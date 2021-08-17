@@ -148,6 +148,34 @@ static enum xnn_status setup_unary_elementwise_nc(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_create_clamp_nc_s8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* clamp_op_out)
+{
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_s8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_s8_minmax_params params;
+  if (xnn_params.s8.clamp.init.s8_minmax != NULL) {
+    xnn_params.s8.clamp.init.s8_minmax(&params, output_min, output_max);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_clamp_nc_s8,
+    xnn_params.s8.clamp.ukernel,
+    clamp_op_out);
+}
+
 enum xnn_status xnn_create_clamp_nc_u8(
     size_t channels,
     size_t input_stride,
@@ -547,6 +575,28 @@ enum xnn_status xnn_setup_ceiling_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     &ceiling_op->params.f32_rnd, sizeof(ceiling_op->params.f32_rnd));
+}
+
+enum xnn_status xnn_setup_clamp_nc_s8(
+    xnn_operator_t clamp_op,
+    size_t batch_size,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  if (clamp_op->type != xnn_operator_type_clamp_nc_s8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_s8),
+      xnn_operator_type_to_string(clamp_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  clamp_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    clamp_op,
+    batch_size, input, output,
+    0 /* log2(sizeof(int8_t)) */,
+    &clamp_op->params.s8_minmax, sizeof(clamp_op->params.s8_minmax));
 }
 
 enum xnn_status xnn_setup_clamp_nc_u8(

@@ -44,6 +44,7 @@ enum xnn_operator_type {
   xnn_operator_type_channel_shuffle_nc_x8,
   xnn_operator_type_channel_shuffle_nc_x32,
   xnn_operator_type_clamp_nc_f32,
+  xnn_operator_type_clamp_nc_s8,
   xnn_operator_type_clamp_nc_u8,
   xnn_operator_type_ceiling_nc_f32,
   xnn_operator_type_constant_pad_nd_x8,

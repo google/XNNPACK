@@ -110,6 +110,69 @@ class ClampOperatorTester {
     return this->iterations_;
   }
 
+  void TestS8() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<int8_t> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const int8_t x = input[i * input_stride() + c];
+          const int8_t y = std::min(std::max(x, int8_t(qmin() - 0x80)), int8_t(qmax() - 0x80));
+          output_ref[i * channels() + c] = y;
+        }
+      }
+
+      // Create, setup, run, and destroy Clamp operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t clamp_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_clamp_nc_s8(
+          channels(), input_stride(), output_stride(),
+          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          0, &clamp_op));
+      ASSERT_NE(nullptr, clamp_op);
+
+      // Smart pointer to automatically delete clamp_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_clamp_op(clamp_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_clamp_nc_s8(
+          clamp_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(clamp_op, nullptr /* thread pool */));
+
+      // Verify results .
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_LE(int32_t(output[i * output_stride() + c]), int32_t(qmax() - 0x80))
+            << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
+          ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80))
+            << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
+          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+            << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels()
+            << ", qmin = " << int32_t(qmin() - 0x80) << ", qmax = " << int32_t(qmax() - 0x80);
+        }
+      }
+    }
+  }
+
   void TestU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

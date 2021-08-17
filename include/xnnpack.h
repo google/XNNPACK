@@ -2451,6 +2451,22 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
 
 #ifndef XNN_NO_S8_OPERATORS
 
+enum xnn_status xnn_create_clamp_nc_s8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* clamp_op_out);
+
+enum xnn_status xnn_setup_clamp_nc_s8(
+  xnn_operator_t clamp_op,
+  size_t batch_size,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
