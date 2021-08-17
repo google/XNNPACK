@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <functional>
 #include <limits>
+#include <numeric>
 #include <random>
 #include <vector>
 
