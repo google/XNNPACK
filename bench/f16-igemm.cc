@@ -206,7 +206,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f16_igemm_4x16__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_6x16__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_8x16__neonfp16arith_ld64)
-#endif  /* XNN_ARCH_ARM64 */
+#endif  // XNN_ARCH_ARM64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
