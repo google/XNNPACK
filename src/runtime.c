@@ -456,14 +456,60 @@ enum xnn_status xnn_create_runtime_v2(
         break;
       }
       case xnn_node_type_clamp:
-        status = xnn_create_clamp_nc_f32(
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_clamp_nc_f32(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_S8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const int8_t output_min =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            const int8_t output_max =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            status = xnn_create_clamp_nc_s8(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              output_min,
+              output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+          case xnn_datatype_quint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const uint8_t output_min =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            const uint8_t output_max =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            status = xnn_create_clamp_nc_u8(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              output_min,
+              output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_U8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -922,24 +968,90 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_max_pooling_2d:
-        status = xnn_create_max_pooling2d_nhwc_f32(
-          node->params.pooling_2d.padding_top,
-          node->params.pooling_2d.padding_right,
-          node->params.pooling_2d.padding_bottom,
-          node->params.pooling_2d.padding_left,
-          node->params.pooling_2d.pooling_height,
-          node->params.pooling_2d.pooling_width,
-          node->params.pooling_2d.stride_height,
-          node->params.pooling_2d.stride_width,
-          node->params.pooling_2d.dilation_height,
-          node->params.pooling_2d.dilation_width,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_max_pooling2d_nhwc_f32(
+              node->params.pooling_2d.padding_top,
+              node->params.pooling_2d.padding_right,
+              node->params.pooling_2d.padding_bottom,
+              node->params.pooling_2d.padding_left,
+              node->params.pooling_2d.pooling_height,
+              node->params.pooling_2d.pooling_width,
+              node->params.pooling_2d.stride_height,
+              node->params.pooling_2d.stride_width,
+              node->params.pooling_2d.dilation_height,
+              node->params.pooling_2d.dilation_width,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_S8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const int8_t output_min =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            const int8_t output_max =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            status = xnn_create_max_pooling2d_nhwc_s8(
+              node->params.pooling_2d.padding_top,
+              node->params.pooling_2d.padding_right,
+              node->params.pooling_2d.padding_bottom,
+              node->params.pooling_2d.padding_left,
+              node->params.pooling_2d.pooling_height,
+              node->params.pooling_2d.pooling_width,
+              node->params.pooling_2d.stride_height,
+              node->params.pooling_2d.stride_width,
+              node->params.pooling_2d.dilation_height,
+              node->params.pooling_2d.dilation_width,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              output_min,
+              output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+          case xnn_datatype_quint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const uint8_t output_min =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            const uint8_t output_max =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            status = xnn_create_max_pooling2d_nhwc_u8(
+              node->params.pooling_2d.padding_top,
+              node->params.pooling_2d.padding_right,
+              node->params.pooling_2d.padding_bottom,
+              node->params.pooling_2d.padding_left,
+              node->params.pooling_2d.pooling_height,
+              node->params.pooling_2d.pooling_width,
+              node->params.pooling_2d.stride_height,
+              node->params.pooling_2d.stride_width,
+              node->params.pooling_2d.dilation_height,
+              node->params.pooling_2d.dilation_width,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              output_min,
+              output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_U8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -1607,6 +1719,30 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_S8_OPERATORS
+      case xnn_operator_type_clamp_nc_s8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_clamp_nc_s8(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+      case xnn_operator_type_clamp_nc_u8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_clamp_nc_u8(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_U8_OPERATORS)
       case xnn_operator_type_deconvolution_nhwc_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
@@ -1768,6 +1904,34 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_S8_OPERATORS
+      case xnn_operator_type_max_pooling_nhwc_s8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_max_pooling2d_nhwc_s8(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+      case xnn_operator_type_max_pooling_nhwc_u8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_max_pooling2d_nhwc_u8(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_U8_OPERATORS)
       case xnn_operator_type_maximum_nd_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->inputs[1]].data != NULL);

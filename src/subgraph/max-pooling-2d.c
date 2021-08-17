@@ -117,6 +117,12 @@ enum xnn_status xnn_define_max_pooling_2d(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_S8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_U8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -143,6 +149,12 @@ enum xnn_status xnn_define_max_pooling_2d(
 
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_S8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_S8_OPERATORS)
+#ifndef XNN_NO_U8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_U8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -151,6 +163,37 @@ enum xnn_status xnn_define_max_pooling_2d(
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
+
+  if (input_value->datatype != output_value->datatype) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+      ": mismatching datatypes across input (%s) and output (%s)",
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), input_id, output_id,
+      xnn_datatype_to_string(input_value->datatype),
+      xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
+  }
+
+#if !defined(XNN_NO_S8_OPERATORS) || !defined(XNN_NO_U8_OPERATORS)
+  if (output_value->datatype == xnn_datatype_qint8 || output_value->datatype == xnn_datatype_quint8) {
+    if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": mismatching zero point quantization parameter across input (%"PRId32") and output (%"PRId32")",
+        xnn_node_type_to_string(xnn_node_type_max_pooling_2d), input_id, output_id,
+        input_value->quantization.zero_point, output_value->quantization.zero_point);
+      return xnn_status_invalid_parameter;
+    }
+    if (input_value->quantization.scale != output_value->quantization.scale) {
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": mismatching zero point quantization parameter across input (%.7g) and output (%.7g)",
+        xnn_node_type_to_string(xnn_node_type_max_pooling_2d), input_id, output_id,
+        input_value->quantization.scale, output_value->quantization.scale);
+      return xnn_status_invalid_parameter;
+    }
+  }
+#endif  // !defined(XNN_NO_S8_OPERATORS) || !defined(XNN_NO_U8_OPERATORS)
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {

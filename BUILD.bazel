@@ -7177,8 +7177,6 @@ xnnpack_cc_library(
         "//conditions:default": [],
     }),
     defines = [
-        "XNN_NO_S8_OPERATORS",
-        "XNN_NO_U8_OPERATORS",
         "XNN_NO_F16_OPERATORS",
         "XNN_NO_X16_OPERATORS",
     ] + select({
@@ -7186,18 +7184,22 @@ xnnpack_cc_library(
         ":xnn_enable_qs8_explicit_false": [
             "XNN_NO_QC8_OPERATORS",
             "XNN_NO_QS8_OPERATORS",
+            "XNN_NO_S8_OPERATORS",
         ],
         "//conditions:default": [
             "XNN_NO_QC8_OPERATORS",
             "XNN_NO_QS8_OPERATORS",
+            "XNN_NO_S8_OPERATORS",
         ],
     }) + select({
         ":xnn_enable_qu8_explicit_true": [],
         ":xnn_enable_qu8_explicit_false": [
             "XNN_NO_QU8_OPERATORS",
+            "XNN_NO_U8_OPERATORS",
         ],
         "//conditions:default": [
             "XNN_NO_QU8_OPERATORS",
+            "XNN_NO_U8_OPERATORS",
         ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
