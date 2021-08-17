@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <numeric>
 #include <random>
 #include <vector>
 
