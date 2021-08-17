@@ -455,13 +455,13 @@ class VUnaryMicrokernelTester {
     Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
   }
 
-  void Test(xnn_u8_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+  void Test(xnn_u8_vunary_ukernel_function vunary, OpType op_type, xnn_init_u8_minmax_params_fn init_params) const {
     ASSERT_EQ(op_type, OpType::Clamp);
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max());
-    auto u8rng = std::bind(distribution, std::ref(rng));
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
     std::vector<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
@@ -487,23 +487,8 @@ class VUnaryMicrokernelTester {
       }
 
       // Prepare parameters.
-      union {
-        union xnn_u8_minmax_params minmax;
-      } params;
-      switch (op_type) {
-        case OpType::Clamp:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_u8_minmax_params(&params.minmax, qmin(), qmax());
-              break;
-            case Variant::Scalar:
-              xnn_init_u8_minmax_scalar_params(&params.minmax, qmin(), qmax());
-              break;
-          }
-          break;
-        default:
-          GTEST_FAIL() << "Unexpected op type";
-      }
+      union xnn_u8_minmax_params params;
+      init_params(&params, qmin(), qmax());
 
       // Call optimized micro-kernel.
       vunary(batch_size() * sizeof(uint8_t), x_data, y.data(), &params);
@@ -516,8 +501,8 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  inline void Test(xnn_u8_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_u8_vunary_ukernel_function(vunary), op_type, variant);
+  inline void Test(xnn_u8_vclamp_ukernel_function vunary, OpType op_type, xnn_init_u8_minmax_params_fn init_params) const {
+    Test(xnn_u8_vunary_ukernel_function(vunary), op_type, init_params);
   }
 
  private:

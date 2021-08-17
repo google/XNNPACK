@@ -186,12 +186,13 @@ $if OP_TYPE == "LeakyReLU":
 """
 
 
-def generate_test_cases(ukernel, op_type, batch_tile, isa):
+def generate_test_cases(ukernel, op_type, init_fn, batch_tile, isa):
   """Generates all tests cases for a Vector Unary Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     op_type: Operation type.
+    init_fn: C name of the function to initialize microkernel parameters.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -203,7 +204,9 @@ def generate_test_cases(ukernel, op_type, batch_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel, "VUnaryMicrokernelTester::OpType::" + op_type]
-  if not isa:
+  if init_fn:
+    test_args.append(init_fn)
+  elif not isa:
     test_args.append("VUnaryMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
@@ -245,12 +248,13 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       op_type, batch_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, op_type, batch_tile, isa)
+      test_case = generate_test_cases(name, op_type, init_fn, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     with codecs.open(options.output, "w", encoding="utf-8") as output_file:

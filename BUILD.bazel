@@ -1834,6 +1834,7 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
     "src/s8-maxpool/9p8x-minmax-wasmsimd-c16.c",
     "src/u8-maxpool/9p8x-minmax-wasmsimd-c16.c",
+    "src/u8-vclamp/wasmsimd-x64.c",
     "src/x32-packx/x4-wasmsimd.c",
     "src/x32-unpool/wasmsimd.c",
     "src/x32-zip/x2-wasmsimd.c",

@@ -4,7 +4,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for U8 micro-kernels
+### Tests for Clamp micro-kernels
 tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc
 
 ### Tests for packing micro-kernels
