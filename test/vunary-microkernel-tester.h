@@ -455,6 +455,57 @@ class VUnaryMicrokernelTester {
     Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
   }
 
+  void Test(xnn_s8_vunary_ukernel_function vunary, OpType op_type, xnn_init_s8_minmax_params_fn init_params) const {
+    ASSERT_EQ(op_type, OpType::Clamp);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<int8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+    std::vector<int8_t> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(i8rng));
+      if (inplace()) {
+        std::copy(x.cbegin(), x.cend(), y.begin());
+      } else {
+        std::fill(y.begin(), y.end(), INT8_C(0xA5));
+      }
+      const int8_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+          case OpType::Clamp:
+            y_ref[i] = std::min(std::max(x_data[i], int8_t(qmin() - 0x80)), int8_t(qmax() - 0x80));
+            break;
+          default:
+            GTEST_FAIL() << "Unexpected op type";
+        }
+      }
+
+      // Prepare parameters.
+      union xnn_s8_minmax_params params;
+      init_params(&params, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Call optimized micro-kernel.
+      vunary(batch_size() * sizeof(int8_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(int32_t(y_ref[i]), int32_t(y[i]))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << int32_t(x[i]);
+      }
+    }
+  }
+
+  inline void Test(xnn_s8_vclamp_ukernel_function vunary, OpType op_type, xnn_init_s8_minmax_params_fn init_params) const {
+    Test(xnn_s8_vunary_ukernel_function(vunary), op_type, init_params);
+  }
+
   void Test(xnn_u8_vunary_ukernel_function vunary, OpType op_type, xnn_init_u8_minmax_params_fn init_params) const {
     ASSERT_EQ(op_type, OpType::Clamp);
 

@@ -889,6 +889,20 @@ DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x2)
 DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x4)
 
 
+#define DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t n,                                     \
+      const int8_t* x,                              \
+      int8_t* y,                                    \
+      const union xnn_s8_minmax_params* params);
+
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__neon_x64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse2_x64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse41_x64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__wasmsimd_x64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__scalar_x4)
+
+
 #define DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \
       size_t n,                                     \

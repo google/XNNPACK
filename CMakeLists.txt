@@ -409,6 +409,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-scalar-x4.c
   src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/s8-maxpool/9p8x-minmax-scalar-c1.c
+  src/s8-vclamp/scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
@@ -1019,6 +1020,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-scalar-x2.c
   src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
   src/s8-maxpool/9p8x-minmax-scalar-c1.c
+  src/s8-vclamp/scalar-x4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
@@ -1140,6 +1142,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
+  src/s8-vclamp/neon-x64.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
@@ -1711,6 +1714,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld128-x16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
+  src/s8-vclamp/neon-x64.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
@@ -2659,6 +2663,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/s8-maxpool/9p8x-minmax-sse2-c16.c
+  src/s8-vclamp/sse2-x64.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
@@ -2919,6 +2924,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/s8-maxpool/9p8x-minmax-sse2-c16.c
+  src/s8-vclamp/sse2-x64.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
@@ -3027,7 +3033,8 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c
-  src/s8-maxpool/9p8x-minmax-sse41-c16.c)
+  src/s8-maxpool/9p8x-minmax-sse41-c16.c
+  src/s8-vclamp/sse41-x64.c)
 
 SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x4.c
@@ -3266,7 +3273,8 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c
-  src/s8-maxpool/9p8x-minmax-sse41-c16.c)
+  src/s8-maxpool/9p8x-minmax-sse41-c16.c
+  src/s8-vclamp/sse41-x64.c)
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x25-minmax-avx.c
@@ -6721,6 +6729,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(s8-maxpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s8-maxpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(s8-maxpool-minmax-test s8-maxpool-minmax-test)
+
+  ADD_EXECUTABLE(s8-vclamp-test test/s8-vclamp.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(s8-vclamp-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(s8-vclamp-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(s8-vclamp-test s8-vclamp-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(u8-lut32norm-test PROPERTIES

@@ -2,6 +2,7 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
 - name: xnn_u8_vclamp_ukernel__neon_x64
   init: xnn_init_u8_minmax_neon_params
 - name: xnn_u8_vclamp_ukernel__sse2_x64

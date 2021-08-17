@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 ### Tests for Clamp micro-kernels
+tools/generate-vunary-test.py --spec test/s8-vclamp.yaml --output test/s8-vclamp.cc
 tools/generate-vunary-test.py --spec test/u8-vclamp.yaml --output test/u8-vclamp.cc
 
 ### Tests for packing micro-kernels

@@ -1913,6 +1913,12 @@ typedef void (*xnn_f32_vclamp_ukernel_function)(
     float* y,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_s8_vclamp_ukernel_function)(
+    size_t n,
+    const int8_t* x,
+    int8_t* y,
+    const union xnn_s8_minmax_params* params);
+
 typedef void (*xnn_u8_vclamp_ukernel_function)(
     size_t n,
     const uint8_t* x,
@@ -2081,6 +2087,12 @@ typedef void (*xnn_vunary_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
+    const void* params);
+
+typedef void (*xnn_s8_vunary_ukernel_function)(
+    size_t n,
+    const int8_t* x,
+    int8_t* y,
     const void* params);
 
 typedef void (*xnn_u8_vunary_ukernel_function)(
