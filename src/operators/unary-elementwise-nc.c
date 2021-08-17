@@ -165,12 +165,14 @@ enum xnn_status xnn_create_clamp_nc_u8(
   }
 
   union xnn_u8_minmax_params params;
-  xnn_init_u8_minmax_params(&params, output_min, output_max);
+  if (xnn_params.u8.clamp.init.u8_minmax != NULL) {
+    xnn_params.u8.clamp.init.u8_minmax(&params, output_min, output_max);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_clamp_nc_u8,
-    xnn_params.u8.clamp,
+    xnn_params.u8.clamp.ukernel,
     clamp_op_out);
 }
 
@@ -206,10 +208,12 @@ enum xnn_status xnn_create_clamp_nc_f32(
 
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
   xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
-    xnn_params.f32.relu : xnn_params.f32.clamp;
+    xnn_params.f32.relu : xnn_params.f32.clamp.ukernel;
 
   union xnn_f32_minmax_params params;
-  xnn_init_f32_minmax_params(&params, output_min, output_max);
+  if (xnn_params.f32.clamp.init.f32_minmax != NULL) {
+    xnn_params.f32.clamp.init.f32_minmax(&params, output_min, output_max);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),

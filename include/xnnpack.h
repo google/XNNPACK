@@ -2449,7 +2449,7 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
 
 #endif  // XNN_NO_QU8_OPERATORS
 
-#ifndef XNN_NO_U8_OPERATORS
+#ifndef XNN_NO_S8_OPERATORS
 
 enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
   uint32_t input_padding_top,
@@ -2479,7 +2479,7 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_s8(
   int8_t* output,
   pthreadpool_t threadpool);
 
-#endif  // XNN_NO_U8_OPERATORS
+#endif  // XNN_NO_S8_OPERATORS
 
 #ifndef XNN_NO_U8_OPERATORS
 

@@ -26,8 +26,8 @@ void xnn_f32_vclamp_ukernel__avx512f_x${BATCH_TILE}(
   assert(x != NULL);
   assert(y != NULL);
 
-  const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
-  const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
+  const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     __m512 vacc${ABC[0:16]} = _mm512_loadu_ps(x);

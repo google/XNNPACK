@@ -2377,6 +2377,18 @@ struct gemm_parameters {
   uint8_t log2_sr;
 };
 
+struct vunary_parameters {
+  xnn_univector_ukernel_function ukernel;
+  union {
+    xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_s8_minmax_params_fn s8_minmax;
+    xnn_init_u8_minmax_params_fn u8_minmax;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  uint8_t element_tile;
+};
+
 struct vbinary_fused_ukernels {
   xnn_vbinary_ukernel_function op_ukernel;
   xnn_vbinary_ukernel_function opc_ukernel;
@@ -2621,11 +2633,12 @@ struct xnn_parameters {
     struct vbinary_parameters vmul;
   } qu8;
   struct {
+    struct vunary_parameters clamp;
     struct maxpool_parameters maxpool;
   } s8;
   struct {
+    struct vunary_parameters clamp;
     struct maxpool_parameters maxpool;
-    xnn_univector_ukernel_function clamp;
     xnn_u8_lut32norm_ukernel_function lut32norm;
     xnn_u8_rmax_ukernel_function rmax;
   } u8;
@@ -2655,7 +2668,7 @@ struct xnn_parameters {
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
     xnn_univector_ukernel_function abs;
-    xnn_univector_ukernel_function clamp;
+    struct vunary_parameters clamp;
     xnn_univector_ukernel_function elu;
     xnn_univector_ukernel_function hswish;
     xnn_univector_ukernel_function lrelu;

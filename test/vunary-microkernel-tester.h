@@ -328,11 +328,46 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  inline void Test(xnn_f32_vabs_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
+  void Test(xnn_f32_vclamp_ukernel_function vclamp, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
+    ASSERT_EQ(op_type, OpType::Clamp);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
+      }
+
+      // Prepare parameters.
+      union xnn_f32_minmax_params params;
+      init_params(&params, float(qmin()), float(qmax()));
+
+      // Call optimized micro-kernel.
+      vclamp(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6f, std::abs(y_ref[i]) * 1.0e-5f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
   }
 
-  inline void Test(xnn_f32_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
+  inline void Test(xnn_f32_vabs_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
