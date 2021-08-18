@@ -376,8 +376,24 @@ static void DWConvEnd2EndBenchmark(
       16 /* channel tile */, 9 /* primary tile */);
   }
 
+  static void qs8_dwconv_up8x9__wasmsimd_mul16_add16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__wasmsimd_mul16_add16,
+      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+      8 /* channel tile */, 9 /* primary tile */);
+  }
+  static void qs8_dwconv_up16x9__wasmsimd_mul16_add16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__wasmsimd_mul16_add16,
+      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+      16 /* channel tile */, 9 /* primary tile */);
+  }
+
   BENCHMARK_QS8_END2END(qs8_dwconv_up8x9__wasmsimd_mul16);
   BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__wasmsimd_mul16);
+
+  BENCHMARK_QS8_END2END(qs8_dwconv_up8x9__wasmsimd_mul16_add16);
+  BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__wasmsimd_mul16_add16);
 #endif  // XNN_ARCH_WASMSIMD
 
 

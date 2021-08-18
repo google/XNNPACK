@@ -125,6 +125,12 @@
   init: xnn_init_qs8_minmax_wasmsimd_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16
   init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__wasmsimd_mul16_add16
+  init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__wasmsimd_mul16_add16
+  init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16_add16
+  init: xnn_init_qs8_minmax_wasmsimd_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up1x9__scalar_lrint
   init: xnn_init_qs8_minmax_scalar_lrint_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrint
@@ -258,6 +264,12 @@
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16
   init: xnn_init_qs8_minmax_wasmsimd_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x25__wasmsimd_mul16
+  init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16_add16
+  init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16_add16
+  init: xnn_init_qs8_minmax_wasmsimd_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up24x25__wasmsimd_mul16_add16
   init: xnn_init_qs8_minmax_wasmsimd_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up1x25__scalar_lrint
   init: xnn_init_qs8_minmax_scalar_lrint_params
