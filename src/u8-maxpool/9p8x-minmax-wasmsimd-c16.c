@@ -140,13 +140,14 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
           vout = wasm_u64x2_shr(vout, 32);
           o += 4;
         }
+        uint32_t vout_lo = wasm_i32x4_extract_lane(vout, 0);
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) wasm_i16x8_extract_lane(vout, 0);
-          vout = wasm_u32x4_shr(vout, 16);
+          *((uint16_t*) o) = (uint16_t) vout_lo;
+          vout_lo >>= 16;
           o += 2;
         }
         if (c & 1) {
-          *((uint8_t*) o) = (uint8_t) wasm_i8x16_extract_lane(vout, 0);
+          *o = (uint8_t) vout_lo;
           o += 1;
         }
       }
@@ -258,13 +259,14 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
           vout = wasm_u64x2_shr(vout, 32);
           o += 4;
         }
+        uint32_t vout_lo = wasm_i32x4_extract_lane(vout, 0);
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) wasm_i16x8_extract_lane(vout, 0);
-          vout = wasm_u32x4_shr(vout, 16);
+          *((uint16_t*) o) = (uint16_t) vout_lo;
+          vout_lo >>= 16;
           o += 2;
         }
         if (c & 1) {
-          *((uint8_t*) o) = (uint8_t) wasm_i8x16_extract_lane(vout, 0);
+          *o = (uint8_t) vout_lo;
           o += 1;
         }
       }

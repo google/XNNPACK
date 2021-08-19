@@ -196,15 +196,17 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
 
       nc -= 4;
     } else {
+      $for M in range(MR):
+        uint32_t vout${M} = wasm_i32x4_extract_lane(vout, ${M});
       if (nc & 2) {
         $for M in range(MR):
-          *((uint16_t*) c${M}) = (uint16_t) wasm_i16x8_extract_lane(vout, ${M * 2});
+          *((uint16_t*) c${M}) = (uint16_t) vout${M};
+          vout${M} >>= 16;
           c${M} += 2;
-        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
         $for M in range(MR):
-          *c${M} = (${XINT8_T}) wasm_i8x16_extract_lane(vout, ${M * 4});
+          *c${M} = (${XINT8_T}) vout${M};
       }
 
       nc = 0;

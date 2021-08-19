@@ -163,16 +163,19 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul16_ld64(
 
       nc -= 4;
     } else {
+      uint32_t vout1 = wasm_i32x4_extract_lane(vout, 1);
+      uint32_t vout0 = wasm_i32x4_extract_lane(vout, 0);
       if (nc & 2) {
-        *((uint16_t*) c1) = (uint16_t) wasm_i16x8_extract_lane(vout, 2);
+        *((uint16_t*) c1) = (uint16_t) vout1;
+        vout1 >>= 16;
         c1 += 2;
-        *((uint16_t*) c0) = (uint16_t) wasm_i16x8_extract_lane(vout, 0);
+        *((uint16_t*) c0) = (uint16_t) vout0;
+        vout0 >>= 16;
         c0 += 2;
-        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
-        *c1 = (int8_t) wasm_i8x16_extract_lane(vout, 4);
-        *c0 = (int8_t) wasm_i8x16_extract_lane(vout, 0);
+        *c1 = (int8_t) vout1;
+        *c0 = (int8_t) vout0;
       }
 
       nc = 0;

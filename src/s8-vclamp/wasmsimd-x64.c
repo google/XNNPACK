@@ -69,13 +69,14 @@ void xnn_s8_vclamp_ukernel__wasmsimd_x64(
       y += 4;
       vacc = wasm_u64x2_shr(vacc, 32);
     }
+    uint32_t vacc_lo = wasm_i32x4_extract_lane(vacc, 0);
     if (n & 2) {
-      *((uint16_t*) y) = (uint16_t) wasm_i32x4_extract_lane(vacc, 0);
+      *((uint16_t*) y) = (uint16_t) vacc_lo;
+      vacc_lo >>= 16;
       y += 2;
-      vacc = wasm_u32x4_shr(vacc, 16);
     }
     if (n & 1) {
-      *y = (uint8_t) wasm_i32x4_extract_lane(vacc, 0);
+      *y = (uint8_t) vacc_lo;
     }
   }
 }

@@ -175,19 +175,24 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_mul32_ld128(
 
       nc -= 4;
     } else {
+      uint32_t vout0 = wasm_i32x4_extract_lane(vout, 0);
+      uint32_t vout1 = wasm_i32x4_extract_lane(vout, 1);
+      uint32_t vout2 = wasm_i32x4_extract_lane(vout, 2);
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) wasm_i16x8_extract_lane(vout, 0);
+        *((uint16_t*) c0) = (uint16_t) vout0;
+        vout0 >>= 16;
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) wasm_i16x8_extract_lane(vout, 2);
+        *((uint16_t*) c1) = (uint16_t) vout1;
+        vout1 >>= 16;
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) wasm_i16x8_extract_lane(vout, 4);
+        *((uint16_t*) c2) = (uint16_t) vout2;
+        vout2 >>= 16;
         c2 += 2;
-        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
-        *c0 = (uint8_t) wasm_i8x16_extract_lane(vout, 0);
-        *c1 = (uint8_t) wasm_i8x16_extract_lane(vout, 4);
-        *c2 = (uint8_t) wasm_i8x16_extract_lane(vout, 8);
+        *c0 = (uint8_t) vout0;
+        *c1 = (uint8_t) vout1;
+        *c2 = (uint8_t) vout2;
       }
 
       nc = 0;

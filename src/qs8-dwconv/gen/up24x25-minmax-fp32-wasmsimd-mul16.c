@@ -977,13 +977,14 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up24x25__wasmsimd_mul16(
           vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
           output += 4;
         }
+        uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout0123456701234567, 0);
-          vout0123456701234567 = wasm_u32x4_shr(vout0123456701234567, 16);
+          *((uint16_t*) output) = (uint16_t) vout0123;
+          vout0123 >>= 16;
           output += 2;
         }
         if (c & 1) {
-          *output = (int8_t) wasm_i8x16_extract_lane(vout0123456701234567, 0);
+          *output = (int8_t) vout0123;
           output += 1;
         }
         c = 0;

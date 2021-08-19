@@ -237,13 +237,14 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
+          uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
-            vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+            *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+            vout${ABC[0:4]} >>= 16;
             output += 2;
           }
           if (c & 1) {
-            *output = (${XINT8_T}) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            *output = (${XINT8_T}) vout${ABC[0:4]};
             output += 1;
           }
           c = 0;
@@ -254,13 +255,14 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
+        uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
-          vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+          *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+          vout${ABC[0:4]} >>= 16;
           output += 2;
         }
         if (c & 1) {
-          *output = (${XINT8_T}) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          *output = (${XINT8_T}) vout${ABC[0:4]};
           output += 1;
         }
       }${" while (c != 0);" if CHANNEL_TILE > 8 else ""}

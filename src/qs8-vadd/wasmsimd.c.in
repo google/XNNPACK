@@ -119,33 +119,35 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__wasmsimd_x${BATCH_TILE}(
           n -= 8 * sizeof(${XINT8_T});
         } else {
           if (n & (4 * sizeof(${XINT8_T}))) {
-            *((uint32_t*) output) = (uint32_t) wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            *((float*) output) = (float) wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
             vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
+          uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
           if (n & (2 * sizeof(${XINT8_T}))) {
-            *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
-            vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+            *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+            vout${ABC[0:4]} >>= 16;
             output += 2;
           }
           if (n & (1 * sizeof(${XINT8_T}))) {
-            *output = (${XINT8_T}) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            *output = (${XINT8_T}) vout${ABC[0:4]};
           }
           n = 0;
         }
       $else:
         if (n & (4 * sizeof(${XINT8_T}))) {
-          *((uint32_t*) output) = (uint32_t) wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          *((float*) output) = (float) wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
           vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
+        uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
         if (n & (2 * sizeof(${XINT8_T}))) {
-          *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
-          vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
+          *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+          vout${ABC[0:4]} >>= 16;
           output += 2;
         }
         if (n & (1 * sizeof(${XINT8_T}))) {
-          *output = (${XINT8_T}) wasm_i8x16_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          *output = (${XINT8_T}) vout${ABC[0:4]};
         }
     }${" while (n != 0);" if BATCH_TILE > 8 else ""}
   }

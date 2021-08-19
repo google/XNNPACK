@@ -77,17 +77,18 @@ void xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8(
       vout0123456701234567 = wasm_u8x16_min(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) wasm_i32x4_extract_lane(vout0123456701234567, 0);
+        *((float*) output) = (float) wasm_f32x4_extract_lane(vout0123456701234567, 0);
         vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
         output += 4;
       }
+      uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) wasm_i16x8_extract_lane(vout0123456701234567, 0);
-        vout0123456701234567 = wasm_u32x4_shr(vout0123456701234567, 16);
+        *((uint16_t*) output) = (uint16_t) vout0123;
+        vout0123 >>= 16;
         output += 2;
       }
       if (n & (1 * sizeof(uint8_t))) {
-        *output = (uint8_t) wasm_i8x16_extract_lane(vout0123456701234567, 0);
+        *output = (uint8_t) vout0123;
       }
     }
   }
