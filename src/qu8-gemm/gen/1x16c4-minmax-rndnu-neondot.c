@@ -40,7 +40,7 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c4__neondot(
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
-  const uint8x16_t vb_zero_point = vld1q_dup_u8(&params->rndnu_neon.kernel_zero_point[0]);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->rndnu_neon.kernel_zero_point[0]);
 
   // Loop over groups of 16 columns.
   do {
@@ -50,7 +50,7 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c4__neondot(
     uint32x4_t vpacc0x4567 = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
     uint32x4_t vpacc0x89AB = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
     uint32x4_t vpacc0xCDEF = vld1q_u32(w); w = (const void*) ((const uint32_t*) w + 4);
-    uint32x4_t vnacc0 = vmovq_n_u32(0);
+    uint32x2_t vnacc0 = vmov_n_u32(0);
 
     // Inner accumulation loop along the 16 columns.
     size_t k = kc;
@@ -70,12 +70,12 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c4__neondot(
       const uint8x16_t vb4567xCDEF = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
 
       // Multiply-accumulate: 1x8 * 8x16 --> 1x16.
-      vnacc0 = vdotq_lane_u32(vnacc0, vb_zero_point, va0x01234567, 0);
+      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 0);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb0123x0123, va0x01234567, 0);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb0123x4567, va0x01234567, 0);
       vpacc0x89AB = vdotq_lane_u32(vpacc0x89AB, vb0123x89AB, va0x01234567, 0);
       vpacc0xCDEF = vdotq_lane_u32(vpacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
-      vnacc0 = vdotq_lane_u32(vnacc0, vb_zero_point, va0x01234567, 1);
+      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 1);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb4567x0123, va0x01234567, 1);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb4567x4567, va0x01234567, 1);
       vpacc0x89AB = vdotq_lane_u32(vpacc0x89AB, vb4567x89AB, va0x01234567, 1);
@@ -95,18 +95,19 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x16c4__neondot(
       const uint8x16_t vb0123xCDEF = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
 
       // Multiply-accumulate: 1x4 * 4x16 --> 1x16.
-      vnacc0 = vdotq_lane_u32(vnacc0, vb_zero_point, va0x01234567, 0);
+      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 0);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb0123x0123, va0x01234567, 0);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb0123x4567, va0x01234567, 0);
       vpacc0x89AB = vdotq_lane_u32(vpacc0x89AB, vb0123x89AB, va0x01234567, 0);
       vpacc0xCDEF = vdotq_lane_u32(vpacc0xCDEF, vb0123xCDEF, va0x01234567, 0);
     }
 
-    // Subtract zero point accumulators with accumulators.
-    int32x4_t vacc0x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x0123, vnacc0));
-    int32x4_t vacc0x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x4567, vnacc0));
-    int32x4_t vacc0x89AB = vreinterpretq_s32_u32(vsubq_u32(vpacc0x89AB, vnacc0));
-    int32x4_t vacc0xCDEF = vreinterpretq_s32_u32(vsubq_u32(vpacc0xCDEF, vnacc0));
+    // Subtract zero point from accumulators.
+    uint32x4_t vnacc0x0123 = vdupq_lane_u32(vnacc0, 0);
+    int32x4_t vacc0x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x0123, vnacc0x0123));
+    int32x4_t vacc0x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x4567, vnacc0x0123));
+    int32x4_t vacc0x89AB = vreinterpretq_s32_u32(vsubq_u32(vpacc0x89AB, vnacc0x0123));
+    int32x4_t vacc0xCDEF = vreinterpretq_s32_u32(vsubq_u32(vpacc0xCDEF, vnacc0x0123));
 
     const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);

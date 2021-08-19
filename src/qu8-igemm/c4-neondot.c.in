@@ -60,7 +60,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
         c${M} = c${M-1};
       }
 
-  const uint8x16_t vb_zero_point = vld1q_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point[0]);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point[0]);
 
   do {
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
@@ -71,7 +71,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
       $for N in range(0, NR, 4):
         uint32x4_t vpacc${M}x${ABC[N:N+4]} = vpacc0x${ABC[N:N+4]};
     $for M in range(0, MR):
-      uint32x4_t vnacc${M} = vmovq_n_u32(0);
+      uint32x2_t vnacc${M} = vmov_n_u32(0);
 
     size_t p = ks;
     do {
@@ -98,7 +98,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
         // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
         $for K in range(0, 8, 4):
           $for M in range(MR):
-            vnacc${M} = vdotq_lane_u32(vnacc${M}, vb_zero_point, va${M}x01234567, ${K//4});
+            vnacc${M} = vdot_lane_u32(vnacc${M}, va_zero_point, va${M}x01234567, ${K//4});
             $for N in range(0, NR, 4):
               vpacc${M}x${ABC[N:N+4]} = vdotq_lane_u32(vpacc${M}x${ABC[N:N+4]}, vb${ABC[K:K+4]}x${ABC[N:N+4]}, va${M}x01234567, ${K//4});
 
@@ -116,17 +116,18 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
 
         // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
-          vnacc${M} = vdotq_lane_u32(vnacc${M}, vb_zero_point, va${M}x01234567, 0);
+          vnacc${M} = vdot_lane_u32(vnacc${M}, va_zero_point, va${M}x01234567, 0);
           $for N in range(0, NR, 4):
             vpacc${M}x${ABC[N:N+4]} = vdotq_lane_u32(vpacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
       }
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    // Subtract zero point accumulators with accumulators.
+    // Subtract zero point from accumulators.
     $for M in range(0, MR):
+      uint32x4_t vnacc${M}x0123 = vdupq_lane_u32(vnacc${M}, 0);
       $for N in range(0, NR, 4):
-        int32x4_t vacc${M}x${ABC[N:N+4]} = vreinterpretq_s32_u32(vsubq_u32(vpacc${M}x${ABC[N:N+4]}, vnacc${M}));
+        int32x4_t vacc${M}x${ABC[N:N+4]} = vreinterpretq_s32_u32(vsubq_u32(vpacc${M}x${ABC[N:N+4]}, vnacc${M}x0123));
 
     $if REQUANTIZATION == "GEMMLOWP":
       const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
