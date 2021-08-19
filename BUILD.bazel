@@ -7198,7 +7198,6 @@ xnnpack_cc_library(
             "XNN_NO_QS8_OPERATORS",
             "XNN_NO_S8_OPERATORS",
         ],
-        ":emscripten": [],
         "//conditions:default": [
             "XNN_NO_QC8_OPERATORS",
             "XNN_NO_QS8_OPERATORS",
@@ -7210,7 +7209,6 @@ xnnpack_cc_library(
             "XNN_NO_QU8_OPERATORS",
             "XNN_NO_U8_OPERATORS",
         ],
-        ":emscripten": [],
         "//conditions:default": [
             "XNN_NO_QU8_OPERATORS",
             "XNN_NO_U8_OPERATORS",
