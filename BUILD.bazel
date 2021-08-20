@@ -10191,6 +10191,11 @@ config_setting(
 )
 
 config_setting(
+    name = "linux_arm64",
+    values = {"cpu": "aarch64"},
+)
+
+config_setting(
     name = "linux_k8",
     values = {"cpu": "k8"},
 )
@@ -10213,11 +10218,6 @@ config_setting(
 config_setting(
     name = "linux_armv7a",
     values = {"cpu": "armv7a"},
-)
-
-config_setting(
-    name = "linux_aarch64",
-    values = {"cpu": "aarch64"},
 )
 
 config_setting(
