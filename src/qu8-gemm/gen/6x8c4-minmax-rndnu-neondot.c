@@ -114,40 +114,34 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_6x8c4__neondot(
       const uint8x16_t vb4567x4567 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
 
       // Multiply-accumulate: 6x8 * 8x8 --> 6x8.
-      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 0);
+      vnacc0 = vdot_u32(vnacc0, va_zero_point, va0x01234567);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb0123x0123, va0x01234567, 0);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb0123x4567, va0x01234567, 0);
-      vnacc1 = vdot_lane_u32(vnacc1, va_zero_point, va1x01234567, 0);
-      vpacc1x0123 = vdotq_lane_u32(vpacc1x0123, vb0123x0123, va1x01234567, 0);
-      vpacc1x4567 = vdotq_lane_u32(vpacc1x4567, vb0123x4567, va1x01234567, 0);
-      vnacc2 = vdot_lane_u32(vnacc2, va_zero_point, va2x01234567, 0);
-      vpacc2x0123 = vdotq_lane_u32(vpacc2x0123, vb0123x0123, va2x01234567, 0);
-      vpacc2x4567 = vdotq_lane_u32(vpacc2x4567, vb0123x4567, va2x01234567, 0);
-      vnacc3 = vdot_lane_u32(vnacc3, va_zero_point, va3x01234567, 0);
-      vpacc3x0123 = vdotq_lane_u32(vpacc3x0123, vb0123x0123, va3x01234567, 0);
-      vpacc3x4567 = vdotq_lane_u32(vpacc3x4567, vb0123x4567, va3x01234567, 0);
-      vnacc4 = vdot_lane_u32(vnacc4, va_zero_point, va4x01234567, 0);
-      vpacc4x0123 = vdotq_lane_u32(vpacc4x0123, vb0123x0123, va4x01234567, 0);
-      vpacc4x4567 = vdotq_lane_u32(vpacc4x4567, vb0123x4567, va4x01234567, 0);
-      vnacc5 = vdot_lane_u32(vnacc5, va_zero_point, va5x01234567, 0);
-      vpacc5x0123 = vdotq_lane_u32(vpacc5x0123, vb0123x0123, va5x01234567, 0);
-      vpacc5x4567 = vdotq_lane_u32(vpacc5x4567, vb0123x4567, va5x01234567, 0);
-      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 1);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb4567x0123, va0x01234567, 1);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb4567x4567, va0x01234567, 1);
-      vnacc1 = vdot_lane_u32(vnacc1, va_zero_point, va1x01234567, 1);
+      vnacc1 = vdot_u32(vnacc1, va_zero_point, va1x01234567);
+      vpacc1x0123 = vdotq_lane_u32(vpacc1x0123, vb0123x0123, va1x01234567, 0);
+      vpacc1x4567 = vdotq_lane_u32(vpacc1x4567, vb0123x4567, va1x01234567, 0);
       vpacc1x0123 = vdotq_lane_u32(vpacc1x0123, vb4567x0123, va1x01234567, 1);
       vpacc1x4567 = vdotq_lane_u32(vpacc1x4567, vb4567x4567, va1x01234567, 1);
-      vnacc2 = vdot_lane_u32(vnacc2, va_zero_point, va2x01234567, 1);
+      vnacc2 = vdot_u32(vnacc2, va_zero_point, va2x01234567);
+      vpacc2x0123 = vdotq_lane_u32(vpacc2x0123, vb0123x0123, va2x01234567, 0);
+      vpacc2x4567 = vdotq_lane_u32(vpacc2x4567, vb0123x4567, va2x01234567, 0);
       vpacc2x0123 = vdotq_lane_u32(vpacc2x0123, vb4567x0123, va2x01234567, 1);
       vpacc2x4567 = vdotq_lane_u32(vpacc2x4567, vb4567x4567, va2x01234567, 1);
-      vnacc3 = vdot_lane_u32(vnacc3, va_zero_point, va3x01234567, 1);
+      vnacc3 = vdot_u32(vnacc3, va_zero_point, va3x01234567);
+      vpacc3x0123 = vdotq_lane_u32(vpacc3x0123, vb0123x0123, va3x01234567, 0);
+      vpacc3x4567 = vdotq_lane_u32(vpacc3x4567, vb0123x4567, va3x01234567, 0);
       vpacc3x0123 = vdotq_lane_u32(vpacc3x0123, vb4567x0123, va3x01234567, 1);
       vpacc3x4567 = vdotq_lane_u32(vpacc3x4567, vb4567x4567, va3x01234567, 1);
-      vnacc4 = vdot_lane_u32(vnacc4, va_zero_point, va4x01234567, 1);
+      vnacc4 = vdot_u32(vnacc4, va_zero_point, va4x01234567);
+      vpacc4x0123 = vdotq_lane_u32(vpacc4x0123, vb0123x0123, va4x01234567, 0);
+      vpacc4x4567 = vdotq_lane_u32(vpacc4x4567, vb0123x4567, va4x01234567, 0);
       vpacc4x0123 = vdotq_lane_u32(vpacc4x0123, vb4567x0123, va4x01234567, 1);
       vpacc4x4567 = vdotq_lane_u32(vpacc4x4567, vb4567x4567, va4x01234567, 1);
-      vnacc5 = vdot_lane_u32(vnacc5, va_zero_point, va5x01234567, 1);
+      vnacc5 = vdot_u32(vnacc5, va_zero_point, va5x01234567);
+      vpacc5x0123 = vdotq_lane_u32(vpacc5x0123, vb0123x0123, va5x01234567, 0);
+      vpacc5x4567 = vdotq_lane_u32(vpacc5x4567, vb0123x4567, va5x01234567, 0);
       vpacc5x0123 = vdotq_lane_u32(vpacc5x0123, vb4567x0123, va5x01234567, 1);
       vpacc5x4567 = vdotq_lane_u32(vpacc5x4567, vb4567x4567, va5x01234567, 1);
 
@@ -156,55 +150,61 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_6x8c4__neondot(
     // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 6x4 block of activations.
-      const uint8x8_t va0x01234567 = vld1_u8(a0); a0 += 4;
-      const uint8x8_t va1x01234567 = vld1_u8(a1); a1 += 4;
-      const uint8x8_t va2x01234567 = vld1_u8(a2); a2 += 4;
-      const uint8x8_t va3x01234567 = vld1_u8(a3); a3 += 4;
-      const uint8x8_t va4x01234567 = vld1_u8(a4); a4 += 4;
-      const uint8x8_t va5x01234567 = vld1_u8(a5); a5 += 4;
+      const uint8x8_t va0x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a0, vmov_n_u32(0), 0)); a0 += 4;
+      const uint8x8_t va1x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a1, vmov_n_u32(0), 0)); a1 += 4;
+      const uint8x8_t va2x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a2, vmov_n_u32(0), 0)); a2 += 4;
+      const uint8x8_t va3x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a3, vmov_n_u32(0), 0)); a3 += 4;
+      const uint8x8_t va4x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a4, vmov_n_u32(0), 0)); a4 += 4;
+      const uint8x8_t va5x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a5, vmov_n_u32(0), 0)); a5 += 4;
 
       // Load a 4x8 block of weights.
       const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
       const uint8x16_t vb0123x4567 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
 
       // Multiply-accumulate: 6x4 * 4x8 --> 6x8.
-      vnacc0 = vdot_lane_u32(vnacc0, va_zero_point, va0x01234567, 0);
+      vnacc0 = vdot_u32(vnacc0, va_zero_point, va0x01234567);
       vpacc0x0123 = vdotq_lane_u32(vpacc0x0123, vb0123x0123, va0x01234567, 0);
       vpacc0x4567 = vdotq_lane_u32(vpacc0x4567, vb0123x4567, va0x01234567, 0);
-      vnacc1 = vdot_lane_u32(vnacc1, va_zero_point, va1x01234567, 0);
+      vnacc1 = vdot_u32(vnacc1, va_zero_point, va1x01234567);
       vpacc1x0123 = vdotq_lane_u32(vpacc1x0123, vb0123x0123, va1x01234567, 0);
       vpacc1x4567 = vdotq_lane_u32(vpacc1x4567, vb0123x4567, va1x01234567, 0);
-      vnacc2 = vdot_lane_u32(vnacc2, va_zero_point, va2x01234567, 0);
+      vnacc2 = vdot_u32(vnacc2, va_zero_point, va2x01234567);
       vpacc2x0123 = vdotq_lane_u32(vpacc2x0123, vb0123x0123, va2x01234567, 0);
       vpacc2x4567 = vdotq_lane_u32(vpacc2x4567, vb0123x4567, va2x01234567, 0);
-      vnacc3 = vdot_lane_u32(vnacc3, va_zero_point, va3x01234567, 0);
+      vnacc3 = vdot_u32(vnacc3, va_zero_point, va3x01234567);
       vpacc3x0123 = vdotq_lane_u32(vpacc3x0123, vb0123x0123, va3x01234567, 0);
       vpacc3x4567 = vdotq_lane_u32(vpacc3x4567, vb0123x4567, va3x01234567, 0);
-      vnacc4 = vdot_lane_u32(vnacc4, va_zero_point, va4x01234567, 0);
+      vnacc4 = vdot_u32(vnacc4, va_zero_point, va4x01234567);
       vpacc4x0123 = vdotq_lane_u32(vpacc4x0123, vb0123x0123, va4x01234567, 0);
       vpacc4x4567 = vdotq_lane_u32(vpacc4x4567, vb0123x4567, va4x01234567, 0);
-      vnacc5 = vdot_lane_u32(vnacc5, va_zero_point, va5x01234567, 0);
+      vnacc5 = vdot_u32(vnacc5, va_zero_point, va5x01234567);
       vpacc5x0123 = vdotq_lane_u32(vpacc5x0123, vb0123x0123, va5x01234567, 0);
       vpacc5x4567 = vdotq_lane_u32(vpacc5x4567, vb0123x4567, va5x01234567, 0);
     }
 
     // Subtract zero point from accumulators.
-    uint32x4_t vnacc0x0123 = vdupq_lane_u32(vnacc0, 0);
+    vnacc0 = vpadd_u32(vnacc0, vnacc0);
+    const uint32x4_t vnacc0x0123 = vcombine_u32(vnacc0, vnacc0);
     int32x4_t vacc0x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x0123, vnacc0x0123));
     int32x4_t vacc0x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc0x4567, vnacc0x0123));
-    uint32x4_t vnacc1x0123 = vdupq_lane_u32(vnacc1, 0);
+    vnacc1 = vpadd_u32(vnacc1, vnacc1);
+    const uint32x4_t vnacc1x0123 = vcombine_u32(vnacc1, vnacc1);
     int32x4_t vacc1x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc1x0123, vnacc1x0123));
     int32x4_t vacc1x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc1x4567, vnacc1x0123));
-    uint32x4_t vnacc2x0123 = vdupq_lane_u32(vnacc2, 0);
+    vnacc2 = vpadd_u32(vnacc2, vnacc2);
+    const uint32x4_t vnacc2x0123 = vcombine_u32(vnacc2, vnacc2);
     int32x4_t vacc2x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc2x0123, vnacc2x0123));
     int32x4_t vacc2x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc2x4567, vnacc2x0123));
-    uint32x4_t vnacc3x0123 = vdupq_lane_u32(vnacc3, 0);
+    vnacc3 = vpadd_u32(vnacc3, vnacc3);
+    const uint32x4_t vnacc3x0123 = vcombine_u32(vnacc3, vnacc3);
     int32x4_t vacc3x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc3x0123, vnacc3x0123));
     int32x4_t vacc3x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc3x4567, vnacc3x0123));
-    uint32x4_t vnacc4x0123 = vdupq_lane_u32(vnacc4, 0);
+    vnacc4 = vpadd_u32(vnacc4, vnacc4);
+    const uint32x4_t vnacc4x0123 = vcombine_u32(vnacc4, vnacc4);
     int32x4_t vacc4x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc4x0123, vnacc4x0123));
     int32x4_t vacc4x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc4x4567, vnacc4x0123));
-    uint32x4_t vnacc5x0123 = vdupq_lane_u32(vnacc5, 0);
+    vnacc5 = vpadd_u32(vnacc5, vnacc5);
+    const uint32x4_t vnacc5x0123 = vcombine_u32(vnacc5, vnacc5);
     int32x4_t vacc5x0123 = vreinterpretq_s32_u32(vsubq_u32(vpacc5x0123, vnacc5x0123));
     int32x4_t vacc5x4567 = vreinterpretq_s32_u32(vsubq_u32(vpacc5x4567, vnacc5x0123));
 

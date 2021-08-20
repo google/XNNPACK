@@ -96,9 +96,9 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
             const uint8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
 
         // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
-        $for K in range(0, 8, 4):
-          $for M in range(MR):
-            vnacc${M} = vdot_lane_u32(vnacc${M}, va_zero_point, va${M}x01234567, ${K//4});
+        $for M in range(MR):
+          vnacc${M} = vdot_u32(vnacc${M}, va_zero_point, va${M}x01234567);
+          $for K in range(0, 8, 4):
             $for N in range(0, NR, 4):
               vpacc${M}x${ABC[N:N+4]} = vdotq_lane_u32(vpacc${M}x${ABC[N:N+4]}, vb${ABC[K:K+4]}x${ABC[N:N+4]}, va${M}x01234567, ${K//4});
 
@@ -108,7 +108,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
       if XNN_UNLIKELY(k != 0) {
         // Load a ${MR}x4 block of activations.
         $for M in range(MR):
-          const uint8x8_t va${M}x01234567 = vld1_u8(a${M});
+          const uint8x8_t va${M}x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a${M}, vmov_n_u32(0), 0)); a${M} += 4;
 
         // Load a 4x${NR} block of weights.
         $for N in range(0, NR, 4):
@@ -116,7 +116,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
 
         // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
-          vnacc${M} = vdot_lane_u32(vnacc${M}, va_zero_point, va${M}x01234567, 0);
+          vnacc${M} = vdot_u32(vnacc${M}, va_zero_point, va${M}x01234567);
           $for N in range(0, NR, 4):
             vpacc${M}x${ABC[N:N+4]} = vdotq_lane_u32(vpacc${M}x${ABC[N:N+4]}, vb0123x${ABC[N:N+4]}, va${M}x01234567, 0);
       }
@@ -125,7 +125,8 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
 
     // Subtract zero point from accumulators.
     $for M in range(0, MR):
-      uint32x4_t vnacc${M}x0123 = vdupq_lane_u32(vnacc${M}, 0);
+      vnacc${M} = vpadd_u32(vnacc${M}, vnacc${M});
+      const uint32x4_t vnacc${M}x0123 = vcombine_u32(vnacc${M}, vnacc${M});
       $for N in range(0, NR, 4):
         int32x4_t vacc${M}x${ABC[N:N+4]} = vreinterpretq_s32_u32(vsubq_u32(vpacc${M}x${ABC[N:N+4]}, vnacc${M}x0123));
 
