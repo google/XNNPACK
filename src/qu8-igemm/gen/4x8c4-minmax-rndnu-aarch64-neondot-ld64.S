@@ -113,28 +113,25 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         UDOT    v17.4s, v4.16b, v1.4b[0]
         UDOT    v18.4s, v4.16b, v2.4b[0]
         UDOT    v19.4s, v4.16b, v3.4b[0]
+        UDOT    v24.2s, v7.8b, v0.8b
+        UDOT    v25.2s, v7.8b, v1.8b
+        LDR     q4,  [x5], 16
+        UDOT    v26.2s, v7.8b, v2.8b
+        UDOT    v27.2s, v7.8b, v3.8b
+        LDR     q6,  [x5], 16
         UDOT    v20.4s, v5.16b, v0.4b[0]
         UDOT    v21.4s, v5.16b, v1.4b[0]
         UDOT    v22.4s, v5.16b, v2.4b[0]
         UDOT    v23.4s, v5.16b, v3.4b[0]
-        UDOT    v24.4s, v7.16b, v0.4b[0]
-        UDOT    v25.4s, v7.16b, v1.4b[0]
-        LDP     q4, q5, [x5], 32
-        UDOT    v26.4s, v7.16b, v2.4b[0]
-        UDOT    v27.4s, v7.16b, v3.4b[0]
         UDOT    v16.4s, v4.16b, v0.4b[1]
         UDOT    v17.4s, v4.16b, v1.4b[1]
         UDOT    v18.4s, v4.16b, v2.4b[1]
         UDOT    v19.4s, v4.16b, v3.4b[1]
-        UDOT    v20.4s, v5.16b, v0.4b[1]
-        UDOT    v21.4s, v5.16b, v1.4b[1]
-        UDOT    v22.4s, v5.16b, v2.4b[1]
-        UDOT    v23.4s, v5.16b, v3.4b[1]
-        UDOT    v24.4s, v7.16b, v0.4b[1]
-        UDOT    v25.4s, v7.16b, v1.4b[1]
+        UDOT    v20.4s, v6.16b, v0.4b[1]
+        UDOT    v21.4s, v6.16b, v1.4b[1]
         SUBS    x0, x0, 8
-        UDOT    v26.4s, v7.16b, v2.4b[1]
-        UDOT    v27.4s, v7.16b, v3.4b[1]
+        UDOT    v22.4s, v6.16b, v2.4b[1]
+        UDOT    v23.4s, v6.16b, v3.4b[1]
         B.HS    2b
 
         # Is there a remainder?- 4 bytes of A
@@ -148,6 +145,13 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         B.HI    1b
 
 3:
+        ADDP    v24.4s, v24.4s, v25.4s
+        ADDP    v26.4s, v26.4s, v27.4s
+        DUP     v25.4s, v24.s[2]
+        DUP     v24.4s, v24.s[0]
+        DUP     v27.4s, v26.s[2]
+        DUP     v26.4s, v26.s[0]
+
         # Subtract zero point from accumulators
         SUB     v16.4s, v16.4s, v24.4s
         SUB     v17.4s, v17.4s, v25.4s
@@ -242,6 +246,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         LDR     s2, [x15], 4
         LDR     s3, [x11], 4
         LDR     q5, [x5], 16
+        UDOT    v24.2s, v7.8b, v0.8b
+        UDOT    v25.2s, v7.8b, v1.8b
+        UDOT    v26.2s, v7.8b, v2.8b
+        UDOT    v27.2s, v7.8b, v3.8b
         UDOT    v16.4s, v4.16b, v0.4b[0]
         UDOT    v17.4s, v4.16b, v1.4b[0]
         UDOT    v18.4s, v4.16b, v2.4b[0]
@@ -249,13 +257,9 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         LDR     x11, [sp, 24]            // reload params pointer
         UDOT    v20.4s, v5.16b, v0.4b[0]
         UDOT    v21.4s, v5.16b, v1.4b[0]
+        ADD     x11, x11, 4
         UDOT    v22.4s, v5.16b, v2.4b[0]
         UDOT    v23.4s, v5.16b, v3.4b[0]
-        ADD     x11, x11, 4
-        UDOT    v24.4s, v7.16b, v0.4b[0]
-        UDOT    v25.4s, v7.16b, v1.4b[0]
-        UDOT    v26.4s, v7.16b, v2.4b[0]
-        UDOT    v27.4s, v7.16b, v3.4b[0]
 
         # ks loop
         SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
