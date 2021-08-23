@@ -25,11 +25,11 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3 v0
-# A1 x15 v1
-# A2 x13 v2
-# A3  x4 v3
-# B   x5 v4  v5
+# A0  x3  v0
+# A1 x15  v1
+# A2 x13  v2
+# A3  x4  v3
+# B   x5  v4  v5  v6
 # C0  x6 v16 v20 v24
 # C1  x8 v17 v21 v25
 # C2  x9 v18 v22 v26
@@ -85,46 +85,47 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         .p2align 3
 1:
         LDR     d0,  [x3], 8
-        LDR     q4,  [x5], 16
+        LDR     q4,  [x5]
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3,  [x4], 8
-        LDR     q5,  [x5], 16
-        UDOT    v16.4s, v4.16b, v0.4b[0]
-        UDOT    v17.4s, v4.16b, v1.4b[0]
-        UDOT    v18.4s, v4.16b, v2.4b[0]
-        UDOT    v19.4s, v4.16b, v3.4b[0]
+        LDR     q5,  [x5, 16]
         UDOT    v24.2s, v7.8b, v0.8b
         UDOT    v25.2s, v7.8b, v1.8b
-        LDR     q4,  [x5], 16
         UDOT    v26.2s, v7.8b, v2.8b
         UDOT    v27.2s, v7.8b, v3.8b
-        LDR     q6,  [x5], 16
+        UDOT    v16.4s, v4.16b, v0.4b[0]
+        UDOT    v17.4s, v4.16b, v1.4b[0]
+        LDR     q6,  [x5, 32]
+        UDOT    v18.4s, v4.16b, v2.4b[0]
+        UDOT    v19.4s, v4.16b, v3.4b[0]
         UDOT    v20.4s, v5.16b, v0.4b[0]
         UDOT    v21.4s, v5.16b, v1.4b[0]
+        LDR     q4,  [x5, 48]
         UDOT    v22.4s, v5.16b, v2.4b[0]
         UDOT    v23.4s, v5.16b, v3.4b[0]
-        UDOT    v16.4s, v4.16b, v0.4b[1]
-        UDOT    v17.4s, v4.16b, v1.4b[1]
-        UDOT    v18.4s, v4.16b, v2.4b[1]
-        UDOT    v19.4s, v4.16b, v3.4b[1]
-        UDOT    v20.4s, v6.16b, v0.4b[1]
-        UDOT    v21.4s, v6.16b, v1.4b[1]
+        UDOT    v16.4s, v6.16b, v0.4b[1]
+        UDOT    v17.4s, v6.16b, v1.4b[1]
+        UDOT    v18.4s, v6.16b, v2.4b[1]
+        UDOT    v19.4s, v6.16b, v3.4b[1]
+        ADD     x5, x5, 64
+        UDOT    v20.4s, v4.16b, v0.4b[1]
+        UDOT    v21.4s, v4.16b, v1.4b[1]
         SUBS    x0, x0, 8
-        UDOT    v22.4s, v6.16b, v2.4b[1]
-        UDOT    v23.4s, v6.16b, v3.4b[1]
+        UDOT    v22.4s, v4.16b, v2.4b[1]
+        UDOT    v23.4s, v4.16b, v3.4b[1]
         B.HS    1b
 
         # Is there a remainder?- 4 bytes of A
         TBNZ    x0, 2, 3f
 
 2:
-        ADDP    v24.4s, v24.4s, v25.4s
-        ADDP    v26.4s, v26.4s, v27.4s
-        DUP     v25.4s, v24.s[2]
-        DUP     v24.4s, v24.s[0]
-        DUP     v27.4s, v26.s[2]
-        DUP     v26.4s, v26.s[0]
+        ADDP    v0.2s, v24.2s, v25.2s
+        ADDP    v1.2s, v26.2s, v27.2s
+        DUP     v24.4s, v0.s[0]
+        DUP     v25.4s, v0.s[1]
+        DUP     v26.4s, v1.s[0]
+        DUP     v27.4s, v1.s[1]
 
         # Subtract zero point from accumulators
         SUB     v16.4s, v16.4s, v24.4s
@@ -183,36 +184,30 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         LD1R    {v4.16b}, [x11], 1      // clamp min value
 
         SQXTUN  v0.8b, v16.8h
-        SQXTUN  v1.8b, v17.8h
-        SQXTUN  v2.8b, v18.8h
-        SQXTUN  v3.8b, v19.8h
+        SQXTUN  v1.8b, v18.8h
         LD1R    {v5.16b}, [x11]         // clamp max value
+        SQXTUN2 v0.16b, v17.8h
+        SQXTUN2 v1.16b, v19.8h
 
-        UMAX    v0.8b, v0.8b, v4.8b
-        UMAX    v1.8b, v1.8b, v4.8b
         LDR     x12, [sp]               // cn_stride
-        UMAX    v2.8b, v2.8b, v4.8b
-        UMAX    v3.8b, v3.8b, v4.8b
+        UMAX    v0.16b, v0.16b, v4.16b
+        UMAX    v1.16b, v1.16b, v4.16b
         SUBS    x1, x1, 8
-        UMIN    v0.8b, v0.8b, v5.8b
-        UMIN    v1.8b, v1.8b, v5.8b
-        UMIN    v2.8b, v2.8b, v5.8b
-        UMIN    v3.8b, v3.8b, v5.8b
+        UMIN    v0.16b, v0.16b, v5.16b
+        UMIN    v1.16b, v1.16b, v5.16b
         B.LO    4f
 
         # Store full 4 x 8
         ST1     {v0.8b}, [x6], x12
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v1.8b}, [x8], x12
+        ST1     {v0.d}[1], [x8], x12
         SUB     x15, x15, x2            // a1 -= kc
-        ST1     {v2.8b}, [x9], x12
+        ST1     {v1.8b}, [x9], x12
         SUB     x13, x13, x2            // a2 -= kc
-        ST1     {v3.8b}, [x7], x12
+        ST1     {v1.d}[1], [x7], x12
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
-
         RET
-
 
         # Remainder- 4 bytes of A
         .p2align 3
@@ -242,29 +237,25 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
 4:
         TBZ     x1, 2, 6f
         STR     s0, [x6], 4
-        DUP     s0, v0.s[1]
-        STR     s1, [x8], 4
-        DUP     s1, v1.s[1]
-        STR     s2, [x9], 4
-        DUP     s2, v2.s[1]
-        STR     s3, [x7], 4
-        DUP     s3, v3.s[1]
+        ST1     {v0.s}[2], [x8], 4
+        STR     s1, [x9], 4
+        ST1     {v1.s}[2], [x7], 4
+        EXT     v0.16b, v0.16b, v0.16b, 4
+        EXT     v1.16b, v1.16b, v1.16b, 4
 6:
         TBZ     x1, 1, 7f
         ST1     {v0.h}[0], [x6], 2
-        DUP     h0, v0.h[1]
-        ST1     {v1.h}[0], [x8], 2
-        DUP     h1, v1.h[1]
-        ST1     {v2.h}[0], [x9], 2
-        DUP     h2, v2.h[1]
-        ST1     {v3.h}[0], [x7], 2
-        DUP     h3, v3.h[1]
+        ST1     {v0.h}[4], [x8], 2
+        ST1     {v1.h}[0], [x9], 2
+        ST1     {v1.h}[4], [x7], 2
+        EXT     v0.16b, v0.16b, v0.16b, 2
+        EXT     v1.16b, v1.16b, v1.16b, 2
 7:
         TBZ     x1, 0, 8f
         ST1     {v0.b}[0], [x6]
-        ST1     {v1.b}[0], [x8]
-        ST1     {v2.b}[0], [x9]
-        ST1     {v3.b}[0], [x7]
+        ST1     {v0.b}[8], [x8]
+        ST1     {v1.b}[0], [x9]
+        ST1     {v1.b}[8], [x7]
 8:
         RET
 
