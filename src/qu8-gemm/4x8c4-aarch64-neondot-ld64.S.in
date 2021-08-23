@@ -7,6 +7,7 @@ $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 
 #include <xnnpack/assembly.h>
 
+$REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -45,11 +46,15 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
         CSEL    x8, x6,  x8, LO         //   c1 = c0
         BIC     x2, x2, 3
 
+        LDP     x12, x11, [sp]          // cn_stride, params
+
         ADD     x13, x15, x4            // a2 = a1 + a_stride
         ADD     x9,  x8, x7             // c2 = c1 + cm_stride
                                         // if mr <= 2
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
+
+        LD1R    {v7.4s}, [x11], 4       // kernel_zero_point
 
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
@@ -65,13 +70,11 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
         MOV     v18.16b, v16.16b
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LDR     x11, [sp, 8]            // reload params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
         SUBS    x0, x2, 8               // k = kc - 8
         MOVI    v24.16b, 0
         MOVI    v25.16b, 0
-        LD1R    {v7.4s}, [x11], 4       // kernel_zero_point
         MOVI    v26.16b, 0
         MOVI    v27.16b, 0
 
@@ -258,8 +261,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
         LD1R    {v5.16b}, [x11]         // clamp max value
         SQXTUN2 v0.16b, v17.8h
         SQXTUN2 v1.16b, v19.8h
+        SUB     x11, x11, ${REWIND_DECREMENT}             // rewind params pointer
 
-        LDR     x12, [sp]               // cn_stride
         UMAX    v0.16b, v0.16b, v4.16b
         UMAX    v1.16b, v1.16b, v4.16b
         SUBS    x1, x1, 8

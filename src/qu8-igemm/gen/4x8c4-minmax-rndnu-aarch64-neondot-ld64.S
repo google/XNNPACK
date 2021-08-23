@@ -58,7 +58,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
-        LD1R    {v7.4s}, [x11], 4      // kernel_zero_point
+        LD1R    {v7.4s}, [x11], 4       // kernel_zero_point
 
         .p2align 3
 0:
