@@ -651,7 +651,7 @@ static void init(void) {
 
   } else if (!XNN_PLATFORM_MOBILE) {
 
-    /*************************** QU8 micro-kernels ***************************/
+    /*************************** QS8 micro-kernels ***************************/
     #ifndef XNN_NO_QS8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -747,7 +747,7 @@ static void init(void) {
 
       xnn_params.s8.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_s8_vclamp_ukernel__scalar_x4,
-        .init.s8_minmax = xnn_init_s8_minmax_neon_params,
+        .init.s8_minmax = xnn_init_s8_minmax_scalar_params,
         .element_tile = 4,
       };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
@@ -764,7 +764,7 @@ static void init(void) {
 
       xnn_params.u8.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__scalar_x4,
-        .init.u8_minmax = xnn_init_u8_minmax_neon_params,
+        .init.u8_minmax = xnn_init_u8_minmax_scalar_params,
         .element_tile = 4,
       };
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
