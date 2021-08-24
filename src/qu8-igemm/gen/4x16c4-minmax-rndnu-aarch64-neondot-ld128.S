@@ -19,10 +19,10 @@
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,                  [sp] -> x10
-#     size_t a_offset,                   [sp + 8] -> x8
-#     const int8_t* zero,                [sp + 16] -> x12
-#     const union xnn_qu8_conv_minmax_params params [sp + 24] -> (x11)
+#     size_t cn_stride,          [sp] -> x10
+#     size_t a_offset,           [sp + 8] -> x8
+#     const int8_t* zero,        [sp + 16] -> x12
+#     const union xnn_qu8_conv_minmax_params params) [sp + 24] -> (x11)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -50,8 +50,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
                                         // if mr <= 2
-        # Save d8-d9,d12-d15 on stack
-        STP     d8,  d9, [sp, -48]!
+        # Save d8,d12-d15 on stack
+        STR     d8,  [sp, -48]!
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
         STP     d12, d13, [sp, 16]
@@ -354,10 +354,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         # nc loop
         B.HI    0b
 
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
         # Remainder- 8 bytes of A
@@ -489,10 +489,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         ST1     {v1.b}[0], [x16]
         ST1     {v0.b}[0], [x6]
 10:
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
 END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128

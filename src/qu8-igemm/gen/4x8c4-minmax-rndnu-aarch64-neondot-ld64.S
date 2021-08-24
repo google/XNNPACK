@@ -19,10 +19,10 @@
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,                  [sp] -> x10
-#     size_t a_offset,                   [sp + 8] -> x8
-#     const int8_t* zero,                [sp + 16] -> x12
-#     const union xnn_qu8_conv_minmax_params [sp + 24] -> (x11)
+#     size_t cn_stride,          [sp] -> x10
+#     size_t a_offset,           [sp + 8] -> x8
+#     const int8_t* zero,        [sp + 16] -> x12
+#     const union xnn_qu8_conv_minmax_params params) [sp + 24] -> (x11)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -32,11 +32,11 @@
 # A2  x15  v2
 # A3  x11  v3
 # B    x5  v4  v5  v6
-# C0   x6 v16 v20 v24
-# C1  x16 v17 v21 v25
-# C2  x17 v18 v22 v26
-# C3   x7 v19 v23 v27
-# zero_point v7
+# C0   x6 v16 v20
+# C1  x16 v17 v21
+# C2  x17 v18 v22
+# C3   x7 v19 v23
+# zero_point v7 v24 v25 v26 v27
 # unused  v8 v9 v10 v11 v13 v14 v15 v28 v29 v30 v31
 
 BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64

@@ -4,12 +4,10 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
-$assert not CHANNELWISE
 
 #include <xnnpack/assembly.h>
 
 $REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-$PARAMS_UNION = "xnn_qu8_minmax_params" if CHANNELWISE else "xnn_qu8_conv_minmax_params"
 # void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -20,18 +18,8 @@ $PARAMS_UNION = "xnn_qu8_minmax_params" if CHANNELWISE else "xnn_qu8_conv_minmax
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union ${PARAMS_UNION} params)  [sp + 8] -> x11
+#     const union xnn_qu8_conv_minmax_params params)  [sp + 8] -> x11
 
-$if REQUANTIZATION == "GEMMLOWP":
-  # params structure is 16 bytes
-  #  struct {
-  #    uint8_t kernel_zero_point[4];
-  #    int32_t multiplier;
-  #    int32_t right_shift;
-  #    int16_t output_zero_point;
-  #    int8_t output_min;
-  #    int8_t output_max;
-  #  } gemmlowp_neon;
 $if REQUANTIZATION == "RNDNU":
   # params structure is 20 bytes
   #  struct {
@@ -43,6 +31,16 @@ $if REQUANTIZATION == "RNDNU":
   #    int8_t output_min;
   #    int8_t output_max;
   #  } rndnu_neon;
+$if REQUANTIZATION == "GEMMLOWP":
+  # params structure is 16 bytes
+  #  struct {
+  #    uint8_t kernel_zero_point[4];
+  #    int32_t multiplier;
+  #    int32_t right_shift;
+  #    int16_t output_zero_point;
+  #    int8_t output_min;
+  #    int8_t output_max;
+  #  } gemmlowp_neon;
 $elif REQUANTIZATION == "FP32":
   # params structure is 12 bytes
   #  struct {
@@ -77,8 +75,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
         ADD     x15, x3, x4             // a1 = a0 + a_stride
         ADD     x8, x6, x7              // c1 = c0 + cm_stride
 
-        # Save d8-d9,d12-d15 on stack
-        STP     d8,  d9, [sp, -48]!
+        # Save d8,d12-d15 on stack
+        STR     d8,  [sp, -48]!
         CSEL    x15, x3, x15, LO        //   a1 = a0
         CSEL    x8, x6,  x8, LO         //   c1 = c0
         BIC     x2, x2, 3
@@ -389,17 +387,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
         $elif REQUANTIZATION == "FP32":
           SCVTF   v16.4s, v16.4s
           SCVTF   v17.4s, v17.4s
-          $if not CHANNELWISE:
-            # Apply params - scale, bias and clamp
-            LD1R    {v4.4s}, [x11], 4
-            SCVTF   v18.4s, v18.4s
-            SCVTF   v19.4s, v19.4s
-          $else:
-            # Load per channel scale values from weights
-            LDR     q4, [x5], 16
-            SCVTF   v18.4s, v18.4s
-            SCVTF   v19.4s, v19.4s
-            LDR     q5, [x5], 16
+          # Apply params - scale, bias and clamp
+          LD1R    {v4.4s}, [x11], 4
+          SCVTF   v18.4s, v18.4s
+          SCVTF   v19.4s, v19.4s
           SCVTF   v20.4s, v20.4s
           SCVTF   v21.4s, v21.4s
           SCVTF   v22.4s, v22.4s
@@ -413,42 +404,22 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
           SCVTF   v30.4s, v30.4s
           SCVTF   v31.4s, v31.4s
 
-          $if CHANNELWISE:
-            LDR     q6, [x5], 16
-            FMUL    v16.4s, v16.4s, v4.4s
-            FMUL    v17.4s, v17.4s, v4.4s
-            FMUL    v18.4s, v18.4s, v4.4s
-            FMUL    v19.4s, v19.4s, v4.4s
-            FMUL    v20.4s, v20.4s, v5.4s
-            LDR     q4, [x5], 16
-            FMUL    v21.4s, v21.4s, v5.4s
-            FMUL    v22.4s, v22.4s, v5.4s
-            FMUL    v23.4s, v23.4s, v5.4s
-            FMUL    v24.4s, v24.4s, v6.4s
-            FMUL    v25.4s, v25.4s, v6.4s
-            FMUL    v26.4s, v26.4s, v6.4s
-            FMUL    v27.4s, v27.4s, v6.4s
-            FMUL    v28.4s, v28.4s, v4.4s
-            FMUL    v29.4s, v29.4s, v4.4s
-            FMUL    v30.4s, v30.4s, v4.4s
-            FMUL    v31.4s, v31.4s, v4.4s
-          $else:
-            FMUL    v16.4s, v16.4s, v4.4s
-            FMUL    v17.4s, v17.4s, v4.4s
-            FMUL    v18.4s, v18.4s, v4.4s
-            FMUL    v19.4s, v19.4s, v4.4s
-            FMUL    v20.4s, v20.4s, v4.4s
-            FMUL    v21.4s, v21.4s, v4.4s
-            FMUL    v22.4s, v22.4s, v4.4s
-            FMUL    v23.4s, v23.4s, v4.4s
-            FMUL    v24.4s, v24.4s, v4.4s
-            FMUL    v25.4s, v25.4s, v4.4s
-            FMUL    v26.4s, v26.4s, v4.4s
-            FMUL    v27.4s, v27.4s, v4.4s
-            FMUL    v28.4s, v28.4s, v4.4s
-            FMUL    v29.4s, v29.4s, v4.4s
-            FMUL    v30.4s, v30.4s, v4.4s
-            FMUL    v31.4s, v31.4s, v4.4s
+          FMUL    v16.4s, v16.4s, v4.4s
+          FMUL    v17.4s, v17.4s, v4.4s
+          FMUL    v18.4s, v18.4s, v4.4s
+          FMUL    v19.4s, v19.4s, v4.4s
+          FMUL    v20.4s, v20.4s, v4.4s
+          FMUL    v21.4s, v21.4s, v4.4s
+          FMUL    v22.4s, v22.4s, v4.4s
+          FMUL    v23.4s, v23.4s, v4.4s
+          FMUL    v24.4s, v24.4s, v4.4s
+          FMUL    v25.4s, v25.4s, v4.4s
+          FMUL    v26.4s, v26.4s, v4.4s
+          FMUL    v27.4s, v27.4s, v4.4s
+          FMUL    v28.4s, v28.4s, v4.4s
+          FMUL    v29.4s, v29.4s, v4.4s
+          FMUL    v30.4s, v30.4s, v4.4s
+          FMUL    v31.4s, v31.4s, v4.4s
 
           FCVTNS  v16.4s, v16.4s
           FCVTNS  v17.4s, v17.4s
@@ -530,10 +501,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
 
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
         # Remainder- 8 bytes of A
@@ -665,10 +636,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aar
         ST1     {v2.b}[0], [x9]
         ST1     {v3.b}[0], [x7]
 9:
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
 END_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld128

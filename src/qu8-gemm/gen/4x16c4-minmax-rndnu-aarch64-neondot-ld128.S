@@ -57,8 +57,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         ADD     x15, x3, x4             // a1 = a0 + a_stride
         ADD     x8, x6, x7              // c1 = c0 + cm_stride
 
-        # Save d8-d9,d12-d15 on stack
-        STP     d8,  d9, [sp, -48]!
+        # Save d8,d12-d15 on stack
+        STR     d8,  [sp, -48]!
         CSEL    x15, x3, x15, LO        //   a1 = a0
         CSEL    x8, x6,  x8, LO         //   c1 = c0
         BIC     x2, x2, 3
@@ -348,10 +348,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
 
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
         # Remainder- 8 bytes of A
@@ -483,10 +483,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         ST1     {v2.b}[0], [x9]
         ST1     {v3.b}[0], [x7]
 9:
-        # Restore d8-d9,d12-d15 from stack
+        # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]
-        LDP     d8,  d9, [sp], 48
+        LDR     d8,  [sp], 48
         RET
 
 END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
