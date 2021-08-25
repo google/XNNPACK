@@ -170,7 +170,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LDR     x14,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
-        # BLOCK 4
+        # BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
@@ -326,7 +326,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         LDR     x14,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
-        # BLOCK 4
+        # BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]

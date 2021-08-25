@@ -327,10 +327,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         SQXTUN  v2.8b, v18.8h
         SQXTUN  v3.8b, v19.8h
         LD1R    {v5.16b}, [x11]         // clamp max value
-        SQXTUN2  v0.16b, v24.8h
-        SQXTUN2  v1.16b, v25.8h
-        SQXTUN2  v2.16b, v26.8h
-        SQXTUN2  v3.16b, v27.8h
+        SQXTUN2 v0.16b, v24.8h
+        SQXTUN2 v1.16b, v25.8h
+        SQXTUN2 v2.16b, v26.8h
+        SQXTUN2 v3.16b, v27.8h
 
         UMAX    v0.16b, v0.16b, v4.16b
         UMAX    v1.16b, v1.16b, v4.16b

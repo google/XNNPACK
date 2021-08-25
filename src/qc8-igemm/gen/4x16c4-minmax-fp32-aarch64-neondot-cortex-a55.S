@@ -190,7 +190,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         LDR     x11,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
-        # BLOCK 4
+        # BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
@@ -346,7 +346,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         LDR     x11,  [x5], 8
         SDOT    v27.4s, v10.16b, v3.4b[1]
 
-        # BLOCK 4
+        # BLOCK 3
         SDOT    v28.4s, v11.16b, v0.4b[1]
         LDR     d9,  [x5], 8
         SDOT    v29.4s, v11.16b, v1.4b[1]
