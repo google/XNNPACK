@@ -8,7 +8,7 @@ XNNPACK is a highly optimized library of floating-point neural network inference
 - ARMv7 (with NEON) on Android, Linux, and iOS (including WatchOS)
 - x86 and x86-64 (up to AVX512) on Windows, Linux, macOS, Android, and iOS simulator
 - WebAssembly MVP
-- WebAssembly SIMD (experimental)
+- WebAssembly SIMD
 
 ## Operator Coverage
 
