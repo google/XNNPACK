@@ -2318,9 +2318,11 @@ SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
+  src/qu8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/2x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
+  src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/2x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c)
