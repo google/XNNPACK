@@ -22,20 +22,20 @@ $REWIND_DECREMENT = {"GEMMLOWP": 15, "RNDNU": 19, "FP32": 11}[REQUANTIZATION]
 #     const int8_t* zero,        [sp + 16] -> x12
 #     const union xnn_qu8_conv_minmax_params [sp + 24] -> (x11)
 
-# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+# d28-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
 # A0  x13  v0  v4
 # A1  x14  v1  v5
 # A2  x15  v2  v6
 # A3  x10  v3  v7
-# B    x5  v8  v9 v10 v11
+# B    x5 v28 v29 v30 v31
 # C0   x6 v16 v20
 # C1  x16 v17 v21
 # C2  x17 v18 v22
 # C3   x7 v19 v23
-# zero_point v28 v24 v25 v26 v27
-# unused v13 v14 v15 v28 v29 v30 v31
+# zero_point v8 v24 v25 v26 v27
+# unused v9 v10 v11 v12 v13 v14 v15
 
 # x11 temp for Cortex-A55 loads
 
@@ -49,13 +49,12 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         LDP     x12, x11, [sp, 16]      // Load zero, params pointer
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-        STP     d8,  d9, [sp, -32]!     // Save d8-d11 on stack
+        STR     d8, [sp, -16]!          // Save d8 on stack
                                         // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
-        STP     d10, d11, [sp, 16]
         BIC     x2, x2, 3
         CMP     x0, 4                   // if mr < 4
-        LD1R    {v28.4s}, [x11], 4      // kernel_zero_point
+        LD1R    {v8.4s}, [x11], 4      // kernel_zero_point
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
@@ -100,12 +99,12 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
 
         # prologue - read A and B values for block 0 and 1
         LDR     d0, [x13], 8
-        LDR     q8,  [x5], 16
+        LDR     q28, [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
         LDR     d3, [x10], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
-        LDR     d9,  [x5], 8
+        LDR     d29, [x5], 8
         LDR     x11, [x5], 8
         # Is there at least 16 bytes for main loop?
         B.LO    3f
@@ -119,182 +118,182 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         .p2align 3
 2:
         # BLOCK 0
-        UDOT    v16.4s,  v8.16b, v0.4b[0]
-        LDR     d10,  [x5], 8
-        UDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x11
-        UDOT    v18.4s,  v8.16b, v2.4b[0]
+        UDOT    v16.4s,  v28.16b, v0.4b[0]
+        LDR     d30,  [x5], 8
+        UDOT    v17.4s,  v28.16b, v1.4b[0]
+        INS     v29.d[1], x11
+        UDOT    v18.4s,  v28.16b, v2.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s,  v8.16b, v3.4b[0]
+        UDOT    v19.4s,  v28.16b, v3.4b[0]
         LDR     d4, [x13], 8
 
         # BLOCK 1
-        UDOT    v20.4s,  v9.16b, v0.4b[0]
-        LDR     d11,  [x5], 8
-        UDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x11
-        UDOT    v22.4s,  v9.16b, v2.4b[0]
+        UDOT    v20.4s,  v29.16b, v0.4b[0]
+        LDR     d31,  [x5], 8
+        UDOT    v21.4s,  v29.16b, v1.4b[0]
+        INS     v30.d[1], x11
+        UDOT    v22.4s,  v29.16b, v2.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s,  v9.16b, v3.4b[0]
+        UDOT    v23.4s,  v29.16b, v3.4b[0]
         LDR     d5, [x14], 8
 
         # BLOCK 0
-        UDOT    v16.4s, v10.16b, v0.4b[1]
-        LDR     d8,  [x5], 8
-        UDOT    v17.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x11
-        UDOT    v18.4s, v10.16b, v2.4b[1]
+        UDOT    v16.4s, v30.16b, v0.4b[1]
+        LDR     d28,  [x5], 8
+        UDOT    v17.4s, v30.16b, v1.4b[1]
+        INS     v31.d[1], x11
+        UDOT    v18.4s, v30.16b, v2.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s, v10.16b, v3.4b[1]
+        UDOT    v19.4s, v30.16b, v3.4b[1]
         LDR     d6, [x15], 8
 
         # BLOCK 1
-        UDOT    v20.4s, v11.16b, v0.4b[1]
-        LDR     d9,  [x5], 8
-        UDOT    v21.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x11
-        UDOT    v22.4s, v11.16b, v2.4b[1]
+        UDOT    v20.4s, v31.16b, v0.4b[1]
+        LDR     d29,  [x5], 8
+        UDOT    v21.4s, v31.16b, v1.4b[1]
+        INS     v28.d[1], x11
+        UDOT    v22.4s, v31.16b, v2.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s, v11.16b, v3.4b[1]
+        UDOT    v23.4s, v31.16b, v3.4b[1]
         LDR     d7, [x10], 8
 
-        UDOT    v24.2s, v28.8b, v0.8b
-        UDOT    v25.2s, v28.8b, v1.8b
-        UDOT    v26.2s, v28.8b, v2.8b
-        UDOT    v27.2s, v28.8b, v3.8b
+        UDOT    v24.2s, v8.8b, v0.8b
+        UDOT    v25.2s, v8.8b, v1.8b
+        UDOT    v26.2s, v8.8b, v2.8b
+        UDOT    v27.2s, v8.8b, v3.8b
 
         # BLOCK 0
-        UDOT    v16.4s,  v8.16b, v4.4b[0]
-        LDR     d10,  [x5], 8
-        UDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x11
-        UDOT    v18.4s,  v8.16b, v6.4b[0]
+        UDOT    v16.4s,  v28.16b, v4.4b[0]
+        LDR     d30,  [x5], 8
+        UDOT    v17.4s,  v28.16b, v5.4b[0]
+        INS     v29.d[1], x11
+        UDOT    v18.4s,  v28.16b, v6.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s,  v8.16b, v7.4b[0]
+        UDOT    v19.4s,  v28.16b, v7.4b[0]
         LDR     d0, [x13], 8
 
         # BLOCK 1
-        UDOT    v20.4s,  v9.16b, v4.4b[0]
-        LDR     d11,  [x5], 8
-        UDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x11
-        UDOT    v22.4s,  v9.16b, v6.4b[0]
+        UDOT    v20.4s,  v29.16b, v4.4b[0]
+        LDR     d31,  [x5], 8
+        UDOT    v21.4s,  v29.16b, v5.4b[0]
+        INS     v30.d[1], x11
+        UDOT    v22.4s,  v29.16b, v6.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s,  v9.16b, v7.4b[0]
+        UDOT    v23.4s,  v29.16b, v7.4b[0]
         LDR     d1, [x14], 8
 
         # BLOCK 0
-        UDOT    v16.4s, v10.16b, v4.4b[1]
-        LDR     d8,  [x5], 8
-        UDOT    v17.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x11
-        UDOT    v18.4s, v10.16b, v6.4b[1]
+        UDOT    v16.4s, v30.16b, v4.4b[1]
+        LDR     d28,  [x5], 8
+        UDOT    v17.4s, v30.16b, v5.4b[1]
+        INS     v31.d[1], x11
+        UDOT    v18.4s, v30.16b, v6.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s, v10.16b, v7.4b[1]
+        UDOT    v19.4s, v30.16b, v7.4b[1]
         LDR     d2, [x15], 8
 
         # BLOCK 1
-        UDOT    v20.4s, v11.16b, v4.4b[1]
-        LDR     d9,  [x5], 8
-        UDOT    v21.4s, v11.16b, v5.4b[1]
-        INS     v8.d[1], x11
-        UDOT    v22.4s, v11.16b, v6.4b[1]
+        UDOT    v20.4s, v31.16b, v4.4b[1]
+        LDR     d29,  [x5], 8
+        UDOT    v21.4s, v31.16b, v5.4b[1]
+        INS     v28.d[1], x11
+        UDOT    v22.4s, v31.16b, v6.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s, v11.16b, v7.4b[1]
+        UDOT    v23.4s, v31.16b, v7.4b[1]
         LDR     d3, [x10], 8
 
-        UDOT    v24.2s, v28.8b, v4.8b
-        UDOT    v25.2s, v28.8b, v5.8b
+        UDOT    v24.2s, v8.8b, v4.8b
+        UDOT    v25.2s, v8.8b, v5.8b
         SUBS    x0, x0, 16
-        UDOT    v26.2s, v28.8b, v6.8b
-        UDOT    v27.2s, v28.8b, v7.8b
+        UDOT    v26.2s, v8.8b, v6.8b
+        UDOT    v27.2s, v8.8b, v7.8b
 
         B.HS    2b
 
         # Epilogue.  Same as main loop but no preloads in final group
 3:
         # BLOCK 0
-        UDOT    v16.4s,  v8.16b, v0.4b[0]
-        LDR     d10,  [x5], 8
-        UDOT    v17.4s,  v8.16b, v1.4b[0]
-        INS     v9.d[1], x11
-        UDOT    v18.4s,  v8.16b, v2.4b[0]
+        UDOT    v16.4s,  v28.16b, v0.4b[0]
+        LDR     d30,  [x5], 8
+        UDOT    v17.4s,  v28.16b, v1.4b[0]
+        INS     v29.d[1], x11
+        UDOT    v18.4s,  v28.16b, v2.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s,  v8.16b, v3.4b[0]
+        UDOT    v19.4s,  v28.16b, v3.4b[0]
         LDR     d4, [x13], 8
 
         # BLOCK 1
-        UDOT    v20.4s,  v9.16b, v0.4b[0]
-        LDR     d11,  [x5], 8
-        UDOT    v21.4s,  v9.16b, v1.4b[0]
-        INS     v10.d[1], x11
-        UDOT    v22.4s,  v9.16b, v2.4b[0]
+        UDOT    v20.4s,  v29.16b, v0.4b[0]
+        LDR     d31,  [x5], 8
+        UDOT    v21.4s,  v29.16b, v1.4b[0]
+        INS     v30.d[1], x11
+        UDOT    v22.4s,  v29.16b, v2.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s,  v9.16b, v3.4b[0]
+        UDOT    v23.4s,  v29.16b, v3.4b[0]
         LDR     d5, [x14], 8
 
         # BLOCK 0
-        UDOT    v16.4s, v10.16b, v0.4b[1]
-        LDR     d8,  [x5], 8
-        UDOT    v17.4s, v10.16b, v1.4b[1]
-        INS     v11.d[1], x11
-        UDOT    v18.4s, v10.16b, v2.4b[1]
+        UDOT    v16.4s, v30.16b, v0.4b[1]
+        LDR     d28,  [x5], 8
+        UDOT    v17.4s, v30.16b, v1.4b[1]
+        INS     v31.d[1], x11
+        UDOT    v18.4s, v30.16b, v2.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s, v10.16b, v3.4b[1]
+        UDOT    v19.4s, v30.16b, v3.4b[1]
         LDR     d6, [x15], 8
 
         # BLOCK 1
-        UDOT    v20.4s, v11.16b, v0.4b[1]
-        LDR     d9,  [x5], 8
-        UDOT    v21.4s, v11.16b, v1.4b[1]
-        INS     v8.d[1], x11
-        UDOT    v22.4s, v11.16b, v2.4b[1]
+        UDOT    v20.4s, v31.16b, v0.4b[1]
+        LDR     d29,  [x5], 8
+        UDOT    v21.4s, v31.16b, v1.4b[1]
+        INS     v28.d[1], x11
+        UDOT    v22.4s, v31.16b, v2.4b[1]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s, v11.16b, v3.4b[1]
+        UDOT    v23.4s, v31.16b, v3.4b[1]
         LDR     d7, [x10], 8
 
-        UDOT    v24.2s, v28.8b, v0.8b
-        UDOT    v25.2s, v28.8b, v1.8b
-        UDOT    v26.2s, v28.8b, v2.8b
-        UDOT    v27.2s, v28.8b, v3.8b
+        UDOT    v24.2s, v8.8b, v0.8b
+        UDOT    v25.2s, v8.8b, v1.8b
+        UDOT    v26.2s, v8.8b, v2.8b
+        UDOT    v27.2s, v8.8b, v3.8b
 
         # BLOCK 0
-        UDOT    v16.4s,  v8.16b, v4.4b[0]
-        LDR     d10,  [x5], 8
-        UDOT    v17.4s,  v8.16b, v5.4b[0]
-        INS     v9.d[1], x11
-        UDOT    v18.4s,  v8.16b, v6.4b[0]
+        UDOT    v16.4s,  v28.16b, v4.4b[0]
+        LDR     d30,  [x5], 8
+        UDOT    v17.4s,  v28.16b, v5.4b[0]
+        INS     v29.d[1], x11
+        UDOT    v18.4s,  v28.16b, v6.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v19.4s,  v8.16b, v7.4b[0]
+        UDOT    v19.4s,  v28.16b, v7.4b[0]
 
         # BLOCK 1
-        UDOT    v20.4s,  v9.16b, v4.4b[0]
-        LDR     d11,  [x5], 8
-        UDOT    v21.4s,  v9.16b, v5.4b[0]
-        INS     v10.d[1], x11
-        UDOT    v22.4s,  v9.16b, v6.4b[0]
+        UDOT    v20.4s,  v29.16b, v4.4b[0]
+        LDR     d31,  [x5], 8
+        UDOT    v21.4s,  v29.16b, v5.4b[0]
+        INS     v30.d[1], x11
+        UDOT    v22.4s,  v29.16b, v6.4b[0]
         LDR     x11,  [x5], 8
-        UDOT    v23.4s,  v9.16b, v7.4b[0]
+        UDOT    v23.4s,  v29.16b, v7.4b[0]
 
         # BLOCK 0
-        UDOT    v16.4s, v10.16b, v4.4b[1]
-        UDOT    v17.4s, v10.16b, v5.4b[1]
-        INS     v11.d[1], x11
-        UDOT    v18.4s, v10.16b, v6.4b[1]
-        UDOT    v19.4s, v10.16b, v7.4b[1]
+        UDOT    v16.4s, v30.16b, v4.4b[1]
+        UDOT    v17.4s, v30.16b, v5.4b[1]
+        INS     v31.d[1], x11
+        UDOT    v18.4s, v30.16b, v6.4b[1]
+        UDOT    v19.4s, v30.16b, v7.4b[1]
 
         # BLOCK 1
-        UDOT    v20.4s, v11.16b, v4.4b[1]
-        UDOT    v21.4s, v11.16b, v5.4b[1]
-        UDOT    v22.4s, v11.16b, v6.4b[1]
-        UDOT    v23.4s, v11.16b, v7.4b[1]
+        UDOT    v20.4s, v31.16b, v4.4b[1]
+        UDOT    v21.4s, v31.16b, v5.4b[1]
+        UDOT    v22.4s, v31.16b, v6.4b[1]
+        UDOT    v23.4s, v31.16b, v7.4b[1]
 
         AND     x0, x2, 15              // kc remainder 0 to 12
 
-        UDOT    v24.2s, v28.8b, v4.8b
-        UDOT    v25.2s, v28.8b, v5.8b
-        UDOT    v26.2s, v28.8b, v6.8b
-        UDOT    v27.2s, v28.8b, v7.8b
+        UDOT    v24.2s, v8.8b, v4.8b
+        UDOT    v25.2s, v8.8b, v5.8b
+        UDOT    v26.2s, v8.8b, v6.8b
+        UDOT    v27.2s, v8.8b, v7.8b
 
         # Is there a remainder?- 4 to 12 bytes of A
         CBNZ    x0, 5f
@@ -307,7 +306,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
 
         ADDP    v0.2s, v24.2s, v25.2s
         ADDP    v1.2s, v26.2s, v27.2s
-        LDR     x11, [sp, 56]           // reload params pointer
+        LDR     x11, [sp, 40]           // reload params pointer
         DUP     v24.4s, v0.s[0]
         DUP     v25.4s, v0.s[1]
         DUP     v26.4s, v1.s[0]
@@ -439,7 +438,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
 
         SQADD   v16.8h, v16.8h, v6.8h
         SQADD   v17.8h, v17.8h, v6.8h
-        LDR     x10, [sp, 32]            // Load cn_stride
+        LDR     x10, [sp, 16]            // Load cn_stride
         SQADD   v18.8h, v18.8h, v6.8h
         SQADD   v19.8h, v19.8h, v6.8h
         LD1R    {v4.16b}, [x11], 1       // clamp min value
@@ -467,9 +466,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         # nc loop
         B.HI    0b
 
-        # Restore d8-d15 from stack
-        LDP     d10, d11, [sp, 16]
-        LDP     d8,  d9, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -483,10 +481,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         LDR     d2, [x15], 8
         LDR     d3, [x10], 8
         LDR     q5, [x5], 16
-        UDOT    v24.2s, v28.8b, v0.8b
-        UDOT    v25.2s, v28.8b, v1.8b
-        UDOT    v26.2s, v28.8b, v2.8b
-        UDOT    v27.2s, v28.8b, v3.8b
+        UDOT    v24.2s, v8.8b, v0.8b
+        UDOT    v25.2s, v8.8b, v1.8b
+        UDOT    v26.2s, v8.8b, v2.8b
+        UDOT    v27.2s, v8.8b, v3.8b
         UDOT    v16.4s, v4.16b, v0.4b[0]
         UDOT    v17.4s, v4.16b, v1.4b[0]
         UDOT    v18.4s, v4.16b, v2.4b[0]
@@ -513,10 +511,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         LDR     s2, [x15], 4
         LDR     s3, [x10], 4
         LDR     q5, [x5], 16
-        UDOT    v24.2s, v28.8b, v0.8b
-        UDOT    v25.2s, v28.8b, v1.8b
-        UDOT    v26.2s, v28.8b, v2.8b
-        UDOT    v27.2s, v28.8b, v3.8b
+        UDOT    v24.2s, v8.8b, v0.8b
+        UDOT    v25.2s, v8.8b, v1.8b
+        UDOT    v26.2s, v8.8b, v2.8b
+        UDOT    v27.2s, v8.8b, v3.8b
         UDOT    v16.4s, v4.16b, v0.4b[0]
         UDOT    v17.4s, v4.16b, v1.4b[0]
         UDOT    v18.4s, v4.16b, v2.4b[0]
@@ -552,9 +550,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
         ST1     {v0.b}[8], [x16]
         ST1     {v0.b}[0], [x6]
 10:
-        # Restore d8-d15 from stack
-        LDP     d10, d11, [sp, 16]
-        LDP     d8,  d9, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
 END_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_cortex_a55
