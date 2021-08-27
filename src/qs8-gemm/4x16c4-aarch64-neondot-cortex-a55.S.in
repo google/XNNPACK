@@ -36,6 +36,8 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax
 # C3  x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
+# x14 temp for Cortex-A55 loads
+
 BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Clamp A and C pointers
@@ -685,6 +687,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
 
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET
@@ -798,6 +801,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         ST1     {v2.b}[0], [x9]
         ST1     {v3.b}[0], [x7]
 10:
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET

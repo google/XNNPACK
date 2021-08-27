@@ -551,7 +551,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         # nc loop
         B.HI    0b
 
-        # Restore d8-d15 from stack
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET
@@ -665,7 +665,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_
         ST1     {v1.b}[0], [x16]
         ST1     {v0.b}[0], [x6]
 11:
-        # Restore d8-d15 from stack
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET

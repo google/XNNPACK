@@ -54,7 +54,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
 
         ADD     x13, x15, x4            // a2 = a1 + a_stride
         ADD     x9,  x8, x7             // c2 = c1 + cm_stride
-        STP     d28,  d29, [sp, -32]!
+        STR     d8, [sp, -16]!          // Save d8 on stack
                                         // if mr <= 2
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
@@ -64,7 +64,6 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
         ADD     x7,  x9, x7             // c3 = c2 + cm_stride
-        STP     d30, d31, [sp, 16]
         CSEL    x4, x13, x4, LO         //   a3 = a2
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
@@ -89,12 +88,12 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
 
         # prologue - read A and B values for block 0 and 1
         LDR     d0,  [x3], 8
-        LDR     q28,  [x5], 16
+        LDR     q28, [x5], 16
         LDR     d1, [x15], 8
         LDR     d2, [x13], 8
         LDR     d3,  [x4], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
-        LDR     d29,  [x5], 8
+        LDR     d29, [x5], 8
         LDR     x14, [x5], 8
         # Is there at least 16 bytes for main loop?
         B.LO    2f
@@ -378,9 +377,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
 
-        # Restore d28-d31 from stack
-        LDP     d30, d31, [sp, 16]
-        LDP     d28,  d29, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -464,9 +462,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         ST1     {v1.b}[0], [x9]
         ST1     {v1.b}[8], [x7]
 9:
-        # Restore d28-d31 from stack
-        LDP     d30, d31, [sp, 16]
-        LDP     d28,  d29, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
 END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a55

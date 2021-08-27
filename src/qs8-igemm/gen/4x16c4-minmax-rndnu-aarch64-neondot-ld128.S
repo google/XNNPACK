@@ -358,12 +358,11 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         SDOT    v29.4s, v7.16b,  v1.4b[1]
         SDOT    v30.4s, v7.16b,  v2.4b[1]
         SDOT    v31.4s, v7.16b,  v3.4b[1]
-
-        # Remainder- 4 bytes of A
-5:
         # Is there a remainder?- 4 bytes of A
         TBZ     x0, 2, 3b
 
+        # Remainder- 4 bytes of A
+5:
         LDR     s0, [x13], 4
         LDR     q4, [x5], 16
         LDR     s1, [x14], 4

@@ -31,13 +31,13 @@
 # A1  x14  v1  v5
 # A2  x15  v2  v6
 # A3  x10  v3  v7
-# B    x5  v28  v29 v30 v31
+# B    x5 v28 v29 v30 v31
 # C0   x6 v16 v20
 # C1  x16 v17 v21
 # C2  x17 v18 v22
 # C3   x7 v19 v23
 # zero_point v8 v24 v25 v26 v27
-# unused v13 v14 v15 v8 v29 v30 v31
+# unused v9 v10 v11 v12 v13 v14 v15
 
 # x11 temp for Cortex-A55 loads
 
@@ -51,10 +51,9 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
         LDP     x12, x11, [sp, 16]      // Load zero, params pointer
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-        STP     d28,  d29, [sp, -32]!     // Save d28-d31 on stack
+        STR     d8, [sp, -16]!          // Save d8 on stack
                                         // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
-        STP     d30, d31, [sp, 16]
         BIC     x2, x2, 3
         CMP     x0, 4                   // if mr < 4
         LD1R    {v8.4s}, [x11], 4      // kernel_zero_point
@@ -102,12 +101,12 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
 
         # prologue - read A and B values for block 0 and 1
         LDR     d0, [x13], 8
-        LDR     q28,  [x5], 16
+        LDR     q28, [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
         LDR     d3, [x10], 8
         SUBS    x0, x0, 16              // is there 16 for main loop?
-        LDR     d29,  [x5], 8
+        LDR     d29, [x5], 8
         LDR     x11, [x5], 8
         # Is there at least 16 bytes for main loop?
         B.LO    3f
@@ -309,7 +308,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
 
         ADDP    v0.2s, v24.2s, v25.2s
         ADDP    v1.2s, v26.2s, v27.2s
-        LDR     x11, [sp, 56]           // reload params pointer
+        LDR     x11, [sp, 40]           // reload params pointer
         DUP     v24.4s, v0.s[0]
         DUP     v25.4s, v0.s[1]
         DUP     v26.4s, v1.s[0]
@@ -368,7 +367,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
 
         SQADD   v16.8h, v16.8h, v6.8h
         SQADD   v17.8h, v17.8h, v6.8h
-        LDR     x10, [sp, 32]            // Load cn_stride
+        LDR     x10, [sp, 16]            // Load cn_stride
         SQADD   v18.8h, v18.8h, v6.8h
         SQADD   v19.8h, v19.8h, v6.8h
         LD1R    {v4.16b}, [x11], 1       // clamp min value
@@ -396,9 +395,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
         # nc loop
         B.HI    0b
 
-        # Restore d28-d15 from stack
-        LDP     d30, d31, [sp, 16]
-        LDP     d28,  d29, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
         # Remainder- 4 to 12 bytes of A
@@ -481,9 +479,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
         ST1     {v0.b}[8], [x16]
         ST1     {v0.b}[0], [x6]
 10:
-        # Restore d28-d15 from stack
-        LDP     d30, d31, [sp, 16]
-        LDP     d28,  d29, [sp], 32
+        # Restore d8 from stack
+        LDR     d8, [sp], 16
         RET
 
 END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a55

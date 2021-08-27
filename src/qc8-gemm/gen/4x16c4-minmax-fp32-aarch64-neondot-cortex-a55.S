@@ -36,6 +36,8 @@
 # C3  x7 v19 v23 v27 v31
 # unused v12 v13 v14 v15
 
+# x14 temp for Cortex-A55 loads
+
 BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55
 
         # Clamp A and C pointers
@@ -526,6 +528,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
 
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET
@@ -639,6 +642,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         ST1     {v2.b}[0], [x9]
         ST1     {v3.b}[0], [x7]
 10:
+        # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32
         RET
