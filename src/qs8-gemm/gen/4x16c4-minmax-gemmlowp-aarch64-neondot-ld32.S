@@ -53,6 +53,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld32
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
 
+        LDP     x12, x11, [sp]          // cn_stride, params
+
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
         ADD     x7,  x9, x7             // c3 = c2 + cm_stride
@@ -68,12 +70,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld32
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LDR     x11, [sp, 8]            // reload params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        MOV     x0, x2                  // k = kc.  assumes kc > 0
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
+        MOV     x0, x2                  // k = kc.  assumes kc > 0
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
@@ -228,7 +229,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld32
         SQXTN2  v1.16b, v25.8h
         SQXTN2  v2.16b, v26.8h
         SQXTN2  v3.16b, v27.8h
-        LDR     x12, [sp]               // cn_stride
+        SUB     x11, x11, 11            // rewind params pointer
 
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b
