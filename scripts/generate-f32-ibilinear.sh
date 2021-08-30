@@ -5,24 +5,26 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=1 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c1.c
-tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=2 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c2.c
-tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c4.c
+tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=1 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c1.c &
+tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=2 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c2.c &
+tools/xngen src/f32-ibilinear/scalar.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/scalar-c4.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/wasmsimd-c4.c
-tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/wasmsimd-c8.c
+tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/wasmsimd-c4.c &
+tools/xngen src/f32-ibilinear/wasmsimd.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/wasmsimd-c8.c &
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/neon-c4.c
-tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/neon-c8.c
+tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/neon-c4.c &
+tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=0 -o src/f32-ibilinear/gen/neon-c8.c &
 
-tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c4.c
-tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c8.c
+tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c4.c &
+tools/xngen src/f32-ibilinear/neon.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -D FMA=1 -o src/f32-ibilinear/gen/neonfma-c8.c &
 
 ################################### x86 SSE ###################################
-tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c4.c
-tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c8.c
+tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=4 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c4.c &
+tools/xngen src/f32-ibilinear/sse.c.in -D CHANNEL_TILE=8 -D PIXEL_TILE=1 -o src/f32-ibilinear/gen/sse-c8.c &
 
 ################################## Unit tests #################################
-tools/generate-ibilinear-test.py --spec test/f32-ibilinear.yaml --output test/f32-ibilinear.cc
+tools/generate-ibilinear-test.py --spec test/f32-ibilinear.yaml --output test/f32-ibilinear.cc &
+
+wait
