@@ -79,6 +79,12 @@ static void qu8_vadd(
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vadd, neon_ld64_x32,
+                    xnn_qu8_vadd_minmax_ukernel__neon_ld64_x32,
+                    xnn_init_qu8_add_minmax_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vadd, neon_ld128_x16,
                     xnn_qu8_vadd_minmax_ukernel__neon_ld128_x16,

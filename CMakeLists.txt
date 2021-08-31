@@ -1140,8 +1140,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-vadd/gen/minmax-neon-ld64-x8.c
-  src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
+  src/qu8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qu8-vadd/gen/minmax-neon-ld64-x32.c
+  src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
@@ -1706,9 +1708,11 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/rndna-neon.c
   src/qu8-vadd/gen/minmax-neon-ld64-x8.c
   src/qu8-vadd/gen/minmax-neon-ld64-x16.c
+  src/qu8-vadd/gen/minmax-neon-ld64-x32.c
   src/qu8-vadd/gen/minmax-neon-ld128-x16.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x8.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
+  src/qu8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qu8-vaddc/gen/minmax-neon-ld128-x16.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
