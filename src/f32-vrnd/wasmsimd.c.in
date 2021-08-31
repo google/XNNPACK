@@ -1,0 +1,63 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/vunary.h>
+
+
+$WASM_F32X4_RND = {
+$  "RNDNE": "wasm_f32x4_nearest",
+$  "RNDZ": "wasm_f32x4_trunc",
+$  "RNDU": "wasm_f32x4_ceil",
+$  "RNDD": "wasm_f32x4_floor",
+$}[OP]
+void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+
+  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    $for N in range(0, BATCH_TILE, 4):
+      const v128_t vx${ABC[N:N+4]} = wasm_v128_load(x); x += 4;
+
+    $for N in range(0, BATCH_TILE, 4):
+      const v128_t vy${ABC[N:N+4]} = ${WASM_F32X4_RND}(vx${ABC[N:N+4]});
+
+    $for N in range(0, BATCH_TILE, 4):
+      wasm_v128_store(y, vy${ABC[N:N+4]}); y += 4;
+  }
+  $if BATCH_TILE > 4:
+    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+      const v128_t vx = wasm_v128_load(x); x += 4;
+      const v128_t vy = ${WASM_F32X4_RND}(vx);
+      wasm_v128_store(y, vy); y += 4;
+    }
+  if XNN_UNLIKELY(n != 0) {
+    const v128_t vx = wasm_v128_load(x);
+    v128_t vy = ${WASM_F32X4_RND}(vx);
+
+    if (n & (2 * sizeof(float))) {
+      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+      vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      *y = wasm_f32x4_extract_lane(vy, 0);
+    }
+  }
+}
