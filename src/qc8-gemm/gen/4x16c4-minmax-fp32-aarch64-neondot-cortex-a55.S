@@ -611,6 +611,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         # Store odd width
         .p2align 3
 6:
+        # Restore d8-d11 from stack
+        LDP     d10, d11, [sp, 16]
         TBZ     x1, 3, 7f
         STR     d0, [x6], 8
         STR     d1, [x8], 8
@@ -621,6 +623,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         DUP     d2, v2.d[1]
         DUP     d3, v3.d[1]
 7:
+        LDP     d8,  d9, [sp], 32
         TBZ     x1, 2, 8f
         STR     s0, [x6], 4
         STR     s1, [x8], 4
@@ -647,9 +650,6 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         STR     b2, [x9]
         STR     b3, [x7]
 10:
-        # Restore d8-d11 from stack
-        LDP     d10, d11, [sp, 16]
-        LDP     d8,  d9, [sp], 32
         RET
 
 END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55
