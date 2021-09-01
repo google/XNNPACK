@@ -19,10 +19,10 @@
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,          [sp] -> x10
+#     size_t cn_stride,          [sp] -> (x0)
 #     size_t a_offset,           [sp + 8] -> x8
 #     const int8_t* zero,        [sp + 16] -> x12
-#     const union xnn_qu8_conv_minmax_params params) [sp + 24] -> (x11)
+#     const union xnn_qu8_conv_minmax_params params) [sp + 24] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -30,7 +30,7 @@
 # A0  x13  v0
 # A1  x14  v1
 # A2  x15  v2
-# A3  x11  v3
+# A3  x10  v3
 # B    x5  v4  v5  v6  v7
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -43,7 +43,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
-        LDP     x10, x8, [sp]           // Load cn_stride, a_offset
+        LDR     x8, [sp, 8]             // Load a_offset
         ADD     x16, x6, x7             // c1 = c0 + cm_stride
         CSEL    x16, x6,  x16, LO       //   c1 = c0
         LDP     x12, x11, [sp, 16]      // Load zero pointer, params
@@ -91,7 +91,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
 1:
         # Load next 4 A pointers
         LDP     x13, x14, [x4], 16
-        LDP     x15, x11, [x4], 16
+        LDP     x15, x10, [x4], 16
 
         CMP     x13, x12                // if a0 == zero
         ADD     x13, x13, x8            // a0 += a_offset
@@ -102,9 +102,9 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         CMP     x15, x12                // if a2 == zero
         ADD     x15, x15, x8            // a2 += a_offset
         CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x11, x12                // if a3 == zero
-        ADD     x11, x11, x8            // a3 += a_offset
-        CSEL    x11, x12, x11, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x10, x12                // if a3 == zero
+        ADD     x10, x10, x8            // a3 += a_offset
+        CSEL    x10, x12, x10, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 16 bytes for main loop?
         SUBS    x0, x2, 16              // k = kc - 16
@@ -117,7 +117,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         LDR     q4,  [x5], 16
         LDR     q1, [x14], 16
         LDR     q2, [x15], 16
-        LDR     q3, [x11], 16
+        LDR     q3, [x10], 16
         LDR     q5,  [x5], 16
 
         UDOT    v12.4s, v8.16b,  v0.16b  // update zero point
@@ -215,12 +215,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         ADDP    v1.4s, v13.4s, v13.4s
         ADDP    v2.4s, v14.4s, v14.4s
         ADDP    v3.4s, v15.4s, v15.4s
-        LDR     x11, [sp, 72]           // reload params pointer
         ADDP    v12.4s, v0.4s, v0.4s
         ADDP    v13.4s, v1.4s, v1.4s
         ADDP    v14.4s, v2.4s, v2.4s
         ADDP    v15.4s, v3.4s, v3.4s
-        ADD     x11, x11, 4
 
         # Subtract zero point from accumulators
         SUB     v16.4s, v16.4s, v12.4s
@@ -331,9 +329,11 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         SQXTUN2 v1.16b, v25.8h
         SQXTUN2 v2.16b, v26.8h
         SQXTUN2 v3.16b, v27.8h
+        LDR     x0, [sp, 48]            // Load cn_stride
 
         UMAX    v0.16b, v0.16b, v4.16b
         UMAX    v1.16b, v1.16b, v4.16b
+        SUB     x11, x11, 15             // rewind params pointer
         UMAX    v2.16b, v2.16b, v4.16b
         UMAX    v3.16b, v3.16b, v4.16b
         SUBS    x1, x1, 16
@@ -344,10 +344,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         B.LO    6f
 
         # Store full 4 x 16
-        ST1     {v3.16b},  [x7], x10
-        ST1     {v2.16b}, [x17], x10
-        ST1     {v1.16b}, [x16], x10
-        ST1     {v0.16b},  [x6], x10
+        ST1     {v3.16b},  [x7], x0
+        ST1     {v2.16b}, [x17], x0
+        ST1     {v1.16b}, [x16], x0
+        ST1     {v0.16b},  [x6], x0
 
         SUB     x4, x4, x3              // a -= ks
 
@@ -370,7 +370,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         LDR     q4,  [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
-        LDR     d3, [x11], 8
+        LDR     d3, [x10], 8
         LDR     q5,  [x5], 16
 
         UDOT    v12.4s, v8.16b,  v0.16b  // update zero point
@@ -422,7 +422,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         LDR     q4, [x5], 16
         LDR     s1, [x14], 4
         LDR     s2, [x15], 4
-        LDR     s3, [x11], 4
+        LDR     s3, [x10], 4
         LDR     q5, [x5], 16
 
         UDOT    v12.4s, v8.16b,  v0.16b  // update zero point
