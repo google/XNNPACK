@@ -266,31 +266,31 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
 5:
         TBZ     x1, 2, 6f
         STR     d20,  [x6], 8
-        DUP     d20, v20.d[1]
         STR     d22, [x16], 8
+        DUP     d20, v20.d[1]
         DUP     d22, v22.d[1]
         STR     d24, [x17], 8
-        DUP     d24, v24.d[1]
         STR     d26, [x14], 8
+        DUP     d24, v24.d[1]
         DUP     d26, v26.d[1]
         STR     d28, [x13], 8
-        DUP     d28, v28.d[1]
         STR     d30,  [x7], 8
+        DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
 6:
         TBZ     x1, 1, 7f
         STR     s20,  [x6], 4
-        DUP     s20, v20.s[1]
         STR     s22, [x16], 4
+        DUP     s20, v20.s[1]
         DUP     s22, v22.s[1]
         STR     s24, [x17], 4
-        DUP     s24, v24.s[1]
         STR     s26, [x14], 4
+        DUP     s24, v24.s[1]
         DUP     s26, v26.s[1]
         STR     s28, [x13], 4
-        DUP     s28, v28.s[1]
         STR     s30,  [x7], 4
+        DUP     s28, v28.s[1]
         DUP     s30, v30.s[1]
 
 7:

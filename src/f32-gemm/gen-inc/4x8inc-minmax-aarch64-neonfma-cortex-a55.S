@@ -429,12 +429,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
 7:
         TBZ     x1, 1, 8f
         STR     d26, [x14], 8
-        DUP     d26, v26.d[1]
         STR     d24, [x17], 8
+        DUP     d26, v26.d[1]
         DUP     d24, v24.d[1]
         STR     d22, [x16], 8
-        DUP     d22, v22.d[1]
         STR     d20,  [x6], 8
+        DUP     d22, v22.d[1]
         DUP     d20, v20.d[1]
 
 8:

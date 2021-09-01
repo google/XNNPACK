@@ -757,32 +757,32 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_co
 5:
         TBZ     x1, 3, 6f
         STR     d0, [x6], 8
-        DUP     d0, v0.d[1]
         STR     d1, [x8], 8
+        DUP     d0, v0.d[1]
         DUP     d1, v1.d[1]
         STR     d2, [x9], 8
-        DUP     d2, v2.d[1]
         STR     d3, [x7], 8
+        DUP     d2, v2.d[1]
         DUP     d3, v3.d[1]
 6:
         TBZ     x1, 2, 7f
         STR     s0, [x6], 4
-        DUP     s0, v0.s[1]
         STR     s1, [x8], 4
+        DUP     s0, v0.s[1]
         DUP     s1, v1.s[1]
         STR     s2, [x9], 4
-        DUP     s2, v2.s[1]
         STR     s3, [x7], 4
+        DUP     s2, v2.s[1]
         DUP     s3, v3.s[1]
 7:
         TBZ     x1, 1, 8f
         STR     h0, [x6], 2
-        DUP     h0, v0.h[1]
         STR     h1, [x8], 2
+        DUP     h0, v0.h[1]
         DUP     h1, v1.h[1]
         STR     h2, [x9], 2
-        DUP     h2, v2.h[1]
         STR     h3, [x7], 2
+        DUP     h2, v2.h[1]
         DUP     h3, v3.h[1]
 8:
         TBZ     x1, 0, 9f

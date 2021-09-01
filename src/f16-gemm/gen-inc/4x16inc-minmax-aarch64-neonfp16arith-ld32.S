@@ -187,23 +187,23 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
 5:
         TBZ     x1, 2, 6f
         STR     d30, [x7], 8
-        DUP     d30, v30.d[1]
         STR     d28, [x10], 8
+        DUP     d30, v30.d[1]
         DUP     d28, v28.d[1]
         STR     d18, [x9], 8
-        DUP     d18, v18.d[1]
         STR     d16, [x6], 8
+        DUP     d18, v18.d[1]
         DUP     d16, v16.d[1]
 
 6:
         TBZ     x1, 1, 7f
         STR     s30,  [x7], 4
-        DUP     s30, v30.s[1]
         STR     s28, [x10], 4
+        DUP     s30, v30.s[1]
         DUP     s28, v28.s[1]
         STR     s18,  [x9], 4
-        DUP     s18, v18.s[1]
         STR     s16,  [x6], 4
+        DUP     s18, v18.s[1]
         DUP     s16, v16.s[1]
 
 7:

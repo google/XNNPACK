@@ -186,12 +186,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld64
 5:
         TBZ     x1, 1, 6f
         STR     d30, [x7], 8
-        DUP     d30, v30.d[1]
         STR     d28, [x10], 8
+        DUP     d30, v30.d[1]
         DUP     d28, v28.d[1]
         STR     d18, [x9], 8
-        DUP     d18, v18.d[1]
         STR     d16, [x6], 8
+        DUP     d18, v18.d[1]
         DUP     d16, v16.d[1]
 
 6:

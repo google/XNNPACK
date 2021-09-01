@@ -439,12 +439,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
 8:
         TBZ     x1, 1, 9f
         STR     d16, [x6], 8
-        DUP     d16, v16.d[1]
         STR     d18, [x9], 8
+        DUP     d16, v16.d[1]
         DUP     d18, v18.d[1]
         STR     d28, [x10], 8
-        DUP     d28, v28.d[1]
         STR     d30, [x7], 8
+        DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
 9:

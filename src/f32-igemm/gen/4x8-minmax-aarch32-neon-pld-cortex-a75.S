@@ -346,24 +346,24 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_pld_cortex_a75
         TST     r1, 4
         BEQ     8f
         VST1.32 {d28-d29},  [r6]!
-        VMOV    q14, q15
         VST1.32 {d24-d25},  [r8]!
+        VMOV    q14, q15
         VMOV    q12, q13
         VST1.32 {d20-d21},  [r4]!
-        VMOV    q10, q11
         VST1.32 {d16-d17}, [r11]!
+        VMOV    q10, q11
         VMOV    q8,  q9
 
 8:
         TST     r1, 2
         BEQ     9f
         VST1.32 {d28},  [r6]!
-        VMOV    d28, d29
         VST1.32 {d24},  [r8]!
+        VMOV    d28, d29
         VMOV    d24, d25
         VST1.32 {d20},  [r4]!
-        VMOV    d20, d21
         VST1.32 {d16}, [r11]!
+        VMOV    d20, d21
         VMOV    d16, d17
 
 9:
