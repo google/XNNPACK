@@ -552,10 +552,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_cor
         SQXTN2  v1.16b, v25.8h
         SQXTN2  v2.16b, v26.8h
         SQXTN2  v3.16b, v27.8h
-        SUB     x11, x11, 11          // rewind params pointer
+        LDR     x0, [sp, 32]            // cn_stride
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b
-        LDR     x0, [sp, 32]            // cn_stride
+        SUB     x11, x11, 11          // rewind params pointer
         SMAX    v2.16b, v2.16b, v4.16b
         SMAX    v3.16b, v3.16b, v4.16b
         SUBS    x1, x1, 16
