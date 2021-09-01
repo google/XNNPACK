@@ -25,14 +25,14 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x20(
 {
   assert(n % sizeof(float) == 0);
 
-  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.800000p17f);
-  const v128_t vminus_log2e = wasm_f32x4_splat(-0x1.715476p0f);
-  const v128_t vindex_mask = wasm_i32x4_splat(INT32_C(0x3F));
-  const v128_t vln2_hi = wasm_f32x4_splat(0x1.630000p-1f);
-  const v128_t vln2_lo = wasm_f32x4_splat(-0x1.BD0106p-13f);
-  const v128_t vc2 = wasm_f32x4_splat(0x1.FFFF0Ap-2f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
-  const v128_t vdenorm_cutoff = wasm_f32x4_splat(0x1.5D589Ep+6f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p17f);
+  const v128_t vminus_log2e = wasm_f32x4_const_splat(-0x1.715476p0f);
+  const v128_t vindex_mask = wasm_i32x4_const_splat(INT32_C(0x3F));
+  const v128_t vln2_hi = wasm_f32x4_const_splat(0x1.630000p-1f);
+  const v128_t vln2_lo = wasm_f32x4_const_splat(-0x1.BD0106p-13f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFF0Ap-2f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+  const v128_t vdenorm_cutoff = wasm_f32x4_const_splat(0x1.5D589Ep+6f);
 
   for (; n >= 20 * sizeof(float); n -= 20 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);

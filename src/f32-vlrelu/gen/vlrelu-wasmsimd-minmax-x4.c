@@ -25,7 +25,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4(
   assert(n % sizeof(float) == 0);
 
   const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     v128_t vx = wasm_v128_load(x);
     x += 4;

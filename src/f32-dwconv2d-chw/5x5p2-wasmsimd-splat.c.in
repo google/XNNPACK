@@ -42,8 +42,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TILE
   const v128_t vwKLMN = wasm_v128_load(weights + 20);
   const v128_t vwOP = wasm_v128_load64_splat(weights + 24);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
-
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(float));
 
   const float* i0 = zero;
@@ -66,7 +64,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TILE
       }
 
     $for M in range(4 + ROW_TILE):
-      v128_t vi${M}x0123 = vzero;
+      v128_t vi${M}x0123 = wasm_f32x4_const_splat(0.0f);
 
     $for M in range(4 + ROW_TILE):
       v128_t vi${M}x4567 = wasm_v128_load(i${M}); i${M} += 4;
@@ -421,6 +419,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TILE
       $for M in range(ROW_TILE):
         vo${M}p${16 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${16 % ACCUMULATORS}, wasm_f32x4_mul(vi${M+4}x2345, wasm_v32x4_shuffle(vwKLMN, vwKLMN, 1, 1, 1, 1)));
 
+      const v128_t vzero = wasm_f32x4_const_splat(0.0f);
       $for M in range(4 + ROW_TILE):
         const v128_t vi${M}x5678 = wasm_v32x4_shuffle(vi${M}x4567, vzero, 1, 2, 3, 4);
 

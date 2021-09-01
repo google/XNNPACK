@@ -41,8 +41,6 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_splat_2x4_acc2(
   const v128_t vw4567 = wasm_v128_load(weights + 4);
   const v128_t vw89 = wasm_v128_load64_splat(weights + 8);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
-
   const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
   const size_t output_width = round_down_po2((input_width + (2 /* padding */ - 3 /* kernel size */ + 2 /* subsampling */) * sizeof(float)) / 2, sizeof(float));
 
@@ -72,11 +70,11 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_splat_2x4_acc2(
       i4 = zero;
     }
 
-    v128_t vi0x1357 = vzero;
-    v128_t vi1x1357 = vzero;
-    v128_t vi2x1357 = vzero;
-    v128_t vi3x1357 = vzero;
-    v128_t vi4x1357 = vzero;
+    v128_t vi0x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi1x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi2x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi3x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi4x1357 = wasm_f32x4_const_splat(0.0f);
 
     size_t w = input_width;
     for (; w >= 8 * sizeof(float); w -= 8 * sizeof(float)) {

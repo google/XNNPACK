@@ -33,7 +33,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
   const v128_t vmax = wasm_v128_load32_splat(&params->scalar.output_max);
 
   while (channels >= 4) {
-    v128_t vsum0 = wasm_f64x2_splat(0.0);
+    v128_t vsum0 = wasm_f32x4_const_splat(0.0f);
     v128_t vsum1 = vsum0;
     v128_t vsum2 = vsum0;
     v128_t vsum3 = vsum0;
@@ -93,7 +93,7 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
   }
 
   while (channels != 0) {
-    v128_t vsum = wasm_f64x2_splat(0.0);
+    v128_t vsum = wasm_f32x4_const_splat(0.0f);
     size_t n = elements;
     while (n >= 4 * sizeof(float)) {
       const v128_t vi0 = wasm_v128_load(i0);

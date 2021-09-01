@@ -20,14 +20,14 @@ void xnn_math_f32_roundu__wasmsimd_addsub(
   assert(n % (4 * sizeof(float)) == 0);
 
   // Mask for the sign bit of a floating-point number.
-  const v128_t vsign_mask = wasm_i32x4_splat(INT32_C(0x80000000));
+  const v128_t vsign_mask = wasm_i32x4_const_splat(INT32_C(0x80000000));
   // Addition of this number to a floating-point number x cause rounding of the result to an integer. Then this magic
   // number is subtracted back from the result to get original x rounded to integer. This trick works only for
   // 0 <= x < 2**24, but all numbers in 2**23 <= x < 2**24 range are integers, so we can further restrict it to
   // 0 <= x < 2**23. Then the upper bound of the validity interval is conveniently the same as the magic number.
-  const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
+  const v128_t vmagic_number = wasm_f32x4_const_splat(0x1.000000p+23f);
   // Unit constant to increment results rounded "wrong way" (i.e. down) in the round-to-nearest-even operation.
-  const v128_t vone = wasm_f32x4_splat(1.0f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(input);

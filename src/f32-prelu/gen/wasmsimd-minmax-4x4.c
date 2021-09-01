@@ -52,7 +52,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_4x4(
   const size_t input_increment = input_stride * 4 - channels;
   const size_t output_increment = output_stride * 4 - channels;
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
   do {
     const float* w = weights;
     size_t c = channels;

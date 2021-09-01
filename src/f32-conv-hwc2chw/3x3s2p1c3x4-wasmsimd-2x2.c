@@ -49,7 +49,6 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
     i0 = zero;
   }
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
 
@@ -94,11 +93,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
       }
 
       // viMx0 = ( iM0c2, iM0c1, iM0c0, --- )
-      v128_t vi0x0 = vzero;
-      v128_t vi1x0 = vzero;
-      v128_t vi2x0 = vzero;
-      v128_t vi3x0 = vzero;
-      v128_t vi4x0 = vzero;
+      v128_t vi0x0 = wasm_f32x4_const_splat(0.0f);
+      v128_t vi1x0 = wasm_f32x4_const_splat(0.0f);
+      v128_t vi2x0 = wasm_f32x4_const_splat(0.0f);
+      v128_t vi3x0 = wasm_f32x4_const_splat(0.0f);
+      v128_t vi4x0 = wasm_f32x4_const_splat(0.0f);
 
       size_t iw = input_width;
       for (; iw >= 4; iw -= 4) {
@@ -391,11 +390,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
 
         const v128_t vk00c1 = wasm_v128_load(w + 16);
 
-        v128_t vi0x2 = vzero;
-        v128_t vi1x2 = vzero;
-        v128_t vi2x2 = vzero;
-        v128_t vi3x2 = vzero;
-        v128_t vi4x2 = vzero;
+        v128_t vi0x2 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi1x2 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi2x2 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi3x2 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi4x2 = wasm_f32x4_const_splat(0.0f);
         if (iw >= 2) {
           // viMx2 = ( iM3c1, iM3c0, iM2c2, iM2c1 )
           vi0x2 = wasm_v128_load(i0 + 4);
@@ -501,11 +500,11 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
 
         const v128_t vk01c2 = wasm_v128_load(w + 64);
 
-        v128_t vi0x3 = vzero;
-        v128_t vi1x3 = vzero;
-        v128_t vi2x3 = vzero;
-        v128_t vi3x3 = vzero;
-        v128_t vi4x3 = vzero;
+        v128_t vi0x3 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi1x3 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi2x3 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi3x3 = wasm_f32x4_const_splat(0.0f);
+        v128_t vi4x3 = wasm_f32x4_const_splat(0.0f);
         if (iw > 2) {
           // viMx3 = ( 0.0, 0.0, 0.0, iM3c2 )
           vi0x3 = wasm_v128_load32_splat(i0 + 8);

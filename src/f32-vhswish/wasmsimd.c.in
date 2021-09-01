@@ -26,7 +26,7 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x${BATCH_TILE}(
   const v128_t vsixth = wasm_v128_load32_splat(&params->scalar.sixth);
   const v128_t vthree = wasm_v128_load32_splat(&params->scalar.three);
   const v128_t vsix = wasm_v128_load32_splat(&params->scalar.six);
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
 
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {

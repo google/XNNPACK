@@ -57,7 +57,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c8_acc2(
   const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
   const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
   const int32_t vshift = params->wasmsimd.shift;
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_splat(0);
   while (channels >= 8) {
     const v128_t vxi0x01234567 = wasm_i16x8_load8x8(i0);
     i0 += 8;

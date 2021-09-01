@@ -51,12 +51,11 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_mul16_ld128(
     c2 = c1;
   }
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   do {
-    v128_t vacc0x0 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[0]);
-    v128_t vacc0x1 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[1]);
-    v128_t vacc0x2 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[2]);
-    v128_t vacc0x3 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[3]);
+    v128_t vacc0x0 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[0]);
+    v128_t vacc0x1 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[1]);
+    v128_t vacc0x2 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[2]);
+    v128_t vacc0x3 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[3]);
     v128_t vacc1x0 = vacc0x0;
     v128_t vacc1x1 = vacc0x1;
     v128_t vacc1x2 = vacc0x2;

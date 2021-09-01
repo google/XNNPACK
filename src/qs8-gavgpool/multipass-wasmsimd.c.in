@@ -200,7 +200,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__wasmsimd_c${CH
   const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
   const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
   const int32_t vshift = params->wasmsimd.shift;
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_splat(0);
   while (channels >= ${CHANNEL_TILE}) {
     $for M in range(ROW_SUBTILE):
       const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});

@@ -140,7 +140,7 @@ void xnn_f32_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
     $elif ACTIVATION == "RELU":
-      const v128_t vzero = wasm_f64x2_splat(0.0);
+      const v128_t vzero = wasm_i32x4_const_splat(0);
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = wasm_i32x4_max(vacc${M}x${ABC[N:N+4]}, vzero);

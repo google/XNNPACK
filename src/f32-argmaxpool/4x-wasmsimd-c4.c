@@ -58,19 +58,19 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
       i3 += 4;
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_f64x2_splat(0.0);
+      v128_t vidx = wasm_i32x4_const_splat(0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(1), vidx, vm1);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(1), vidx, vm1);
 
       const v128_t vm2 = wasm_f32x4_gt(vi2, vmax);
       vmax = wasm_v128_bitselect(vi2, vmax, vm2);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(2), vidx, vm2);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(2), vidx, vm2);
 
       const v128_t vm3 = wasm_f32x4_gt(vi3, vmax);
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(3), vidx, vm3);
 
       wasm_v128_store(output, vmax);
       output += 4;
@@ -84,19 +84,19 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
       const v128_t vi3 = wasm_v128_load(i3);
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_f64x2_splat(0.0);
+      v128_t vidx = wasm_i32x4_const_splat(0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(1), vidx, vm1);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(1), vidx, vm1);
 
       const v128_t vm2 = wasm_f32x4_gt(vi2, vmax);
       vmax = wasm_v128_bitselect(vi2, vmax, vm2);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(2), vidx, vm2);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(2), vidx, vm2);
 
       const v128_t vm3 = wasm_f32x4_gt(vi3, vmax);
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(3), vidx, vm3);
 
       if (c & 2) {
         *((double*) output) = wasm_f64x2_extract_lane(vmax, 0);

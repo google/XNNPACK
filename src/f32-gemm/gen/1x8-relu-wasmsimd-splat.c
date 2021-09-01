@@ -96,7 +96,7 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat(
       } while (k != 0);
     }
 
-    const v128_t vzero = wasm_f64x2_splat(0.0);
+    const v128_t vzero = wasm_i32x4_const_splat(0);
     vacc0x0123 = wasm_i32x4_max(vacc0x0123, vzero);
     vacc0x4567 = wasm_i32x4_max(vacc0x4567, vzero);
 

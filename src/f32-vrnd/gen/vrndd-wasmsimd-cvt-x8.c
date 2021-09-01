@@ -25,9 +25,9 @@ void xnn_f32_vrndd_ukernel__wasmsimd_cvt_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_f32x4_splat(-0.0f);
-  const v128_t vmagic_number = wasm_f32x4_splat(0x1.000000p+23f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
+  const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
+  const v128_t vmagic_number = wasm_f32x4_const_splat(0x1.000000p+23f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);
     const v128_t vx4567 = wasm_v128_load(x + 4);

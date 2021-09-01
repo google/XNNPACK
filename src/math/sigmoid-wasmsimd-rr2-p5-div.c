@@ -20,22 +20,22 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div(
   assert(n % (4 * sizeof(float)) == 0);
 
   // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
-  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.8000FEp23f);
-  const v128_t vminus_log2e = wasm_f32x4_splat(-0x1.715476p+0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp23f);
+  const v128_t vminus_log2e = wasm_f32x4_const_splat(-0x1.715476p+0f);
   // Last 7 bits are zeroes
-  const v128_t vln2_hi = wasm_f32x4_splat(0x1.62E400p-1f);
-  const v128_t vln2_lo = wasm_f32x4_splat(0x1.7F7D1Cp-20f);
+  const v128_t vln2_hi = wasm_f32x4_const_splat(0x1.62E400p-1f);
+  const v128_t vln2_lo = wasm_f32x4_const_splat(0x1.7F7D1Cp-20f);
   // Coefficient of polynomial approximation of
   // exp(-t) ~ 1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))) on [-log(2)/2, log(2)/2]
-  const v128_t vc5 = wasm_f32x4_splat(-0x1.0F9F9Cp-7f);
-  const v128_t vc4 = wasm_f32x4_splat( 0x1.573A1Ap-5f);
-  const v128_t vc3 = wasm_f32x4_splat(-0x1.555A80p-3f);
-  const v128_t vc2 = wasm_f32x4_splat( 0x1.FFFDC6p-2f);
-  const v128_t vc1 = wasm_f32x4_splat(-0x1.FFFFF6p-1f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
+  const v128_t vc5 = wasm_f32x4_const_splat(-0x1.0F9F9Cp-7f);
+  const v128_t vc4 = wasm_f32x4_const_splat( 0x1.573A1Ap-5f);
+  const v128_t vc3 = wasm_f32x4_const_splat(-0x1.555A80p-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat( 0x1.FFFDC6p-2f);
+  const v128_t vc1 = wasm_f32x4_const_splat(-0x1.FFFFF6p-1f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
   // The largest z for which sigmoidf(-z) is normalized.
   // This number is also the largest z for which expf(-z) is normalized.
-  const v128_t vdenorm_cutoff = wasm_f32x4_splat(0x1.5D589Ep+6f);
+  const v128_t vdenorm_cutoff = wasm_f32x4_const_splat(0x1.5D589Ep+6f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(input);

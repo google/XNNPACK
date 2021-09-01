@@ -45,7 +45,7 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
     const v128_t vy_min = wasm_v128_load32_splat(&params->scalar.min);
     const v128_t vy_max = wasm_v128_load32_splat(&params->scalar.max);
   $elif ACTIVATION == "RELU":
-    const v128_t vzero = wasm_f64x2_splat(0.0);
+    const v128_t vzero = wasm_i32x4_const_splat(0);
 
   for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
     const v128_t va${ABC[0:4]} = wasm_v128_load(a);

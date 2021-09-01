@@ -28,7 +28,7 @@ void xnn_qu8_requantize_fp32__wasmsimd(
   const v128_t vscale = wasm_f32x4_splat(scale);
   const v128_t vfmin = wasm_f32x4_splat((float) ((int32_t) (uint32_t) qmin - (int32_t) (uint32_t) zero_point));
   const v128_t vfmax = wasm_f32x4_splat((float) ((int32_t) (uint32_t) qmax - (int32_t) (uint32_t) zero_point));
-  const v128_t vfmagic = wasm_f32x4_splat(12582912.0f);
+  const v128_t vfmagic = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vimagic = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) (uint32_t) zero_point);
   for (; n != 0; n -= 16) {
     const v128_t x = wasm_v128_load(input);

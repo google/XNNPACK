@@ -26,7 +26,7 @@ void xnn_f32_vrelu_ukernel__wasmsimd_x8(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     v128_t vacc0123 = wasm_v128_load(x);

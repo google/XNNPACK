@@ -27,7 +27,7 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x8(
   const v128_t vsixth = wasm_v128_load32_splat(&params->scalar.sixth);
   const v128_t vthree = wasm_v128_load32_splat(&params->scalar.three);
   const v128_t vsix = wasm_v128_load32_splat(&params->scalar.six);
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(x);

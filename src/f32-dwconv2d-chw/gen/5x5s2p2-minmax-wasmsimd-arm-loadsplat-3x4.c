@@ -65,8 +65,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_loadsplat_3x4(
   const v128_t vk43 = wasm_v128_load32_splat(weights + 24);
   const v128_t vk44 = wasm_v128_load32_splat(weights + 25);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
-
   const uint32_t padding_top_less_1 = padding_top - 1;
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(float));
 
@@ -113,25 +111,25 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_loadsplat_3x4(
       i8 = zero;
     }
 
-    v128_t vi0x0246 = vzero;
-    v128_t vi1x0246 = vzero;
-    v128_t vi2x0246 = vzero;
-    v128_t vi3x0246 = vzero;
-    v128_t vi4x0246 = vzero;
-    v128_t vi5x0246 = vzero;
-    v128_t vi6x0246 = vzero;
-    v128_t vi7x0246 = vzero;
-    v128_t vi8x0246 = vzero;
+    v128_t vi0x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi1x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi2x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi3x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi4x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi5x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi6x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi7x0246 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi8x0246 = wasm_f32x4_const_splat(0.0f);
 
-    v128_t vi0x1357 = vzero;
-    v128_t vi1x1357 = vzero;
-    v128_t vi2x1357 = vzero;
-    v128_t vi3x1357 = vzero;
-    v128_t vi4x1357 = vzero;
-    v128_t vi5x1357 = vzero;
-    v128_t vi6x1357 = vzero;
-    v128_t vi7x1357 = vzero;
-    v128_t vi8x1357 = vzero;
+    v128_t vi0x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi1x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi2x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi3x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi4x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi5x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi6x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi7x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi8x1357 = wasm_f32x4_const_splat(0.0f);
 
     const v128_t vi0x89AB = wasm_v128_load(i0);
     const v128_t vi0xCDEF = wasm_v128_load(i0 + 4);
@@ -539,6 +537,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_loadsplat_3x4(
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi6x79BD, vk41));
       vo2p0 = wasm_f32x4_add(vo2p0, wasm_f32x4_mul(vi8x79BD, vk41));
 
+      const v128_t vzero = wasm_f32x4_const_splat(0.0f);
       const v128_t vi0xACEG = wasm_v32x4_shuffle(vi0x8ACE, vzero, 1, 2, 3, 4);
       const v128_t vi1xACEG = wasm_v32x4_shuffle(vi1x8ACE, vzero, 1, 2, 3, 4);
       const v128_t vi2xACEG = wasm_v32x4_shuffle(vi2x8ACE, vzero, 1, 2, 3, 4);

@@ -19,22 +19,22 @@ void xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max(
   assert(n % (4 * sizeof(float)) == 0);
 
   // The largest x for which expm1f(x) is saturated at -1.0f.
-  const v128_t vsat_cutoff = wasm_f32x4_splat(-0x1.154246p+4f);
+  const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.154246p+4f);
   // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
-  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.8000FEp23f);
-  const v128_t vlog2e = wasm_f32x4_splat(0x1.715476p+0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp23f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   // Last 5 bits are zeroes
-  const v128_t vminus_ln2_hi = wasm_f32x4_splat(-0x1.62E440p-1f);
-  const v128_t vminus_ln2_lo = wasm_f32x4_splat(0x1.0105C6p-21f);
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E440p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(0x1.0105C6p-21f);
   // Coefficient of polynomial approximation
   //   exp(t) - 1 ~ t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/2, log(2)/2]
-  const v128_t vc6 = wasm_f32x4_splat(0x1.6b7338p-10f);
-  const v128_t vc5 = wasm_f32x4_splat(0x1.12278Ep-7f);
-  const v128_t vc4 = wasm_f32x4_splat(0x1.555716p-5f);
-  const v128_t vc3 = wasm_f32x4_splat(0x1.5554B0p-3f);
-  const v128_t vc2 = wasm_f32x4_splat(0x1.FFFFFEp-2f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
+  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6b7338p-10f);
+  const v128_t vc5 = wasm_f32x4_const_splat(0x1.12278Ep-7f);
+  const v128_t vc4 = wasm_f32x4_const_splat(0x1.555716p-5f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFFFEp-2f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     v128_t vx = wasm_v128_load(input);

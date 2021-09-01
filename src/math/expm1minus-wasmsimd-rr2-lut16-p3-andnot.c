@@ -23,21 +23,21 @@ void xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot(
   assert(n % (4 * sizeof(float)) == 0);
 
   // Large number such that ulp(magic bias) == exp2(-4)
-  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.800000p19f);
-  const v128_t vlog2e = wasm_f32x4_splat(0x1.715476p+0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p19f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   // Mask for the lowest 4 bits
-  const v128_t vindex_mask = wasm_i32x4_splat(0xF);
+  const v128_t vindex_mask = wasm_i32x4_const_splat(0xF);
   // The largest x for which expm1f(x) is saturated at -1.0f.
-  const v128_t vsat_cutoff = wasm_f32x4_splat(-0x1.154246p+4f);
+  const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.154246p+4f);
   // Last 9 bits are zeroes
-  const v128_t vminus_ln2_hi = wasm_f32x4_splat(-0x1.62E400p-1f);
-  const v128_t vminus_ln2_lo = wasm_f32x4_splat(-0x1.7F7D1Cp-20f);
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
   // Coefficient of polynomial approximation
   //   exp(t) - 1 ~ t * (1 + t * (c2 + t * c3))
   // on [-log(2)/32, log(2)/32]
-  const v128_t vc3 = wasm_f32x4_splat(0x1.55561Cp-3f);
-  const v128_t vc2 = wasm_f32x4_splat(0x1.0001ECp-1f);
-  const v128_t vone = wasm_f32x4_splat(1.0f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.55561Cp-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.0001ECp-1f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     v128_t vx = wasm_v128_load(input);

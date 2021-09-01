@@ -24,23 +24,23 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x${ELEMENTS_TILE}${"" if 
 {
   assert(elements % sizeof(float) == 0);
 
-  const v128_t vmagic_bias = wasm_f32x4_splat(0x1.8000FEp23f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp23f);
   // The smallest x for which expf(x) is normalized.
-  const v128_t vdenorm_cutoff = wasm_f32x4_splat(-0x1.5D589Ep6f);
-  const v128_t vlog2e = wasm_f32x4_splat(0x1.715476p+0f);
+  const v128_t vdenorm_cutoff = wasm_f32x4_const_splat(-0x1.5D589Ep6f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   // Last 7 bits are zeroes
-  const v128_t vminus_ln2_hi = wasm_f32x4_splat(-0x1.62E400p-1f);
-  const v128_t vminus_ln2_lo = wasm_f32x4_splat(-0x1.7F7D1Cp-20f);
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
 
-  const v128_t vc1 = wasm_f32x4_splat(0x1.FFFFF6p-1f);
-  const v128_t vc2 = wasm_f32x4_splat(0x1.FFFDC6p-2f);
-  const v128_t vc3 = wasm_f32x4_splat(0x1.555A80p-3f);
-  const v128_t vc4 = wasm_f32x4_splat(0x1.573A1Ap-5f);
-  const v128_t vc5 = wasm_f32x4_splat(0x1.0F9F9Cp-7f);
+  const v128_t vc1 = wasm_f32x4_const_splat(0x1.FFFFF6p-1f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFDC6p-2f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.555A80p-3f);
+  const v128_t vc4 = wasm_f32x4_const_splat(0x1.573A1Ap-5f);
+  const v128_t vc5 = wasm_f32x4_const_splat(0x1.0F9F9Cp-7f);
 
   const v128_t vi_max = wasm_f32x4_splat(max);
 
-  v128_t vacc0 = wasm_f64x2_splat(0.0);
+  v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   $for K in range(1, ACCUMULATORS):
     v128_t vacc${K} = vacc0;
   for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {

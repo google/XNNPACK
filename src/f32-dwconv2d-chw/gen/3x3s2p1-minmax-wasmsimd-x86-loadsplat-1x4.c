@@ -51,8 +51,6 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_loadsplat_1x4(
   const v128_t vk21 = wasm_v32x4_shuffle(vw89, vw89, 0, 0, 0, 0);
   const v128_t vk22 = wasm_v32x4_shuffle(vw89, vw89, 1, 1, 1, 1);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
-
   const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(float));
 
   const float* i0 = (const float*) ((uintptr_t) input - ((-padding_top) & input_width));
@@ -71,9 +69,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_loadsplat_1x4(
       i2 = zero;
     }
 
-    v128_t vi0x1357 = vzero;
-    v128_t vi1x1357 = vzero;
-    v128_t vi2x1357 = vzero;
+    v128_t vi0x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi1x1357 = wasm_f32x4_const_splat(0.0f);
+    v128_t vi2x1357 = wasm_f32x4_const_splat(0.0f);
 
     size_t w = input_width;
     for (; w >= 8 * sizeof(float); w -= 8 * sizeof(float)) {

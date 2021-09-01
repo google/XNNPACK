@@ -43,12 +43,11 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul16_ld128(
   kc = round_up_po2(kc, 8);
   int8_t* c0 = c;
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   do {
-    v128_t vacc0x0 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[0]);
-    v128_t vacc0x1 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[1]);
-    v128_t vacc0x2 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[2]);
-    v128_t vacc0x3 = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[3]);
+    v128_t vacc0x0 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[0]);
+    v128_t vacc0x1 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[1]);
+    v128_t vacc0x2 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[2]);
+    v128_t vacc0x3 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[3]);
     w = (const void*) ((const int32_t*) w + 4);
 
     size_t p = ks;

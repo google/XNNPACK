@@ -64,8 +64,6 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
   const v128_t vk43 = wasm_v128_load32_splat(weights + 24);
   const v128_t vk44 = wasm_v128_load32_splat(weights + 25);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
-
   const uint32_t padding_top_less_1 = padding_top - 1;
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(float));
 
@@ -96,10 +94,10 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
       }
 
     $for M in range(3 + 2 * ROW_TILE):
-      v128_t vi${M}x0246 = vzero;
+      v128_t vi${M}x0246 = wasm_f32x4_const_splat(0.0f);
 
     $for M in range(3 + 2 * ROW_TILE):
-      v128_t vi${M}x1357 = vzero;
+      v128_t vi${M}x1357 = wasm_f32x4_const_splat(0.0f);
 
     $for M in range(3 + 2 * ROW_TILE):
       const v128_t vi${M}x89AB = wasm_v128_load(i${M});
@@ -344,6 +342,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
       $for M in range(ROW_TILE):
         vo${M}p${21 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${21 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+4}x79BD, vk41));
 
+      const v128_t vzero = wasm_f32x4_const_splat(0.0f);
       $for M in range(3 + 2 * ROW_TILE):
         const v128_t vi${M}xACEG = wasm_v32x4_shuffle(vi${M}x8ACE, vzero, 1, 2, 3, 4);
 

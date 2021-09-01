@@ -93,39 +93,39 @@ void xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4(
       i8 += 4;
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_f64x2_splat(0.0);
+      v128_t vidx = wasm_i32x4_const_splat(0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(1), vidx, vm1);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(1), vidx, vm1);
 
       const v128_t vm2 = wasm_f32x4_gt(vi2, vmax);
       vmax = wasm_v128_bitselect(vi2, vmax, vm2);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(2), vidx, vm2);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(2), vidx, vm2);
 
       const v128_t vm3 = wasm_f32x4_gt(vi3, vmax);
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(3), vidx, vm3);
 
       const v128_t vm4 = wasm_f32x4_gt(vi4, vmax);
       vmax = wasm_v128_bitselect(vi4, vmax, vm4);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(4), vidx, vm4);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(4), vidx, vm4);
 
       const v128_t vm5 = wasm_f32x4_gt(vi5, vmax);
       vmax = wasm_v128_bitselect(vi5, vmax, vm5);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(5), vidx, vm5);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(5), vidx, vm5);
 
       const v128_t vm6 = wasm_f32x4_gt(vi6, vmax);
       vmax = wasm_v128_bitselect(vi6, vmax, vm6);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(6), vidx, vm6);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(6), vidx, vm6);
 
       const v128_t vm7 = wasm_f32x4_gt(vi7, vmax);
       vmax = wasm_v128_bitselect(vi7, vmax, vm7);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(7), vidx, vm7);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(7), vidx, vm7);
 
       const v128_t vm8 = wasm_f32x4_gt(vi8, vmax);
       vmax = wasm_v128_bitselect(vi8, vmax, vm8);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(8), vidx, vm8);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(8), vidx, vm8);
 
       wasm_v128_store(output, vmax);
       output += 4;
@@ -144,39 +144,39 @@ void xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4(
       const v128_t vi8 = wasm_v128_load(i8);
 
       v128_t vmax = vi0;
-      v128_t vidx = wasm_f64x2_splat(0.0);
+      v128_t vidx = wasm_i32x4_const_splat(0);
 
       const v128_t vm1 = wasm_f32x4_gt(vi1, vmax);
       vmax = wasm_v128_bitselect(vi1, vmax, vm1);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(1), vidx, vm1);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(1), vidx, vm1);
 
       const v128_t vm2 = wasm_f32x4_gt(vi2, vmax);
       vmax = wasm_v128_bitselect(vi2, vmax, vm2);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(2), vidx, vm2);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(2), vidx, vm2);
 
       const v128_t vm3 = wasm_f32x4_gt(vi3, vmax);
       vmax = wasm_v128_bitselect(vi3, vmax, vm3);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(3), vidx, vm3);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(3), vidx, vm3);
 
       const v128_t vm4 = wasm_f32x4_gt(vi4, vmax);
       vmax = wasm_v128_bitselect(vi4, vmax, vm4);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(4), vidx, vm4);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(4), vidx, vm4);
 
       const v128_t vm5 = wasm_f32x4_gt(vi5, vmax);
       vmax = wasm_v128_bitselect(vi5, vmax, vm5);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(5), vidx, vm5);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(5), vidx, vm5);
 
       const v128_t vm6 = wasm_f32x4_gt(vi6, vmax);
       vmax = wasm_v128_bitselect(vi6, vmax, vm6);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(6), vidx, vm6);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(6), vidx, vm6);
 
       const v128_t vm7 = wasm_f32x4_gt(vi7, vmax);
       vmax = wasm_v128_bitselect(vi7, vmax, vm7);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(7), vidx, vm7);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(7), vidx, vm7);
 
       const v128_t vm8 = wasm_f32x4_gt(vi8, vmax);
       vmax = wasm_v128_bitselect(vi8, vmax, vm8);
-      vidx = wasm_v128_bitselect(wasm_i32x4_splat(8), vidx, vm8);
+      vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(8), vidx, vm8);
 
       if (c & 2) {
         *((double*) output) = wasm_f64x2_extract_lane(vmax, 0);

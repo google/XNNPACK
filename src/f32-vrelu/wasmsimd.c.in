@@ -25,7 +25,7 @@ void xnn_f32_vrelu_ukernel__wasmsimd_x${BATCH_TILE}(
   assert(x != NULL);
   assert(y != NULL);
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
+  const v128_t vzero = wasm_i32x4_const_splat(0);
 
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {

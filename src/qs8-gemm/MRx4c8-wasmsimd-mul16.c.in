@@ -67,12 +67,11 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
         c${M} = c${M-1};
       }
 
-  const v128_t vzero = wasm_f64x2_splat(0.0);
   $if DATATYPE == "QU8":
     const v128_t vb_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.kernel_zero_point);
   do {
     $for N in range(4):
-      v128_t vacc0x${N} = wasm_f32x4_replace_lane(vzero, 0, ((const float*) w)[${N}]);
+      v128_t vacc0x${N} = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, ((const float*) w)[${N}]);
     $for M in range(1, MR):
       $for N in range(4):
         v128_t vacc${M}x${N} = vacc0x${N};
