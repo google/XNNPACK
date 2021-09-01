@@ -105,7 +105,7 @@ void xnn_${DATATYPE.lower()}_igemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()
 
             $for M in range(MR):
               vacc${M}x${N} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_dot_i16x8(vxa${M}, vxb${N}));
-              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N}, wasm_i32x4_dot_i16x8(vxa${M}, vxb${N+1}));
+              vacc${M}x${N+1} = wasm_i32x4_add(vacc${M}x${N+1}, wasm_i32x4_dot_i16x8(vxa${M}, vxb${N+1}));
         $else:
           $for N in range(4):
             $if VARIANT == "LD64":
