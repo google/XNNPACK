@@ -793,20 +793,20 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_co
         DUP     s0, v0.s[1]
 8:
         TBZ     x1, 1, 9f
-        ST1     {v3.h}[0], [x7], 2
+        STR     h3, [x7], 2
         DUP     h3, v3.h[1]
-        ST1     {v2.h}[0], [x17], 2
+        STR     h2, [x17], 2
         DUP     h2, v2.h[1]
-        ST1     {v1.h}[0], [x16], 2
+        STR     h1, [x16], 2
         DUP     h1, v1.h[1]
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         DUP     h0, v0.h[1]
 9:
         TBZ     x1, 0, 10f
-        ST1     {v3.b}[0], [x7]
-        ST1     {v2.b}[0], [x17]
-        ST1     {v1.b}[0], [x16]
-        ST1     {v0.b}[0], [x6]
+        STR     b3, [x7]
+        STR     b2, [x17]
+        STR     b1, [x16]
+        STR     b0, [x6]
 10:
         # Restore x20-x21 from stack
         LDP     x20, x21, [sp], 16

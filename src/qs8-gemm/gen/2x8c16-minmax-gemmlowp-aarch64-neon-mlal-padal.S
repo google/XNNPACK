@@ -202,12 +202,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_2x8c16__aarch64_neon_mlal_pa
 
 3:
         TBZ     x1, 1, 4f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
 4:
         TBZ     x1, 0, 5f
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
         ST1     {v0.b}[8], [x7]
 5:
         # Restore d10-d15 from stack

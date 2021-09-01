@@ -317,17 +317,17 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
         EXT     v1.16b, v1.16b, v1.16b, 4
 5:
         TBZ     x1, 1, 6f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         ST1     {v0.h}[4], [x8], 2
-        ST1     {v1.h}[0], [x9], 2
+        STR     h1, [x9], 2
         ST1     {v1.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
 6:
         TBZ     x1, 0, 7f
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
         ST1     {v0.b}[8], [x8]
-        ST1     {v1.b}[0], [x9]
+        STR     b1, [x9]
         ST1     {v1.b}[8], [x7]
 7:
         RET

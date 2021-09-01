@@ -258,11 +258,11 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_padal_
 
 7:
         TBZ     x1, 1, 8f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
 8:
         TBZ     x1, 0, 9f
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
 9:
         RET
 

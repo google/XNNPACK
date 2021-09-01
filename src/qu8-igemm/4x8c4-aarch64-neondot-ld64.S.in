@@ -342,17 +342,17 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aar
 6:
         TBZ     x1, 1, 7f
         ST1     {v1.h}[4], [x7], 2
-        ST1     {v1.h}[0], [x17], 2
+        STR     h1, [x17], 2
         ST1     {v0.h}[4], [x16], 2
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
 7:
         TBZ     x1, 0, 8f
         ST1     {v1.b}[8], [x7]
-        ST1     {v1.b}[0], [x17]
+        STR     b1, [x17]
         ST1     {v0.b}[8], [x16]
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
 8:
         RET
 

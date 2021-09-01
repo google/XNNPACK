@@ -427,20 +427,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_gemmlowp_ukernel_4x16c4__aarch64_neondot_ld12
         DUP     s3, v3.s[1]
 7:
         TBZ     x1, 1, 8f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         DUP     h0, v0.h[1]
-        ST1     {v1.h}[0], [x8], 2
+        STR     h1, [x8], 2
         DUP     h1, v1.h[1]
-        ST1     {v2.h}[0], [x9], 2
+        STR     h2, [x9], 2
         DUP     h2, v2.h[1]
-        ST1     {v3.h}[0], [x7], 2
+        STR     h3, [x7], 2
         DUP     h3, v3.h[1]
 8:
         TBZ     x1, 0, 9f
-        ST1     {v0.b}[0], [x6]
-        ST1     {v1.b}[0], [x8]
-        ST1     {v2.b}[0], [x9]
-        ST1     {v3.b}[0], [x7]
+        STR     b0, [x6]
+        STR     b1, [x8]
+        STR     b2, [x9]
+        STR     b3, [x7]
 9:
         RET
 

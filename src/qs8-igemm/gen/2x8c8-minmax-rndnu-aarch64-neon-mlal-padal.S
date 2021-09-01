@@ -356,12 +356,12 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__aarch64_neon_mlal_padal
 7:
         TBZ     x1, 1, 8f
         ST1     {v0.h}[4], [x7], 2
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
 8:
         TBZ     x1, 0, 9f
         ST1     {v0.b}[8], [x7]
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
 9:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 48]

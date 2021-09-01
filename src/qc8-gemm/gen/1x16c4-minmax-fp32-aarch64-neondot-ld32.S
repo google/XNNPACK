@@ -109,11 +109,11 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__aarch64_neondot_ld32
         DUP     s0, v0.s[1]
 4:
         TBZ     x1, 1, 5f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         DUP     h0, v0.h[1]
 5:
         TBZ     x1, 0, 6f
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
 6:
         RET
 

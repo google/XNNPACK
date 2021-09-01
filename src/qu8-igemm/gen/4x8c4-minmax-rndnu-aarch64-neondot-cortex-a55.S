@@ -56,7 +56,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
         CMP     x0, 4                   // if mr < 4
-        LD1R    {v8.4s}, [x11], 4      // kernel_zero_point
+        LD1R    {v8.4s}, [x11], 4       // kernel_zero_point
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
@@ -467,17 +467,17 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_
 8:
         TBZ     x1, 1, 9f
         ST1     {v1.h}[4], [x7], 2
-        ST1     {v1.h}[0], [x17], 2
+        STR     h1, [x17], 2
         ST1     {v0.h}[4], [x16], 2
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
 9:
         TBZ     x1, 0, 10f
         ST1     {v1.b}[8], [x7]
-        ST1     {v1.b}[0], [x17]
+        STR     b1, [x17]
         ST1     {v0.b}[8], [x16]
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
 10:
         # Restore d8 from stack
         LDR     d8, [sp], 16

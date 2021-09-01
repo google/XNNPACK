@@ -59,7 +59,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
 
-        LD1R    {v8.4s}, [x11], 4      // kernel_zero_point
+        LD1R    {v8.4s}, [x11], 4       // kernel_zero_point
 
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
@@ -449,17 +449,17 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         EXT     v1.16b, v1.16b, v1.16b, 4
 7:
         TBZ     x1, 1, 8f
-        ST1     {v0.h}[0], [x6], 2
+        STR     h0, [x6], 2
         ST1     {v0.h}[4], [x8], 2
-        ST1     {v1.h}[0], [x9], 2
+        STR     h1, [x9], 2
         ST1     {v1.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
 8:
         TBZ     x1, 0, 9f
-        ST1     {v0.b}[0], [x6]
+        STR     b0, [x6]
         ST1     {v0.b}[8], [x8]
-        ST1     {v1.b}[0], [x9]
+        STR     b1, [x9]
         ST1     {v1.b}[8], [x7]
 9:
         # Restore d8 from stack
