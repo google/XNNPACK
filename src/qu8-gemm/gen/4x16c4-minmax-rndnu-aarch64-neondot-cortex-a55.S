@@ -58,15 +58,20 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_
         ADD     x15, x3, x4             // a1 = a0 + a_stride
         ADD     x8, x6, x7              // c1 = c0 + cm_stride
 
+        # Save d8-d15 to stack
+        STP     d8, d9, [sp, -64]!
         CSEL    x15, x3, x15, LO        //   a1 = a0
         CSEL    x8, x6,  x8, LO         //   c1 = c0
         BIC     x2, x2, 3
+        STP     d10, d11, [sp, 16]
 
         ADD     x13, x15, x4            // a2 = a1 + a_stride
         ADD     x9,  x8, x7             // c2 = c1 + cm_stride
+        STP     d12, d13, [sp, 32]
                                         // if mr <= 2
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
+        STP     d14, d15, [sp, 48]
 
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
@@ -77,11 +82,6 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_
         CSEL    x4, x13, x4, LO         //   a3 = a2
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
-        # Save d8-d15 to stack
-        STP     d8, d9, [sp, -64]!
-        STP     d10, d11, [sp, 16]
-        STP     d12, d13, [sp, 32]
-        STP     d14, d15, [sp, 48]
 
         .p2align 3
 0:
@@ -278,19 +278,19 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_
         UDOT    v27.4s, v10.16b, v0.4b[1]
         LDR     d3,  [x4], 8
 
-        # BLOCK 3
-        UDOT    v28.4s, v11.16b, v4.4b[1]
-        LDR     d9,  [x5], 8
-        UDOT    v29.4s, v11.16b, v5.4b[1]
-        INS     v8.d[1], x14
-        UDOT    v30.4s, v11.16b, v6.4b[1]
-        LDR     x14,  [x5], 8
+        # BLOCK 3 special
         UDOT    v31.4s, v11.16b, v0.4b[1]
+        LDR     d9,  [x5], 8
+        UDOT    v15.2s, v7.8b, v0.8b  // free up v0 early
+        INS     v8.d[1], x14
+        UDOT    v28.4s, v11.16b, v4.4b[1]
+        LDR     x14,  [x5], 8
+        UDOT    v29.4s, v11.16b, v5.4b[1]
+        LDR     d0,  [x3], 8
+        UDOT    v30.4s, v11.16b, v6.4b[1]
         SUBS    x0, x0, 16
 
-        UDOT    v15.2s, v7.8b, v0.8b
         UDOT    v12.2s, v7.8b, v4.8b
-        LDR     d0,  [x3], 8
         UDOT    v13.2s, v7.8b, v5.8b
         UDOT    v14.2s, v7.8b, v6.8b
         B.HS    1b

@@ -42,10 +42,14 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
-        STP     d8,  d9, [sp, -32]!
+
+        LDP     x12, x11, [sp]          // cn_stride, params
+
         ADD     x15, x3, x4             // a1 = a0 + a_stride
         ADD     x8, x6, x7              // c1 = c0 + cm_stride
-        STP     d10, d11, [sp, 16]
+
+        STP     d8,  d9, [sp, -32]!
+
         CSEL    x15, x3, x15, LO        //   a1 = a0
         CSEL    x8, x6,  x8, LO         //   c1 = c0
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
@@ -56,6 +60,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         CSEL    x13, x15, x13, LS       //   a2 = a1
         CSEL    x9,  x8,  x9, LS        //   c2 = c1
         BIC     x2, x2, 3
+
+        STP     d10, d11, [sp, 16]
 
         CMP     x0, 4                   // if mr < 4
         ADD     x4, x13, x4             // a3 = a2 + a_stride
@@ -72,14 +78,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         LDP     q24, q28, [x5], 32
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
-        LDR     x11, [sp, 40]           // reload params
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
+        SUBS    x0, x2, 16              // k = kc - 16
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
-        SUBS    x0, x2, 16              // k = kc - 16
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
         # Is there at least 16 bytes for prologue/epilogue?
@@ -504,7 +509,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SQXTN2  v1.16b, v25.8h
         SQXTN2  v2.16b, v26.8h
         SQXTN2  v3.16b, v27.8h
-        LDR     x12, [sp, 32]           // cn_stride
+        SUB     x11, x11, 3            // rewind params pointer
 
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b
