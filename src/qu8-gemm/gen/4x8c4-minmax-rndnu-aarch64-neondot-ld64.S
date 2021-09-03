@@ -68,66 +68,89 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
+        SUBS    x0, x2, 16              // k = kc - 16
         MOV     v17.16b, v16.16b
         MOV     v18.16b, v16.16b
         MOV     v19.16b, v16.16b
         MOV     v21.16b, v20.16b
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v20.16b
-        SUBS    x0, x2, 8               // k = kc - 8
         MOVI    v24.16b, 0
         MOVI    v25.16b, 0
         MOVI    v26.16b, 0
         MOVI    v27.16b, 0
 
-        # Is there at least 8 bytes?
-        B.LO    3f
+        # Is there at least 16 bytes?
+        B.LO    30f
 
-        # Main loop - 8 bytes of A
+        # Main loop - 16 bytes of A
         .p2align 3
 1:
-        LDR     d0,  [x3], 8
-        LDR     q4,  [x5]
-        LDR     d1, [x15], 8
-        LDR     d2, [x13], 8
-        LDR     d3,  [x4], 8
-        LDR     q5,  [x5, 16]
-        UDOT    v24.2s, v7.8b, v0.8b
-        UDOT    v25.2s, v7.8b, v1.8b
-        UDOT    v26.2s, v7.8b, v2.8b
-        UDOT    v27.2s, v7.8b, v3.8b
+        LDR     q0,  [x3], 16
+        LDR     q4,  [x5], 16
+        LDR     q1, [x15], 16
+        LDR     q2, [x13], 16
+        LDR     q3,  [x4], 16
+        LDR     q5,  [x5], 16
+        UDOT    v24.4s, v7.16b, v0.16b  // update zero point
+        UDOT    v25.4s, v7.16b, v1.16b
+        UDOT    v26.4s, v7.16b, v2.16b
+        UDOT    v27.4s, v7.16b, v3.16b
         UDOT    v16.4s, v4.16b, v0.4b[0]
         UDOT    v17.4s, v4.16b, v1.4b[0]
-        LDR     q6,  [x5, 32]
+        LDR     q6,  [x5], 16
         UDOT    v18.4s, v4.16b, v2.4b[0]
         UDOT    v19.4s, v4.16b, v3.4b[0]
         UDOT    v20.4s, v5.16b, v0.4b[0]
         UDOT    v21.4s, v5.16b, v1.4b[0]
-        LDR     q4,  [x5, 48]
+        LDR     q4,  [x5], 16
         UDOT    v22.4s, v5.16b, v2.4b[0]
         UDOT    v23.4s, v5.16b, v3.4b[0]
         UDOT    v16.4s, v6.16b, v0.4b[1]
         UDOT    v17.4s, v6.16b, v1.4b[1]
+        LDR     q5,  [x5], 16
         UDOT    v18.4s, v6.16b, v2.4b[1]
         UDOT    v19.4s, v6.16b, v3.4b[1]
-        ADD     x5, x5, 64
         UDOT    v20.4s, v4.16b, v0.4b[1]
         UDOT    v21.4s, v4.16b, v1.4b[1]
-        SUBS    x0, x0, 8
+        LDR     q6,  [x5], 16
         UDOT    v22.4s, v4.16b, v2.4b[1]
         UDOT    v23.4s, v4.16b, v3.4b[1]
+        UDOT    v16.4s, v5.16b, v0.4b[2]
+        UDOT    v17.4s, v5.16b, v1.4b[2]
+        LDR     q4,  [x5], 16
+        UDOT    v18.4s, v5.16b, v2.4b[2]
+        UDOT    v19.4s, v5.16b, v3.4b[2]
+        UDOT    v20.4s, v6.16b, v0.4b[2]
+        UDOT    v21.4s, v6.16b, v1.4b[2]
+        LDR     q5,  [x5], 16
+        UDOT    v22.4s, v6.16b, v2.4b[2]
+        UDOT    v23.4s, v6.16b, v3.4b[2]
+        UDOT    v16.4s, v4.16b, v0.4b[3]
+        UDOT    v17.4s, v4.16b, v1.4b[3]
+        UDOT    v18.4s, v4.16b, v2.4b[3]
+        UDOT    v19.4s, v4.16b, v3.4b[3]
+        SUBS    x0, x0, 16
+        UDOT    v20.4s, v5.16b, v0.4b[3]
+        UDOT    v21.4s, v5.16b, v1.4b[3]
+        UDOT    v22.4s, v5.16b, v2.4b[3]
+        UDOT    v23.4s, v5.16b, v3.4b[3]
         B.HS    1b
 
+        # Is there a remainder?- 8 bytes of A
+        TBNZ    x0, 3, 3f
         # Is there a remainder?- 4 bytes of A
-        TBNZ    x0, 2, 3f
+        TBNZ    x0, 2, 4f
 
 2:
-        ADDP    v0.2s, v24.2s, v25.2s
-        ADDP    v1.2s, v26.2s, v27.2s
-        DUP     v24.4s, v0.s[0]
-        DUP     v25.4s, v0.s[1]
-        DUP     v26.4s, v1.s[0]
-        DUP     v27.4s, v1.s[1]
+        ADDP    v0.4s, v24.4s, v24.4s
+        ADDP    v1.4s, v25.4s, v25.4s
+        ADDP    v2.4s, v26.4s, v26.4s
+        ADDP    v3.4s, v27.4s, v27.4s
+        ADDP    v24.4s, v0.4s, v0.4s
+        ADDP    v25.4s, v1.4s, v1.4s
+        ADDP    v26.4s, v2.4s, v2.4s
+        ADDP    v27.4s, v3.4s, v3.4s
 
         # Subtract zero point from accumulators
         SUB     v16.4s, v16.4s, v24.4s
@@ -197,7 +220,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         SUBS    x1, x1, 8
         UMIN    v0.16b, v0.16b, v5.16b
         UMIN    v1.16b, v1.16b, v5.16b
-        B.LO    4f
+        B.LO    5f
 
         # Store full 4 x 8
         ST1     {v0.8b}, [x6], x12
@@ -211,19 +234,53 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         B.NE    0b
         RET
 
-        # Remainder- 4 bytes of A
+        # Remainder- 4-12 bytes of A
         .p2align 3
+30:     TBZ     x0, 3, 4f
+
 3:
+        LDR     d0,  [x3], 8
+        LDR     q4,  [x5]
+        LDR     d1, [x15], 8
+        LDR     d2, [x13], 8
+        LDR     d3,  [x4], 8
+        LDR     q5,  [x5, 16]
+        UDOT    v24.4s, v7.16b, v0.16b  // update zero point
+        UDOT    v25.4s, v7.16b, v1.16b
+        UDOT    v26.4s, v7.16b, v2.16b
+        UDOT    v27.4s, v7.16b, v3.16b
+        UDOT    v16.4s, v4.16b, v0.4b[0]
+        UDOT    v17.4s, v4.16b, v1.4b[0]
+        LDR     q6,  [x5, 32]
+        UDOT    v18.4s, v4.16b, v2.4b[0]
+        UDOT    v19.4s, v4.16b, v3.4b[0]
+        UDOT    v20.4s, v5.16b, v0.4b[0]
+        UDOT    v21.4s, v5.16b, v1.4b[0]
+        LDR     q4,  [x5, 48]
+        UDOT    v22.4s, v5.16b, v2.4b[0]
+        UDOT    v23.4s, v5.16b, v3.4b[0]
+        UDOT    v16.4s, v6.16b, v0.4b[1]
+        UDOT    v17.4s, v6.16b, v1.4b[1]
+        UDOT    v18.4s, v6.16b, v2.4b[1]
+        UDOT    v19.4s, v6.16b, v3.4b[1]
+        ADD     x5, x5, 64
+        UDOT    v20.4s, v4.16b, v0.4b[1]
+        UDOT    v21.4s, v4.16b, v1.4b[1]
+        UDOT    v22.4s, v4.16b, v2.4b[1]
+        UDOT    v23.4s, v4.16b, v3.4b[1]
+        TBZ     x0, 2, 2b
+
+4:
         LDR     s0,  [x3], 4
         LDR     q4, [x5], 16
         LDR     s1, [x15], 4
         LDR     s2, [x13], 4
         LDR     s3,  [x4], 4
         LDR     q5, [x5], 16
-        UDOT    v24.2s, v7.8b, v0.8b
-        UDOT    v25.2s, v7.8b, v1.8b
-        UDOT    v26.2s, v7.8b, v2.8b
-        UDOT    v27.2s, v7.8b, v3.8b
+        UDOT    v24.4s, v7.16b, v0.16b  // update zero point
+        UDOT    v25.4s, v7.16b, v1.16b
+        UDOT    v26.4s, v7.16b, v2.16b
+        UDOT    v27.4s, v7.16b, v3.16b
         UDOT    v16.4s, v4.16b, v0.4b[0]
         UDOT    v17.4s, v4.16b, v1.4b[0]
         UDOT    v18.4s, v4.16b, v2.4b[0]
@@ -236,29 +293,29 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 2, 5f
+5:
+        TBZ     x1, 2, 6f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x8], 4
         STR     s1, [x9], 4
         ST1     {v1.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
         EXT     v1.16b, v1.16b, v1.16b, 4
-5:
-        TBZ     x1, 1, 6f
+6:
+        TBZ     x1, 1, 7f
         STR     h0, [x6], 2
         ST1     {v0.h}[4], [x8], 2
         STR     h1, [x9], 2
         ST1     {v1.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
-6:
-        TBZ     x1, 0, 7f
+7:
+        TBZ     x1, 0, 8f
         STR     b0, [x6]
         ST1     {v0.b}[8], [x8]
         STR     b1, [x9]
         ST1     {v1.b}[8], [x7]
-7:
+8:
         RET
 
 END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
