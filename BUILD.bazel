@@ -7349,6 +7349,19 @@ xnnpack_cc_library(
             "XNN_NO_QU8_OPERATORS",
             "XNN_NO_U8_OPERATORS",
         ],
+    }) + select({
+        ":xnn_wasmsimd_version_m87": [
+            "XNN_WASMSIMD_VERSION=87",
+        ],
+        ":xnn_wasmsimd_version_m88": [
+            "XNN_WASMSIMD_VERSION=88",
+        ],
+        ":xnn_wasmsimd_version_m91": [
+            "XNN_WASMSIMD_VERSION=91",
+        ],
+        "//conditions:default": [
+            "XNN_WASMSIMD_VERSION=87",
+        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
@@ -10332,6 +10345,24 @@ config_setting(
 config_setting(
     name = "xnn_enable_qu8_explicit_false",
     define_values = {"xnn_enable_qu8": "false"},
+)
+
+# Target Chrome M87 instructions in WAsm SIMD build
+config_setting(
+    name = "xnn_wasmsimd_version_m87",
+    define_values = {"xnn_wasmsimd_version": "m87"},
+)
+
+# Target Chrome M88 instructions in WAsm SIMD build
+config_setting(
+    name = "xnn_wasmsimd_version_m88",
+    define_values = {"xnn_wasmsimd_version": "m88"},
+)
+
+# Target Chrome M91 instructions in WAsm SIMD build
+config_setting(
+    name = "xnn_wasmsimd_version_m91",
+    define_values = {"xnn_wasmsimd_version": "m91"},
 )
 
 # Builds with -c dbg
