@@ -12,7 +12,7 @@
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   k-block: 16
-- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
+- name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld128
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   k-block: 16
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_1x8c4__neondot

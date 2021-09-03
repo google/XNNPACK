@@ -1,16 +1,14 @@
-// Auto-generated file. Do not edit!
-//   Template: src/qu8-igemm/4x8c4-aarch64-neondot-ld64.S.in
-//   Generator: tools/xngen
-//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64(
+$REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+# void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -39,7 +37,7 @@
 # zero_point v7 v24 v25 v26 v27
 # unused  v8 v9 v10 v11 v13 v14 v15 v28 v29 v30 v31
 
-BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -182,34 +180,107 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         SUB     v22.4s, v22.4s, v26.4s
         SUB     v23.4s, v23.4s, v27.4s
 
-        # Apply params - preshift, scale, postshift, bias and clamp
-        LD1R    {v4.4s}, [x11], 4
-        SSHL    v16.4s, v16.4s, v4.4s   // shift to upper bits
-        SSHL    v17.4s, v17.4s, v4.4s
-        SSHL    v18.4s, v18.4s, v4.4s
-        SSHL    v19.4s, v19.4s, v4.4s
-        LD1R    {v5.4s}, [x11], 4
-        SSHL    v20.4s, v20.4s, v4.4s
-        SSHL    v21.4s, v21.4s, v4.4s
-        SSHL    v22.4s, v22.4s, v4.4s
-        SSHL    v23.4s, v23.4s, v4.4s
-        LD1R    {v6.4s}, [x11], 4
-        SQDMULH v16.4s, v16.4s, v5.4s   // scale without rounding
-        SQDMULH v17.4s, v17.4s, v5.4s
-        SQDMULH v18.4s, v18.4s, v5.4s
-        SQDMULH v19.4s, v19.4s, v5.4s
-        SQDMULH v20.4s, v20.4s, v5.4s
-        SQDMULH v21.4s, v21.4s, v5.4s
-        SQDMULH v22.4s, v22.4s, v5.4s
-        SQDMULH v23.4s, v23.4s, v5.4s
-        SRSHL   v16.4s, v16.4s, v6.4s   // signed rounding shift left
-        SRSHL   v17.4s, v17.4s, v6.4s
-        SRSHL   v18.4s, v18.4s, v6.4s
-        SRSHL   v19.4s, v19.4s, v6.4s
-        SRSHL   v20.4s, v20.4s, v6.4s
-        SRSHL   v21.4s, v21.4s, v6.4s
-        SRSHL   v22.4s, v22.4s, v6.4s
-        SRSHL   v23.4s, v23.4s, v6.4s
+        $if REQUANTIZATION == "GEMMLOWP":
+          # Apply params - scale, shift, bias and clamp
+          LD2R    {v4.4s, v5.4s}, [x11], 8
+          CMEQ    v6.4s, v5.4s, 0
+
+          BIC     v0.16b, v16.16b, v6.16b
+          BIC     v1.16b, v17.16b, v6.16b
+          BIC     v2.16b, v18.16b, v6.16b
+          BIC     v3.16b, v19.16b, v6.16b
+
+          SQRDMULH v16.4s, v16.4s, v4.4s
+          SQRDMULH v17.4s, v17.4s, v4.4s
+          SQRDMULH v18.4s, v18.4s, v4.4s
+          SQRDMULH v19.4s, v19.4s, v4.4s
+
+          SSRA    v16.4s, v0.4s, 31       // signed shift right accumulate
+          SSRA    v17.4s, v1.4s, 31
+          SSRA    v18.4s, v2.4s, 31
+          SSRA    v19.4s, v3.4s, 31
+
+          BIC     v0.16b, v20.16b, v6.16b
+          BIC     v1.16b, v21.16b, v6.16b
+          BIC     v2.16b, v22.16b, v6.16b
+          BIC     v3.16b, v23.16b, v6.16b
+
+          SQRDMULH v20.4s, v20.4s, v4.4s
+          SQRDMULH v21.4s, v21.4s, v4.4s
+          SQRDMULH v22.4s, v22.4s, v4.4s
+          SQRDMULH v23.4s, v23.4s, v4.4s
+
+          SSRA    v20.4s, v0.4s, 31
+          SSRA    v21.4s, v1.4s, 31
+          SSRA    v22.4s, v2.4s, 31
+          SSRA    v23.4s, v3.4s, 31
+
+          SRSHL   v16.4s, v16.4s, v5.4s   // signed rounding shift left
+          SRSHL   v17.4s, v17.4s, v5.4s
+          SRSHL   v18.4s, v18.4s, v5.4s
+          SRSHL   v19.4s, v19.4s, v5.4s
+          SRSHL   v20.4s, v20.4s, v5.4s
+          SRSHL   v21.4s, v21.4s, v5.4s
+          SRSHL   v22.4s, v22.4s, v5.4s
+          SRSHL   v23.4s, v23.4s, v5.4s
+        $elif REQUANTIZATION == "RNDNU":
+          # Apply params - preshift, scale, postshift, bias and clamp
+          LD1R    {v4.4s}, [x11], 4
+          SSHL    v16.4s, v16.4s, v4.4s   // shift to upper bits
+          SSHL    v17.4s, v17.4s, v4.4s
+          SSHL    v18.4s, v18.4s, v4.4s
+          SSHL    v19.4s, v19.4s, v4.4s
+          LD1R    {v5.4s}, [x11], 4
+          SSHL    v20.4s, v20.4s, v4.4s
+          SSHL    v21.4s, v21.4s, v4.4s
+          SSHL    v22.4s, v22.4s, v4.4s
+          SSHL    v23.4s, v23.4s, v4.4s
+          LD1R    {v6.4s}, [x11], 4
+          SQDMULH v16.4s, v16.4s, v5.4s   // scale without rounding
+          SQDMULH v17.4s, v17.4s, v5.4s
+          SQDMULH v18.4s, v18.4s, v5.4s
+          SQDMULH v19.4s, v19.4s, v5.4s
+          SQDMULH v20.4s, v20.4s, v5.4s
+          SQDMULH v21.4s, v21.4s, v5.4s
+          SQDMULH v22.4s, v22.4s, v5.4s
+          SQDMULH v23.4s, v23.4s, v5.4s
+          SRSHL   v16.4s, v16.4s, v6.4s   // signed rounding shift left
+          SRSHL   v17.4s, v17.4s, v6.4s
+          SRSHL   v18.4s, v18.4s, v6.4s
+          SRSHL   v19.4s, v19.4s, v6.4s
+          SRSHL   v20.4s, v20.4s, v6.4s
+          SRSHL   v21.4s, v21.4s, v6.4s
+          SRSHL   v22.4s, v22.4s, v6.4s
+          SRSHL   v23.4s, v23.4s, v6.4s
+        $elif REQUANTIZATION == "FP32":
+          # Apply params - scale, bias and clamp
+          SCVTF   v16.4s, v16.4s
+          SCVTF   v17.4s, v17.4s
+          LD1R    {v4.4s}, [x11], 4
+          SCVTF   v18.4s, v18.4s
+          SCVTF   v19.4s, v19.4s
+          SCVTF   v20.4s, v20.4s
+          SCVTF   v21.4s, v21.4s
+          SCVTF   v22.4s, v22.4s
+          SCVTF   v23.4s, v23.4s
+
+          FMUL    v16.4s, v16.4s, v4.4s
+          FMUL    v17.4s, v17.4s, v4.4s
+          FMUL    v18.4s, v18.4s, v4.4s
+          FMUL    v19.4s, v19.4s, v4.4s
+          FMUL    v20.4s, v20.4s, v4.4s
+          FMUL    v21.4s, v21.4s, v4.4s
+          FMUL    v22.4s, v22.4s, v4.4s
+          FMUL    v23.4s, v23.4s, v4.4s
+
+          FCVTNS  v16.4s, v16.4s
+          FCVTNS  v17.4s, v17.4s
+          FCVTNS  v18.4s, v18.4s
+          FCVTNS  v19.4s, v19.4s
+          FCVTNS  v20.4s, v20.4s
+          FCVTNS  v21.4s, v21.4s
+          FCVTNS  v22.4s, v22.4s
+          FCVTNS  v23.4s, v23.4s
 
         SQXTN   v16.4h, v16.4s
         SQXTN   v17.4h, v17.4s
@@ -234,7 +305,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
         LD1R    {v5.16b}, [x11]          // clamp max value
         SQXTUN2 v0.16b, v17.8h
         SQXTUN2 v1.16b, v19.8h
-        SUB     x11, x11, 15             // rewind params pointer
+        SUB     x11, x11, ${REWIND_DECREMENT}             // rewind params pointer
 
         UMAX    v0.16b, v0.16b, v4.16b
         UMAX    v1.16b, v1.16b, v4.16b
@@ -336,7 +407,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
 9:
         RET
 
-END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

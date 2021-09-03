@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qu8-gemm/4x8c4-aarch64-neondot-ld64.S.in
+//   Template: src/qu8-gemm/4x8c4-aarch64-neondot-ld128.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64(
+# void xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -37,7 +37,7 @@
 # zero_point v7 v24 v25 v26 v27
 # unused v8 v9 v10 v11 v13 v14 v15 v28 v29 v30 v31
 
-BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld128
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -318,7 +318,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
 8:
         RET
 
-END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -8,7 +8,7 @@ $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 #include <xnnpack/assembly.h>
 
 $REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld64(
+# void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -35,7 +35,7 @@ $REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # zero_point v7 v24 v25 v26 v27
 # unused v8 v9 v10 v11 v13 v14 v15 v28 v29 v30 v31
 
-BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -389,7 +389,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
 8:
         RET
 
-END_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld64
+END_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

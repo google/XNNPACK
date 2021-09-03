@@ -401,7 +401,7 @@ tools/xngen src/qs8-igemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATI
 
 ### C4 QU8 micro-kernels
 tools/xngen src/qu8-igemm/4x8c4-aarch64-neondot-cortex-a55.S.in  -D REQUANTIZATION=RNDNU -o src/qu8-igemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-cortex-a55.S &
-tools/xngen src/qu8-igemm/4x8c4-aarch64-neondot-ld64.S.in        -D REQUANTIZATION=RNDNU -o src/qu8-igemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-ld64.S &
+tools/xngen src/qu8-igemm/4x8c4-aarch64-neondot-ld128.S.in        -D REQUANTIZATION=RNDNU -o src/qu8-igemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-ld128.S &
 tools/xngen src/qu8-igemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU -o src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S &
 tools/xngen src/qu8-igemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU -o src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S &
 
