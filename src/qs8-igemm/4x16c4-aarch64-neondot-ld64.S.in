@@ -10,6 +10,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$REWIND_DECREMENT = 3 if CHANNELWISE else {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1

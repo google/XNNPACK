@@ -19,10 +19,10 @@
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
-#     size_t cn_stride,                  [sp] -> x10
+#     size_t cn_stride,                  [sp] -> (x0)
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
-#     const union xnn_qs8_minmax_params params [sp + 24] -> (x11)
+#     const union xnn_qs8_minmax_params params [sp + 24] -> x11
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -30,7 +30,7 @@
 # A0  x13  v0
 # A1  x14  v1
 # A2  x15  v2
-# A3  x11  v3
+# A3  x10  v3
 # B    x5  v4  v5  v6  v7
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
@@ -42,13 +42,13 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
-        LDP     x10, x8, [sp]           // Load cn_stride, a_offset
+        LDR     x8, [sp, 8]             // Load a_offset
         ADD     x16, x6, x7             // c1 = c0 + cm_stride
         CSEL    x16, x6,  x16, LO       //   c1 = c0
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
 
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
-        LDR     x12, [sp, 16]           // Load zero pointer
+        LDP     x12, x11, [sp, 16]      // Load zero, params pointer
                                         // if mr <= 2
         CSEL    x17, x16, x17, LS       //   c2 = c1
         BIC     x2, x2, 3
@@ -80,7 +80,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
 1:
         # Load next 4 A pointers
         LDP     x13, x14, [x4], 16
-        LDP     x15, x11, [x4], 16
+        LDP     x15, x10, [x4], 16
 
         CMP     x13, x12                // if a0 == zero
         ADD     x13, x13, x8            // a0 += a_offset
@@ -91,9 +91,9 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         CMP     x15, x12                // if a2 == zero
         ADD     x15, x15, x8            // a2 += a_offset
         CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x11, x12                // if a3 == zero
-        ADD     x11, x11, x8            // a3 += a_offset
-        CSEL    x11, x12, x11, EQ       //   a3 = zero, else += a3 + a_offset
+        CMP     x10, x12                // if a3 == zero
+        ADD     x10, x10, x8            // a3 += a_offset
+        CSEL    x10, x12, x10, EQ       //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 8 bytes for main loop?
         SUBS    x0, x2, 8               // k = kc - 8
@@ -106,7 +106,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         LDR     q4,  [x5], 16
         LDR     d1, [x14], 8
         LDR     d2, [x15], 8
-        LDR     d3, [x11], 8
+        LDR     d3, [x10], 8
         LDR     q5,  [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -148,8 +148,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
 
         # Is there a remainder?- 4 bytes of A
         TBNZ    x0, 2, 4f
-
-        LDR     x11, [sp, 24]           // reload params pointer
 
         # ks loop
         SUBS    x9, x9, 32              // ks -= MR * sizeof(int8_t*)
@@ -250,9 +248,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SQXTN2  v1.16b, v25.8h
         SQXTN2  v2.16b, v26.8h
         SQXTN2  v3.16b, v27.8h
-
+        LDR     x0, [sp]                 // cn_stride
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b
+        SUB     x11, x11, 3          // rewind params pointer
         SMAX    v2.16b, v2.16b, v4.16b
         SMAX    v3.16b, v3.16b, v4.16b
         SUBS    x1, x1, 16
@@ -263,10 +262,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         B.LO    5f
 
         # Store full 4 x 16
-        ST1     {v3.16b},  [x7], x10
-        ST1     {v2.16b}, [x17], x10
-        ST1     {v1.16b}, [x16], x10
-        ST1     {v0.16b},  [x6], x10
+        ST1     {v3.16b},  [x7], x0
+        ST1     {v2.16b}, [x17], x0
+        ST1     {v1.16b}, [x16], x0
+        ST1     {v0.16b},  [x6], x0
 
         SUB     x4, x4, x3              // a -= ks
 
@@ -281,7 +280,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         LDR     q4, [x5], 16
         LDR     s1, [x14], 4
         LDR     s2, [x15], 4
-        LDR     s3, [x11], 4
+        LDR     s3, [x10], 4
         LDR     q5, [x5], 16
         SDOT    v16.4s, v4.16b,  v0.4b[0]
         SDOT    v17.4s, v4.16b,  v1.4b[0]
@@ -292,7 +291,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
         SDOT    v21.4s, v5.16b,  v1.4b[0]
         SDOT    v22.4s, v5.16b,  v2.4b[0]
         SDOT    v23.4s, v5.16b,  v3.4b[0]
-        LDR     x11, [sp, 24]            // reload params pointer
         SDOT    v24.4s, v6.16b, v0.4b[0]
         SDOT    v25.4s, v6.16b, v1.4b[0]
         SDOT    v26.4s, v6.16b, v2.4b[0]
