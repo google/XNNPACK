@@ -7237,6 +7237,19 @@ xnnpack_cc_library(
     }) + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
+    }) + select({
+        ":xnn_wasmsimd_version_m87": [
+            "-DXNN_WASMSIMD_VERSION=87",
+        ],
+        ":xnn_wasmsimd_version_m88": [
+            "-DXNN_WASMSIMD_VERSION=88",
+        ],
+        ":xnn_wasmsimd_version_m91": [
+            "-DXNN_WASMSIMD_VERSION=91",
+        ],
+        "//conditions:default": [
+            "-DXNN_WASMSIMD_VERSION=87",
+        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
@@ -7279,6 +7292,19 @@ xnnpack_cc_library(
     }) + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
+    }) + select({
+        ":xnn_wasmsimd_version_m87": [
+            "-DXNN_WASMSIMD_VERSION=87",
+        ],
+        ":xnn_wasmsimd_version_m88": [
+            "-DXNN_WASMSIMD_VERSION=88",
+        ],
+        ":xnn_wasmsimd_version_m91": [
+            "-DXNN_WASMSIMD_VERSION=91",
+        ],
+        "//conditions:default": [
+            "-DXNN_WASMSIMD_VERSION=87",
+        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     includes = ["include"],
