@@ -106,11 +106,12 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x2__scalar_magic(
     float vfpacc2x0 = (float) vacc2x0;
     float vfpacc2x1 = (float) vacc2x1;
 
-    const float vscale0 = ((const float*) w)[0];
+    typedef XNN_UNALIGNED float unaligned_float;
+    const float vscale0 = ((const unaligned_float*) w)[0];
     vfpacc0x0 *= vscale0;
     vfpacc1x0 *= vscale0;
     vfpacc2x0 *= vscale0;
-    const float vscale1 = ((const float*) w)[1];
+    const float vscale1 = ((const unaligned_float*) w)[1];
     vfpacc0x1 *= vscale1;
     vfpacc1x1 *= vscale1;
     vfpacc2x1 *= vscale1;

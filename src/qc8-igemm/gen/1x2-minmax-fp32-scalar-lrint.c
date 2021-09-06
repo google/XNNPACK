@@ -73,9 +73,10 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x2__scalar_lrint(
     float vfpacc0x0 = (float) vacc0x0;
     float vfpacc0x1 = (float) vacc0x1;
 
-    const float vscale0 = ((const float*) w)[0];
+    typedef XNN_UNALIGNED float unaligned_float;
+    const float vscale0 = ((const unaligned_float*) w)[0];
     vfpacc0x0 *= vscale0;
-    const float vscale1 = ((const float*) w)[1];
+    const float vscale1 = ((const unaligned_float*) w)[1];
     vfpacc0x1 *= vscale1;
     w = (const void*) ((const float*) w + 2);
 

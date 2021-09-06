@@ -243,7 +243,8 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up1x25__scalar_lrint(
 
       w = (const void*) ((uintptr_t) w + sizeof(int32_t) + 25 * sizeof(int8_t));
 
-      const float vscale = *((const float*) w);
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale = *((const unaligned_float*) w);
       w = (const void*) ((const float*) w + 1);
       const float vfpacc = (float) vacc * vscale;
       long vrndacc = lrintf(vfpacc);

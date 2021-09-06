@@ -182,8 +182,9 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrint(
       float vfpacc0 = (float) vacc0;
       float vfpacc1 = (float) vacc1;
 
-      const float vscale0 = ((const float*) w)[0];
-      const float vscale1 = ((const float*) w)[1];
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale0 = ((const unaligned_float*) w)[0];
+      const float vscale1 = ((const unaligned_float*) w)[1];
       w = (const void*) ((const float*) w + 2);
 
       vfpacc0 *= vscale0;
@@ -236,7 +237,8 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrint(
       const int32_t vk8 = (int32_t) ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[16];
       vacc += vi8 * vk8;
 
-      const float vscale = *((const float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 18 * sizeof(int8_t)));
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale = *((const unaligned_float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 18 * sizeof(int8_t)));
       const float vfpacc = (float) vacc * vscale;
       long vrndacc = lrintf(vfpacc);
       vrndacc = XNN_UNPREDICTABLE(vrndacc < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc;

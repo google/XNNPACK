@@ -424,8 +424,9 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__scalar_magic(
       float vfpacc0 = (float) vacc0;
       float vfpacc1 = (float) vacc1;
 
-      const float vscale0 = ((const float*) w)[0];
-      const float vscale1 = ((const float*) w)[1];
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale0 = ((const unaligned_float*) w)[0];
+      const float vscale1 = ((const unaligned_float*) w)[1];
       w = (const void*) ((const float*) w + 2);
 
       vfpacc0 *= vscale0;
@@ -526,7 +527,8 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__scalar_magic(
       const int32_t vk24 = (int32_t) ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[48];
       vacc += vi24 * vk24;
 
-      const float vscale = *((const float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 50 * sizeof(int8_t)));
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale = *((const unaligned_float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 50 * sizeof(int8_t)));
       float vfpacc = (float) vacc * vscale;
       vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
       vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);

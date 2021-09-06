@@ -172,6 +172,18 @@
   #error "Platform-specific implementation of XNN_ALIGN required"
 #endif
 
+#if defined(__GNUC__)
+  #define XNN_UNALIGNED __attribute__((__aligned__(1)))
+#elif defined(_MSC_VER)
+  #if defined(_M_IX86)
+    #define XNN_UNALIGNED
+  #else
+    #define XNN_UNALIGNED __unaligned
+  #endif
+#else
+  #error "Platform-specific implementation of XNN_UNALIGNED required"
+#endif
+
 #define XNN_COUNT_OF(array) (sizeof(array) / sizeof(0[array]))
 
 #if defined(__cplusplus) || XNN_COMPILER_MSVC

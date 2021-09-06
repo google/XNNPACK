@@ -117,7 +117,8 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up1x9__scalar_magic(
 
       w = (const void*) ((uintptr_t) w + sizeof(int32_t) + 9 * sizeof(int8_t));
 
-      const float vscale = *((const float*) w);
+      typedef XNN_UNALIGNED float unaligned_float;
+      const float vscale = *((const unaligned_float*) w);
       w = (const void*) ((const float*) w + 1);
       float vfpacc = (float) vacc * vscale;
       vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);

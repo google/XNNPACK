@@ -174,10 +174,17 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
           float vfpacc${M}x${N} = (float) vacc${M}x${N};
 
       $if DATATYPE == "QC8":
-        $for N in range(NR):
-          const float vscale${N} = ((const float*) w)[${N}];
-          $for M in range(MR):
-            vfpacc${M}x${N} *= vscale${N};
+        $if NR % 4 != 0:
+          typedef XNN_UNALIGNED float unaligned_float;
+          $for N in range(NR):
+            const float vscale${N} = ((const unaligned_float*) w)[${N}];
+            $for M in range(MR):
+              vfpacc${M}x${N} *= vscale${N};
+        $else:
+          $for N in range(NR):
+            const float vscale${N} = ((const float*) w)[${N}];
+            $for M in range(MR):
+              vfpacc${M}x${N} *= vscale${N};
         w = (const void*) ((const float*) w + ${NR});
       $else:
         const float vscale = params->${PARAMS_STRUCT}.scale;
