@@ -108,7 +108,7 @@ void xnn_qu8_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neond
       if XNN_UNLIKELY(k != 0) {
         // Load a ${MR}x4 block of activations.
         $for M in range(MR):
-          const uint8x8_t va${M}x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a${M}, vmov_n_u32(0), 0)); a${M} += 4;
+          const uint8x8_t va${M}x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a${M}, vmov_n_u32(0), 0)); a${M} += 4;
 
         // Load a 4x${NR} block of weights.
         $for N in range(0, NR, 4):

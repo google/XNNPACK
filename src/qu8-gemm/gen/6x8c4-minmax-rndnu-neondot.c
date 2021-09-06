@@ -150,12 +150,12 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_6x8c4__neondot(
     // Handle up to 4 final positions of `k`
     if XNN_UNLIKELY(k != 0) {
       // Load a 6x4 block of activations.
-      const uint8x8_t va0x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a0, vmov_n_u32(0), 0)); a0 += 4;
-      const uint8x8_t va1x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a1, vmov_n_u32(0), 0)); a1 += 4;
-      const uint8x8_t va2x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a2, vmov_n_u32(0), 0)); a2 += 4;
-      const uint8x8_t va3x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a3, vmov_n_u32(0), 0)); a3 += 4;
-      const uint8x8_t va4x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a4, vmov_n_u32(0), 0)); a4 += 4;
-      const uint8x8_t va5x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a5, vmov_n_u32(0), 0)); a5 += 4;
+      const uint8x8_t va0x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a0, vmov_n_u32(0), 0)); a0 += 4;
+      const uint8x8_t va1x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a1, vmov_n_u32(0), 0)); a1 += 4;
+      const uint8x8_t va2x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a2, vmov_n_u32(0), 0)); a2 += 4;
+      const uint8x8_t va3x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a3, vmov_n_u32(0), 0)); a3 += 4;
+      const uint8x8_t va4x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a4, vmov_n_u32(0), 0)); a4 += 4;
+      const uint8x8_t va5x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a5, vmov_n_u32(0), 0)); a5 += 4;
 
       // Load a 4x8 block of weights.
       const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);

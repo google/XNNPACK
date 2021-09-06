@@ -95,7 +95,7 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_1x16c4__neondot(
       // Handle up to 4 final positions of `k`
       if XNN_UNLIKELY(k != 0) {
         // Load a 1x4 block of activations.
-        const uint8x8_t va0x01234567 = vreinterpret_u8_u32(vld1_lane_u32(a0, vmov_n_u32(0), 0)); a0 += 4;
+        const uint8x8_t va0x01234567 = vreinterpret_u8_u32(vld1_lane_u32((const void*) a0, vmov_n_u32(0), 0)); a0 += 4;
 
         // Load a 4x16 block of weights.
         const uint8x16_t vb0123x0123 = vld1q_u8(w); w = (const void*) ((const uint8_t*) w + 16);
