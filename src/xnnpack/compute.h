@@ -767,8 +767,10 @@ struct elementwise_binary_context {
   size_t y_stride[XNN_MAX_TENSOR_DIMS - 1];
   size_t elements;
   union {
-    union xnn_qs8_add_minmax_params qs8;
-    union xnn_qu8_add_minmax_params qu8;
+    union xnn_qs8_addsub_minmax_params qs8_addsub;
+    union xnn_qu8_addsub_minmax_params qu8_addsub;
+    union xnn_qs8_mul_minmax_params qs8_mul;
+    union xnn_qu8_mul_minmax_params qu8_mul;
     struct xnn_f16_minmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;

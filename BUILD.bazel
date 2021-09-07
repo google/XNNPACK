@@ -5819,7 +5819,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/rmax.h",
     "src/xnnpack/spmm.h",
     "src/xnnpack/unpool.h",
-    "src/xnnpack/vadd.h",
+    "src/xnnpack/vaddsub.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",

@@ -318,8 +318,8 @@ def main(args):
 
     spec_name = os.path.splitext(os.path.split(options.spec)[1])[0]
     microkernel_header = {
-      "VAddMicrokernelTester": "xnnpack/vadd.h",
-      "VAddCMicrokernelTester": "xnnpack/vadd.h",
+      "VAddMicrokernelTester": "xnnpack/vaddsub.h",
+      "VAddCMicrokernelTester": "xnnpack/vaddsub.h",
       "VMulMicrokernelTester": "xnnpack/vmul.h",
       "VMulCMicrokernelTester": "xnnpack/vmul.h",
       "VBinaryMicrokernelTester": "xnnpack/vbinary.h",

@@ -11,7 +11,7 @@
 
 #include <smmintrin.h>
 
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 void xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_x8(
@@ -19,7 +19,7 @@ void xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_x8(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);

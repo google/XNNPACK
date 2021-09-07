@@ -219,15 +219,15 @@ enum xnn_status xnn_create_add_nd_qs8(
   }
 
   struct {
-    union xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_add_minmax_params qs8_radd;
+    union xnn_qs8_addsub_minmax_params qs8_addsub;
+    union xnn_qs8_addsub_minmax_params qs8_raddsub;
   } params;
-  if (xnn_params.qs8.vadd.init.qs8_add != NULL) {
-    xnn_params.qs8.vadd.init.qs8_add(
-      &params.qs8_add, input1_zero_point, input2_zero_point, output_zero_point,
+  if (xnn_params.qs8.vadd.init.qs8_addsub != NULL) {
+    xnn_params.qs8.vadd.init.qs8_addsub(
+      &params.qs8_addsub, input1_zero_point, input2_zero_point, output_zero_point,
       input1_output_scale, input2_output_scale, output_min, output_max);
-    xnn_params.qs8.vadd.init.qs8_add(
-      &params.qs8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    xnn_params.qs8.vadd.init.qs8_addsub(
+      &params.qs8_raddsub, input2_zero_point, input1_zero_point, output_zero_point,
       input2_output_scale, input1_output_scale, output_min, output_max);
   }
   return create_binary_elementwise_nd(
@@ -297,15 +297,15 @@ enum xnn_status xnn_create_add_nd_qu8(
   }
 
   struct {
-    union xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_add_minmax_params qu8_radd;
+    union xnn_qu8_addsub_minmax_params qu8_addsub;
+    union xnn_qu8_addsub_minmax_params qu8_raddsub;
   } params;
-  if (xnn_params.qu8.vadd.init.qu8_add != NULL) {
-    xnn_params.qu8.vadd.init.qu8_add(
-      &params.qu8_add, input1_zero_point, input2_zero_point, output_zero_point,
+  if (xnn_params.qu8.vadd.init.qu8_addsub != NULL) {
+    xnn_params.qu8.vadd.init.qu8_addsub(
+      &params.qu8_addsub, input1_zero_point, input2_zero_point, output_zero_point,
       input1_output_scale, input2_output_scale, output_min, output_max);
-    xnn_params.qu8.vadd.init.qu8_add(
-      &params.qu8_radd, input2_zero_point, input1_zero_point, output_zero_point,
+    xnn_params.qu8.vadd.init.qu8_addsub(
+      &params.qu8_raddsub, input2_zero_point, input1_zero_point, output_zero_point,
       input2_output_scale, input1_output_scale, output_min, output_max);
   }
   return create_binary_elementwise_nd(
@@ -857,8 +857,8 @@ enum xnn_status xnn_setup_add_nd_qs8(
     input1, input2, output,
     XNN_INIT_FLAG_QS8,
     0 /* log2(sizeof(int8_t))) */,
-    &add_op->params.qs8_add, sizeof(add_op->params.qs8_add),
-    &add_op->params.qs8_radd, sizeof(add_op->params.qs8_radd),
+    &add_op->params.qs8_addsub, sizeof(add_op->params.qs8_addsub),
+    &add_op->params.qs8_raddsub, sizeof(add_op->params.qs8_raddsub),
     &xnn_params.qs8.vadd,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -881,8 +881,8 @@ enum xnn_status xnn_setup_add_nd_qu8(
     input1, input2, output,
     XNN_INIT_FLAG_QU8,
     0 /* log2(sizeof(uint8_t))) */,
-    &add_op->params.qu8_add, sizeof(add_op->params.qu8_add),
-    &add_op->params.qu8_radd, sizeof(add_op->params.qu8_radd),
+    &add_op->params.qu8_addsub, sizeof(add_op->params.qu8_addsub),
+    &add_op->params.qu8_raddsub, sizeof(add_op->params.qu8_raddsub),
     &xnn_params.qu8.vadd,
     pthreadpool_get_threads_count(threadpool));
 }

@@ -12,7 +12,7 @@
 #include <fp16.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vmul.h>
 
 
 void xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x1(

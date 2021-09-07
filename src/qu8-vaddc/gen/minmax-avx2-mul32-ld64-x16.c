@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/intrinsics-polyfill.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
@@ -20,7 +20,7 @@ void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vrounding = _mm256_load_si256((const __m256i*) params->avx2.rounding);

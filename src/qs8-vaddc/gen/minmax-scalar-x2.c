@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
@@ -18,7 +18,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x2(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;

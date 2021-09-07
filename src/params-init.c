@@ -1934,7 +1934,7 @@ void xnn_init_u8_minmax_scalar_params(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qu8_add_minmax_sse2_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -1997,7 +1997,7 @@ void xnn_init_qu8_add_minmax_sse2_params(
 }
 
 void xnn_init_qu8_add_minmax_sse4_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2049,7 +2049,7 @@ void xnn_init_qu8_add_minmax_sse4_params(
 }
 
 void xnn_init_qu8_add_minmax_avx2_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2099,7 +2099,7 @@ void xnn_init_qu8_add_minmax_avx2_params(
 }
 
 void xnn_init_qu8_add_minmax_avx512_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2151,7 +2151,7 @@ void xnn_init_qu8_add_minmax_avx512_params(
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_qu8_add_minmax_neon_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2197,7 +2197,7 @@ void xnn_init_qu8_add_minmax_neon_params(
 
 #if XNN_ARCH_WASMSIMD
 void xnn_init_qu8_add_minmax_wasmsimd_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2250,7 +2250,7 @@ void xnn_init_qu8_add_minmax_wasmsimd_params(
 #endif  // XNN_ARCH_WASMSIMD
 
 void xnn_init_qu8_add_minmax_scalar_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2296,7 +2296,7 @@ void xnn_init_qu8_add_minmax_scalar_params(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_qs8_add_minmax_sse2_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2357,7 +2357,7 @@ void xnn_init_qs8_add_minmax_sse2_params(
 }
 
 void xnn_init_qs8_add_minmax_sse4_mul16_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2420,7 +2420,7 @@ void xnn_init_qs8_add_minmax_sse4_mul16_params(
 }
 
 void xnn_init_qs8_add_minmax_sse4_mul32_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2472,7 +2472,7 @@ void xnn_init_qs8_add_minmax_sse4_mul32_params(
 }
 
 void xnn_init_qs8_add_minmax_avx2_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2522,7 +2522,7 @@ void xnn_init_qs8_add_minmax_avx2_params(
 }
 
 void xnn_init_qs8_add_minmax_avx512_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2574,7 +2574,7 @@ void xnn_init_qs8_add_minmax_avx512_params(
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_qs8_add_minmax_neon_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2620,7 +2620,7 @@ void xnn_init_qs8_add_minmax_neon_params(
 
 #if XNN_ARCH_WASMSIMD
 void xnn_init_qs8_add_minmax_wasmsimd_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2673,7 +2673,7 @@ void xnn_init_qs8_add_minmax_wasmsimd_params(
 #endif  // XNN_ARCH_WASMSIMD
 
 void xnn_init_qs8_add_minmax_scalar_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,

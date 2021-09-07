@@ -52,7 +52,7 @@
 #include <xnnpack/rmax.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/unpool.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vmul.h>
 #include <xnnpack/vmulcaddc.h>
@@ -177,7 +177,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__neon_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16,
-        .init.qs8_add = xnn_init_qs8_add_minmax_neon_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_neon_params,
         .element_tile = 16,
       };
       if (cpuinfo_has_arm_neon_v8()) {
@@ -245,7 +245,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x16,
-        .init.qu8_add = xnn_init_qu8_add_minmax_neon_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_neon_params,
         .element_tile = 8,
       };
       if (cpuinfo_has_arm_neon_v8()) {
@@ -682,7 +682,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__scalar_x1,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x1,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x1,
-        .init.qs8_add = xnn_init_qs8_add_minmax_scalar_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_scalar_params,
         .element_tile = 1,
       };
       xnn_params.qs8.vmul = (struct vbinary_parameters) {
@@ -730,7 +730,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x1,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x1,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x1,
-        .init.qu8_add = xnn_init_qu8_add_minmax_scalar_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_scalar_params,
         .element_tile = 1,
       };
       xnn_params.qu8.vmul = (struct vbinary_parameters) {
@@ -1412,7 +1412,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__neon_ld64_x32,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x32,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x32,
-      .init.qs8_add = xnn_init_qs8_add_minmax_neon_params,
+      .init.qs8_addsub = xnn_init_qs8_add_minmax_neon_params,
       .element_tile = 32,
     };
     xnn_params.qs8.vmul = (struct vbinary_parameters) {
@@ -1582,7 +1582,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__neon_ld64_x32,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x32,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_x32,
-      .init.qu8_add = xnn_init_qu8_add_minmax_neon_params,
+      .init.qu8_addsub = xnn_init_qu8_add_minmax_neon_params,
       .element_tile = 8,
     };
     xnn_params.qu8.vmul = (struct vbinary_parameters) {
@@ -2430,7 +2430,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
-        .init.qs8_add = xnn_init_qs8_add_minmax_avx512_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_avx512_params,
         .element_tile = 16,
       };
     } else if (cpuinfo_has_x86_xop()) {
@@ -2438,7 +2438,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
-        .init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_sse4_mul32_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_avx2()) {
@@ -2446,7 +2446,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
-        .init.qs8_add = xnn_init_qs8_add_minmax_avx2_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_avx2_params,
         .element_tile = 16,
       };
     } else if (cpuinfo_has_x86_avx()) {
@@ -2454,7 +2454,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
-        .init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_sse4_mul32_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_sse4_1()) {
@@ -2462,7 +2462,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
-        .init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul16_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_sse4_mul16_params,
         .element_tile = 8,
       };
     } else {
@@ -2470,7 +2470,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
-        .init.qs8_add = xnn_init_qs8_add_minmax_sse2_params,
+        .init.qs8_addsub = xnn_init_qs8_add_minmax_sse2_params,
         .element_tile = 8,
       };
     }
@@ -2626,7 +2626,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
-        .init.qu8_add = xnn_init_qu8_add_minmax_avx512_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_avx512_params,
         .element_tile = 16,
       };
     } else if (cpuinfo_has_x86_xop()) {
@@ -2634,7 +2634,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
-        .init.qu8_add = xnn_init_qu8_add_minmax_sse4_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_sse4_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_avx2()) {
@@ -2642,7 +2642,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
-        .init.qu8_add = xnn_init_qu8_add_minmax_avx2_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_avx2_params,
         .element_tile = 16,
       };
     } else if (cpuinfo_has_x86_avx()) {
@@ -2650,7 +2650,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
-        .init.qu8_add = xnn_init_qu8_add_minmax_sse4_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_sse4_params,
         .element_tile = 8,
       };
     } else if (cpuinfo_has_x86_sse4_1()) {
@@ -2658,7 +2658,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
-        .init.qu8_add = xnn_init_qu8_add_minmax_sse2_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_sse2_params,
         .element_tile = 8,
       };
     } else {
@@ -2666,7 +2666,7 @@ static void init(void) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8,
-        .init.qu8_add = xnn_init_qu8_add_minmax_sse2_params,
+        .init.qu8_addsub = xnn_init_qu8_add_minmax_sse2_params,
         .element_tile = 8,
       };
     }
@@ -3361,7 +3361,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__wasmsimd_x8,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
-      .init.qs8_add = xnn_init_qs8_add_minmax_wasmsimd_params,
+      .init.qs8_addsub = xnn_init_qs8_add_minmax_wasmsimd_params,
       .element_tile = 8,
     };
     xnn_params.qs8.vmul = (struct vbinary_parameters) {
@@ -3422,7 +3422,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x8,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x8,
-      .init.qu8_add = xnn_init_qu8_add_minmax_wasmsimd_params,
+      .init.qu8_addsub = xnn_init_qu8_add_minmax_wasmsimd_params,
       .element_tile = 8,
     };
     xnn_params.qu8.vmul = (struct vbinary_parameters) {
@@ -4017,7 +4017,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
-      .init.qs8_add = xnn_init_qs8_add_minmax_scalar_params,
+      .init.qs8_addsub = xnn_init_qs8_add_minmax_scalar_params,
       .element_tile = 4,
     };
     xnn_params.qs8.vmul = (struct vbinary_parameters) {
@@ -4076,7 +4076,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x4,
-      .init.qu8_add = xnn_init_qu8_add_minmax_scalar_params,
+      .init.qu8_addsub = xnn_init_qu8_add_minmax_scalar_params,
       .element_tile = 4,
     };
     xnn_params.qu8.vmul = (struct vbinary_parameters) {
@@ -4459,7 +4459,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__scalar_x4,
-      .init.qs8_add = xnn_init_qs8_add_minmax_scalar_params,
+      .init.qs8_addsub = xnn_init_qs8_add_minmax_scalar_params,
       .element_tile = 4,
     };
   #endif  // XNN_NO_QS8_OPERATORS
@@ -4495,7 +4495,7 @@ static void init(void) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__scalar_x4,
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__scalar_x4,
-      .init.qu8_add = xnn_init_qu8_add_minmax_scalar_params,
+      .init.qu8_addsub = xnn_init_qu8_add_minmax_scalar_params,
       .element_tile = 4,
     };
   #endif  // XNN_NO_QU8_OPERATORS

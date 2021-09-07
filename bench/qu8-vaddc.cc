@@ -16,13 +16,13 @@
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/params-init.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 static void qu8_vaddc(
   benchmark::State& state,
-  xnn_qu8_vadd_minmax_ukernel_function vaddc,
-  xnn_init_qu8_add_minmax_params_fn init_params,
+  xnn_qu8_vaddsub_minmax_ukernel_function vaddc,
+  xnn_init_qu8_addsub_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -42,7 +42,7 @@ static void qu8_vaddc(
   std::generate(a.begin(), a.end(), std::ref(u8rng));
   const uint8_t b = u8rng();
 
-  union xnn_qu8_add_minmax_params params;
+  union xnn_qu8_addsub_minmax_params params;
   init_params(&params,
     127 /* a zero point */, 127 /* b zero point */, 127 /* output zero point */,
     0.5f /* a-output scale */, 0.75f /* b-output scale */,

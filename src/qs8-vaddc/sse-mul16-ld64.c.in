@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <${SSE_HEADER}>
 
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 $PARAMS_STRUCT = "sse4_mul16" if SSE == 4 and DATATYPE == "QS8" else "sse2"
@@ -29,7 +29,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TI
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i vbias = _mm_add_epi32(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(params->${PARAMS_STRUCT}.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),

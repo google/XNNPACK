@@ -594,7 +594,7 @@ union xnn_qs8_conv_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
-union xnn_qu8_add_minmax_params {
+union xnn_qu8_addsub_minmax_params {
   struct {
     int32_t bias;
     int32_t a_multiplier;
@@ -676,7 +676,7 @@ union xnn_qu8_add_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
-union xnn_qs8_add_minmax_params {
+union xnn_qs8_addsub_minmax_params {
   struct {
     int32_t bias;
     int32_t a_multiplier;
@@ -2001,19 +2001,19 @@ typedef void (*xnn_vadd_ukernel_function)(
     void* y,
     const void* params);
 
-typedef void (*xnn_qu8_vadd_minmax_ukernel_function)(
+typedef void (*xnn_qu8_vaddsub_minmax_ukernel_function)(
     size_t n,
     const uint8_t* input_x,
     const uint8_t* input_y,
     uint8_t* output,
-    const union xnn_qu8_add_minmax_params* params);
+    const union xnn_qu8_addsub_minmax_params* params);
 
-typedef void (*xnn_qs8_vadd_minmax_ukernel_function)(
+typedef void (*xnn_qs8_vaddsub_minmax_ukernel_function)(
     size_t n,
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
-    const union xnn_qs8_add_minmax_params* params);
+    const union xnn_qs8_addsub_minmax_params* params);
 
 typedef void (*xnn_qu8_vmul_minmax_ukernel_function)(
     size_t n,
@@ -2231,8 +2231,8 @@ typedef void (*xnn_init_qu8_conv_minmax_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
-typedef void (*xnn_init_qs8_add_minmax_params_fn)(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef void (*xnn_init_qs8_addsub_minmax_params_fn)(
+  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -2241,8 +2241,8 @@ typedef void (*xnn_init_qs8_add_minmax_params_fn)(
   int8_t output_min,
   int8_t output_max);
 
-typedef void (*xnn_init_qu8_add_minmax_params_fn)(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef void (*xnn_init_qu8_addsub_minmax_params_fn)(
+  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,
@@ -2399,9 +2399,9 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels minmax;
   struct vbinary_fused_ukernels linear;
   union {
-    xnn_init_qs8_add_minmax_params_fn qs8_add;
+    xnn_init_qs8_addsub_minmax_params_fn qs8_addsub;
     xnn_init_qs8_mul_minmax_params_fn qs8_mul;
-    xnn_init_qu8_add_minmax_params_fn qu8_add;
+    xnn_init_qu8_addsub_minmax_params_fn qu8_addsub;
     xnn_init_qu8_mul_minmax_params_fn qu8_mul;
   } init;
   // Number of elements in a tile.

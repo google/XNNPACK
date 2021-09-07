@@ -11,7 +11,7 @@
 
 #include <emmintrin.h>
 
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 
 
 void xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
@@ -19,7 +19,7 @@ void xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i vbias = _mm_add_epi32(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(params->sse2.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),

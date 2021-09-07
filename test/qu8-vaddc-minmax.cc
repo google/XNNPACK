@@ -14,7 +14,7 @@
 #include <xnnpack/isa-checks.h>
 
 #include <xnnpack/params-init.h>
-#include <xnnpack/vadd.h>
+#include <xnnpack/vaddsub.h>
 #include "vaddc-microkernel-tester.h"
 
 
