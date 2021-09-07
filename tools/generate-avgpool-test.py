@@ -2471,8 +2471,14 @@ def main(args):
                                       channel_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
-    with codecs.open(options.output, "w", encoding="utf-8") as output_file:
-      output_file.write(tests)
+    txt_changed = True
+    if os.path.exists(options.output):
+      with codecs.open(options.output, "r", encoding="utf-8") as output_file:
+        txt_changed = output_file.read() != tests
+
+    if txt_changed:
+      with codecs.open(options.output, "w", encoding="utf-8") as output_file:
+        output_file.write(tests)
 
 
 if __name__ == "__main__":
