@@ -40,7 +40,6 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TI
     const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.rounding);
   const __m128i vshift = _mm_loadu_si32(params->${PARAMS_STRUCT}.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
@@ -64,7 +63,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TI
         __m128i vacc${ABC[N:N+4]} = _mm_add_epi32(vbias, _mm_mullo_epi32(va${ABC[N:N+4]}, va_multiplier));
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[N:N+4]}, vrounding), vshift);
+      vacc${ABC[N:N+4]} = _mm_sra_epi32(vacc${ABC[N:N+4]}, vshift);
 
     $for N in range(0, BATCH_TILE, 8):
       const __m128i vout${ABC[N:N+8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]}), voutput_zero_point);
@@ -112,8 +111,8 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TI
         __m128i vacc${ABC[0:4]} = _mm_add_epi32(vbias, _mm_mullo_epi32(va${ABC[0:4]}, va_multiplier));
         __m128i vacc${ABC[4:8]} = _mm_add_epi32(vbias, _mm_mullo_epi32(va${ABC[4:8]}, va_multiplier));
 
-      vacc${ABC[0:4]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[0:4]}, vrounding), vshift);
-      vacc${ABC[4:8]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[4:8]}, vrounding), vshift);
+      vacc${ABC[0:4]} = _mm_sra_epi32(vacc${ABC[0:4]}, vshift);
+      vacc${ABC[4:8]} = _mm_sra_epi32(vacc${ABC[4:8]}, vshift);
 
       const __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
 

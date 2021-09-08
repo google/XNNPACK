@@ -23,7 +23,6 @@ void xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x32(
     const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.a_multiplier);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse4_mul32.rounding);
   const __m128i vshift = _mm_loadu_si32(params->sse4_mul32.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4_mul32.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4_mul32.output_min);
@@ -53,14 +52,14 @@ void xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x32(
     __m128i vaccOPQR = _mm_add_epi32(vbias, _mm_mullo_epi32(vaOPQR, va_multiplier));
     __m128i vaccSTUV = _mm_add_epi32(vbias, _mm_mullo_epi32(vaSTUV, va_multiplier));
 
-    vacc0123 = _mm_sra_epi32(_mm_add_epi32(vacc0123, vrounding), vshift);
-    vacc4567 = _mm_sra_epi32(_mm_add_epi32(vacc4567, vrounding), vshift);
-    vacc89AB = _mm_sra_epi32(_mm_add_epi32(vacc89AB, vrounding), vshift);
-    vaccCDEF = _mm_sra_epi32(_mm_add_epi32(vaccCDEF, vrounding), vshift);
-    vaccGHIJ = _mm_sra_epi32(_mm_add_epi32(vaccGHIJ, vrounding), vshift);
-    vaccKLMN = _mm_sra_epi32(_mm_add_epi32(vaccKLMN, vrounding), vshift);
-    vaccOPQR = _mm_sra_epi32(_mm_add_epi32(vaccOPQR, vrounding), vshift);
-    vaccSTUV = _mm_sra_epi32(_mm_add_epi32(vaccSTUV, vrounding), vshift);
+    vacc0123 = _mm_sra_epi32(vacc0123, vshift);
+    vacc4567 = _mm_sra_epi32(vacc4567, vshift);
+    vacc89AB = _mm_sra_epi32(vacc89AB, vshift);
+    vaccCDEF = _mm_sra_epi32(vaccCDEF, vshift);
+    vaccGHIJ = _mm_sra_epi32(vaccGHIJ, vshift);
+    vaccKLMN = _mm_sra_epi32(vaccKLMN, vshift);
+    vaccOPQR = _mm_sra_epi32(vaccOPQR, vshift);
+    vaccSTUV = _mm_sra_epi32(vaccSTUV, vshift);
 
     const __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
     const __m128i vout89ABCDEF = _mm_adds_epi16(_mm_packs_epi32(vacc89AB, vaccCDEF), voutput_zero_point);
@@ -89,8 +88,8 @@ void xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x32(
       __m128i vacc0123 = _mm_add_epi32(vbias, _mm_mullo_epi32(va0123, va_multiplier));
       __m128i vacc4567 = _mm_add_epi32(vbias, _mm_mullo_epi32(va4567, va_multiplier));
 
-      vacc0123 = _mm_sra_epi32(_mm_add_epi32(vacc0123, vrounding), vshift);
-      vacc4567 = _mm_sra_epi32(_mm_add_epi32(vacc4567, vrounding), vshift);
+      vacc0123 = _mm_sra_epi32(vacc0123, vshift);
+      vacc4567 = _mm_sra_epi32(vacc4567, vshift);
 
       const __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 

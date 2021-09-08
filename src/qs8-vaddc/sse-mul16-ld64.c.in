@@ -36,7 +36,6 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TI
     _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.bias));
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier_lo);
   const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier_hi);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.rounding);
   const __m128i vshift = _mm_cvtsi32_si128((int) params->${PARAMS_STRUCT}.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
@@ -78,7 +77,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TI
       __m128i vacc${ABC[N+4:N+8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod${ABC[N:N+8]}lo, vaprod${ABC[N:N+8]}hi));
 
     $for N in range(0, BATCH_TILE, 4):
-      vacc${ABC[N:N+4]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[N:N+4]}, vrounding), vshift);
+      vacc${ABC[N:N+4]} = _mm_sra_epi32(vacc${ABC[N:N+4]}, vshift);
 
     $for N in range(0, BATCH_TILE, 8):
       __m128i vout${ABC[N:N+8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[N:N+4]}, vacc${ABC[N+4:N+8]}), voutput_zero_point);
@@ -146,8 +145,8 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul16_ld64_x${BATCH_TI
       __m128i vacc${ABC[0:4]} = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
       __m128i vacc${ABC[4:8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod${ABC[0:8]}lo, vaprod${ABC[0:8]}hi));
 
-      vacc${ABC[0:4]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[0:4]}, vrounding), vshift);
-      vacc${ABC[4:8]} = _mm_sra_epi32(_mm_add_epi32(vacc${ABC[4:8]}, vrounding), vshift);
+      vacc${ABC[0:4]} = _mm_sra_epi32(vacc${ABC[0:4]}, vshift);
+      vacc${ABC[4:8]} = _mm_sra_epi32(vacc${ABC[4:8]}, vshift);
 
       __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
       $if DATATYPE == "QS8" and SSE < 4:

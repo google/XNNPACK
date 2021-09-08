@@ -624,7 +624,6 @@ union xnn_qu8_addsub_minmax_params {
     XNN_ALIGN(16) uint16_t a_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t b_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t b_multiplier_hi[8];
-    XNN_ALIGN(16) int32_t rounding[4];
     uint32_t shift;
     uint32_t b_multiplier;
     XNN_ALIGN(16) int16_t output_zero_point[8];
@@ -635,7 +634,6 @@ union xnn_qu8_addsub_minmax_params {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
-    XNN_ALIGN(16) int32_t rounding[4];
     XNN_ALIGN(16) uint32_t shift[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) uint8_t output_min[16];
@@ -645,7 +643,6 @@ union xnn_qu8_addsub_minmax_params {
     XNN_ALIGN(32) int32_t bias[8];
     XNN_ALIGN(32) int32_t a_multiplier[8];
     XNN_ALIGN(32) int32_t b_multiplier[8];
-    XNN_ALIGN(32) int32_t rounding[8];
     XNN_ALIGN(32) uint32_t shift[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(16) uint8_t output_min[16];
@@ -655,7 +652,6 @@ union xnn_qu8_addsub_minmax_params {
     XNN_ALIGN(64) int32_t bias[16];
     XNN_ALIGN(64) int32_t a_multiplier[16];
     XNN_ALIGN(64) int32_t b_multiplier[16];
-    XNN_ALIGN(64) int32_t rounding[16];
     XNN_ALIGN(64) uint32_t shift[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(32) uint8_t output_min[32];
@@ -667,7 +663,6 @@ union xnn_qu8_addsub_minmax_params {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
-    XNN_ALIGN(16) int32_t rounding[4];
     int32_t shift;
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) uint8_t output_min[16];
@@ -681,7 +676,6 @@ union xnn_qs8_addsub_minmax_params {
     int32_t bias;
     int32_t a_multiplier;
     int32_t b_multiplier;
-    int32_t rounding;
     uint32_t shift;
     int32_t output_min_less_zero_point;
     int32_t output_max_less_zero_point;
@@ -706,7 +700,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(16) uint16_t a_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t b_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t b_multiplier_hi[8];
-    XNN_ALIGN(16) int32_t rounding[4];
     uint32_t shift;
     uint32_t b_multiplier;
     XNN_ALIGN(16) int16_t output_zero_point[8];
@@ -719,7 +712,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(16) uint16_t a_multiplier_hi[8];
     XNN_ALIGN(16) uint16_t b_multiplier_lo[8];
     XNN_ALIGN(16) uint16_t b_multiplier_hi[8];
-    XNN_ALIGN(16) int32_t rounding[4];
     uint32_t shift;
     uint32_t b_multiplier;
     XNN_ALIGN(16) int16_t output_zero_point[8];
@@ -730,7 +722,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
-    XNN_ALIGN(16) int32_t rounding[4];
     XNN_ALIGN(16) uint32_t shift[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
@@ -740,7 +731,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(32) int32_t bias[8];
     XNN_ALIGN(32) int32_t a_multiplier[8];
     XNN_ALIGN(32) int32_t b_multiplier[8];
-    XNN_ALIGN(32) int32_t rounding[8];
     XNN_ALIGN(32) uint32_t shift[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(16) int8_t output_min[16];
@@ -750,7 +740,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(64) int32_t bias[16];
     XNN_ALIGN(64) int32_t a_multiplier[16];
     XNN_ALIGN(64) int32_t b_multiplier[16];
-    XNN_ALIGN(64) int32_t rounding[16];
     XNN_ALIGN(64) uint32_t shift[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(32) int8_t output_min[32];
@@ -762,7 +751,6 @@ union xnn_qs8_addsub_minmax_params {
     XNN_ALIGN(16) int32_t bias[4];
     XNN_ALIGN(16) int32_t a_multiplier[4];
     XNN_ALIGN(16) int32_t b_multiplier[4];
-    XNN_ALIGN(16) int32_t rounding[4];
     int32_t shift;
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];

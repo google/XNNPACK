@@ -456,7 +456,7 @@ static inline uint8_t xnn_qu8_quantize_add(
   int32_t acc = params.scalar.bias + (int32_t) (uint32_t) a * params.scalar.a_multiplier + (int32_t) (uint32_t) b * params.scalar.b_multiplier;
 
   // Shift right with rounding away from zero.
-  acc = asr_s32(acc + params.scalar.rounding, params.scalar.shift);
+  acc = asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
   acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
@@ -472,7 +472,7 @@ static inline int8_t xnn_qs8_quantize_add(
   int32_t acc = params.scalar.bias + (int32_t) a * params.scalar.a_multiplier + (int32_t) b * params.scalar.b_multiplier;
 
   // Shift right with rounding away from zero.
-  acc = asr_s32(acc + params.scalar.rounding, params.scalar.shift);
+  acc = asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
   acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);

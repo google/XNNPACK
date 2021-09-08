@@ -1973,7 +1973,7 @@ void xnn_init_qu8_add_minmax_sse2_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->sse2.bias[i] = bias;
   }
@@ -1989,9 +1989,6 @@ void xnn_init_qu8_add_minmax_sse2_params(
   }
   params->sse2.shift = shift;
   params->sse2.b_multiplier = (uint32_t) b_multiplier;
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.rounding[i] = rounding;
-  }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
   }
@@ -2041,12 +2038,11 @@ void xnn_init_qu8_add_minmax_sse4_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->sse4.bias[i] = bias;
     params->sse4.a_multiplier[i] = a_multiplier;
     params->sse4.b_multiplier[i] = b_multiplier;
-    params->sse4.rounding[i] = rounding;
     params->sse4.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 8; i++) {
@@ -2098,12 +2094,11 @@ void xnn_init_qu8_add_minmax_avx2_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
   for (uint32_t i = 0; i < 8; i++) {
     params->avx2.bias[i] = bias;
     params->avx2.a_multiplier[i] = a_multiplier;
     params->avx2.b_multiplier[i] = b_multiplier;
-    params->avx2.rounding[i] = rounding;
     params->avx2.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 16; i++) {
@@ -2153,12 +2148,11 @@ void xnn_init_qu8_add_minmax_avx512_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->avx512.bias[i] = bias;
     params->avx512.a_multiplier[i] = a_multiplier;
     params->avx512.b_multiplier[i] = b_multiplier;
-    params->avx512.rounding[i] = rounding;
     params->avx512.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 32; i++) {
@@ -2261,12 +2255,11 @@ void xnn_init_qu8_add_minmax_wasmsimd_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.bias[i] = bias;
     params->wasmsimd.a_multiplier[i] = a_multiplier;
     params->wasmsimd.b_multiplier[i] = b_multiplier;
-    params->wasmsimd.rounding[i] = rounding;
   }
   params->wasmsimd.shift = shift;
   for (uint32_t i = 0; i < 8; i++) {
@@ -2319,10 +2312,9 @@ void xnn_init_qu8_add_minmax_scalar_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  params->scalar.bias = (int32_t) -(a_multiplier * (int32_t) (uint32_t) a_zero_point + b_multiplier * (int32_t) (uint32_t) b_zero_point);
+  params->scalar.bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
   params->scalar.a_multiplier = a_multiplier;
   params->scalar.b_multiplier = b_multiplier;
-  params->scalar.rounding = rounding;
   params->scalar.shift = shift;
   params->scalar.output_min_less_zero_point = (int32_t) (uint32_t) output_min - (int32_t) (uint32_t) output_zero_point;
   params->scalar.output_max_less_zero_point = (int32_t) (uint32_t) output_max - (int32_t) (uint32_t) output_zero_point;
@@ -2370,7 +2362,7 @@ void xnn_init_qs8_add_minmax_sse2_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->sse2.bias[i] = bias;
   }
@@ -2386,9 +2378,6 @@ void xnn_init_qs8_add_minmax_sse2_params(
   }
   params->sse2.shift = shift;
   params->sse2.b_multiplier = (uint32_t) b_multiplier;
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.rounding[i] = rounding;
-  }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
     params->sse2.output_min[i] = (int16_t) output_min;
@@ -2436,7 +2425,7 @@ void xnn_init_qs8_add_minmax_sse4_mul16_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->sse4_mul16.bias[i] = bias;
   }
@@ -2452,9 +2441,6 @@ void xnn_init_qs8_add_minmax_sse4_mul16_params(
   }
   params->sse4_mul16.shift = shift;
   params->sse4_mul16.b_multiplier = (uint32_t) b_multiplier;
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse4_mul16.rounding[i] = rounding;
-  }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse4_mul16.output_zero_point[i] = (int16_t) output_zero_point;
   }
@@ -2504,12 +2490,11 @@ void xnn_init_qs8_add_minmax_sse4_mul32_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->sse4_mul32.bias[i] = bias;
     params->sse4_mul32.a_multiplier[i] = a_multiplier;
     params->sse4_mul32.b_multiplier[i] = b_multiplier;
-    params->sse4_mul32.rounding[i] = rounding;
     params->sse4_mul32.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 8; i++) {
@@ -2561,12 +2546,11 @@ void xnn_init_qs8_add_minmax_avx2_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 8; i++) {
     params->avx2.bias[i] = bias;
     params->avx2.a_multiplier[i] = a_multiplier;
     params->avx2.b_multiplier[i] = b_multiplier;
-    params->avx2.rounding[i] = rounding;
     params->avx2.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 16; i++) {
@@ -2616,12 +2600,11 @@ void xnn_init_qs8_add_minmax_avx512_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 16; i++) {
     params->avx512.bias[i] = bias;
     params->avx512.a_multiplier[i] = a_multiplier;
     params->avx512.b_multiplier[i] = b_multiplier;
-    params->avx512.rounding[i] = rounding;
     params->avx512.shift[i] = shift;
   }
   for (uint32_t i = 0; i < 32; i++) {
@@ -2724,12 +2707,11 @@ void xnn_init_qs8_add_minmax_wasmsimd_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  const int32_t bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.bias[i] = bias;
     params->wasmsimd.a_multiplier[i] = a_multiplier;
     params->wasmsimd.b_multiplier[i] = b_multiplier;
-    params->wasmsimd.rounding[i] = rounding;
   }
   params->wasmsimd.shift = shift;
   for (uint32_t i = 0; i < 8; i++) {
@@ -2782,10 +2764,9 @@ void xnn_init_qs8_add_minmax_scalar_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  params->scalar.bias = (int32_t) -(a_multiplier * (int32_t) a_zero_point + b_multiplier * (int32_t) b_zero_point);
+  params->scalar.bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
   params->scalar.a_multiplier = a_multiplier;
   params->scalar.b_multiplier = b_multiplier;
-  params->scalar.rounding = rounding;
   params->scalar.shift = shift;
   params->scalar.output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
   params->scalar.output_max_less_zero_point = (int32_t) output_max - (int32_t) output_zero_point;

@@ -26,7 +26,6 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     _mm_load_si128((const __m128i*) params->sse2.bias));
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);
   const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_hi);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
   const __m128i vshift = _mm_cvtsi32_si128((int) params->sse2.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
@@ -48,8 +47,8 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     __m128i vacc0123 = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vaprod01234567lo, vaprod01234567hi));
     __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod01234567lo, vaprod01234567hi));
 
-    vacc0123 = _mm_sra_epi32(_mm_add_epi32(vacc0123, vrounding), vshift);
-    vacc4567 = _mm_sra_epi32(_mm_add_epi32(vacc4567, vrounding), vshift);
+    vacc0123 = _mm_sra_epi32(vacc0123, vshift);
+    vacc4567 = _mm_sra_epi32(vacc4567, vshift);
 
     __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
@@ -79,8 +78,8 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
       __m128i vacc0123 = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vaprod01234567lo, vaprod01234567hi));
       __m128i vacc4567 = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vaprod01234567lo, vaprod01234567hi));
 
-      vacc0123 = _mm_sra_epi32(_mm_add_epi32(vacc0123, vrounding), vshift);
-      vacc4567 = _mm_sra_epi32(_mm_add_epi32(vacc4567, vrounding), vshift);
+      vacc0123 = _mm_sra_epi32(vacc0123, vshift);
+      vacc4567 = _mm_sra_epi32(vacc4567, vshift);
 
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
       vout01234567 = _mm_max_epi16(vout01234567, voutput_min);

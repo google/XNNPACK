@@ -25,7 +25,6 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x24(
   const __m256i vbias = _mm256_load_si256((const __m256i*) params->avx2.bias);
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vb_multiplier = _mm256_load_si256((const __m256i*) params->avx2.b_multiplier);
-  const __m256i vrounding = _mm256_load_si256((const __m256i*) params->avx2.rounding);
   const __m128i vshift = _mm_loadu_si32(params->avx2.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
@@ -49,9 +48,9 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x24(
     vacc89ABCDEF = _mm256_add_epi32(vacc89ABCDEF, _mm256_mullo_epi32(vb89ABCDEF, vb_multiplier));
     vaccGHIJKLMN = _mm256_add_epi32(vaccGHIJKLMN, _mm256_mullo_epi32(vbGHIJKLMN, vb_multiplier));
 
-    vacc01234567 = _mm256_sra_epi32(_mm256_add_epi32(vacc01234567, vrounding), vshift);
-    vacc89ABCDEF = _mm256_sra_epi32(_mm256_add_epi32(vacc89ABCDEF, vrounding), vshift);
-    vaccGHIJKLMN = _mm256_sra_epi32(_mm256_add_epi32(vaccGHIJKLMN, vrounding), vshift);
+    vacc01234567 = _mm256_sra_epi32(vacc01234567, vshift);
+    vacc89ABCDEF = _mm256_sra_epi32(vacc89ABCDEF, vshift);
+    vaccGHIJKLMN = _mm256_sra_epi32(vaccGHIJKLMN, vshift);
 
     __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
     __m128i voutGHIJKLMN = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vaccGHIJKLMN), _mm256_extracti128_si256(vaccGHIJKLMN, 1)), _mm256_castsi256_si128(voutput_zero_point));
@@ -80,7 +79,7 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x24(
 
       vacc01234567 = _mm256_add_epi32(vacc01234567, _mm256_mullo_epi32(vb01234567, vb_multiplier));
 
-      vacc01234567 = _mm256_sra_epi32(_mm256_add_epi32(vacc01234567, vrounding), vshift);
+      vacc01234567 = _mm256_sra_epi32(vacc01234567, vshift);
 
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);

@@ -25,7 +25,6 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32(
   const __m512i vbias = _mm512_load_si512(params->avx512.bias);
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
-  const __m512i vrounding = _mm512_load_si512(params->avx512.rounding);
   const __m128i vshift = _mm_loadu_si32(params->avx512.shift);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx512.output_min);
@@ -45,8 +44,8 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32(
     vacc0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_mullo_epi32(vb0123456789ABCDEF, vb_multiplier));
     vaccGHIJKLMNOPQRSTUV = _mm512_add_epi32(vaccGHIJKLMNOPQRSTUV, _mm512_mullo_epi32(vbGHIJKLMNOPQRSTUV, vb_multiplier));
 
-    vacc0123456789ABCDEF = _mm512_sra_epi32(_mm512_add_epi32(vacc0123456789ABCDEF, vrounding), vshift);
-    vaccGHIJKLMNOPQRSTUV = _mm512_sra_epi32(_mm512_add_epi32(vaccGHIJKLMNOPQRSTUV, vrounding), vshift);
+    vacc0123456789ABCDEF = _mm512_sra_epi32(vacc0123456789ABCDEF, vshift);
+    vaccGHIJKLMNOPQRSTUV = _mm512_sra_epi32(vaccGHIJKLMNOPQRSTUV, vshift);
 
     __m512i vout0123GHIJ4567KLMN89ABOPQRCDEFSTUV = _mm512_adds_epi16(_mm512_packs_epi32(vacc0123456789ABCDEF, vaccGHIJKLMNOPQRSTUV), voutput_zero_point);
 
@@ -70,7 +69,7 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x32(
 
       vacc0123456789ABCDEF = _mm512_add_epi32(vacc0123456789ABCDEF, _mm512_mullo_epi32(vb0123456789ABCDEF, vb_multiplier));
 
-      vacc0123456789ABCDEF = _mm512_sra_epi32(_mm512_add_epi32(vacc0123456789ABCDEF, vrounding), vshift);
+      vacc0123456789ABCDEF = _mm512_sra_epi32(vacc0123456789ABCDEF, vshift);
 
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), _mm512_castsi512_si256(voutput_zero_point));
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
