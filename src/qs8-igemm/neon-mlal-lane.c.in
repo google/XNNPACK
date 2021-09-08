@@ -456,10 +456,10 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
         if (nc & 8) {
           $for M in reversed(range(MR)):
             $if M % 2 == 1:
-              ${VST1_X8}(c${M}, ${VGET_HIGH_X8}(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M} += 8;
-              ${VST1_X8}(c${M-1}, ${VGET_LOW_X8}(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M-1} += 8;
+              ${VST1_X8}(c${M}, ${VGET_HIGH_X8}(vout${M-1}x01234567_${M}x01234567)); c${M} += 8;
+              ${VST1_X8}(c${M-1}, ${VGET_LOW_X8}(vout${M-1}x01234567_${M}x01234567)); c${M-1} += 8;
             $elif M + 1 == MR:
-              ${VST1_X8}(c${M}, vout${M}x${ABC[N:N+8]}); c${M} += 8;
+              ${VST1_X8}(c${M}, vout${M}x01234567); c${M} += 8;
           $for M in reversed(range(MR)):
             $if M % 2 == 1:
               vout${M-1}x01234567_${M}x01234567 = ${VCOMBINE_X8}(${VGET_HIGH_X8}(vout${M-1}x0123456789ABCDEF), ${VGET_HIGH_X8}(vout${M}x0123456789ABCDEF));

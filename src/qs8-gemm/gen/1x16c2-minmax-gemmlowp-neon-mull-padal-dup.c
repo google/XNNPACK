@@ -202,6 +202,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_1x16c2__neon_mull_padal_dup(
 
       nc -= 16;
     } else {
+      // Final case where not all of the 16 columns fit in the destination.
       int8x8_t vout0x01234567 = vget_low_s8(vout0x0123456789ABCDEF);
       if (nc & 8) {
         vst1_s8(c0, vout0x01234567); c0 += 8;

@@ -489,6 +489,7 @@ void xnn_qs8_gemm_minmax_gemmlowp_ukernel_3x16c16__neon_mlal_padal(
 
       nc -= 16;
     } else {
+      // Final case where not all of the 16 columns fit in the destination.
       int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
       int8x8_t vout2x01234567 = vget_low_s8(vout2x0123456789ABCDEF);
       if (nc & 8) {

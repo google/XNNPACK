@@ -314,6 +314,7 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8
 
       nc -= ${NR};
     } else {
+      // Final case where not all of the ${NR} columns fit in the destination.
       $if NR == 16:
         $for M in range(MR):
           $if M % 2 == 1:
@@ -323,10 +324,10 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8
         if (nc & 8) {
           $for M in range(MR):
             $if M % 2 == 1:
-              vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M-1} += 8;
-              vst1_s8(c${M}, vget_high_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]})); c${M} += 8;
+              vst1_s8(c${M-1}, vget_low_s8(vout${M-1}x01234567_${M}x01234567)); c${M-1} += 8;
+              vst1_s8(c${M}, vget_high_s8(vout${M-1}x01234567_${M}x01234567)); c${M} += 8;
             $elif M + 1 == MR:
-              vst1_s8(c${M}, vout${M}x${ABC[N:N+8]}); c${M} += 8;
+              vst1_s8(c${M}, vout${M}x01234567); c${M} += 8;
           $for M in range(MR):
             $if M % 2 == 1:
               vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_high_s8(vout${M-1}x0123456789ABCDEF), vget_high_s8(vout${M}x0123456789ABCDEF));

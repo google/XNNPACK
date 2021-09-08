@@ -272,6 +272,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_padal_dup(
 
       nc -= 8;
     } else {
+      // Final case where not all of the 8 columns fit in the destination.
       if (nc & 4) {
         vst1q_lane_u32(__builtin_assume_aligned(c0, 1), vreinterpretq_u32_s8(vout0x01234567_1x01234567), 0); c0 += 4;
         vst1q_lane_u32(__builtin_assume_aligned(c1, 1), vreinterpretq_u32_s8(vout0x01234567_1x01234567), 2); c1 += 4;
