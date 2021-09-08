@@ -489,10 +489,10 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_8x16c4__neondot(
 
       nc -= 16;
     } else {
-      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
-      int8x16_t vout2x01234567_3x01234567 = vcombine_s8(vget_low_s8(vout2x0123456789ABCDEF), vget_low_s8(vout3x0123456789ABCDEF));
-      int8x16_t vout4x01234567_5x01234567 = vcombine_s8(vget_low_s8(vout4x0123456789ABCDEF), vget_low_s8(vout5x0123456789ABCDEF));
       int8x16_t vout6x01234567_7x01234567 = vcombine_s8(vget_low_s8(vout6x0123456789ABCDEF), vget_low_s8(vout7x0123456789ABCDEF));
+      int8x16_t vout4x01234567_5x01234567 = vcombine_s8(vget_low_s8(vout4x0123456789ABCDEF), vget_low_s8(vout5x0123456789ABCDEF));
+      int8x16_t vout2x01234567_3x01234567 = vcombine_s8(vget_low_s8(vout2x0123456789ABCDEF), vget_low_s8(vout3x0123456789ABCDEF));
+      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
       if (nc & 8) {
         vst1_s8(c7, vget_high_s8(vout6x01234567_7x01234567)); c7 += 8;
         vst1_s8(c6, vget_low_s8(vout6x01234567_7x01234567)); c6 += 8;

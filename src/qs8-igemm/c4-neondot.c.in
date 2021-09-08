@@ -247,7 +247,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
       nc -= ${NR};
     } else {
       $if NR == 16:
-        $for M in range(MR):
+        $for M in reversed(range(MR)):
           $if M % 2 == 1:
             int8x16_t vout${M-1}x01234567_${M}x01234567 = vcombine_s8(vget_low_s8(vout${M-1}x0123456789ABCDEF), vget_low_s8(vout${M}x0123456789ABCDEF));
           $elif M + 1 == MR:

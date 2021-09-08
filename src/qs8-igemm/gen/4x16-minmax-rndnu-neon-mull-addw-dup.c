@@ -656,8 +656,8 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__neon_mull_addw_dup(
 
       nc -= 16;
     } else {
-      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
       int8x16_t vout2x01234567_3x01234567 = vcombine_s8(vget_low_s8(vout2x0123456789ABCDEF), vget_low_s8(vout3x0123456789ABCDEF));
+      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vget_low_s8(vout0x0123456789ABCDEF), vget_low_s8(vout1x0123456789ABCDEF));
       if (nc & 8) {
         vst1_s8(c3, vget_high_s8(vout2x01234567_3x01234567)); c3 += 8;
         vst1_s8(c2, vget_low_s8(vout2x01234567_3x01234567)); c2 += 8;
