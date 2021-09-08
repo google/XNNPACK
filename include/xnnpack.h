@@ -2185,6 +2185,29 @@ enum xnn_status xnn_setup_multiply_nd_qs8(
   int8_t* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_subtract_nd_qs8(
+  int8_t input1_zero_point,
+  float input1_scale,
+  int8_t input2_zero_point,
+  float input2_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* subtract_op_out);
+
+enum xnn_status xnn_setup_subtract_nd_qs8(
+  xnn_operator_t subtract_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const int8_t* input1,
+  const int8_t* input2,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_QS8_OPERATORS
 
 #ifndef XNN_NO_QU8_OPERATORS
@@ -2444,6 +2467,29 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
   xnn_operator_t softmax_op,
   size_t batch_size,
   const uint8_t* input,
+  uint8_t* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_subtract_nd_qu8(
+  uint8_t input1_zero_point,
+  float input1_scale,
+  uint8_t input2_zero_point,
+  float input2_scale,
+  uint8_t output_zero_point,
+  float output_scale,
+  uint8_t output_min,
+  uint8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* subtract_op_out);
+
+enum xnn_status xnn_setup_subtract_nd_qu8(
+  xnn_operator_t subtract_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const uint8_t* input1,
+  const uint8_t* input2,
   uint8_t* output,
   pthreadpool_t threadpool);
 

@@ -148,6 +148,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Squared Difference (NC, F32)";
     case xnn_operator_type_subtract_nd_f32:
       return "Subtract (ND, F32)";
+    case xnn_operator_type_subtract_nd_qs8:
+      return "Subtract (ND, QS8)";
+    case xnn_operator_type_subtract_nd_qu8:
+      return "Subtract (ND, QU8)";
     case xnn_operator_type_truncation_nc_f32:
       return "Truncation (NC, F32)";
     case xnn_operator_type_unpooling_nhwc_x32:

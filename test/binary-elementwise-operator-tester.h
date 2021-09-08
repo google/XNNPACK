@@ -295,6 +295,14 @@ class BinaryElementwiseOperatorTester {
             int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
             0, &binary_elementwise_op);
           break;
+        case OperationType::Subtract:
+          status = xnn_create_subtract_nd_qs8(
+            input1_zero_point(), input1_scale(),
+            input2_zero_point(), input2_scale(),
+            output_zero_point(), output_scale(),
+            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            0, &binary_elementwise_op);
+          break;
         default:
           FAIL() << "Unsupported operation type";
       }
@@ -322,6 +330,17 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_qs8(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Subtract:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_subtract_nd_qs8(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),
@@ -458,6 +477,14 @@ class BinaryElementwiseOperatorTester {
             qmin(), qmax(),
             0, &binary_elementwise_op);
           break;
+        case OperationType::Subtract:
+          status = xnn_create_subtract_nd_qu8(
+            input1_zero_point(), input1_scale(),
+            input2_zero_point(), input2_scale(),
+            output_zero_point(), output_scale(),
+            qmin(), qmax(),
+            0, &binary_elementwise_op);
+          break;
         default:
           FAIL() << "Unsupported operation type";
       }
@@ -485,6 +512,17 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_qu8(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Subtract:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_subtract_nd_qu8(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),
