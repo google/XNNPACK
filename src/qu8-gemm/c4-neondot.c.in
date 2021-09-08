@@ -5,7 +5,7 @@
 
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
-$assert 8 <= NR <= 16
+$assert 8 <= NR <= 32
 $assert REQUANTIZATION == "RNDNU"
 #include <assert.h>
 
@@ -245,7 +245,15 @@ void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__neondo
 
       nc -= ${NR};
     } else {
-      $if NR == 16:
+      $if NR == 32:
+        if (nc & 16) {
+          $for M in range(MR):
+            vst1q_u8(c${M}, vout${M}x${ABC[0:16]});  c${M} += 16;
+
+          $for M in range(MR):
+            vout${M}x${ABC[0:16]} = vout${M}x${ABC[16:32]};
+        }
+      $if NR >= 16:
         $for M in range(MR):
           $if M % 2 == 1:
             uint8x16_t vout${M-1}x01234567_${M}x01234567 = vcombine_u8(vget_low_u8(vout${M-1}x0123456789ABCDEF), vget_low_u8(vout${M}x0123456789ABCDEF));

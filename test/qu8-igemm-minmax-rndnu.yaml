@@ -57,6 +57,15 @@
 - name: xnn_qu8_igemm_minmax_rndnu_ukernel_8x16c4__neondot
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   k-block: 8
+- name: xnn_qu8_igemm_minmax_rndnu_ukernel_1x32c4__neondot
+  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qu8_igemm_minmax_rndnu_ukernel_2x32c4__neondot
+  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qu8_igemm_minmax_rndnu_ukernel_3x32c4__neondot
+  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
+  k-block: 8
 - name: xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a75
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   k-block: 8

@@ -289,7 +289,26 @@ static void GEMMEnd2EndBenchmark(
       8 /* mr */, 16 /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEONDOT);
   }
-
+  static void qu8_gemm_2x32c4__neondot(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_2x32c4__neondot,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_2x32c4__neondot,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x32c4__neondot,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x32c4__neondot,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      2 /* mr */, 32 /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qu8_gemm_3x32c4__neondot(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x32c4__neondot,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_3x32c4__neondot,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x32c4__neondot,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x32c4__neondot,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      3 /* mr */, 32 /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEONDOT);
+  }
   BENCHMARK_QU8_END2END(qu8_gemm_1x8c4__neondot);
   BENCHMARK_QU8_END2END(qu8_gemm_2x8c4__neondot);
   BENCHMARK_QU8_END2END(qu8_gemm_3x8c4__neondot);
@@ -304,6 +323,8 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QU8_END2END(qu8_gemm_5x16c4__neondot);
   BENCHMARK_QU8_END2END(qu8_gemm_6x16c4__neondot);
   BENCHMARK_QU8_END2END(qu8_gemm_8x16c4__neondot);
+  BENCHMARK_QU8_END2END(qu8_gemm_2x32c4__neondot);
+  BENCHMARK_QU8_END2END(qu8_gemm_3x32c4__neondot);
 
 #if XNN_ENABLE_FULL_BENCHMARKS
   BENCHMARK_QU8_END2END(qu8_gemm_1x16__neon_mlal_lane);

@@ -354,6 +354,9 @@ tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RND
 tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=5  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/5x16c4-minmax-rndnu-neondot.c &
 tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/6x16c4-minmax-rndnu-neondot.c &
 tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/8x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/1x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/2x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-gemm/gen/3x32c4-minmax-rndnu-neondot.c &
 
 ############################### AArch64 assembly ##############################
 # Cortex A53 micro-kernel

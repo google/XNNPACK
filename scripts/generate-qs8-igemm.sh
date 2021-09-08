@@ -360,6 +360,9 @@ tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RN
 tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=5  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/5x16c4-minmax-rndnu-neondot.c &
 tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/6x16c4-minmax-rndnu-neondot.c &
 tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/8x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=1  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/1x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=2  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/2x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=3  -D NR=32 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qu8-igemm/gen/3x32c4-minmax-rndnu-neondot.c &
 
 ############################### AArch64 assembly ##############################
 # Cortex A53 micro-kernel
