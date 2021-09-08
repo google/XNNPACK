@@ -1358,11 +1358,57 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_subtract:
-        status = xnn_create_subtract_nd_f32(
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_subtract_nd_f32(
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_QS8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const int8_t output_min =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            const int8_t output_max =
+              (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+            status = xnn_create_subtract_nd_qs8(
+              (int8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              (int8_t) values[node->inputs[1]].quantization.zero_point,
+              values[node->inputs[1]].quantization.scale,
+              (int8_t) output_zero_point,
+              output_scale, output_min, output_max, node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+          case xnn_datatype_quint8:
+          {
+            const float output_scale = values[node->outputs[0]].quantization.scale;
+            const int32_t output_zero_point = values[node->outputs[0]].quantization.zero_point;
+            const uint8_t output_min =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            const uint8_t output_max =
+              (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+            status = xnn_create_subtract_nd_qu8(
+              (uint8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              (uint8_t) values[node->inputs[1]].quantization.zero_point,
+              values[node->inputs[1]].quantization.scale,
+              (uint8_t) output_zero_point,
+              output_scale, output_min, output_max, node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -2129,6 +2175,40 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_operator_type_subtract_nd_qs8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->inputs[1]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_subtract_nd_qs8(
+          opdata->operator_object,
+          opdata->shape1.num_dims,
+          opdata->shape1.dim,
+          opdata->shape2.num_dims,
+          opdata->shape2.dim,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->inputs[1]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+      case xnn_operator_type_subtract_nd_qu8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->inputs[1]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_subtract_nd_qu8(
+          opdata->operator_object,
+          opdata->shape1.num_dims,
+          opdata->shape1.dim,
+          opdata->shape2.num_dims,
+          opdata->shape2.dim,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->inputs[1]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       case xnn_operator_type_unpooling_nhwc_x32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->inputs[1]].data != NULL);
