@@ -7492,4 +7492,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(rounding-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(x8-lut-bench bench/x8-lut.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x8-lut-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 ENDIF()

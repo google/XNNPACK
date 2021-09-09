@@ -7884,6 +7884,15 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
+xnnpack_benchmark(
+    name = "x8_lut_bench",
+    srcs = [
+        "bench/x8-lut.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
 ########################### Benchmarks for operators ###########################
 
 xnnpack_benchmark(
