@@ -90,6 +90,7 @@ enum xnn_operator_type {
   xnn_operator_type_resize_bilinear_nchw_f32,
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_sigmoid_nc_f32,
+  xnn_operator_type_sigmoid_nc_qs8,
   xnn_operator_type_sigmoid_nc_qu8,
   xnn_operator_type_softmax_nc_f32,
   xnn_operator_type_softmax_nc_qu8,

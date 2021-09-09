@@ -23,6 +23,7 @@ static enum xnn_status create_lut_elementwise_nc(
     size_t output_stride,
     int32_t input_zero_point,
     float input_scale,
+    int32_t input_min,
     long output_zero_point,
     float output_scale,
     long output_min,
@@ -108,13 +109,13 @@ static enum xnn_status create_lut_elementwise_nc(
 
   uint8_t* lookup_table = lut_elementwise_op->lookup_table;
   const float inv_output_scale = 1.0f / output_scale;
-  for (int32_t i = 0; i < 256; i++) {
+  for (int32_t i = input_min; i < input_min + 256; i++) {
     const float dequantized_input = (i - input_zero_point) * input_scale;
     const float dequantized_output = init_fn(dequantized_input, init_params);
     long quantized_output = lrintf(dequantized_output * inv_output_scale) + output_zero_point;
     quantized_output = XNN_UNPREDICTABLE(quantized_output < output_min) ? output_min : quantized_output;
     quantized_output = XNN_UNPREDICTABLE(quantized_output > output_max) ? output_max : quantized_output;
-    lookup_table[i] = (uint8_t) quantized_output;
+    lookup_table[(uint8_t) i] = (uint8_t) quantized_output;
   }
 
   lut_elementwise_op->channels = channels;
@@ -178,7 +179,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
 
   return create_lut_elementwise_nc(
     channels, input_stride, output_stride,
-    (int32_t) (uint32_t) input_zero_point, input_scale,
+    (int32_t) (uint32_t) input_zero_point, input_scale, 0 /* input min */,
     (long) (unsigned long) output_zero_point, output_scale,
     (long) (unsigned long) output_min, (long) (unsigned long) output_max,
     flags,
@@ -188,6 +189,43 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
 
 static float calculate_sigmoid(float x, const void* params) {
   return signbit(x) ? 1.0f / (1.0f + expf(-x)) : 1.0f - 1.0f / (1.0f + expf(x));
+}
+
+enum xnn_status xnn_create_sigmoid_nc_qs8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* sigmoid_op_out)
+{
+  if (output_scale != 0x1.0p-8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: only output scale of 1/256 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qs8), output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if (output_zero_point != -128) {
+    xnn_log_error(
+      "failed to create %s operator with %" PRIu8 " output zero point: only output zero point of -128 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_qs8), output_zero_point);
+    return xnn_status_unsupported_parameter;
+  }
+
+  return create_lut_elementwise_nc(
+    channels, input_stride, output_stride,
+    (int32_t) input_zero_point, input_scale, INT8_MIN,
+    (long) output_zero_point, output_scale,
+    (long) output_min, (long) output_max,
+    flags,
+    (xnn_lut_init_fn) &calculate_sigmoid, NULL,
+    xnn_operator_type_sigmoid_nc_qs8, sigmoid_op_out);
 }
 
 enum xnn_status xnn_create_sigmoid_nc_qu8(
@@ -219,7 +257,7 @@ enum xnn_status xnn_create_sigmoid_nc_qu8(
 
   return create_lut_elementwise_nc(
     channels, input_stride, output_stride,
-    (int32_t) (uint32_t) input_zero_point, input_scale,
+    (int32_t) (uint32_t) input_zero_point, input_scale, 0 /* input min */,
     (long) (unsigned long) output_zero_point, output_scale,
     (long) (unsigned long) output_min, (long) (unsigned long) output_max,
     flags,
@@ -300,6 +338,18 @@ enum xnn_status xnn_setup_leaky_relu_nc_qu8(
 {
   return setup_lut_elementwise_nc(
     leaky_relu_op, xnn_operator_type_leaky_relu_nc_qu8,
+    batch_size, input, output);
+}
+
+enum xnn_status xnn_setup_sigmoid_nc_qs8(
+    xnn_operator_t sigmoid_op,
+    size_t batch_size,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_lut_elementwise_nc(
+    sigmoid_op, xnn_operator_type_sigmoid_nc_qs8,
     batch_size, input, output);
 }
 
