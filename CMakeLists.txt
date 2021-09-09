@@ -414,7 +414,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
   src/u8-vclamp/scalar-x4.c
-  src/x8-lut/gen/scalar-x4.c
+  src/x8-lut/gen/lut-scalar-x4.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
@@ -1025,11 +1025,11 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
   src/u8-vclamp/scalar-x4.c
-  src/x8-lut/gen/scalar-x1.c
-  src/x8-lut/gen/scalar-x2.c
-  src/x8-lut/gen/scalar-x4.c
-  src/x8-lut/gen/scalar-x8.c
-  src/x8-lut/gen/scalar-x16.c
+  src/x8-lut/gen/lut-scalar-x1.c
+  src/x8-lut/gen/lut-scalar-x2.c
+  src/x8-lut/gen/lut-scalar-x4.c
+  src/x8-lut/gen/lut-scalar-x8.c
+  src/x8-lut/gen/lut-scalar-x16.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
