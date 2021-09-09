@@ -1208,12 +1208,52 @@ enum xnn_status xnn_create_runtime_v2(
         runtime->opdata[i].outputs[0] = node->outputs[0];
         break;
       case xnn_node_type_sigmoid:
-        status = xnn_create_sigmoid_nc_f32(
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
-          values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
-          node->flags,
-          &runtime->opdata[i].operator_object);
+        switch (values[node->outputs[0]].datatype) {
+          case xnn_datatype_fp32:
+            status = xnn_create_sigmoid_nc_f32(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+#ifndef XNN_NO_QS8_OPERATORS
+          case xnn_datatype_qint8:
+          {
+            status = xnn_create_sigmoid_nc_qs8(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              (int8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              (int8_t) values[node->outputs[0]].quantization.zero_point,
+              values[node->outputs[0]].quantization.scale,
+              INT8_MIN, INT8_MAX,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+          case xnn_datatype_quint8:
+          {
+            status = xnn_create_sigmoid_nc_qu8(
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* channels */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* input stride */,
+              values[node->inputs[0]].shape.dim[values[node->inputs[0]].shape.num_dims - 1] /* output stride */,
+              (uint8_t) values[node->inputs[0]].quantization.zero_point,
+              values[node->inputs[0]].quantization.scale,
+              (uint8_t) values[node->outputs[0]].quantization.zero_point,
+              values[node->outputs[0]].quantization.scale,
+              0, UINT8_MAX,
+              node->flags,
+              &runtime->opdata[i].operator_object);
+            break;
+          }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+          default:
+            XNN_UNREACHABLE;
+        }
         if (status != xnn_status_success) {
           goto error;
         }
@@ -2115,6 +2155,30 @@ enum xnn_status xnn_setup_runtime(
           runtime->blobs[opdata->outputs[0]].data,
           runtime->threadpool);
         break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_operator_type_sigmoid_nc_qs8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_sigmoid_nc_qs8(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+      case xnn_operator_type_sigmoid_nc_qu8:
+        assert(runtime->blobs[opdata->inputs[0]].data != NULL);
+        assert(runtime->blobs[opdata->outputs[0]].data != NULL);
+        status = xnn_setup_sigmoid_nc_qu8(
+          opdata->operator_object,
+          opdata->batch_size,
+          runtime->blobs[opdata->inputs[0]].data,
+          runtime->blobs[opdata->outputs[0]].data,
+          runtime->threadpool);
+        break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       case xnn_operator_type_softmax_nc_f32:
         assert(runtime->blobs[opdata->inputs[0]].data != NULL);
         assert(runtime->blobs[opdata->outputs[0]].data != NULL);
