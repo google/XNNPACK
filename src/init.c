@@ -307,7 +307,7 @@ static void init(void) {
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
-      xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
       xnn_params.x8.zip = (struct zip_parameters) {
         .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__neon,
         .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__neon,
@@ -782,7 +782,7 @@ static void init(void) {
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
-      xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
       xnn_params.x8.zip = (struct zip_parameters) {
         .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
         .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__scalar,
@@ -1634,7 +1634,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__neon,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__neon,
@@ -2751,7 +2751,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__sse2,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__sse2,
@@ -3474,7 +3474,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__scalar,
@@ -4128,7 +4128,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__scalar,
@@ -4523,7 +4523,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__scalar,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__scalar,

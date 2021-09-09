@@ -1397,8 +1397,8 @@ typedef void (*xnn_x32_zipv_ukernel_function)(
 typedef void (*xnn_x8_lut_ukernel_function)(
     size_t n,
     const uint8_t* x,
-    const uint8_t* t,
-    uint8_t* y);
+    uint8_t* y,
+    const uint8_t* t);
 
 typedef void (*xnn_dwconv2d_chw_ukernel_function)(
     size_t input_height,

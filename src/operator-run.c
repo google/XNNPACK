@@ -803,7 +803,7 @@ void xnn_compute_lut_strided(
   const void* x = (const void*) ((uintptr_t) context->x + context->x_stride * batch_index);
   void* y = (void*) ((uintptr_t) context->y + context->y_stride * batch_index);
 
-  context->ukernel(context->n, x, context->t, y);
+  context->ukernel(context->n, x, y, context->t);
 }
 
 void xnn_compute_lut_contiguous(
@@ -814,7 +814,7 @@ void xnn_compute_lut_contiguous(
   const void* x = (const void*) ((uintptr_t) context->x + offset);
   void* y = (void*) ((uintptr_t) context->y + offset);
 
-  context->ukernel(size, x, context->t, y);
+  context->ukernel(size, x, y, context->t);
 }
 
 void xnn_compute_univector_strided(

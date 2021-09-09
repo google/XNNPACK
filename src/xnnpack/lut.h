@@ -23,10 +23,14 @@ extern "C" {
   XNN_INTERNAL void fn_name(                     \
       size_t n,                                  \
       const uint8_t* x,                          \
-      const uint8_t* t,                          \
-      uint8_t* y);
+      uint8_t* y,                                \
+      const uint8_t* t);
 
-DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x1)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x2)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x4)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x8)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x16)
 
 
 #define DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(fn_name) \
