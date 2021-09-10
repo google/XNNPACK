@@ -3019,7 +3019,9 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qu8-igemm/gen/2x4c8-minmax-gemmlowp-ssse3-ld64.c
   src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld64.c
   src/qu8-requantization/gemmlowp-ssse3.c
-  src/qu8-requantization/rndna-ssse3.c)
+  src/qu8-requantization/rndna-ssse3.c
+  src/x8-lut/gen/lut-ssse3-x16.c
+  src/x8-lut/gen/lut-ssse3-x32.c)
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse41-2x8.c
@@ -3683,7 +3685,11 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c
-  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c)
+  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/x8-lut/gen/lut-avx-x16.c
+  src/x8-lut/gen/lut-avx-x32.c
+  src/x8-lut/gen/lut-avx-x48.c
+  src/x8-lut/gen/lut-avx-x64.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c
@@ -4213,7 +4219,11 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x8.c
   src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
   src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
-  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c)
+  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
+  src/x8-lut/gen/lut-avx2-x32.c
+  src/x8-lut/gen/lut-avx2-x64.c
+  src/x8-lut/gen/lut-avx2-x96.c
+  src/x8-lut/gen/lut-avx2-x128.c)
 
 SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up16x4-minmax-avx512f.c

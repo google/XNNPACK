@@ -78,6 +78,61 @@ static void x8_lut(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(x8_lut, avx2_x32,
+                    xnn_x8_lut_ukernel__avx2_x32,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx2_x64,
+                    xnn_x8_lut_ukernel__avx2_x64,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx2_x96,
+                    xnn_x8_lut_ukernel__avx2_x96,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx2_x128,
+                    xnn_x8_lut_ukernel__avx2_x128,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(x8_lut, avx_x16,
+                    xnn_x8_lut_ukernel__avx_x16,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx_x32,
+                    xnn_x8_lut_ukernel__avx_x32,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx_x48,
+                    xnn_x8_lut_ukernel__avx_x48,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, avx_x64,
+                    xnn_x8_lut_ukernel__avx_x64,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(x8_lut, ssse3_x16,
+                    xnn_x8_lut_ukernel__ssse3_x16,
+                    benchmark::utils::CheckSSSE3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, ssse3_x32,
+                    xnn_x8_lut_ukernel__ssse3_x32,
+                    benchmark::utils::CheckSSSE3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 BENCHMARK_CAPTURE(x8_lut, scalar_x1,
                   xnn_x8_lut_ukernel__scalar_x1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)

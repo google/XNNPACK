@@ -17,6 +17,21 @@ tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/lut
 tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/lut-neon-tbx128x4-x48.c &
 tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/lut-neon-tbx128x4-x64.c &
 
+################################### x86 SSE ###################################
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=0 -D BATCH_TILE=16 -o src/x8-lut/gen/lut-ssse3-x16.c &
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=0 -D BATCH_TILE=32 -o src/x8-lut/gen/lut-ssse3-x32.c &
+
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=1 -D BATCH_TILE=16 -o src/x8-lut/gen/lut-avx-x16.c &
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=1 -D BATCH_TILE=32 -o src/x8-lut/gen/lut-avx-x32.c &
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=1 -D BATCH_TILE=48 -o src/x8-lut/gen/lut-avx-x48.c &
+tools/xngen src/x8-lut/ssse3.c.in -D AVX=1 -D BATCH_TILE=64 -o src/x8-lut/gen/lut-avx-x64.c &
+
+################################### x86 AVX2 ##################################
+tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=32  -o src/x8-lut/gen/lut-avx2-x32.c &
+tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=64  -o src/x8-lut/gen/lut-avx2-x64.c &
+tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=96  -o src/x8-lut/gen/lut-avx2-x96.c &
+tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=128 -o src/x8-lut/gen/lut-avx2-x128.c &
+
 ################################## Unit tests #################################
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
 

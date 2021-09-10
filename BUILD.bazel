@@ -3970,6 +3970,8 @@ ALL_SSSE3_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/4x4c2-minmax-gemmlowp-ssse3-ld64.c",
     "src/qu8-requantization/gemmlowp-ssse3.c",
     "src/qu8-requantization/rndna-ssse3.c",
+    "src/x8-lut/gen/lut-ssse3-x16.c",
+    "src/x8-lut/gen/lut-ssse3-x32.c",
 ]
 
 PROD_SSE41_MICROKERNEL_SRCS = [
@@ -4640,6 +4642,10 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c",
+    "src/x8-lut/gen/lut-avx-x16.c",
+    "src/x8-lut/gen/lut-avx-x32.c",
+    "src/x8-lut/gen/lut-avx-x48.c",
+    "src/x8-lut/gen/lut-avx-x64.c",
 ]
 
 PROD_XOP_MICROKERNEL_SRCS = [
@@ -5174,6 +5180,10 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c",
     "src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c",
     "src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c",
+    "src/x8-lut/gen/lut-avx2-x32.c",
+    "src/x8-lut/gen/lut-avx2-x64.c",
+    "src/x8-lut/gen/lut-avx2-x96.c",
+    "src/x8-lut/gen/lut-avx2-x128.c",
 ]
 
 PROD_AVX512F_MICROKERNEL_SRCS = [
