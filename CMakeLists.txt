@@ -5500,6 +5500,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(subtract-nd-test subtract-nd-test)
 
+  ADD_EXECUTABLE(tanh-nc-test test/tanh-nc.cc)
+  SET_TARGET_PROPERTIES(tanh-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(tanh-nc-test tanh-nc-test)
+
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
   SET_TARGET_PROPERTIES(truncation-nc-test PROPERTIES
     CXX_STANDARD 11

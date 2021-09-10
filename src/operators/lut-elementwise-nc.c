@@ -265,6 +265,84 @@ enum xnn_status xnn_create_sigmoid_nc_qu8(
     xnn_operator_type_sigmoid_nc_qu8, sigmoid_op_out);
 }
 
+static float calculate_tanh(float x, const void* params) {
+  return tanhf(x);
+}
+
+enum xnn_status xnn_create_tanh_nc_qs8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    int8_t input_zero_point,
+    float input_scale,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* tanh_op_out)
+{
+  if (output_scale != 0x1.0p-7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: only output scale of 1/128 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_qs8), output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if (output_zero_point != 0) {
+    xnn_log_error(
+      "failed to create %s operator with %" PRIu8 " output zero point: only output zero point of 0 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_qs8), output_zero_point);
+    return xnn_status_unsupported_parameter;
+  }
+
+  return create_lut_elementwise_nc(
+    channels, input_stride, output_stride,
+    (int32_t) input_zero_point, input_scale, INT8_MIN,
+    (long) output_zero_point, output_scale,
+    (long) output_min, (long) output_max,
+    flags,
+    (xnn_lut_init_fn) &calculate_tanh, NULL,
+    xnn_operator_type_tanh_nc_qs8, tanh_op_out);
+}
+
+enum xnn_status xnn_create_tanh_nc_qu8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint8_t input_zero_point,
+    float input_scale,
+    uint8_t output_zero_point,
+    float output_scale,
+    uint8_t output_min,
+    uint8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* tanh_op_out)
+{
+  if (output_scale != 0x1.0p-7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale: only output scale of 1/128 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_qu8), output_scale);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if (output_zero_point != 128) {
+    xnn_log_error(
+      "failed to create %s operator with %" PRIu8 " output zero point: only output zero point of 128 is supported",
+      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_qu8), output_zero_point);
+    return xnn_status_unsupported_parameter;
+  }
+
+  return create_lut_elementwise_nc(
+    channels, input_stride, output_stride,
+    (int32_t) (uint32_t) input_zero_point, input_scale, 0 /* input min */,
+    (long) (unsigned long) output_zero_point, output_scale,
+    (long) (unsigned long) output_min, (long) (unsigned long) output_max,
+    flags,
+    (xnn_lut_init_fn) &calculate_tanh, NULL,
+    xnn_operator_type_tanh_nc_qu8, tanh_op_out);
+}
+
 static enum xnn_status setup_lut_elementwise_nc(
     xnn_operator_t lut_elementwise_op,
     enum xnn_operator_type expected_operator_type,
@@ -362,5 +440,29 @@ enum xnn_status xnn_setup_sigmoid_nc_qu8(
 {
   return setup_lut_elementwise_nc(
     sigmoid_op, xnn_operator_type_sigmoid_nc_qu8,
+    batch_size, input, output);
+}
+
+enum xnn_status xnn_setup_tanh_nc_qs8(
+    xnn_operator_t tanh_op,
+    size_t batch_size,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_lut_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_qs8,
+    batch_size, input, output);
+}
+
+enum xnn_status xnn_setup_tanh_nc_qu8(
+    xnn_operator_t tanh_op,
+    size_t batch_size,
+    const uint8_t* input,
+    uint8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_lut_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_qu8,
     batch_size, input, output);
 }

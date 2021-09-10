@@ -10285,6 +10285,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "tanh_nc_test",
+    srcs = [
+        "test/tanh-nc.cc",
+        "test/tanh-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "truncation_nc_test",
     srcs = [
         "test/truncation-nc.cc",
