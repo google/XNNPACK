@@ -59,9 +59,9 @@ class LUTMicrokernelTester {
     auto u8rng = std::bind(
       std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-    std::vector<uint8_t> x(batch_size());
+    std::vector<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::array<uint8_t, 256> t;
-    std::vector<uint8_t> y(batch_size());
+    std::vector<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
     std::vector<uint8_t> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));

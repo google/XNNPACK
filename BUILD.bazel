@@ -2899,7 +2899,7 @@ ALL_NEONFMA_MICROKERNEL_SRCS = [
     "src/math/sqrt-neonfma-nr3fma.c",
 ]
 
-PROD_AARCH64_NEONFMA_MICROKERNEL_SRCS = [
+PROD_AARCH64_NEON_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c",
     "src/f32-dwconv2d-chw/gen/3x3p1-minmax-neonfma-3x4.c",
     "src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neonfma-2x4-acc2.c",
@@ -2919,7 +2919,7 @@ PROD_AARCH64_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-vsqrt/gen/neon-sqrt-x4.c",
 ]
 
-ALL_AARCH64_NEONFMA_MICROKERNEL_SRCS = [
+ALL_AARCH64_NEON_MICROKERNEL_SRCS = [
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x1.c",
@@ -3032,6 +3032,10 @@ ALL_AARCH64_NEONFMA_MICROKERNEL_SRCS = [
     "src/math/sigmoid-neonfma-rr2-lut64-p2-div.c",
     "src/math/sigmoid-neonfma-rr2-lut2048-p1-div.c",
     "src/math/sigmoid-neonfma-rr2-p5-div.c",
+    "src/x8-lut/gen/lut-neon-tbx128x4-x16.c",
+    "src/x8-lut/gen/lut-neon-tbx128x4-x32.c",
+    "src/x8-lut/gen/lut-neon-tbx128x4-x48.c",
+    "src/x8-lut/gen/lut-neon-tbx128x4-x64.c",
 ]
 
 PROD_NEONV8_MICROKERNEL_SRCS = [
@@ -6020,7 +6024,7 @@ xnnpack_cc_library(
         "-mfpu=neon",
     ],
     aarch32_srcs = ALL_NEON_MICROKERNEL_SRCS,
-    aarch64_srcs = ALL_NEON_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEON_MICROKERNEL_SRCS + ALL_AARCH64_NEON_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -6039,7 +6043,7 @@ xnnpack_cc_library(
         "-mfpu=neon",
     ],
     aarch32_srcs = PROD_NEON_MICROKERNEL_SRCS,
-    aarch64_srcs = PROD_NEON_MICROKERNEL_SRCS,
+    aarch64_srcs = PROD_NEON_MICROKERNEL_SRCS + PROD_AARCH64_NEON_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -6058,7 +6062,7 @@ xnnpack_cc_library(
         "-mfpu=neon",
     ],
     aarch32_srcs = ALL_NEON_MICROKERNEL_SRCS,
-    aarch64_srcs = ALL_NEON_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEON_MICROKERNEL_SRCS + ALL_AARCH64_NEON_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -6081,7 +6085,7 @@ xnnpack_cc_library(
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
-    aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS + ALL_AARCH64_NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=swift",
         "-mtune=generic",
@@ -6104,7 +6108,7 @@ xnnpack_cc_library(
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
-    aarch64_srcs = PROD_NEONFMA_MICROKERNEL_SRCS + PROD_AARCH64_NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=swift",
         "-mtune=generic",
@@ -6127,7 +6131,7 @@ xnnpack_cc_library(
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
-    aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS + ALL_AARCH64_NEONFMA_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
     apple_aarch32_copts = [
         "-mcpu=swift",
         "-mtune=generic",

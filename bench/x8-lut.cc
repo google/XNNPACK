@@ -59,6 +59,25 @@ static void x8_lut(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x16,
+                    xnn_x8_lut_ukernel__neon_tbx128x4_x16)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x32,
+                    xnn_x8_lut_ukernel__neon_tbx128x4_x32)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x48,
+                    xnn_x8_lut_ukernel__neon_tbx128x4_x48)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x64,
+                    xnn_x8_lut_ukernel__neon_tbx128x4_x64)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM64
+
 BENCHMARK_CAPTURE(x8_lut, scalar_x1,
                   xnn_x8_lut_ukernel__scalar_x1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)

@@ -32,6 +32,11 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x4)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x8)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__scalar_x16)
 
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__neon_tbx128x4_x16)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__neon_tbx128x4_x32)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__neon_tbx128x4_x48)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__neon_tbx128x4_x64)
+
 
 #define DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \

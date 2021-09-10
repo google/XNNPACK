@@ -12,6 +12,7 @@
 #include <xnnpack/lut.h>
 #include <xnnpack/common.h>
 
+
 void xnn_x8_lut_ukernel__scalar_x1(
     size_t n,
     const uint8_t* x,
