@@ -32,6 +32,12 @@ tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=64  -o src/x8-lut/gen/lut-avx2-x6
 tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=96  -o src/x8-lut/gen/lut-avx2-x96.c &
 tools/xngen src/x8-lut/avx2.c.in -D BATCH_TILE=128 -o src/x8-lut/gen/lut-avx2-x128.c &
 
+################################## x86 AVX512 #################################
+tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=64  -o src/x8-lut/gen/lut-avx512skx-vpshufb-x64.c &
+tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=128 -o src/x8-lut/gen/lut-avx512skx-vpshufb-x128.c &
+tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=192 -o src/x8-lut/gen/lut-avx512skx-vpshufb-x192.c &
+tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=256 -o src/x8-lut/gen/lut-avx512skx-vpshufb-x256.c &
+
 ################################## Unit tests #################################
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
 
