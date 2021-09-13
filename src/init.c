@@ -1,4 +1,3 @@
-
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
@@ -1634,7 +1633,7 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
+    xnn_params.x8.lut = xnn_x8_lut_ukernel__neon_tbx128x4_x64;
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__neon,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__neon,
@@ -2751,7 +2750,16 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
+    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512skx_vpshufb_x64;
+    } else if (cpuinfo_has_x86_avx2()) {
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__avx2_x128;
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__avx_x64;
+    } else {
+      // Note: SSSE3 version is usually slower than scalar
+      xnn_params.x8.lut = xnn_x8_lut_ukernel__scalar_x4;
+    }
     xnn_params.x8.zip = (struct zip_parameters) {
       .x2 = (xnn_zipc_ukernel_function) xnn_x8_zip_x2_ukernel__sse2,
       .x3 = (xnn_zipc_ukernel_function) xnn_x8_zip_x3_ukernel__sse2,

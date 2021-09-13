@@ -3365,7 +3365,8 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-avx-mul32-ld32-x8.c
   src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
   src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
-  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c)
+  src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x16.c
+  src/x8-lut/gen/lut-avx-x64.c)
 
 SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c
@@ -3966,7 +3967,8 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/3x8c8-minmax-fp32-avx2.c
   src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
-  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c)
+  src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
+  src/x8-lut/gen/lut-avx2-x128.c)
 
 SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f32-raddexpminusmax/gen/avx2-p5-x64-acc2.c
@@ -4543,7 +4545,8 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x16c8-minmax-fp32-avx512skx.c
   src/qu8-igemm/gen/4x16c8-minmax-fp32-avx512skx.c
   src/qu8-vadd/gen/minmax-avx512skx-mul32-ld128-x16.c
-  src/qu8-vaddc/gen/minmax-avx512skx-mul32-ld128-x16.c)
+  src/qu8-vaddc/gen/minmax-avx512skx-mul32-ld128-x16.c
+  src/x8-lut/gen/lut-avx512skx-vpshufb-x64.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c
