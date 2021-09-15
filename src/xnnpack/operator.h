@@ -63,6 +63,7 @@ enum xnn_operator_type {
   xnn_operator_type_depth_to_space_nhwc_x32,
   xnn_operator_type_divide_nd_f32,
   xnn_operator_type_elu_nc_f32,
+  xnn_operator_type_elu_nc_qs8,
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_qs8,
   xnn_operator_type_fully_connected_nc_qu8,

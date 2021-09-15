@@ -135,6 +135,42 @@ error:
   return status;
 }
 
+static float calculate_elu(float x, const float* alpha_ptr) {
+  const float alpha = *alpha_ptr;
+  return signbit(x) ? alpha * expm1f(x) : x;
+}
+
+enum xnn_status xnn_create_elu_nc_qs8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    float alpha,
+    int8_t input_zero_point,
+    float input_scale,
+    int8_t output_zero_point,
+    float output_scale,
+    int8_t output_min,
+    int8_t output_max,
+    uint32_t flags,
+    xnn_operator_t* elu_op_out)
+{
+  if (alpha <= 0.0f || !isnormal(alpha)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g alpha parameter: alpha must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_elu_nc_qs8), alpha);
+    return xnn_status_invalid_parameter;
+  }
+
+  return create_lut_elementwise_nc(
+    channels, input_stride, output_stride,
+    (int32_t) input_zero_point, input_scale, INT8_MIN,
+    (long) output_zero_point, output_scale,
+    (long) output_min, (long) output_max,
+    flags,
+    (xnn_lut_init_fn) &calculate_elu, &alpha,
+    xnn_operator_type_elu_nc_qs8, elu_op_out);
+}
+
 static float calculate_leaky_relu(float x, const float* negative_slope_ptr) {
   const float negative_slope = *negative_slope_ptr;
   return signbit(x) ? x * negative_slope : x;
@@ -405,6 +441,18 @@ static enum xnn_status setup_lut_elementwise_nc(
   lut_elementwise_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_elu_nc_qs8(
+    xnn_operator_t sigmoid_op,
+    size_t batch_size,
+    const int8_t* input,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_lut_elementwise_nc(
+    sigmoid_op, xnn_operator_type_elu_nc_qs8,
+    batch_size, input, output);
 }
 
 enum xnn_status xnn_setup_leaky_relu_nc_qu8(

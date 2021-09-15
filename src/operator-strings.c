@@ -80,6 +80,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Divide (ND, F32)";
     case xnn_operator_type_elu_nc_f32:
       return "ELU (NC, F32)";
+    case xnn_operator_type_elu_nc_qs8:
+      return "ELU (NC, QS8)";
     case xnn_operator_type_floor_nc_f32:
       return "Floor (NC, F32)";
     case xnn_operator_type_fully_connected_nc_f32:

@@ -2117,6 +2117,27 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8(
   int8_t* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_elu_nc_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float alpha,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* elu_op_out);
+
+enum xnn_status xnn_setup_elu_nc_qs8(
+  xnn_operator_t elu_op,
+  size_t batch_size,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_fully_connected_nc_qs8(
   size_t input_channels,
   size_t output_channels,
