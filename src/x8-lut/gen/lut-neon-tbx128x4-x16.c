@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/lut.h>
 #include <xnnpack/common.h>
 

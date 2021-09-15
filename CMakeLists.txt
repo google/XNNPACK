@@ -1979,7 +1979,8 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vdiv-minmax-neon-x8.c
   src/f32-vbinary/gen/vdivc-minmax-neon-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-neon-x8.c
-  src/f32-vsqrt/gen/neon-sqrt-x4.c)
+  src/f32-vsqrt/gen/neon-sqrt-x4.c
+  src/x8-lut/gen/lut-neon-tbx128x4-x64.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
