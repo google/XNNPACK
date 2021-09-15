@@ -14,6 +14,8 @@ $if AVX:
 $else:
   #include <tmmintrin.h>
 
+$if AVX:
+  #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/lut.h>
 #include <xnnpack/common.h>
 

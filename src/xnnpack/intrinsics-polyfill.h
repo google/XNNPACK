@@ -131,6 +131,23 @@ __m512i _mm512_set_epi8(
 
 #endif  // __AVX512F__
 
+#ifdef __AVX512BW__
+
+// GCC pre-11
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 11)
+static XNN_INTRINSIC
+__m512i _mm512_loadu_epi8(const void* address) {
+  return _mm512_loadu_epi32(address);
+}
+
+static XNN_INTRINSIC
+void _mm512_storeu_epi8(void* address, __m512i value) {
+  _mm512_storeu_epi32(address, value);
+}
+#endif  // GCC pre-11
+
+#endif  // __AVX512BW__
+
 #if XNN_ARCH_ARM && (defined(__ARM_NEON) || defined(__ARM_NEON__))
 #include <arm_neon.h>
 
