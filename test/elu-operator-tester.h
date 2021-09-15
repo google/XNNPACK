@@ -225,7 +225,7 @@ class ELUOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           const float x = input_scale() *
             (int32_t(input[i * input_stride() + c]) - int32_t(input_zero_point() - 0x80));
-          const float elu_x = signbit(x) ? alpha() * std::expm1(x) : x;
+          const float elu_x = std::signbit(x) ? alpha() * std::expm1(x) : x;
           const float scaled_elu_x = elu_x / output_scale();
           float y = scaled_elu_x;
           y = std::min<float>(y, int32_t(qmax() - 0x80) - int32_t(output_zero_point() - 0x80));
