@@ -87,9 +87,23 @@ static void DWConvEnd2EndBenchmark(
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
+  static void qu8_dwconv_up24x9__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      24 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_up32x9__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
 
   BENCHMARK_QU8_END2END(qu8_dwconv_up8x9__neon_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_up16x9__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_up24x9__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_up32x9__neon_mul16);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

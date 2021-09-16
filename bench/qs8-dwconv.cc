@@ -207,6 +207,18 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
+  static void qs8_dwconv_up24x9__neon_mul16(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      24 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qs8_dwconv_up32x9__neon_mul16(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul16,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
   static void qs8_dwconv_up8x25__neon_mul8_ld64(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
       xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8_ld64,
@@ -255,6 +267,18 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
   }
+  static void qs8_dwconv_up24x25__neon_mul16(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul16,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      24 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qs8_dwconv_up32x25__neon_mul16(benchmark::State& state, const char* net) {
+    DWConvBenchmark(state,
+      xnn_qs8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul16,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
 
   BENCHMARK_DWCONV(qs8_dwconv_up8x9__neon_mul8_ld64);
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__neon_mul8_ld64);
@@ -264,6 +288,8 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__neon_mla8_ld128);
   BENCHMARK_DWCONV(qs8_dwconv_up8x9__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_up16x9__neon_mul16);
+  BENCHMARK_DWCONV(qs8_dwconv_up24x9__neon_mul16);
+  BENCHMARK_DWCONV(qs8_dwconv_up32x9__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_up8x25__neon_mul8_ld64);
   BENCHMARK_DWCONV(qs8_dwconv_up16x25__neon_mul8_ld64);
   BENCHMARK_DWCONV(qs8_dwconv_up16x25__neon_mul8_ld128);
@@ -272,6 +298,8 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_up16x25__neon_mla8_ld128);
   BENCHMARK_DWCONV(qs8_dwconv_up8x25__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_up16x25__neon_mul16);
+  BENCHMARK_DWCONV(qs8_dwconv_up24x25__neon_mul16);
+  BENCHMARK_DWCONV(qs8_dwconv_up32x25__neon_mul16);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

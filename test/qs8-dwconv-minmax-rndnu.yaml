@@ -30,7 +30,15 @@
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
 - name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul16
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
 - name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul16
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
 - name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul16
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul16
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
