@@ -137,12 +137,12 @@ __m512i _mm512_set_epi8(
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 11)
 static XNN_INTRINSIC
 __m512i _mm512_loadu_epi8(const void* address) {
-  return _mm512_loadu_epi32(address);
+  return _mm512_loadu_si512(address);
 }
 
 static XNN_INTRINSIC
 void _mm512_storeu_epi8(void* address, __m512i value) {
-  _mm512_storeu_epi32(address, value);
+  _mm512_storeu_si512(address, value);
 }
 #endif  // GCC pre-11
 
