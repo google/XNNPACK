@@ -214,7 +214,7 @@ class LeakyReLUOperatorTester {
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
-    std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels());
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + (batch_size() - 1) * input_stride() + channels());
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
