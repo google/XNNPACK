@@ -55,6 +55,11 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__avx512skx_vpshufb_x128)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__avx512skx_vpshufb_x192)
 DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__avx512skx_vpshufb_x256)
 
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_x16)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_x32)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_x48)
+DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_x64)
+
 
 #define DECLARE_U8_LUT32NORM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \

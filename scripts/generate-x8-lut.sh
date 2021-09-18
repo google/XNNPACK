@@ -11,6 +11,12 @@ tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=4  -o src/x8-lut/gen/lut-scalar
 tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=8  -o src/x8-lut/gen/lut-scalar-x8.c &
 tools/xngen src/x8-lut/scalar.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/lut-scalar-x16.c &
 
+################################## WAsm SIMD ##################################
+tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/lut-wasmsimd-x16.c &
+tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/lut-wasmsimd-x32.c &
+tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/lut-wasmsimd-x48.c &
+tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/lut-wasmsimd-x64.c &
+
 ################################## ARM64 NEON #################################
 tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/lut-neon-tbx128x4-x16.c &
 tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/lut-neon-tbx128x4-x32.c &

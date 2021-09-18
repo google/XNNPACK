@@ -1,0 +1,95 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 16
+$assert BATCH_TILE % 16 == 0
+$SIMD_TILE = BATCH_TILE // 16
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/lut.h>
+#include <xnnpack/common.h>
+
+
+void xnn_x8_lut_ukernel__wasmsimd_x${BATCH_TILE}(
+    size_t n,
+    const uint8_t* x,
+    uint8_t* y,
+    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+{
+  assert(n != 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const v128_t vtable0 = wasm_v128_load(t);
+  $for T in range(1, 16):
+    const v128_t vtable${T} = wasm_v128_load(t + ${T * 16});
+  const v128_t voffset = wasm_i8x16_const_splat(16);
+  $if BATCH_TILE > 16:
+    for (; n >= ${BATCH_TILE} * sizeof(uint8_t); n -= ${BATCH_TILE} * sizeof(uint8_t)) {
+      v128_t vx0 = wasm_v128_load(x);
+      $for N in range(1, SIMD_TILE):
+        v128_t vx${N} = wasm_v128_load(x + ${N * 16});
+      x += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        v128_t vy${N} = wasm_i8x16_swizzle(vtable0, vx${N});
+
+      $for T in range(1, 16):
+        $for N in range(SIMD_TILE):
+          vx${N} = wasm_i8x16_sub(vx${N}, voffset);
+          vy${N} = wasm_v128_or(vy${N}, wasm_i8x16_swizzle(vtable${T}, vx${N}));
+
+      wasm_v128_store(y, vy0);
+      $for N in range(1, SIMD_TILE):
+        wasm_v128_store(y + ${N * 16}, vy${N});
+      y += ${BATCH_TILE};
+    }
+  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
+    v128_t vx = wasm_v128_load(x);
+    x += 16;
+
+    v128_t vy = wasm_i8x16_swizzle(vtable0, vx);
+
+    $for T in range(1, 16):
+      vx = wasm_i8x16_sub(vx, voffset);
+      vy = wasm_v128_or(vy, wasm_i8x16_swizzle(vtable${T}, vx));
+
+    wasm_v128_store(y, vy);
+    y += 16;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    v128_t vx = wasm_v128_load(x);
+
+    v128_t vy = wasm_i8x16_swizzle(vtable0, vx);
+
+    $for T in range(1, 16):
+      vx = wasm_i8x16_sub(vx, voffset);
+      vy = wasm_v128_or(vy, wasm_i8x16_swizzle(vtable${T}, vx));
+
+    if (n & (8 * sizeof(uint8_t))) {
+      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+      vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
+      y += 8;
+    }
+    if (n & (4 * sizeof(uint8_t))) {
+      *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
+      vy = wasm_u64x2_shr(vy, 32);
+      y += 4;
+    }
+    uint32_t vy_lo = wasm_i32x4_extract_lane(vy, 0);
+    if (n & (2 * sizeof(uint8_t))) {
+      *((uint16_t*) y) = (uint16_t) vy_lo;
+      vy_lo >>= 16;
+      y += 2;
+    }
+    if (n & (1 * sizeof(uint8_t))) {
+      *y = (uint8_t) vy_lo;
+    }
+  }
+}
