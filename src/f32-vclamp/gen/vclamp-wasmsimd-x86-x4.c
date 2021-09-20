@@ -33,10 +33,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_x86_x4(
     v128_t vacc = wasm_v128_load(x);
     x += 4;
 
-    const v128_t vmaskmin = wasm_f32x4_lt(vacc, vy_min);
-    const v128_t vmaskmax = wasm_f32x4_le(vy_max, vacc);
-    vacc = wasm_v128_bitselect(vy_min, vacc, vmaskmin);
-    vacc = wasm_v128_bitselect(vy_max, vacc, vmaskmax);
+    vacc = wasm_f32x4_pmax(vy_min, vacc);
+    vacc = wasm_f32x4_pmin(vy_max, vacc);
 
     wasm_v128_store(y, vacc);
     y += 4;
@@ -44,10 +42,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_x86_x4(
   if XNN_UNLIKELY(n != 0) {
     v128_t vacc = wasm_v128_load(x);
 
-    const v128_t vmaskmin = wasm_f32x4_lt(vacc, vy_min);
-    const v128_t vmaskmax = wasm_f32x4_le(vy_max, vacc);
-    vacc = wasm_v128_bitselect(vy_min, vacc, vmaskmin);
-    vacc = wasm_v128_bitselect(vy_max, vacc, vmaskmax);
+    vacc = wasm_f32x4_pmax(vy_min, vacc);
+    vacc = wasm_f32x4_pmin(vy_max, vacc);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vacc, 0);

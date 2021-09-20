@@ -137,10 +137,8 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
       const v128_t vsum = wasm_f32x4_add(vsum2345, vsum01678);
 
       v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
-      const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-      const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-      vout = wasm_v128_bitselect(vmin, vout, vufmask);
-      vout = wasm_v128_bitselect(vmax, vout, vofmask);
+      vout = wasm_f32x4_pmax(vmin, vout);
+      vout = wasm_f32x4_pmin(vmax, vout);
 
       wasm_v128_store(output, vout);
       output += 4;
@@ -168,10 +166,8 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
       const v128_t vsum = wasm_f32x4_add(vsum2345, vsum01678);
 
       v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
-      const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-      const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-      vout = wasm_v128_bitselect(vmin, vout, vufmask);
-      vout = wasm_v128_bitselect(vmax, vout, vofmask);
+      vout = wasm_f32x4_pmax(vmin, vout);
+      vout = wasm_f32x4_pmin(vmax, vout);
 
       if (c & 2) {
         *((double*) output) = wasm_f64x2_extract_lane(vout, 0);

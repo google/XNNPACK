@@ -118,10 +118,10 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128(
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
 
     const v128_t voutput_min_less_zero_point = wasm_v128_load(params->wasmsimd.output_min_less_zero_point);
-    vacc0x0123 = wasm_f32x4_max(voutput_min_less_zero_point, vacc0x0123);
+    vacc0x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc0x0123);
 
     const v128_t voutput_max_less_zero_point = wasm_v128_load(params->wasmsimd.output_max_less_zero_point);
-    vacc0x0123 = wasm_f32x4_min(voutput_max_less_zero_point, vacc0x0123);
+    vacc0x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc0x0123);
 
     const v128_t vmagic_bias = wasm_v128_load(params->wasmsimd.magic_bias);
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);

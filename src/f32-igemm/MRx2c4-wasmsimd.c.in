@@ -129,16 +129,15 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUF
       $if X86:
         const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
         $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_v128_bitselect(vmin, vacc${M}${M+1}x01, wasm_f32x4_lt(vacc${M}${M+1}x01, vmin));
+          vacc${M}${M+1}x01 = wasm_f32x4_pmax(vmin, vacc${M}${M+1}x01);
+
+        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+        $for M in range(0, MR, 2):
+          vacc${M}${M+1}x01 = wasm_f32x4_pmin(vmax, vacc${M}${M+1}x01);
       $else:
         $for M in range(0, MR, 2):
           vacc${M}${M+1}x01 = wasm_f32x4_max(vacc${M}${M+1}x01, vmin);
 
-      $if X86:
-        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
-        $for M in range(0, MR, 2):
-          vacc${M}${M+1}x01 = wasm_v128_bitselect(vacc${M}${M+1}x01, vmax, wasm_f32x4_le(vacc${M}${M+1}x01, vmax));
-      $else:
         $for M in range(0, MR, 2):
           vacc${M}${M+1}x01 = wasm_f32x4_min(vacc${M}${M+1}x01, vmax);
     $elif ACTIVATION == "RELU":

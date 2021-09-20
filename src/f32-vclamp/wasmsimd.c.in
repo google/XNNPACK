@@ -37,14 +37,10 @@ void xnn_f32_vclamp_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
 
       $if X86:
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmaskmin${ABC[N:N+4]} = wasm_f32x4_lt(vacc${ABC[N:N+4]}, vy_min);
+          vacc${ABC[N:N+4]} = wasm_f32x4_pmax(vy_min, vacc${ABC[N:N+4]});
 
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vmaskmax${ABC[N:N+4]} = wasm_f32x4_le(vy_max, vacc${ABC[N:N+4]});
-          vacc${ABC[N:N+4]} = wasm_v128_bitselect(vy_min, vacc${ABC[N:N+4]}, vmaskmin${ABC[N:N+4]});
-
-        $for N in range(0, BATCH_TILE, 4):
-          vacc${ABC[N:N+4]} = wasm_v128_bitselect(vy_max, vacc${ABC[N:N+4]}, vmaskmax${ABC[N:N+4]});
+          vacc${ABC[N:N+4]} = wasm_f32x4_pmin(vy_max, vacc${ABC[N:N+4]});
       $else:
         $for N in range(0, BATCH_TILE, 4):
           vacc${ABC[N:N+4]} = wasm_f32x4_max(vacc${ABC[N:N+4]}, vy_min);
@@ -62,10 +58,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
     x += 4;
 
     $if X86:
-      const v128_t vmaskmin = wasm_f32x4_lt(vacc, vy_min);
-      const v128_t vmaskmax = wasm_f32x4_le(vy_max, vacc);
-      vacc = wasm_v128_bitselect(vy_min, vacc, vmaskmin);
-      vacc = wasm_v128_bitselect(vy_max, vacc, vmaskmax);
+      vacc = wasm_f32x4_pmax(vy_min, vacc);
+      vacc = wasm_f32x4_pmin(vy_max, vacc);
     $else:
       vacc = wasm_f32x4_max(vacc, vy_min);
       vacc = wasm_f32x4_min(vacc, vy_max);
@@ -77,10 +71,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
     v128_t vacc = wasm_v128_load(x);
 
     $if X86:
-      const v128_t vmaskmin = wasm_f32x4_lt(vacc, vy_min);
-      const v128_t vmaskmax = wasm_f32x4_le(vy_max, vacc);
-      vacc = wasm_v128_bitselect(vy_min, vacc, vmaskmin);
-      vacc = wasm_v128_bitselect(vy_max, vacc, vmaskmax);
+      vacc = wasm_f32x4_pmax(vy_min, vacc);
+      vacc = wasm_f32x4_pmin(vy_max, vacc);
     $else:
       vacc = wasm_f32x4_max(vacc, vy_min);
       vacc = wasm_f32x4_min(vacc, vy_max);

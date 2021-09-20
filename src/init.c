@@ -3708,8 +3708,8 @@ static void init(void) {
       };
     }
     xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16_acc2;
-    xnn_params.f32.rmax = xnn_f32_rmax_ukernel__wasmsimd_arm;
     if (is_wasm_x86) {
+      xnn_params.f32.rmax = xnn_f32_rmax_ukernel__wasmsimd_x86;
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16,
@@ -3760,6 +3760,7 @@ static void init(void) {
         .element_tile = 16,
       };
     } else {
+      xnn_params.f32.rmax = xnn_f32_rmax_ukernel__wasmsimd_arm;
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vadd_minmax_ukernel__wasmsimd_arm_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vaddc_minmax_ukernel__wasmsimd_arm_x16,

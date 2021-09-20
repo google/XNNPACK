@@ -30,28 +30,21 @@ void xnn_f32_rmax_ukernel__wasmsimd_x86(
     const v128_t vx3 = wasm_v128_load(x + 12);
     x += 16;
 
-    const v128_t vlt0 = wasm_f32x4_lt(vx0, vmax0);
-    const v128_t vlt1 = wasm_f32x4_lt(vx1, vmax1);
-    const v128_t vlt2 = wasm_f32x4_lt(vx2, vmax2);
-    const v128_t vlt3 = wasm_f32x4_lt(vx3, vmax3);
-
-    vmax0 = wasm_v128_bitselect(vmax0, vx0, vlt0);
-    vmax1 = wasm_v128_bitselect(vmax1, vx1, vlt1);
-    vmax2 = wasm_v128_bitselect(vmax2, vx2, vlt2);
-    vmax3 = wasm_v128_bitselect(vmax3, vx3, vlt3);
+    vmax0 = wasm_f32x4_pmax(vx0, vmax0);
+    vmax1 = wasm_f32x4_pmax(vx1, vmax1);
+    vmax2 = wasm_f32x4_pmax(vx2, vmax2);
+    vmax3 = wasm_f32x4_pmax(vx3, vmax3);
   }
-  const v128_t vlt01 = wasm_f32x4_lt(vmax0, vmax1);
-  const v128_t vlt23 = wasm_f32x4_lt(vmax2, vmax3);
-  const v128_t vmax01 = wasm_v128_bitselect(vmax1, vmax0, vlt01);
-  const v128_t vmax23 = wasm_v128_bitselect(vmax3, vmax2, vlt23);
-  v128_t vmax0123 = wasm_v128_bitselect(vmax23, vmax01, wasm_f32x4_lt(vmax01, vmax23));
+  const v128_t vmax01 = wasm_f32x4_pmax(vmax1, vmax0);
+  const v128_t vmax23 = wasm_f32x4_pmax(vmax3, vmax2);
+  v128_t vmax0123 = wasm_f32x4_pmax(vmax23, vmax01);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
-    vmax0123 = wasm_v128_bitselect(vmax0123, vx, wasm_f32x4_lt(vx, vmax0123));
+    vmax0123 = wasm_f32x4_pmax(vx, vmax0123);
     x += 4;
   }
   const v128_t vmax2301 = wasm_v32x4_shuffle(vmax0123, vmax0123, 2, 3, 0, 1);
-  vmax0123 = wasm_v128_bitselect(vmax2301, vmax0123, wasm_f32x4_lt(vmax0123, vmax2301));
+  vmax0123 = wasm_f32x4_pmax(vmax2301, vmax0123);
   float vmax = math_max_f32(wasm_f32x4_extract_lane(vmax0123, 0), wasm_f32x4_extract_lane(vmax0123, 1));
   if XNN_UNLIKELY(n != 0) {
     do {

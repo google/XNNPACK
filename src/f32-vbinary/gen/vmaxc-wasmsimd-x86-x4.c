@@ -33,9 +33,8 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x4(
     const v128_t va0123 = wasm_v128_load(a);
     a += 4;
 
-    const v128_t vm0123 = wasm_f32x4_le(va0123, vb);
+    v128_t vy0123 = wasm_f32x4_pmax(vb, va0123);
 
-    v128_t vy0123 = wasm_v128_bitselect(vb, va0123, vm0123);
 
 
     wasm_v128_store(y, vy0123);
@@ -44,8 +43,7 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x4(
   if XNN_UNLIKELY(n != 0) {
     const v128_t va = wasm_v128_load(a);
 
-    const v128_t vm = wasm_f32x4_le(va, vb);
-    v128_t vy = wasm_v128_bitselect(vb, va, vm);
+    v128_t vy = wasm_f32x4_pmax(vb, va);
 
 
     if (n & (2 * sizeof(float))) {

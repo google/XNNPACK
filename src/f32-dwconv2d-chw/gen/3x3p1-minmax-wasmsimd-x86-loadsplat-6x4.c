@@ -233,18 +233,18 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_loadsplat_6x4(
       vi7x4567 = vi7x89AB;
 
 
-      v128_t vo0 = wasm_v128_bitselect(vmin, vo0p0, wasm_f32x4_lt(vo0p0, vmin));
-      v128_t vo1 = wasm_v128_bitselect(vmin, vo1p0, wasm_f32x4_lt(vo1p0, vmin));
-      v128_t vo2 = wasm_v128_bitselect(vmin, vo2p0, wasm_f32x4_lt(vo2p0, vmin));
-      v128_t vo3 = wasm_v128_bitselect(vmin, vo3p0, wasm_f32x4_lt(vo3p0, vmin));
-      v128_t vo4 = wasm_v128_bitselect(vmin, vo4p0, wasm_f32x4_lt(vo4p0, vmin));
-      v128_t vo5 = wasm_v128_bitselect(vmin, vo5p0, wasm_f32x4_lt(vo5p0, vmin));
-      vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
-      vo1 = wasm_v128_bitselect(vo1, vmax, wasm_f32x4_le(vo1, vmax));
-      vo2 = wasm_v128_bitselect(vo2, vmax, wasm_f32x4_le(vo2, vmax));
-      vo3 = wasm_v128_bitselect(vo3, vmax, wasm_f32x4_le(vo3, vmax));
-      vo4 = wasm_v128_bitselect(vo4, vmax, wasm_f32x4_le(vo4, vmax));
-      vo5 = wasm_v128_bitselect(vo5, vmax, wasm_f32x4_le(vo5, vmax));
+      v128_t vo0 = wasm_f32x4_pmax(vmin, vo0p0);
+      v128_t vo1 = wasm_f32x4_pmax(vmin, vo1p0);
+      v128_t vo2 = wasm_f32x4_pmax(vmin, vo2p0);
+      v128_t vo3 = wasm_f32x4_pmax(vmin, vo3p0);
+      v128_t vo4 = wasm_f32x4_pmax(vmin, vo4p0);
+      v128_t vo5 = wasm_f32x4_pmax(vmin, vo5p0);
+      vo0 = wasm_f32x4_pmin(vmax, vo0);
+      vo1 = wasm_f32x4_pmin(vmax, vo1);
+      vo2 = wasm_f32x4_pmin(vmax, vo2);
+      vo3 = wasm_f32x4_pmin(vmax, vo3);
+      vo4 = wasm_f32x4_pmin(vmax, vo4);
+      vo5 = wasm_f32x4_pmin(vmax, vo5);
 
       wasm_v128_store(o5, vo5);
       o5 += 4;
@@ -349,18 +349,18 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_loadsplat_6x4(
       vo5p0 = wasm_f32x4_add(vo5p0, wasm_f32x4_mul(vi7x5678, vk22));
 
 
-      v128_t vo0 = wasm_v128_bitselect(vmin, vo0p0, wasm_f32x4_lt(vo0p0, vmin));
-      v128_t vo1 = wasm_v128_bitselect(vmin, vo1p0, wasm_f32x4_lt(vo1p0, vmin));
-      v128_t vo2 = wasm_v128_bitselect(vmin, vo2p0, wasm_f32x4_lt(vo2p0, vmin));
-      v128_t vo3 = wasm_v128_bitselect(vmin, vo3p0, wasm_f32x4_lt(vo3p0, vmin));
-      v128_t vo4 = wasm_v128_bitselect(vmin, vo4p0, wasm_f32x4_lt(vo4p0, vmin));
-      v128_t vo5 = wasm_v128_bitselect(vmin, vo5p0, wasm_f32x4_lt(vo5p0, vmin));
-      vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
-      vo1 = wasm_v128_bitselect(vo1, vmax, wasm_f32x4_le(vo1, vmax));
-      vo2 = wasm_v128_bitselect(vo2, vmax, wasm_f32x4_le(vo2, vmax));
-      vo3 = wasm_v128_bitselect(vo3, vmax, wasm_f32x4_le(vo3, vmax));
-      vo4 = wasm_v128_bitselect(vo4, vmax, wasm_f32x4_le(vo4, vmax));
-      vo5 = wasm_v128_bitselect(vo5, vmax, wasm_f32x4_le(vo5, vmax));
+      v128_t vo0 = wasm_f32x4_pmax(vmin, vo0p0);
+      v128_t vo1 = wasm_f32x4_pmax(vmin, vo1p0);
+      v128_t vo2 = wasm_f32x4_pmax(vmin, vo2p0);
+      v128_t vo3 = wasm_f32x4_pmax(vmin, vo3p0);
+      v128_t vo4 = wasm_f32x4_pmax(vmin, vo4p0);
+      v128_t vo5 = wasm_f32x4_pmax(vmin, vo5p0);
+      vo0 = wasm_f32x4_pmin(vmax, vo0);
+      vo1 = wasm_f32x4_pmin(vmax, vo1);
+      vo2 = wasm_f32x4_pmin(vmax, vo2);
+      vo3 = wasm_f32x4_pmin(vmax, vo3);
+      vo4 = wasm_f32x4_pmin(vmax, vo4);
+      vo5 = wasm_f32x4_pmin(vmax, vo5);
 
       if XNN_LIKELY(w == 4 * sizeof(float)) {
         wasm_v128_store(o5, vo5);

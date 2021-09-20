@@ -170,8 +170,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_splat_1x4_acc2(
 
       vo0p0 = wasm_f32x4_add(vo0p0, vo0p1);
 
-      v128_t vo0 = wasm_v128_bitselect(vmin, vo0p0, wasm_f32x4_lt(vo0p0, vmin));
-      vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
+      v128_t vo0 = wasm_f32x4_pmax(vmin, vo0p0);
+      vo0 = wasm_f32x4_pmin(vmax, vo0);
 
       wasm_v128_store(o0, vo0); o0 += 4;
     }
@@ -277,8 +277,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_splat_1x4_acc2(
 
       vo0p0 = wasm_f32x4_add(vo0p0, vo0p1);
 
-      v128_t vo0 = wasm_v128_bitselect(vmin, vo0p0, wasm_f32x4_lt(vo0p0, vmin));
-      vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
+      v128_t vo0 = wasm_f32x4_pmax(vmin, vo0p0);
+      vo0 = wasm_f32x4_pmin(vmax, vo0);
 
       wasm_v128_store(o0, vo0); o0 += 4;
 
@@ -372,8 +372,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_x86_splat_1x4_acc2(
 
       vo0p0 = wasm_f32x4_add(vo0p0, vo0p1);
 
-      v128_t vo0 = wasm_v128_bitselect(vmin, vo0p0, wasm_f32x4_lt(vo0p0, vmin));
-      vo0 = wasm_v128_bitselect(vo0, vmax, wasm_f32x4_le(vo0, vmax));
+      v128_t vo0 = wasm_f32x4_pmax(vmin, vo0p0);
+      vo0 = wasm_f32x4_pmin(vmax, vo0);
 
       if XNN_LIKELY(w & (4 * sizeof(float))) {
         wasm_v128_store(o0, vo0); o0 += 4;

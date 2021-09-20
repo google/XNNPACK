@@ -164,8 +164,8 @@ void xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_x86_c4(
     const v128_t vsum = wasm_f32x4_add(vsum0123, vsum456a);
 
     v128_t vout = wasm_f32x4_mul(vsum, vscale);
-    vout = wasm_f32x4_max(vout, vmin);
-    vout = wasm_f32x4_min(vout, vmax);
+    vout = wasm_f32x4_pmax(vmin, vout);
+    vout = wasm_f32x4_pmin(vmax, vout);
 
     wasm_v128_store(output, vout);
     output += 4;
@@ -193,8 +193,8 @@ void xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_x86_c4(
     const v128_t vsum = wasm_f32x4_add(vsum0123, vsum456a);
 
     v128_t vout = wasm_f32x4_mul(vsum, vscale);
-    vout = wasm_f32x4_max(vout, vmin);
-    vout = wasm_f32x4_min(vout, vmax);
+    vout = wasm_f32x4_pmax(vmin, vout);
+    vout = wasm_f32x4_pmin(vmax, vout);
 
     if (channels & 2) {
       *((double*) output) = wasm_f64x2_extract_lane(vout, 0);

@@ -112,11 +112,11 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
 
         const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
         $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = wasm_f32x4_max(vacc${ABC[C:C+4]}, voutput_min_less_zero_point);
+          vacc${ABC[C:C+4]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[C:C+4]});
 
         const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
         $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = wasm_f32x4_min(vacc${ABC[C:C+4]}, voutput_max_less_zero_point);
+          vacc${ABC[C:C+4]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[C:C+4]});
 
         const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
         $for C in range(0, CHANNEL_TILE, 4):
@@ -205,12 +205,12 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale);
 
         const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
-        vacc${ABC[0:4]} = wasm_f32x4_max(vacc${ABC[0:4]}, voutput_min_less_zero_point);
-        vacc${ABC[4:8]} = wasm_f32x4_max(vacc${ABC[4:8]}, voutput_min_less_zero_point);
+        vacc${ABC[0:4]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[0:4]});
+        vacc${ABC[4:8]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[4:8]});
 
         const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
-        vacc${ABC[0:4]} = wasm_f32x4_min(vacc${ABC[0:4]}, voutput_max_less_zero_point);
-        vacc${ABC[4:8]} = wasm_f32x4_min(vacc${ABC[4:8]}, voutput_max_less_zero_point);
+        vacc${ABC[0:4]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[0:4]});
+        vacc${ABC[4:8]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[4:8]});
 
         const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
         vacc${ABC[0:4]} = wasm_f32x4_add(vacc${ABC[0:4]}, vmagic_bias);

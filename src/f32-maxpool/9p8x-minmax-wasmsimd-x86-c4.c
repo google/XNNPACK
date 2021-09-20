@@ -94,21 +94,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4(
         const v128_t vi8 = wasm_v128_load(i8);
         i8 += 4;
 
-        const v128_t vmax01 = wasm_v128_bitselect(vi1, vi0, wasm_f32x4_lt(vi0, vi1));
-        const v128_t vmax23 = wasm_v128_bitselect(vi3, vi2, wasm_f32x4_lt(vi2, vi3));
-        const v128_t vmax45 = wasm_v128_bitselect(vi5, vi4, wasm_f32x4_lt(vi4, vi5));
-        const v128_t vmax018 = wasm_v128_bitselect(vi8, vmax01, wasm_f32x4_lt(vmax01, vi8));
-        const v128_t vmax67 = wasm_v128_bitselect(vi7, vi6, wasm_f32x4_lt(vi6, vi7));
+        const v128_t vmax01 = wasm_f32x4_pmax(vi1, vi0);
+        const v128_t vmax23 = wasm_f32x4_pmax(vi3, vi2);
+        const v128_t vmax45 = wasm_f32x4_pmax(vi5, vi4);
+        const v128_t vmax018 = wasm_f32x4_pmax(vi8, vmax01);
+        const v128_t vmax67 = wasm_f32x4_pmax(vi7, vi6);
 
-        const v128_t vmax2345 = wasm_v128_bitselect(vmax45, vmax23, wasm_f32x4_lt(vmax23, vmax45));
-        const v128_t vmax01678 = wasm_v128_bitselect(vmax67, vmax018, wasm_f32x4_lt(vmax018, vmax67));
-        const v128_t vmax = wasm_v128_bitselect(vmax2345, vmax01678, wasm_f32x4_lt(vmax01678, vmax2345));
+        const v128_t vmax2345 = wasm_f32x4_pmax(vmax45, vmax23);
+        const v128_t vmax01678 = wasm_f32x4_pmax(vmax67, vmax018);
+        const v128_t vmax = wasm_f32x4_pmax(vmax2345, vmax01678);
 
-        const v128_t vmaskmin = wasm_f32x4_lt(vmax, voutput_min);
-        const v128_t vmaskmax = wasm_f32x4_le(vmax, voutput_max);
-
-        v128_t vout = wasm_v128_bitselect(voutput_min, vmax, vmaskmin);
-        vout = wasm_v128_bitselect(vout, voutput_max, vmaskmax);
+        v128_t vout = wasm_f32x4_pmax(voutput_min, vmax);
+        vout = wasm_f32x4_pmin(voutput_max, vout);
 
         wasm_v128_store(o, vout);
         o += 4;
@@ -133,21 +130,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4(
         const v128_t vi8 = wasm_v128_load(i8);
         i8 += 4;
 
-        const v128_t vmax01 = wasm_v128_bitselect(vi1, vi0, wasm_f32x4_lt(vi0, vi1));
-        const v128_t vmax23 = wasm_v128_bitselect(vi3, vi2, wasm_f32x4_lt(vi2, vi3));
-        const v128_t vmax45 = wasm_v128_bitselect(vi5, vi4, wasm_f32x4_lt(vi4, vi5));
-        const v128_t vmax018 = wasm_v128_bitselect(vi8, vmax01, wasm_f32x4_lt(vmax01, vi8));
-        const v128_t vmax67 = wasm_v128_bitselect(vi7, vi6, wasm_f32x4_lt(vi6, vi7));
+        const v128_t vmax01 = wasm_f32x4_pmax(vi1, vi0);
+        const v128_t vmax23 = wasm_f32x4_pmax(vi3, vi2);
+        const v128_t vmax45 = wasm_f32x4_pmax(vi5, vi4);
+        const v128_t vmax018 = wasm_f32x4_pmax(vi8, vmax01);
+        const v128_t vmax67 = wasm_f32x4_pmax(vi7, vi6);
 
-        const v128_t vmax2345 = wasm_v128_bitselect(vmax45, vmax23, wasm_f32x4_lt(vmax23, vmax45));
-        const v128_t vmax01678 = wasm_v128_bitselect(vmax67, vmax018, wasm_f32x4_lt(vmax018, vmax67));
-        const v128_t vmax = wasm_v128_bitselect(vmax2345, vmax01678, wasm_f32x4_lt(vmax01678, vmax2345));
+        const v128_t vmax2345 = wasm_f32x4_pmax(vmax45, vmax23);
+        const v128_t vmax01678 = wasm_f32x4_pmax(vmax67, vmax018);
+        const v128_t vmax = wasm_f32x4_pmax(vmax2345, vmax01678);
 
-        const v128_t vmaskmin = wasm_f32x4_lt(vmax, voutput_min);
-        const v128_t vmaskmax = wasm_f32x4_le(vmax, voutput_max);
-
-        v128_t vout = wasm_v128_bitselect(voutput_min, vmax, vmaskmin);
-        vout = wasm_v128_bitselect(vout, voutput_max, vmaskmax);
+        v128_t vout = wasm_f32x4_pmax(voutput_min, vmax);
+        vout = wasm_f32x4_pmin(voutput_max, vout);
 
         if (c & 2) {
           *((double*) o) = wasm_f64x2_extract_lane(vout, 0);
@@ -220,21 +214,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4(
         i7 += 4;
         const v128_t vo = wasm_v128_load(o);
 
-        const v128_t vmax01 = wasm_v128_bitselect(vi1, vi0, wasm_f32x4_lt(vi0, vi1));
-        const v128_t vmax23 = wasm_v128_bitselect(vi3, vi2, wasm_f32x4_lt(vi2, vi3));
-        const v128_t vmax45 = wasm_v128_bitselect(vi5, vi4, wasm_f32x4_lt(vi4, vi5));
-        const v128_t vmax01o = wasm_v128_bitselect(vo, vmax01, wasm_f32x4_lt(vmax01, vo));
-        const v128_t vmax67 = wasm_v128_bitselect(vi7, vi6, wasm_f32x4_lt(vi6, vi7));
+        const v128_t vmax01 = wasm_f32x4_pmax(vi1, vi0);
+        const v128_t vmax23 = wasm_f32x4_pmax(vi3, vi2);
+        const v128_t vmax45 = wasm_f32x4_pmax(vi5, vi4);
+        const v128_t vmax01o = wasm_f32x4_pmax(vo, vmax01);
+        const v128_t vmax67 = wasm_f32x4_pmax(vi7, vi6);
 
-        const v128_t vmax2345 = wasm_v128_bitselect(vmax45, vmax23, wasm_f32x4_lt(vmax23, vmax45));
-        const v128_t vmax0167 = wasm_v128_bitselect(vmax67, vmax01o, wasm_f32x4_lt(vmax01o, vmax67));
-        const v128_t vmax = wasm_v128_bitselect(vmax2345, vmax0167, wasm_f32x4_lt(vmax0167, vmax2345));
+        const v128_t vmax2345 = wasm_f32x4_pmax(vmax45, vmax23);
+        const v128_t vmax0167 = wasm_f32x4_pmax(vmax67, vmax01o);
+        const v128_t vmax = wasm_f32x4_pmax(vmax2345, vmax0167);
 
-        const v128_t vmaskmin = wasm_f32x4_lt(vmax, voutput_min);
-        const v128_t vmaskmax = wasm_f32x4_le(vmax, voutput_max);
-
-        v128_t vout = wasm_v128_bitselect(voutput_min, vmax, vmaskmin);
-        vout = wasm_v128_bitselect(vout, voutput_max, vmaskmax);
+        v128_t vout = wasm_f32x4_pmax(voutput_min, vmax);
+        vout = wasm_f32x4_pmin(voutput_max, vout);
 
         wasm_v128_store(o, vout);
         o += 4;
@@ -250,21 +241,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4(
         const v128_t vi7 = wasm_v128_load(i7);
         const v128_t vo = wasm_v128_load(o);
 
-        const v128_t vmax01 = wasm_v128_bitselect(vi1, vi0, wasm_f32x4_lt(vi0, vi1));
-        const v128_t vmax23 = wasm_v128_bitselect(vi3, vi2, wasm_f32x4_lt(vi2, vi3));
-        const v128_t vmax45 = wasm_v128_bitselect(vi5, vi4, wasm_f32x4_lt(vi4, vi5));
-        const v128_t vmax01o = wasm_v128_bitselect(vo, vmax01, wasm_f32x4_lt(vmax01, vo));
-        const v128_t vmax67 = wasm_v128_bitselect(vi7, vi6, wasm_f32x4_lt(vi6, vi7));
+        const v128_t vmax01 = wasm_f32x4_pmax(vi1, vi0);
+        const v128_t vmax23 = wasm_f32x4_pmax(vi3, vi2);
+        const v128_t vmax45 = wasm_f32x4_pmax(vi5, vi4);
+        const v128_t vmax01o = wasm_f32x4_pmax(vo, vmax01);
+        const v128_t vmax67 = wasm_f32x4_pmax(vi7, vi6);
 
-        const v128_t vmax2345 = wasm_v128_bitselect(vmax45, vmax23, wasm_f32x4_lt(vmax23, vmax45));
-        const v128_t vmax0167 = wasm_v128_bitselect(vmax67, vmax01o, wasm_f32x4_lt(vmax01o, vmax67));
-        const v128_t vmax = wasm_v128_bitselect(vmax2345, vmax0167, wasm_f32x4_lt(vmax0167, vmax2345));
+        const v128_t vmax2345 = wasm_f32x4_pmax(vmax45, vmax23);
+        const v128_t vmax0167 = wasm_f32x4_pmax(vmax67, vmax01o);
+        const v128_t vmax = wasm_f32x4_pmax(vmax2345, vmax0167);
 
-        const v128_t vmaskmin = wasm_f32x4_lt(vmax, voutput_min);
-        const v128_t vmaskmax = wasm_f32x4_le(vmax, voutput_max);
-
-        v128_t vout = wasm_v128_bitselect(voutput_min, vmax, vmaskmin);
-        vout = wasm_v128_bitselect(vout, voutput_max, vmaskmax);
+        v128_t vout = wasm_f32x4_pmax(voutput_min, vmax);
+        vout = wasm_f32x4_pmin(voutput_max, vout);
 
         if (c & 2) {
           *((double*) o) = wasm_f64x2_extract_lane(vout, 0);

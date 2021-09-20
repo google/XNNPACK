@@ -34,11 +34,9 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x8(
     const v128_t va4567 = wasm_v128_load(a + 4);
     a += 8;
 
-    const v128_t vm0123 = wasm_f32x4_le(va0123, vb);
-    const v128_t vm4567 = wasm_f32x4_le(va4567, vb);
+    v128_t vy0123 = wasm_f32x4_pmax(vb, va0123);
+    v128_t vy4567 = wasm_f32x4_pmax(vb, va4567);
 
-    v128_t vy0123 = wasm_v128_bitselect(vb, va0123, vm0123);
-    v128_t vy4567 = wasm_v128_bitselect(vb, va4567, vm4567);
 
 
     wasm_v128_store(y, vy0123);
@@ -49,8 +47,7 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x8(
     const v128_t va = wasm_v128_load(a);
     a += 4;
 
-    const v128_t vm = wasm_f32x4_le(va, vb);
-    v128_t vy = wasm_v128_bitselect(vb, va, vm);
+    v128_t vy = wasm_f32x4_pmax(vb, va);
 
 
     wasm_v128_store(y, vy);
@@ -59,8 +56,7 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x8(
   if XNN_UNLIKELY(n != 0) {
     const v128_t va = wasm_v128_load(a);
 
-    const v128_t vm = wasm_f32x4_le(va, vb);
-    v128_t vy = wasm_v128_bitselect(vb, va, vm);
+    v128_t vy = wasm_f32x4_pmax(vb, va);
 
 
     if (n & (2 * sizeof(float))) {

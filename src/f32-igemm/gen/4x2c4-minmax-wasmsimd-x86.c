@@ -160,12 +160,12 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
     const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-    vacc01x01 = wasm_v128_bitselect(vmin, vacc01x01, wasm_f32x4_lt(vacc01x01, vmin));
-    vacc23x01 = wasm_v128_bitselect(vmin, vacc23x01, wasm_f32x4_lt(vacc23x01, vmin));
+    vacc01x01 = wasm_f32x4_pmax(vmin, vacc01x01);
+    vacc23x01 = wasm_f32x4_pmax(vmin, vacc23x01);
 
     const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
-    vacc01x01 = wasm_v128_bitselect(vacc01x01, vmax, wasm_f32x4_le(vacc01x01, vmax));
-    vacc23x01 = wasm_v128_bitselect(vacc23x01, vmax, wasm_f32x4_le(vacc23x01, vmax));
+    vacc01x01 = wasm_f32x4_pmin(vmax, vacc01x01);
+    vacc23x01 = wasm_f32x4_pmin(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
       *((double*) c3) = wasm_f64x2_extract_lane(vacc23x01, 1);

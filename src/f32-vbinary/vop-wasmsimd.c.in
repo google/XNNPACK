@@ -19,8 +19,8 @@ $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 $WASM_F32X4_OP = {
 $  "ADD": "wasm_f32x4_add",
 $  "DIV": "wasm_f32x4_div",
-$  "MAX": "wasm_f32x4_max",
-$  "MIN": "wasm_f32x4_min",
+$  "MAX": "wasm_f32x4_pmax" if X86 else "wasm_f32x4_max",
+$  "MIN": "wasm_f32x4_pmin" if X86 else "wasm_f32x4_min",
 $  "MUL": "wasm_f32x4_mul",
 $  "SUB": "wasm_f32x4_sub",
 $  "SQRDIFF": "wasm_f32x4_sub",
@@ -81,14 +81,10 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
     $if ACTIVATION == "MINMAX":
       $if X86:
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vltmask${ABC[N:N+4]} = wasm_f32x4_lt(vy${ABC[N:N+4]}, vy_min);
+          vy${ABC[N:N+4]} = wasm_f32x4_pmax(vy_min, vy${ABC[N:N+4]});
 
         $for N in range(0, BATCH_TILE, 4):
-          const v128_t vngtmask${ABC[N:N+4]} = wasm_f32x4_le(vy${ABC[N:N+4]}, vy_max);
-          vy${ABC[N:N+4]} = wasm_v128_bitselect(vy_min, vy${ABC[N:N+4]}, vltmask${ABC[N:N+4]});
-
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_v128_bitselect(vy${ABC[N:N+4]}, vy_max, vngtmask${ABC[N:N+4]});
+          vy${ABC[N:N+4]} = wasm_f32x4_pmin(vy_max, vy${ABC[N:N+4]});
       $else:
         $for N in range(0, BATCH_TILE, 4):
           vy${ABC[N:N+4]} = wasm_f32x4_max(vy${ABC[N:N+4]}, vy_min);
@@ -125,10 +121,8 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
 
       $if ACTIVATION == "MINMAX":
         $if X86:
-          const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
-          const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
-          vy = wasm_v128_bitselect(vy_min, vy, vltmask);
-          vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+          vy = wasm_f32x4_pmax(vy_min, vy);
+          vy = wasm_f32x4_pmin(vy_max, vy);
         $else:
           vy = wasm_f32x4_max(vy, vy_min);
           vy = wasm_f32x4_min(vy, vy_max);
@@ -155,10 +149,8 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
 
     $if ACTIVATION == "MINMAX":
       $if X86:
-        const v128_t vltmask = wasm_f32x4_lt(vy, vy_min);
-        const v128_t vngtmask = wasm_f32x4_le(vy, vy_max);
-        vy = wasm_v128_bitselect(vy_min, vy, vltmask);
-        vy = wasm_v128_bitselect(vy, vy_max, vngtmask);
+        vy = wasm_f32x4_pmax(vy_min, vy);
+        vy = wasm_f32x4_pmin(vy_max, vy);
       $else:
         vy = wasm_f32x4_max(vy, vy_min);
         vy = wasm_f32x4_min(vy, vy_max);

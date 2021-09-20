@@ -78,10 +78,8 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
     const v128_t vsum = wasm_f32x4_add(wasm_v32x4_shuffle(vsum01, vsum23, 0, 2, 4, 6), wasm_v32x4_shuffle(vsum01, vsum23, 1, 3, 5, 7));
     v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
 
-    const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-    const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-    vout = wasm_v128_bitselect(vmin, vout, vufmask);
-    vout = wasm_v128_bitselect(vmax, vout, vofmask);
+    vout = wasm_f32x4_pmin(vmax, vout);
+    vout = wasm_f32x4_pmax(vmin, vout);
 
     wasm_v128_store(output, vout);
     output += 4;
@@ -113,10 +111,8 @@ void xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4(
 
     v128_t vout = wasm_f32x4_mul(vsum, vmultiplier);
 
-    const v128_t vufmask = wasm_f32x4_lt(vout, vmin);
-    const v128_t vofmask = wasm_f32x4_le(vmax, vout);
-    vout = wasm_v128_bitselect(vmin, vout, vufmask);
-    vout = wasm_v128_bitselect(vmax, vout, vofmask);
+    vout = wasm_f32x4_pmin(vmax, vout);
+    vout = wasm_f32x4_pmax(vmin, vout);
 
     *output++ = wasm_f32x4_extract_lane(vout, 0);
     channels -= 1;

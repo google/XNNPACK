@@ -48,11 +48,11 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
     vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
     vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-    vacc0123 = wasm_f32x4_max(vacc0123, voutput_min_less_zero_point);
-    vacc4567 = wasm_f32x4_max(vacc4567, voutput_min_less_zero_point);
+    vacc0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc0123);
+    vacc4567 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc4567);
 
-    vacc0123 = wasm_f32x4_min(vacc0123, voutput_max_less_zero_point);
-    vacc4567 = wasm_f32x4_min(vacc4567, voutput_max_less_zero_point);
+    vacc0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc0123);
+    vacc4567 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc4567);
 
     vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
     vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
@@ -84,11 +84,11 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
       vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
       vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-      vacc0123 = wasm_f32x4_max(vacc0123, voutput_min_less_zero_point);
-      vacc4567 = wasm_f32x4_max(vacc4567, voutput_min_less_zero_point);
+      vacc0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc0123);
+      vacc4567 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc4567);
 
-      vacc0123 = wasm_f32x4_min(vacc0123, voutput_max_less_zero_point);
-      vacc4567 = wasm_f32x4_min(vacc4567, voutput_max_less_zero_point);
+      vacc0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc0123);
+      vacc4567 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc4567);
 
       vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
       vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);

@@ -104,18 +104,17 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFI
         const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vmin, vacc${M}x${ABC[N:N+4]}, wasm_f32x4_lt(vacc${M}x${ABC[N:N+4]}, vmin));
+            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vmin, vacc${M}x${ABC[N:N+4]});
+
+        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+        $for N in range(0, NR, 4):
+          $for M in range(MR):
+            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vmax, vacc${M}x${ABC[N:N+4]});
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_max(vacc${M}x${ABC[N:N+4]}, vmin);
 
-      $if X86:
-        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_v128_bitselect(vacc${M}x${ABC[N:N+4]}, vmax, wasm_f32x4_le(vacc${M}x${ABC[N:N+4]}, vmax));
-      $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);

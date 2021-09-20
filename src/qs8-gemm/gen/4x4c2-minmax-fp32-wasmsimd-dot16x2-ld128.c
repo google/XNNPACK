@@ -186,16 +186,16 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld128(
     vacc3x0123 = wasm_f32x4_mul(vacc3x0123, vscale);
 
     const v128_t voutput_min_less_zero_point = wasm_v128_load(params->fp32_wasmsimd.output_min_less_zero_point);
-    vacc0x0123 = wasm_f32x4_max(voutput_min_less_zero_point, vacc0x0123);
-    vacc1x0123 = wasm_f32x4_max(voutput_min_less_zero_point, vacc1x0123);
-    vacc2x0123 = wasm_f32x4_max(voutput_min_less_zero_point, vacc2x0123);
-    vacc3x0123 = wasm_f32x4_max(voutput_min_less_zero_point, vacc3x0123);
+    vacc0x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc0x0123);
+    vacc1x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc1x0123);
+    vacc2x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc2x0123);
+    vacc3x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc3x0123);
 
     const v128_t voutput_max_less_zero_point = wasm_v128_load(params->fp32_wasmsimd.output_max_less_zero_point);
-    vacc0x0123 = wasm_f32x4_min(voutput_max_less_zero_point, vacc0x0123);
-    vacc1x0123 = wasm_f32x4_min(voutput_max_less_zero_point, vacc1x0123);
-    vacc2x0123 = wasm_f32x4_min(voutput_max_less_zero_point, vacc2x0123);
-    vacc3x0123 = wasm_f32x4_min(voutput_max_less_zero_point, vacc3x0123);
+    vacc0x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc0x0123);
+    vacc1x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc1x0123);
+    vacc2x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc2x0123);
+    vacc3x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc3x0123);
 
     const v128_t vmagic_bias = wasm_v128_load(params->fp32_wasmsimd.magic_bias);
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);
