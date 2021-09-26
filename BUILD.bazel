@@ -4663,6 +4663,14 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/x8-lut/gen/lut-avx-x64.c",
 ]
 
+PROD_F16C_MICROKERNEL_SRCS = [
+]
+
+ALL_F16C_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-f16c-x8.c",
+    "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
+]
+
 PROD_XOP_MICROKERNEL_SRCS = [
     "src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c",
     "src/qc8-dwconv/gen/up16x25-minmax-fp32-xop-mul16-add16.c",
@@ -5865,6 +5873,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/unpool.h",
     "src/xnnpack/vaddsub.h",
     "src/xnnpack/vbinary.h",
+    "src/xnnpack/vcvt.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscale.h",
@@ -6563,6 +6572,55 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "f16c_bench_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mf16c"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = ALL_F16C_MICROKERNEL_SRCS,
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "f16c_prod_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mf16c"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = PROD_F16C_MICROKERNEL_SRCS,
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "f16c_test_microkernels",
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mf16c"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = ALL_F16C_MICROKERNEL_SRCS,
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "xop_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -6931,6 +6989,7 @@ xnnpack_aggregate_library(
         ":ssse3_bench_microkernels",
         ":sse41_bench_microkernels",
         ":avx_bench_microkernels",
+        ":f16c_bench_microkernels",
         ":xop_bench_microkernels",
         ":fma3_bench_microkernels",
         ":avx2_bench_microkernels",
@@ -6978,6 +7037,7 @@ xnnpack_aggregate_library(
         ":ssse3_prod_microkernels",
         ":sse41_prod_microkernels",
         ":avx_prod_microkernels",
+        ":f16c_prod_microkernels",
         ":xop_prod_microkernels",
         ":fma3_prod_microkernels",
         ":avx2_prod_microkernels",
@@ -7025,6 +7085,7 @@ xnnpack_aggregate_library(
         ":ssse3_test_microkernels",
         ":sse41_test_microkernels",
         ":avx_test_microkernels",
+        ":f16c_test_microkernels",
         ":xop_test_microkernels",
         ":fma3_test_microkernels",
         ":avx2_test_microkernels",
@@ -8535,6 +8596,15 @@ xnnpack_unit_test(
 )
 
 ######################### Unit tests for micro-kernels #########################
+
+xnnpack_unit_test(
+    name = "f16_f32_vcvt_test",
+    srcs = [
+        "test/f16-f32-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
 
 xnnpack_unit_test(
     name = "f16_dwconv_minmax_test",
