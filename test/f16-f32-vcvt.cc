@@ -89,3 +89,77 @@
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_F32_VCVT__AVX512SKX_X16, batch_eq_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    VCvtMicrokernelTester()
+      .batch_size(16)
+      .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x16);
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X16, batch_div_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x16);
+    }
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X16, batch_lt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x16);
+    }
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X16, batch_gt_16) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x16);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(F16_F32_VCVT__AVX512SKX_X32, batch_eq_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    VCvtMicrokernelTester()
+      .batch_size(32)
+      .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x32);
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X32, batch_div_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x32);
+    }
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X32, batch_lt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x32);
+    }
+  }
+
+  TEST(F16_F32_VCVT__AVX512SKX_X32, batch_gt_32) {
+    TEST_REQUIRES_X86_AVX512SKX;
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_f32_vcvt_ukernel__avx512skx_x32);
+    }
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

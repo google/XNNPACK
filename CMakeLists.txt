@@ -4563,6 +4563,8 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx512skx-vpshufb-x64.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
+  src/f16-f32-vcvt/gen/vcvt-avx512skx-x32.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c
