@@ -7286,6 +7286,7 @@ xnnpack_cc_library(
     deps = [
         ":indirection",
         ":logging_utils",
+        ":operator_run",
         ":packing",
         "@FP16",
         "@FXdiv",
@@ -7318,6 +7319,7 @@ xnnpack_cc_library(
     deps = [
         ":indirection_test_mode",
         ":logging_utils",
+        ":operator_run_test_mode",
         ":packing_test_mode",
         "@FP16",
         "@FXdiv",
@@ -7367,7 +7369,6 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging_utils",
         ":memory_planner",
-        ":operator_run",
         ":operators",
         ":prod_microkernels",
         "@clog",
@@ -7422,7 +7423,6 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging_utils",
         ":memory_planner_test_mode",
-        ":operator_run_test_mode",
         ":operators_test_mode",
         ":test_microkernels",
         "@clog",
