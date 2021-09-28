@@ -13,6 +13,91 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_argmax_pooling_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 1);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  assert(node->num_outputs == 2);
+  const uint32_t output_value_id = node->outputs[0];
+  assert(output_value_id != XNN_INVALID_VALUE_ID);
+  assert(output_value_id < num_values);
+  const uint32_t output_index_id = node->outputs[1];
+  assert(output_index_id != XNN_INVALID_VALUE_ID);
+  assert(output_index_id < num_values);
+
+  const size_t channel_dim = values[input_id].shape.dim[3];
+  assert(channel_dim == values[output_value_id].shape.dim[3]);
+  assert(channel_dim == values[output_index_id].shape.dim[3]);
+
+  const enum xnn_status status = xnn_create_argmax_pooling2d_nhwc_f32(
+    node->params.pooling_2d.padding_top,
+    node->params.pooling_2d.padding_right,
+    node->params.pooling_2d.padding_bottom,
+    node->params.pooling_2d.padding_left,
+    node->params.pooling_2d.pooling_height,
+    node->params.pooling_2d.pooling_width,
+    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+    node->flags,
+    &opdata->operator_object);
+  if (status == xnn_status_success) {
+    opdata->batch_size = values[input_id].shape.dim[0];
+    opdata->input_height = values[input_id].shape.dim[1];
+    opdata->input_width = values[input_id].shape.dim[2];
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_value_id;
+    opdata->outputs[1] = output_index_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_argmax_pooling_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_value_id = opdata->outputs[0];
+  assert(output_value_id != XNN_INVALID_VALUE_ID);
+  assert(output_value_id < num_blobs);
+
+  const uint32_t output_index_id = opdata->outputs[1];
+  assert(output_index_id != XNN_INVALID_VALUE_ID);
+  assert(output_index_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_value_blob = blobs + output_value_id;
+  void* output_value_data = output_value_blob->data;
+  assert(output_value_data != NULL);
+
+  const struct xnn_blob* output_index_blob = blobs + output_index_id;
+  void* output_index_data = output_index_blob->data;
+  assert(output_index_data != NULL);
+
+  return xnn_setup_argmax_pooling2d_nhwc_f32(
+    opdata->operator_object,
+    opdata->batch_size,
+    opdata->input_height,
+    opdata->input_width,
+    input_data,
+    output_value_data,
+    output_index_data,
+    threadpool);
+}
+
 enum xnn_status xnn_define_argmax_pooling_2d(
   xnn_subgraph_t subgraph,
   uint32_t input_padding_top,
@@ -133,6 +218,9 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   node->outputs[0] = output_value_id;
   node->outputs[1] = output_index_id;
   node->flags = flags;
+
+  node->create = create_argmax_pooling_operator;
+  node->setup = setup_argmax_pooling_operator;
 
   return xnn_status_success;
 }

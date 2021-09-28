@@ -13,6 +13,181 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_fully_connected_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs >= 2);
+  assert(node->num_inputs <= 3);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+  const uint32_t filter_id = node->inputs[1];
+  assert(filter_id != XNN_INVALID_VALUE_ID);
+  assert(filter_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[node->inputs[0]].shape);
+  size_t output_channels, input_channels;
+  if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    input_channels = values[node->inputs[1]].shape.dim[0];
+    output_channels = values[node->inputs[1]].shape.dim[1];
+  } else {
+    output_channels = values[node->inputs[1]].shape.dim[0];
+    input_channels = values[node->inputs[1]].shape.dim[1];
+  }
+
+  const void* filter_data = values[filter_id].data;
+  assert(filter_data != NULL);
+
+  const void* bias_data = NULL;
+  if (node->num_inputs > 2) {
+    const uint32_t bias_id = node->inputs[2];
+    assert(bias_id != XNN_INVALID_VALUE_ID);
+    assert(bias_id < num_values);
+
+    bias_data = values[bias_id].data;
+    assert(bias_data != NULL);
+  }
+
+  enum xnn_status status;
+  switch (values[node->outputs[0]].datatype) {
+    case xnn_datatype_fp32:
+      status = xnn_create_fully_connected_nc_f32(
+        input_channels,
+        output_channels,
+        input_channels /* input stride */,
+        output_channels /* output stride */,
+        filter_data,
+        bias_data,
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags /* flags */,
+        &opdata->operator_object);
+      break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+    {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const int8_t output_min =
+        (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+      const int8_t output_max =
+        (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+      status = xnn_create_fully_connected_nc_qs8(
+        input_channels,
+        output_channels,
+        input_channels /* input stride */,
+        output_channels /* output stride */,
+        (int8_t) values[input_id].quantization.zero_point,
+        values[input_id].quantization.scale,
+        values[filter_id].quantization.scale,
+        filter_data,
+        bias_data,
+        (int8_t) output_zero_point,
+        output_scale, output_min, output_max,
+        node->flags /* flags */,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+    {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const uint8_t output_min =
+        (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+      const uint8_t output_max =
+        (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+      status = xnn_create_fully_connected_nc_qu8(
+        input_channels,
+        output_channels,
+        input_channels /* input stride */,
+        output_channels /* output stride */,
+        (uint8_t) values[input_id].quantization.zero_point,
+        values[input_id].quantization.scale,
+        (uint8_t) values[filter_id].quantization.zero_point,
+        values[filter_id].quantization.scale,
+        filter_data,
+        bias_data,
+        (uint8_t) output_zero_point,
+        output_scale, output_min, output_max,
+        node->flags /* flags */,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status == xnn_status_success) {
+    opdata->batch_size = num_input_elements / input_channels;
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_fully_connected_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  switch (opdata->operator_object->type) {
+    case xnn_operator_type_fully_connected_nc_f32:
+      return xnn_setup_fully_connected_nc_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_operator_type_fully_connected_nc_qs8:
+      return xnn_setup_fully_connected_nc_qs8(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_operator_type_fully_connected_nc_qu8:
+      return xnn_setup_fully_connected_nc_qu8(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static inline bool check_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
@@ -286,6 +461,9 @@ enum xnn_status xnn_define_fully_connected(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_fully_connected_operator;
+  node->setup = setup_fully_connected_operator;
 
   return xnn_status_success;
 }

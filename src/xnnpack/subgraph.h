@@ -92,6 +92,21 @@ struct xnn_blob {
   bool external;
 };
 
+struct xnn_node;
+struct xnn_operator_data;
+
+typedef enum xnn_status (*xnn_create_operator_fn)(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata);
+
+typedef enum xnn_status (*xnn_setup_operator_fn)(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool);
+
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_abs,
@@ -234,10 +249,15 @@ struct xnn_node {
   // Number of zero filter parameters in all 1x1 Convolutions of the sparse cluster.
   // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
   size_t num_zeroes;
+  // Factory function to create an operator object from the node.
+  xnn_create_operator_fn create;
+  // Function to setup an operator using opdata.
+  xnn_setup_operator_fn setup;
 };
 
 struct xnn_operator_data {
   xnn_operator_t operator_object;
+  xnn_setup_operator_fn setup;
   size_t batch_size;
   size_t input_height;
   size_t input_width;
@@ -291,6 +311,14 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,
   uint32_t value_id);
+
+// Product of all shape dimensions
+size_t xnn_shape_multiply_all_dims(
+  const struct xnn_shape shape[1]);
+
+// Product of all shape dimensions, except for the last (channel) one
+size_t xnn_shape_multiply_non_channel_dims(
+  const struct xnn_shape shape[1]);
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 

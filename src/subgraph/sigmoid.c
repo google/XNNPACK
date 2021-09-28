@@ -13,6 +13,129 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_sigmoid_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 1);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  assert(num_input_dims >= 1);
+  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
+
+  enum xnn_status status;
+  switch (values[output_id].datatype) {
+    case xnn_datatype_fp32:
+      status = xnn_create_sigmoid_nc_f32(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+    {
+      status = xnn_create_sigmoid_nc_qs8(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        (int8_t) values[input_id].quantization.zero_point,
+        values[input_id].quantization.scale,
+        (int8_t) values[output_id].quantization.zero_point,
+        values[output_id].quantization.scale,
+        INT8_MIN, INT8_MAX,
+        node->flags,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+    {
+      status = xnn_create_sigmoid_nc_qu8(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        (uint8_t) values[input_id].quantization.zero_point,
+        values[input_id].quantization.scale,
+        (uint8_t) values[output_id].quantization.zero_point,
+        values[output_id].quantization.scale,
+        0, UINT8_MAX,
+        node->flags,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status == xnn_status_success) {
+    opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_sigmoid_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  switch (opdata->operator_object->type) {
+    case xnn_operator_type_sigmoid_nc_f32:
+      return xnn_setup_sigmoid_nc_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_operator_type_sigmoid_nc_qs8:
+      return xnn_setup_sigmoid_nc_qs8(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_operator_type_sigmoid_nc_qu8:
+      return xnn_setup_sigmoid_nc_qu8(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 enum xnn_status xnn_define_sigmoid(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
@@ -110,6 +233,9 @@ enum xnn_status xnn_define_sigmoid(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_sigmoid_operator;
+  node->setup = setup_sigmoid_operator;
 
   return xnn_status_success;
 }

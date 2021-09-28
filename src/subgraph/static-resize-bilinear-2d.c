@@ -13,6 +13,104 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_resize_bilinear_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 1);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  const size_t channel_dim = values[input_id].shape.dim[3];
+  assert(channel_dim == values[output_id].shape.dim[3]);
+
+  enum xnn_status status;
+  if (values[input_id].layout == xnn_layout_type_nchw) {
+    assert(values[output_id].layout == xnn_layout_type_nchw);
+    status = xnn_create_resize_bilinear2d_nchw_f32(
+      channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+      node->flags,
+      &opdata->operator_object);
+  } else {
+    assert(values[input_id].layout == xnn_layout_type_nhwc);
+    assert(values[output_id].layout == xnn_layout_type_nhwc);
+    status = xnn_create_resize_bilinear2d_nhwc_f32(
+      channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+      node->flags,
+      &opdata->operator_object);
+  }
+  if (status == xnn_status_success) {
+    opdata->batch_size = values[input_id].shape.dim[0];
+    opdata->input_height = values[input_id].shape.dim[1];
+    opdata->input_width = values[input_id].shape.dim[2];
+    opdata->output_height = values[output_id].shape.dim[1];
+    opdata->output_width = values[output_id].shape.dim[2];
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_resize_bilinear_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  switch (opdata->operator_object->type) {
+    case xnn_operator_type_resize_bilinear_nchw_f32:
+      return xnn_setup_resize_bilinear2d_nchw_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        opdata->output_height,
+        opdata->output_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+    case xnn_operator_type_resize_bilinear_nhwc_f32:
+      return xnn_setup_resize_bilinear2d_nhwc_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        opdata->output_height,
+        opdata->output_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 enum xnn_status xnn_define_static_resize_bilinear_2d(
   xnn_subgraph_t subgraph,
   size_t new_height,
@@ -125,6 +223,9 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_resize_bilinear_operator;
+  node->setup = setup_resize_bilinear_operator;
 
   return xnn_status_success;
 }

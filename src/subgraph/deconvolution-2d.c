@@ -13,6 +13,102 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_deconvolution_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 3);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+  const uint32_t filter_id = node->inputs[1];
+  assert(filter_id != XNN_INVALID_VALUE_ID);
+  assert(filter_id < num_values);
+  const uint32_t bias_id = node->inputs[2];
+  assert(bias_id != XNN_INVALID_VALUE_ID);
+  assert(bias_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  const void* filter_data = values[filter_id].data;
+  assert(filter_data != NULL);
+
+  const void* bias_data = values[bias_id].data;
+  assert(filter_data != NULL);
+
+  const enum xnn_status status = xnn_create_deconvolution2d_nhwc_f32(
+    node->params.deconvolution_2d.padding_top,
+    node->params.deconvolution_2d.padding_right,
+    node->params.deconvolution_2d.padding_bottom,
+    node->params.deconvolution_2d.padding_left,
+    node->params.deconvolution_2d.kernel_height,
+    node->params.deconvolution_2d.kernel_width,
+    node->params.deconvolution_2d.upsampling_height,
+    node->params.deconvolution_2d.upsampling_width,
+    node->params.deconvolution_2d.dilation_height,
+    node->params.deconvolution_2d.dilation_width,
+    node->params.deconvolution_2d.groups,
+    node->params.deconvolution_2d.group_input_channels,
+    node->params.deconvolution_2d.group_output_channels,
+    node->params.deconvolution_2d.group_input_channels * node->params.deconvolution_2d.groups /* input_pixel_stride */,
+    node->params.deconvolution_2d.group_output_channels * node->params.deconvolution_2d.groups /* output_pixel_stride */,
+    filter_data,
+    bias_data,
+    node->activation.output_min,
+    node->activation.output_max,
+    node->flags,
+    &opdata->operator_object);
+  if (status == xnn_status_success) {
+    opdata->batch_size = values[input_id].shape.dim[0];
+    opdata->input_height = values[input_id].shape.dim[1];
+    opdata->input_width = values[input_id].shape.dim[2];
+    opdata->adjustment_height = node->params.deconvolution_2d.adjustment_height;
+    opdata->adjustment_width = node->params.deconvolution_2d.adjustment_width;
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_deconvolution_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  return xnn_setup_deconvolution2d_nhwc_f32(
+    opdata->operator_object,
+    opdata->batch_size,
+    opdata->input_height,
+    opdata->input_width,
+    opdata->adjustment_height,
+    opdata->adjustment_width,
+    input_data,
+    output_data,
+    threadpool);
+}
+
 enum xnn_status xnn_define_deconvolution_2d(
   xnn_subgraph_t subgraph,
   uint32_t padding_top,
@@ -255,6 +351,9 @@ enum xnn_status xnn_define_deconvolution_2d(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_deconvolution_operator;
+  node->setup = setup_deconvolution_operator;
 
   return xnn_status_success;
 };

@@ -6,12 +6,181 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
+
+static enum xnn_status create_add_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 2);
+  const uint32_t input1_id = node->inputs[0];
+  assert(input1_id != XNN_INVALID_VALUE_ID);
+  assert(input1_id < num_values);
+  const uint32_t input2_id = node->inputs[1];
+  assert(input2_id != XNN_INVALID_VALUE_ID);
+  assert(input2_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  enum xnn_status status;
+  switch (values[output_id].datatype) {
+    case xnn_datatype_fp32:
+      status = xnn_create_add_nd_f32(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+    {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const int8_t output_min =
+        (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+      const int8_t output_max =
+        (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+      status = xnn_create_add_nd_qs8(
+        (int8_t) values[input1_id].quantization.zero_point,
+        values[input1_id].quantization.scale,
+        (int8_t) values[input2_id].quantization.zero_point,
+        values[input2_id].quantization.scale,
+        (int8_t) output_zero_point,
+        output_scale, output_min, output_max, node->flags,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+    {
+      const float output_scale = values[output_id].quantization.scale;
+      const int32_t output_zero_point = values[output_id].quantization.zero_point;
+      const uint8_t output_min =
+        (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+      const uint8_t output_max =
+        (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+      status = xnn_create_add_nd_qu8(
+        (uint8_t) values[input1_id].quantization.zero_point,
+        values[input1_id].quantization.scale,
+        (uint8_t) values[input2_id].quantization.zero_point,
+        values[input2_id].quantization.scale,
+        (uint8_t) output_zero_point,
+        output_scale, output_min, output_max, node->flags,
+        &opdata->operator_object);
+      break;
+    }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status == xnn_status_success) {
+    opdata->shape1.num_dims = values[input1_id].shape.num_dims;
+    opdata->shape2.num_dims = values[input2_id].shape.num_dims;
+    if (values[output_id].layout == xnn_layout_type_nchw) {
+      assert(values[input1_id].layout == xnn_layout_type_nchw);
+      assert(values[input2_id].layout == xnn_layout_type_nchw);
+      opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
+      opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
+      if (values[input1_id].shape.num_dims > 2) {
+        memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
+      }
+      opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
+      opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+      if (values[input1_id].shape.num_dims > 2) {
+        memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+      }
+    } else {
+      assert(values[output_id].layout == xnn_layout_type_nhwc);
+      assert(values[input1_id].layout == xnn_layout_type_nhwc);
+      assert(values[input2_id].layout == xnn_layout_type_nhwc);
+      memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
+      memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+    }
+    opdata->inputs[0] = input1_id;
+    opdata->inputs[1] = input2_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_add_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id != XNN_INVALID_VALUE_ID);
+  assert(input1_id < num_blobs);
+
+  const uint32_t input2_id = opdata->inputs[1];
+  assert(input2_id != XNN_INVALID_VALUE_ID);
+  assert(input2_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input1_blob = blobs + input1_id;
+  const void* input1_data = input1_blob->data;
+  assert(input1_data != NULL);
+
+  const struct xnn_blob* input2_blob = blobs + input2_id;
+  const void* input2_data = input2_blob->data;
+  assert(input2_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  switch (opdata->operator_object->type) {
+    case xnn_operator_type_add_nd_f32:
+      return xnn_setup_add_nd_f32(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_operator_type_add_nd_qs8:
+      return xnn_setup_add_nd_qs8(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_operator_type_add_nd_qu8:
+      return xnn_setup_add_nd_qu8(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
 
 enum xnn_status xnn_define_add2(
   xnn_subgraph_t subgraph,
@@ -172,6 +341,9 @@ enum xnn_status xnn_define_add2(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_add_operator;
+  node->setup = setup_add_operator;
 
   return xnn_status_success;
 }

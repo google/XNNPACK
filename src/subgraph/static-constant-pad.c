@@ -16,6 +16,108 @@
 #include <xnnpack/subgraph.h>
 
 
+static enum xnn_status create_constant_pad_operator(
+  const struct xnn_node* node,
+  const struct xnn_value* values,
+  size_t num_values,
+  struct xnn_operator_data* opdata)
+{
+  assert(node->num_inputs == 1);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  assert(node->num_outputs == 1);
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
+  enum xnn_status status;
+  switch (values[output_id].datatype) {
+    case xnn_datatype_fp32:
+      status = xnn_create_constant_pad_nd_x32(
+        &node->params.static_pad.padding_value,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+      status = xnn_create_constant_pad_nd_x8(
+        &node->params.static_pad.padding_value,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status == xnn_status_success) {
+    opdata->shape1 = values[input_id].shape;
+    memcpy(opdata->pre_paddings, node->params.static_pad.pre_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+    memcpy(opdata->post_paddings, node->params.static_pad.post_paddings, sizeof(size_t) * XNN_MAX_TENSOR_DIMS);
+    opdata->inputs[0] = input_id;
+    opdata->outputs[0] = output_id;
+  }
+  return status;
+}
+
+static enum xnn_status setup_constant_pad_operator(
+  const struct xnn_operator_data* opdata,
+  const struct xnn_blob* blobs,
+  size_t num_blobs,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_blobs);
+
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_blobs);
+
+  const struct xnn_blob* input_blob = blobs + input_id;
+  const void* input_data = input_blob->data;
+  assert(input_data != NULL);
+
+  const struct xnn_blob* output_blob = blobs + output_id;
+  void* output_data = output_blob->data;
+  assert(output_data != NULL);
+
+  switch (opdata->operator_object->type) {
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    case xnn_operator_type_constant_pad_nd_x8:
+      return xnn_setup_constant_pad_nd_x8(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->pre_paddings,
+        opdata->post_paddings,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    case xnn_operator_type_constant_pad_nd_x32:
+      return xnn_setup_constant_pad_nd_x32(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->pre_paddings,
+        opdata->post_paddings,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 enum xnn_status xnn_define_static_constant_pad(
   xnn_subgraph_t subgraph,
   const size_t* pre_paddings,
@@ -168,6 +270,9 @@ enum xnn_status xnn_define_static_constant_pad(
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;
+
+  node->create = create_constant_pad_operator;
+  node->setup = setup_constant_pad_operator;
 
   return xnn_status_success;
 }
