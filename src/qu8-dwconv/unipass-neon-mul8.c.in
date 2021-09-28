@@ -1,0 +1,226 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert REQUANTIZATION in ["RNDNU"]
+$assert DATATYPE in ["QU8"]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert KERNEL_TILE >= 2
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/dwconv.h>
+
+
+void xnn_qu8_dwconv_minmax_rndnu_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__neon_mul8(
+    size_t channels,
+    size_t output_width,
+    const uint8_t** input,
+    const void* weights,
+    uint8_t* output,
+    size_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const uint8_t* zero,
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  const uint8x8_t vkernel_zero_point = vld1_dup_u8(params->rndnu_neon.kernel_zero_point);
+  const uint16x8_t vkernel_zero_point16 = vmovl_u8(vkernel_zero_point);
+  const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
+  const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
+  const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
+  $if CHANNEL_TILE == 8:
+    const uint8x8_t voutput_min = vld1_dup_u8(&params->rndnu_neon.output_min);
+    const uint8x8_t voutput_max = vld1_dup_u8(&params->rndnu_neon.output_max);
+  $else:
+    const uint8x16_t voutput_min = vld1q_dup_u8(&params->rndnu_neon.output_min);
+    const uint8x16_t voutput_max = vld1q_dup_u8(&params->rndnu_neon.output_max);
+  do {
+    $for K in range(KERNEL_TILE):
+      const uint8_t* i${K} = input[${K}];
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const uint8_t*) ((uintptr_t) i${K} + input_offset);
+      }
+    input = (const uint8_t**) ((uintptr_t) input + input_stride);
+
+
+    size_t c = channels;
+    const void* w = weights;
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      $for C in range(0, CHANNEL_TILE, 4):
+        int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+
+
+      $for K in range(KERNEL_TILE):
+        $for C in range(0, CHANNEL_TILE, 8):
+          const uint8x8_t vi${K}x${ABC[C:C+8]} = vld1_u8(i${K}); i${K} += 8;
+          const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          $if K == 0:
+            uint16x8_t vprod${ABC[C:C+8]} = vmull_u8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+          $else:
+            vprod${ABC[C:C+8]} = vmull_u8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+          $if KERNEL_TILE == 1:
+            uint16x8_t vsum${ABC[0:8]} = vmovl_u8(vi${K}x${ABC[0:8]});
+          $if K == 1:
+            uint16x8_t vsum${ABC[C:C+8]} = vaddl_u8(vi0x${ABC[C:C+8]}, vi1x${ABC[C:C+8]});
+          $elif K > 1:
+            vsum${ABC[C:C+8]} = vaddw_u8(vsum${ABC[C:C+8]}, vi${K}x${ABC[C:C+8]});
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vprod${ABC[C:C+8]})));
+          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vprod${ABC[C:C+8]})));
+
+      $for C in range(0, CHANNEL_TILE, 8):
+        vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point16)));
+        vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point16)));
+
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vshlq_s32(vacc${ABC[C:C+4]}, vright_pre_shift);
+
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vqdmulhq_s32(vacc${ABC[C:C+4]}, vmultiplier);
+
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vrshlq_s32(vacc${ABC[C:C+4]}, vright_post_shift);
+
+#if XNN_ARCH_ARM64
+      $for C in range(0, CHANNEL_TILE, 8):
+        const int16x8_t vacc${ABC[C:C+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]}), voutput_zero_point);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          uint8x16_t vout${ABC[C:C+16]} = vqmovun_high_s16(vqmovun_s16(vacc${ABC[C:C+8]}), vacc${ABC[C+8:C+16]});
+        $else:
+          uint8x8_t vout${ABC[C:C+8]} = vqmovun_s16(vacc${ABC[C:C+8]});
+#else
+      $for C in range(0, CHANNEL_TILE, 8):
+        const int16x8_t vacc${ABC[C:C+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]})), voutput_zero_point);
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          uint8x16_t vout${ABC[C:C+16]} = vcombine_u8(vqmovun_s16(vacc${ABC[C:C+8]}), vqmovun_s16(vacc${ABC[C+8:C+16]}));
+        $else:
+          uint8x8_t vout${ABC[C:C+8]} = vqmovun_s16(vacc${ABC[C:C+8]});
+#endif
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          vout${ABC[C:C+16]} = vmaxq_u8(vout${ABC[C:C+16]}, voutput_min);
+        $else:
+          $if CHANNEL_TILE == 8:
+            vout${ABC[C:C+8]} = vmax_u8(vout${ABC[C:C+8]}, voutput_min);
+          $else:
+            vout${ABC[C:C+8]} = vmax_u8(vout${ABC[C:C+8]}, vget_low_u8(voutput_min));
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          vout${ABC[C:C+16]} = vminq_u8(vout${ABC[C:C+16]}, voutput_max);
+        $else:
+          $if CHANNEL_TILE == 8:
+            vout${ABC[C:C+8]} = vmin_u8(vout${ABC[C:C+8]}, voutput_max);
+          $else:
+            vout${ABC[C:C+8]} = vmin_u8(vout${ABC[C:C+8]}, vget_low_u8(voutput_max));
+
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          vst1q_u8(output, vout${ABC[C:C+16]}); output += 16;
+        $else:
+          vst1_u8(output, vout${ABC[C:C+8]}); output += 8;
+    }
+    if XNN_UNLIKELY(c != 0) {
+      $if CHANNEL_TILE > 8:
+        const uint8_t* k = (const uint8_t*) ((const int32_t*) w + ${CHANNEL_TILE});
+      ${"do " if CHANNEL_TILE > 8 else ""}{
+        int32x4_t vacc${ABC[0:4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+        int32x4_t vacc${ABC[4:8]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+
+        $for K in range(KERNEL_TILE):
+          $if CHANNEL_TILE > 8:
+            const int16x8_t vi${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(i${K}))); i${K} += 8;
+          $else:
+            const int16x8_t vi${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(i${K})));
+          $if CHANNEL_TILE > 8:
+            $if K == 0:
+              const int16x8_t vk${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8(k), vkernel_zero_point)); k += 8;
+            $else:
+              const int16x8_t vk${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8((const void*) (k + ${K * CHANNEL_TILE - 8})), vkernel_zero_point));
+          $else:
+            $if K == 0:
+              const int16x8_t vk${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8(w), vkernel_zero_point));
+            $else:
+              const int16x8_t vk${K}x${ABC[0:8]} = vreinterpretq_s16_u16(vsubl_u8(vld1_u8((const void*) ((const uint8_t*) w + ${K * CHANNEL_TILE})), vkernel_zero_point));
+
+          vacc${ABC[0:4]} = vmlal_s16(vacc${ABC[0:4]}, vget_low_s16(vi${K}x${ABC[0:8]}), vget_low_s16(vk${K}x${ABC[0:8]}));
+          vacc${ABC[4:8]} = vmlal_s16(vacc${ABC[4:8]}, vget_high_s16(vi${K}x${ABC[0:8]}), vget_high_s16(vk${K}x${ABC[0:8]}));
+
+        vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_pre_shift);
+        vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_pre_shift);
+
+        vacc${ABC[0:4]} = vqdmulhq_s32(vacc${ABC[0:4]}, vmultiplier);
+        vacc${ABC[4:8]} = vqdmulhq_s32(vacc${ABC[4:8]}, vmultiplier);
+
+        vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_post_shift);
+        vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_post_shift);
+
+#if XNN_ARCH_ARM64
+        const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]}), voutput_zero_point);
+        uint8x8_t vout${ABC[0:8]} = vqmovun_s16(vacc${ABC[0:8]});
+#else
+        const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]})), voutput_zero_point);
+        uint8x8_t vout${ABC[0:8]} = vqmovun_s16(vacc${ABC[0:8]});
+#endif
+
+        $if CHANNEL_TILE == 8:
+          vout${ABC[0:8]} = vmax_u8(vout${ABC[0:8]}, voutput_min);
+          vout${ABC[0:8]} = vmin_u8(vout${ABC[0:8]}, voutput_max);
+        $else:
+          vout${ABC[0:8]} = vmax_u8(vout${ABC[0:8]}, vget_low_u8(voutput_min));
+          vout${ABC[0:8]} = vmin_u8(vout${ABC[0:8]}, vget_low_u8(voutput_max));
+
+        $if CHANNEL_TILE > 8:
+          if XNN_LIKELY(c >= 8) {
+            vst1_u8(output, vout${ABC[0:8]}); output += 8;
+            c -= 8;
+          } else {
+            if (c & 4) {
+              vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout${ABC[0:8]}), 0); output += 4;
+              vout${ABC[0:8]} = vext_u8(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+            }
+            if (c & 2) {
+              vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_u8(vout${ABC[0:8]}), 0); output += 2;
+              vout${ABC[0:8]} = vext_u8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+            }
+            if (c & 1) {
+              vst1_lane_u8(output, vout${ABC[0:8]}, 0); output += 1;
+            }
+            c = 0;
+          }
+        $else:
+          if (c & 4) {
+            vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout${ABC[0:8]}), 0); output += 4;
+            vout${ABC[0:8]} = vext_u8(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
+          }
+          if (c & 2) {
+            vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_u8(vout${ABC[0:8]}), 0); output += 2;
+            vout${ABC[0:8]} = vext_u8(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
+          }
+          if (c & 1) {
+            vst1_lane_u8(output, vout${ABC[0:8]}, 0); output += 1;
+          }
+      }${" while (c != 0);" if CHANNEL_TILE > 8 else ""}
+    }
+
+    output = (uint8_t*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}
