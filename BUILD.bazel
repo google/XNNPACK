@@ -2696,6 +2696,14 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/xx-pad/neon.c",
 ]
 
+PROD_NEONFP16_MICROKERNEL_SRCS = [
+]
+
+ALL_NEONFP16_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c",
+    "src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c",
+]
+
 PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/up4x9-minmax-neonfma.c",
     "src/f32-dwconv/gen/up4x25-minmax-neonfma-acc2.c",
@@ -6125,6 +6133,79 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonfp16_bench_microkernels",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-fp16",
+    ],
+    aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
+    apple_aarch32_copts = [
+        "-mcpu=cortex-a9",
+        "-mtune=generic",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonfp16_prod_microkernels",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-fp16",
+    ],
+    aarch32_srcs = PROD_NEONFP16_MICROKERNEL_SRCS,
+    aarch64_srcs = PROD_NEONFP16_MICROKERNEL_SRCS,
+    apple_aarch32_copts = [
+        "-mcpu=cortex-a9",
+        "-mtune=generic",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonfp16_test_microkernels",
+    hdrs = INTERNAL_HDRS,
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-fp16",
+    ],
+    aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
+    aarch64_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
+    apple_aarch32_copts = [
+        "-mcpu=cortex-a9",
+        "-mtune=generic",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neonfma_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     aarch32_copts = [
@@ -6962,12 +7043,14 @@ xnnpack_aggregate_library(
     name = "bench_microkernels",
     aarch32_ios_deps = [
         ":neon_bench_microkernels",
+        ":neonfp16_bench_microkernels",
         ":neonfma_bench_microkernels",
         ":neonv8_bench_microkernels",
         ":asm_microkernels",
     ],
     aarch32_nonios_deps = [
         ":neon_bench_microkernels",
+        ":neonfp16_bench_microkernels",
         ":neonfma_bench_microkernels",
         ":neonv8_bench_microkernels",
         ":neondot_bench_microkernels",
@@ -6975,6 +7058,7 @@ xnnpack_aggregate_library(
     ],
     aarch64_deps = [
         ":neon_bench_microkernels",
+        ":neonfp16_bench_microkernels",
         ":neonfma_bench_microkernels",
         ":neonv8_bench_microkernels",
         ":neonfp16arith_bench_microkernels",
@@ -7010,12 +7094,14 @@ xnnpack_aggregate_library(
     name = "prod_microkernels",
     aarch32_ios_deps = [
         ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
         ":neonv8_prod_microkernels",
         ":asm_microkernels",
     ],
     aarch32_nonios_deps = [
         ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
         ":neonv8_prod_microkernels",
         ":neondot_prod_microkernels",
@@ -7023,6 +7109,7 @@ xnnpack_aggregate_library(
     ],
     aarch64_deps = [
         ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
         ":neonv8_prod_microkernels",
         ":neonfp16arith_prod_microkernels",
@@ -7058,12 +7145,14 @@ xnnpack_aggregate_library(
     name = "test_microkernels",
     aarch32_ios_deps = [
         ":neon_test_microkernels",
+        ":neonfp16_test_microkernels",
         ":neonfma_test_microkernels",
         ":neonv8_test_microkernels",
         ":asm_microkernels",
     ],
     aarch32_nonios_deps = [
         ":neon_test_microkernels",
+        ":neonfp16_test_microkernels",
         ":neonfma_test_microkernels",
         ":neonv8_test_microkernels",
         ":neondot_test_microkernels",
@@ -7071,6 +7160,7 @@ xnnpack_aggregate_library(
     ],
     aarch64_deps = [
         ":neon_test_microkernels",
+        ":neonfp16_test_microkernels",
         ":neonfma_test_microkernels",
         ":neonv8_test_microkernels",
         ":neonfp16arith_test_microkernels",
