@@ -1051,3 +1051,319 @@ constexpr int kBlockSize = 1024;
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD
+  TEST(CVT__WASMSIMD_INT16, positive_normal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x0400); n < UINT16_C(0x7C00); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = n + i;
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT16, negative_normal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x8400); n < UINT16_C(0xFC00); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = n + i;
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT16, positive_zero) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
+    xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT16, negative_zero) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
+    xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT16, positive_subnormal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = 0; n < UINT16_C(0x0400); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x0001));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT16, negative_subnormal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x8000); n < UINT16_C(0x8400); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x8001));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT16, positive_infinity) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
+    xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT16, negative_infinity) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
+    xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT16, positive_nan) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x7C00); n < UINT16_C(0x8000); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x7C01));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT16, negative_nan) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x7C00); n < UINT16_C(0x8000); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(UINT16_C(0x8000) | (n + i), UINT16_C(0xFC01));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_WASMSIMD
+  TEST(CVT__WASMSIMD_INT32, positive_normal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x0400); n < UINT16_C(0x7C00); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = n + i;
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT32, negative_normal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x8400); n < UINT16_C(0xFC00); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = n + i;
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT32, positive_zero) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
+    xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT32, negative_zero) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
+    xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT32, positive_subnormal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = 0; n < UINT16_C(0x0400); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x0001));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT32, negative_subnormal) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x8000); n < UINT16_C(0x8400); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x8001));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT32, positive_infinity) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
+    xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT32, negative_infinity) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
+    xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+      << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+  }
+
+  TEST(CVT__WASMSIMD_INT32, positive_nan) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x7C00); n < UINT16_C(0x8000); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(n + i, UINT16_C(0x7C01));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD_INT32, negative_nan) {
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x7C00); n < UINT16_C(0x8000); n += kBlockSize) {
+      for (uint16_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = std::max<uint16_t>(UINT16_C(0x8000) | (n + i), UINT16_C(0xFC01));
+      }
+      xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD

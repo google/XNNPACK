@@ -1745,6 +1745,8 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/vneg-wasmsimd-x8.c",
     "src/f32-vunary/gen/vsqr-wasmsimd-x4.c",
     "src/f32-vunary/gen/vsqr-wasmsimd-x8.c",
+    "src/math/cvt-f16-f32-wasmsimd-int16.c",
+    "src/math/cvt-f16-f32-wasmsimd-int32.c",
     "src/math/expm1minus-wasmsimd-rr2-lut16-p3-andnot.c",
     "src/math/expm1minus-wasmsimd-rr2-lut16-p3-max.c",
     "src/math/expm1minus-wasmsimd-rr2-p6-andnot.c",

@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
+#include <smmintrin.h>
 
 #include <xnnpack/math-stubs.h>
 
@@ -27,7 +27,7 @@ void xnn_math_f16_f32_cvt__sse41_int32(
   const __m128i vdenorm_cutoff = _mm_set1_epi32(0x04000000);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n != 0; n -= 4 * sizeof(float)) {
+  for (; n != 0; n -= 8 * sizeof(float)) {
     const __m128i vh = _mm_loadu_si128((const __m128i*) i);
     i += 8;
 
