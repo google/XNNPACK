@@ -29,12 +29,25 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     const float* input,                          \
     float* output);
 
+#define DECLARE_F16_F32_CVT_MATH_FUNCTION(fn_name) \
+  void fn_name(                                    \
+    size_t n,                                      \
+    const void* input,                             \
+    float* output);
+
 #define DECLARE_F32_EXT_UNARY_MATH_FUNCTION(fn_name) \
   void fn_name(                                      \
     size_t n,                                        \
     const float* input,                              \
     float* output_mantissa,                          \
     float* output_exponent);
+
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neonfp16)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse2_int16)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse2_int32)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse41_int16)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse41_int32)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__f16c)
 
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neon_addsub)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neonv8)

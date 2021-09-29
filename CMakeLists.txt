@@ -1759,7 +1759,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c
-  src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c)
+  src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c
+  src/math/cvt-f16-f32-neonfp16.c)
 
 SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up4x9-minmax-neonfma.c
@@ -2787,6 +2788,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x16.c
   src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x20.c
   src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x24.c
+  src/math/cvt-f16-f32-sse2-int16.c
+  src/math/cvt-f16-f32-sse2-int32.c
   src/math/exp-sse2-rr2-lut64-p2.c
   src/math/exp-sse2-rr2-p5.c
   src/math/expm1minus-sse2-rr2-lut16-p3.c
@@ -3119,6 +3122,8 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x16.c
   src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x20.c
   src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x24.c
+  src/math/cvt-f16-f32-sse41-int16.c
+  src/math/cvt-f16-f32-sse41-int32.c
   src/math/roundd-sse41.c
   src/math/roundne-sse41.c
   src/math/roundu-sse41.c
@@ -3714,7 +3719,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
 
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
-  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c)
+  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/math/cvt-f16-f32-f16c.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c
@@ -7028,6 +7034,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   # ---[ Build accuracy tests
+  ADD_EXECUTABLE(f16-f32-cvt-eval eval/f16-f32-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-f32-cvt-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
   ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
     CXX_STANDARD 11

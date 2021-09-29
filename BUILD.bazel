@@ -2702,6 +2702,7 @@ PROD_NEONFP16_MICROKERNEL_SRCS = [
 ALL_NEONFP16_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c",
+    "src/math/cvt-f16-f32-neonfp16.c",
 ]
 
 PROD_NEONFMA_MICROKERNEL_SRCS = [
@@ -3743,6 +3744,8 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x16.c",
     "src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x20.c",
     "src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x24.c",
+    "src/math/cvt-f16-f32-sse2-int16.c",
+    "src/math/cvt-f16-f32-sse2-int32.c",
     "src/math/exp-sse2-rr2-lut64-p2.c",
     "src/math/exp-sse2-rr2-p5.c",
     "src/math/expm1minus-sse2-rr2-lut16-p3.c",
@@ -4079,6 +4082,8 @@ ALL_SSE41_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x16.c",
     "src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x20.c",
     "src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x24.c",
+    "src/math/cvt-f16-f32-sse41-int16.c",
+    "src/math/cvt-f16-f32-sse41-int32.c",
     "src/math/roundd-sse41.c",
     "src/math/roundne-sse41.c",
     "src/math/roundu-sse41.c",
@@ -4683,6 +4688,7 @@ PROD_F16C_MICROKERNEL_SRCS = [
 ALL_F16C_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-f16c-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
+    "src/math/cvt-f16-f32-f16c.c",
 ]
 
 PROD_XOP_MICROKERNEL_SRCS = [
@@ -8615,6 +8621,17 @@ xnnpack_benchmark(
 )
 
 ################### Accuracy verification for math functions ##################
+
+xnnpack_unit_test(
+    name = "f16_f32_cvt_eval",
+    srcs = [
+        "eval/f16-f32-cvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
 
 xnnpack_unit_test(
     name = "f32_exp_eval",
