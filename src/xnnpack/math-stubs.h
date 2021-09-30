@@ -42,6 +42,8 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     float* output_mantissa,                          \
     float* output_exponent);
 
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neon_int16)
+DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neon_int32)
 DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neonfp16)
 DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse2_int16)
 DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__sse2_int32)
