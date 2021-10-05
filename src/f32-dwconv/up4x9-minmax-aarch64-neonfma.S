@@ -20,35 +20,33 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # inputs
-# i0  x8 v10
-# i1  x9 v11
-# i2 x10 v12
-# i3 x11 v13
-# i4 x12 v14
-# i5 x13 v15
-# i6 x14 v16
-# i7 x15 v17
-# i8 x16 v18
+# i0  x8 v23
+# i1  x9 v24
+# i2 x10 v25
+# i3 x11 v26
+# i4 x12 v27
+# i5 x13 v28
+# i6 x14 v29
+# i7 x15 v30
+# i8 x16 v31
 
 # weights
-# x17 v0, v1, v2, v3, v4, v5, v6, v7, v8, v9
+# x17 v0 (acc) v1 v2 v3 v4 v5 v6 v7 v18 v19
 
-# Clamp v30 v31
+# Clamp v16 v17
+
+# unused v20 v21 v22
 
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 
-        # Save x19-x20,d8-d15 on stack
-        STP     x19, x20, [sp, -80]!
-        STP     d8,  d9, [sp, 16]
-        STP     d10, d11, [sp, 32]
-        STP     d12, d13, [sp, 48]
-        STP     d14, d15, [sp, 64]
+        # Save x19-x20,d16-d28 on stack
+        STP     x19, x20, [sp, -16]!
 
         # Load zero, params pointer
-        LDP     x19, x20, [sp, 80]
+        LDP     x19, x20, [sp, 16]
 
         # Load min/max values
-        LD2R    {v30.4s, v31.4s}, [x20]
+        LD2R    {v16.4s, v17.4s}, [x20]
 
 0:
         #  x8 := i0
@@ -106,36 +104,35 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # skip main loop if c <= 4
         B.LO    2f
 1:
-        LDP     q0, q1, [x17], 32
+        LDR     q23, [x8], 16      // load 9 inputs
+        LDR     q24, [x9], 16
+        LDR     q25, [x10], 16
+        LDR     q26, [x11], 16
+        LDR     q27, [x12], 16
+        LDR     q28, [x13], 16
+        LDR     q29, [x14], 16
+        LDR     q30, [x15], 16
+        LDR     q31, [x16], 16
+        LDP     q0, q1, [x17], 32  // load bias and 9 weights
         LDP     q2, q3, [x17], 32
         LDP     q4, q5, [x17], 32
         LDP     q6, q7, [x17], 32
-        LDP     q8, q9, [x17], 32
-        LDR     q10, [x8], 16
-        LDR     q11, [x9], 16
-        LDR     q12, [x10], 16
-        LDR     q13, [x11], 16
-        LDR     q14, [x12], 16
-        LDR     q15, [x13], 16
-        LDR     q16, [x14], 16
-        LDR     q17, [x15], 16
-        LDR     q18, [x16], 16
+        LDP     q18, q19, [x17], 32
 
-        FMLA    v0.4S, v1.4S, v10.4S
-        FMLA    v0.4S, v2.4S, v11.4S
-        FMLA    v0.4S, v3.4S, v12.4S
-        FMLA    v0.4S, v4.4S, v13.4S
-        FMLA    v0.4S, v5.4S, v14.4S
-        FMLA    v0.4S, v6.4S, v15.4S
-        FMLA    v0.4S, v7.4S, v16.4S
-        FMLA    v0.4S, v8.4S, v17.4S
-        FMLA    v0.4S, v9.4S, v18.4S
-
-        FMAX    v0.4S, v0.4S, v30.4S
-        FMIN    v0.4S, v0.4S, v31.4S
-
-        STR     q0, [x4], 16
+        FMLA    v0.4S, v1.4S, v23.4S
+        FMLA    v0.4S, v2.4S, v24.4S
+        FMLA    v0.4S, v3.4S, v25.4S
+        FMLA    v0.4S, v4.4S, v26.4S
+        FMLA    v0.4S, v5.4S, v27.4S
+        FMLA    v0.4S, v6.4S, v28.4S
+        FMLA    v0.4S, v7.4S, v29.4S
+        FMLA    v0.4S, v18.4S, v30.4S
+        FMLA    v0.4S, v19.4S, v31.4S
         SUBS    x20, x20, 4
+
+        FMAX    v0.4S, v0.4S, v16.4S
+        FMIN    v0.4S, v0.4S, v17.4S
+        STR     q0, [x4], 16
         B.HS    1b
 
 2:
@@ -144,41 +141,41 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # skip processing remainder channels unless c != 0
         CBZ     x20, 4f
 
-        LDP     q0, q1, [x17], 32
+        LDR     q23, [x8], 16      // load 9 inputs
+        LDR     q24, [x9], 16
+        LDR     q25, [x10], 16
+        LDR     q26, [x11], 16
+        LDR     q27, [x12], 16
+        LDR     q28, [x13], 16
+        LDR     q29, [x14], 16
+        LDR     q30, [x15], 16
+        LDR     q31, [x16], 16
+        LDP     q0, q1, [x17], 32  // load bias and 9 weights
         LDP     q2, q3, [x17], 32
         LDP     q4, q5, [x17], 32
         LDP     q6, q7, [x17], 32
-        LDP     q8, q9, [x17], 32
-        LDR     q10, [x8], 16
-        LDR     q11, [x9], 16
-        LDR     q12, [x10], 16
-        LDR     q13, [x11], 16
-        LDR     q14, [x12], 16
-        LDR     q15, [x13], 16
-        LDR     q16, [x14], 16
-        LDR     q17, [x15], 16
-        LDR     q18, [x16], 16
+        LDP     q18, q19, [x17], 32
 
-        FMLA    v0.4S, v1.4S, v10.4S
-        FMLA    v0.4S, v2.4S, v11.4S
-        FMLA    v0.4S, v3.4S, v12.4S
-        FMLA    v0.4S, v4.4S, v13.4S
-        FMLA    v0.4S, v5.4S, v14.4S
-        FMLA    v0.4S, v6.4S, v15.4S
-        FMLA    v0.4S, v7.4S, v16.4S
-        FMLA    v0.4S, v8.4S, v17.4S
-        FMLA    v0.4S, v9.4S, v18.4S
+        FMLA    v0.4S, v1.4S, v23.4S
+        FMLA    v0.4S, v2.4S, v24.4S
+        FMLA    v0.4S, v3.4S, v25.4S
+        FMLA    v0.4S, v4.4S, v26.4S
+        FMLA    v0.4S, v5.4S, v27.4S
+        FMLA    v0.4S, v6.4S, v28.4S
+        FMLA    v0.4S, v7.4S, v29.4S
+        FMLA    v0.4S, v18.4S, v30.4S
+        FMLA    v0.4S, v19.4S, v31.4S
 
-        FMAX    v0.4S, v0.4S, v30.4S
-        FMIN    v0.4S, v0.4S, v31.4S
+        FMAX    v0.4S, v0.4S, v16.4S
+        FMIN    v0.4S, v0.4S, v17.4S
 
         TBZ     x20, 1, 3f
 
         STR     d0, [x4], 8
         DUP     d0, v0.D[1]
 
-3:
         TBZ     x20, 0, 4f
+3:
         STR     s0, [x4], 4
 
 4:
@@ -189,12 +186,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # process next pixel if output_width != 0
         B.NE    0b
 
-        # Restore x19-x20,d8-d15 from stack
-        LDP     d14, d15, [sp, 64]
-        LDP     d12, d13, [sp, 48]
-        LDP     d10, d11, [sp, 32]
-        LDP     d8,  d9, [sp, 16]
-        LDP     x19, x20, [sp], 80
+        # Restore x19,x20 from stack
+        LDP     x19, x20, [sp], 16
         RET
 
 END_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
