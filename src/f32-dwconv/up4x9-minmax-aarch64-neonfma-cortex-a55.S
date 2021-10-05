@@ -20,20 +20,40 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # inputs
-# i0  x8 v10
-# i1  x9 v11
-# i2 x10 v12
-# i3 x11 v13
-# i4 x12 v14
-# i5 x13 v15
-# i6 x14 v16
-# i7 x15 v17
-# i8 x16 v18
+# i0  x8
+# i1  x9
+# i2 x10
+# i3 x11
+# i4 x12
+# i5 x13
+# i6 x14
+# i7 x15
+# i8 x16
 
-# weights
-# x17 v0, v1, v2, v3, v4, v5, v6, v7, v8, v9
+# weights.  Bias and 9 weights.
+# x17
+
+# accumulators
+# v0-v3
+
+# Input and weight paired values.
+# Inputs are even and weights are odd registers
+# v4  v5
+# v6  v7
+# v10 v11
+# v12 v13
+# v14 v15
+# v16 v17
+# v18 v19
+# v20 v21
+# v22 v23
+# v24 v25
+# v26 v27
+# v28 v29
 
 # Clamp v30 v31
+
+# unused v8 v9
 
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
 
@@ -50,19 +70,11 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LD2R    {v30.4s, v31.4s}, [x20]
 
 0:
-        #  x8 := i0
-        #  x9 := i1
+        # Load 9 input pointers
         LDP     x8, x9, [x2]
-        #  x10 := i2
-        # x11 := i3
         LDP     x10, x11, [x2, 16]
-        # x12 := i4
-        # x13 := i5
         LDP     x12, x13, [x2, 32]
-        # x14 := i6
-        # x15 := i7
         LDP     x14, x15, [x2, 48]
-        # x16 := i8
         LDR     x16, [x2, 64]
 
         CMP     x8, x19                 // if i0 == zero
@@ -785,12 +797,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         # skip processing 4 channels if ((c - 8) & 4) = (c & 4) != 0
         TBZ     x20, 2, 4f
 
-        LDP     q0, q1, [x17], 32
-        LDP     q2, q3, [x17], 32
-        LDP     q4, q5, [x17], 32
-        LDP     q6, q7, [x17], 32
-        LDP     q28, q29, [x17], 32
-        LDR     q10, [x8], 16
+        LDR     q10, [x8], 16        // load 9 inputs
+        LDP     q0, q1, [x17], 32    // load bias and 9 weights
         LDR     q11, [x9], 16
         LDR     q12, [x10], 16
         LDR     q13, [x11], 16
@@ -799,6 +807,10 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDR     q16, [x14], 16
         LDR     q17, [x15], 16
         LDR     q18, [x16], 16
+        LDP     q2, q3, [x17], 32
+        LDP     q4, q5, [x17], 32
+        LDP     q6, q7, [x17], 32
+        LDP     q28, q29, [x17], 32
 
         FMLA    v0.4S, v1.4S, v10.4S
         FMLA    v0.4S, v2.4S, v11.4S
@@ -821,12 +833,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         # skip processing remainder channels unless c != 0
         CBZ     x20, 6f
 
-        LDP     q0, q1, [x17], 32
-        LDP     q2, q3, [x17], 32
-        LDP     q4, q5, [x17], 32
-        LDP     q6, q7, [x17], 32
-        LDP     q28, q29, [x17], 32
-        LDR     q10, [x8], 16
+        LDR     q10, [x8], 16        // load 9 inputs
+        LDP     q0, q1, [x17], 32    // load bias and 9 weights
         LDR     q11, [x9], 16
         LDR     q12, [x10], 16
         LDR     q13, [x11], 16
@@ -835,6 +843,10 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         LDR     q16, [x14], 16
         LDR     q17, [x15], 16
         LDR     q18, [x16], 16
+        LDP     q2, q3, [x17], 32
+        LDP     q4, q5, [x17], 32
+        LDP     q6, q7, [x17], 32
+        LDP     q28, q29, [x17], 32
 
         FMLA    v0.4S, v1.4S, v10.4S
         FMLA    v0.4S, v2.4S, v11.4S

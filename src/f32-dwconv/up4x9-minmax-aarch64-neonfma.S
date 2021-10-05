@@ -20,48 +20,40 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # inputs
-# i0  x8 v23
-# i1  x9 v24
-# i2 x10 v25
-# i3 x11 v26
-# i4 x12 v27
-# i5 x13 v28
-# i6 x14 v29
-# i7 x15 v30
-# i8 x16 v31
+# i0  x8 v21
+# i1  x9 v22
+# i2 x10 v23
+# i3 x11 v24
+# i4 x12 v25
+# i5 x13 v26
+# i6 x14 v27
+# i7 x15 v28
+# i8 x16 v29
 
 # weights
-# x17 v0 (acc) v1 v2 v3 v4 v5 v6 v7 v18 v19
+# x17 v0 (acc) v1 v2 v3 v4 v5 v6 v7 v16 v17
 
-# Clamp v16 v17
+# Clamp v30 v31
 
-# unused v20 v21 v22
+# unused v18 v19 v20
 
 BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
 
-        # Save x19-x20,d16-d28 on stack
+        # Save x19,x20 on stack
         STP     x19, x20, [sp, -16]!
 
         # Load zero, params pointer
         LDP     x19, x20, [sp, 16]
 
         # Load min/max values
-        LD2R    {v16.4s, v17.4s}, [x20]
+        LD2R    {v30.4s, v31.4s}, [x20]
 
 0:
-        #  x8 := i0
-        #  x9 := i1
+        # Load 9 input pointers
         LDP     x8, x9, [x2]
-        #  x10 := i2
-        # x11 := i3
         LDP     x10, x11, [x2, 16]
-        # x12 := i4
-        # x13 := i5
         LDP     x12, x13, [x2, 32]
-        # x14 := i6
-        # x15 := i7
         LDP     x14, x15, [x2, 48]
-        # x16 := i8
         LDR     x16, [x2, 64]
 
         CMP     x8, x19                 // if i0 == zero
@@ -104,34 +96,34 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # skip main loop if c <= 4
         B.LO    2f
 1:
-        LDR     q23, [x8], 16      // load 9 inputs
-        LDR     q24, [x9], 16
-        LDR     q25, [x10], 16
-        LDR     q26, [x11], 16
-        LDR     q27, [x12], 16
-        LDR     q28, [x13], 16
-        LDR     q29, [x14], 16
-        LDR     q30, [x15], 16
-        LDR     q31, [x16], 16
+        LDR     q21, [x8], 16      // load 9 inputs
         LDP     q0, q1, [x17], 32  // load bias and 9 weights
+        LDR     q22, [x9], 16
+        LDR     q23, [x10], 16
+        LDR     q24, [x11], 16
+        LDR     q25, [x12], 16
+        LDR     q26, [x13], 16
+        LDR     q27, [x14], 16
+        LDR     q28, [x15], 16
+        LDR     q29, [x16], 16
         LDP     q2, q3, [x17], 32
         LDP     q4, q5, [x17], 32
         LDP     q6, q7, [x17], 32
-        LDP     q18, q19, [x17], 32
+        LDP     q16, q17, [x17], 32
 
-        FMLA    v0.4S, v1.4S, v23.4S
-        FMLA    v0.4S, v2.4S, v24.4S
-        FMLA    v0.4S, v3.4S, v25.4S
-        FMLA    v0.4S, v4.4S, v26.4S
-        FMLA    v0.4S, v5.4S, v27.4S
-        FMLA    v0.4S, v6.4S, v28.4S
-        FMLA    v0.4S, v7.4S, v29.4S
-        FMLA    v0.4S, v18.4S, v30.4S
-        FMLA    v0.4S, v19.4S, v31.4S
+        FMLA    v0.4S, v1.4S, v21.4S
+        FMLA    v0.4S, v2.4S, v22.4S
+        FMLA    v0.4S, v3.4S, v23.4S
+        FMLA    v0.4S, v4.4S, v24.4S
+        FMLA    v0.4S, v5.4S, v25.4S
+        FMLA    v0.4S, v6.4S, v26.4S
+        FMLA    v0.4S, v7.4S, v27.4S
+        FMLA    v0.4S, v16.4S, v28.4S
+        FMLA    v0.4S, v17.4S, v29.4S
         SUBS    x20, x20, 4
 
-        FMAX    v0.4S, v0.4S, v16.4S
-        FMIN    v0.4S, v0.4S, v17.4S
+        FMAX    v0.4S, v0.4S, v30.4S
+        FMIN    v0.4S, v0.4S, v31.4S
         STR     q0, [x4], 16
         B.HS    1b
 
@@ -141,33 +133,33 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # skip processing remainder channels unless c != 0
         CBZ     x20, 4f
 
-        LDR     q23, [x8], 16      // load 9 inputs
-        LDR     q24, [x9], 16
-        LDR     q25, [x10], 16
-        LDR     q26, [x11], 16
-        LDR     q27, [x12], 16
-        LDR     q28, [x13], 16
-        LDR     q29, [x14], 16
-        LDR     q30, [x15], 16
-        LDR     q31, [x16], 16
+        LDR     q21, [x8], 16      // load 9 inputs
         LDP     q0, q1, [x17], 32  // load bias and 9 weights
+        LDR     q22, [x9], 16
+        LDR     q23, [x10], 16
+        LDR     q24, [x11], 16
+        LDR     q25, [x12], 16
+        LDR     q26, [x13], 16
+        LDR     q27, [x14], 16
+        LDR     q28, [x15], 16
+        LDR     q29, [x16], 16
         LDP     q2, q3, [x17], 32
         LDP     q4, q5, [x17], 32
         LDP     q6, q7, [x17], 32
-        LDP     q18, q19, [x17], 32
+        LDP     q16, q17, [x17], 32
 
-        FMLA    v0.4S, v1.4S, v23.4S
-        FMLA    v0.4S, v2.4S, v24.4S
-        FMLA    v0.4S, v3.4S, v25.4S
-        FMLA    v0.4S, v4.4S, v26.4S
-        FMLA    v0.4S, v5.4S, v27.4S
-        FMLA    v0.4S, v6.4S, v28.4S
-        FMLA    v0.4S, v7.4S, v29.4S
-        FMLA    v0.4S, v18.4S, v30.4S
-        FMLA    v0.4S, v19.4S, v31.4S
+        FMLA    v0.4S, v1.4S, v21.4S
+        FMLA    v0.4S, v2.4S, v22.4S
+        FMLA    v0.4S, v3.4S, v23.4S
+        FMLA    v0.4S, v4.4S, v24.4S
+        FMLA    v0.4S, v5.4S, v25.4S
+        FMLA    v0.4S, v6.4S, v26.4S
+        FMLA    v0.4S, v7.4S, v27.4S
+        FMLA    v0.4S, v16.4S, v28.4S
+        FMLA    v0.4S, v17.4S, v29.4S
 
-        FMAX    v0.4S, v0.4S, v16.4S
-        FMIN    v0.4S, v0.4S, v17.4S
+        FMAX    v0.4S, v0.4S, v30.4S
+        FMIN    v0.4S, v0.4S, v31.4S
 
         TBZ     x20, 1, 3f
 
