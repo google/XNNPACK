@@ -25,20 +25,26 @@ parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
 
-
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
   common_parts = common_name.split("_")
   param_spec = common_parts[-1]
   assert param_spec.startswith("up")
-  cr, kr = map(int, param_spec[2:].split("x"))
+
+  if len(param_spec[2:].split("p")) > 1:
+    tile_part, kernel_part = param_spec[2:].split("p", 1)
+    primary_tile = int(tile_part)
+    cr, kr = map(int, kernel_part.split("x"))
+  else:
+    primary_tile = 0;
+    cr, kr = map(int, param_spec[2:].split("x"))
   arch, isa = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "gemmlowp", "rndnu"]:
     requantization = None
 
-  return cr, kr, requantization, arch, isa
+  return primary_tile, cr, kr, requantization, arch, isa
 
 
 DWCONV_TEST_CODE = """\
@@ -329,6 +335,7 @@ def generate_test_cases(ukernel, cr, kr, c_block,
       "UKERNEL_TYPE": ukernel_type.upper(),
       "DATATYPE": datatype,
       "ACTIVATION": activation.upper(),
+      "PRIMARY_TILE": primary_tile,
       "CR": cr,
       "KR": kr,
       "CBLOCK": c_block,
@@ -376,7 +383,7 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      cr, kr, requantization, arch, isa = split_ukernel_name(name)
+      primary_tile, cr, kr, requantization, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
