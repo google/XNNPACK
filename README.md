@@ -56,21 +56,21 @@ All operators in XNNPACK support NHWC layout, but additionally allow custom stri
 
 The table below presents **single-threaded** performance of XNNPACK library on three generations of MobileNet models and three generations of Pixel phones.
 
-| Model              | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
-| ------------------ | :-------: | :---------: | :----------: |
-| MobileNet v1 1.0X  |    82     |      86     |      88      |
-| MobileNet v2 1.0X  |    49     |      53     |      55      |
-| MobileNet v3 Large |    39     |      42     |      44      |
-| MobileNet v3 Small |    12     |      14     |      14      |
+| Model                   | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
+| ----------------------- | :-------: | :---------: | :----------: |
+| FP32 MobileNet v1 1.0X  |    82     |      86     |      88      |
+| FP32 MobileNet v2 1.0X  |    49     |      53     |      55      |
+| FP32 MobileNet v3 Large |    39     |      42     |      44      |
+| FP32 MobileNet v3 Small |    12     |      14     |      14      |
 
 The following table presents **multi-threaded** (using as many threads as there are big cores) performance of XNNPACK library on three generations of MobileNet models and three generations of Pixel phones.
 
-| Model              | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
-| ------------------ | :-------: | :---------: | :----------: |
-| MobileNet v1 1.0X  |    43     |      27     |      46      |
-| MobileNet v2 1.0X  |    26     |      18     |      28      |
-| MobileNet v3 Large |    22     |      16     |      24      |
-| MobileNet v3 Small |     7     |       6     |       8      |
+| Model                   | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
+| ----------------------- | :-------: | :---------: | :----------: |
+| FP32 MobileNet v1 1.0X  |    43     |      27     |      46      |
+| FP32 MobileNet v2 1.0X  |    26     |      18     |      28      |
+| FP32 MobileNet v3 Large |    22     |      16     |      24      |
+| FP32 MobileNet v3 Small |     7     |       6     |       8      |
 
 Benchmarked on March 27, 2020 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build with Android NDK r21 (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
 
@@ -78,14 +78,16 @@ Benchmarked on March 27, 2020 with `end2end_bench --benchmark_min_time=5` on an 
 
 The table below presents **multi-threaded** performance of XNNPACK library on three generations of MobileNet models and three generations of Raspberry Pi boards.
 
-| Model              | RPi Zero W (BCM2835), ms | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms |
-| ------------------ | :----------------------: | :-----------------: | :--------------------: | :-----------------: |
-| MobileNet v1 1.0X  |          4004            |         337         |          116           |          72         |
-| MobileNet v2 1.0X  |          2011            |         195         |           83           |          41         |
-| MobileNet v3 Large |          1694            |         163         |           70           |          38         |
-| MobileNet v3 Small |           482            |          52         |           23           |          13         |
+| Model                   | RPi Zero W (BCM2835), ms | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms | RPi 4 (BCM2711, ARM64), ms |
+| ----------------------- | :----------------------: | :-----------------: | :--------------------: | :-----------------: | :------------------------: |
+| FP32 MobileNet v1 1.0X  |          3937            |         299         |          114           |          72         |             76             |
+| FP32 MobileNet v2 1.0X  |          1987            |         187         |           79           |          41         |             44             |
+| FP32 MobileNet v3 Large |          1658            |         158         |           67           |          38         |             41             |
+| FP32 MobileNet v3 Small |           487            |          50         |           23           |          13         |             14             |
+| INT8 MobileNet v1 1.0X  |          2598            |         169         |           61           |          29         |             24             |
+| INT8 MobileNet v2 1.0X  |          1487            |         109         |           40           |          20         |             17             |
 
-Benchmarked on May 22, 2020 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs.
+Benchmarked on Oct 15, 2021 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs. INT8 inference was evaluated on per-channel quantization schema.
 
 ## Publications
 
