@@ -57,6 +57,17 @@ tools/xngen src/f16-f32-vcvt/f16c.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/
 tools/xngen src/f16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c &
 tools/xngen src/f16-f32-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-avx512skx-x32.c &
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int16-x8.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int16-x16.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int16-x24.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int16.c.in -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int16-x32.c &
+
+tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int32-x8.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int32-x16.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int32-x24.c &
+tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int32-x32.c &
+
 ################################## Unit tests #################################
 tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc &
 
