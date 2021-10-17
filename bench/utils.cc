@@ -173,17 +173,17 @@ bool CheckVFP(benchmark::State& state) {
   return true;
 }
 
-bool CheckNEONFP16ARITH(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) {
-    state.SkipWithError("no NEON-FP16-ARITH extension");
+bool CheckNEON(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
+    state.SkipWithError("no NEON extension");
     return false;
   }
   return true;
 }
 
-bool CheckNEON(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
-    state.SkipWithError("no NEON extension");
+bool CheckNEONFP16(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16()) {
+    state.SkipWithError("no NEON-FP16 extension");
     return false;
   }
   return true;
@@ -200,6 +200,14 @@ bool CheckNEONFMA(benchmark::State& state) {
 bool CheckNEONV8(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_v8()) {
     state.SkipWithError("no NEON-FMA extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckNEONFP16ARITH(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) {
+    state.SkipWithError("no NEON-FP16-ARITH extension");
     return false;
   }
   return true;
@@ -232,6 +240,14 @@ bool CheckSSE41(benchmark::State& state) {
 bool CheckAVX(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx()) {
     state.SkipWithError("no AVX extension");
+    return false;
+  }
+  return true;
+}
+
+bool CheckF16C(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_x86_f16c()) {
+    state.SkipWithError("no F16C extension");
     return false;
   }
   return true;

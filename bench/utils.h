@@ -77,13 +77,13 @@ typedef bool (*IsaCheckFunction)(benchmark::State& state);
 // If VFP is unsupported, report error in benchmark state, and return false.
 bool CheckVFP(benchmark::State& state);
 
-// Check if ARM NEON-FP16-ARITH extension is supported.
-// If NEON-FP16-ARITH is unsupported, report error in benchmark state, and return false.
-bool CheckNEONFP16ARITH(benchmark::State& state);
-
 // Check if ARM NEON extension is supported.
 // If NEON is unsupported, report error in benchmark state, and return false.
 bool CheckNEON(benchmark::State& state);
+
+// Check if ARM NEON-FP16 extension is supported.
+// If NEON-FP16 is unsupported, report error in benchmark state, and return false.
+bool CheckNEONFP16(benchmark::State& state);
 
 // Check if ARM NEON-FMA extension is supported.
 // If NEON-FMA is unsupported, report error in benchmark state, and return false.
@@ -92,6 +92,10 @@ bool CheckNEONFMA(benchmark::State& state);
 // Check if ARMv8 NEON instructions are supported.
 // If ARMv8 NEON is unsupported, report error in benchmark state, and return false.
 bool CheckNEONV8(benchmark::State& state);
+
+// Check if ARM NEON-FP16-ARITH extension is supported.
+// If NEON-FP16-ARITH is unsupported, report error in benchmark state, and return false.
+bool CheckNEONFP16ARITH(benchmark::State& state);
 
 // Check if ARM DOT extension is supported.
 // If DOT is unsupported, report error in benchmark state, and return false.
@@ -108,6 +112,10 @@ bool CheckSSE41(benchmark::State& state);
 // Check if x86 AVX extension is supported.
 // If AVX is unsupported, report error in benchmark state, and return false.
 bool CheckAVX(benchmark::State& state);
+
+// Check if x86 F16C extension is supported.
+// If F16C is unsupported, report error in benchmark state, and return false.
+bool CheckF16C(benchmark::State& state);
 
 // Check if x86 XOP extension is supported.
 // If XOP is unsupported, report error in benchmark state, and return false.

@@ -7891,6 +7891,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_f32_vcvt_bench",
+    srcs = [
+        "bench/f16-f32-vcvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_igemm_bench",
     srcs = [
         "bench/f32-igemm.cc",
