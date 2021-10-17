@@ -30,11 +30,11 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x32(
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
     const __m512 vacc0 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
-    const __m512 vacc1 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 1)));
+    const __m512 vacc1 = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) (i + 16)));
     i += 32;
 
     _mm512_storeu_ps(output, vacc0);
-    _mm512_storeu_ps(output + 1, vacc1);
+    _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
   }
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {

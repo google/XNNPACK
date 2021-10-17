@@ -2727,6 +2727,14 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/xx-pad/sse2.c)
 
 SET(ALL_SSE2_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-sse2-int16-x8.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int16-x16.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int16-x24.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int32-x8.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int32-x16.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int32-x24.c
+  src/f16-f32-vcvt/gen/vcvt-sse2-int32-x32.c
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
@@ -3088,6 +3096,14 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/s8-vclamp/sse41-x64.c)
 
 SET(ALL_SSE41_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-sse41-int16-x8.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int16-x24.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int16-x32.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int32-x8.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int32-x16.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int32-x24.c
+  src/f16-f32-vcvt/gen/vcvt-sse41-int32-x32.c
   src/f32-prelu/gen/sse41-2x4.c
   src/f32-prelu/gen/sse41-2x8.c
   src/f32-velu/gen/velu-sse41-rr2-lut16-p3-x4.c
@@ -3396,6 +3412,14 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx-x64.c)
 
 SET(ALL_AVX_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-avx-int16-x8.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int16-x24.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int16-x32.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int32-x8.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int32-x16.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int32-x24.c
+  src/f16-f32-vcvt/gen/vcvt-avx-int32-x32.c
   src/f32-dwconv/gen/up8x4-minmax-avx-acc2.c
   src/f32-dwconv/gen/up8x4-minmax-avx.c
   src/f32-dwconv/gen/up8x9-minmax-avx-acc2.c

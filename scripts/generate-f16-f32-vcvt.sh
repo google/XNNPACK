@@ -8,6 +8,37 @@
 tools/xngen src/f16-f32-vcvt/neonfp16.c.in -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c &
 tools/xngen src/f16-f32-vcvt/neonfp16.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c &
 
+################################# x86 128-bit #################################
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-sse2-int16-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-sse2-int16-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-sse2-int16-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c &
+
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-sse2-int32-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-sse2-int32-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-sse2-int32-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=2 -D AVX=0 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-sse2-int32-x32.c &
+
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-sse41-int16-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-sse41-int16-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-sse41-int16-x32.c &
+
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-sse41-int32-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-sse41-int32-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-sse41-int32-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=0 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-sse41-int32-x32.c &
+
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-avx-int16-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-avx-int16-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int16.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-avx-int16-x32.c &
+
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-avx-int32-x8.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-avx-int32-x16.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=24 -o src/f16-f32-vcvt/gen/vcvt-avx-int32-x24.c &
+tools/xngen src/f16-f32-vcvt/sse-int32.c.in -D SSE=4 -D AVX=1 -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-avx-int32-x32.c &
+
 ################################# x86 256-bit #################################
 tools/xngen src/f16-f32-vcvt/f16c.c.in -D BATCH_TILE=8  -o src/f16-f32-vcvt/gen/vcvt-f16c-x8.c &
 tools/xngen src/f16-f32-vcvt/f16c.c.in -D BATCH_TILE=16 -o src/f16-f32-vcvt/gen/vcvt-f16c-x16.c &
