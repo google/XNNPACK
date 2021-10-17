@@ -1168,6 +1168,14 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/xx-pad/neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int16-x32.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int32-x8.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int32-x16.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int32-x24.c
+  src/f16-f32-vcvt/gen/vcvt-neon-int32-x32.c
   src/f32-argmaxpool/4x-neon-c4.c
   src/f32-argmaxpool/9p8x-neon-c4.c
   src/f32-argmaxpool/9x-neon-c4.c
