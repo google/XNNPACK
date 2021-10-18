@@ -28,12 +28,12 @@ void xnn_f16_f32_vcvt_ukernel__f16c_x16(
 
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m256 vacc01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
-    const __m256 vacc89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
+    const __m256 vacc0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    const __m256 vacc1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
     i += 16;
 
-    _mm256_storeu_ps(output, vacc01234567);
-    _mm256_storeu_ps(output + 8, vacc89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {

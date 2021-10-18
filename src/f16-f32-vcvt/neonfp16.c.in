@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$SIMD_TILE = BATCH_TILE // 8
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -28,15 +28,15 @@ void xnn_f16_f32_vcvt_ukernel__neonfp16_x${BATCH_TILE}(
   const uint16_t* i = (const uint16_t*) input;
   $if BATCH_TILE > 8:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-      $for N in range(0, BATCH_TILE, 8):
-        const float16x8_t vh${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+      $for N in range(SIMD_TILE):
+        const float16x8_t vh${N} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
-      $for N in range(0, BATCH_TILE, 8):
-        const float32x4_t vf${ABC[N:N+4]} = vcvt_f32_f16(vget_low_f16(vh${ABC[N:N+8]}));
-        const float32x4_t vf${ABC[N+4:N+8]} = vcvt_f32_f16(vget_high_f16(vh${ABC[N:N+8]}));
+      $for N in range(SIMD_TILE):
+        const float32x4_t vf${2*N} = vcvt_f32_f16(vget_low_f16(vh${N}));
+        const float32x4_t vf${2*N+1} = vcvt_f32_f16(vget_high_f16(vh${N}));
 
-      $for N in range(0, BATCH_TILE, 4):
-        vst1q_f32(output, vf${ABC[N:N+4]}); output += 4;
+      $for N in range(2*SIMD_TILE):
+        vst1q_f32(output, vf${N}); output += 4;
     }
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const float16x8_t vh = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

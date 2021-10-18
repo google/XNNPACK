@@ -28,18 +28,18 @@ void xnn_f16_f32_vcvt_ukernel__neonfp16_x16(
 
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const float16x8_t vh01234567 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
-    const float16x8_t vh89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vh0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vh1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
-    const float32x4_t vf0123 = vcvt_f32_f16(vget_low_f16(vh01234567));
-    const float32x4_t vf4567 = vcvt_f32_f16(vget_high_f16(vh01234567));
-    const float32x4_t vf89AB = vcvt_f32_f16(vget_low_f16(vh89ABCDEF));
-    const float32x4_t vfCDEF = vcvt_f32_f16(vget_high_f16(vh89ABCDEF));
+    const float32x4_t vf0 = vcvt_f32_f16(vget_low_f16(vh0));
+    const float32x4_t vf1 = vcvt_f32_f16(vget_high_f16(vh0));
+    const float32x4_t vf2 = vcvt_f32_f16(vget_low_f16(vh1));
+    const float32x4_t vf3 = vcvt_f32_f16(vget_high_f16(vh1));
 
-    vst1q_f32(output, vf0123); output += 4;
-    vst1q_f32(output, vf4567); output += 4;
-    vst1q_f32(output, vf89AB); output += 4;
-    vst1q_f32(output, vfCDEF); output += 4;
+    vst1q_f32(output, vf0); output += 4;
+    vst1q_f32(output, vf1); output += 4;
+    vst1q_f32(output, vf2); output += 4;
+    vst1q_f32(output, vf3); output += 4;
   }
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const float16x8_t vh = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

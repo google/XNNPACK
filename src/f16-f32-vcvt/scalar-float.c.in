@@ -1,0 +1,92 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vcvt.h>
+
+#include <fp16.h>
+
+
+void xnn_f16_f32_vcvt_ukernel__scalar_float_x${BATCH_TILE}(
+    size_t n,
+    const void* input,
+    float* output,
+    const void* params)
+{
+  assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint16_t* i = (const uint16_t*) input;
+  $if BATCH_TILE > 1:
+    const uint32_t vsign_mask = UINT32_C(0x80000000);
+    const uint32_t vexp_offset = UINT32_C(0x70000000);
+    const float vexp_scale = 0x1.0p-112f;
+    const uint32_t vmagic_mask = UINT32_C(0x3F000000);
+    const float vmagic_bias = 0.5f;
+    const uint32_t vdenormalized_cutoff = UINT32_C(0x08000000);
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(BATCH_TILE):
+        const uint16_t vh${N} = i[${N}];
+      i += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vw${N} = (uint32_t) vh${N} << 16;
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vsign${N} = vw${N} & vsign_mask;
+
+      $for N in range(BATCH_TILE):
+        const uint32_t v2w${N} = vw${N} + vw${N};
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vnorm${N} = fp32_to_bits(fp32_from_bits((v2w${N} >> 4) + vexp_offset) * vexp_scale);
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vdenorm${N} = fp32_to_bits(fp32_from_bits((v2w${N} >> 17) | vmagic_mask) - vmagic_bias);
+
+      $for N in range(BATCH_TILE):
+        const uint32_t vf${N} = vsign${N} | (XNN_UNPREDICTABLE(v2w${N} < vdenormalized_cutoff) ? vdenorm${N} : vnorm${N});
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = fp32_from_bits(vf${N});
+      output += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      const uint16_t vh = *i++;
+
+      const float vf = fp16_ieee_to_fp32_value(vh);
+
+      *output++ = vf;
+
+      n -= sizeof(float);
+    } while (n != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(n != 0) {
+      const uint16_t vh = *i;
+
+      const float vf = fp16_ieee_to_fp32_value(vh);
+
+      *output = vf;
+    }
+  $else:
+    if XNN_UNLIKELY(n != 0) {
+      do {
+        const uint16_t vh = *i++;
+
+        const float vf = fp16_ieee_to_fp32_value(vh);
+
+        *output++ = vf;
+
+        n -= sizeof(float);
+      } while (n != 0);
+    }
+}
