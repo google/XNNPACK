@@ -121,6 +121,20 @@ static void DWConvEnd2EndBenchmark(
       8 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
 
+  static void f32_dwconv_up16x9__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_up16x9__neon,
+      xnn_init_f32_minmax_scalar_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+
+  static void f32_dwconv_up16x9__neon_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+
   static void f32_dwconv_up4x9__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma,
@@ -149,15 +163,33 @@ static void DWConvEnd2EndBenchmark(
       8 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEONFMA);
   }
 
-  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neon);
-  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neon_acc2);
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neon);
-  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neon_acc2);
+  static void f32_dwconv_up16x9__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEONFMA);
+  }
+
+  static void f32_dwconv_up16x9__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEONFMA);
+  }
 
   BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neonfma);
   BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neonfma_acc2);
   BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neonfma);
   BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neonfma_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__neonfma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neon);
+  BENCHMARK_FP32_END2END(f32_dwconv_up4x9__neon_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neon);
+  BENCHMARK_FP32_END2END(f32_dwconv_up8x9__neon_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__neon);
+  BENCHMARK_FP32_END2END(f32_dwconv_up16x9__neon_acc2);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

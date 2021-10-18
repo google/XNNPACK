@@ -293,7 +293,7 @@ TEST(${TEST_NAME}, zero) {
 }
 """
 
-def generate_test_cases(ukernel, cr, kr, c_block,
+def generate_test_cases(ukernel, primary_tile, cr, kr, c_block,
                         init_fn, requantization, is_pipelined, isa):
   """Generates all tests cases for a DWCONV micro-kernel.
 
@@ -389,7 +389,7 @@ def main(args):
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
-        name, cr, kr, cr, init_fn, requantization, pipelined, isa)
+        name, primary_tile, cr, kr, cr, init_fn, requantization, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     txt_changed = True

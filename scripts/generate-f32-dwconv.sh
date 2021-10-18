@@ -108,35 +108,47 @@ tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D X86=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up8x25-wasmsimd.c &
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x4-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x4-minmax-neon-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x4-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x4-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x4-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x4-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x4-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x4-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up16x4-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up16x4-minmax-neon-acc2.c &
 
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x4-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x4-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x4-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x4-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x4-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x4-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up16x4-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up16x4-minmax-neonfma-acc2.c &
 
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x9-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x9-minmax-neon-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x9-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x9-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x9-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x9-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x9-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x9-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up16x9-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up16x9-minmax-neon-acc2.c &
 
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x9-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x9-minmax-neonfma-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x9-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x9-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x9-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x9-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x9-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x9-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up16x9-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up16x9-minmax-neonfma-acc2.c &
 
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x25-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x25-minmax-neon.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up4x25-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up8x25-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/up16x25-minmax-neon.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/up16x25-minmax-neon-acc2.c &
 
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x25-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x25-minmax-neonfma-acc2.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x25-minmax-neonfma.c &
-tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x25-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up4x25-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up4x25-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up8x25-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up8x25-minmax-neonfma-acc2.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv/gen/up16x25-minmax-neonfma.c &
+tools/xngen src/f32-dwconv/up-neon.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv/gen/up16x25-minmax-neonfma-acc2.c &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-dwconv/up-sse.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/up4x4-minmax-sse.c &

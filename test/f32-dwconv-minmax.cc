@@ -1146,6 +1146,378 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(25)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 25; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 25; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(25)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 25; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEONFMA_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 25; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_DWCONV_MINMAX_UP4X9__NEONFMA, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
@@ -1883,6 +2255,378 @@
           .input_offset(176)
           .zero_index(mz)
           .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(9)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 9; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 9; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(9)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 9; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEONFMA_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 9; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -2634,6 +3378,378 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(4)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 4; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 4; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(4)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 4; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEONFMA_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t mz = 0; mz < 4; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_DWCONV_MINMAX_UP4X25__NEON, c_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     DWConvMicrokernelTester()
@@ -3371,6 +4487,378 @@
           .input_offset(176)
           .zero_index(mz)
           .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(25)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 25; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 25; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(25)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 25; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(25)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X25__NEON_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 25; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(25)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -4122,6 +5610,378 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(9)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 9; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 9; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(9)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 9; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(9)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X9__NEON_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 9; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(9)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_DWCONV_MINMAX_UP4X4__NEON, c_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     DWConvMicrokernelTester()
@@ -4859,6 +6719,378 @@
           .input_offset(176)
           .zero_index(mz)
           .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(4)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 4; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 4; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    DWConvMicrokernelTester()
+      .cr(16)
+      .kr(4)
+      .channels(16)
+      .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_div_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_div_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 1; channels < 16; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_gt_16_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, c_gt_16_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 17; channels < 32; channels++) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, multipixel) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, multipixel_with_step) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      for (size_t step = 2; step <= 4; step++) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .width(3)
+          .step(step)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, multipixel_with_output_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(16)
+        .width(5)
+        .output_stride(83)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, multipixel_with_qmin) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmin(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, multipixel_with_qmax) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 1; channels <= 80; channels += 15) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .width(3)
+        .qmax(128)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t channels = 32; channels < 256; channels += 48) {
+      DWConvMicrokernelTester()
+        .cr(16)
+        .kr(4)
+        .channels(channels)
+        .input_offset(304)
+        .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
+    }
+  }
+
+  TEST(F32_DWCONV_MINMAX_UP16X4__NEON_ACC2, zero) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t mz = 0; mz < 4; mz++) {
+      for (uint32_t channels = 32; channels < 256; channels += 48) {
+        DWConvMicrokernelTester()
+          .cr(16)
+          .kr(4)
+          .channels(channels)
+          .input_offset(304)
+          .zero_index(mz)
+          .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
