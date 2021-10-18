@@ -1058,9 +1058,9 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-neon-c4.c
   src/f32-avgpool/9x-minmax-neon-c4.c
   src/f32-conv-hwc2chw/3x3s2p1c3x4-neon-2x2.c
-  src/f32-dwconv/gen/up4x4-minmax-neon.c
-  src/f32-dwconv/gen/up4x9-minmax-neon.c
-  src/f32-dwconv/gen/up4x25-minmax-neon-acc2.c
+  src/f32-dwconv/gen/up8x4-minmax-neon.c
+  src/f32-dwconv/gen/up8x9-minmax-neon.c
+  src/f32-dwconv/gen/up8x25-minmax-neon-acc2.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neon-2x4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neon-1x4.c
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4.c
@@ -1777,10 +1777,9 @@ SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/math/cvt-f16-f32-neonfp16.c)
 
 SET(PROD_NEONFMA_MICROKERNEL_SRCS
-  src/f32-dwconv/gen/up4x9-minmax-neonfma.c
-  src/f32-dwconv/gen/up4x25-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/up8x4-minmax-neonfma.c
   src/f32-dwconv/gen/up8x9-minmax-neonfma.c
+  src/f32-dwconv/gen/up8x25-minmax-neonfma-acc2.c
   src/f32-gemm/gen/1x8s4-minmax-neonfma.c
   src/f32-gemm/gen/6x8s4-minmax-neonfma.c
   src/f32-ibilinear-chw/gen/neonfma-p8.c
