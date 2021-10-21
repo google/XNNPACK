@@ -30,8 +30,7 @@ static enum xnn_status create_floor_operator(
   assert(output_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
-  assert(num_input_dims >= 1);
-  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
+  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
   const enum xnn_status status = xnn_create_floor_nc_f32(
     channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
