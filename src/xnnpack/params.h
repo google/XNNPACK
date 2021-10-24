@@ -2600,8 +2600,10 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_X8      0x00000400
 // Indicates that XX XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_XX      0x00000800
+// Indicates that VCVT XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_VCVT    0x00001000
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
-#define XNN_INIT_FLAG_CHW_OPT 0x00001000
+#define XNN_INIT_FLAG_CHW_OPT 0x00002000
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
@@ -2707,6 +2709,9 @@ struct xnn_parameters {
     // Bilinear interpolation (2D) in CHW layout.
     struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
+  struct {
+    xnn_univector_ukernel_function f16_to_f32;
+  } vcvt;
   struct {
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;

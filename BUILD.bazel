@@ -122,6 +122,8 @@ TABLE_SRCS = [
 ]
 
 PROD_SCALAR_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c",
+    "src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c",
     "src/f32-argmaxpool/4x-scalar-c1.c",
     "src/f32-argmaxpool/9p8x-scalar-c1.c",
     "src/f32-argmaxpool/9x-scalar-c1.c",
@@ -1999,6 +2001,7 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
 
 # ISA-specific micro-kernels
 PROD_NEON_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c",
     "src/f32-argmaxpool/4x-neon-c4.c",
     "src/f32-argmaxpool/9p8x-neon-c4.c",
     "src/f32-argmaxpool/9x-neon-c4.c",
@@ -2721,6 +2724,7 @@ ALL_NEON_MICROKERNEL_SRCS = [
 ]
 
 PROD_NEONFP16_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c",
 ]
 
 ALL_NEONFP16_MICROKERNEL_SRCS = [
@@ -3659,6 +3663,7 @@ ALL_SSE_MICROKERNEL_SRCS = [
 ]
 
 PROD_SSE2_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c",
     "src/f32-argmaxpool/4x-sse2-c4.c",
     "src/f32-argmaxpool/9p8x-sse2-c4.c",
     "src/f32-argmaxpool/9x-sse2-c4.c",
@@ -4055,6 +4060,7 @@ ALL_SSSE3_MICROKERNEL_SRCS = [
 ]
 
 PROD_SSE41_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c",
     "src/f32-prelu/gen/sse41-2x8.c",
     "src/f32-vlrelu/gen/vlrelu-sse41-x8.c",
     "src/f32-vrnd/gen/vrndd-sse41-x8.c",
@@ -4346,6 +4352,7 @@ ALL_SSE41_MICROKERNEL_SRCS = [
 ]
 
 PROD_AVX_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c",
     "src/f32-dwconv/gen/up8x25-minmax-avx.c",
     "src/f32-dwconv/gen/up16x4-minmax-avx.c",
     "src/f32-dwconv/gen/up16x9-minmax-avx.c",
@@ -4748,6 +4755,7 @@ ALL_AVX_MICROKERNEL_SRCS = [
 ]
 
 PROD_F16C_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
 ]
 
 ALL_F16C_MICROKERNEL_SRCS = [
@@ -5594,6 +5602,7 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
 ]
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c",
     "src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c",
@@ -10313,6 +10322,15 @@ xnnpack_unit_test(
     srcs = [
         "test/constant-pad-nd.cc",
         "test/constant-pad-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "convert_nc_test",
+    srcs = [
+        "test/convert-nc.cc",
+        "test/convert-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

@@ -250,6 +250,8 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-2048.c)
 
 SET(PROD_SCALAR_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
   src/f32-argmaxpool/9x-scalar-c1.c
@@ -1052,6 +1054,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/xx-pad/scalar.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
   src/f32-argmaxpool/4x-neon-c4.c
   src/f32-argmaxpool/9p8x-neon-c4.c
   src/f32-argmaxpool/9x-neon-c4.c
@@ -1770,6 +1773,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-zip/xm-neon.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c)
+
+SET(PROD_NEONFP16_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c)
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c
@@ -2694,6 +2700,7 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/x32-packx/x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
@@ -3086,6 +3093,7 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-ssse3-x32.c)
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c
   src/f32-prelu/gen/sse41-2x8.c
   src/f32-vlrelu/gen/vlrelu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
@@ -3375,6 +3383,7 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/s8-vclamp/sse41-x64.c)
 
 SET(PROD_AVX_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c
   src/f32-dwconv/gen/up8x25-minmax-avx.c
   src/f32-dwconv/gen/up16x4-minmax-avx.c
   src/f32-dwconv/gen/up16x9-minmax-avx.c
@@ -3771,6 +3780,9 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx-x32.c
   src/x8-lut/gen/lut-avx-x48.c
   src/x8-lut/gen/lut-avx-x64.c)
+
+SET(PROD_F16C_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
@@ -4609,6 +4621,7 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/sqrt-avx512f-nr2fma.c)
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
   src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c
   src/qc8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
@@ -4956,6 +4969,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(aarch64|arm64)$" OR IOS_ARCH MATCHES "^arm64.*")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEON_MICROKERNEL_SRCS})
+  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFP16_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFMA_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONV8_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AARCH64_NEON_MICROKERNEL_SRCS})
@@ -4979,6 +4993,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86_64|AMD64)$" OR IOS_ARCH MATC
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSSE3_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE41_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX_MICROKERNEL_SRCS})
+  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_F16C_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_XOP_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX2_MICROKERNEL_SRCS})
@@ -5358,6 +5373,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(constant-pad-nd-test constant-pad-nd-test)
+
+  ADD_EXECUTABLE(convert-nc-test test/convert-nc.cc)
+  SET_TARGET_PROPERTIES(convert-nc-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(convert-nc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+  ADD_TEST(convert-nc-test convert-nc-test)
 
   ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
   SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES

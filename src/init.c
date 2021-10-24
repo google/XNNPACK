@@ -53,6 +53,7 @@
 #include <xnnpack/unpool.h>
 #include <xnnpack/vaddsub.h>
 #include <xnnpack/vbinary.h>
+#include <xnnpack/vcvt.h>
 #include <xnnpack/vmul.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
@@ -614,6 +615,17 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
+    /*************************** VCVT micro-kernels ***************************/
+    #ifndef XNN_NO_VCVT_OPERATORS
+      init_flags |= XNN_INIT_FLAG_VCVT;
+
+      if (cpuinfo_has_arm_neon_fp16()) {
+        xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neonfp16_x16;
+      } else {
+        xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neon_int16_x16;
+      }
+    #endif  // XNN_NO_VCVT_OPERATORS
+
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
@@ -1005,6 +1017,13 @@ static void init(void) {
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
+
+    /*************************** VCVT micro-kernels ***************************/
+    #ifndef XNN_NO_VCVT_OPERATORS
+      init_flags |= XNN_INIT_FLAG_VCVT;
+
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__scalar_float_x4;
+    #endif  // XNN_NO_VCVT_OPERATORS
 
     /**************************** X32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
@@ -2146,6 +2165,13 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** VCVT micro-kernels ***************************/
+  #ifndef XNN_NO_VCVT_OPERATORS
+    init_flags |= XNN_INIT_FLAG_VCVT;
+
+    xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neonfp16_x16;
+  #endif  // XNN_NO_VCVT_OPERATORS
+
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
@@ -3255,6 +3281,23 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** VCVT micro-kernels ***************************/
+  #ifndef XNN_NO_VCVT_OPERATORS
+    init_flags |= XNN_INIT_FLAG_VCVT;
+
+    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__avx512skx_x16;
+    } else if (cpuinfo_has_x86_f16c()) {
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__f16c_x16;
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__avx_int16_x16;
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__sse41_int16_x16;
+    } else {
+      xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__sse2_int16_x32;
+    }
+  #endif  // XNN_NO_VCVT_OPERATORS
+
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
@@ -3916,6 +3959,13 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** VCVT micro-kernels ***************************/
+  #ifndef XNN_NO_VCVT_OPERATORS
+    init_flags |= XNN_INIT_FLAG_VCVT;
+
+    xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16;
+  #endif  // XNN_NO_VCVT_OPERATORS
+
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
@@ -4399,6 +4449,13 @@ static void init(void) {
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
+
+  /*************************** VCVT micro-kernels ***************************/
+  #ifndef XNN_NO_VCVT_OPERATORS
+    init_flags |= XNN_INIT_FLAG_VCVT;
+
+    xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__scalar_float_x1;
+  #endif  // XNN_NO_VCVT_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
