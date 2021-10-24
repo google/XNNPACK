@@ -2730,6 +2730,8 @@ PROD_NEONFP16_MICROKERNEL_SRCS = [
 ALL_NEONFP16_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-neonfp16-x8.c",
+    "src/f32-f16-vcvt/gen/vcvt-neonfp16-x16.c",
     "src/math/cvt-f16-f32-neonfp16.c",
 ]
 
@@ -4761,6 +4763,8 @@ PROD_F16C_MICROKERNEL_SRCS = [
 ALL_F16C_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-f16c-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-f16c-x8.c",
+    "src/f32-f16-vcvt/gen/vcvt-f16c-x16.c",
     "src/math/cvt-f16-f32-f16c.c",
 ]
 
@@ -5631,6 +5635,8 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
 ALL_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c",
     "src/f16-f32-vcvt/gen/vcvt-avx512skx-x32.c",
+    "src/f32-f16-vcvt/gen/vcvt-avx512skx-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-avx512skx-x32.c",
     "src/qc8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c",
@@ -8006,6 +8012,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_f16_vcvt_bench",
+    srcs = [
+        "bench/f32-f16-vcvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_gemm_bench",
     srcs = [
         "bench/f32-gemm.cc",
@@ -9126,6 +9141,15 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f32_f16_vcvt_test",
+    srcs = [
+        "test/f32-f16-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

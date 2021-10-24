@@ -67,6 +67,31 @@ class VCvtMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_f16_vcvt_ukernel_function vcvt) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution = std::uniform_real_distribution<float>(-100.0f, 100.0f);
+    auto f32rng = std::bind(distribution, std::ref(rng));
+
+    std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<uint16_t> output(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E));
+
+      // Call optimized micro-kernel.
+      vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), nullptr /* params */);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(output[i], fp16_ieee_from_fp32_value(input[i]))
+          << "at " << i << " / " << batch_size()
+          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(input[i])
+          << " (" << input[i] << ")";
+      }
+    }
+  }
+
  private:
   size_t batch_size_ = 1;
   size_t iterations_ = 15;

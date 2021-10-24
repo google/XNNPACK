@@ -35,7 +35,7 @@ static void f16_f32_vcvt(
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
   auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(num_elements);
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<float, AlignedAllocator<float, 64>> y(num_elements);
   std::generate(x.begin(), x.end(), std::ref(f16rng));
   std::fill(y.begin(), y.end(), std::nanf(""));

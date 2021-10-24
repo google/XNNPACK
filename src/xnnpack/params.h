@@ -2107,6 +2107,12 @@ typedef void (*xnn_f16_f32_vcvt_ukernel_function)(
     float* output,
     const void* params);
 
+typedef void (*xnn_f32_f16_vcvt_ukernel_function)(
+    size_t n,
+    const float* input,
+    void* output,
+    const void* params);
+
 typedef void (*xnn_vmulcaddc_ukernel_function)(
     size_t m,
     size_t c,

@@ -1780,6 +1780,8 @@ SET(PROD_NEONFP16_MICROKERNEL_SRCS
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c
+  src/f32-f16-vcvt/gen/vcvt-neonfp16-x8.c
+  src/f32-f16-vcvt/gen/vcvt-neonfp16-x16.c
   src/math/cvt-f16-f32-neonfp16.c)
 
 SET(PROD_NEONFMA_MICROKERNEL_SRCS
@@ -3787,6 +3789,8 @@ SET(PROD_F16C_MICROKERNEL_SRCS
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
+  src/f32-f16-vcvt/gen/vcvt-f16c-x16.c
   src/math/cvt-f16-f32-f16c.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
@@ -4649,6 +4653,8 @@ SET(PROD_AVX512SKX_MICROKERNEL_SRCS
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
   src/f16-f32-vcvt/gen/vcvt-avx512skx-x32.c
+  src/f32-f16-vcvt/gen/vcvt-avx512skx-x16.c
+  src/f32-f16-vcvt/gen/vcvt-avx512skx-x32.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c
@@ -5959,6 +5965,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f32-dwconv-minmax-test f32-dwconv-minmax-test)
+
+  ADD_EXECUTABLE(f32-f16-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-f16-vcvt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f32-f16-vcvt-test f32-f16-vcvt-test)
 
   ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-gavgpool-cw-test PROPERTIES
@@ -7453,6 +7468,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(f32-f16-vcvt-bench bench/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-f16-vcvt-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
