@@ -30,16 +30,16 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   xw = "gemm_xw_" in common_name
   param_spec = common_parts[-1]
-  if "s" in param_spec:
-    param_spec, sr = param_spec.split("s", 1)
-    sr = int(sr)
-  else:
-    sr = 1
   if "c" in param_spec:
     param_spec, kr = param_spec.split("c", 1)
     kr = int(kr)
   else:
     kr = 1
+  if "s" in param_spec:
+    param_spec, sr = param_spec.split("s", 1)
+    sr = int(sr)
+  else:
+    sr = 1
   mr, nr = map(int, param_spec.split("x"))
   arch, isa = xnncommon.parse_target_name(target_name)
 
