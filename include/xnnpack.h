@@ -1395,6 +1395,20 @@ enum xnn_status xnn_setup_elu_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_floor_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* floor_op_out);
+
+enum xnn_status xnn_setup_floor_nc_f32(
+  xnn_operator_t floor_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
   size_t input_channels,
   size_t output_channels,
@@ -1409,20 +1423,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
 
 enum xnn_status xnn_setup_fully_connected_nc_f32(
   xnn_operator_t fully_connected_op,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_floor_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  uint32_t flags,
-  xnn_operator_t* floor_op_out);
-
-enum xnn_status xnn_setup_floor_nc_f32(
-  xnn_operator_t floor_op,
   size_t batch_size,
   const float* input,
   float* output,
@@ -1921,6 +1921,25 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_fully_connected_nc_f16(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_setup_fully_connected_nc_f16(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
   const void* input,
   void* output,
   pthreadpool_t threadpool);

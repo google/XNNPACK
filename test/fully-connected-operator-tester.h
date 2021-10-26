@@ -19,6 +19,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 
@@ -473,6 +475,116 @@ class FullyConnectedOperatorTester {
               output_ref[i * output_channels() + c],
               output[i * output_stride() + c],
               1.0e-4 * std::abs(output_ref[i * output_channels() + c]))
+            << "batch index = " << i << ", channel = " << c;
+        }
+      }
+    }
+  }
+
+  void TestF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+      (batch_size() - 1) * input_stride() + input_channels());
+    std::vector<uint16_t> kernel(output_channels() * input_channels());
+    std::vector<uint16_t> bias(output_channels());
+    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + output_channels());
+    std::vector<float> output_ref(batch_size() * output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7C00));
+
+      // Compute reference results, without renormalization.
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            output_ref[i * output_channels() + oc] = fp16_ieee_to_fp32_value(bias[oc]);
+          }
+        }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+      }
+      if (transpose_weights()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            for (size_t ic = 0; ic < input_channels(); ic++) {
+              output_ref[i * output_channels() + oc] +=
+                fp16_ieee_to_fp32_value(input[i * input_stride() + ic]) * fp16_ieee_to_fp32_value(kernel[ic * output_channels() + oc]);
+            }
+          }
+        }
+      } else {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            for (size_t ic = 0; ic < input_channels(); ic++) {
+              output_ref[i * output_channels() + oc] +=
+                fp16_ieee_to_fp32_value(input[i * input_stride() + ic]) * fp16_ieee_to_fp32_value(kernel[oc * input_channels() + ic]);
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
+      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t fully_connected_op = nullptr;
+
+      const xnn_status status = xnn_create_fully_connected_nc_f16(
+          input_channels(), output_channels(),
+          input_stride(), output_stride(),
+          kernel.data(), has_bias() ? bias.data() : nullptr,
+          output_min, output_max,
+          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+          &fully_connected_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, fully_connected_op);
+
+      // Smart pointer to automatically delete fully_connected_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_f16(
+          fully_connected_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < output_channels(); c++) {
+          ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max)
+            << "batch index = " << i << ", channel = " << c;
+          ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min)
+            << "batch index = " << i << ", channel = " << c;
+          ASSERT_NEAR(
+              output_ref[i * output_channels() + c],
+              fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
+              1.0e-2f * std::abs(output_ref[i * output_channels() + c]))
             << "batch index = " << i << ", channel = " << c;
         }
       }

@@ -5467,7 +5467,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(fully-connected-nc-test fully-connected-nc-test)
 
   ADD_EXECUTABLE(floor-nc-test test/floor-nc.cc)

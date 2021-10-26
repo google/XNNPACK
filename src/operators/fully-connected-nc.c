@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
@@ -466,6 +468,63 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     fully_connected_op_out);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_f16(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* fully_connected_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  const uint16_t fp16_output_min = fp16_ieee_from_fp32_value(output_min);
+  const uint16_t fp16_output_max = fp16_ieee_from_fp32_value(output_max);
+  const float rounded_output_min = fp16_ieee_to_fp32_value(fp16_output_min);
+  const float rounded_output_max = fp16_ieee_to_fp32_value(fp16_output_max);
+  if (rounded_output_min >= rounded_output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16), rounded_output_min, rounded_output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_f16_scaleminmax_params params;
+  if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
+    xnn_params.f16.gemm.init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
+  }
+  return create_fully_connected_nc(
+    input_channels, output_channels,
+    input_stride, output_stride,
+    kernel, bias, flags,
+    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
+    sizeof(uint16_t) /* sizeof(bias element) */,
+    (xnn_pack_gemm_io_w_function) xnn_pack_f16_gemm_io_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w,
+    NULL /* packing params */, 0 /* packed weights padding byte */,
+    &params, sizeof(params),
+    &xnn_params.f16.gemm, &xnn_params.f16.gemm.minmax,
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_fully_connected_nc_f16,
+    fully_connected_op_out);
+}
+
 enum xnn_status xnn_setup_fully_connected_nc_qu8(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
@@ -547,5 +606,33 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
     &fully_connected_op->params.f32_minmax,
     sizeof(fully_connected_op->params.f32_minmax),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_f16(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (fully_connected_op->type != xnn_operator_type_fully_connected_nc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16),
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_fully_connected_nc(
+    fully_connected_op,
+    batch_size,
+    input, output,
+    XNN_INIT_FLAG_F32,
+    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
+    sizeof(uint16_t) /* sizeof(bias element) */,
+    1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
+    &fully_connected_op->params.f16_scaleminmax,
+    sizeof(fully_connected_op->params.f16_scaleminmax),
     pthreadpool_get_threads_count(threadpool));
 }

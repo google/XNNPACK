@@ -86,6 +86,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "ELU (NC, QS8)";
     case xnn_operator_type_floor_nc_f32:
       return "Floor (NC, F32)";
+    case xnn_operator_type_fully_connected_nc_f16:
+      return "Fully Connected (NC, F16)";
     case xnn_operator_type_fully_connected_nc_f32:
       return "Fully Connected (NC, F32)";
     case xnn_operator_type_fully_connected_nc_qs8:
