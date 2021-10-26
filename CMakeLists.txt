@@ -1782,7 +1782,8 @@ SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c
   src/f32-f16-vcvt/gen/vcvt-neonfp16-x8.c
   src/f32-f16-vcvt/gen/vcvt-neonfp16-x16.c
-  src/math/cvt-f16-f32-neonfp16.c)
+  src/math/cvt-f16-f32-neonfp16.c
+  src/math/cvt-f32-f16-neonfp16.c)
 
 SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/gen/up8x4-minmax-neonfma.c
@@ -3791,7 +3792,8 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c
-  src/math/cvt-f16-f32-f16c.c)
+  src/math/cvt-f16-f32-f16c.c
+  src/math/cvt-f32-f16-f16c.c)
 
 SET(PROD_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up16x9-minmax-fp32-xop-mul16-add16.c
@@ -7135,6 +7137,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(f32-f16-cvt-eval eval/f32-f16-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-f16-cvt-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-f16-cvt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f32-f16-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
 
   ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
