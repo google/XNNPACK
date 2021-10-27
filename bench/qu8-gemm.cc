@@ -16,6 +16,8 @@
 #include <random>
 #include <vector>
 
+#include <cpuinfo.h>
+
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_GEMMLOWP
 #include "gemmlowp/public/gemmlowp.h"
@@ -39,6 +41,14 @@ static void GEMMBenchmark(benchmark::State& state,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
+  if (!cpuinfo_initialize()) {
+    state.SkipWithError("cpuinfo initialization failed");
+    return;
+  }
+  if (isa_check && !isa_check(state)) {
+    return;
+  }
+
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
