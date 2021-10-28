@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>  // for printf
 
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
@@ -195,7 +196,9 @@ void xnn_pack_qs8_gemm_goi_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  assert(sr == 1);
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
@@ -214,7 +217,24 @@ void xnn_pack_qs8_gemm_goi_w(
         } while (--n != 0);
       }
       packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * sizeof(int32_t));
-      for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
+
+      for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+        const size_t kr_block_size = min(kc - kr_block_start, kr);
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          int32_t ksum = 0;
+          for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+            const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + (round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset)];
+            ksum += (int32_t) kv;
+            *((int8_t*) packed_w) = kv;
+            packed_w = (void*) ((uintptr_t) packed_w + sizeof(int8_t));
+          }
+          packed_b[nr_block_offset] -= ksum * izp;
+          packed_w = (void*) ((uintptr_t) packed_w + (kr - kr_block_size) * sizeof(int8_t));
+        }
+        packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(int8_t));
+      }
+
+      for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
         const size_t kr_block_size = min(kc - kr_block_start, kr);
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
@@ -676,7 +696,9 @@ void xnn_pack_qs8_conv_goki_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  assert(sr == 1);
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
@@ -695,8 +717,26 @@ void xnn_pack_qs8_conv_goki_w(
         } while (--n != 0);
       }
       packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * sizeof(int32_t));
+
       for (size_t ki = 0; ki < ks; ki++) {
-        for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
+        for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+          const size_t kr_block_size = min(kc - kr_block_start, kr);
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+            int32_t ksum = 0;
+            for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+              const int8_t kv =
+                k[((nr_block_start + nr_block_offset) * ks + ki) * kc + (round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset)];
+              ksum += (int32_t) kv;
+              *((int8_t*) packed_w) = kv;
+              packed_w = (void*) ((uintptr_t) packed_w + sizeof(int8_t));
+            }
+            packed_b[nr_block_offset] -= ksum * izp;
+            packed_w = (void*) ((uintptr_t) packed_w + (kr - kr_block_size) * sizeof(int8_t));
+          }
+          packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(int8_t));
+        }
+
+        for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
           const size_t kr_block_size = min(kc - kr_block_start, kr);
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
             int32_t ksum = 0;
@@ -712,6 +752,7 @@ void xnn_pack_qs8_conv_goki_w(
           }
           packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(int8_t));
         }
+
       }
       packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
     }

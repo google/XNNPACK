@@ -1542,6 +1542,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c
   src/qs8-gemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-gemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c
+  src/qs8-gemm/gen/1x8s4c2-minmax-rndnu-neon-mull-padal.c
   src/qs8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane-prfm.c
@@ -1563,6 +1564,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-gemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c
   src/qs8-gemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c
+  src/qs8-gemm/gen/2x8s4c2-minmax-rndnu-neon-mull-padal.c
   src/qs8-gemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-gemm/gen/2x16-minmax-rndnu-neon-mull-addw-dup.c
   src/qs8-gemm/gen/2x16c2-minmax-rndnu-neon-mlal-padal-dup.c
@@ -1615,6 +1617,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c
   src/qs8-igemm/gen/1x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-igemm/gen/1x8c16-minmax-gemmlowp-neon-mlal-padal.c
+  src/qs8-igemm/gen/1x8s4c2-minmax-rndnu-neon-mull-padal.c
   src/qs8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qs8-igemm/gen/1x16-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane-prfm.c
@@ -1636,6 +1639,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8c8-minmax-gemmlowp-neon-mull-padal.c
   src/qs8-igemm/gen/2x8c8-minmax-rndnu-neon-mlal-padal.c
   src/qs8-igemm/gen/2x8c16-minmax-gemmlowp-neon-mlal-padal.c
+  src/qs8-igemm/gen/2x8s4c2-minmax-rndnu-neon-mull-padal.c
   src/qs8-igemm/gen/2x16-minmax-gemmlowp-neon-mlal-lane.c
   src/qs8-igemm/gen/2x16-minmax-rndnu-neon-mull-addw-dup.c
   src/qs8-igemm/gen/2x16c2-minmax-rndnu-neon-mlal-padal-dup.c
