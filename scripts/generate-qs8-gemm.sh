@@ -275,6 +275,8 @@ tools/xngen src/qs8-gemm/c2-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -
 ### S4C2 micro-kernels
 tools/xngen src/qs8-gemm/c2-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/1x8s4c2-minmax-rndnu-neon-mull-padal.c &
 tools/xngen src/qs8-gemm/c2-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/2x8s4c2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/1x8s4c2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/2x8s4c2-minmax-rndnu-neon-mlal-padal.c &
 
 ### C8 micro-kernels
 tools/xngen src/qs8-gemm/c8-neon-mull-padal.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c &
