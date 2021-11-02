@@ -19,16 +19,26 @@ static enum xnn_status create_deconvolution_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
-  assert(node->num_inputs == 3);
+  assert(node->num_inputs >= 2);
+  assert(node->num_inputs <= 3);
+  const bool use_bias = node->num_inputs >= 3;
+
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
   const uint32_t filter_id = node->inputs[1];
   assert(filter_id != XNN_INVALID_VALUE_ID);
   assert(filter_id < num_values);
-  const uint32_t bias_id = node->inputs[2];
-  assert(bias_id != XNN_INVALID_VALUE_ID);
-  assert(bias_id < num_values);
+
+  const void* bias_data = NULL;
+  if (use_bias) {
+    const uint32_t bias_id = node->inputs[2];
+    assert(bias_id != XNN_INVALID_VALUE_ID);
+    assert(bias_id < num_values);
+
+    bias_data = values[bias_id].data;
+    assert(bias_data != NULL);
+  }
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
@@ -36,9 +46,6 @@ static enum xnn_status create_deconvolution_operator(
   assert(output_id < num_values);
 
   const void* filter_data = values[filter_id].data;
-  assert(filter_data != NULL);
-
-  const void* bias_data = values[bias_id].data;
   assert(filter_data != NULL);
 
   const enum xnn_status status = xnn_create_deconvolution2d_nhwc_f32(
@@ -262,37 +269,41 @@ enum xnn_status xnn_define_deconvolution_2d(
       return xnn_status_invalid_parameter;
   }
 
-  if (bias_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id);
-    return xnn_status_invalid_parameter;
-  }
+  const bool use_bias = bias_id != XNN_INVALID_VALUE_ID;
 
-  const struct xnn_value* bias_value = &subgraph->values[bias_id];
-  if (bias_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id, bias_value->type);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (bias_value->data == NULL) {
-    xnn_log_error(
-      "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
-      xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  switch (bias_value->datatype) {
-    case xnn_datatype_fp32:
-      break;
-    default:
+  if (use_bias) {
+    if (bias_id >= subgraph->num_values) {
       xnn_log_error(
-        "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id,
-        xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
+        "failed to define %s operator with bias ID #%" PRIu32 ": invalid Value ID",
+        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id);
       return xnn_status_invalid_parameter;
+    }
+
+    const struct xnn_value* bias_value = &subgraph->values[bias_id];
+    if (bias_value->type != xnn_value_type_dense_tensor) {
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id, bias_value->type);
+      return xnn_status_invalid_parameter;
+    }
+
+    if (bias_value->data == NULL) {
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
+        xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id);
+      return xnn_status_invalid_parameter;
+    }
+
+    switch (bias_value->datatype) {
+      case xnn_datatype_fp32:
+        break;
+      default:
+        xnn_log_error(
+          "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+          xnn_node_type_to_string(xnn_node_type_deconvolution_2d), bias_id,
+          xnn_datatype_to_string(bias_value->datatype), bias_value->datatype);
+        return xnn_status_invalid_parameter;
+    }
   }
 
   if (output_id >= subgraph->num_values) {
@@ -344,7 +355,7 @@ enum xnn_status xnn_define_deconvolution_2d(
   node->params.deconvolution_2d.group_output_channels = group_output_channels;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
-  node->num_inputs = 3;
+  node->num_inputs = use_bias ? 3 : 2;
   node->inputs[0] = input_id;
   node->inputs[1] = filter_id;
   node->inputs[2] = bias_id;
