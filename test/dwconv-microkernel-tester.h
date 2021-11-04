@@ -351,8 +351,8 @@ class DWConvMicrokernelTester {
         int32_t accumulated_min = accumulators[c];
         int32_t accumulated_max = accumulators[c];
         for (size_t x = 0; x < width(); x++) {
-          accumulated_min = std::min(accumulated_min, accumulators[x * width() + c]);
-          accumulated_max = std::max(accumulated_max, accumulators[x * width() + c]);
+          accumulated_min = std::min(accumulated_min, accumulators[x * channels() + c]);
+          accumulated_max = std::max(accumulated_max, accumulators[x * channels() + c]);
         }
         const uint32_t accumulated_range = uint32_t(accumulated_max - accumulated_min);
         const float output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
