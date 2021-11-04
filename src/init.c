@@ -627,8 +627,10 @@ static void init(void) {
 
       if (cpuinfo_has_arm_neon_fp16()) {
         xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neonfp16_x16;
+        xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__neonfp16_x16;
       } else {
         xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neon_int16_x16;
+        xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
       }
     #endif  // XNN_NO_VCVT_OPERATORS
 
@@ -1035,6 +1037,7 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_VCVT;
 
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__scalar_float_x4;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
     #endif  // XNN_NO_VCVT_OPERATORS
 
     /**************************** X32 micro-kernels ****************************/
@@ -2188,6 +2191,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_VCVT;
 
     xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__neonfp16_x16;
+    xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__neonfp16_x16;
   #endif  // XNN_NO_VCVT_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
@@ -3325,14 +3329,20 @@ static void init(void) {
 
     if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__avx512skx_x16;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__avx512skx_x16;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
     } else if (cpuinfo_has_x86_f16c()) {
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__f16c_x16;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__f16c_x16;
     } else if (cpuinfo_has_x86_avx()) {
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__avx_int16_x16;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
     } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__sse41_int16_x16;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
     } else {
       xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__sse2_int16_x32;
+      xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
     }
   #endif  // XNN_NO_VCVT_OPERATORS
 
@@ -4014,6 +4024,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_VCVT;
 
     xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16;
+    xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x4;
   #endif  // XNN_NO_VCVT_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/
@@ -4511,6 +4522,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_VCVT;
 
     xnn_params.vcvt.f16_to_f32 = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__scalar_float_x1;
+    xnn_params.vcvt.f32_to_f16 = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_float_x1;
   #endif  // XNN_NO_VCVT_OPERATORS
 
   /**************************** X32 micro-kernels ****************************/

@@ -2741,6 +2741,17 @@ enum xnn_status xnn_setup_convert_nc_f16_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_convert_nc_f32_f16(size_t channels,
+                                              size_t input_stride,
+                                              size_t output_stride,
+                                              uint32_t flags,
+                                              xnn_operator_t* convert_op_out);
+
+enum xnn_status xnn_setup_convert_nc_f32_f16(xnn_operator_t convert_op,
+                                             size_t batch_size,
+                                             const float* input, void* output,
+                                             pthreadpool_t threadpool);
+
 #endif  // XNN_NO_CVT_OPERATORS
 
 #ifdef __cplusplus

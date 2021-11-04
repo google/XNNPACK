@@ -50,6 +50,7 @@ enum xnn_operator_type {
   xnn_operator_type_constant_pad_nd_x8,
   xnn_operator_type_constant_pad_nd_x32,
   xnn_operator_type_convert_nc_f16_f32,
+  xnn_operator_type_convert_nc_f32_f16,
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_convolution_nhwc_f16,
   xnn_operator_type_convolution_nhwc_f32,

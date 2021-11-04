@@ -122,6 +122,8 @@ TABLE_SRCS = [
 ]
 
 PROD_SCALAR_MICROKERNEL_SRCS = [
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x1.c",
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x4.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c",
     "src/f32-argmaxpool/4x-scalar-c1.c",
@@ -310,6 +312,10 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x1.c",
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x2.c",
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x3.c",
+    "src/f32-f16-vcvt/gen/vcvt-scalar-float-x4.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-float-x2.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-float-x3.c",
@@ -2806,6 +2812,7 @@ ALL_NEON_MICROKERNEL_SRCS = [
 
 PROD_NEONFP16_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-neonfp16-x16.c",
 ]
 
 ALL_NEONFP16_MICROKERNEL_SRCS = [
@@ -4867,6 +4874,7 @@ ALL_AVX_MICROKERNEL_SRCS = [
 
 PROD_F16C_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-f16c-x16.c",
 ]
 
 ALL_F16C_MICROKERNEL_SRCS = [
@@ -5718,6 +5726,7 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c",
+    "src/f32-f16-vcvt/gen/vcvt-avx512skx-x16.c",
     "src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c",
     "src/qc8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c",
