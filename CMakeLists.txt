@@ -792,6 +792,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-scalar-x1.c
   src/f32-vunary/gen/vsqr-scalar-x2.c
   src/f32-vunary/gen/vsqr-scalar-x4.c
+  src/math/cvt-f32-f16-scalar.c
   src/math/expm1minus-scalar-rr2-lut4-p4.c
   src/math/expm1minus-scalar-rr2-lut8-p3.c
   src/math/expm1minus-scalar-rr2-lut8-p4.c
