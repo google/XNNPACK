@@ -1455,6 +1455,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-neon-x8.c
   src/math/cvt-f16-f32-neon-int16.c
   src/math/cvt-f16-f32-neon-int32.c
+  src/math/cvt-f32-f16-neon.c
   src/math/expm1minus-neon-rr2-lut16-p3.c
   src/math/expm1minus-neon-rr2-p6.c
   src/math/roundd-neon-addsub.c
