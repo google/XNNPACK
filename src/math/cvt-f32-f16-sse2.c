@@ -37,23 +37,22 @@ void xnn_math_f32_f16_cvt__sse2(
 
     const __m128 vabsx_lo = _mm_and_ps(vx_lo, vnonsign_mask);
     const __m128 vabsx_hi = _mm_and_ps(vx_hi, vnonsign_mask);
-    const __m128i vsignw_lo = _mm_srai_epi32(_mm_castps_si128(vx_lo), 31);
-    const __m128i vsignw_hi = _mm_srai_epi32(_mm_castps_si128(vx_hi), 31);
 
+    const __m128 vsignx_lo = _mm_xor_ps(vx_lo, vabsx_lo);
+    const __m128 vsignx_hi = _mm_xor_ps(vx_hi, vabsx_hi);
     __m128i vbias_lo = _mm_add_epi32(_mm_castps_si128(vabsx_lo), vexp_bias);
     __m128i vbias_hi = _mm_add_epi32(_mm_castps_si128(vabsx_hi), vexp_bias);
     __m128 vf_lo = _mm_mul_ps(vabsx_lo, vscale_to_inf);
     __m128 vf_hi = _mm_mul_ps(vabsx_hi, vscale_to_inf);
     const __m128i vnanmaskw_lo = _mm_cmpgt_epi32(_mm_castps_si128(vabsx_lo), vexpw_max);
     const __m128i vnanmaskw_hi = _mm_cmpgt_epi32(_mm_castps_si128(vabsx_hi), vexpw_max);
-    __m128i vsignh = _mm_packs_epi32(vsignw_lo, vsignw_hi);
 
     vbias_lo = _mm_and_si128(vbias_lo, vexpw_max);
     vbias_hi = _mm_and_si128(vbias_hi, vexpw_max);
     vf_lo = _mm_mul_ps(vf_lo, vscale_to_zero);
     vf_hi = _mm_mul_ps(vf_hi, vscale_to_zero);
     const __m128i vnanmaskh = _mm_packs_epi32(vnanmaskw_lo, vnanmaskw_hi);
-    vsignh = _mm_slli_epi16(vsignh, 15);
+    const __m128i vsignh = _mm_packs_epi32(_mm_castps_si128(vsignx_lo), _mm_castps_si128(vsignx_hi));
 
     vbias_lo = _mm_max_epi16(vbias_lo, vbias_min);
     vbias_hi = _mm_max_epi16(vbias_hi, vbias_min);
