@@ -5,6 +5,18 @@
 
 - name: xnn_f32_f16_vcvt_ukernel__neonfp16_x8
 - name: xnn_f32_f16_vcvt_ukernel__neonfp16_x16
+- name: xnn_f32_f16_vcvt_ukernel__sse2_x8
+- name: xnn_f32_f16_vcvt_ukernel__sse2_x16
+- name: xnn_f32_f16_vcvt_ukernel__sse2_x24
+- name: xnn_f32_f16_vcvt_ukernel__sse2_x32
+- name: xnn_f32_f16_vcvt_ukernel__sse41_x8
+- name: xnn_f32_f16_vcvt_ukernel__sse41_x16
+- name: xnn_f32_f16_vcvt_ukernel__sse41_x24
+- name: xnn_f32_f16_vcvt_ukernel__sse41_x32
+- name: xnn_f32_f16_vcvt_ukernel__avx_x8
+- name: xnn_f32_f16_vcvt_ukernel__avx_x16
+- name: xnn_f32_f16_vcvt_ukernel__avx_x24
+- name: xnn_f32_f16_vcvt_ukernel__avx_x32
 - name: xnn_f32_f16_vcvt_ukernel__f16c_x8
 - name: xnn_f32_f16_vcvt_ukernel__f16c_x16
 - name: xnn_f32_f16_vcvt_ukernel__avx512skx_x16

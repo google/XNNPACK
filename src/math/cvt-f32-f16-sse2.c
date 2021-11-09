@@ -19,14 +19,14 @@ void xnn_math_f32_f16_cvt__sse2(
 {
   assert(n % (8 * sizeof(uint16_t)) == 0);
 
-  const __m128 vscale_to_inf = _mm_set1_ps(0x1.0p+112f);
-  const __m128 vscale_to_zero = _mm_set1_ps(0x1.0p-110f);
   const __m128 vnonsign_mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
   const __m128i vexp_bias = _mm_set1_epi32(0x07800000);
+  const __m128 vscale_to_inf = _mm_set1_ps(0x1.0p+112f);
   const __m128i vexpw_max = _mm_set1_epi32(0x7F800000);
+  const __m128 vscale_to_zero = _mm_set1_ps(0x1.0p-110f);
   const __m128i vbias_min = _mm_set1_epi32(0x40008000);
-  const __m128i vexph_mask = _mm_set1_epi32(0x7C00);
   const __m128i vmanth_mask = _mm_set1_epi32(0x0FFF);
+  const __m128i vexph_mask = _mm_set1_epi32(0x7C00);
   const __m128i vnanh = _mm_set1_epi16(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
