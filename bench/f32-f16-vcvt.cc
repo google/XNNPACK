@@ -153,6 +153,25 @@ static void f32_f16_vcvt(
     ->UseRealTime(); 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_x8,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_x8)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_x16,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_x16)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime(); 
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_x24,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_x24)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime(); 
+  BENCHMARK_CAPTURE(f32_f16_vcvt, wasmsimd_x32,
+                    xnn_f32_f16_vcvt_ukernel__wasmsimd_x32)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime(); 
+#endif  // XNN_ARCH_WASMSIMD
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

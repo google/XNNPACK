@@ -32,6 +32,12 @@ tools/xngen src/f32-f16-vcvt/f16c.c.in -D BATCH_TILE=16 -o src/f32-f16-vcvt/gen/
 tools/xngen src/f32-f16-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/f32-f16-vcvt/gen/vcvt-avx512skx-x16.c &
 tools/xngen src/f32-f16-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/f32-f16-vcvt/gen/vcvt-avx512skx-x32.c &
 
+################################## WAsm SIMD ##################################
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-f16-vcvt/gen/vcvt-wasmsimd-x8.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-f16-vcvt/gen/vcvt-wasmsimd-x16.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=24 -o src/f32-f16-vcvt/gen/vcvt-wasmsimd-x24.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -o src/f32-f16-vcvt/gen/vcvt-wasmsimd-x32.c &
+
 ################################## Unit tests #################################
 tools/generate-vcvt-test.py --spec test/f32-f16-vcvt.yaml --output test/f32-f16-vcvt.cc &
 
