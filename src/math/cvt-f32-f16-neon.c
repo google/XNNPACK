@@ -21,9 +21,9 @@ void xnn_math_f32_f16_cvt__neon(
 
   const uint32x4_t vexp_bias = vdupq_n_u32(UINT32_C(0x07800000));
   const float32x4_t vscale_to_inf = vdupq_n_f32(0x1.0p+112f);
-  const uint32x4_t vmagic = vdupq_n_u32(UINT32_C(0x7F800000));
+  const uint32x4_t vexpw_max = vdupq_n_u32(UINT32_C(0x7F800000));
   const float32x4_t vscale_to_zero = vdupq_n_f32(0x1.0p-110f);
-  const uint32x4_t vmax_exp = vdupq_n_u32(UINT32_C(0x40000000));
+  const uint32x4_t vbias_min = vdupq_n_u32(UINT32_C(0x40000000));
   const uint16x8_t vexph_mask = vdupq_n_u16(UINT16_C(0x7C00));
   const uint16x8_t vmanth_mask = vdupq_n_u16(UINT16_C(0x0FFF));
   const uint16x8_t vsignh_mask = vdupq_n_u16(UINT16_C(0x8000));
@@ -42,17 +42,17 @@ void xnn_math_f32_f16_cvt__neon(
 
     float32x4_t vf_lo = vmulq_f32(vabsx_lo, vscale_to_inf);
     float32x4_t vf_hi = vmulq_f32(vabsx_hi, vscale_to_inf);
-    const uint32x4_t vnanmask_lo = vcgtq_u32(vreinterpretq_u32_f32(vabsx_lo), vmagic);
-    const uint32x4_t vnanmask_hi = vcgtq_u32(vreinterpretq_u32_f32(vabsx_hi), vmagic);
+    const uint32x4_t vnanmask_lo = vcgtq_u32(vreinterpretq_u32_f32(vabsx_lo), vexpw_max);
+    const uint32x4_t vnanmask_hi = vcgtq_u32(vreinterpretq_u32_f32(vabsx_hi), vexpw_max);
 
-    vbias_lo = vandq_u32(vbias_lo, vmagic);
-    vbias_hi = vandq_u32(vbias_hi, vmagic);
+    vbias_lo = vandq_u32(vbias_lo, vexpw_max);
+    vbias_hi = vandq_u32(vbias_hi, vexpw_max);
     vf_lo = vmulq_f32(vf_lo, vscale_to_zero);
     vf_hi = vmulq_f32(vf_hi, vscale_to_zero);
 
     const uint16x8_t vnanmask = vcombine_u16(vmovn_u32(vnanmask_lo), vmovn_u32(vnanmask_hi));
-    vbias_lo = vmaxq_u32(vbias_lo, vmax_exp);
-    vbias_hi = vmaxq_u32(vbias_hi, vmax_exp);
+    vbias_lo = vmaxq_u32(vbias_lo, vbias_min);
+    vbias_hi = vmaxq_u32(vbias_hi, vbias_min);
 
     vf_lo = vaddq_f32(vf_lo, vreinterpretq_f32_u32(vbias_lo));
     vf_hi = vaddq_f32(vf_hi, vreinterpretq_f32_u32(vbias_hi));

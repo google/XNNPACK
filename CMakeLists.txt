@@ -2926,6 +2926,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/vsigmoid-sse2-p5-div-x24.c
   src/math/cvt-f16-f32-sse2-int16.c
   src/math/cvt-f16-f32-sse2-int32.c
+  src/math/cvt-f32-f16-sse2.c
   src/math/exp-sse2-rr2-lut64-p2.c
   src/math/exp-sse2-rr2-p5.c
   src/math/expm1minus-sse2-rr2-lut16-p3.c
@@ -3269,6 +3270,7 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/vsigmoid-sse41-p5-div-x24.c
   src/math/cvt-f16-f32-sse41-int16.c
   src/math/cvt-f16-f32-sse41-int32.c
+  src/math/cvt-f32-f16-sse41.c
   src/math/roundd-sse41.c
   src/math/roundne-sse41.c
   src/math/roundu-sse41.c

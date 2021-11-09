@@ -25,11 +25,10 @@ void xnn_math_f32_f16_cvt__scalar(
   const float vscale_to_zero = 0x1.0p-110f;
   const uint32_t vnonsign_mask = UINT32_C(0x7FFFFFFF);
   const uint32_t vexp_bias = UINT32_C(0x07800000);
-  const uint32_t vexpw_mask = UINT32_C(0x7F800000);
-  const uint32_t vmax_exp = UINT32_C(0x40000000);
+  const uint32_t vexpw_max = UINT32_C(0x7F800000);
+  const uint32_t vbias_min = UINT32_C(0x40000000);
   const uint16_t vexph_mask = UINT16_C(0x7C00);
   const uint16_t vmanth_mask = UINT16_C(0x0FFF);
-  const uint32_t vnanw_threshold = UINT32_C(0x7F800000);
   const uint16_t vnanh = UINT16_C(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
@@ -40,7 +39,7 @@ void xnn_math_f32_f16_cvt__scalar(
     const uint32_t vnonsignw = vw & vnonsign_mask;
     const uint32_t vsignw = vw ^ vnonsignw;
 
-    const uint32_t vbias = math_max_u32((vnonsignw + vexp_bias) & vexpw_mask, vmax_exp);
+    const uint32_t vbias = math_max_u32((vnonsignw + vexp_bias) & vexpw_max, vbias_min);
     const float vf = (fp32_from_bits(vnonsignw) * vscale_to_inf) * vscale_to_zero + fp32_from_bits(vbias);
 
     const uint32_t vbits = fp32_to_bits(vf);
@@ -49,7 +48,7 @@ void xnn_math_f32_f16_cvt__scalar(
     const uint16_t vnonsignh = vexph + vmanth;
     const uint16_t vsignh = (uint16_t) (vsignw >> 16);
 
-    const uint16_t vh = vsignh | (vnonsignw > vnanw_threshold ? vnanh : vnonsignh);
+    const uint16_t vh = vsignh | (XNN_UNPREDICTABLE(vnonsignw > vexpw_max) ? vnanh : vnonsignh);
 
     *o++ = vh;
   }
