@@ -42,33 +42,33 @@ void xnn_math_f32_f16_cvt__neon(
 
     float32x4_t vf_lo = vmulq_f32(vabsx_lo, vscale_to_inf);
     float32x4_t vf_hi = vmulq_f32(vabsx_hi, vscale_to_inf);
-    const uint32x4_t vnanmask_lo = vcgtq_u32(vreinterpretq_u32_f32(vabsx_lo), vexpw_max);
-    const uint32x4_t vnanmask_hi = vcgtq_u32(vreinterpretq_u32_f32(vabsx_hi), vexpw_max);
+    const uint32x4_t vnanmaskw_lo = vcgtq_u32(vreinterpretq_u32_f32(vabsx_lo), vexpw_max);
+    const uint32x4_t vnanmaskw_hi = vcgtq_u32(vreinterpretq_u32_f32(vabsx_hi), vexpw_max);
 
     vbias_lo = vandq_u32(vbias_lo, vexpw_max);
     vbias_hi = vandq_u32(vbias_hi, vexpw_max);
     vf_lo = vmulq_f32(vf_lo, vscale_to_zero);
     vf_hi = vmulq_f32(vf_hi, vscale_to_zero);
 
-    const uint16x8_t vnanmask = vcombine_u16(vmovn_u32(vnanmask_lo), vmovn_u32(vnanmask_hi));
+    const uint16x8_t vnanmaskh = vcombine_u16(vmovn_u32(vnanmaskw_lo), vmovn_u32(vnanmaskw_hi));
     vbias_lo = vmaxq_u32(vbias_lo, vbias_min);
     vbias_hi = vmaxq_u32(vbias_hi, vbias_min);
 
     vf_lo = vaddq_f32(vf_lo, vreinterpretq_f32_u32(vbias_lo));
     vf_hi = vaddq_f32(vf_hi, vreinterpretq_f32_u32(vbias_hi));
 
-    uint16x8_t vexpy = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vf_lo), 13), vshrn_n_u32(vreinterpretq_u32_f32(vf_hi), 13));
-    uint16x8_t vmanty = vcombine_u16(vmovn_u32(vreinterpretq_u32_f32(vf_lo)), vmovn_u32(vreinterpretq_u32_f32(vf_hi)));
-    uint16x8_t vsigny = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vx_lo), 16), vshrn_n_u32(vreinterpretq_u32_f32(vx_hi), 16));
+    uint16x8_t vexph = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vf_lo), 13), vshrn_n_u32(vreinterpretq_u32_f32(vf_hi), 13));
+    uint16x8_t vmanth = vcombine_u16(vmovn_u32(vreinterpretq_u32_f32(vf_lo)), vmovn_u32(vreinterpretq_u32_f32(vf_hi)));
+    uint16x8_t vsignh = vcombine_u16(vshrn_n_u32(vreinterpretq_u32_f32(vx_lo), 16), vshrn_n_u32(vreinterpretq_u32_f32(vx_hi), 16));
 
-    vexpy = vandq_u16(vexpy, vexph_mask);
-    vmanty = vandq_u16(vmanty, vmanth_mask);
-    vsigny = vandq_u16(vsigny, vsignh_mask);
+    vexph = vandq_u16(vexph, vexph_mask);
+    vmanth = vandq_u16(vmanth, vmanth_mask);
+    vsignh = vandq_u16(vsignh, vsignh_mask);
 
-    uint16x8_t vy = vaddq_u16(vmanty, vexpy);
-    vy = vbslq_u16(vnanmask, vnanh, vy);
-    vy = vorrq_u16(vy, vsigny);
+    uint16x8_t vh = vaddq_u16(vmanth, vexph);
+    vh = vbslq_u16(vnanmaskh, vnanh, vh);
+    vh = vorrq_u16(vh, vsignh);
 
-    vst1q_u16(o, vy); o += 8;
+    vst1q_u16(o, vh); o += 8;
   }
 }

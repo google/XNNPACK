@@ -1266,6 +1266,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-2x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-3x4-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-3x4.c
+  src/f32-f16-vcvt/gen/vcvt-neon-x8.c
+  src/f32-f16-vcvt/gen/vcvt-neon-x16.c
+  src/f32-f16-vcvt/gen/vcvt-neon-x24.c
+  src/f32-f16-vcvt/gen/vcvt-neon-x32.c
   src/f32-gavgpool-cw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c

@@ -58,6 +58,27 @@ static void f32_f16_vcvt(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f32_f16_vcvt, neon_x8,
+                    xnn_f32_f16_vcvt_ukernel__neon_x8,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_f16_vcvt, neon_x16,
+                    xnn_f32_f16_vcvt_ukernel__neon_x16,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_f16_vcvt, neon_x24,
+                    xnn_f32_f16_vcvt_ukernel__neon_x24,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_f16_vcvt, neon_x32,
+                    xnn_f32_f16_vcvt_ukernel__neon_x32,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_f16_vcvt, neonfp16_x8,
                     xnn_f32_f16_vcvt_ukernel__neonfp16_x8,
                     benchmark::utils::CheckNEONFP16)
