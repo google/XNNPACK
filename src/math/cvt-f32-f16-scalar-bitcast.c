@@ -14,7 +14,7 @@
 #include <fp16/bitcasts.h>
 
 
-void xnn_math_f32_f16_cvt__scalar(
+void xnn_math_f32_f16_cvt__scalar_bitcast(
     size_t n,
     const float* input,
     void* output)
@@ -33,22 +33,34 @@ void xnn_math_f32_f16_cvt__scalar(
 
   uint16_t* o = (uint16_t*) output;
   for (; n != 0; n -= sizeof(uint16_t)) {
-    const float vi = *input++;
+    const float vx = *input++;
 
-    const uint32_t vw = fp32_to_bits(vi);
+    const uint32_t vw = fp32_to_bits(vx);
     const uint32_t vnonsignw = vw & vnonsign_mask;
-    const uint32_t vsignw = vw ^ vnonsignw;
 
-    const uint32_t vbias = math_max_u32((vnonsignw + vexp_bias) & vexpw_max, vbias_min);
-    const float vf = (fp32_from_bits(vnonsignw) * vscale_to_inf) * vscale_to_zero + fp32_from_bits(vbias);
+    float vf = fp32_from_bits(vnonsignw);
+    const uint32_t vsignw = vw ^ vnonsignw;
+    uint32_t vbias = vnonsignw + vexp_bias;
+
+    vf *= vscale_to_inf;
+    vbias &= vexpw_max;
+
+    vf *= vscale_to_zero;
+    vbias = math_max_u32(vbias, vbias_min);
+
+    vf += fp32_from_bits(vbias);
 
     const uint32_t vbits = fp32_to_bits(vf);
+
     const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
     const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;
-    const uint16_t vnonsignh = vexph + vmanth;
     const uint16_t vsignh = (uint16_t) (vsignw >> 16);
 
-    const uint16_t vh = vsignh | (XNN_UNPREDICTABLE(vnonsignw > vexpw_max) ? vnanh : vnonsignh);
+    uint16_t vh = vexph + vmanth;
+    if XNN_UNPREDICTABLE(vnonsignw > vexpw_max) {
+      vh = vnanh;
+    }
+    vh |= vsignh;
 
     *o++ = vh;
   }
