@@ -24,7 +24,7 @@ $PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("neonv
 $if REQUANTIZATION == "FP32" and CHANNELWISE and not ARMV8:
   $PARAMS_STRUCT = "neon_fp32"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}s4c2__${ISA}_${"mlal" if MLA else "mull"}_padal(
+void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2s4__${ISA}_${"mlal" if MLA else "mull"}_padal(
     size_t mr,
     size_t nc,
     size_t kc,
