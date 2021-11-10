@@ -29,3 +29,11 @@
 - name: xnn_f32_f16_vcvt_ukernel__wasmsimd_x16
 - name: xnn_f32_f16_vcvt_ukernel__wasmsimd_x24
 - name: xnn_f32_f16_vcvt_ukernel__wasmsimd_x32
+- name: xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1
+- name: xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2
+- name: xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3
+- name: xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4
+- name: xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1
+- name: xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x2
+- name: xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3
+- name: xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4

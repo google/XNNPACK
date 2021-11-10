@@ -519,6 +519,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-3x1-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-3x1.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-bitcast-x1.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-bitcast-x2.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-bitcast-x3.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-bitcast-x4.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-fabsf-x1.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-fabsf-x2.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-fabsf-x3.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-fabsf-x4.c
   src/f32-gavgpool-cw/scalar-x1.c
   src/f32-gavgpool/7p7x-minmax-scalar-c1.c
   src/f32-gavgpool/7x-minmax-scalar-c1.c

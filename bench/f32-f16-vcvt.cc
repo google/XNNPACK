@@ -193,6 +193,40 @@ static void f32_f16_vcvt(
     ->UseRealTime(); 
 #endif  // XNN_ARCH_WASMSIMD
 
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_bitcast_x1,
+                  xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_bitcast_x2,
+                  xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_bitcast_x3,
+                  xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_bitcast_x4,
+                  xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_fabsf_x1,
+                  xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_fabsf_x2,
+                  xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x2)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_fabsf_x3,
+                  xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_f16_vcvt, scalar_fabsf_x4,
+                  xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
