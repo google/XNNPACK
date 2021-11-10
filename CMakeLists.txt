@@ -1136,10 +1136,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mla8-ld64.c
-  src/qc8-gemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c
-  src/qc8-gemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c
-  src/qc8-igemm/gen/1x8c2-minmax-fp32-neon-mlal-padal-dup.c
-  src/qc8-igemm/gen/2x8c2-minmax-fp32-neon-mlal-padal-dup.c
+  src/qc8-gemm/gen/1x8c2s4-minmax-fp32-neon-mlal-padal.c
+  src/qc8-gemm/gen/2x8c2s4-minmax-fp32-neon-mlal-padal.c
+  src/qc8-igemm/gen/1x8c2s4-minmax-fp32-neon-mlal-padal.c
+  src/qc8-igemm/gen/2x8c2s4-minmax-fp32-neon-mlal-padal.c
   src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mla8-ld64.c
@@ -2281,16 +2281,16 @@ SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neonv8-mla8-ld64.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neonv8-mla8-ld64.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neonv8-mla8-ld64.c
-  src/qc8-gemm/gen/1x8c2-minmax-fp32-neonv8-mlal-padal-dup.c
+  src/qc8-gemm/gen/1x8c2s4-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-gemm/gen/1x8c8-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-gemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
-  src/qc8-gemm/gen/2x8c2-minmax-fp32-neonv8-mlal-padal-dup.c
+  src/qc8-gemm/gen/2x8c2s4-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-gemm/gen/2x8c8-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-gemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
-  src/qc8-igemm/gen/1x8c2-minmax-fp32-neonv8-mlal-padal-dup.c
+  src/qc8-igemm/gen/1x8c2s4-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-igemm/gen/1x8c8-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
-  src/qc8-igemm/gen/2x8c2-minmax-fp32-neonv8-mlal-padal-dup.c
+  src/qc8-igemm/gen/2x8c2s4-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-igemm/gen/2x8c8-minmax-fp32-neonv8-mlal-padal.c
   src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
   src/qs8-vmul/gen/minmax-fp32-neonv8-ld64-x16.c
