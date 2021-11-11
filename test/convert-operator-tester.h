@@ -114,10 +114,63 @@ class ConvertOperatorTester {
       ASSERT_NE(nullptr, convert_op);
 
       // Smart pointer to automatically delete convert op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(convert_op, xnn_delete_operator);
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_convert_nc_f16_f32(
+          convert_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(convert_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void TestF32toF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<uint16_t> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[i * channels() + c] = fp16_ieee_from_fp32_value(input[i * input_stride() + c]);
+        }
+      }
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_convert_nc_f32_f16(
+          channels(), input_stride(), output_stride(),
+          0, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      // Smart pointer to automatically delete convert op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_convert_nc_f32_f16(
           convert_op,
           batch_size(),
           input.data(), output.data(),

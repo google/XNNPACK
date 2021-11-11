@@ -317,6 +317,21 @@ enum xnn_status xnn_create_convert_nc_f16_f32(
     convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_f32_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0,
+    xnn_operator_type_convert_nc_f32_f16,
+    xnn_params.vcvt.f32_to_f16,
+    convert_op_out);
+}
+
 enum xnn_status xnn_create_copy_nc_x32(
     size_t channels,
     size_t input_stride,
@@ -685,6 +700,29 @@ enum xnn_status xnn_setup_convert_nc_f16_f32(
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     2 /* log2(sizeof(float)) */,
+    NULL, 0);
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_f16(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  const float* input,
+  void* output,
+  pthreadpool_t threadpool)
+{
+  if (convert_op->type != xnn_operator_type_convert_nc_f32_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_f16),
+      xnn_operator_type_to_string(convert_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  convert_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    convert_op,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0);
 }
 

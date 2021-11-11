@@ -2717,6 +2717,7 @@ struct xnn_parameters {
   } f32;
   struct {
     xnn_univector_ukernel_function f16_to_f32;
+    xnn_univector_ukernel_function f32_to_f16;
   } vcvt;
   struct {
     xnn_unpool_ukernel_function unpool;

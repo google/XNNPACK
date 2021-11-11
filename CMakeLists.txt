@@ -276,6 +276,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-scalar-2x1-acc2.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-1x1-acc5.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-scalar-2x1-acc2.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-bitcast-x4.c
+  src/f32-f16-vcvt/gen/vcvt-scalar-fabsf-x2.c
   src/f32-gavgpool-cw/scalar-x1.c
   src/f32-gavgpool/7p7x-minmax-scalar-c1.c
   src/f32-gavgpool/7x-minmax-scalar-c1.c
@@ -1089,6 +1091,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neon-1x4.c
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-neon-1x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neon-1x4.c
+  src/f32-f16-vcvt/gen/vcvt-neon-x8.c
   src/f32-gavgpool-cw/neon-x4.c
   src/f32-gavgpool/7p7x-minmax-neon-c4.c
   src/f32-gavgpool/7x-minmax-neon-c4.c
@@ -1885,7 +1888,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/xx-pad/neon.c)
 
 SET(PROD_NEONFP16_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c)
+  src/f16-f32-vcvt/gen/vcvt-neonfp16-x16.c
+  src/f32-f16-vcvt/gen/vcvt-neonfp16-x16.c)
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neonfp16-x8.c
@@ -2847,6 +2851,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
+  src/f32-f16-vcvt/gen/vcvt-sse2-x16.c
   src/f32-prelu/gen/sse2-2x8.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x12.c
@@ -3242,6 +3247,7 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c
+  src/f32-f16-vcvt/gen/vcvt-sse41-x8.c
   src/f32-prelu/gen/sse41-2x8.c
   src/f32-vlrelu/gen/vlrelu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
@@ -3537,6 +3543,7 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c
+  src/f32-f16-vcvt/gen/vcvt-avx-x24.c
   src/f32-dwconv/gen/up8x25-minmax-avx.c
   src/f32-dwconv/gen/up16x3-minmax-avx.c
   src/f32-dwconv/gen/up16x4-minmax-avx.c
@@ -3944,7 +3951,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx-x64.c)
 
 SET(PROD_F16C_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c)
+  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
@@ -4788,6 +4796,7 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
+  src/f32-f16-vcvt/gen/vcvt-avx512skx-x16.c
   src/qc8-dwconv/gen/up32x9-minmax-fp32-avx512skx-mul32.c
   src/qc8-dwconv/gen/up32x25-minmax-fp32-avx512skx-mul32.c
   src/qc8-gemm/gen/1x16c8-minmax-fp32-avx512skx.c
