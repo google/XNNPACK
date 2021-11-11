@@ -999,9 +999,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_4x8c4__neon_mull_padal_dup);
   BENCHMARK_QS8_END2END(qs8_gemm_4x16c4__neon_mull_padal_dup);
 
-  BENCHMARK_QS8_END2END(qs8_gemm_2x8c2s4__neon_mull_padal);
-  BENCHMARK_QS8_END2END(qs8_gemm_2x8c2s4__neon_mlal_padal);
-
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c2__neon_mlal_padal_dup);
   BENCHMARK_QS8_END2END(qs8_gemm_2x16c2__neon_mlal_padal_dup);
   BENCHMARK_QS8_END2END(qs8_gemm_3x8c2__neon_mlal_padal_dup);
