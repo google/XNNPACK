@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -65,7 +66,7 @@ void xnn_f32_f16_vcvt_ukernel__f16c_x16(
       o += 2;
     }
     if (n & (1 * sizeof(uint16_t))) {
-      _mm_storeu_si16(o, vh);
+      *((uint16_t*) o) = _mm_extract_epi16(vh, 0);
     }
   }
 }
