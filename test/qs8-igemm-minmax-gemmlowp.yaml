@@ -3,37 +3,37 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c2__neon_mlal_padal_dup
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c2__neon_mlal_dup
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c2__neon_mlal_padal_dup
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c2__neon_mlal_dup
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_prfm
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_cortex_a53
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_cortex_a53
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_padal_prfm_cortex_a53
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__aarch64_neon_mlal_prfm_cortex_a53
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c16__aarch64_neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c16__aarch64_neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_prfm
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_cortex_a53
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_cortex_a53
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_padal_prfm_cortex_a53
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__aarch64_neon_mlal_prfm_cortex_a53
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
 - name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
@@ -81,76 +81,76 @@
 - name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_6x16__neon_mlal_lane
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c8__neon_mull_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c8__neon_mull
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 8
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c8__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c8__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x8c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x8c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x8c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x16c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_2x16c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_3x16c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
-- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c16__neon_mlal_padal
+- name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_4x16c16__neon_mlal
   init: xnn_init_qs8_conv_minmax_gemmlowp_neon_params
   k-block: 16
 - name: xnn_qs8_igemm_minmax_gemmlowp_ukernel_1x8__neon_mull_addw_dup
