@@ -310,35 +310,66 @@ tools/xngen src/qs8-igemm/c2-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D ML
 tools/xngen src/qs8-igemm/c2-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/2x8c2s4-minmax-fp32-neonv8-mlal-padal.c &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4-minmax-rndnu-neon-mull-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4-minmax-rndnu-neon-mull-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4-minmax-rndnu-neon-mull-padal-dup.c &
 
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-fp32-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-fp32-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
 
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/1x8c4-minmax-fp32-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/2x8c4-minmax-fp32-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-fp32-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-fp32-neon-mlal-padal-dup.c &
 
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/1x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/2x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/1x8c4-minmax-fp32-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/2x8c4-minmax-fp32-neon-mlal-padal-dup.c &
 
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/1x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/2x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/1x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/2x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
 
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
-tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4-minmax-rndnu-neon-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/1x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/2x8c4-minmax-fp32-neonv8-mlal-padal-dup.c &
+
+### C4S2 micro-kernels
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4s2-minmax-rndnu-neon-mull-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4s2-minmax-rndnu-neon-mull-padal.c &
+
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x8c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x8c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x16c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x16c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/3x16c4s2-minmax-rndnu-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/4x16c4s2-minmax-rndnu-neon-mlal-padal.c &
+
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c4s2-minmax-fp32-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/2x8c4s2-minmax-fp32-neon-mlal-padal.c &
+
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/1x8c4s2-minmax-fp32-neon-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qc8-igemm/gen/2x8c4s2-minmax-fp32-neon-mlal-padal.c &
+
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/1x8c4s2-minmax-fp32-neonv8-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-igemm/gen/2x8c4s2-minmax-fp32-neonv8-mlal-padal.c &
+
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/1x8c4s2-minmax-fp32-neonv8-mlal-padal.c &
+tools/xngen src/qs8-igemm/c4-neon-mull-padal-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qc8-igemm/gen/2x8c4s2-minmax-fp32-neonv8-mlal-padal.c &
 
 ### C8 micro-kernels
 tools/xngen src/qs8-igemm/c8-neon-mull-padal.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=GEMMLOWP -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-igemm/gen/1x8c8-minmax-gemmlowp-neon-mull-padal.c &
