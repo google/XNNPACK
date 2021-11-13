@@ -33,18 +33,18 @@ static enum xnn_status create_constant_pad_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (values[output_id].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_constant_pad_nd_x32(
         &node->params.static_pad.padding_value,
         node->flags,
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
 #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
       status = xnn_create_constant_pad_nd_x8(
@@ -180,15 +180,21 @@ enum xnn_status xnn_define_static_constant_pad(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
+      compute_type = xnn_compute_type_qu8;
       break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -265,6 +271,7 @@ enum xnn_status xnn_define_static_constant_pad(
   }
 
   node->type = xnn_node_type_static_constant_pad;
+  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

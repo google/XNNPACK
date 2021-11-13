@@ -33,8 +33,8 @@ static enum xnn_status create_max_pooling_operator(
   assert(channel_dim == values[output_id].shape.dim[3]);
 
   enum xnn_status status;
-  switch (values[output_id].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_max_pooling2d_nhwc_f32(
         node->params.pooling_2d.padding_top,
         node->params.pooling_2d.padding_right,
@@ -53,7 +53,7 @@ static enum xnn_status create_max_pooling_operator(
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_S8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -81,7 +81,7 @@ static enum xnn_status create_max_pooling_operator(
     }
 #endif  // !defined(XNN_NO_S8_OPERATORS)
 #ifndef XNN_NO_U8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -314,15 +314,21 @@ enum xnn_status xnn_define_max_pooling_2d(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
 #ifndef XNN_NO_S8_OPERATORS
     case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
 #endif  // !defined(XNN_NO_S8_OPERATORS)
 #ifndef XNN_NO_U8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_U8_OPERATORS)
+      compute_type = xnn_compute_type_qu8;
       break;
+#endif  // !defined(XNN_NO_U8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -368,6 +374,7 @@ enum xnn_status xnn_define_max_pooling_2d(
   }
 
   node->type = xnn_node_type_max_pooling_2d;
+  node->compute_type = compute_type;
   node->params.pooling_2d.padding_top = input_padding_top;
   node->params.pooling_2d.padding_right = input_padding_right;
   node->params.pooling_2d.padding_bottom = input_padding_bottom;

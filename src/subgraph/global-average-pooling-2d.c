@@ -19,6 +19,8 @@ static enum xnn_status create_global_average_pooling_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
+  assert(node->compute_type == xnn_compute_type_fp32);
+
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -199,6 +201,7 @@ enum xnn_status xnn_define_global_average_pooling_2d(
   }
 
   node->type = xnn_node_type_global_average_pooling_2d;
+  node->compute_type = xnn_compute_type_fp32;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;

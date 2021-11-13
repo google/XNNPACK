@@ -19,6 +19,8 @@ static enum xnn_status create_prelu_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
+  assert(node->compute_type == xnn_compute_type_fp32);
+
   assert(node->num_inputs == 2);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -175,6 +177,7 @@ enum xnn_status xnn_define_prelu(
   }
 
   node->type = xnn_node_type_prelu;
+  node->compute_type = xnn_compute_type_fp32;
   node->num_inputs = 2;
   node->inputs[0] = input_id;
   node->inputs[1] = slope_id;

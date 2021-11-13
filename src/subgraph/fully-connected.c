@@ -57,8 +57,8 @@ static enum xnn_status create_fully_connected_operator(
   }
 
   enum xnn_status status;
-  switch (values[node->outputs[0]].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_fully_connected_nc_f32(
         input_channels,
         output_channels,
@@ -72,7 +72,7 @@ static enum xnn_status create_fully_connected_operator(
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -98,7 +98,7 @@ static enum xnn_status create_fully_connected_operator(
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -188,50 +188,76 @@ static enum xnn_status setup_fully_connected_operator(
   }
 }
 
-static inline bool check_datatypes_with_bias(
+static inline enum xnn_compute_type validate_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype bias_datatype,
   enum xnn_datatype output_datatype)
 {
-  switch (output_datatype) {
+  switch (filter_datatype) {
     case xnn_datatype_fp32:
-      return input_datatype == xnn_datatype_fp32 &&
-        filter_datatype == xnn_datatype_fp32 && bias_datatype == xnn_datatype_fp32;
+      if (input_datatype == xnn_datatype_fp32 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32)
+      {
+        return xnn_compute_type_fp32;
+      }
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-      return input_datatype == xnn_datatype_qint8 &&
-        filter_datatype == xnn_datatype_qint8 && bias_datatype == xnn_datatype_qint32;
+      if (input_datatype == xnn_datatype_qint8 &&
+          bias_datatype == xnn_datatype_qint32 &&
+          output_datatype == xnn_datatype_qint8)
+      {
+        return xnn_compute_type_qs8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-      return input_datatype == xnn_datatype_quint8 &&
-        filter_datatype == xnn_datatype_quint8 && bias_datatype == xnn_datatype_qint32;
+      if (input_datatype == xnn_datatype_quint8 &&
+          bias_datatype == xnn_datatype_qint32 &&
+          output_datatype == xnn_datatype_quint8)
+      {
+        return xnn_compute_type_qu8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
+  return xnn_compute_type_invalid;
 }
 
-static inline bool check_datatypes_without_bias(
+static inline enum xnn_compute_type validate_datatypes_without_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype output_datatype)
 {
-  switch (output_datatype) {
+  switch (filter_datatype) {
     case xnn_datatype_fp32:
-      return input_datatype == xnn_datatype_fp32 && filter_datatype == xnn_datatype_fp32;
+      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_fp32;
+      }
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-      return input_datatype == xnn_datatype_qint8 && filter_datatype == xnn_datatype_qint8;
+      if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
+        return xnn_compute_type_qs8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-      return input_datatype == xnn_datatype_quint8 && filter_datatype == xnn_datatype_quint8;
+      if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_quint8) {
+        return xnn_compute_type_qu8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
+  return xnn_compute_type_invalid;
 }
 
 enum xnn_status xnn_define_fully_connected(
@@ -421,8 +447,11 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   if (bias_value != NULL) {
-    if (!check_datatypes_with_bias(input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype)) {
+    compute_type = validate_datatypes_with_bias(
+      input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype);
+    if (compute_type == xnn_compute_type_invalid) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
@@ -434,7 +463,9 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
     }
   } else {
-    if (!check_datatypes_without_bias(input_value->datatype, filter_value->datatype, output_value->datatype)) {
+    compute_type = validate_datatypes_without_bias(
+      input_value->datatype, filter_value->datatype, output_value->datatype);
+    if (compute_type == xnn_compute_type_invalid) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
@@ -452,6 +483,7 @@ enum xnn_status xnn_define_fully_connected(
   }
 
   node->type = xnn_node_type_fully_connected;
+  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2 + (size_t) (bias_id != XNN_INVALID_VALUE_ID);

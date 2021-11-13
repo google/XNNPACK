@@ -107,6 +107,14 @@ typedef enum xnn_status (*xnn_setup_operator_fn)(
   size_t num_blobs,
   pthreadpool_t threadpool);
 
+enum xnn_compute_type {
+  xnn_compute_type_invalid = 0,
+  xnn_compute_type_fp32,
+  xnn_compute_type_qc8,
+  xnn_compute_type_qs8,
+  xnn_compute_type_qu8,
+};
+
 enum xnn_node_type {
   xnn_node_type_invalid = 0,
   xnn_node_type_abs,
@@ -148,6 +156,7 @@ enum xnn_node_type {
 struct xnn_node {
   enum xnn_node_type type;
   uint32_t id;
+  enum xnn_compute_type compute_type;
   /// Static parameters of the operator node.
   union {
     struct {

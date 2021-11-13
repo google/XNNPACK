@@ -33,15 +33,15 @@ static enum xnn_status create_sigmoid_operator(
   const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
-  switch (values[output_id].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_sigmoid_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
     {
       status = xnn_create_sigmoid_nc_qs8(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -56,7 +56,7 @@ static enum xnn_status create_sigmoid_operator(
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
     {
       status = xnn_create_sigmoid_nc_qu8(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -194,15 +194,21 @@ enum xnn_status xnn_define_sigmoid(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
+      compute_type = xnn_compute_type_qu8;
       break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -227,6 +233,7 @@ enum xnn_status xnn_define_sigmoid(
   }
 
   node->type = xnn_node_type_sigmoid;
+  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

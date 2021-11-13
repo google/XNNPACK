@@ -20,6 +20,8 @@ static enum xnn_status create_minimum_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
+  assert(node->compute_type == xnn_compute_type_fp32);
+
   assert(node->num_inputs == 2);
   const uint32_t input1_id = node->inputs[0];
   assert(input1_id != XNN_INVALID_VALUE_ID);
@@ -203,6 +205,7 @@ enum xnn_status xnn_define_minimum2(
   }
 
   node->type = xnn_node_type_minimum2;
+  node->compute_type = xnn_compute_type_fp32;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
   node->inputs[1] = input2_id;

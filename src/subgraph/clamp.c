@@ -33,8 +33,8 @@ static enum xnn_status create_clamp_operator(
   const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
-  switch (values[output_id].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_clamp_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->activation.output_min,
@@ -43,7 +43,7 @@ static enum xnn_status create_clamp_operator(
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_S8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -61,7 +61,7 @@ static enum xnn_status create_clamp_operator(
     }
 #endif  // !defined(XNN_NO_S8_OPERATORS)
 #ifndef XNN_NO_U8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -204,15 +204,21 @@ enum xnn_status xnn_define_clamp(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
 #ifndef XNN_NO_S8_OPERATORS
     case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
 #endif  // !defined(XNN_NO_S8_OPERATORS)
 #ifndef XNN_NO_U8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_U8_OPERATORS)
+      compute_type = xnn_compute_type_qu8;
       break;
+#endif  // !defined(XNN_NO_U8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -232,7 +238,7 @@ enum xnn_status xnn_define_clamp(
   }
 
 #if !defined(XNN_NO_U8_OPERATORS) || !defined(XNN_NO_S8_OPERATORS)
-  if (output_value->datatype == xnn_datatype_qint8 || output_value->datatype == xnn_datatype_quint8) {
+  if (compute_type == xnn_datatype_qint8 || compute_type == xnn_datatype_quint8) {
     if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
@@ -258,6 +264,7 @@ enum xnn_status xnn_define_clamp(
   }
 
   node->type = xnn_node_type_clamp;
+  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;

@@ -19,6 +19,8 @@ static enum xnn_status create_unpooling_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
+  assert(node->compute_type == xnn_compute_type_fp32);
+
   assert(node->num_inputs == 2);
   const uint32_t input_value_id = node->inputs[0];
   assert(input_value_id != XNN_INVALID_VALUE_ID);
@@ -206,6 +208,7 @@ enum xnn_status xnn_define_unpooling_2d(
   }
 
   node->type = xnn_node_type_unpooling_2d;
+  node->compute_type = xnn_compute_type_fp32;
   node->params.pooling_2d.padding_top = padding_top;
   node->params.pooling_2d.padding_right = padding_right;
   node->params.pooling_2d.padding_bottom = padding_bottom;

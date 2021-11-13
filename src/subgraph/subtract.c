@@ -34,8 +34,8 @@ static enum xnn_status create_subtract_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (values[output_id].datatype) {
-    case xnn_datatype_fp32:
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
       status = xnn_create_subtract_nd_f32(
         node->activation.output_min,
         node->activation.output_max,
@@ -43,7 +43,7 @@ static enum xnn_status create_subtract_operator(
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
+    case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -63,7 +63,7 @@ static enum xnn_status create_subtract_operator(
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
+    case xnn_compute_type_qu8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -300,15 +300,21 @@ enum xnn_status xnn_define_subtract(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
+      compute_type = xnn_compute_type_qu8;
       break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -336,6 +342,7 @@ enum xnn_status xnn_define_subtract(
   }
 
   node->type = xnn_node_type_subtract;
+  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2;
