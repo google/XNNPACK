@@ -128,6 +128,10 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
 #define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
 
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
+  if (node->compute_type != xnn_compute_type_fp32) {
+    return 0;
+  }
+
   switch (node->type) {
     case xnn_node_type_convolution_2d:
       // Supported cases:
