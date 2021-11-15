@@ -147,6 +147,7 @@ enum xnn_status xnn_define_bankers_rounding(
   }
 
   node->type = xnn_node_type_bankers_rounding;
+  node->compute_type = xnn_compute_type_fp32;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;
