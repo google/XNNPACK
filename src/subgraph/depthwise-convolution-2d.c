@@ -49,6 +49,7 @@ static enum xnn_status create_convolution_operator(
   enum xnn_status status;
   if (values[output_id].layout == xnn_layout_type_nchw) {
     assert(values[input_id].layout == xnn_layout_type_nchw);
+    assert(node->compute_type == xnn_compute_type_fp32);
     status = xnn_create_convolution2d_nchw_f32(
       node->params.depthwise_convolution_2d.input_padding_top,
       node->params.depthwise_convolution_2d.input_padding_right,
@@ -74,8 +75,8 @@ static enum xnn_status create_convolution_operator(
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
-    switch (values[filter_id].datatype) {
-      case xnn_datatype_fp32:
+    switch (node->compute_type) {
+      case xnn_compute_type_fp32:
         status = xnn_create_convolution2d_nhwc_f32(
           node->params.depthwise_convolution_2d.input_padding_top,
           node->params.depthwise_convolution_2d.input_padding_right,
@@ -100,7 +101,7 @@ static enum xnn_status create_convolution_operator(
           &opdata->operator_object);
         break;
 #ifndef XNN_NO_QS8_OPERATORS
-      case xnn_datatype_qint8:
+      case xnn_compute_type_qs8:
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -135,7 +136,7 @@ static enum xnn_status create_convolution_operator(
           &opdata->operator_object);
         break;
       }
-      case xnn_datatype_qcint8:
+      case xnn_compute_type_qc8:
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -172,7 +173,7 @@ static enum xnn_status create_convolution_operator(
       }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
-      case xnn_datatype_quint8:
+      case xnn_compute_type_qu8:
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -305,7 +306,7 @@ static enum xnn_status setup_convolution_operator(
   }
 }
 
-static inline bool check_datatypes_with_bias(
+static inline enum xnn_compute_type validate_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype bias_datatype,
@@ -313,46 +314,81 @@ static inline bool check_datatypes_with_bias(
 {
   switch (filter_datatype) {
     case xnn_datatype_fp32:
-      return input_datatype == xnn_datatype_fp32 &&
-        bias_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32;
+      if (input_datatype == xnn_datatype_fp32 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32)
+      {
+        return xnn_compute_type_fp32;
+      }
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-      return input_datatype == xnn_datatype_qint8 &&
-        bias_datatype == xnn_datatype_qint32 && output_datatype == xnn_datatype_qint8;
+      if (input_datatype == xnn_datatype_qint8 &&
+          bias_datatype == xnn_datatype_qint32 &&
+          output_datatype == xnn_datatype_qint8)
+      {
+        return xnn_compute_type_qs8;
+      }
+      break;
     case xnn_datatype_qcint8:
-      return input_datatype == xnn_datatype_qint8 &&
-        bias_datatype == xnn_datatype_qcint32 && output_datatype == xnn_datatype_qint8;
+      if (input_datatype == xnn_datatype_qint8 &&
+          bias_datatype == xnn_datatype_qcint32 &&
+          output_datatype == xnn_datatype_qint8)
+      {
+        return xnn_compute_type_qc8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-      return input_datatype == xnn_datatype_quint8 &&
-        bias_datatype == xnn_datatype_qint32 && output_datatype == xnn_datatype_quint8;
+      if (input_datatype == xnn_datatype_quint8 &&
+          bias_datatype == xnn_datatype_qint32 &&
+          output_datatype == xnn_datatype_quint8)
+      {
+        return xnn_compute_type_qu8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
+  return xnn_compute_type_invalid;
 }
 
-static inline bool check_datatypes_without_bias(
+static inline enum xnn_compute_type validate_datatypes_without_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype output_datatype)
 {
   switch (filter_datatype) {
     case xnn_datatype_fp32:
-      return input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32;
+      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_fp32;
+      }
+      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
+      if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
+        return xnn_compute_type_qs8;
+      }
+      break;
     case xnn_datatype_qcint8:
-      return input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8;
+      if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
+        return xnn_compute_type_qc8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-      return input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_quint8;
+      if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_quint8) {
+        return xnn_compute_type_qu8;
+      }
+      break;
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
+  return xnn_compute_type_invalid;
 }
 
 enum xnn_status xnn_define_depthwise_convolution_2d(
@@ -624,8 +660,11 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   if (bias_value != NULL) {
-    if (!check_datatypes_with_bias(input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype)) {
+    compute_type = validate_datatypes_with_bias(
+      input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype);
+    if (compute_type == xnn_compute_type_invalid) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
@@ -637,7 +676,8 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
       return xnn_status_invalid_parameter;
     }
   } else {
-    if (!check_datatypes_without_bias(input_value->datatype, filter_value->datatype, output_value->datatype)) {
+    compute_type = validate_datatypes_without_bias(input_value->datatype, filter_value->datatype, output_value->datatype);
+    if (compute_type == xnn_compute_type_invalid) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
@@ -676,6 +716,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   }
 
   node->type = xnn_node_type_depthwise_convolution_2d;
+  node->compute_type = compute_type;
   node->params.depthwise_convolution_2d.input_padding_top = input_padding_top;
   node->params.depthwise_convolution_2d.input_padding_right = input_padding_right;
   node->params.depthwise_convolution_2d.input_padding_bottom = input_padding_bottom;
