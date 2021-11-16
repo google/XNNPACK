@@ -15,7 +15,6 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_dup(
     size_t mr,
     size_t nc,
@@ -174,6 +173,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_dup(
 
         const int8x8_t va0c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0));
         const int8x8_t va1c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0));
+
         const int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0, va0c0);
         const int16x8_t vprod1x0123c0 = vmull_s8(vb0123c0, va1c0);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c0);
@@ -184,6 +184,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_dup(
         vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c0);
         const int8x8_t va0c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1));
         const int8x8_t va1c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1));
+
         const int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1, va0c1);
         const int16x8_t vprod1x0123c1 = vmull_s8(vb0123c1, va1c1);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c1);
@@ -194,6 +195,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_dup(
         vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c1);
         const int8x8_t va0c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2));
         const int8x8_t va1c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2));
+
         const int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2, va0c2);
         const int16x8_t vprod1x0123c2 = vmull_s8(vb0123c2, va1c2);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c2);
@@ -204,6 +206,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_dup(
         vacc1x4567 = vpadalq_s16(vacc1x4567, vprod1x4567c2);
         const int8x8_t va0c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3));
         const int8x8_t va1c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3));
+
         const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, va0c3);
         const int16x8_t vprod1x0123c3 = vmull_s8(vb0123c3, va1c3);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c3);

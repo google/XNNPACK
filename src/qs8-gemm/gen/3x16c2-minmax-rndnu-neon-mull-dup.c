@@ -14,7 +14,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_gemm_minmax_rndnu_ukernel_3x16c2__neon_mull_dup(
     size_t mr,
     size_t nc,
@@ -94,6 +93,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_3x16c2__neon_mull_dup(
       const int8x8_t va0c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0));
       const int8x8_t va1c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 0));
       const int8x8_t va2c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 0));
+
       const int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0, va0c0);
       const int16x8_t vprod1x0123c0 = vmull_s8(vb0123c0, va1c0);
       const int16x8_t vprod2x0123c0 = vmull_s8(vb0123c0, va2c0);
@@ -121,6 +121,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_3x16c2__neon_mull_dup(
       const int8x8_t va0c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1));
       const int8x8_t va1c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 1));
       const int8x8_t va2c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 1));
+
       const int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1, va0c1);
       const int16x8_t vprod1x0123c1 = vmull_s8(vb0123c1, va1c1);
       const int16x8_t vprod2x0123c1 = vmull_s8(vb0123c1, va2c1);
@@ -148,6 +149,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_3x16c2__neon_mull_dup(
       const int8x8_t va0c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2));
       const int8x8_t va1c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 2));
       const int8x8_t va2c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 2));
+
       const int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2, va0c2);
       const int16x8_t vprod1x0123c2 = vmull_s8(vb0123c2, va1c2);
       const int16x8_t vprod2x0123c2 = vmull_s8(vb0123c2, va2c2);
@@ -175,6 +177,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_3x16c2__neon_mull_dup(
       const int8x8_t va0c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3));
       const int8x8_t va1c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va1), 3));
       const int8x8_t va2c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va2), 3));
+
       const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, va0c3);
       const int16x8_t vprod1x0123c3 = vmull_s8(vb0123c3, va1c3);
       const int16x8_t vprod2x0123c3 = vmull_s8(vb0123c3, va2c3);

@@ -14,7 +14,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
-
 void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c2__neon_mull_dup(
     size_t mr,
     size_t nc,
@@ -81,6 +80,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c2__neon_mull_dup(
         const int8x8_t vbCDEFc3 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
         const int8x8_t va0c0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 0));
+
         const int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0, va0c0);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c0);
         const int16x8_t vprod0x4567c0 = vmull_s8(vb4567c0, va0c0);
@@ -90,6 +90,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c2__neon_mull_dup(
         const int16x8_t vprod0xCDEFc0 = vmull_s8(vbCDEFc0, va0c0);
         vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc0);
         const int8x8_t va0c1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 1));
+
         const int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1, va0c1);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c1);
         const int16x8_t vprod0x4567c1 = vmull_s8(vb4567c1, va0c1);
@@ -99,6 +100,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c2__neon_mull_dup(
         const int16x8_t vprod0xCDEFc1 = vmull_s8(vbCDEFc1, va0c1);
         vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc1);
         const int8x8_t va0c2 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 2));
+
         const int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2, va0c2);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c2);
         const int16x8_t vprod0x4567c2 = vmull_s8(vb4567c2, va0c2);
@@ -108,6 +110,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c2__neon_mull_dup(
         const int16x8_t vprod0xCDEFc2 = vmull_s8(vbCDEFc2, va0c2);
         vacc0xCDEF = vpadalq_s16(vacc0xCDEF, vprod0xCDEFc2);
         const int8x8_t va0c3 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va0), 3));
+
         const int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3, va0c3);
         vacc0x0123 = vpadalq_s16(vacc0x0123, vprod0x0123c3);
         const int16x8_t vprod0x4567c3 = vmull_s8(vb4567c3, va0c3);
