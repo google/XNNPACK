@@ -147,14 +147,18 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld128
         # Store full 4 x 8
         B.LO    5f
 
-        ST1     {v16.16b, v17.16b},  [x6], x14
+        STP     q16, q17,  [x6]
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v18.16b, v19.16b},  [x9], x14
+        ADD     x6, x6, x14
+        STP     q18, q19,  [x9]
         SUB     x11, x11, x2            // a1 -= kc
-        ST1     {v28.16b, v29.16b}, [x10], x14
+        ADD     x9, x9, x14
+        STP     q28, q29, [x10]
         SUB     x12, x12, x2            // a2 -= kc
-        ST1     {v30.16b, v31.16b},  [x7], x14
+        ADD     x10, x10, x14
+        STP     q30, q31,  [x7]
         SUB     x4,  x4, x2             // a3 -= kc
+        ADD     x7, x7, x14
 
         B.HI    0b
         RET

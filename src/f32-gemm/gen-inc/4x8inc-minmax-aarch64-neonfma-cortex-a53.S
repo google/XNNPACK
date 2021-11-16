@@ -356,14 +356,18 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Store full 4 x 8
         B.LO    6f
 
-        ST1     {v26.16b, v27.16b}, [x14], x0
+        STP     q26, q27, [x14]
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v24.16b, v25.16b}, [x17], x0
+        ADD     x14, x14, x0
+        STP     q24, q25, [x17]
         SUB     x9,  x9, x2             // a1 -= kc
-        ST1     {v22.16b, v23.16b}, [x16], x0
+        ADD     x17, x17, x0
+        STP     q22, q23, [x16]
         SUB     x10, x10, x2            // a2 -= kc
-        ST1     {v20.16b, v21.16b},  [x6], x0
+        ADD     x16, x16, x0
+        STP     q20, q21,  [x6]
         SUB     x11, x11, x2            // a3 -= kc
+        ADD     x6, x6, x0
 
         B.HI    0b
 

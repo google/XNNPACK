@@ -174,8 +174,9 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__aarch64_n
         # Store full 1 x 8
         B.LO    9f
 
-        ST1     {v16.16b, v17.16b}, [x6], x14
+        STP     q16, q17, [x6]
         SUB     x3,  x3, x2             // a0 -= kc
+        ADD     x6, x6, x14
 
         B.HI    0b
 
