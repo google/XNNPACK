@@ -3,6 +3,30 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neon_mlal_ld1r
+  init: xnn_init_qs8_conv_minmax_fp32_neon_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neon_mlal_ld1r
+  init: xnn_init_qs8_conv_minmax_fp32_neon_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neonv8_mlal_ld1r
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld1r
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neon_mlal_ld2r
+  init: xnn_init_qs8_conv_minmax_fp32_neon_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neon_mlal_ld2r
+  init: xnn_init_qs8_conv_minmax_fp32_neon_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neonv8_mlal_ld2r
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 16
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld2r
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 16
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neon_mlal_ld4r
   init: xnn_init_qs8_conv_minmax_fp32_neon_params
   k-block: 16

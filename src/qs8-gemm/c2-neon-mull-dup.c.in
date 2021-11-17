@@ -8,6 +8,7 @@ $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
 $assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DUP in ["DUP", "LD1R", "LD2R", "LD4R"]
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -23,7 +24,7 @@ $PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("neonv
 $if REQUANTIZATION == "FP32" and CHANNELWISE and not ARMV8:
   $PARAMS_STRUCT = "neon_fp32"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2__${ISA}_${"mlal" if MLA else "mull"}_${"ld4r" if LD4R else "dup"}(
+void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2__${ISA}_${"mlal" if MLA else "mull"}_${DUP.lower()}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -78,25 +79,45 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2
     $if MLA:
       while (k >= 16 * sizeof(int8_t)) {
         $for M in range(MR):
-          $if LD4R:
+          $if DUP == "LD4R":
             const int16x4x4_t va${M}x0 = vld4_dup_s16((const void*)a${M}); a${M} += 8;
             const int16x4x4_t va${M}x1 = vld4_dup_s16((const void*)a${M}); a${M} += 8;
+          $elif DUP == "LD2R":
+            const int16x4x2_t va${M}0x0 = vld2_dup_s16((const void*)a${M});
+            const int16x4x2_t va${M}1x0 = vld2_dup_s16((const void*)(a${M} + 4)); a${M} += 8;
+            const int16x4x2_t va${M}0x1 = vld2_dup_s16((const void*)a${M});
+            const int16x4x2_t va${M}1x1 = vld2_dup_s16((const void*)(a${M} + 4)); a${M} += 8;
+          $elif DUP == "LD1R":
+            const int16x4_t va${M}0x0 = vld1_dup_s16((const void*)a${M});
+            const int16x4_t va${M}1x0 = vld1_dup_s16((const void*)(a${M} + 2));
+            const int16x4_t va${M}2x0 = vld1_dup_s16((const void*)(a${M} + 4));
+            const int16x4_t va${M}3x0 = vld1_dup_s16((const void*)(a${M} + 6)); a${M} += 8;
+            const int16x4_t va${M}0x1 = vld1_dup_s16((const void*)a${M});
+            const int16x4_t va${M}1x1 = vld1_dup_s16((const void*)(a${M} + 2));
+            const int16x4_t va${M}2x1 = vld1_dup_s16((const void*)(a${M} + 4));
+            const int16x4_t va${M}3x1 = vld1_dup_s16((const void*)(a${M} + 6)); a${M} += 8;
           $else:
             const int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
             const int8x8_t va${M}x1 = vld1_s8(a${M}); a${M} += 8;
-
         $for K in range(4):
           $for N in range(0, NR, 4):
             const int8x8_t vb${ABC[N:N+4]}c${K}x0 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
         $for K in range(4):
           $for M in range(MR):
-            $if LD4R:
+            $if DUP == "LD4R":
               const int8x8_t va${M}c${K}x0 = vreinterpret_s8_s16(va${M}x0.val[${K}]);
               const int8x8_t va${M}c${K}x1 = vreinterpret_s8_s16(va${M}x1.val[${K}]);
+            $elif DUP == "LD2R":
+              const int8x8_t va${M}c${K}x0 = vreinterpret_s8_s16(va${M}${int(K/2)}x0.val[${K%2}]);
+              const int8x8_t va${M}c${K}x1 = vreinterpret_s8_s16(va${M}${int(K/2)}x1.val[${K%2}]);
+            $elif DUP == "LD1R":
+              const int8x8_t va${M}c${K}x0 = vreinterpret_s8_s16(va${M}${K}x0);
+              const int8x8_t va${M}c${K}x1 = vreinterpret_s8_s16(va${M}${K}x1);
             $else:
               const int8x8_t va${M}c${K}x0 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x0), ${K}));
               const int8x8_t va${M}c${K}x1 = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}x1), ${K}));
+
           $for N in range(0, NR, 4):
             $for M in range(MR):
               int16x8_t vprod${M}x${ABC[N:N+4]}c${K} = vmull_s8(vb${ABC[N:N+4]}c${K}x0, va${M}c${K}x0);
@@ -111,8 +132,16 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2
 
     ${"if" if MLA else "while"} (k >= 8 * sizeof(int8_t)) {
       $for M in range(MR):
-        $if LD4R:
+        $if DUP == "LD4R":
           const int16x4x4_t va${M} = vld4_dup_s16((const void*)a${M}); a${M} += 8;
+        $elif DUP == "LD2R":
+          const int16x4x2_t va${M}0 = vld2_dup_s16((const void*)a${M});
+          const int16x4x2_t va${M}1 = vld2_dup_s16((const void*)(a${M} + 4)); a${M} += 8;
+        $elif DUP == "LD1R":
+          const int16x4_t va${M}0 = vld1_dup_s16((const void*)a${M});
+          const int16x4_t va${M}1 = vld1_dup_s16((const void*)(a${M} + 2));
+          const int16x4_t va${M}2 = vld1_dup_s16((const void*)(a${M} + 4));
+          const int16x4_t va${M}3 = vld1_dup_s16((const void*)(a${M} + 6)); a${M} += 8;
         $else:
           const int8x8_t va${M} = vld1_s8(a${M}); a${M} += 8;
 
@@ -122,8 +151,12 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c2
 
       $for K in range(4):
         $for M in range(MR):
-          $if LD4R:
+          $if DUP == "LD4R":
             const int8x8_t va${M}c${K} = vreinterpret_s8_s16(va${M}.val[${K}]);
+          $elif DUP == "LD2R":
+            const int8x8_t va${M}c${K} = vreinterpret_s8_s16(va${M}${int(K/2)}.val[${K%2}]);
+          $elif DUP == "LD1R":
+            const int8x8_t va${M}c${K} = vreinterpret_s8_s16(va${M}${K});
           $else:
             const int8x8_t va${M}c${K} = vreinterpret_s8_s16(vdup_lane_s16(vreinterpret_s16_s8(va${M}), ${K}));
 

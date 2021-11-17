@@ -86,6 +86,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld4r(
         const int8x8_t va0c0x1 = vreinterpret_s8_s16(va0x1.val[0]);
         const int8x8_t va1c0x0 = vreinterpret_s8_s16(va1x0.val[0]);
         const int8x8_t va1c0x1 = vreinterpret_s8_s16(va1x1.val[0]);
+
         int16x8_t vprod0x0123c0 = vmull_s8(vb0123c0x0, va0c0x0);
         int16x8_t vprod1x0123c0 = vmull_s8(vb0123c0x0, va1c0x0);
         const int8x8_t vb0123c0x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
@@ -104,6 +105,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld4r(
         const int8x8_t va0c1x1 = vreinterpret_s8_s16(va0x1.val[1]);
         const int8x8_t va1c1x0 = vreinterpret_s8_s16(va1x0.val[1]);
         const int8x8_t va1c1x1 = vreinterpret_s8_s16(va1x1.val[1]);
+
         int16x8_t vprod0x0123c1 = vmull_s8(vb0123c1x0, va0c1x0);
         int16x8_t vprod1x0123c1 = vmull_s8(vb0123c1x0, va1c1x0);
         const int8x8_t vb0123c1x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
@@ -122,6 +124,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld4r(
         const int8x8_t va0c2x1 = vreinterpret_s8_s16(va0x1.val[2]);
         const int8x8_t va1c2x0 = vreinterpret_s8_s16(va1x0.val[2]);
         const int8x8_t va1c2x1 = vreinterpret_s8_s16(va1x1.val[2]);
+
         int16x8_t vprod0x0123c2 = vmull_s8(vb0123c2x0, va0c2x0);
         int16x8_t vprod1x0123c2 = vmull_s8(vb0123c2x0, va1c2x0);
         const int8x8_t vb0123c2x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
@@ -140,6 +143,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c2__neonv8_mlal_ld4r(
         const int8x8_t va0c3x1 = vreinterpret_s8_s16(va0x1.val[3]);
         const int8x8_t va1c3x0 = vreinterpret_s8_s16(va1x0.val[3]);
         const int8x8_t va1c3x1 = vreinterpret_s8_s16(va1x1.val[3]);
+
         int16x8_t vprod0x0123c3 = vmull_s8(vb0123c3x0, va0c3x0);
         int16x8_t vprod1x0123c3 = vmull_s8(vb0123c3x0, va1c3x0);
         const int8x8_t vb0123c3x1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
