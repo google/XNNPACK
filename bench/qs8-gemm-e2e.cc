@@ -136,6 +136,26 @@ static void GEMMEnd2EndBenchmark(
       4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
+  static void qs8_gemm_4x16__aarch64_neon_mlal_lane_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_ld64,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_ld64,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+  static void qs8_gemm_4x16__aarch64_neon_mlal_lane_prfm_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
   static void qs8_gemm_2x8c8__aarch64_neon_mlal(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c8__aarch64_neon_mlal,
@@ -183,6 +203,8 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_gemm_4x16c4__aarch64_neondot_ld128)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_4x16__aarch64_neon_mlal_lane_cortex_a53)
+  BENCHMARK_QS8_END2END(qs8_gemm_4x16__aarch64_neon_mlal_lane_prfm_ld64)
+  BENCHMARK_QS8_END2END(qs8_gemm_4x16__aarch64_neon_mlal_lane_ld64)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8__aarch64_neon_mlal_prfm_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8__aarch64_neon_mlal_cortex_a53)
   BENCHMARK_QS8_END2END(qs8_gemm_2x8c8__aarch64_neon_mlal_prfm)
