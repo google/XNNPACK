@@ -62,6 +62,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neon_mull_dup(
       const int8x8_t vb67c1 = vld1_s8(w); w = (const void*) ((uintptr_t) w + 8 * sizeof(int8_t));
 
       const int8x8_t va0c0 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va0), 0));
+
       const int16x8_t vprod0x01c0 = vmull_s8(vb01c0, va0c0);
       vacc0x01 = vpadalq_s16(vacc0x01, vprod0x01c0);
       const int16x8_t vprod0x23c0 = vmull_s8(vb23c0, va0c0);
@@ -71,6 +72,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neon_mull_dup(
       const int16x8_t vprod0x67c0 = vmull_s8(vb67c0, va0c0);
       vacc0x67 = vpadalq_s16(vacc0x67, vprod0x67c0);
       const int8x8_t va0c1 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va0), 1));
+
       const int16x8_t vprod0x01c1 = vmull_s8(vb01c1, va0c1);
       vacc0x01 = vpadalq_s16(vacc0x01, vprod0x01c1);
       const int16x8_t vprod0x23c1 = vmull_s8(vb23c1, va0c1);

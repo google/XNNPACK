@@ -87,6 +87,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c4__neon_mull_dup(
 
         const int8x8_t va0c0 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va0), 0));
         const int8x8_t va1c0 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va1), 0));
+
         const int16x8_t vprod0x01c0 = vmull_s8(vb01c0, va0c0);
         const int16x8_t vprod1x01c0 = vmull_s8(vb01c0, va1c0);
         vacc0x01 = vpadalq_s16(vacc0x01, vprod0x01c0);
@@ -105,6 +106,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c4__neon_mull_dup(
         vacc1x67 = vpadalq_s16(vacc1x67, vprod1x67c0);
         const int8x8_t va0c1 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va0), 1));
         const int8x8_t va1c1 = vreinterpret_s8_s32(vdup_lane_s32(vreinterpret_s32_s8(va1), 1));
+
         const int16x8_t vprod0x01c1 = vmull_s8(vb01c1, va0c1);
         const int16x8_t vprod1x01c1 = vmull_s8(vb01c1, va1c1);
         vacc0x01 = vpadalq_s16(vacc0x01, vprod0x01c1);
