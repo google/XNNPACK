@@ -5186,18 +5186,6 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
-  src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
-  src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
-  src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
-  src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
-  src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
-  src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
-  src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-ld64.S
-  src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
-  src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
-  src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
-  src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-ld64.S
-  src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
   src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen-inc/1x16inc-minmax-aarch64-neonfp16arith-ld32.S
   src/f16-gemm/gen-inc/4x8inc-minmax-aarch64-neonfp16arith-ld64.S
@@ -5293,7 +5281,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qc8-gemm/gen/2x8c8-minmax-fp32-aarch64-neon-mull.S
   src/qc8-gemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal.S
   src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
   src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qc8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld32.S
   src/qc8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld64.S
@@ -5308,7 +5298,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qc8-igemm/gen/2x8c8-minmax-fp32-aarch64-neon-mlal.S
   src/qc8-igemm/gen/2x8c16-minmax-fp32-aarch64-neon-mlal.S
   src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
   src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qc8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qc8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
   src/qc8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld64.S
   src/qc8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
@@ -5349,11 +5341,15 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-gemm/gen/2x8c16-minmax-gemmlowp-aarch64-neon-mlal.S
   src/qs8-gemm/gen/2x8c16-minmax-rndnu-aarch64-neon-mlal.S
   src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
   src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qs8-gemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qs8-gemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-cortex-a53.S
   src/qs8-gemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-ld64.S
   src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qs8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
   src/qs8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld32.S
   src/qs8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld64.S
@@ -5394,11 +5390,15 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/2x8c16-minmax-gemmlowp-aarch64-neon-mlal.S
   src/qs8-igemm/gen/2x8c16-minmax-rndnu-aarch64-neon-mlal.S
   src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-ld64.S
   src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qs8-igemm/gen/4x16-minmax-fp32-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qs8-igemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-cortex-a53.S
   src/qs8-igemm/gen/4x16-minmax-gemmlowp-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S
+  src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-ld64.S
   src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
+  src/qs8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qs8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
   src/qs8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld64.S
   src/qs8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
