@@ -10315,6 +10315,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10326,6 +10327,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10337,6 +10339,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10347,6 +10350,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10388,6 +10392,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10421,6 +10426,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10539,6 +10545,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10569,6 +10576,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10928,6 +10936,7 @@ xnnpack_unit_test(
         "test/deconvolution-nhwc.cc",
         "test/deconvolution-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 

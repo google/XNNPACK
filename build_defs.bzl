@@ -290,7 +290,7 @@ def xnnpack_aggregate_library(
         }),
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True,  timeout = "short"):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True, timeout = "short", shard_count = 1):
     """Unit test binary based on Google Test.
 
     Args:
@@ -307,6 +307,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       tags: List of arbitrary text tags.
       automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
+      shard_count: Specifies the number of parallel shards to use to run the test.
     """
 
     if automatic:
@@ -340,6 +341,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             }),
             tags = tags,
             timeout = timeout,
+            shard_count = shard_count,
         )
     else:
         native.cc_binary(
