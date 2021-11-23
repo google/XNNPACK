@@ -124,15 +124,32 @@ static void init(void) {
         xnn_params.qc8.gemm.log2_kr = 1;
         xnn_params.qc8.gemm.log2_sr = 2;
       } else {
-        xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2s4__neon_mlal);
-        xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2s4__neon_mlal);
-        xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal);
-        xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal);
-        xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_neon_fp32_params;
-        xnn_params.qc8.gemm.mr = 2;
-        xnn_params.qc8.gemm.nr = 8;
-        xnn_params.qc8.gemm.log2_kr = 1;
-        xnn_params.qc8.gemm.log2_sr = 2;
+        switch (cpuinfo_get_core(0)->uarch) {
+          case cpuinfo_uarch_cortex_a5:
+          case cpuinfo_uarch_cortex_a7:
+          case cpuinfo_uarch_krait:
+            xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2__neon_mlal_ld1r);
+            xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2__neon_mlal_ld1r);
+            xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2__neon_mlal_ld1r);
+            xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x8c2__neon_mlal_ld1r);
+            xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_neon_fp32_params;
+            xnn_params.qc8.gemm.mr = 2;
+            xnn_params.qc8.gemm.nr = 8;
+            xnn_params.qc8.gemm.log2_kr = 1;
+            break;
+
+          default:
+            xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2s4__neon_mlal);
+            xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2s4__neon_mlal);
+            xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal);
+            xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal);
+            xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_neon_fp32_params;
+            xnn_params.qc8.gemm.mr = 2;
+            xnn_params.qc8.gemm.nr = 8;
+            xnn_params.qc8.gemm.log2_kr = 1;
+            xnn_params.qc8.gemm.log2_sr = 2;
+            break;
+        }
       }
 
       if (cpuinfo_has_arm_neon_v8()) {
@@ -170,15 +187,32 @@ static void init(void) {
         xnn_params.qs8.gemm.nr = 8;
         xnn_params.qs8.gemm.log2_kr = 2;
       } else {
-        xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c2s4__neon_mlal);
-        xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c2s4__neon_mlal);
-        xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c2s4__neon_mlal);
-        xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c2s4__neon_mlal);
-        xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
-        xnn_params.qs8.gemm.mr = 2;
-        xnn_params.qs8.gemm.nr = 8;
-        xnn_params.qs8.gemm.log2_kr = 1;
-        xnn_params.qs8.gemm.log2_sr = 2;
+        switch (cpuinfo_get_core(0)->uarch) {
+          case cpuinfo_uarch_cortex_a5:
+          case cpuinfo_uarch_cortex_a7:
+          case cpuinfo_uarch_krait:
+            xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c2__neon_mlal_ld1r);
+            xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c2__neon_mlal_ld1r);
+            xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c2__neon_mlal_ld1r);
+            xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c2__neon_mlal_ld1r);
+            xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
+            xnn_params.qs8.gemm.mr = 2;
+            xnn_params.qs8.gemm.nr = 8;
+            xnn_params.qs8.gemm.log2_kr = 1;
+            break;
+
+          default:
+            xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c2s4__neon_mlal);
+            xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c2s4__neon_mlal);
+            xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c2s4__neon_mlal);
+            xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c2s4__neon_mlal);
+            xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
+            xnn_params.qs8.gemm.mr = 2;
+            xnn_params.qs8.gemm.nr = 8;
+            xnn_params.qs8.gemm.log2_kr = 1;
+            xnn_params.qs8.gemm.log2_sr = 2;
+            break;
+        }
       }
 
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mla8_ld64;

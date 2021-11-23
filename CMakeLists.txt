@@ -1139,20 +1139,28 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mla8-ld64.c
+  src/qc8-gemm/gen/1x8c2-minmax-fp32-neon-mlal-ld1r.c
   src/qc8-gemm/gen/1x8c2s4-minmax-fp32-neon-mlal.c
+  src/qc8-gemm/gen/2x8c2-minmax-fp32-neon-mlal-ld1r.c
   src/qc8-gemm/gen/2x8c2s4-minmax-fp32-neon-mlal.c
+  src/qc8-igemm/gen/1x8c2-minmax-fp32-neon-mlal-ld1r.c
   src/qc8-igemm/gen/1x8c2s4-minmax-fp32-neon-mlal.c
+  src/qc8-igemm/gen/2x8c2-minmax-fp32-neon-mlal-ld1r.c
   src/qc8-igemm/gen/2x8c2s4-minmax-fp32-neon-mlal.c
   src/qs8-dwconv/gen/up8x25-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-neon-c8-acc2.c
+  src/qs8-gemm/gen/1x8c2-minmax-rndnu-neon-mlal-ld1r.c
   src/qs8-gemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qs8-gemm/gen/2x8c2-minmax-rndnu-neon-mlal-ld1r.c
   src/qs8-gemm/gen/2x8c2s4-minmax-rndnu-neon-mlal.c
+  src/qs8-igemm/gen/1x8c2-minmax-rndnu-neon-mlal-ld1r.c
   src/qs8-igemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qs8-igemm/gen/2x8c2-minmax-rndnu-neon-mlal-ld1r.c
   src/qs8-igemm/gen/2x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-vadd/gen/minmax-neon-ld64-x16.c
   src/qs8-vadd/gen/minmax-neon-ld64-x32.c
