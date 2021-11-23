@@ -1153,6 +1153,16 @@ static void init(void) {
           xnn_params.qc8.gemm.log2_kr = 2;
         } else {
           switch (cpuinfo_get_core(0)->uarch) {
+            case cpuinfo_uarch_cortex_a35:
+              xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64);
+              xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64);
+              xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
+              xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane);
+              xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_neon_params;
+              xnn_params.qc8.gemm.mr = 4;
+              xnn_params.qc8.gemm.nr = 16;
+              break;
+
             case cpuinfo_uarch_cortex_a53:
             case cpuinfo_uarch_cortex_a55r0:
               xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53);
@@ -1334,6 +1344,16 @@ static void init(void) {
           xnn_params.qs8.gemm.log2_kr = 2;
         } else {
           switch (cpuinfo_get_core(0)->uarch) {
+            case cpuinfo_uarch_cortex_a35:
+              xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_ld64);
+              xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_ld64);
+              xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
+              xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane);
+              xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
+              xnn_params.qs8.gemm.mr = 4;
+              xnn_params.qs8.gemm.nr = 16;
+              break;
+
             case cpuinfo_uarch_cortex_a53:
             case cpuinfo_uarch_cortex_a55r0:
               xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_cortex_a53);
