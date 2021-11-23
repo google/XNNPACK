@@ -3080,8 +3080,12 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x8.c",
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-neon-ld128-x16.c",
+    "src/s8-ibilinear/gen/neon-c8.c",
+    "src/s8-ibilinear/gen/neon-c16.c",
     "src/s8-maxpool/9p8x-minmax-neon-c16.c",
     "src/s8-vclamp/neon-x64.c",
+    "src/u8-ibilinear/gen/neon-c8.c",
+    "src/u8-ibilinear/gen/neon-c16.c",
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-rmax/neon.c",
     "src/u8-vclamp/neon-x64.c",
@@ -10635,6 +10639,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "s8_ibilinear_test",
+    srcs = [
+        "test/s8-ibilinear.cc",
+        "test/ibilinear-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "s8_maxpool_minmax_test",
     srcs = [
         "test/s8-maxpool-minmax.cc",
@@ -10648,6 +10662,16 @@ xnnpack_unit_test(
     srcs = [
         "test/s8-vclamp.cc",
         "test/vunary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "u8_ibilinear_test",
+    srcs = [
+        "test/u8-ibilinear.cc",
+        "test/ibilinear-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

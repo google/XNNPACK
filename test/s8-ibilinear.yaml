@@ -1,0 +1,7 @@
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+- name: xnn_s8_ibilinear_ukernel__neon_c8
+- name: xnn_s8_ibilinear_ukernel__neon_c16

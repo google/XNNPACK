@@ -2109,8 +2109,12 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld128-x16.c
+  src/s8-ibilinear/gen/neon-c8.c
+  src/s8-ibilinear/gen/neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
   src/s8-vclamp/neon-x64.c
+  src/u8-ibilinear/gen/neon-c8.c
+  src/u8-ibilinear/gen/neon-c16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
@@ -7409,6 +7413,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-vmulc-minmax-fp32-test qu8-vmulc-minmax-fp32-test)
 
+  ADD_EXECUTABLE(s8-ibilinear-minmax-test test/s8-ibilinear-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(s8-ibilinear-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s8-ibilinear-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(s8-ibilinear-minmax-test s8-ibilinear-minmax-test)
+
   ADD_EXECUTABLE(s8-maxpool-minmax-test test/s8-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(s8-maxpool-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -7435,6 +7448,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(u8-lut32norm-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(u8-lut32norm-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(u8-lut32norm-test u8-lut32norm-test)
+
+  ADD_EXECUTABLE(u8-ibilinear-minmax-test test/u8-ibilinear-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(u8-ibilinear-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(u8-ibilinear-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(u8-ibilinear-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(u8-ibilinear-minmax-test u8-ibilinear-minmax-test)
 
   ADD_EXECUTABLE(u8-maxpool-minmax-test test/u8-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(u8-maxpool-minmax-test PROPERTIES

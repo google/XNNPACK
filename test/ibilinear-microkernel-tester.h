@@ -18,6 +18,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/math.h>
 #include <xnnpack/params.h>
 
 
@@ -139,7 +140,120 @@ class IBilinearMicrokernelTester {
               output_ref[i * channels() + c],
               output[i * output_stride() + c],
               std::abs(output_ref[i * channels() + c]) * 1.0e-4)
-            << "i = " << i << ", channel = " << c;
+            << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void Test(xnn_s8_ibilinear_ukernel_function ibilinear) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int16_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+    auto w11rng = std::bind(std::uniform_int_distribution<int16_t>(0, 2047), std::ref(rng));
+
+    std::vector<const int8_t*> indirection(pixels() * 4);
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
+    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_weights(pixels() * 2);
+    std::vector<int8_t> output((pixels() - 1) * output_stride() + channels());
+    std::vector<int8_t> output_ref(pixels() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::generate(packed_weights.begin(), packed_weights.end(), std::ref(w11rng));
+      std::fill(output.begin(), output.end(), INT8_C(0xFA));
+
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+
+      // Compute reference results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const int32_t alpha_h = packed_weights[i * 2 + 0];
+          const int32_t alpha_v = packed_weights[i * 2 + 1];
+          const int32_t acc = asr_s32(
+            int32_t(indirection[i * 4 + 0][c + input_offset()]) * (2048 - alpha_h) * (2048 - alpha_v) +
+            int32_t(indirection[i * 4 + 1][c + input_offset()]) * alpha_h * (2048 - alpha_v) +
+            int32_t(indirection[i * 4 + 2][c + input_offset()]) * (2048 - alpha_h) * alpha_v +
+            int32_t(indirection[i * 4 + 3][c + input_offset()]) * alpha_h * alpha_v +
+            2097152, 22);
+          ASSERT_GE(acc, std::numeric_limits<int8_t>::min());
+          ASSERT_LE(acc, std::numeric_limits<int8_t>::max());
+          output_ref[i * channels() + c] = (int8_t) acc;
+        }
+      }
+
+      // Call optimized micro-kernel.
+      ibilinear(
+        pixels(), channels() * sizeof(int8_t),
+        indirection.data(), input_offset() * sizeof(int8_t),
+        packed_weights.data(), output.data(),
+        (output_stride() - channels()) * sizeof(int8_t));
+
+      // Verify results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+            << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void Test(xnn_u8_ibilinear_ukernel_function ibilinear) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint16_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+    auto w11rng = std::bind(std::uniform_int_distribution<uint16_t>(0, 2047), std::ref(rng));
+
+    std::vector<const uint8_t*> indirection(pixels() * 4);
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
+    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_weights(pixels() * 2);
+    std::vector<uint8_t> output((pixels() - 1) * output_stride() + channels());
+    std::vector<uint8_t> output_ref(pixels() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::generate(packed_weights.begin(), packed_weights.end(), std::ref(w11rng));
+      std::fill(output.begin(), output.end(), UINT8_C(0xFA));
+
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+
+      // Compute reference results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const uint32_t alpha_h = uint32_t(int32_t(packed_weights[i * 2 + 0]));
+          const uint32_t alpha_v = uint32_t(int32_t(packed_weights[i * 2 + 1]));
+          const uint32_t acc = (2097152 +
+            int32_t(indirection[i * 4 + 0][c + input_offset()]) * (2048 - alpha_h) * (2048 - alpha_v) +
+            int32_t(indirection[i * 4 + 1][c + input_offset()]) * alpha_h * (2048 - alpha_v) +
+            int32_t(indirection[i * 4 + 2][c + input_offset()]) * (2048 - alpha_h) * alpha_v +
+            int32_t(indirection[i * 4 + 3][c + input_offset()]) * alpha_h * alpha_v) >> 22;
+          ASSERT_LE(acc, std::numeric_limits<uint8_t>::max());
+          output_ref[i * channels() + c] = (uint8_t) acc;
+        }
+      }
+
+      // Call optimized micro-kernel.
+      ibilinear(
+        pixels(), channels() * sizeof(uint8_t),
+        indirection.data(), input_offset() * sizeof(uint8_t),
+        packed_weights.data(), output.data(),
+        (output_stride() - channels()) * sizeof(uint8_t));
+
+      // Verify results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+            << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
         }
       }
     }
