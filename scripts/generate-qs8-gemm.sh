@@ -651,6 +651,7 @@ tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATIO
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S &
 
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S &
+tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S &
 
 ### C8 / C16 micro-kernels
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-cortex-a53.S &

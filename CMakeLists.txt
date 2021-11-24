@@ -5359,6 +5359,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
+  src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S
   src/qu8-igemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
@@ -5370,6 +5371,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
   src/qu8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
+  src/qu8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S)
 
