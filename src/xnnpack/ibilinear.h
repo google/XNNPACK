@@ -55,6 +55,12 @@ DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__wasmsimd_c8)
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__neon_c8)
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__neon_c16)
 
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__sse2_c8)
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__sse2_c16)
+
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__sse41_c8)
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__sse41_c16)
+
 #define DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t output_pixels,                            \
@@ -67,6 +73,12 @@ DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__neon_c16)
 
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__neon_c8)
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__neon_c16)
+
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__sse2_c8)
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__sse2_c16)
+
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__sse41_c8)
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__sse41_c16)
 
 #define DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                \

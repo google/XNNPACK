@@ -3461,8 +3461,12 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x16.c
+  src/s8-ibilinear/gen/sse2-c8.c
+  src/s8-ibilinear/gen/sse2-c16.c
   src/s8-maxpool/9p8x-minmax-sse2-c16.c
   src/s8-vclamp/sse2-x64.c
+  src/u8-ibilinear/gen/sse2-c8.c
+  src/u8-ibilinear/gen/sse2-c16.c
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
@@ -3830,8 +3834,12 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x16.c
+  src/s8-ibilinear/gen/sse41-c8.c
+  src/s8-ibilinear/gen/sse41-c16.c
   src/s8-maxpool/9p8x-minmax-sse41-c16.c
-  src/s8-vclamp/sse41-x64.c)
+  src/s8-vclamp/sse41-x64.c
+  src/u8-ibilinear/gen/sse41-c8.c
+  src/u8-ibilinear/gen/sse41-c16.c)
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx-int16-x16.c

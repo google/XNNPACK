@@ -5,3 +5,7 @@
 
 - name: xnn_s8_ibilinear_ukernel__neon_c8
 - name: xnn_s8_ibilinear_ukernel__neon_c16
+- name: xnn_s8_ibilinear_ukernel__sse2_c8
+- name: xnn_s8_ibilinear_ukernel__sse2_c16
+- name: xnn_s8_ibilinear_ukernel__sse41_c8
+- name: xnn_s8_ibilinear_ukernel__sse41_c16
