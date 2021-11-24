@@ -2654,10 +2654,14 @@ struct xnn_parameters {
   } qu8;
   struct {
     struct vunary_parameters clamp;
+    // Bilinear interpolation (2D).
+    struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
   } s8;
   struct {
     struct vunary_parameters clamp;
+    // Bilinear interpolation (2D).
+    struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
     xnn_u8_lut32norm_ukernel_function lut32norm;
     xnn_u8_rmax_ukernel_function rmax;

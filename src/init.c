@@ -299,6 +299,11 @@ static void init(void) {
         .init.s8_minmax = xnn_init_s8_minmax_neon_params,
         .element_tile = 64,
       };
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__neon_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
         .init.s8 = xnn_init_s8_minmax_neon_params,
@@ -315,6 +320,11 @@ static void init(void) {
         .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__neon_x64,
         .init.u8_minmax = xnn_init_u8_minmax_neon_params,
         .element_tile = 64,
+      };
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__neon_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
       };
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
@@ -793,6 +803,11 @@ static void init(void) {
         .init.s8_minmax = xnn_init_s8_minmax_scalar_params,
         .element_tile = 4,
       };
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__scalar_c1,
+        .pixel_tile = 1,
+        .channel_tile = 1,
+      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
         .init.s8 = xnn_init_s8_minmax_scalar_params,
@@ -809,6 +824,11 @@ static void init(void) {
         .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__scalar_x4,
         .init.u8_minmax = xnn_init_u8_minmax_scalar_params,
         .element_tile = 4,
+      };
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__scalar_c1,
+        .pixel_tile = 1,
+        .channel_tile = 1,
       };
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
@@ -1683,6 +1703,11 @@ static void init(void) {
       .init.s8_minmax = xnn_init_s8_minmax_neon_params,
       .element_tile = 64,
     };
+    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__neon_c16,
+      .pixel_tile = 1,
+      .channel_tile = 16,
+    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
       .init.s8 = xnn_init_s8_minmax_neon_params,
@@ -1699,6 +1724,11 @@ static void init(void) {
       .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__neon_x64,
       .init.u8_minmax = xnn_init_u8_minmax_neon_params,
       .element_tile = 64,
+    };
+    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__neon_c16,
+      .pixel_tile = 1,
+      .channel_tile = 16,
     };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
@@ -2801,6 +2831,11 @@ static void init(void) {
         .init.s8_minmax = xnn_init_s8_minmax_sse4_params,
         .element_tile = 64,
       };
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__sse41_c16,
+        .pixel_tile = 1,
+        .channel_tile = 16,
+      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16,
         .init.s8 = xnn_init_s8_minmax_sse4_params,
@@ -2812,6 +2847,11 @@ static void init(void) {
         .ukernel = (xnn_univector_ukernel_function) xnn_s8_vclamp_ukernel__sse2_x64,
         .init.s8_minmax = xnn_init_s8_minmax_sse2_params,
         .element_tile = 64,
+      };
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__sse2_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
       };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16,
@@ -2831,6 +2871,19 @@ static void init(void) {
       .init.u8_minmax = xnn_init_u8_minmax_sse2_params,
       .element_tile = 64,
     };
+    if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__sse41_c16,
+        .pixel_tile = 1,
+        .channel_tile = 16,
+      };
+    } else {
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__sse2_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
+    }
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16,
       .init.u8 = xnn_init_u8_minmax_sse2_params,
@@ -3588,6 +3641,19 @@ static void init(void) {
       .init.s8_minmax = xnn_init_s8_minmax_wasmsimd_params,
       .element_tile = 64,
     };
+    #if defined(XNN_WASMSIMD_VERSION) && (XNN_WASMSIMD_VERSION >= 88)
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
+    #else  // XNN_WASMSIMD_VERSION >= 88
+      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
+    #endif  // XNN_WASMSIMD_VERSION >= 88
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
       .init.s8 = xnn_init_s8_minmax_wasmsimd_params,
@@ -3605,6 +3671,19 @@ static void init(void) {
       .init.u8_minmax = xnn_init_u8_minmax_wasmsimd_params,
       .element_tile = 64,
     };
+    #if defined(XNN_WASMSIMD_VERSION) && (XNN_WASMSIMD_VERSION >= 88)
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
+    #else  // XNN_WASMSIMD_VERSION >= 88
+      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__wasmsimd_mul32_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
+    #endif  // XNN_WASMSIMD_VERSION >= 88
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
       .init.u8 = xnn_init_u8_minmax_wasmsimd_params,
@@ -4263,6 +4342,11 @@ static void init(void) {
       .init.s8_minmax = xnn_init_s8_minmax_scalar_params,
       .element_tile = 4,
     };
+    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__scalar_c1,
+      .pixel_tile = 1,
+      .channel_tile = 1,
+    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .init.s8 = xnn_init_s8_minmax_scalar_params,
@@ -4279,6 +4363,11 @@ static void init(void) {
       .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__scalar_x4,
       .init.u8_minmax = xnn_init_u8_minmax_scalar_params,
       .element_tile = 4,
+    };
+    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__scalar_c1,
+      .pixel_tile = 1,
+      .channel_tile = 1,
     };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
