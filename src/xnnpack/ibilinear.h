@@ -52,6 +52,10 @@ DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__wasmsimd_c8)
       int8_t* output,                                  \
       size_t output_increment);
 
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__scalar_c1)
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__scalar_c2)
+DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__scalar_c4)
+
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__neon_c8)
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__neon_c16)
 
@@ -76,6 +80,10 @@ DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c
       const int16_t* weights,                          \
       uint8_t* output,                                 \
       size_t output_increment);
+
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__scalar_c1)
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__scalar_c2)
+DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__scalar_c4)
 
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__neon_c8)
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__neon_c16)

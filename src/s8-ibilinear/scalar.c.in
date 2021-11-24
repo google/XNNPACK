@@ -1,0 +1,121 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE >= 1
+$assert PIXEL_TILE == 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/ibilinear.h>
+#include <xnnpack/math.h>
+
+
+$XINT8_T = {"S8": "int8_t", "U8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
+    size_t output_pixels,
+    size_t channels,
+    const ${XINT8_T}**restrict input,
+    size_t input_offset,
+    const int16_t*restrict weights,
+    ${XINT8_T}*restrict output,
+    size_t output_increment)
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+
+  do {
+    const ${XINT8_T}* i0 = (const ${XINT8_T}*) ((uintptr_t) input[0] + input_offset);
+    const ${XINT8_T}* i1 = (const ${XINT8_T}*) ((uintptr_t) input[1] + input_offset);
+    const ${XINT8_T}* i2 = (const ${XINT8_T}*) ((uintptr_t) input[2] + input_offset);
+    const ${XINT8_T}* i3 = (const ${XINT8_T}*) ((uintptr_t) input[3] + input_offset);
+    input += 4;
+
+    const int32_t valphah = (int32_t) (uint32_t) (uint16_t) weights[0];
+    const int32_t valphav = (int32_t) (uint32_t) (uint16_t) weights[1];
+    weights += 2;
+
+    const int32_t vrounding = INT32_C(0x00200000);
+
+    size_t c = channels;
+    $if CHANNEL_TILE > 1:
+      for (; c >= ${CHANNEL_TILE} * sizeof(${XINT8_T}); c -= ${CHANNEL_TILE} * sizeof(${XINT8_T})) {
+        $for C in range(CHANNEL_TILE):
+          const int32_t vtl${ABC[C]} = (int32_t) i0[${C}];
+          const int32_t vtr${ABC[C]} = (int32_t) i1[${C}];
+          const int32_t vbl${ABC[C]} = (int32_t) i2[${C}];
+          const int32_t vbr${ABC[C]} = (int32_t) i3[${C}];
+        i0 += ${CHANNEL_TILE};
+        i1 += ${CHANNEL_TILE};
+        i2 += ${CHANNEL_TILE};
+        i3 += ${CHANNEL_TILE};
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vtd${ABC[C]} = vtr${ABC[C]} - vtl${ABC[C]};
+          const int32_t vbd${ABC[C]} = vbr${ABC[C]} - vbl${ABC[C]};
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vt${ABC[C]} = (vtl${ABC[C]} << 11) + vtd${ABC[C]} * valphah;
+          const int32_t vb${ABC[C]} = (vbl${ABC[C]} << 11) + vbd${ABC[C]} * valphah;
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vd${ABC[C]} = vb${ABC[C]} - vt${ABC[C]};
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vacc${ABC[C]} = (vt${ABC[C]} << 11) + vd${ABC[C]} * valphav;
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vo${ABC[C]} = asr_s32(vacc${ABC[C]} + vrounding, 22);
+
+        $for C in range(CHANNEL_TILE):
+          output[${C}] = (${XINT8_T}) vo${ABC[C]};
+        output += ${CHANNEL_TILE};
+      }
+      for (; c >= sizeof(${XINT8_T}); c -= sizeof(${XINT8_T})) {
+        const int32_t vtl = (int32_t) *i0++;
+        const int32_t vtr = (int32_t) *i1++;
+        const int32_t vbl = (int32_t) *i2++;
+        const int32_t vbr = (int32_t) *i3++;
+
+        const int32_t vtd = vtr - vtl;
+        const int32_t vbd = vbr - vbl;
+
+        const int32_t vt = (vtl << 11) + vtd * valphah;
+        const int32_t vb = (vbl << 11) + vbd * valphah;
+
+        const int32_t vd = vb - vt;
+
+        const int32_t vacc = (vt << 11) + vd * valphav;
+
+        const int32_t vo = asr_s32(vacc + vrounding, 22);
+
+        *output++ = vo;
+      }
+    $else:
+      do {
+        const int32_t vtl = (int32_t) *i0++;
+        const int32_t vtr = (int32_t) *i1++;
+        const int32_t vbl = (int32_t) *i2++;
+        const int32_t vbr = (int32_t) *i3++;
+
+        const int32_t vtd = vtr - vtl;
+        const int32_t vbd = vbr - vbl;
+
+        const int32_t vt = (vtl << 11) + vtd * valphah;
+        const int32_t vb = (vbl << 11) + vbd * valphah;
+
+        const int32_t vd = vb - vt;
+
+        const int32_t vacc = (vt << 11) + vd * valphav;
+
+        const int32_t vo = asr_s32(vacc + vrounding, 22);
+
+        *output++ = vo;
+
+        c -= sizeof(${XINT8_T});
+      } while (c != 0);
+
+    output = (${XINT8_T}*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

@@ -1047,8 +1047,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-scalar-x1.c
   src/qu8-vmulc/gen/minmax-fp32-scalar-x2.c
   src/qu8-vmulc/gen/minmax-fp32-scalar-x4.c
+  src/s8-ibilinear/gen/scalar-c1.c
+  src/s8-ibilinear/gen/scalar-c2.c
+  src/s8-ibilinear/gen/scalar-c4.c
   src/s8-maxpool/9p8x-minmax-scalar-c1.c
   src/s8-vclamp/scalar-x4.c
+  src/u8-ibilinear/gen/scalar-c1.c
+  src/u8-ibilinear/gen/scalar-c2.c
+  src/u8-ibilinear/gen/scalar-c4.c
   src/u8-lut32norm/scalar.c
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
