@@ -91,8 +91,13 @@ void xnn_s8_ibilinear_ukernel__neon_c16(
       const int32x4_t vacc89AB = vmlaq_s32(vshlq_n_s32(vt89AB, 11), vd89AB, valphav);
       const int32x4_t vaccCDEF = vmlaq_s32(vshlq_n_s32(vtCDEF, 11), vdCDEF, valphav);
 
-      const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
-      const int16x8_t vacc89ABCDEF = vcombine_s16(vshrn_n_s32(vacc89AB, 16), vshrn_n_s32(vaccCDEF, 16));
+      #if XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vuzp2q_s16(vreinterpretq_s16_s32(vacc0123), vreinterpretq_s16_s32(vacc4567));
+        const int16x8_t vacc89ABCDEF = vuzp2q_s16(vreinterpretq_s16_s32(vacc89AB), vreinterpretq_s16_s32(vaccCDEF));
+      #else  // !XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
+        const int16x8_t vacc89ABCDEF = vcombine_s16(vshrn_n_s32(vacc89AB, 16), vshrn_n_s32(vaccCDEF, 16));
+      #endif  // !XNN_ARCH_ARM64
 
       const int8x8_t vo01234567 = vrshrn_n_s16(vacc01234567, 6);
       const int8x8_t vo89ABCDEF = vrshrn_n_s16(vacc89ABCDEF, 6);
@@ -130,7 +135,11 @@ void xnn_s8_ibilinear_ukernel__neon_c16(
       const int32x4_t vacc0123 = vmlaq_s32(vshlq_n_s32(vt0123, 11), vd0123, valphav);
       const int32x4_t vacc4567 = vmlaq_s32(vshlq_n_s32(vt4567, 11), vd4567, valphav);
 
-      const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
+      #if XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vuzp2q_s16(vreinterpretq_s16_s32(vacc0123), vreinterpretq_s16_s32(vacc4567));
+      #else  // !XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
+      #endif  // !XNN_ARCH_ARM64
 
       const int8x8_t vo01234567 = vrshrn_n_s16(vacc01234567, 6);
 
@@ -166,7 +175,11 @@ void xnn_s8_ibilinear_ukernel__neon_c16(
       const int32x4_t vacc0123 = vmlaq_s32(vshlq_n_s32(vt0123, 11), vd0123, valphav);
       const int32x4_t vacc4567 = vmlaq_s32(vshlq_n_s32(vt4567, 11), vd4567, valphav);
 
-      const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
+      #if XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vuzp2q_s16(vreinterpretq_s16_s32(vacc0123), vreinterpretq_s16_s32(vacc4567));
+      #else  // !XNN_ARCH_ARM64
+        const int16x8_t vacc01234567 = vcombine_s16(vshrn_n_s32(vacc0123, 16), vshrn_n_s32(vacc4567, 16));
+      #endif  // !XNN_ARCH_ARM64
 
       int8x8_t vo01234567 = vrshrn_n_s16(vacc01234567, 6);
 
