@@ -301,6 +301,172 @@ class ResizeBilinearOperatorTester {
     }
   }
 
+  void TestNHWCxS8() const {
+    if (align_corners()) {
+      ASSERT_FALSE(tf_legacy_mode());
+    }
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+
+    std::vector<int8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
+      for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
+        for (size_t output_y = 0; output_y < output_height(); output_y++) {
+          const float input_y = (float(output_y) + offset) * height_scale() - offset;
+          const int64_t input_y_top = std::max<int64_t>(int64_t(std::floor(input_y)), 0);
+          const int64_t input_y_bottom = std::min<int64_t>(int64_t(std::ceil(input_y)), input_height() - 1);
+          const float y_alpha = input_y - std::floor(input_y);
+          for (size_t output_x = 0; output_x < output_width(); output_x++) {
+            const float input_x = (float(output_x) + offset) * width_scale() - offset;
+            const int64_t input_x_left = std::max<int64_t>(int64_t(std::floor(input_x)), 0);
+            const int64_t input_x_right = std::min<int64_t>(int64_t(std::ceil(input_x)), input_width() - 1);
+            const float x_alpha = input_x - std::floor(input_x);
+            for (size_t c = 0; c < channels(); c++) {
+              output_ref[((batch_index * output_height() + output_y) * output_width() + output_x) * channels() + c] =
+                float(int32_t(input[((batch_index * input_height() + input_y_top) * input_width() + input_x_left) * input_pixel_stride() + c])) * (1.0f - y_alpha) * (1.0f - x_alpha) +
+                float(int32_t(input[((batch_index * input_height() + input_y_top) * input_width() + input_x_right) * input_pixel_stride() + c])) * (1.0f - y_alpha) * x_alpha +
+                float(int32_t(input[((batch_index * input_height() + input_y_bottom) * input_width() + input_x_left) * input_pixel_stride() + c])) * y_alpha * (1.0f - x_alpha) +
+                float(int32_t(input[((batch_index * input_height() + input_y_bottom) * input_width() + input_x_right) * input_pixel_stride() + c])) * y_alpha * x_alpha;
+            }
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy Resize Bilinear operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t resize_bilinear_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_resize_bilinear2d_nhwc_s8(
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
+          &resize_bilinear_op));
+      ASSERT_NE(nullptr, resize_bilinear_op);
+
+      // Smart pointer to automatically delete resize_bilinear_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_s8(
+          resize_bilinear_op,
+          batch_size(), input_height(), input_width(),
+          output_height(), output_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_NEAR(
+                  float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+                  output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+                  0.6f) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestNHWCxU8() const {
+    if (align_corners()) {
+      ASSERT_FALSE(tf_legacy_mode());
+    }
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+
+    std::vector<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
+      for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
+        for (size_t output_y = 0; output_y < output_height(); output_y++) {
+          const float input_y = (float(output_y) + offset) * height_scale() - offset;
+          const int64_t input_y_top = std::max<int64_t>(int64_t(std::floor(input_y)), 0);
+          const int64_t input_y_bottom = std::min<int64_t>(int64_t(std::ceil(input_y)), input_height() - 1);
+          const float y_alpha = input_y - std::floor(input_y);
+          for (size_t output_x = 0; output_x < output_width(); output_x++) {
+            const float input_x = (float(output_x) + offset) * width_scale() - offset;
+            const int64_t input_x_left = std::max<int64_t>(int64_t(std::floor(input_x)), 0);
+            const int64_t input_x_right = std::min<int64_t>(int64_t(std::ceil(input_x)), input_width() - 1);
+            const float x_alpha = input_x - std::floor(input_x);
+            for (size_t c = 0; c < channels(); c++) {
+              output_ref[((batch_index * output_height() + output_y) * output_width() + output_x) * channels() + c] =
+                float(int32_t(input[((batch_index * input_height() + input_y_top) * input_width() + input_x_left) * input_pixel_stride() + c])) * (1.0f - y_alpha) * (1.0f - x_alpha) +
+                float(int32_t(input[((batch_index * input_height() + input_y_top) * input_width() + input_x_right) * input_pixel_stride() + c])) * (1.0f - y_alpha) * x_alpha +
+                float(int32_t(input[((batch_index * input_height() + input_y_bottom) * input_width() + input_x_left) * input_pixel_stride() + c])) * y_alpha * (1.0f - x_alpha) +
+                float(int32_t(input[((batch_index * input_height() + input_y_bottom) * input_width() + input_x_right) * input_pixel_stride() + c])) * y_alpha * x_alpha;
+            }
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy Resize Bilinear operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t resize_bilinear_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_resize_bilinear2d_nhwc_u8(
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
+          &resize_bilinear_op));
+      ASSERT_NE(nullptr, resize_bilinear_op);
+
+      // Smart pointer to automatically delete resize_bilinear_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_u8(
+          resize_bilinear_op,
+          batch_size(), input_height(), input_width(),
+          output_height(), output_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_NEAR(
+                  float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+                  output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+                  0.6f) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestNCHWxF32() const {
     if (align_corners()) {
       ASSERT_FALSE(tf_legacy_mode());
@@ -385,163 +551,6 @@ class ResizeBilinearOperatorTester {
       }
     }
   }
-
-  // void TestSetupF32() const {
-  //   std::random_device random_device;
-  //   auto rng = std::mt19937(random_device());
-  //   auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
-
-  //   std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
-  //     (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
-  //     (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-  //   std::vector<float> output(std::max(
-  //     (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
-  //     (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
-  //   std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-  //   std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
-  //   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-  //     std::generate(input.begin(), input.end(), std::ref(f32rng));
-  //     std::fill(output.begin(), output.end(), std::nanf(""));
-
-  //     // Compute reference results, without clamping.
-  //     for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
-  //       for (size_t output_y = 0; output_y < output_height(); output_y++) {
-  //         for (size_t output_x = 0; output_x < output_width(); output_x++) {
-  //           for (size_t c = 0; c < channels(); c++) {
-  //             float acc = 0.0f;
-  //             size_t n = 0;
-  //             for (size_t py = 0; py < pooling_height(); py++) {
-  //               const size_t iy = output_y * stride_height() + py - padding_top();
-  //               for (size_t px = 0; px < pooling_width(); px++) {
-  //                 const size_t input_x = output_x * stride_width() + px - padding_left();
-  //                 if (input_x < input_width() && iy < input_height()) {
-  //                   acc += input[((batch_index * input_height() + iy) * input_width() + input_x) * input_pixel_stride() + c];
-  //                   n += 1;
-  //                 }
-  //               }
-  //             }
-  //             output_ref[((batch_index * output_height() + output_y) * output_width() + output_x) * channels() + c] = acc / float(n);
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     // Compute clamping parameters.
-  //     const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
-  //     const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
-  //     const float accumulated_range = accumulated_max - accumulated_min;
-  //     const float output_min = accumulated_range == 0.0f ?
-  //       -std::numeric_limits<float>::infinity() :
-  //       accumulated_min + accumulated_range / 255.0f * float(qmin());
-  //     const float output_max = accumulated_range == 0.0f ?
-  //       +std::numeric_limits<float>::infinity() :
-  //       accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
-
-  //     // Clamp reference results.
-  //     for (float& value : output_ref) {
-  //       value = std::max(std::min(value, output_max), output_min);
-  //     }
-
-  //     // Create, setup, and run Average Pooling operator once.
-  //     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  //     xnn_operator_t resize_bilinear_op = nullptr;
-
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_create_average_pooling2d_nhwc_f32(
-  //         padding_top(), padding_right(), padding_bottom(), padding_left(),
-  //         pooling_height(), pooling_width(),
-  //         stride_height(), stride_width(),
-  //         channels(), input_pixel_stride(), output_pixel_stride(),
-  //         output_min, output_max,
-  //         0, &resize_bilinear_op));
-  //     ASSERT_NE(nullptr, resize_bilinear_op);
-
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_setup_average_pooling2d_nhwc_f32(
-  //         resize_bilinear_op,
-  //         batch_size(), input_height(), input_width(),
-  //         input.data(), output.data(),
-  //         nullptr /* thread pool */));
-
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
-
-  //     // Verify results of the first run.
-  //     for (size_t batch_index = 0; batch_index < batch_size(); batch_index++) {
-  //       for (size_t y = 0; y < output_height(); y++) {
-  //         for (size_t x = 0; x < output_width(); x++) {
-  //           for (size_t c = 0; c < channels(); c++) {
-  //             ASSERT_LE(output[((batch_index * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
-  //             ASSERT_GE(output[((batch_index * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-  //             ASSERT_NEAR(output[((batch_index * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
-  //                 output_ref[((batch_index * output_height() + y) * output_width() + x) * channels() + c],
-  //                 std::abs(output_ref[((batch_index * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-6f) <<
-  //               "in batch index " << batch_index << ", pixel (" << y << ", " << x << "), channel " << c;
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     // Re-generate data for the second run.
-  //     std::generate(input.begin(), input.end(), std::ref(f32rng));
-  //     std::fill(output.begin(), output.end(), std::nanf(""));
-
-  //     // Compute reference results for the second run.
-  //     for (size_t batch_index = 0; batch_index < next_batch_size(); batch_index++) {
-  //       for (size_t output_y = 0; output_y < next_output_height(); output_y++) {
-  //         for (size_t output_x = 0; output_x < next_output_width(); output_x++) {
-  //           for (size_t c = 0; c < channels(); c++) {
-  //             float acc = 0.0f;
-  //             int32_t n = 0;
-  //             for (size_t py = 0; py < pooling_height(); py++) {
-  //               const size_t iy = output_y * stride_height() + py - padding_top();
-  //               for (size_t px = 0; px < pooling_width(); px++) {
-  //                 const size_t input_x = output_x * stride_width() + px - padding_left();
-  //                 if (input_x < next_input_width() && iy < next_input_height()) {
-  //                   acc += input[((batch_index * next_input_height() + iy) * next_input_width() + input_x) * input_pixel_stride() + c];
-  //                   n += 1;
-  //                 }
-  //               }
-  //             }
-  //             next_output_ref[((batch_index * next_output_height() + output_y) * next_output_width() + output_x) * channels() + c] =
-  //               std::max(std::min(acc / float(n), output_max), output_min);
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     // Setup and run Average Pooling operator the second time, and destroutput_y the operator.
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_setup_average_pooling2d_nhwc_f32(
-  //         resize_bilinear_op,
-  //         next_batch_size(), next_input_height(), next_input_width(),
-  //         input.data(), output.data(),
-  //         nullptr /* thread pool */));
-
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
-
-  //     ASSERT_EQ(xnn_status_success,
-  //       xnn_delete_operator(resize_bilinear_op));
-  //     resize_bilinear_op = nullptr;
-
-  //     // Verify results of the second run.
-  //     for (size_t batch_index = 0; batch_index < next_batch_size(); batch_index++) {
-  //       for (size_t y = 0; y < next_output_height(); y++) {
-  //         for (size_t x = 0; x < next_output_width(); x++) {
-  //           for (size_t c = 0; c < channels(); c++) {
-  //             ASSERT_LE(output[((batch_index * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
-  //             ASSERT_GE(output[((batch_index * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
-  //             ASSERT_NEAR(output[((batch_index * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c],
-  //                 next_output_ref[((batch_index * next_output_height() + y) * next_output_width() + x) * channels() + c],
-  //                 std::abs(next_output_ref[((batch_index * next_output_height() + y) * next_output_width() + x) * channels() + c]) * 1.0e-6f) <<
-  //               "in batch index " << batch_index << ", pixel (" << y << ", " << x << "), channel " << c;
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
 
  private:
   size_t input_height_{1};

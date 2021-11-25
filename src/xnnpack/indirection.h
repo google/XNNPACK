@@ -58,6 +58,30 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f32(
   bool align_corners,
   bool tensorflow_legacy);
 
+typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
+  size_t input_pixel_stride,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const void* input,
+  const void** indirection_buffer,
+  void* packed_weights,
+  bool align_corners,
+  bool tensorflow_legacy);
+
+XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_q11(
+  size_t input_pixel_stride,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const void* input,
+  const void** indirection_buffer,
+  int16_t* packed_weights,
+  bool align_corners,
+  bool tensorflow_legacy);
+
 XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_chw_f32(
   size_t input_pixel_stride,
   size_t input_height,
