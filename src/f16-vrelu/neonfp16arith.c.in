@@ -56,7 +56,7 @@ void xnn_f16_vrelu_ukernel__neonfp16arith_x${BATCH_TILE}(
       vacc_lo = vget_high_f16(vacc);
     }
     if (n & (2 * sizeof(__fp16))) {
-      vst1_lane_u32(__builtin_assume_aligned(y, 1), vreinterpret_u32_f16(vacc_lo), 0); y += 2;
+      vst1_lane_u32((void*) y, vreinterpret_u32_f16(vacc_lo), 0); y += 2;
       vacc_lo = vext_f16(vacc_lo, vacc_lo, 2);
     }
     if (n & (1 * sizeof(__fp16))) {

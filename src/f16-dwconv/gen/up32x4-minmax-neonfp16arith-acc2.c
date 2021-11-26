@@ -197,7 +197,7 @@ void xnn_f16_dwconv_minmax_ukernel_up32x4__neonfp16arith_acc2(
         vacc0123 = vget_high_f16(vacc01234567);
       }
       if (c & 2) {
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_f16(vacc0123), 0); output += 2;
+        vst1_lane_u32((void*) output, vreinterpret_u32_f16(vacc0123), 0); output += 2;
         vacc0123 = vext_f16(vacc0123, vacc0123, 2);
       }
       if (c & 1) {

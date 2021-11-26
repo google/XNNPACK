@@ -403,11 +403,11 @@ void xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8(
         vout = vmin_u8(vout, voutput_max);
 
         if (c & 4) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u8(vout), 0); output += 4;
+          vst1_lane_u32((void*) output, vreinterpret_u32_u8(vout), 0); output += 4;
           vout = vext_u8(vout, vout, 4);
         }
         if (c & 2) {
-          vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_u8(vout), 0); output += 2;
+          vst1_lane_u16((void*) output, vreinterpret_u16_u8(vout), 0); output += 2;
           vout = vext_u8(vout, vout, 2);
         }
         if (c & 1) {

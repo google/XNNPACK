@@ -278,16 +278,16 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_3x16c4__neondot(
         vout2x01234567 = vget_high_u8(vout2x0123456789ABCDEF);
       }
       if (nc & 4) {
-        vst1q_lane_u32(__builtin_assume_aligned(c0, 1), vreinterpretq_u32_u8(vout0x01234567_1x01234567), 0); c0 += 4;
-        vst1q_lane_u32(__builtin_assume_aligned(c1, 1), vreinterpretq_u32_u8(vout0x01234567_1x01234567), 2); c1 += 4;
-        vst1_lane_u32(__builtin_assume_aligned(c2, 1), vreinterpret_u32_u8(vout2x01234567), 0); c2 += 4;
+        vst1q_lane_u32((void*) c0, vreinterpretq_u32_u8(vout0x01234567_1x01234567), 0); c0 += 4;
+        vst1q_lane_u32((void*) c1, vreinterpretq_u32_u8(vout0x01234567_1x01234567), 2); c1 += 4;
+        vst1_lane_u32((void*) c2, vreinterpret_u32_u8(vout2x01234567), 0); c2 += 4;
         vout0x01234567_1x01234567 = vextq_u8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 4);
         vout2x01234567 = vext_u8(vout2x01234567, vout2x01234567, 4);
       }
       if (nc & 2) {
-        vst1q_lane_u16(__builtin_assume_aligned(c0, 1), vreinterpretq_u16_u8(vout0x01234567_1x01234567), 0); c0 += 2;
-        vst1q_lane_u16(__builtin_assume_aligned(c1, 1), vreinterpretq_u16_u8(vout0x01234567_1x01234567), 4); c1 += 2;
-        vst1_lane_u16(__builtin_assume_aligned(c2, 1), vreinterpret_u16_u8(vout2x01234567), 0); c2 += 2;
+        vst1q_lane_u16((void*) c0, vreinterpretq_u16_u8(vout0x01234567_1x01234567), 0); c0 += 2;
+        vst1q_lane_u16((void*) c1, vreinterpretq_u16_u8(vout0x01234567_1x01234567), 4); c1 += 2;
+        vst1_lane_u16((void*) c2, vreinterpret_u16_u8(vout2x01234567), 0); c2 += 2;
         vout0x01234567_1x01234567 = vextq_u8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 2);
         vout2x01234567 = vext_u8(vout2x01234567, vout2x01234567, 2);
       }

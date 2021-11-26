@@ -3556,7 +3556,6 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c16-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-ssse3-c24-acc2.c
-  src/qs8-gemm/gen/1x4c2-xw-minmax-fp32-ssse3.c
   src/qs8-gemm/gen/1x4c8-minmax-fp32-ssse3-ld64.c
   src/qs8-gemm/gen/1x4c8-minmax-fp32-ssse3-ld128.c
   src/qs8-gemm/gen/1x4c8-xw-minmax-fp32-ssse3.c

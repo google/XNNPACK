@@ -126,11 +126,11 @@ XNN_DISABLE_TSAN void xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16(
           vout_lo = vget_high_s8(vout);
         }
         if (c & 4) {
-          vst1_lane_u32(__builtin_assume_aligned(o, 1), vreinterpret_u32_s8(vout_lo), 0); o += 4;
+          vst1_lane_u32((void*) o, vreinterpret_u32_s8(vout_lo), 0); o += 4;
           vout_lo = vext_s8(vout_lo, vout_lo, 4);
         }
         if (c & 2) {
-          vst1_lane_u16(__builtin_assume_aligned(o, 1), vreinterpret_u16_s8(vout_lo), 0); o += 2;
+          vst1_lane_u16((void*) o, vreinterpret_u16_s8(vout_lo), 0); o += 2;
           vout_lo = vext_s8(vout_lo, vout_lo, 2);
         }
         if (c & 1) {
@@ -232,11 +232,11 @@ XNN_DISABLE_TSAN void xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16(
           vout_lo = vget_high_s8(vout);
         }
         if (c & 4) {
-          vst1_lane_u32(__builtin_assume_aligned(o, 1), vreinterpret_u32_s8(vout_lo), 0); o += 4;
+          vst1_lane_u32((void*) o, vreinterpret_u32_s8(vout_lo), 0); o += 4;
           vout_lo = vext_s8(vout_lo, vout_lo, 4);
         }
         if (c & 2) {
-          vst1_lane_u16(__builtin_assume_aligned(o, 1), vreinterpret_u16_s8(vout_lo), 0); o += 2;
+          vst1_lane_u16((void*) o, vreinterpret_u16_s8(vout_lo), 0); o += 2;
           vout_lo = vext_s8(vout_lo, vout_lo, 2);
         }
         if (c & 1) {

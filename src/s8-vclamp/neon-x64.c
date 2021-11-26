@@ -57,11 +57,11 @@ void xnn_s8_vclamp_ukernel__neon_x64(
     vacc = vmax_s8(vacc, vget_low_s8(voutput_min));
 
     if (n & 4) {
-      vst1_lane_u32(__builtin_assume_aligned(y, 1), vreinterpret_u32_s8(vacc), 0); y += 4;
+      vst1_lane_u32((void*) y, vreinterpret_u32_s8(vacc), 0); y += 4;
       vacc = vext_s8(vacc, vacc, 4);
     }
     if (n & 2) {
-      vst1_lane_u16(__builtin_assume_aligned(y, 1), vreinterpret_u16_s8(vacc), 0); y += 2;
+      vst1_lane_u16((void*) y, vreinterpret_u16_s8(vacc), 0); y += 2;
       vacc = vext_s8(vacc, vacc, 2);
     }
     if (n & 1) {

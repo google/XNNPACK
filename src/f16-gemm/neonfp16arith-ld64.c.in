@@ -159,7 +159,7 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
                 vacc${M}x${ABC[0:4]} = vget_high_f16(vacc${M}x${ABC[0:8]});
             $elif LOG2N == 1:
               $for M in range(MR):
-                vst1_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpret_u32_f16(vacc${M}x${ABC[0:4]}), 0); c${M} += 2;
+                vst1_lane_u32((void*) c${M}, vreinterpret_u32_f16(vacc${M}x${ABC[0:4]}), 0); c${M} += 2;
 
               $for M in range(MR):
                 vacc${M}x${ABC[0:4]} = vext_f16(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 2);

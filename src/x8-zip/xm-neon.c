@@ -44,28 +44,28 @@ void xnn_x8_zip_xm_ukernel__neon(
         const uint16x4x2_t vxyzw_lo = vzip_u16(vreinterpret_u16_u8(vxy.val[0]), vreinterpret_u16_u8(vzw.val[0]));
         const uint16x4x2_t vxyzw_hi = vzip_u16(vreinterpret_u16_u8(vxy.val[1]), vreinterpret_u16_u8(vzw.val[1]));
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_lo.val[0]), 0);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_lo.val[0]), 0);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_lo.val[0]), 1);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_lo.val[0]), 1);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_lo.val[1]), 0);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_lo.val[1]), 0);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_lo.val[1]), 1);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_lo.val[1]), 1);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_hi.val[0]), 0);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_hi.val[0]), 0);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_hi.val[0]), 1);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_hi.val[0]), 1);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_hi.val[1]), 0);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_hi.val[1]), 0);
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_u16(vxyzw_hi.val[1]), 1);
+        vst1_lane_u32((void*) output, vreinterpret_u32_u16(vxyzw_hi.val[1]), 1);
         output = (uint8_t*) ((uintptr_t) output + m);
 
         k -= 8;
@@ -93,16 +93,16 @@ void xnn_x8_zip_xm_ukernel__neon(
         uint32x2_t vxyzw3 = vreinterpret_u32_u16(vxyzw_hi.val[1]);
 
         if (k & 4) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw0, 0);
+          vst1_lane_u32((void*) output, vxyzw0, 0);
           output = (uint8_t*) ((uintptr_t) output + m);
 
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw0, 1);
+          vst1_lane_u32((void*) output, vxyzw0, 1);
           output = (uint8_t*) ((uintptr_t) output + m);
 
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw1, 0);
+          vst1_lane_u32((void*) output, vxyzw1, 0);
           output = (uint8_t*) ((uintptr_t) output + m);
 
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw1, 1);
+          vst1_lane_u32((void*) output, vxyzw1, 1);
           output = (uint8_t*) ((uintptr_t) output + m);
 
           vxyzw0 = vxyzw2;
@@ -110,16 +110,16 @@ void xnn_x8_zip_xm_ukernel__neon(
         }
 
         if (k & 2) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw0, 0);
+          vst1_lane_u32((void*) output, vxyzw0, 0);
           output = (uint8_t*) ((uintptr_t) output + m);
 
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw0, 1);
+          vst1_lane_u32((void*) output, vxyzw0, 1);
           output = (uint8_t*) ((uintptr_t) output + m);
 
           vxyzw0 = vxyzw1;
         }
         if (k & 1) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vxyzw0, 0);
+          vst1_lane_u32((void*) output, vxyzw0, 0);
           output = (uint8_t*) ((uintptr_t) output + m);
         }
       }

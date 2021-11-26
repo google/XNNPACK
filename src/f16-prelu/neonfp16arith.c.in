@@ -115,7 +115,7 @@ void xnn_f16_prelu_ukernel__neonfp16arith_${ROW_TILE}x${CHANNEL_TILE}(
       }
       if (c & (2 * sizeof(__fp16))) {
         $for M in range(ROW_TILE):
-          vst1_lane_u32(__builtin_assume_aligned(o${M}, 1), vreinterpret_u32_f16(vacc${M}x0123), 0); o${M} += 2;
+          vst1_lane_u32((void*) o${M}, vreinterpret_u32_f16(vacc${M}x0123), 0); o${M} += 2;
           vacc${M}x0123 = vext_f16(vacc${M}x0123, vacc${M}x0123, 2);
       }
       if (c & (1 * sizeof(__fp16))) {

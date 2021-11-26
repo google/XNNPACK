@@ -107,7 +107,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8(
       vout_lo = vget_high_f16(vout);
     }
     if (channels & 2) {
-      vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_f16(vout_lo), 0); output += 2;
+      vst1_lane_u32((void*) output, vreinterpret_u32_f16(vout_lo), 0); output += 2;
       vout_lo = vext_f16(vout_lo, vout_lo, 2);
     }
     if (channels & 1) {

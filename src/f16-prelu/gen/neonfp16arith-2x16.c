@@ -117,9 +117,9 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x16(
         vacc1x0123 = vget_high_f16(vacc1x01234567);
       }
       if (c & (2 * sizeof(__fp16))) {
-        vst1_lane_u32(__builtin_assume_aligned(o0, 1), vreinterpret_u32_f16(vacc0x0123), 0); o0 += 2;
+        vst1_lane_u32((void*) o0, vreinterpret_u32_f16(vacc0x0123), 0); o0 += 2;
         vacc0x0123 = vext_f16(vacc0x0123, vacc0x0123, 2);
-        vst1_lane_u32(__builtin_assume_aligned(o1, 1), vreinterpret_u32_f16(vacc1x0123), 0); o1 += 2;
+        vst1_lane_u32((void*) o1, vreinterpret_u32_f16(vacc1x0123), 0); o1 += 2;
         vacc1x0123 = vext_f16(vacc1x0123, vacc1x0123, 2);
       }
       if (c & (1 * sizeof(__fp16))) {

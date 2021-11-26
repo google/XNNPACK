@@ -288,10 +288,10 @@ void xnn_f16_gemm_minmax_ukernel_4x16__neonfp16arith_ld64(
         vacc3x0123 = vget_high_f16(vacc3x01234567);
       }
       if (nc & 2) {
-        vst1_lane_u32(__builtin_assume_aligned(c0, 1), vreinterpret_u32_f16(vacc0x0123), 0); c0 += 2;
-        vst1_lane_u32(__builtin_assume_aligned(c1, 1), vreinterpret_u32_f16(vacc1x0123), 0); c1 += 2;
-        vst1_lane_u32(__builtin_assume_aligned(c2, 1), vreinterpret_u32_f16(vacc2x0123), 0); c2 += 2;
-        vst1_lane_u32(__builtin_assume_aligned(c3, 1), vreinterpret_u32_f16(vacc3x0123), 0); c3 += 2;
+        vst1_lane_u32((void*) c0, vreinterpret_u32_f16(vacc0x0123), 0); c0 += 2;
+        vst1_lane_u32((void*) c1, vreinterpret_u32_f16(vacc1x0123), 0); c1 += 2;
+        vst1_lane_u32((void*) c2, vreinterpret_u32_f16(vacc2x0123), 0); c2 += 2;
+        vst1_lane_u32((void*) c3, vreinterpret_u32_f16(vacc3x0123), 0); c3 += 2;
 
         vacc0x0123 = vext_f16(vacc0x0123, vacc0x0123, 2);
         vacc1x0123 = vext_f16(vacc1x0123, vacc1x0123, 2);

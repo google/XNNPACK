@@ -259,11 +259,11 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__neon_c16_acc2(
         channels -= 8;
       } else {
         if (channels & 4) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_s8(vout01234567), 0); output += 4;
+          vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout01234567), 0); output += 4;
           vout01234567 = vext_s8(vout01234567, vout01234567, 4);
         }
         if (channels & 2) {
-          vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_s8(vout01234567), 0); output += 2;
+          vst1_lane_u16((void*) output, vreinterpret_u16_s8(vout01234567), 0); output += 2;
           vout01234567 = vext_s8(vout01234567, vout01234567, 2);
         }
         if (channels & 1) {

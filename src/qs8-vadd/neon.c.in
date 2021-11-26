@@ -208,11 +208,11 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "
           n -= 8 * sizeof(${XINT8_T});
         } else {
           if (n & (4 * sizeof(${XINT8_T}))) {
-            vst1_lane_u32(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
+            vst1_lane_u32((void*) output, ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
             vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
           }
           if (n & (2 * sizeof(${XINT8_T}))) {
-            vst1_lane_u16(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
+            vst1_lane_u16((void*) output, ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
             vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
           }
           if (n & (1 * sizeof(${XINT8_T}))) {
@@ -222,11 +222,11 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "
         }
       $else:
         if (n & (4 * sizeof(${XINT8_T}))) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
+          vst1_lane_u32((void*) output, ${VREINTERPRET_U32_X8}(vout${ABC[0:8]}), 0); output += 4;
           vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
         }
         if (n & (2 * sizeof(${XINT8_T}))) {
-          vst1_lane_u16(__builtin_assume_aligned(output, 1), ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
+          vst1_lane_u16((void*) output, ${VREINTERPRET_U16_X8}(vout${ABC[0:8]}), 0); output += 2;
           vout${ABC[0:8]} = ${VEXT_X8}(vout${ABC[0:8]}, vout${ABC[0:8]}, 2);
         }
         if (n & (1 * sizeof(${XINT8_T}))) {

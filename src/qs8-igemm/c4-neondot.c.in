@@ -268,10 +268,10 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
       if (nc & 4) {
         $for M in reversed(range(MR)):
           $if M % 2 == 1:
-            vst1q_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 2); c${M} += 4;
-            vst1q_lane_u32(__builtin_assume_aligned(c${M-1}, 1), vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 4;
+            vst1q_lane_u32((void*) c${M}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 2); c${M} += 4;
+            vst1q_lane_u32((void*) c${M-1}, vreinterpretq_u32_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 4;
           $elif M + 1 == MR:
-            vst1_lane_u32(__builtin_assume_aligned(c${M}, 1), vreinterpret_u32_s8(vout${M}x01234567), 0); c${M} += 4;
+            vst1_lane_u32((void*) c${M}, vreinterpret_u32_s8(vout${M}x01234567), 0); c${M} += 4;
         $for M in reversed(range(MR)):
           $if M % 2 == 1:
             vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 4);
@@ -281,10 +281,10 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
       if (nc & 2) {
         $for M in reversed(range(MR)):
           $if M % 2 == 1:
-            vst1q_lane_u16(__builtin_assume_aligned(c${M}, 1), vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 4); c${M} += 2;
-            vst1q_lane_u16(__builtin_assume_aligned(c${M-1}, 1), vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 2;
+            vst1q_lane_u16((void*) c${M}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 4); c${M} += 2;
+            vst1q_lane_u16((void*) c${M-1}, vreinterpretq_u16_s8(vout${M-1}x01234567_${M}x01234567), 0); c${M-1} += 2;
           $elif M + 1 == MR:
-            vst1_lane_u16(__builtin_assume_aligned(c${M}, 1), vreinterpret_u16_s8(vout${M}x01234567), 0); c${M} += 2;
+            vst1_lane_u16((void*) c${M}, vreinterpret_u16_s8(vout${M}x01234567), 0); c${M} += 2;
         $for M in reversed(range(MR)):
           $if M % 2 == 1:
             vout${M-1}x01234567_${M}x01234567 = vextq_s8(vout${M-1}x01234567_${M}x01234567, vout${M-1}x01234567_${M}x01234567, 2);

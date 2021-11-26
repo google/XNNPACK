@@ -56,7 +56,7 @@ void xnn_f16_vmin_ukernel__neonfp16arith_x8(
     }
 
     if (n & (2 * sizeof(__fp16))) {
-      vst1_lane_u32(__builtin_assume_aligned(y, 1), vreinterpret_u32_f16(vy0123), 0); y += 2;
+      vst1_lane_u32((void*) y, vreinterpret_u32_f16(vy0123), 0); y += 2;
       vy0123 = vext_f16(vy0123, vy0123, 2);
     }
 

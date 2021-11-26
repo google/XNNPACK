@@ -110,11 +110,11 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld128_x16(
         n -= 8 * sizeof(int8_t);
       } else {
         if (n & (4 * sizeof(int8_t))) {
-          vst1_lane_u32(__builtin_assume_aligned(output, 1), vreinterpret_u32_s8(vout01234567), 0); output += 4;
+          vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout01234567), 0); output += 4;
           vout01234567 = vext_s8(vout01234567, vout01234567, 4);
         }
         if (n & (2 * sizeof(int8_t))) {
-          vst1_lane_u16(__builtin_assume_aligned(output, 1), vreinterpret_u16_s8(vout01234567), 0); output += 2;
+          vst1_lane_u16((void*) output, vreinterpret_u16_s8(vout01234567), 0); output += 2;
           vout01234567 = vext_s8(vout01234567, vout01234567, 2);
         }
         if (n & (1 * sizeof(int8_t))) {

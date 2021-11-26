@@ -299,11 +299,11 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane(
         vout0x01234567 = vget_high_u8(vout0x0123456789ABCDEF);
       }
       if (nc & 4) {
-        vst1_lane_u32(__builtin_assume_aligned(c0, 1), vreinterpret_u32_u8(vout0x01234567), 0); c0 += 4;
+        vst1_lane_u32((void*) c0, vreinterpret_u32_u8(vout0x01234567), 0); c0 += 4;
         vout0x01234567 = vext_u8(vout0x01234567, vout0x01234567, 4);
       }
       if (nc & 2) {
-        vst1_lane_u16(__builtin_assume_aligned(c0, 1), vreinterpret_u16_u8(vout0x01234567), 0); c0 += 2;
+        vst1_lane_u16((void*) c0, vreinterpret_u16_u8(vout0x01234567), 0); c0 += 2;
         vout0x01234567 = vext_u8(vout0x01234567, vout0x01234567, 2);
       }
       if (nc & 1) {
