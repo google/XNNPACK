@@ -316,7 +316,7 @@ class ResizeBilinearOperatorTester {
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), std::nanf(""));
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -399,7 +399,7 @@ class ResizeBilinearOperatorTester {
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::fill(output.begin(), output.end(), std::nanf(""));
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
