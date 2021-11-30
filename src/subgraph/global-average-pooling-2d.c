@@ -19,8 +19,6 @@ static enum xnn_status create_global_average_pooling_operator(
   size_t num_values,
   struct xnn_operator_data* opdata)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -37,6 +35,7 @@ static enum xnn_status create_global_average_pooling_operator(
 
   enum xnn_status status;
   if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
+    assert(node->compute_type == xnn_compute_type_fp32);
     status = xnn_create_global_average_pooling_ncw_f32(
       channel_dim /* channels */,
       node->activation.output_min,
@@ -46,12 +45,58 @@ static enum xnn_status create_global_average_pooling_operator(
   } else {
     assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
     assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-    status = xnn_create_global_average_pooling_nwc_f32(
-      channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-      node->activation.output_min,
-      node->activation.output_max,
-      node->flags,
-      &opdata->operator_object);
+    switch (node->compute_type) {
+      case xnn_compute_type_fp32:
+        status = xnn_create_global_average_pooling_nwc_f32(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &opdata->operator_object);
+        break;
+#ifndef XNN_NO_QS8_OPERATORS
+      case xnn_compute_type_qs8:
+      {
+        const float output_scale = values[output_id].quantization.scale;
+        const int32_t output_zero_point = values[output_id].quantization.zero_point;
+        const int8_t output_min =
+          (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+        const int8_t output_max =
+          (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+        status = xnn_create_global_average_pooling_nwc_qs8(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          (int8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+          (int8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+          output_min,
+          output_max,
+          node->flags,
+          &opdata->operator_object);
+        break;
+      }
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+      case xnn_compute_type_qu8:
+      {
+        const float output_scale = values[output_id].quantization.scale;
+        const int32_t output_zero_point = values[output_id].quantization.zero_point;
+        const uint8_t output_min =
+          (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+        const uint8_t output_max =
+          (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+        status = xnn_create_global_average_pooling_nwc_qu8(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          (uint8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+          (uint8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+          output_min,
+          output_max,
+          node->flags,
+          &opdata->operator_object);
+        break;
+      }
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+      default:
+        XNN_UNREACHABLE;
+    }
   }
   if (status == xnn_status_success) {
     opdata->batch_size = values[input_id].shape.dim[0];
@@ -103,6 +148,28 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_operator_type_global_average_pooling_nwc_qs8:
+      return xnn_setup_global_average_pooling_nwc_qs8(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_operator_type_global_average_pooling_nwc_qu8:
+      return xnn_setup_global_average_pooling_nwc_qu8(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -160,6 +227,12 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -184,9 +257,21 @@ enum xnn_status xnn_define_global_average_pooling_2d(
     return xnn_status_invalid_parameter;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      compute_type = xnn_compute_type_qu8;
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -195,13 +280,23 @@ enum xnn_status xnn_define_global_average_pooling_2d(
       return xnn_status_invalid_parameter;
   }
 
+  if (input_value->datatype != output_value->datatype) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+      ": mismatching datatypes across input (%s) and output (%s)",
+      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d), input_id, output_id,
+      xnn_datatype_to_string(input_value->datatype),
+      xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
+  }
+
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;
   }
 
   node->type = xnn_node_type_global_average_pooling_2d;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 1;
