@@ -74,9 +74,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm
         # BLOCK 1 - 6 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         SMULL   v23.8h, v5.8b, v0.8b
-        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 320]
         SADALP  v16.4s, v17.8h
-        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 384]
         SADALP  v18.4s, v19.8h
         LDP     d4, d5, [x5, 32]
         SMLAL   v21.8h, v2.8b, v6.8b
@@ -126,9 +126,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm
         # BLOCK 1 - 6 cycles
         SMULL   v21.8h, v4.8b, v0.8b
         SMULL   v23.8h, v5.8b, v0.8b
-        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 320]
         SADALP  v16.4s, v17.8h
-        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 384]
         SADALP  v18.4s, v19.8h
         LDP     d4, d5, [x5, 32]
         SMLAL   v21.8h, v2.8b, v6.8b

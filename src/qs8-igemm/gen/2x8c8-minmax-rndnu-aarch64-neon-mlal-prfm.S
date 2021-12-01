@@ -97,13 +97,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__aarch64_neon_mlal_prfm
 2:
         SMULL   v2.8h, v4.8b, v0.8b
         SMULL   v3.8h, v4.8b, v1.8b
-        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 320]
         SMULL   v10.8h, v5.8b, v0.8b
         SMULL   v11.8h, v5.8b, v1.8b
         LDP     d4, d5, [x5, 16]
         SMLAL   v2.8h, v8.8b, v6.8b
         SMLAL   v3.8h, v8.8b, v7.8b
-        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 384]
         SMLAL   v10.8h, v9.8b, v6.8b
         SMLAL   v11.8h, v9.8b, v7.8b
 

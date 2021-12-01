@@ -151,10 +151,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_p
         INS     v5.d[0], x11
         SMLAL   v24.4s, v6.4h, v0.h[0]
         SMLAL2  v28.4s, v6.8h, v0.h[0]
-        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 320]
         SMLAL   v25.4s, v6.4h, v1.h[0]
         SMLAL2  v29.4s, v6.8h, v1.h[0]
-        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 384]
         USUBL   v5.8h, v5.8b, v7.8b
         SMLAL   v26.4s, v6.4h, v2.h[0]
         SMLAL2  v30.4s, v6.8h, v2.h[0]
