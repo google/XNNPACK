@@ -1,0 +1,156 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/vcvt.h>
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
+$XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
+$VLD1Q_DUP_X8 = {"QS8": "vld1q_dup_s8", "QU8": "vld1q_dup_u8"}[DATATYPE]
+$VLD1_DUP_X8 = {"QS8": "vld1_dup_s8", "QU8": "vld1_dup_u8"}[DATATYPE]
+$VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
+$VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
+$VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
+$VQMOVXN_S16 = {"QS8": "vqmovn_s16", "QU8": "vqmovun_s16"}[DATATYPE]
+$VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[DATATYPE]
+$VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
+$VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
+$VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
+$VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
+$VMAXQ_X8 = {"QS8": "vmaxq_s8", "QU8": "vmaxq_u8"}[DATATYPE]
+$VMAX_X8 = {"QS8": "vmax_s8", "QU8": "vmax_u8"}[DATATYPE]
+$VMINQ_X8 = {"QS8": "vminq_s8", "QU8": "vminq_u8"}[DATATYPE]
+$VMIN_X8 = {"QS8": "vmin_s8", "QU8": "vmin_u8"}[DATATYPE]
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    ${XINT8_T}* y,
+    const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const float32x4_t vscale = vld1q_dup_f32(&params->neonv8.scale);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
+  $if BATCH_TILE > 8:
+    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->neonv8.output_min);
+    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->neonv8.output_max);
+  $else:
+    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neonv8.output_min);
+    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neonv8.output_max);
+  $if BATCH_TILE > 8:
+    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(0, BATCH_TILE, 4):
+        float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
+
+      $for N in range(0, BATCH_TILE, 4):
+        vx${ABC[N:N+4]} = vmulq_f32(vx${ABC[N:N+4]}, vscale);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const int32x4_t vacc${ABC[N:N+4]} = vcvtnq_s32_f32(vx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 8):
+        int16x8_t vacc${ABC[N:N+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[N:N+4]}), vqmovn_s32(vacc${ABC[N+4:N+8]}));
+
+      $for N in range(0, BATCH_TILE, 8):
+        vacc${ABC[N:N+8]} = vqaddq_s16(vacc${ABC[N:N+8]}, voutput_zero_point);
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          ${XINT8X16_T} vy${ABC[N:N+16]} = ${VCOMBINE_X8}(${VQMOVXN_S16}(vacc${ABC[N:N+8]}), ${VQMOVXN_S16}(vacc${ABC[N+8:N+16]}));
+        $else:
+          ${XINT8X8_T} vy${ABC[N:N+8]} = ${VQMOVXN_S16}(vacc${ABC[N:N+8]});
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          vy${ABC[N:N+16]} = ${VMAXQ_X8}(vy${ABC[N:N+16]}, voutput_min);
+        $else:
+          vy${ABC[N:N+8]} = ${VMAX_X8}(vy${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_min));
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          vy${ABC[N:N+16]} = ${VMINQ_X8}(vy${ABC[N:N+16]}, voutput_max);
+        $else:
+          vy${ABC[N:N+8]} = ${VMIN_X8}(vy${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_max));
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          ${VST1Q_X8}(y, vy${ABC[N:N+16]}); y += 16;
+        $else:
+          ${VST1_X8}(y, vy${ABC[N:N+8]}); y += 8;
+    }
+  for (; n >= 8 * sizeof(${XINT8_T}); n -= 8 * sizeof(${XINT8_T})) {
+    float32x4_t vx_lo = vld1q_f32(x); x += 4;
+    float32x4_t vx_hi = vld1q_f32(x); x += 4;
+
+    vx_lo = vmulq_f32(vx_lo, vscale);
+    vx_hi = vmulq_f32(vx_hi, vscale);
+
+    const int32x4_t vacc_lo = vcvtnq_s32_f32(vx_lo);
+    const int32x4_t vacc_hi = vcvtnq_s32_f32(vx_hi);
+
+    int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    vacc = vqaddq_s16(vacc, voutput_zero_point);
+
+    ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
+    $if BATCH_TILE > 8:
+      vy = ${VMAX_X8}(vy, ${VGET_LOW_X8}(voutput_min));
+      vy = ${VMIN_X8}(vy, ${VGET_LOW_X8}(voutput_max));
+    $else:
+      vy = ${VMAX_X8}(vy, voutput_min);
+      vy = ${VMIN_X8}(vy, voutput_max);
+    ${VST1_X8}(y, vy); y += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    assert(n >= 1 * sizeof(${XINT8_T}));
+    assert(n <= 7 * sizeof(${XINT8_T}));
+    float32x4_t vx_lo = vld1q_f32(x);
+    const float* x_hi = x + 4;
+    if XNN_UNPREDICTABLE((n & (4 * sizeof(${XINT8_T}))) == 0) {
+      x_hi = x;
+    }
+    float32x4_t vx_hi = vld1q_f32(x_hi);
+
+    vx_lo = vmulq_f32(vx_lo, vscale);
+    vx_hi = vmulq_f32(vx_hi, vscale);
+
+    const int32x4_t vacc_lo = vcvtnq_s32_f32(vx_lo);
+    const int32x4_t vacc_hi = vcvtnq_s32_f32(vx_hi);
+
+    int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
+    vacc = vqaddq_s16(vacc, voutput_zero_point);
+
+    ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
+    $if BATCH_TILE > 8:
+      vy = ${VMAX_X8}(vy, ${VGET_LOW_X8}(voutput_min));
+      vy = ${VMIN_X8}(vy, ${VGET_LOW_X8}(voutput_max));
+    $else:
+      vy = ${VMAX_X8}(vy, voutput_min);
+      vy = ${VMIN_X8}(vy, voutput_max);
+
+    if (n & (4 * sizeof(${XINT8_T}))) {
+      vst1_lane_u32((void*) y, ${VREINTERPRET_U32_X8}(vy), 0); y += 4;
+      vy = ${VEXT_X8}(vy, vy, 4);
+    }
+    if (n & (2 * sizeof(${XINT8_T}))) {
+      vst1_lane_u16((void*) y, ${VREINTERPRET_U16_X8}(vy), 0); y += 2;
+      vy = ${VEXT_X8}(vy, vy, 2);
+    }
+    if (n & (1 * sizeof(${XINT8_T}))) {
+      ${VST1_LANE_X8}(y, vy, 0);
+    }
+  }
+}

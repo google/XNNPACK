@@ -949,6 +949,14 @@ union xnn_qs8_avgpool_params {
 };
 
 union xnn_f32_qs8_cvt_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float scale;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } neonv8;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float scale[4];
@@ -966,6 +974,14 @@ union xnn_f32_qs8_cvt_params {
 };
 
 union xnn_f32_qu8_cvt_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float scale;
+    int16_t output_zero_point;
+    uint8_t output_min;
+    uint8_t output_max;
+  } neonv8;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float scale[4];
