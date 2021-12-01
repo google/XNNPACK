@@ -27,13 +27,16 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_(f16|f32)_vcvt_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32)_(qs8|qu8|f16|f32)_vcvt_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
+
+  input_datatype = match.group(1)
+  output_datatype = match.group(2)
   batch_tile = int(match.group(4))
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
-  return batch_tile, arch, isa
+  return input_datatype, output_datatype, batch_tile, arch, isa
 
 
 CVT_TEST_TEMPLATE = """\
@@ -42,6 +45,12 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
     ${ISA_CHECK};
   VCvtMicrokernelTester()
     .batch_size(${BATCH_TILE})
+    $if OUTPUT_DATATYPE == "QS8":
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+    $elif OUTPUT_DATATYPE == "QU8":
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -52,6 +61,12 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if OUTPUT_DATATYPE == "QS8":
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+        $elif OUTPUT_DATATYPE == "QU8":
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -62,6 +77,12 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if OUTPUT_DATATYPE == "QS8":
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+        $elif OUTPUT_DATATYPE == "QU8":
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -72,18 +93,164 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
+      $if OUTPUT_DATATYPE == "QS8":
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+      $elif OUTPUT_DATATYPE == "QU8":
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
+
+$if OUTPUT_DATATYPE in ["QS8", "QU8"]:
+  TEST(${TEST_NAME}, scale) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        $if OUTPUT_DATATYPE == "QS8":
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+        $elif OUTPUT_DATATYPE == "QU8":
+          .zero_point(100)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .zero_point(zero_point)
+          $if OUTPUT_DATATYPE == "QS8":
+            .qmin(std::numeric_limits<int8_t>::min())
+            .qmax(std::numeric_limits<int8_t>::max())
+          $elif OUTPUT_DATATYPE == "QU8":
+            .qmin(std::numeric_limits<uint8_t>::min())
+            .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, saturation) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        $if OUTPUT_DATATYPE == "QS8":
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+        $elif OUTPUT_DATATYPE == "QU8":
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, overflow) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(4294967296.0f)
+        $if OUTPUT_DATATYPE == "QS8":
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+        $elif OUTPUT_DATATYPE == "QU8":
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+$if OUTPUT_DATATYPE == "QS8":
+  TEST(${TEST_NAME}, qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t qmin = -128; qmin < 127; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<int8_t>::max())
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, qmax) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t qmax = -127; qmax <= 127; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(qmax)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+$if OUTPUT_DATATYPE == "QU8":
+  TEST(${TEST_NAME}, qmin) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+  TEST(${TEST_NAME}, qmax) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(qmax)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
 """
 
 
-def generate_test_cases(ukernel, init_fn, batch_tile, isa):
+def generate_test_cases(ukernel, init_fn, input_datatype, output_datatype,
+                        batch_tile, isa):
   """Generates all tests cases for a Vector Convert Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     init_fn: C name of the function to initialize microkernel parameters.
+    input_datatype: input conversion data type.
+    output_datatype: output conversion data type.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -100,6 +267,8 @@ def generate_test_cases(ukernel, init_fn, batch_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "BATCH_TILE": batch_tile,
+      "INPUT_DATATYPE": input_datatype.upper(),
+      "OUTPUT_DATATYPE": output_datatype.upper(),
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
     })
 
@@ -135,12 +304,14 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      batch_tile, arch, isa = split_ukernel_name(name)
+      input_datatype, output_datatype, batch_tile, arch, isa = \
+        split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, init_fn, batch_tile, isa)
+      test_case = generate_test_cases(
+        name, init_fn, input_datatype, output_datatype, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

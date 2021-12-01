@@ -1,0 +1,21 @@
+# Copyright 2021 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+- name: xnn_f32_qs8_vcvt_ukernel__sse2_x8
+  init: xnn_init_f32_qs8_cvt_sse2_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse2_x16
+  init: xnn_init_f32_qs8_cvt_sse2_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse2_x24
+  init: xnn_init_f32_qs8_cvt_sse2_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse2_x32
+  init: xnn_init_f32_qs8_cvt_sse2_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse41_x8
+  init: xnn_init_f32_qs8_cvt_sse4_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse41_x16
+  init: xnn_init_f32_qs8_cvt_sse4_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse41_x24
+  init: xnn_init_f32_qs8_cvt_sse4_params
+- name: xnn_f32_qs8_vcvt_ukernel__sse41_x32
+  init: xnn_init_f32_qs8_cvt_sse4_params

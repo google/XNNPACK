@@ -3278,6 +3278,14 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-igemm/gen/5x8-minmax-sse2-dup.c
   src/f32-prelu/gen/sse2-2x4.c
   src/f32-prelu/gen/sse2-2x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse2-x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse2-x16.c
+  src/f32-qs8-vcvt/gen/vcvt-sse2-x24.c
+  src/f32-qs8-vcvt/gen/vcvt-sse2-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-sse2-x8.c
+  src/f32-qu8-vcvt/gen/vcvt-sse2-x16.c
+  src/f32-qu8-vcvt/gen/vcvt-sse2-x24.c
+  src/f32-qu8-vcvt/gen/vcvt-sse2-x32.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x4.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x8-acc2.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x8.c
@@ -3644,6 +3652,10 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/vcvt-sse41-x32.c
   src/f32-prelu/gen/sse41-2x4.c
   src/f32-prelu/gen/sse41-2x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse41-x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse41-x16.c
+  src/f32-qs8-vcvt/gen/vcvt-sse41-x24.c
+  src/f32-qs8-vcvt/gen/vcvt-sse41-x32.c
   src/f32-velu/gen/velu-sse41-rr2-lut16-p3-x4.c
   src/f32-velu/gen/velu-sse41-rr2-lut16-p3-x8.c
   src/f32-velu/gen/velu-sse41-rr2-lut16-p3-x12.c
@@ -6509,6 +6521,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f32-f16-vcvt-test f32-f16-vcvt-test)
+
+  ADD_EXECUTABLE(f32-qs8-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-qs8-vcvt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f32-qs8-vcvt-test f32-qs8-vcvt-test)
+
+  ADD_EXECUTABLE(f32-qu8-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-qu8-vcvt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f32-qu8-vcvt-test f32-qu8-vcvt-test)
 
   ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-gavgpool-cw-test PROPERTIES

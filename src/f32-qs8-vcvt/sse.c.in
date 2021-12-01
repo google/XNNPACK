@@ -1,0 +1,161 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert SSE in [2, 4]
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <${SSE_HEADER}>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vcvt.h>
+
+
+$ISA = {2: "sse2", 4: "sse41"}[SSE]
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
+$_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
+    size_t n,
+    const float* x,
+    ${XINT8_T}* y,
+    const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+
+  const __m128 vscale = _mm_load_ps(params->sse${SSE}.scale);
+  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse${SSE}.output_max_less_zero_point);
+  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse${SSE}.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse${SSE}.output_min);
+
+  $if BATCH_TILE > 8:
+    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      __m128 vx${ABC[0:4]} = _mm_loadu_ps(x);
+      $for N in range(4, BATCH_TILE, 4):
+        __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(x + ${N});
+      x += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 4):
+        vx${ABC[N:N+4]} = _mm_mul_ps(vx${ABC[N:N+4]}, vscale);
+
+      $for N in range(0, BATCH_TILE, 4):
+        vx${ABC[N:N+4]} = _mm_min_ps(vx${ABC[N:N+4]}, voutput_max_less_zero_point);
+
+      $for N in range(0, BATCH_TILE, 4):
+        const __m128i vy${ABC[N:N+4]} = _mm_cvtps_epi32(vx${ABC[N:N+4]});
+
+      $for N in range(0, BATCH_TILE, 8):
+        __m128i vy${ABC[N:N+8]} = _mm_packs_epi32(vy${ABC[N:N+4]}, vy${ABC[N+4:N+8]});
+
+      $for N in range(0, BATCH_TILE, 8):
+        vy${ABC[N:N+8]} = _mm_adds_epi16(vy${ABC[N:N+8]}, voutput_zero_point);
+
+      $if DATATYPE == "QS8" and SSE < 4:
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm_max_epi16(vy${ABC[N:N+8]}, voutput_min);
+
+      $for N in range(0, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          __m128i vy${ABC[N:N+16]} = ${_MM_PACKXS_EPI16}(vy${ABC[N:N+8]}, vy${ABC[N+8:N+16]});
+        $else:
+          vy${ABC[N:N+8]} = ${_MM_PACKXS_EPI16}(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
+
+      $if DATATYPE == "QU8" or SSE == 4:
+        $for N in range(0, BATCH_TILE, 16):
+          $if N + 8 < BATCH_TILE:
+            vy${ABC[N:N+16]} = ${_MM_MAX_EPX8}(vy${ABC[N:N+16]}, voutput_min);
+          $else:
+            vy${ABC[N:N+8]} = ${_MM_MAX_EPX8}(vy${ABC[N:N+8]}, voutput_min);
+
+      _mm_storeu_si128((__m128i*) y, vy${ABC[0:16]});
+      $for N in range(16, BATCH_TILE, 16):
+        $if N + 8 < BATCH_TILE:
+          _mm_storeu_si128((__m128i*) (y + ${N}), vy${ABC[N:N+16]});
+        $else:
+          _mm_storel_epi64((__m128i*) (y + ${N}), vy${ABC[N:N+8]});
+      y += ${BATCH_TILE};
+    }
+  for (; n >= 8 * sizeof(${XINT8_T}); n -= 8 * sizeof(${XINT8_T})) {
+    __m128 vx_lo = _mm_loadu_ps(x);
+    __m128 vx_hi = _mm_loadu_ps(x + 4);
+    x += 8;
+
+    vx_lo = _mm_mul_ps(vx_lo, vscale);
+    vx_hi = _mm_mul_ps(vx_hi, vscale);
+
+    vx_lo = _mm_min_ps(vx_lo, voutput_max_less_zero_point);
+    vx_hi = _mm_min_ps(vx_hi, voutput_max_less_zero_point);
+
+    const __m128i vy_lo = _mm_cvtps_epi32(vx_lo);
+    const __m128i vy_hi = _mm_cvtps_epi32(vx_hi);
+
+    __m128i vy = _mm_packs_epi32(vy_lo, vy_hi);
+    vy = _mm_adds_epi16(vy, voutput_zero_point);
+    $if DATATYPE == "QS8" and SSE < 4:
+      vy = _mm_max_epi16(vy, voutput_min);
+    vy = ${_MM_PACKXS_EPI16}(vy, vy);
+    $if DATATYPE == "QU8" or SSE == 4:
+      vy = ${_MM_MAX_EPX8}(vy, voutput_min);
+
+    _mm_storel_epi64((__m128i*) y, vy);
+    y += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    __m128 vx_lo = _mm_loadu_ps(x);
+    const float* x_hi = x + 4;
+    if XNN_UNPREDICTABLE((n & (4 * sizeof(${XINT8_T}))) == 0) {
+      x_hi = x;
+    }
+    __m128 vx_hi = _mm_loadu_ps(x_hi);
+
+    vx_lo = _mm_mul_ps(vx_lo, vscale);
+    vx_hi = _mm_mul_ps(vx_hi, vscale);
+
+    vx_lo = _mm_min_ps(vx_lo, voutput_max_less_zero_point);
+    vx_hi = _mm_min_ps(vx_hi, voutput_max_less_zero_point);
+
+    const __m128i vy_lo = _mm_cvtps_epi32(vx_lo);
+    const __m128i vy_hi = _mm_cvtps_epi32(vx_hi);
+
+    __m128i vy = _mm_packs_epi32(vy_lo, vy_hi);
+    vy = _mm_adds_epi16(vy, voutput_zero_point);
+    $if DATATYPE == "QS8" and SSE < 4:
+      vy = _mm_max_epi16(vy, voutput_min);
+    vy = ${_MM_PACKXS_EPI16}(vy, vy);
+    $if DATATYPE == "QU8" or SSE == 4:
+      vy = ${_MM_MAX_EPX8}(vy, voutput_min);
+
+    if (n & (4 * sizeof(${XINT8_T}))) {
+      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      y += 4;
+      vy = _mm_srli_epi64(vy, 32);
+    }
+    $if SSE == 4:
+      if (n & (2 * sizeof(${XINT8_T}))) {
+        *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+        y += 2;
+        vy = _mm_srli_epi32(vy, 16);
+      }
+      if (n & (1 * sizeof(${XINT8_T}))) {
+        *y = (${XINT8_T}) _mm_extract_epi16(vy, 0);
+      }
+    $else:
+      {
+        uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
+        if (n & (2 * sizeof(${XINT8_T}))) {
+          *((uint16_t*) y) = (uint16_t) vy_lo;
+          y += 2;
+          vy_lo >>= 16;
+        }
+        if (n & (1 * sizeof(${XINT8_T}))) {
+          *y = (${XINT8_T}) vy_lo;
+        }
+      }
+  }
+}

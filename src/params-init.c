@@ -3026,3 +3026,65 @@ void xnn_init_qs8_mul_minmax_fp32_wasmsimd_params(
   }
 }
 #endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_sse2_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.scale[i] = scale;
+    params->sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
+    params->sse2.output_min[i] = (int16_t) output_min;
+  }
+}
+
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_sse4_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse4.scale[i] = scale;
+    params->sse4.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse4.output_min[i] = output_min;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_sse2_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.scale[i] = scale;
+    params->sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse2.output_min[i] = output_min;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
