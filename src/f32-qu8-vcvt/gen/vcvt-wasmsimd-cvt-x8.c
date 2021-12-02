@@ -1,0 +1,98 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-qs8-vcvt/wasmsimd-cvt.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/vcvt.h>
+
+
+void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x8(
+    size_t n,
+    const float* x,
+    uint8_t* y,
+    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd_cvt.scale);
+  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_cvt.output_zero_point);
+  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd_cvt.output_min);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_cvt.output_max);
+  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
+    v128_t vx_lo = wasm_v128_load(x);
+    v128_t vx_hi = wasm_v128_load(x + 4);
+    x += 8;
+
+    vx_lo = wasm_f32x4_mul(vx_lo, vscale);
+    vx_hi = wasm_f32x4_mul(vx_hi, vscale);
+
+    vx_lo = wasm_f32x4_nearest(vx_lo);
+    vx_hi = wasm_f32x4_nearest(vx_hi);
+
+    v128_t vacc_lo = wasm_i32x4_trunc_sat_f32x4(vx_lo);
+    v128_t vacc_hi = wasm_i32x4_trunc_sat_f32x4(vx_hi);
+
+    v128_t vacc = wasm_i16x8_narrow_i32x4(vacc_lo, vacc_hi);
+    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+
+    v128_t vy = wasm_u8x16_narrow_i16x8(vacc, vacc);
+    vy = wasm_u8x16_max(vy, voutput_min);
+    vy = wasm_u8x16_min(vy, voutput_max);
+
+    *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    y += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    assert(n >= 1 * sizeof(uint8_t));
+    assert(n <= 7 * sizeof(uint8_t));
+    v128_t vx_lo = wasm_v128_load(x);
+    const float* x_hi = x + 4;
+    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint8_t))) == 0) {
+      x_hi = x;
+    }
+    v128_t vx_hi = wasm_v128_load(x_hi);
+
+    vx_lo = wasm_f32x4_mul(vx_lo, vscale);
+    vx_hi = wasm_f32x4_mul(vx_hi, vscale);
+
+    vx_lo = wasm_f32x4_nearest(vx_lo);
+    vx_hi = wasm_f32x4_nearest(vx_hi);
+
+    v128_t vacc_lo = wasm_i32x4_trunc_sat_f32x4(vx_lo);
+    v128_t vacc_hi = wasm_i32x4_trunc_sat_f32x4(vx_hi);
+
+    v128_t vacc = wasm_i16x8_narrow_i32x4(vacc_lo, vacc_hi);
+    vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
+
+    v128_t vy = wasm_u8x16_narrow_i16x8(vacc, vacc);
+    vy = wasm_u8x16_max(vy, voutput_min);
+    vy = wasm_u8x16_min(vy, voutput_max);
+
+    if (n & (4 * sizeof(uint8_t))) {
+      *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
+      y += 4;
+      vy = wasm_u64x2_shr(vy, 32);
+    }
+    uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
+    if (n & (2 * sizeof(uint8_t))) {
+      *((uint16_t*) y) = (uint16_t) vy_lo;
+      y += 2;
+      vy_lo >>= 16;
+    }
+    if (n & (1 * sizeof(uint8_t))) {
+      *y = (uint8_t) vy_lo;
+    }
+  }
+}

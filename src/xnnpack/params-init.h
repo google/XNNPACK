@@ -876,6 +876,13 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_sse4_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_wasmsimd_cvt_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
 XNN_INTERNAL void xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -917,6 +924,13 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_sse2_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_cvt_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
 XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
