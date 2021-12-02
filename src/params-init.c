@@ -3097,6 +3097,29 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_sse4_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd_magic.scale[i] = scale;
+    params->wasmsimd_magic.magic_bias[i] = 12582912.0f;
+    params->wasmsimd_magic.magic_min[i] = magic_min;
+    params->wasmsimd_magic.magic_bias_less_zero_point[i] = magic_bias_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd_magic.output_max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_INTERNAL void xnn_init_f32_qu8_cvt_neon_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -3105,10 +3128,10 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_neon_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  const int32_t output_min_less_zero_point = (int32_t) output_min - (int32_t) output_zero_point;
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   params->neon.scale = scale;
   params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_min = (int32_t) fp32_to_bits(12582912.0f + (float) output_min_less_zero_point);
+  params->neon.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   params->neon.output_max = output_max;
 }
@@ -3148,3 +3171,26 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_sse2_params(
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd_magic.scale[i] = scale;
+    params->wasmsimd_magic.magic_bias[i] = 12582912.0f;
+    params->wasmsimd_magic.magic_min[i] = magic_min;
+    params->wasmsimd_magic.magic_bias_less_zero_point[i] = magic_bias_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->wasmsimd_magic.output_max[i] = output_max;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD

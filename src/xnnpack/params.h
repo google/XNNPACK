@@ -978,6 +978,15 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(16) int8_t output_min[16];
   } sse4;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    float scale[2];
+    float magic_bias[2];
+    int32_t magic_min[2];
+    int32_t magic_bias_less_zero_point[2];
+    int8_t output_max[8];
+  } wasmsimd_magic;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 union xnn_f32_qu8_cvt_params {
@@ -1004,6 +1013,15 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(16) uint8_t output_min[16];
   } sse2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD
+  struct {
+    float scale[2];
+    float magic_bias[2];
+    int32_t magic_min[2];
+    int32_t magic_bias_less_zero_point[2];
+    uint8_t output_max[8];
+  } wasmsimd_magic;
+#endif  // XNN_ARCH_WASMSIMD
 };
 
 typedef void (*xnn_ppmm_ukernel_function)(
