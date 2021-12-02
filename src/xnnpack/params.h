@@ -952,6 +952,13 @@ union xnn_f32_qs8_cvt_params {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float scale;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_bias_less_zero_point;
+    int8_t output_max;
+  } neon;
+  struct {
+    float scale;
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;
@@ -975,6 +982,13 @@ union xnn_f32_qs8_cvt_params {
 
 union xnn_f32_qu8_cvt_params {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_bias_less_zero_point;
+    uint8_t output_max;
+  } neon;
   struct {
     float scale;
     int16_t output_zero_point;

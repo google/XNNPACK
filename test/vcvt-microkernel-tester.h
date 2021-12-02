@@ -163,10 +163,10 @@ class VCvtMicrokernelTester {
 
       // Compute reference results
       for (size_t i = 0; i < batch_size(); i++) {
-        long value = std::lrintf(input[i] * scale()) + long(zero_point());
-        value = std::max<long>(value, qmin());
-        value = std::min<long>(value, qmax());
-        output_ref[i] = int8_t(value);
+        float scaled_input = input[i] * scale();
+        scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
+        scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+        output_ref[i] = int8_t(std::lrintf(scaled_input) + long(zero_point()));
       }
 
       // Verify results.
@@ -209,10 +209,10 @@ class VCvtMicrokernelTester {
 
       // Compute reference results
       for (size_t i = 0; i < batch_size(); i++) {
-        long value = std::lrintf(input[i] * scale()) + long(zero_point());
-        value = std::max<long>(value, qmin());
-        value = std::min<long>(value, qmax());
-        output_ref[i] = uint8_t(value);
+        float scaled_input = input[i] * scale();
+        scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
+        scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+        output_ref[i] = uint8_t(std::lrintf(scaled_input) + long(zero_point()));
       }
 
       // Verify results.

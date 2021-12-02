@@ -1362,6 +1362,14 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-prelu/gen/neon-4x4.c
   src/f32-prelu/gen/neon-4x8.c
   src/f32-prelu/gen/neon-4x16.c
+  src/f32-qs8-vcvt/gen/vcvt-neon-x8.c
+  src/f32-qs8-vcvt/gen/vcvt-neon-x16.c
+  src/f32-qs8-vcvt/gen/vcvt-neon-x24.c
+  src/f32-qs8-vcvt/gen/vcvt-neon-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-neon-x8.c
+  src/f32-qu8-vcvt/gen/vcvt-neon-x16.c
+  src/f32-qu8-vcvt/gen/vcvt-neon-x24.c
+  src/f32-qu8-vcvt/gen/vcvt-neon-x32.c
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x4.c
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8-acc2.c
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8.c
