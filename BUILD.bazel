@@ -2463,6 +2463,8 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/math/cvt-f16-f32-neon-int16.c",
     "src/math/cvt-f16-f32-neon-int32.c",
     "src/math/cvt-f32-f16-neon.c",
+    "src/math/cvt-f32-qs8-neon.c",
+    "src/math/cvt-f32-qu8-neon.c",
     "src/math/expm1minus-neon-rr2-lut16-p3.c",
     "src/math/expm1minus-neon-rr2-p6.c",
     "src/math/roundd-neon-addsub.c",
@@ -3594,6 +3596,8 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
     "src/f32-qu8-vcvt/gen/vcvt-neonv8-x16.c",
     "src/f32-qu8-vcvt/gen/vcvt-neonv8-x24.c",
     "src/f32-qu8-vcvt/gen/vcvt-neonv8-x32.c",
+    "src/math/cvt-f32-qs8-neonv8.c",
+    "src/math/cvt-f32-qu8-neonv8.c",
     "src/math/roundd-neonv8.c",
     "src/math/roundne-neonv8.c",
     "src/math/roundu-neonv8.c",
@@ -9320,6 +9324,28 @@ xnnpack_unit_test(
     name = "f32_f16_cvt_eval",
     srcs = [
         "eval/f32-f16-cvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_qs8_cvt_eval",
+    srcs = [
+        "eval/f32-qs8-cvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+        "src/xnnpack/math-stubs.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    automatic = False,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_qu8_cvt_eval",
+    srcs = [
+        "eval/f32-qu8-cvt.cc",
         "src/xnnpack/AlignedAllocator.h",
         "src/xnnpack/math-stubs.h",
     ] + MICROKERNEL_TEST_HDRS,

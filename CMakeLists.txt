@@ -1484,6 +1484,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/cvt-f16-f32-neon-int16.c
   src/math/cvt-f16-f32-neon-int32.c
   src/math/cvt-f32-f16-neon.c
+  src/math/cvt-f32-qs8-neon.c
+  src/math/cvt-f32-qu8-neon.c
   src/math/expm1minus-neon-rr2-lut16-p3.c
   src/math/expm1minus-neon-rr2-p6.c
   src/math/roundd-neon-addsub.c
@@ -2607,6 +2609,8 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x16.c
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x24.c
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x32.c
+  src/math/cvt-f32-qs8-neonv8.c
+  src/math/cvt-f32-qu8-neonv8.c
   src/math/roundd-neonv8.c
   src/math/roundne-neonv8.c
   src/math/roundu-neonv8.c
@@ -7734,6 +7738,22 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-f16-cvt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f32-f16-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(f32-qs8-cvt-eval eval/f32-qs8-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-qs8-cvt-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-qs8-cvt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f32-qs8-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(f32-qu8-cvt-eval eval/f32-qu8-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-qu8-cvt-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f32-qu8-cvt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f32-qu8-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
 
   ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES

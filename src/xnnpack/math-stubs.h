@@ -41,6 +41,20 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     const float* input,                            \
     void* output);
 
+#define DECLARE_F32_QS8_CVT_MATH_FUNCTION(fn_name) \
+  void fn_name(                                    \
+    size_t n,                                      \
+    const float* input,                            \
+    int8_t* output,                                \
+    int8_t output_zero_point);
+
+#define DECLARE_F32_QU8_CVT_MATH_FUNCTION(fn_name) \
+  void fn_name(                                    \
+    size_t n,                                      \
+    const float* input,                            \
+    uint8_t* output,                               \
+    uint8_t output_zero_point);
+
 #define DECLARE_F32_EXT_UNARY_MATH_FUNCTION(fn_name) \
   void fn_name(                                      \
     size_t n,                                        \
@@ -67,6 +81,12 @@ DECLARE_F32_F16_CVT_MATH_FUNCTION(xnn_math_f32_f16_cvt__f16c)
 DECLARE_F32_F16_CVT_MATH_FUNCTION(xnn_math_f32_f16_cvt__wasmsimd)
 DECLARE_F32_F16_CVT_MATH_FUNCTION(xnn_math_f32_f16_cvt__scalar_bitcast)
 DECLARE_F32_F16_CVT_MATH_FUNCTION(xnn_math_f32_f16_cvt__scalar_fabsf)
+
+DECLARE_F32_QS8_CVT_MATH_FUNCTION(xnn_math_f32_qs8_cvt__neon)
+DECLARE_F32_QS8_CVT_MATH_FUNCTION(xnn_math_f32_qs8_cvt__neonv8)
+
+DECLARE_F32_QU8_CVT_MATH_FUNCTION(xnn_math_f32_qu8_cvt__neon)
+DECLARE_F32_QU8_CVT_MATH_FUNCTION(xnn_math_f32_qu8_cvt__neonv8)
 
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neon_addsub)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundne__neonv8)
