@@ -199,7 +199,7 @@ bool CheckNEONFMA(benchmark::State& state) {
 
 bool CheckNEONV8(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_v8()) {
-    state.SkipWithError("no NEON-FMA extension");
+    state.SkipWithError("no NEON-V8 extension");
     return false;
   }
   return true;
