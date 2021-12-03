@@ -231,8 +231,8 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane_prfm(
       vacc5x89AB = vmlal_lane_s16(vacc5x89AB, vget_low_s16(vxb89ABCDEFc3), vget_low_s16(vxa5), 3);
       vacc5xCDEF = vmlal_lane_s16(vacc5xCDEF, vget_high_s16(vxb89ABCDEFc3), vget_low_s16(vxa5), 3);
 
-      __builtin_prefetch((const int8_t*) w + 480);
-      __builtin_prefetch((const int8_t*) w + 544);
+      __builtin_prefetch((const int8_t*) w + 448);
+      __builtin_prefetch((const int8_t*) w + 512);
 
       const int8x8_t vb01234567c4 = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
       const int16x8_t vxb01234567c4 = vmovl_s8(vb01234567c4);
