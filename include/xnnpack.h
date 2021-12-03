@@ -2791,42 +2791,6 @@ enum xnn_status xnn_setup_convert_nc_f32_f16(
   void* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_convert_nc_f32_qs8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  float output_scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_setup_convert_nc_f32_qs8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  const float* input,
-  int8_t* output,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_f32_qu8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  float output_scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_setup_convert_nc_f32_qu8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  const float* input,
-  uint8_t* output,
-  pthreadpool_t threadpool);
-
 #endif  // XNN_NO_CVT_OPERATORS
 
 #ifdef __cplusplus
