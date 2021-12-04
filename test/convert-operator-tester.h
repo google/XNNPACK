@@ -85,7 +85,6 @@ class ConvertOperatorTester {
   }
 
   inline ConvertOperatorTester& zero_point(int16_t zero_point) {
-    assert(zero_point != 0);
     this->zero_point_ = zero_point;
     return *this;
   }
@@ -95,7 +94,6 @@ class ConvertOperatorTester {
   }
 
   inline ConvertOperatorTester& qmin(int16_t qmin) {
-    assert(qmin != 0);
     this->qmin_ = qmin;
     return *this;
   }
@@ -105,7 +103,6 @@ class ConvertOperatorTester {
   }
 
   inline ConvertOperatorTester& qmax(int16_t qmax) {
-    assert(qmax != 0);
     this->qmax_ = qmax;
     return *this;
   }
