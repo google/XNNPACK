@@ -332,6 +332,80 @@ enum xnn_status xnn_create_convert_nc_f32_f16(
     convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_f32_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float output_scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_qs8_cvt_params params;
+  if (xnn_params.vcvt.f32_to_qs8.init.f32_qs8_cvt != NULL) {
+    xnn_params.vcvt.f32_to_qs8.init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_convert_nc_f32_qs8,
+    xnn_params.vcvt.f32_to_qs8.ukernel,
+    convert_op_out);
+}
+
+enum xnn_status xnn_create_convert_nc_f32_qu8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float output_scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: range min must be below range max",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_qu8_cvt_params params;
+  if (xnn_params.vcvt.f32_to_qu8.init.f32_qu8_cvt != NULL) {
+    xnn_params.vcvt.f32_to_qu8.init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_convert_nc_f32_qu8,
+    xnn_params.vcvt.f32_to_qu8.ukernel,
+    convert_op_out);
+}
+
 enum xnn_status xnn_create_copy_nc_x32(
     size_t channels,
     size_t input_stride,
@@ -724,6 +798,52 @@ enum xnn_status xnn_setup_convert_nc_f32_f16(
     2 /* log2(sizeof(float)) */,
     1 /* log2(sizeof(uint16_t)) */,
     NULL, 0);
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_qs8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  const float* input,
+  int8_t* output,
+  pthreadpool_t threadpool)
+{
+  if (convert_op->type != xnn_operator_type_convert_nc_f32_qs8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8),
+      xnn_operator_type_to_string(convert_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  convert_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    convert_op,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    0 /* log2(sizeof(int8_t)) */,
+    &convert_op->params.f32_qs8_cvt, sizeof(convert_op->params.f32_qs8_cvt));
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_qu8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  const float* input,
+  uint8_t* output,
+  pthreadpool_t threadpool)
+{
+  if (convert_op->type != xnn_operator_type_convert_nc_f32_qu8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8),
+      xnn_operator_type_to_string(convert_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  convert_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    convert_op,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    0 /* log2(sizeof(uint8_t)) */,
+    &convert_op->params.f32_qu8_cvt, sizeof(convert_op->params.f32_qu8_cvt));
 }
 
 enum xnn_status xnn_setup_copy_nc_x32(

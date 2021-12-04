@@ -311,6 +311,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-pavgpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9x-minmax-scalar-c1.c
   src/f32-prelu/gen/scalar-2x4.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x4.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x4.c
   src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
   src/f32-rmax/scalar.c
   src/f32-spmm/gen/8x1-minmax-scalar.c
@@ -1123,6 +1125,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-pavgpool/9p8x-minmax-neon-c4.c
   src/f32-pavgpool/9x-minmax-neon-c4.c
   src/f32-prelu/gen/neon-2x8.c
+  src/f32-qs8-vcvt/gen/vcvt-neon-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-neon-x32.c
   src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8.c
   src/f32-rmax/neon.c
   src/f32-spmm/gen/32x1-minmax-neon.c
@@ -2584,6 +2588,8 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-neon-tbx128x4-x64.c)
 
 SET(PROD_NEONV8_MICROKERNEL_SRCS
+  src/f32-qs8-vcvt/gen/vcvt-neonv8-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-neonv8-x32.c
   src/f32-vrnd/gen/vrndd-neonv8-x8.c
   src/f32-vrnd/gen/vrndne-neonv8-x8.c
   src/f32-vrnd/gen/vrndu-neonv8-x8.c
@@ -3217,6 +3223,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-argmaxpool/9x-sse2-c4.c
   src/f32-f16-vcvt/gen/vcvt-sse2-x16.c
   src/f32-prelu/gen/sse2-2x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse2-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-sse2-x32.c
   src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x12.c
   src/f32-vlrelu/gen/vlrelu-sse2-x8.c
@@ -3626,6 +3634,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c
   src/f32-f16-vcvt/gen/vcvt-sse41-x8.c
   src/f32-prelu/gen/sse41-2x8.c
+  src/f32-qs8-vcvt/gen/vcvt-sse41-x32.c
   src/f32-vlrelu/gen/vlrelu-sse41-x8.c
   src/f32-vrnd/gen/vrndd-sse41-x8.c
   src/f32-vrnd/gen/vrndne-sse41-x8.c

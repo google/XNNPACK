@@ -51,6 +51,8 @@ enum xnn_operator_type {
   xnn_operator_type_constant_pad_nd_x32,
   xnn_operator_type_convert_nc_f16_f32,
   xnn_operator_type_convert_nc_f32_f16,
+  xnn_operator_type_convert_nc_f32_qs8,
+  xnn_operator_type_convert_nc_f32_qu8,
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_convolution_nhwc_f16,
   xnn_operator_type_convolution_nhwc_f32,
@@ -295,6 +297,8 @@ struct xnn_operator {
       union xnn_f32_scaleminmax_params f32_scaleminmax;
     };
     union xnn_f32_chw_params f32_chw;
+    union xnn_f32_qs8_cvt_params f32_qs8_cvt;
+    union xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
