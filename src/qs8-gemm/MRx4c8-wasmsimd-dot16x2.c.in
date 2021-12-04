@@ -22,6 +22,7 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_m
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
 $WASM_X8X16_NARROW_I16X8 = "wasm_u8x16_narrow_i16x8" if DATATYPE == "QU8" else "wasm_i8x16_narrow_i16x8"
+$WASM_X8X16_MIN = "wasm_u8x16_min" if DATATYPE == "QU8" else "wasm_i8x16_min"
 void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd_dot16x2${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
@@ -147,17 +148,13 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
 
-    const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
-    $for M in range(MR):
-      vacc${M}x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${M}x0123);
-
-    const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
-    $for M in range(MR):
-      vacc${M}x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${M}x0123);
-
     const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
     $for M in range(MR):
       vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vmagic_bias);
+
+    const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_i32x4_max(vacc${M}x0123, vmagic_min);
 
     const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
     $for M in range(MR):
@@ -170,6 +167,9 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
       v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
     $else:
       v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
+
+    const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+    vout = ${WASM_X8X16_MIN}(vout, voutput_max);
 
     if (nc >= 4) {
       $for M in range(MR):

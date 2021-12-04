@@ -183,23 +183,17 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2(
     vacc2x0123 = wasm_f32x4_mul(vacc2x0123, vscale);
     vacc3x0123 = wasm_f32x4_mul(vacc3x0123, vscale);
 
-    const v128_t voutput_min_less_zero_point = wasm_v128_load(params->fp32_wasmsimd.output_min_less_zero_point);
-    vacc0x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc0x0123);
-    vacc1x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc1x0123);
-    vacc2x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc2x0123);
-    vacc3x0123 = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc3x0123);
-
-    const v128_t voutput_max_less_zero_point = wasm_v128_load(params->fp32_wasmsimd.output_max_less_zero_point);
-    vacc0x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc0x0123);
-    vacc1x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc1x0123);
-    vacc2x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc2x0123);
-    vacc3x0123 = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc3x0123);
-
     const v128_t vmagic_bias = wasm_v128_load(params->fp32_wasmsimd.magic_bias);
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);
     vacc1x0123 = wasm_f32x4_add(vacc1x0123, vmagic_bias);
     vacc2x0123 = wasm_f32x4_add(vacc2x0123, vmagic_bias);
     vacc3x0123 = wasm_f32x4_add(vacc3x0123, vmagic_bias);
+
+    const v128_t vmagic_min = wasm_v128_load(params->fp32_wasmsimd.magic_min);
+    vacc0x0123 = wasm_i32x4_max(vacc0x0123, vmagic_min);
+    vacc1x0123 = wasm_i32x4_max(vacc1x0123, vmagic_min);
+    vacc2x0123 = wasm_i32x4_max(vacc2x0123, vmagic_min);
+    vacc3x0123 = wasm_i32x4_max(vacc3x0123, vmagic_min);
 
     const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
     vacc0x0123 = wasm_i32x4_sub(vacc0x0123, vmagic_bias_less_output_zero_point);
@@ -211,6 +205,9 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2(
     v128_t vacc23x0123 = wasm_i16x8_narrow_i32x4(vacc2x0123, vacc3x0123);
 
     v128_t vout = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc23x0123);
+
+    const v128_t voutput_max = wasm_v128_load(params->fp32_wasmsimd.output_max);
+    vout = wasm_i8x16_min(vout, voutput_max);
 
     if (nc >= 4) {
       *((float*) c0) = (float) wasm_f32x4_extract_lane(vout, 0);

@@ -24,6 +24,7 @@ $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8
 $WASM_X32X4_EXTEND_LOW_X16X8 = "wasm_u32x4_extend_low_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_low_i16x8"
 $WASM_X32X4_EXTEND_HIGH_X16X8 = "wasm_u32x4_extend_high_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_high_i16x8"
 $WASM_X8X16_NARROW_I16X8 = "wasm_u8x16_narrow_i16x8" if DATATYPE == "QU8" else "wasm_i8x16_narrow_i16x8"
+$WASM_X8X16_MIN = "wasm_u8x16_min" if DATATYPE == "QU8" else "wasm_i8x16_min"
 void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd_mul16${"_add16" if ADD16 else ""}(
     size_t channels,
     size_t output_width,
@@ -110,17 +111,13 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           $for C in range(0, CHANNEL_TILE, 4):
             vacc${ABC[C:C+4]} = wasm_f32x4_mul(vacc${ABC[C:C+4]}, vscale);
 
-        const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
-        $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[C:C+4]});
-
-        const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
-        $for C in range(0, CHANNEL_TILE, 4):
-          vacc${ABC[C:C+4]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[C:C+4]});
-
         const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
         $for C in range(0, CHANNEL_TILE, 4):
           vacc${ABC[C:C+4]} = wasm_f32x4_add(vacc${ABC[C:C+4]}, vmagic_bias);
+
+        const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
+        $for C in range(0, CHANNEL_TILE, 4):
+          vacc${ABC[C:C+4]} = wasm_i32x4_max(vacc${ABC[C:C+4]}, vmagic_min);
 
         const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
         $for C in range(0, CHANNEL_TILE, 4):
@@ -134,6 +131,13 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             v128_t vout${ABC[C:C+16]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]});
           $else:
             v128_t vout${ABC[C:C+8]}${ABC[C:C+8]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[C:C+8]}, vout${ABC[C:C+8]});
+
+        const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+        $for C in range(0, CHANNEL_TILE, 16):
+          $if C + 8 < CHANNEL_TILE:
+            vout${ABC[C:C+16]} = ${WASM_X8X16_MIN}(vout${ABC[C:C+16]}, voutput_max);
+          $else:
+            vout${ABC[C:C+8]}${ABC[C:C+8]} = ${WASM_X8X16_MIN}(vout${ABC[C:C+8]}${ABC[C:C+8]}, voutput_max);
 
       $if CHANNEL_TILE > 8:
         wasm_v128_store(output, vout${ABC[0:16]});
@@ -204,17 +208,13 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vacc${ABC[0:4]} = wasm_f32x4_mul(vacc${ABC[0:4]}, vscale);
           vacc${ABC[4:8]} = wasm_f32x4_mul(vacc${ABC[4:8]}, vscale);
 
-        const v128_t voutput_min_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_min_less_zero_point);
-        vacc${ABC[0:4]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[0:4]});
-        vacc${ABC[4:8]} = wasm_f32x4_pmax(voutput_min_less_zero_point, vacc${ABC[4:8]});
-
-        const v128_t voutput_max_less_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.output_max_less_zero_point);
-        vacc${ABC[0:4]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[0:4]});
-        vacc${ABC[4:8]} = wasm_f32x4_pmin(voutput_max_less_zero_point, vacc${ABC[4:8]});
-
         const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
         vacc${ABC[0:4]} = wasm_f32x4_add(vacc${ABC[0:4]}, vmagic_bias);
         vacc${ABC[4:8]} = wasm_f32x4_add(vacc${ABC[4:8]}, vmagic_bias);
+
+        const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
+        vacc${ABC[0:4]} = wasm_i32x4_max(vacc${ABC[0:4]}, vmagic_min);
+        vacc${ABC[4:8]} = wasm_i32x4_max(vacc${ABC[4:8]}, vmagic_min);
 
         const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
         vacc${ABC[0:4]} = wasm_i32x4_sub(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
@@ -222,6 +222,9 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
 
         v128_t vout${ABC[0:8]} = wasm_i16x8_narrow_i32x4(vacc${ABC[0:4]}, vacc${ABC[4:8]});
         v128_t vout${ABC[0:8]}${ABC[0:8]} = ${WASM_X8X16_NARROW_I16X8}(vout${ABC[0:8]}, vout${ABC[0:8]});
+
+        const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+        vout${ABC[0:8]}${ABC[0:8]} = ${WASM_X8X16_MIN}(vout${ABC[0:8]}${ABC[0:8]}, voutput_max);
 
       $if CHANNEL_TILE > 8:
         w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
