@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-qs8-vcvt/scalar-magic.c.in
+//   Template: src/f32-qs8-vcvt/scalar-magic-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,23 +16,23 @@
 #include <fp16.h>
 
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2(
+void xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x2(
     size_t n,
     const float* x,
-    uint8_t* y,
-    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    int8_t* y,
+    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic.scale;
-  const float vmagic_bias = params->scalar_magic.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic.magic_min;
-  const int32_t vmagic_max = params->scalar_magic.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic.magic_bias_less_zero_point;
+  const float vscale = params->scalar_magic_iminmax.scale;
+  const float vmagic_bias = params->scalar_magic_iminmax.magic_bias;
+  const int32_t vmagic_min = params->scalar_magic_iminmax.magic_min;
+  const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
 
-  for (; n >= 2 * sizeof(uint8_t); n -= 2 * sizeof(uint8_t)) {
+  for (; n >= 2 * sizeof(int8_t); n -= 2 * sizeof(int8_t)) {
     float vx0 = x[0];
     float vx1 = x[1];
     x += 2;
@@ -55,8 +55,8 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2(
     vy0 -= vmagic_bias_less_zero_point;
     vy1 -= vmagic_bias_less_zero_point;
 
-    y[0] = (uint8_t) vy0;
-    y[1] = (uint8_t) vy1;
+    y[0] = (int8_t) vy0;
+    y[1] = (int8_t) vy1;
     y += 2;
   }
   if XNN_UNLIKELY(n != 0) {
@@ -69,6 +69,6 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2(
     vy = math_min_s32(vy, vmagic_max);
     vy -= vmagic_bias_less_zero_point;
 
-    *y = (uint8_t) vy;
+    *y = (int8_t) vy;
   }
 }

@@ -311,8 +311,10 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-pavgpool/9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/9x-minmax-scalar-c1.c
   src/f32-prelu/gen/scalar-2x4.c
-  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x4.c
-  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x4.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c
   src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
   src/f32-rmax/scalar.c
   src/f32-spmm/gen/8x1-minmax-scalar.c
@@ -578,14 +580,22 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-ppmm/gen/4x4-minmax-scalar.c
   src/f32-prelu/gen/scalar-2x1.c
   src/f32-prelu/gen/scalar-2x4.c
-  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x1.c
-  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x2.c
-  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x3.c
-  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-x4.c
-  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x1.c
-  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x2.c
-  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x3.c
-  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-x4.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x1.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x2.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x3.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x4.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x2.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x3.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x1.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x2.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x3.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x4.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x2.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x3.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x1.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2-acc2.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2.c

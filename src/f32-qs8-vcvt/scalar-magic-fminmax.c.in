@@ -14,7 +14,9 @@ $assert BATCH_TILE >= 1
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_magic_fminmax_x${BATCH_TILE}(
     size_t n,
     const float* x,
     ${XINT8_T}* y,
@@ -24,11 +26,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic.scale;
-  const float vmagic_bias = params->scalar_magic.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic.magic_min;
-  const int32_t vmagic_max = params->scalar_magic.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic.magic_bias_less_zero_point;
+  const float vscale = params->scalar_magic_fminmax.scale;
+  const float voutput_min_less_zero_point = params->scalar_magic_fminmax.output_min_less_zero_point;
+  const float voutput_max_less_zero_point = params->scalar_magic_fminmax.output_max_less_zero_point;
+  const float vmagic_bias = params->scalar_magic_fminmax.magic_bias;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_fminmax.magic_bias_less_zero_point;
 
   $if BATCH_TILE > 1:
     for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
@@ -40,16 +42,16 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
         vx${N} *= vscale;
 
       $for N in range(BATCH_TILE):
+        vx${N} = ${MAX_F32}(vx${N}, voutput_min_less_zero_point);
+
+      $for N in range(BATCH_TILE):
+        vx${N} = ${MIN_F32}(vx${N}, voutput_max_less_zero_point);
+
+      $for N in range(BATCH_TILE):
         vx${N} += vmagic_bias;
 
       $for N in range(BATCH_TILE):
         int32_t vy${N} = (int32_t) fp32_to_bits(vx${N});
-
-      $for N in range(BATCH_TILE):
-        vy${N} = math_max_s32(vy${N}, vmagic_min);
-
-      $for N in range(BATCH_TILE):
-        vy${N} = math_min_s32(vy${N}, vmagic_max);
 
       $for N in range(BATCH_TILE):
         vy${N} -= vmagic_bias_less_zero_point;
@@ -62,11 +64,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
     do {
       float vx = *x++;
       vx *= vscale;
+      vx = ${MAX_F32}(vx, voutput_min_less_zero_point);
+      vx = ${MIN_F32}(vx, voutput_max_less_zero_point);
       vx += vmagic_bias;
 
       int32_t vy = (int32_t) fp32_to_bits(vx);
-      vy = math_max_s32(vy, vmagic_min);
-      vy = math_min_s32(vy, vmagic_max);
       vy -= vmagic_bias_less_zero_point;
 
       *y++ = (${XINT8_T}) vy;
@@ -77,11 +79,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
     if XNN_UNLIKELY(n != 0) {
       float vx = *x;
       vx *= vscale;
+      vx = ${MAX_F32}(vx, voutput_min_less_zero_point);
+      vx = ${MIN_F32}(vx, voutput_max_less_zero_point);
       vx += vmagic_bias;
 
       int32_t vy = (int32_t) fp32_to_bits(vx);
-      vy = math_max_s32(vy, vmagic_min);
-      vy = math_min_s32(vy, vmagic_max);
       vy -= vmagic_bias_less_zero_point;
 
       *y = (${XINT8_T}) vy;
@@ -91,11 +93,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_x${BATCH_TILE}(
       do {
         float vx = *x++;
         vx *= vscale;
+        vx = ${MAX_F32}(vx, voutput_min_less_zero_point);
+        vx = ${MIN_F32}(vx, voutput_max_less_zero_point);
         vx += vmagic_bias;
 
         int32_t vy = (int32_t) fp32_to_bits(vx);
-        vy = math_max_s32(vy, vmagic_min);
-        vy = math_min_s32(vy, vmagic_max);
         vy -= vmagic_bias_less_zero_point;
 
         *y++ = (${XINT8_T}) vy;

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-qs8-vcvt/scalar-magic.c.in
+//   Template: src/f32-qs8-vcvt/scalar-magic-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,7 +16,7 @@
 #include <fp16.h>
 
 
-void xnn_f32_qs8_vcvt_ukernel__scalar_magic_x1(
+void xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x1(
     size_t n,
     const float* x,
     int8_t* y,
@@ -26,11 +26,11 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_magic_x1(
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic.scale;
-  const float vmagic_bias = params->scalar_magic.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic.magic_min;
-  const int32_t vmagic_max = params->scalar_magic.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic.magic_bias_less_zero_point;
+  const float vscale = params->scalar_magic_iminmax.scale;
+  const float vmagic_bias = params->scalar_magic_iminmax.magic_bias;
+  const int32_t vmagic_min = params->scalar_magic_iminmax.magic_min;
+  const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
 
   do {
     float vx = *x++;

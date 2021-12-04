@@ -951,11 +951,18 @@ union xnn_qs8_avgpool_params {
 union xnn_f32_qs8_cvt_params {
   struct {
     float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+  } scalar_magic_fminmax;
+  struct {
+    float scale;
     float magic_bias;
     int32_t magic_min;
     int32_t magic_max;
     int32_t magic_bias_less_zero_point;
-  } scalar_magic;
+  } scalar_magic_iminmax;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float scale;
@@ -1005,11 +1012,18 @@ union xnn_f32_qs8_cvt_params {
 union xnn_f32_qu8_cvt_params {
   struct {
     float scale;
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+  } scalar_magic_fminmax;
+  struct {
+    float scale;
     float magic_bias;
     int32_t magic_min;
     int32_t magic_max;
     int32_t magic_bias_less_zero_point;
-  } scalar_magic;
+  } scalar_magic_iminmax;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float scale;

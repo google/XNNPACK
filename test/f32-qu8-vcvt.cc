@@ -2477,25 +2477,473 @@
 #endif  // XNN_ARCH_WASMSIMD
 
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, batch_eq_1) {
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, batch_eq_1) {
+    VCvtMicrokernelTester()
+      .batch_size(1)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, batch_gt_1) {
+    for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, scale) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, zero_point) {
+    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, saturation) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, overflow) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(4294967296.0f)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, qmin) {
+    for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X1, qmax) {
+    for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(qmax)
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, batch_eq_2) {
+    VCvtMicrokernelTester()
+      .batch_size(2)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, batch_div_2) {
+    for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, batch_lt_2) {
+    for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, batch_gt_2) {
+    for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, scale) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, zero_point) {
+    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, saturation) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, overflow) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(4294967296.0f)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, qmin) {
+    for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X2, qmax) {
+    for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(qmax)
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, batch_eq_3) {
+    VCvtMicrokernelTester()
+      .batch_size(3)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, batch_div_3) {
+    for (size_t batch_size = 6; batch_size < 30; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, batch_lt_3) {
+    for (size_t batch_size = 1; batch_size < 3; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, batch_gt_3) {
+    for (size_t batch_size = 4; batch_size < 6; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, scale) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, zero_point) {
+    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, saturation) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, overflow) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(4294967296.0f)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, qmin) {
+    for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X3, qmax) {
+    for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(qmax)
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, batch_eq_4) {
+    VCvtMicrokernelTester()
+      .batch_size(4)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, batch_div_4) {
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, batch_lt_4) {
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, batch_gt_4) {
+    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, scale) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, zero_point) {
+    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, saturation) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, overflow) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(4294967296.0f)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, qmin) {
+    for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+      for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(qmin)
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+
+  TEST(F32_QU8_VCVT__WASM_MAGIC_FMINMAX_X4, qmax) {
+    for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+      for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .scale(500)
+          .zero_point(128)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(qmax)
+          .Test(xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, batch_eq_1) {
   VCvtMicrokernelTester()
     .batch_size(1)
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, batch_gt_1) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, batch_gt_1) {
   for (size_t batch_size = 2; batch_size < 10; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, scale) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, scale) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2503,11 +2951,11 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, scale) {
       .zero_point(100)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, zero_point) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, zero_point) {
   for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
     for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2515,12 +2963,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, zero_point) {
         .zero_point(zero_point)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, saturation) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, saturation) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2528,22 +2976,22 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, saturation) {
       .zero_point(128)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, overflow) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, overflow) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .scale(4294967296.0f)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, qmin) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, qmin) {
   for (int16_t qmin = 0; qmin < 255; qmin += 51) {
     for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2552,12 +3000,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, qmin) {
         .zero_point(128)
         .qmin(qmin)
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, qmax) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X1, qmax) {
   for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
     for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2566,50 +3014,50 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X1, qmax) {
         .zero_point(128)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(qmax)
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x1, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, batch_eq_2) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, batch_eq_2) {
   VCvtMicrokernelTester()
     .batch_size(2)
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, batch_div_2) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, batch_div_2) {
   for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, batch_lt_2) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, batch_lt_2) {
   for (size_t batch_size = 1; batch_size < 2; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, batch_gt_2) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, batch_gt_2) {
   for (size_t batch_size = 3; batch_size < 4; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, scale) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, scale) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2617,11 +3065,11 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, scale) {
       .zero_point(100)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, zero_point) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, zero_point) {
   for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
     for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2629,12 +3077,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, zero_point) {
         .zero_point(zero_point)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, saturation) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, saturation) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2642,22 +3090,22 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, saturation) {
       .zero_point(128)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, overflow) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, overflow) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .scale(4294967296.0f)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, qmin) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, qmin) {
   for (int16_t qmin = 0; qmin < 255; qmin += 51) {
     for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2666,12 +3114,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, qmin) {
         .zero_point(128)
         .qmin(qmin)
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, qmax) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X2, qmax) {
   for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
     for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
       VCvtMicrokernelTester()
@@ -2680,50 +3128,50 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X2, qmax) {
         .zero_point(128)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(qmax)
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x2, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, batch_eq_3) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, batch_eq_3) {
   VCvtMicrokernelTester()
     .batch_size(3)
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, batch_div_3) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, batch_div_3) {
   for (size_t batch_size = 6; batch_size < 30; batch_size += 3) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, batch_lt_3) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, batch_lt_3) {
   for (size_t batch_size = 1; batch_size < 3; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, batch_gt_3) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, batch_gt_3) {
   for (size_t batch_size = 4; batch_size < 6; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, scale) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, scale) {
   for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2731,11 +3179,11 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, scale) {
       .zero_point(100)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, zero_point) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, zero_point) {
   for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
     for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
       VCvtMicrokernelTester()
@@ -2743,12 +3191,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, zero_point) {
         .zero_point(zero_point)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, saturation) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, saturation) {
   for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2756,22 +3204,22 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, saturation) {
       .zero_point(128)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, overflow) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, overflow) {
   for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .scale(4294967296.0f)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, qmin) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, qmin) {
   for (int16_t qmin = 0; qmin < 255; qmin += 51) {
     for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
       VCvtMicrokernelTester()
@@ -2780,12 +3228,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, qmin) {
         .zero_point(128)
         .qmin(qmin)
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, qmax) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X3, qmax) {
   for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
     for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
       VCvtMicrokernelTester()
@@ -2794,50 +3242,50 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X3, qmax) {
         .zero_point(128)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(qmax)
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x3, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, batch_eq_4) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, batch_eq_4) {
   VCvtMicrokernelTester()
     .batch_size(4)
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
-    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, batch_div_4) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, batch_div_4) {
   for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, batch_lt_4) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, batch_lt_4) {
   for (size_t batch_size = 1; batch_size < 4; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, batch_gt_4) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, batch_gt_4) {
   for (size_t batch_size = 5; batch_size < 8; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, scale) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, scale) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2845,11 +3293,11 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, scale) {
       .zero_point(100)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, zero_point) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, zero_point) {
   for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VCvtMicrokernelTester()
@@ -2857,12 +3305,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, zero_point) {
         .zero_point(zero_point)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, saturation) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, saturation) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
@@ -2870,22 +3318,22 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, saturation) {
       .zero_point(128)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, overflow) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, overflow) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
       .scale(4294967296.0f)
       .qmin(std::numeric_limits<uint8_t>::min())
       .qmax(std::numeric_limits<uint8_t>::max())
-      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, qmin) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, qmin) {
   for (int16_t qmin = 0; qmin < 255; qmin += 51) {
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VCvtMicrokernelTester()
@@ -2894,12 +3342,12 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, qmin) {
         .zero_point(128)
         .qmin(qmin)
         .qmax(std::numeric_limits<uint8_t>::max())
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
     }
   }
 }
 
-TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, qmax) {
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_FMINMAX_X4, qmax) {
   for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VCvtMicrokernelTester()
@@ -2908,7 +3356,443 @@ TEST(F32_QU8_VCVT__SCALAR_MAGIC_X4, qmax) {
         .zero_point(128)
         .qmin(std::numeric_limits<uint8_t>::min())
         .qmax(qmax)
-        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_x4, xnn_init_f32_qu8_cvt_scalar_magic_params);
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_fminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, batch_eq_1) {
+  VCvtMicrokernelTester()
+    .batch_size(1)
+    .qmin(std::numeric_limits<uint8_t>::min())
+    .qmax(std::numeric_limits<uint8_t>::max())
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, batch_gt_1) {
+  for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, scale) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(50)
+      .zero_point(100)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, zero_point) {
+  for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .zero_point(zero_point)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, saturation) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(500)
+      .zero_point(128)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, overflow) {
+  for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(4294967296.0f)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, qmin) {
+  for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(qmin)
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X1, qmax) {
+  for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(qmax)
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, batch_eq_2) {
+  VCvtMicrokernelTester()
+    .batch_size(2)
+    .qmin(std::numeric_limits<uint8_t>::min())
+    .qmax(std::numeric_limits<uint8_t>::max())
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, batch_div_2) {
+  for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, batch_lt_2) {
+  for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, batch_gt_2) {
+  for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, scale) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(50)
+      .zero_point(100)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, zero_point) {
+  for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .zero_point(zero_point)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, saturation) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(500)
+      .zero_point(128)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, overflow) {
+  for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(4294967296.0f)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, qmin) {
+  for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(qmin)
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X2, qmax) {
+  for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(qmax)
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, batch_eq_3) {
+  VCvtMicrokernelTester()
+    .batch_size(3)
+    .qmin(std::numeric_limits<uint8_t>::min())
+    .qmax(std::numeric_limits<uint8_t>::max())
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, batch_div_3) {
+  for (size_t batch_size = 6; batch_size < 30; batch_size += 3) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, batch_lt_3) {
+  for (size_t batch_size = 1; batch_size < 3; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, batch_gt_3) {
+  for (size_t batch_size = 4; batch_size < 6; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, scale) {
+  for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(50)
+      .zero_point(100)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, zero_point) {
+  for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .zero_point(zero_point)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, saturation) {
+  for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(500)
+      .zero_point(128)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, overflow) {
+  for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(4294967296.0f)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, qmin) {
+  for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(qmin)
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X3, qmax) {
+  for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+    for (size_t batch_size = 1; batch_size <= 15; batch_size += 2) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(qmax)
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, batch_eq_4) {
+  VCvtMicrokernelTester()
+    .batch_size(4)
+    .qmin(std::numeric_limits<uint8_t>::min())
+    .qmax(std::numeric_limits<uint8_t>::max())
+    .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, batch_div_4) {
+  for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, batch_lt_4) {
+  for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, batch_gt_4) {
+  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, scale) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(50)
+      .zero_point(100)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, zero_point) {
+  for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .zero_point(zero_point)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, saturation) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(500)
+      .zero_point(128)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, overflow) {
+  for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+    VCvtMicrokernelTester()
+      .batch_size(batch_size)
+      .scale(4294967296.0f)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, qmin) {
+  for (int16_t qmin = 0; qmin < 255; qmin += 51) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(qmin)
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
+    }
+  }
+}
+
+TEST(F32_QU8_VCVT__SCALAR_MAGIC_IMINMAX_X4, qmax) {
+  for (int16_t qmax = 1; qmax <= 255; qmax += 51) {
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(500)
+        .zero_point(128)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(qmax)
+        .Test(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4, xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params);
     }
   }
 }
