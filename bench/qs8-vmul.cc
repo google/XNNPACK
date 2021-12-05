@@ -70,20 +70,20 @@ static void qs8_vmul(
   BENCHMARK_CAPTURE(qs8_vmul, neonv8_ld64_x8,
                     xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x8,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
-                    benchmark::utils::CheckNEON)
+                    benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qs8_vmul, neonv8_ld64_x16,
                     xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x16,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
-                    benchmark::utils::CheckNEON)
+                    benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qs8_vmul, neonv8_ld128_x16,
                     xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld128_x16,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
-                    benchmark::utils::CheckNEON)
+                    benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 

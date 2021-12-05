@@ -774,10 +774,10 @@ union xnn_qu8_mul_minmax_params {
     uint8_t a_zero_point[2];
     uint8_t b_zero_point[2];
     float scale;
-    float output_min_less_zero_point;
-    float output_max_less_zero_point;
     float magic_bias;
-    int32_t magic_bias_less_zero_point;
+    int32_t magic_min;
+    int32_t magic_bias_less_output_zero_point;
+    int8_t output_max;
   } fp32_neon;
   struct {
     uint8_t a_zero_point[2];
@@ -826,10 +826,10 @@ union xnn_qs8_mul_minmax_params {
     int8_t a_zero_point[2];
     int8_t b_zero_point[2];
     float scale;
-    float output_min_less_zero_point;
-    float output_max_less_zero_point;
     float magic_bias;
-    int32_t magic_bias_less_zero_point;
+    int32_t magic_min;
+    int32_t magic_bias_less_output_zero_point;
+    int8_t output_max;
   } fp32_neon;
   struct {
     int8_t a_zero_point[2];

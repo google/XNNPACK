@@ -49,17 +49,21 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
     vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
 #if XNN_ARCH_ARM64
-      const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
+    int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
 
-      uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
+    vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
+
+    uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #else
-      const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
+    int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
 
-      uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
+    vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
+
+    uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #endif
-      vout01234567 = vmax_u8(vout01234567, voutput_min);
+    vout01234567 = vmax_u8(vout01234567, voutput_min);
 
-      vout01234567 = vmin_u8(vout01234567, voutput_max);
+    vout01234567 = vmin_u8(vout01234567, voutput_max);
 
     vst1_u8(output, vout01234567); output += 8;
   }
@@ -82,13 +86,16 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
       vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
 #if XNN_ARCH_ARM64
-      const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
+      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
       uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #else
-      const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
+      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
       uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #endif
       vout01234567 = vmax_u8(vout01234567, voutput_min);
+
       vout01234567 = vmin_u8(vout01234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
