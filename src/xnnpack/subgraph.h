@@ -113,6 +113,8 @@ enum xnn_compute_type {
   xnn_compute_type_qc8,
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
+  xnn_compute_type_fp32_to_qs8,
+  xnn_compute_type_fp32_to_qu8,
 };
 
 enum xnn_node_type {
@@ -124,6 +126,7 @@ enum xnn_node_type {
   xnn_node_type_bankers_rounding,
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
+  xnn_node_type_convert,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depthwise_convolution_2d,
