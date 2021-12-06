@@ -422,10 +422,10 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul8_ld128(
       vacc89AB = vaddw_s16(vacc89AB, vget_low_s16(vprod89ABCDEF));
       vaccCDEF = vaddw_s16(vaccCDEF, vget_high_s16(vprod89ABCDEF));
 
-      vacc0123 = vshlq_s32(vacc0123, vright_pre_shift);
-      vacc4567 = vshlq_s32(vacc4567, vright_pre_shift);
-      vacc89AB = vshlq_s32(vacc89AB, vright_pre_shift);
-      vaccCDEF = vshlq_s32(vaccCDEF, vright_pre_shift);
+      vacc0123 = vqshlq_s32(vacc0123, vright_pre_shift);
+      vacc4567 = vqshlq_s32(vacc4567, vright_pre_shift);
+      vacc89AB = vqshlq_s32(vacc89AB, vright_pre_shift);
+      vaccCDEF = vqshlq_s32(vaccCDEF, vright_pre_shift);
 
       vacc0123 = vqdmulhq_s32(vacc0123, vmultiplier);
       vacc4567 = vqdmulhq_s32(vacc4567, vmultiplier);
@@ -637,8 +637,8 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul8_ld128(
         vacc0123 = vaddw_s16(vacc0123, vget_low_s16(vprod01234567));
         vacc4567 = vaddw_s16(vacc4567, vget_high_s16(vprod01234567));
 
-        vacc0123 = vrshlq_s32(vacc0123, vright_pre_shift);
-        vacc4567 = vrshlq_s32(vacc4567, vright_pre_shift);
+        vacc0123 = vqshlq_s32(vacc0123, vright_pre_shift);
+        vacc4567 = vqshlq_s32(vacc4567, vright_pre_shift);
 
         vacc0123 = vqdmulhq_s32(vacc0123, vmultiplier);
         vacc4567 = vqdmulhq_s32(vacc4567, vmultiplier);

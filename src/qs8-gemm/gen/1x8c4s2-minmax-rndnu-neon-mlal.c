@@ -183,8 +183,8 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4s2__neon_mlal(
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
     const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
 
-    vacc0x0123 = vshlq_s32(vacc0x0123, vright_pre_shift);
-    vacc0x4567 = vshlq_s32(vacc0x4567, vright_pre_shift);
+    vacc0x0123 = vqshlq_s32(vacc0x0123, vright_pre_shift);
+    vacc0x4567 = vqshlq_s32(vacc0x4567, vright_pre_shift);
 
     vacc0x0123 = vqdmulhq_s32(vacc0x0123, vmultiplier);
     vacc0x4567 = vqdmulhq_s32(vacc0x4567, vmultiplier);

@@ -178,7 +178,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
 
       $for M in range(MR):
         $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
+          vacc${M}x${ABC[N:N+4]} = vqshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
 
       $for M in range(MR):
         $for N in range(0, NR, 4):

@@ -75,11 +75,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
 2:
         # Apply params - preshift, scale, postshift, bias and clamp
         LD1R    {v4.4s}, [x11], 4
-        SSHL    v28.4s, v28.4s, v4.4s   // shift to upper bits
-        SSHL    v29.4s, v29.4s, v4.4s
+        SQSHL   v28.4s, v28.4s, v4.4s   // shift to upper bits
+        SQSHL   v29.4s, v29.4s, v4.4s
         LD1R    {v5.4s}, [x11], 4
-        SSHL    v30.4s, v30.4s, v4.4s
-        SSHL    v31.4s, v31.4s, v4.4s
+        SQSHL   v30.4s, v30.4s, v4.4s
+        SQSHL   v31.4s, v31.4s, v4.4s
         LD1R    {v6.4s}, [x11], 4
         SQDMULH v28.4s, v28.4s, v5.4s   // scale without rounding
         SQDMULH v29.4s, v29.4s, v5.4s

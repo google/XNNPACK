@@ -281,23 +281,23 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_pr
 2:
         # Apply params - preshift, scale, postshift, bias and clamp
         LD1R    {v4.4s}, [x11], 4
-        SSHL    v16.4s, v16.4s, v4.4s   // shift to upper bits
-        SSHL    v17.4s, v17.4s, v4.4s
-        SSHL    v18.4s, v18.4s, v4.4s
-        SSHL    v19.4s, v19.4s, v4.4s
-        SSHL    v20.4s, v20.4s, v4.4s
-        SSHL    v21.4s, v21.4s, v4.4s
-        SSHL    v22.4s, v22.4s, v4.4s
-        SSHL    v23.4s, v23.4s, v4.4s
+        SQSHL   v16.4s, v16.4s, v4.4s   // shift to upper bits
+        SQSHL   v17.4s, v17.4s, v4.4s
+        SQSHL   v18.4s, v18.4s, v4.4s
+        SQSHL   v19.4s, v19.4s, v4.4s
+        SQSHL   v20.4s, v20.4s, v4.4s
+        SQSHL   v21.4s, v21.4s, v4.4s
+        SQSHL   v22.4s, v22.4s, v4.4s
+        SQSHL   v23.4s, v23.4s, v4.4s
         LD1R    {v5.4s}, [x11], 4
-        SSHL    v24.4s, v24.4s, v4.4s
-        SSHL    v25.4s, v25.4s, v4.4s
-        SSHL    v26.4s, v26.4s, v4.4s
-        SSHL    v27.4s, v27.4s, v4.4s
-        SSHL    v28.4s, v28.4s, v4.4s
-        SSHL    v29.4s, v29.4s, v4.4s
-        SSHL    v30.4s, v30.4s, v4.4s
-        SSHL    v31.4s, v31.4s, v4.4s
+        SQSHL   v24.4s, v24.4s, v4.4s
+        SQSHL   v25.4s, v25.4s, v4.4s
+        SQSHL   v26.4s, v26.4s, v4.4s
+        SQSHL   v27.4s, v27.4s, v4.4s
+        SQSHL   v28.4s, v28.4s, v4.4s
+        SQSHL   v29.4s, v29.4s, v4.4s
+        SQSHL   v30.4s, v30.4s, v4.4s
+        SQSHL   v31.4s, v31.4s, v4.4s
         LD1R    {v6.4s}, [x11], 4
         SQDMULH v16.4s, v16.4s, v5.4s   // scale without rounding
         SQDMULH v17.4s, v17.4s, v5.4s

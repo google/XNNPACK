@@ -168,8 +168,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal
 
         # Apply params - preshift, scale, postshift, bias and clamp
         LD1R    {v5.4s}, [x11], 4
-        SSHL    v0.4s, v0.4s, v4.4s     // shift to upper bits
-        SSHL    v1.4s, v1.4s, v4.4s
+        SQSHL   v0.4s, v0.4s, v4.4s     // shift to upper bits
+        SQSHL   v1.4s, v1.4s, v4.4s
         SQDMULH v0.4s, v0.4s, v7.4s     // scale without rounding
         SQDMULH v1.4s, v1.4s, v7.4s
         SRSHL   v0.4s, v0.4s, v5.4s     // signed rounding shift left
