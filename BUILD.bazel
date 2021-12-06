@@ -7980,6 +7980,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "aarch32_assembler",
+    srcs = [
+        "src/jit/aarch32-assembler.cc",
+    ],
+    hdrs = INTERNAL_HDRS + ["src/xnnpack/aarch32-assembler.h"],
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -11180,6 +11188,16 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "aarch32_assembler_test",
+    srcs = [
+        "test/aarch32-assembler.cc",
+    ],
+    deps = [
+        ":aarch32_assembler",
     ],
 )
 

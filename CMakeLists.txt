@@ -250,6 +250,9 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-64.c
   src/tables/exp2minus-k-over-2048.c)
 
+SET (JIT_SRCS
+  src/jit/aarch32-assembler.cc)
+
 SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c
@@ -5436,6 +5439,7 @@ ENDIF()
 ADD_LIBRARY(all_microkernels OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(packing OBJECT src/packing.c)
+ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
   ADD_LIBRARY(XNNPACK ${COLD_SRCS} ${HOT_SRCS} ${TABLE_SRCS} ${PROD_MICROKERNEL_SRCS})
@@ -5565,6 +5569,7 @@ TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE src)
 TARGET_INCLUDE_DIRECTORIES(all_microkernels PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(jit PRIVATE include src)
 IF(WIN32)
   # Target Windows 7+ API
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE _WIN32_WINNT=0x0601)
@@ -7464,6 +7469,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(xx-pad-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(xx-pad-test xx-pad-test)
+
+  ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc $<TARGET_OBJECTS:jit>)
+  SET_TARGET_PROPERTIES(aarch32-assembler-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE src)
+  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
