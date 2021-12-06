@@ -93,6 +93,9 @@ void xnn_qc8_gemm_xw_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const void*) ((const float*) w + 8);
     vscaled0x01234567 = _mm256_mul_ps(vscaled0x01234567, vscale01234567);
 
+    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
+    vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
+
     vacc0x01234567 = _mm256_cvtps_epi32(vscaled0x01234567);
 
     const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
@@ -103,7 +106,6 @@ void xnn_qc8_gemm_xw_minmax_fp32_ukernel_1x8c8__avx2(
     __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
 
     vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->avx2.output_min));
-    vout = _mm256_min_epi8(vout, _mm256_load_si256((const __m256i*) params->avx2.output_max));
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

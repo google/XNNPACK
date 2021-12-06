@@ -82,6 +82,10 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         $for C in range(0, CHANNEL_TILE, 8):
           vfpacc${ABC[C:C+8]} = _mm256_mul_ps(vfpacc${ABC[C:C+8]}, vscale);
 
+      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+      $for C in range(0, CHANNEL_TILE, 8):
+        vfpacc${ABC[C:C+8]} = _mm256_min_ps(vfpacc${ABC[C:C+8]}, voutput_max_less_zero_point);
+
       $for C in range(0, CHANNEL_TILE, 8):
         vacc${ABC[C:C+8]} = _mm256_cvtps_epi32(vfpacc${ABC[C:C+8]});
 
@@ -93,10 +97,8 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         __m128i vout${ABC[C:C+16]} = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]}), _mm256_extracti128_si256(vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]}, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
       $for C in range(0, CHANNEL_TILE, 16):
         vout${ABC[C:C+16]} = _mm_max_epi8(vout${ABC[C:C+16]}, voutput_min);
-        vout${ABC[C:C+16]} = _mm_min_epi8(vout${ABC[C:C+16]}, voutput_max);
 
       _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
       $for C in range(16, CHANNEL_TILE, 16):
@@ -144,6 +146,10 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vfpacc${ABC[0:8]} = _mm256_mul_ps(vfpacc${ABC[0:8]}, vscale);
           vfpacc${ABC[8:16]} = _mm256_mul_ps(vfpacc${ABC[8:16]}, vscale);
 
+        const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+        vfpacc${ABC[0:8]} = _mm256_min_ps(vfpacc${ABC[0:8]}, voutput_max_less_zero_point);
+        vfpacc${ABC[8:16]} = _mm256_min_ps(vfpacc${ABC[8:16]}, voutput_max_less_zero_point);
+
         vacc${ABC[0:8]} = _mm256_cvtps_epi32(vfpacc${ABC[0:8]});
         vacc${ABC[8:16]} = _mm256_cvtps_epi32(vfpacc${ABC[8:16]});
 
@@ -155,10 +161,9 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         __m128i vout${ABC[8:16]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[8:16]}), _mm256_extracti128_si256(vacc${ABC[8:16]}, 1)), voutput_zero_point);
 
         const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
-        const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
 
         __m128i vout${ABC[0:16]} = _mm_packs_epi16(vout${ABC[0:8]}, vout${ABC[8:16]});
-        vout${ABC[0:16]} = _mm_min_epi8(_mm_max_epi8(vout${ABC[0:16]}, voutput_min), voutput_max);
+        vout${ABC[0:16]} = _mm_max_epi8(vout${ABC[0:16]}, voutput_min);
 
         $if CHANNEL_TILE > 16:
           if XNN_LIKELY(c >= 16) {

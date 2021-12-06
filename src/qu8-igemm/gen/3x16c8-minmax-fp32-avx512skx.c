@@ -52,9 +52,9 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __m512 vscale = _mm512_load_ps(params->fp32_avx512.scale);
+  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->fp32_avx512.output_zero_point);
   const __m512i voutput_min = _mm512_load_si512(params->fp32_avx512.output_min);
-  const __m512i voutput_max = _mm512_load_si512(params->fp32_avx512.output_max);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 4));
@@ -142,6 +142,10 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx(
     vscaled1x084C195D2A6E3B7F = _mm512_mul_ps(vscaled1x084C195D2A6E3B7F, vscale);
     vscaled2x084C195D2A6E3B7F = _mm512_mul_ps(vscaled2x084C195D2A6E3B7F, vscale);
 
+    vscaled0x084C195D2A6E3B7F = _mm512_min_ps(vscaled0x084C195D2A6E3B7F, voutput_max_less_zero_point);
+    vscaled1x084C195D2A6E3B7F = _mm512_min_ps(vscaled1x084C195D2A6E3B7F, voutput_max_less_zero_point);
+    vscaled2x084C195D2A6E3B7F = _mm512_min_ps(vscaled2x084C195D2A6E3B7F, voutput_max_less_zero_point);
+
     vacc0x084C195D2A6E3B7F = _mm512_cvtps_epi32(vscaled0x084C195D2A6E3B7F);
     vacc1x084C195D2A6E3B7F = _mm512_cvtps_epi32(vscaled1x084C195D2A6E3B7F);
     vacc2x084C195D2A6E3B7F = _mm512_cvtps_epi32(vscaled2x084C195D2A6E3B7F);
@@ -153,7 +157,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx(
     vout0122x084Cx195Dx2A6Ex3B7F = _mm512_permutexvar_epi32(_mm512_set_epi32(15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1, 12, 8, 4, 0), vout0122x084Cx195Dx2A6Ex3B7F);
     __m512i vout0122x0123456789ABCDEF = _mm512_shuffle_epi8(vout0122x084Cx195Dx2A6Ex3B7F, _mm512_set_epi8(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0, 15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0));
     vout0122x0123456789ABCDEF = _mm512_max_epu8(vout0122x0123456789ABCDEF, voutput_min);
-    vout0122x0123456789ABCDEF = _mm512_min_epu8(vout0122x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c2, _mm512_extracti32x4_epi32(vout0122x0123456789ABCDEF, 2));

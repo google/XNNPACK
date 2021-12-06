@@ -462,6 +462,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
       vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
       vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+      const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
+      vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+      vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
       vacc0123 = _mm_cvtps_epi32(vscaled0123);
       vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -470,9 +474,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
       vout01234567 = _mm_max_epi16(vout01234567, voutput_min);
-
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse2.output_max);
-      vout01234567 = _mm_min_epi16(vout01234567, voutput_max);
 
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
@@ -758,6 +759,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
         vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
         vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+        const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
+        vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+        vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -766,7 +771,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
         vout01234567 = _mm_max_epi16(vout01234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
-        vout01234567 = _mm_min_epi16(vout01234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_max));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 

@@ -97,6 +97,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__sse41_ld64(
     const __m128 vscale = _mm_load_ps(params->fp32_sse4.scale);
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale);
 
+    const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
+    vscaled0x0123 = _mm_min_ps(vscaled0x0123, voutput_max_less_zero_point);
+
     vacc0x0123 = _mm_cvtps_epi32(vscaled0x0123);
 
     const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
@@ -106,7 +109,6 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__sse41_ld64(
     __m128i vout = _mm_packs_epi16(vacc00x0123, vacc00x0123);
 
     vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
-    vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_max));
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);

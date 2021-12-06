@@ -214,6 +214,12 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x4c2__sse41_ld128(
     vscaled2x0123 = _mm_mul_ps(vscaled2x0123, vscale);
     vscaled3x0123 = _mm_mul_ps(vscaled3x0123, vscale);
 
+    const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
+    vscaled0x0123 = _mm_min_ps(vscaled0x0123, voutput_max_less_zero_point);
+    vscaled1x0123 = _mm_min_ps(vscaled1x0123, voutput_max_less_zero_point);
+    vscaled2x0123 = _mm_min_ps(vscaled2x0123, voutput_max_less_zero_point);
+    vscaled3x0123 = _mm_min_ps(vscaled3x0123, voutput_max_less_zero_point);
+
     vacc0x0123 = _mm_cvtps_epi32(vscaled0x0123);
     vacc1x0123 = _mm_cvtps_epi32(vscaled1x0123);
     vacc2x0123 = _mm_cvtps_epi32(vscaled2x0123);
@@ -227,7 +233,6 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x4c2__sse41_ld128(
     __m128i vout = _mm_packs_epi16(vacc01x0123, vacc23x0123);
 
     vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
-    vout = _mm_min_epi8(vout, _mm_load_si128((const __m128i*) params->fp32_sse4.output_max));
 
     if (nc >= 4) {
       *((uint32_t*) c3) = (uint32_t) _mm_extract_epi32(vout, 3);

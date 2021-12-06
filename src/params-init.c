@@ -54,16 +54,17 @@ void xnn_init_qu8_conv_minmax_fp32_sse2_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse2.scale[i] = scale;
+    params->fp32_sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 8; i++) {
-    params->fp32_sse2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
-    params->fp32_sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
+    params->fp32_sse2.kernel_zero_point[i] = (int16_t) kernel_zero_point;
+    params->fp32_sse2.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_sse2.output_min[i] = output_min;
-    params->fp32_sse2.output_max[i] = output_max;
   }
 }
 
@@ -75,16 +76,17 @@ void xnn_init_qu8_conv_minmax_fp32_avx2_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_avx2.scale[i] = scale;
+    params->fp32_avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
-    params->fp32_avx2.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
-    params->fp32_avx2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
+    params->fp32_avx2.kernel_zero_point[i] = (int16_t) kernel_zero_point;
+    params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx2.output_min[i] = output_min;
-    params->fp32_avx2.output_max[i] = output_max;
   }
 }
 
@@ -96,8 +98,10 @@ void xnn_init_qu8_conv_minmax_fp32_avx512_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
+    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx512.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
@@ -105,7 +109,6 @@ void xnn_init_qu8_conv_minmax_fp32_avx512_params(
   }
   for (uint32_t i = 0; i < 64; i++) {
     params->fp32_avx512.output_min[i] = output_min;
-    params->fp32_avx512.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -278,13 +281,14 @@ void xnn_init_qs8_conv_minmax_fp32_sse2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse2.scale[i] = scale;
+    params->fp32_sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_sse2.output_zero_point[i] = (int16_t) output_zero_point;
     params->fp32_sse2.output_min[i] = (int16_t) output_min;
-    params->fp32_sse2.output_max[i] = (int16_t) output_max;
   }
 }
 
@@ -295,15 +299,16 @@ void xnn_init_qs8_conv_minmax_fp32_sse4_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse4.scale[i] = scale;
+    params->fp32_sse4.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_sse4.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_sse4.output_min[i] = output_min;
-    params->fp32_sse4.output_max[i] = output_max;
   }
 }
 
@@ -314,15 +319,16 @@ void xnn_init_qs8_conv_minmax_fp32_avx2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_avx2.scale[i] = scale;
+    params->fp32_avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx2.output_min[i] = output_min;
-    params->fp32_avx2.output_max[i] = output_max;
   }
 }
 
@@ -333,15 +339,16 @@ void xnn_init_qs8_conv_minmax_fp32_avx512_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
+    params->fp32_avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->fp32_avx512.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 64; i++) {
     params->fp32_avx512.output_min[i] = output_min;
-    params->fp32_avx512.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -476,10 +483,13 @@ void xnn_init_qs8_minmax_sse2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
     params->sse2.output_min[i] = (int16_t) output_min;
-    params->sse2.output_max[i] = (int16_t) output_max;
   }
 }
 
@@ -489,12 +499,15 @@ void xnn_init_qs8_minmax_sse4_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse4.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->sse4.output_min[i] = output_min;
-    params->sse4.output_max[i] = output_max;
   }
 }
 
@@ -504,12 +517,15 @@ void xnn_init_qs8_minmax_avx2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->avx2.output_min[i] = output_min;
-    params->avx2.output_max[i] = output_max;
   }
 }
 
@@ -519,12 +535,15 @@ void xnn_init_qs8_minmax_avx512_params(
   int8_t output_min,
   int8_t output_max)
 {
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
   for (uint32_t i = 0; i < 32; i++) {
     params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
   }
   for (uint32_t i = 0; i < 64; i++) {
     params->avx512.output_min[i] = output_min;
-    params->avx512.output_max[i] = output_max;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

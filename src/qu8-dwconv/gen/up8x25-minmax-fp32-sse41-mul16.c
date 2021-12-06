@@ -499,6 +499,10 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul16(
       vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
       vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+      const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
+      vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+      vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
       vacc0123 = _mm_cvtps_epi32(vscaled0123);
       vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -509,9 +513,6 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul16(
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
       vout0123456701234567 = _mm_max_epu8(vout0123456701234567, voutput_min);
-
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse2.output_max);
-      vout0123456701234567 = _mm_min_epu8(vout0123456701234567, voutput_max);
 
       _mm_storel_epi64((__m128i*) output, vout0123456701234567);
       output += 8;
@@ -830,6 +831,10 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul16(
         vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
         vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+        const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
+        vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+        vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -840,7 +845,6 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse41_mul16(
         __m128i vout0123456701234567 = _mm_packus_epi16(vout01234567, vout01234567);
 
         vout0123456701234567 = _mm_max_epu8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
-        vout0123456701234567 = _mm_min_epu8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_max));
 
         if (c & 4) {
           *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);

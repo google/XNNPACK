@@ -399,6 +399,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
       vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
       vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+      const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
+      vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+      vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
       vacc0123 = _mm_cvtps_epi32(vscaled0123);
       vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -406,10 +410,8 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
       __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse4.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse4.output_max);
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
       vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
-      vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
       _mm_storel_epi64((__m128i*) output, vout0123456701234567);
       output += 8;
@@ -549,6 +551,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
 
         __m128 vscaled0123 = _mm_cvtepi32_ps(vacc0123);
         vscaled0123 = _mm_mul_ps(vscaled0123, _mm_load_ps(params->fp32_sse4.scale));
+        vscaled0123 = _mm_min_ps(vscaled0123, _mm_load_ps(params->fp32_sse4.output_max_less_zero_point));
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
 
         w = (const void*) ((const int32_t*) w + 4);
@@ -558,7 +561,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__avx_mul32(
 
         vout0123 = _mm_packs_epi16(vout0123, vout0123);
         vout0123 = _mm_max_epi8(vout0123, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
-        vout0123 = _mm_min_epi8(vout0123, _mm_load_si128((const __m128i*) params->fp32_sse4.output_max));
 
         if XNN_LIKELY(c >= 4) {
           _mm_storeu_si32(output, vout0123);

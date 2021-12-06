@@ -133,6 +133,10 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_2x4c2__sse2(
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale);
 
+    const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
+    vscaled0x0123 = _mm_min_ps(vscaled0x0123, voutput_max_less_zero_point);
+    vscaled1x0123 = _mm_min_ps(vscaled1x0123, voutput_max_less_zero_point);
+
     vacc0x0123 = _mm_cvtps_epi32(vscaled0x0123);
     vacc1x0123 = _mm_cvtps_epi32(vscaled1x0123);
 
@@ -140,8 +144,7 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_2x4c2__sse2(
     __m128i vacc01x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0x0123, vacc1x0123), voutput_zero_point);
 
     const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
-    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse2.output_max);
-    vacc01x0123 = _mm_min_epi16(_mm_max_epi16(vacc01x0123, voutput_min), voutput_max);
+    vacc01x0123 = _mm_max_epi16(vacc01x0123, voutput_min);
 
     __m128i vout = _mm_packs_epi16(vacc01x0123, vacc01x0123);
 

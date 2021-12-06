@@ -31,9 +31,9 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx512skx_mul32(
   assert(output_width != 0);
 
   const __m512 vscale = _mm512_load_ps(params->fp32_avx512.scale);
+  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_avx512.output_max);
 
   const __m512i vk_zero_point = _mm512_cvtepu16_epi32(_mm256_load_si256((const __m256i*) params->fp32_avx512.kernel_zero_point));
   do {
@@ -150,6 +150,8 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx512skx_mul32(
 
       vscaled0123456789ABCDEF = _mm512_mul_ps(vscaled0123456789ABCDEF, vscale);
 
+      vscaled0123456789ABCDEF = _mm512_min_ps(vscaled0123456789ABCDEF, voutput_max_less_zero_point);
+
       vacc0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0123456789ABCDEF);
 
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(_mm512_castsi512_si256(vacc0123456789ABCDEF), _mm512_extracti32x8_epi32(vacc0123456789ABCDEF, 1)), voutput_zero_point);
@@ -159,7 +161,6 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx512skx_mul32(
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packus_epi16(vout012389AB, vout4567CDEF), _MM_SHUFFLE(3, 1, 2, 0));
 
       vout0123456789ABCDEF = _mm_max_epu8(vout0123456789ABCDEF, voutput_min);
-      vout0123456789ABCDEF = _mm_min_epu8(vout0123456789ABCDEF, voutput_max);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
       output += 16;
@@ -219,6 +220,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx512skx_mul32(
 
         __m512 vscaled0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0123456789ABCDEF);
         vscaled0123456789ABCDEF = _mm512_mul_ps(vscaled0123456789ABCDEF, vscale);
+        vscaled0123456789ABCDEF = _mm512_min_ps(vscaled0123456789ABCDEF, voutput_max_less_zero_point);
         vacc0123456789ABCDEF = _mm512_cvtps_epi32(vscaled0123456789ABCDEF);
 
 
@@ -228,7 +230,6 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx512skx_mul32(
         const __m128i vout4567CDEF = _mm256_extracti128_si256(vout012389AB4567CDEF, 1);
         __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packus_epi16(vout012389AB, vout4567CDEF), _MM_SHUFFLE(3, 1, 2, 0));
         vout0123456789ABCDEF = _mm_max_epu8(vout0123456789ABCDEF, voutput_min);
-        vout0123456789ABCDEF = _mm_min_epu8(vout0123456789ABCDEF, voutput_max);
 
         _mm_mask_storeu_epi8(output, vmask, vout0123456789ABCDEF);
         output = (uint8_t*) ((uintptr_t) output + c);

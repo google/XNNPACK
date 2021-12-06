@@ -49,9 +49,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __m512 vscale = _mm512_load_ps(params->fp32_avx512.scale);
+  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->fp32_avx512.output_zero_point);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_min);
-  const __m256i voutput_max = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_max);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 4));
@@ -106,6 +106,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
     vscaled0x084C195D2A6E3B7F = _mm512_mul_ps(vscaled0x084C195D2A6E3B7F, vscale);
     vscaled1x084C195D2A6E3B7F = _mm512_mul_ps(vscaled1x084C195D2A6E3B7F, vscale);
 
+    vscaled0x084C195D2A6E3B7F = _mm512_min_ps(vscaled0x084C195D2A6E3B7F, voutput_max_less_zero_point);
+    vscaled1x084C195D2A6E3B7F = _mm512_min_ps(vscaled1x084C195D2A6E3B7F, voutput_max_less_zero_point);
+
     vacc0x084C195D2A6E3B7F = _mm512_cvtps_epi32(vscaled0x084C195D2A6E3B7F);
     vacc1x084C195D2A6E3B7F = _mm512_cvtps_epi32(vscaled1x084C195D2A6E3B7F);
 
@@ -115,7 +118,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
     const __m256i vout01x084C2A6E195D3B7F = _mm256_permutevar8x32_epi32(vout01x084Cx2A6Ex195Dx3B7F, _mm256_set_epi32(7, 5, 3, 1, 6, 4, 2, 0));
     __m256i vout01x0123456789ABCDEF = _mm256_shuffle_epi8(vout01x084C2A6E195D3B7F, _mm256_set_epi8(15, 7, 11, 3, 13, 5, 9, 1, 14, 6, 10, 2, 12, 4, 8, 0, 15, 7, 11, 3, 13, 5, 9, 1, 14, 6, 10, 2, 12, 4, 8, 0));
     vout01x0123456789ABCDEF = _mm256_max_epu8(vout01x0123456789ABCDEF, voutput_min);
-    vout01x0123456789ABCDEF = _mm256_min_epu8(vout01x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
       _mm_storeu_si128((__m128i*) c0, _mm256_castsi256_si128(vout01x0123456789ABCDEF));

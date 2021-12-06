@@ -329,23 +329,23 @@ union xnn_qu8_conv_minmax_params {
   struct {
     XNN_ALIGN(16) int16_t kernel_zero_point[8];
     XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) uint8_t output_min[16];
-    XNN_ALIGN(16) uint8_t output_max[16];
   } fp32_sse2;
   struct {
     XNN_ALIGN(32) int16_t kernel_zero_point[16];
     XNN_ALIGN(32) float scale[8];
+    XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) uint8_t output_min[32];
-    XNN_ALIGN(32) uint8_t output_max[32];
   } fp32_avx2;
   struct {
     XNN_ALIGN(64) int16_t kernel_zero_point[32];
     XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) uint8_t output_min[64];
-    XNN_ALIGN(64) uint8_t output_max[64];
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
@@ -387,24 +387,24 @@ union xnn_qs8_minmax_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];
-    XNN_ALIGN(16) int16_t output_max[8];
   } sse2;
   struct {
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
-    XNN_ALIGN(16) int8_t output_max[16];
   } sse4;
   struct {
+    XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) int8_t output_min[32];
-    XNN_ALIGN(32) int8_t output_max[32];
   } avx2;
   struct {
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) int8_t output_min[64];
-    XNN_ALIGN(64) int8_t output_max[64];
   } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
@@ -465,27 +465,27 @@ union xnn_qs8_conv_minmax_params {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int16_t output_min[8];
-    XNN_ALIGN(16) int16_t output_max[8];
   } fp32_sse2;
   struct {
     XNN_ALIGN(16) float scale[4];
+    XNN_ALIGN(16) float output_max_less_zero_point[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
     XNN_ALIGN(16) int8_t output_min[16];
-    XNN_ALIGN(16) int8_t output_max[16];
   } fp32_sse4;
   struct {
     XNN_ALIGN(32) float scale[8];
+    XNN_ALIGN(32) float output_max_less_zero_point[8];
     XNN_ALIGN(32) int16_t output_zero_point[16];
     XNN_ALIGN(32) int8_t output_min[32];
-    XNN_ALIGN(32) int8_t output_max[32];
   } fp32_avx2;
   struct {
     XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
     XNN_ALIGN(64) int16_t output_zero_point[32];
     XNN_ALIGN(64) int8_t output_min[64];
-    XNN_ALIGN(64) int8_t output_max[64];
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD

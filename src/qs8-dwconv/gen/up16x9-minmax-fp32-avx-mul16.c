@@ -270,6 +270,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16(
       vscaled89AB = _mm_mul_ps(vscaled89AB, vscale);
       vscaledCDEF = _mm_mul_ps(vscaledCDEF, vscale);
 
+      const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
+      vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+      vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+      vscaled89AB = _mm_min_ps(vscaled89AB, voutput_max_less_zero_point);
+      vscaledCDEF = _mm_min_ps(vscaledCDEF, voutput_max_less_zero_point);
+
       vacc0123 = _mm_cvtps_epi32(vscaled0123);
       vacc4567 = _mm_cvtps_epi32(vscaled4567);
       vacc89AB = _mm_cvtps_epi32(vscaled89AB);
@@ -284,9 +290,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16(
 
       const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse4.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
-
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse4.output_max);
-      vout0123456789ABCDEF = _mm_min_epi8(vout0123456789ABCDEF, voutput_max);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
       output += 16;
@@ -415,6 +418,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16(
         vscaled0123 = _mm_mul_ps(vscaled0123, vscale);
         vscaled4567 = _mm_mul_ps(vscaled4567, vscale);
 
+        const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
+        vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
+        vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
+
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
@@ -427,7 +434,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16(
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
-        vout0123456701234567 = _mm_min_epi8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse4.output_max));
 
         if XNN_LIKELY(c >= 8) {
           _mm_storel_epi64((__m128i*) output, vout0123456701234567);
