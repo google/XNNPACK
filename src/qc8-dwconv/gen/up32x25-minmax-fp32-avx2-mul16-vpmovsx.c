@@ -542,6 +542,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__avx2_mul16_vpmovsx(
       vaccOPQRSTUV = _mm256_add_epi32(vaccOPQRSTUV, _mm256_cvtepi16_epi32(vprod24xOPQRSTUV));
 
       w = (const void*) ((uintptr_t) w + 32 * sizeof(int32_t) + 800 * sizeof(int8_t));
+
       __m256 vfpacc01234567 = _mm256_cvtepi32_ps(vacc01234567);
       __m256 vfpacc89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
       __m256 vfpaccGHIJKLMN = _mm256_cvtepi32_ps(vaccGHIJKLMN);

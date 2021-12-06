@@ -696,6 +696,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x25__scalar_lrint(
         vrndacc = XNN_UNPREDICTABLE(vrndacc < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc;
         vrndacc = XNN_UNPREDICTABLE(vrndacc > voutput_max_less_zero_point) ? voutput_max_less_zero_point : vrndacc;
         int32_t vout = (int32_t) vrndacc + voutput_zero_point;
+
         *output++ = (int8_t) vout;
       } while (--c != 0);
     }

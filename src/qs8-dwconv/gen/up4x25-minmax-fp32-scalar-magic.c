@@ -698,6 +698,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x25__scalar_magic(
         vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
         vfpacc += vmagic_bias;
         int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+
         *output++ = (int8_t) vout;
       } while (--c != 0);
     }
