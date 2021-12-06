@@ -286,16 +286,6 @@ union xnn_f32_hswish_params {
 union xnn_qu8_conv_minmax_params {
   struct {
     int32_t kernel_zero_point;
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t output_min_less_zero_point;
-    int32_t output_max_less_zero_point;
-    int32_t output_zero_point;
-  } gemmlowp_scalar;
-  struct {
-    int32_t kernel_zero_point;
     float scale;
     long output_min_less_zero_point;
     long output_max_less_zero_point;
@@ -310,14 +300,6 @@ union xnn_qu8_conv_minmax_params {
     int32_t magic_bias_less_output_zero_point;
   } fp32_scalar_magic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    uint8_t kernel_zero_point[4];
-    int32_t multiplier;
-    int32_t right_shift;
-    int16_t output_zero_point;
-    uint8_t output_min;
-    uint8_t output_max;
-  } gemmlowp_neon;
   struct {
     uint8_t kernel_zero_point[4];
     float scale;
@@ -344,17 +326,6 @@ union xnn_qu8_conv_minmax_params {
   } rndnu_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) int16_t kernel_zero_point[8];
-    XNN_ALIGN(16) uint32_t multiplier[4];
-    XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    XNN_ALIGN(16) uint64_t shift[2];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) uint8_t output_min[16];
-    XNN_ALIGN(16) uint8_t output_max[16];
-  } gemmlowp_sse2;
   struct {
     XNN_ALIGN(16) int16_t kernel_zero_point[8];
     XNN_ALIGN(16) float scale[4];
@@ -449,15 +420,6 @@ union xnn_qs8_minmax_params {
 union xnn_qs8_conv_minmax_params {
   struct {
     int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t output_min_less_zero_point;
-    int32_t output_max_less_zero_point;
-    int32_t output_zero_point;
-  } gemmlowp_scalar;
-  struct {
-    int32_t multiplier;
     uint32_t shift;
     int64_t rounding;
     int32_t output_min_less_zero_point;
@@ -478,13 +440,6 @@ union xnn_qs8_conv_minmax_params {
     int32_t magic_bias_less_output_zero_point;
   } fp32_scalar_magic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    int32_t multiplier;
-    int32_t right_shift;
-    int16_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
-  } gemmlowp_neon;
   struct {
     float scale;
     float output_min_less_zero_point;
@@ -508,46 +463,6 @@ union xnn_qs8_conv_minmax_params {
   } rndnu_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) uint32_t multiplier[4];
-    XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    XNN_ALIGN(16) uint64_t shift[2];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int16_t output_min[8];
-    XNN_ALIGN(16) int16_t output_max[8];
-  } gemmlowp_sse2;
-  struct {
-    XNN_ALIGN(16) uint32_t multiplier[4];
-    XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    XNN_ALIGN(16) uint64_t shift[2];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int8_t output_min[16];
-    XNN_ALIGN(16) int8_t output_max[16];
-  } gemmlowp_sse4;
-  struct {
-    XNN_ALIGN(32) uint32_t multiplier[8];
-    XNN_ALIGN(32) uint64_t rounding[4];
-    XNN_ALIGN(32) int32_t remainder_mask[8];
-    XNN_ALIGN(32) int32_t remainder_threshold[8];
-    XNN_ALIGN(32) uint64_t shift[4];
-    XNN_ALIGN(32) int16_t output_zero_point[16];
-    XNN_ALIGN(32) int8_t output_min[32];
-    XNN_ALIGN(32) int8_t output_max[32];
-  } gemmlowp_avx2;
-  struct {
-    int64_t multiplier;
-    uint64_t rounding;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint64_t shift;
-    XNN_ALIGN(64) int16_t output_zero_point[32];
-    XNN_ALIGN(64) int8_t output_min[64];
-    XNN_ALIGN(64) int8_t output_max[64];
-  } gemmlowp_avx512;
   struct {
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) int16_t output_zero_point[8];
@@ -574,16 +489,6 @@ union xnn_qs8_conv_minmax_params {
   } fp32_avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
-  struct {
-    XNN_ALIGN(16) int64_t multiplier[2];
-    XNN_ALIGN(16) int64_t rounding[2];
-    XNN_ALIGN(16) int32_t remainder_mask[4];
-    XNN_ALIGN(16) int32_t remainder_threshold[4];
-    int32_t shift;
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) int8_t output_min[16];
-    XNN_ALIGN(16) int8_t output_max[16];
-  } gemmlowp_wasmsimd;
   struct {
     XNN_ALIGN(16) float scale[4];
     XNN_ALIGN(16) float magic_bias[4];

@@ -44,7 +44,7 @@ def split_ukernel_name(name):
   arch, isa = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
-  if requantization not in ["fp32", "gemmlowp", "rndnu"]:
+  if requantization not in ["fp32", "rndnu"]:
     requantization = None
 
   return mr, nr, kr, sr, xw, requantization, arch, isa

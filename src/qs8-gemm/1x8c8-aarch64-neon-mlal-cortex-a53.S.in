@@ -3,14 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"]
 $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$REWIND_DECREMENT = 3 if CHANNELWISE else {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+$REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -196,27 +196,16 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
-        $if REQUANTIZATION == "GEMMLOWP" or REQUANTIZATION == "RNDNU":
+        $if REQUANTIZATION == "RNDNU":
           LD1R    {v4.4s}, [x11], 4
         ADDP    v24.4s, v24.4s, v26.4s
         ADDP    v28.4s, v28.4s, v30.4s
-        $if REQUANTIZATION == "GEMMLOWP" or REQUANTIZATION == "RNDNU":
+        $if REQUANTIZATION == "RNDNU":
           LD1R    {v7.4s}, [x11], 4
         ADDP    v0.4s, v16.4s, v20.4s
         ADDP    v1.4s, v24.4s, v28.4s
 
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          SQRDMULH v0.4s, v0.4s, v4.4s
-          SQRDMULH v1.4s, v1.4s, v4.4s
-          CMEQ    v4.4s, v7.4s, 0
-          BIC     v6.16b, v0.16b, v4.16b
-          BIC     v16.16b, v1.16b, v4.16b
-          SSRA    v0.4s, v6.4s, 31
-          SSRA    v1.4s, v16.4s, 31
-          SRSHL   v0.4s, v0.4s, v7.4s
-          SRSHL   v1.4s, v1.4s, v7.4s
-        $elif REQUANTIZATION == "RNDNU":
+        $if REQUANTIZATION == "RNDNU":
           # Apply params - preshift, scale, postshift, bias and clamp
           LD1R    {v5.4s}, [x11], 4
           SSHL    v0.4s, v0.4s, v4.4s     // shift to upper bits

@@ -6,7 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
-$assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"]
 $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 #include <assert.h>
 
@@ -176,22 +176,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    $if REQUANTIZATION == "GEMMLOWP":
-      const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vqrdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
-
-      const int32x4_t vright_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_shift);
-      const int32x4_t vzero_shift_mask = vreinterpretq_s32_u32(vceqq_s32(vright_shift, vmovq_n_s32(0)));
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vsraq_n_s32(vacc${M}x${ABC[N:N+4]}, vbicq_s32(vacc${M}x${ABC[N:N+4]}, vzero_shift_mask), 31);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_shift);
-    $elif REQUANTIZATION == "RNDNU":
+    $if REQUANTIZATION == "RNDNU":
       const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
       const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
       const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);

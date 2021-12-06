@@ -3,11 +3,11 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "GEMMLOWP", "RNDNU"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"]
 
 #include <xnnpack/assembly.h>
 
-$REWIND_DECREMENT = {"GEMMLOWP": 11, "RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+$REWIND_DECREMENT = {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 # void xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
@@ -160,50 +160,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarc
         SUB     v22.4s, v22.4s, v26.4s
         SUB     v23.4s, v23.4s, v27.4s
 
-        $if REQUANTIZATION == "GEMMLOWP":
-          # Apply params - scale, shift, bias and clamp
-          LD2R    {v4.4s, v5.4s}, [x11], 8
-          CMEQ    v6.4s, v5.4s, 0
-
-          BIC     v0.16b, v16.16b, v6.16b
-          BIC     v1.16b, v17.16b, v6.16b
-          BIC     v2.16b, v18.16b, v6.16b
-          BIC     v3.16b, v19.16b, v6.16b
-
-          SQRDMULH v16.4s, v16.4s, v4.4s
-          SQRDMULH v17.4s, v17.4s, v4.4s
-          SQRDMULH v18.4s, v18.4s, v4.4s
-          SQRDMULH v19.4s, v19.4s, v4.4s
-
-          SSRA    v16.4s, v0.4s, 31       // signed shift right accumulate
-          SSRA    v17.4s, v1.4s, 31
-          SSRA    v18.4s, v2.4s, 31
-          SSRA    v19.4s, v3.4s, 31
-
-          BIC     v0.16b, v20.16b, v6.16b
-          BIC     v1.16b, v21.16b, v6.16b
-          BIC     v2.16b, v22.16b, v6.16b
-          BIC     v3.16b, v23.16b, v6.16b
-
-          SQRDMULH v20.4s, v20.4s, v4.4s
-          SQRDMULH v21.4s, v21.4s, v4.4s
-          SQRDMULH v22.4s, v22.4s, v4.4s
-          SQRDMULH v23.4s, v23.4s, v4.4s
-
-          SSRA    v20.4s, v0.4s, 31
-          SSRA    v21.4s, v1.4s, 31
-          SSRA    v22.4s, v2.4s, 31
-          SSRA    v23.4s, v3.4s, 31
-
-          SRSHL   v16.4s, v16.4s, v5.4s   // signed rounding shift left
-          SRSHL   v17.4s, v17.4s, v5.4s
-          SRSHL   v18.4s, v18.4s, v5.4s
-          SRSHL   v19.4s, v19.4s, v5.4s
-          SRSHL   v20.4s, v20.4s, v5.4s
-          SRSHL   v21.4s, v21.4s, v5.4s
-          SRSHL   v22.4s, v22.4s, v5.4s
-          SRSHL   v23.4s, v23.4s, v5.4s
-        $elif REQUANTIZATION == "RNDNU":
+        $if REQUANTIZATION == "RNDNU":
           # Apply params - preshift, scale, postshift, bias and clamp
           LD1R    {v4.4s}, [x11], 4
           SSHL    v16.4s, v16.4s, v4.4s   // shift to upper bits

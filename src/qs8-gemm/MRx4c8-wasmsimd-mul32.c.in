@@ -17,13 +17,13 @@ $assert MR <= 4
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + "wasmsimd"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_STRUCT = "wasmsimd" if DATATYPE == "QC8" else "fp32_wasmsimd"
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
 $WASM_X8X16_NARROW_I16X8 = "wasm_u8x16_narrow_i16x8" if DATATYPE == "QU8" else "wasm_i8x16_narrow_i16x8"
 $WASM_X8X16_MIN = "wasm_u8x16_min" if DATATYPE == "QU8" else "wasm_i8x16_min"
-void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x4c8__wasmsimd_mul32${LOAD_SUFFIX}(
+void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__wasmsimd_mul32${LOAD_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -137,42 +137,41 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_${REQUANTIZATION.lower()}
     $for M in range(MR):
       v128_t vacc${M}x0123 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x02, vacc${M}x13, 2, 6, 3, 7));
 
-    $if REQUANTIZATION == "FP32":
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_f32x4_convert_i32x4(vacc${M}x0123);
+
+    $if DATATYPE == "QC8":
+      const v128_t vscale0123 = wasm_v128_load(w);
+      w = (const void*) ((const float*) w + 4);
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_convert_i32x4(vacc${M}x0123);
-
-      $if DATATYPE == "QC8":
-        const v128_t vscale0123 = wasm_v128_load(w);
-        w = (const void*) ((const float*) w + 4);
-        $for M in range(MR):
-          vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
-      $else:
-        const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
-        $for M in range(MR):
-          vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
-
-      const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
+        vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
+    $else:
+      const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
       $for M in range(MR):
-        vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vmagic_bias);
+        vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
 
-      const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
-      $for M in range(MR):
-        vacc${M}x0123 = wasm_i32x4_max(vacc${M}x0123, vmagic_min);
+    const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vmagic_bias);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
-      $for M in range(MR):
-        vacc${M}x0123 = wasm_i32x4_sub(vacc${M}x0123, vmagic_bias_less_output_zero_point);
+    const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_i32x4_max(vacc${M}x0123, vmagic_min);
 
-      $for M in range(0, MR, 2):
-        v128_t vacc${M}${min(M+1, MR-1)}x0123 = wasm_i16x8_narrow_i32x4(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123);
+    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+    $for M in range(MR):
+      vacc${M}x0123 = wasm_i32x4_sub(vacc${M}x0123, vmagic_bias_less_output_zero_point);
 
-      $if MR > 2:
-        v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
-      $else:
-        v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
+    $for M in range(0, MR, 2):
+      v128_t vacc${M}${min(M+1, MR-1)}x0123 = wasm_i16x8_narrow_i32x4(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123);
 
-      const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
-      vout = ${WASM_X8X16_MIN}(vout, voutput_max);
+    $if MR > 2:
+      v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc${min(2, MR-1)}${min(3, MR-1)}x0123);
+    $else:
+      v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
+
+    const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+    vout = ${WASM_X8X16_MIN}(vout, voutput_max);
 
     if (nc >= 4) {
       $for M in range(MR):
