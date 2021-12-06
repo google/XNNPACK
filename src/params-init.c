@@ -22,6 +22,9 @@ void xnn_init_qu8_conv_minmax_fp32_scalar_lrint_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_scalar_lrint.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
   params->fp32_scalar_lrint.scale = scale;
   params->fp32_scalar_lrint.output_min_less_zero_point = (long) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
@@ -37,6 +40,9 @@ void xnn_init_qu8_conv_minmax_fp32_scalar_magic_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_scalar_magic.kernel_zero_point = (int32_t) (uint32_t) kernel_zero_point;
   params->fp32_scalar_magic.scale = scale;
   params->fp32_scalar_magic.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
@@ -54,6 +60,9 @@ void xnn_init_qu8_conv_minmax_fp32_sse2_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse2.scale[i] = scale;
@@ -76,6 +85,9 @@ void xnn_init_qu8_conv_minmax_fp32_avx2_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_avx2.scale[i] = scale;
@@ -98,6 +110,9 @@ void xnn_init_qu8_conv_minmax_fp32_avx512_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
@@ -122,6 +137,9 @@ void xnn_init_qu8_conv_minmax_fp32_neon_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_neon.kernel_zero_point[0] = kernel_zero_point;
   params->fp32_neon.kernel_zero_point[1] = kernel_zero_point;
   params->fp32_neon.kernel_zero_point[2] = kernel_zero_point;
@@ -141,6 +159,9 @@ void xnn_init_qu8_conv_minmax_fp32_neonv8_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_neonv8.kernel_zero_point[0] = kernel_zero_point;
   params->fp32_neonv8.kernel_zero_point[1] = kernel_zero_point;
   params->fp32_neonv8.kernel_zero_point[2] = kernel_zero_point;
@@ -159,6 +180,9 @@ void xnn_init_qu8_conv_minmax_rndnu_neon_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
@@ -167,9 +191,9 @@ void xnn_init_qu8_conv_minmax_rndnu_neon_params(
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  // Shift is in [0, 31] range.
+  // Shift is in [-8, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
-  assert(shift >= 0);
+  assert(shift >= -8);
   assert(shift < 32);
 
   // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
@@ -198,6 +222,9 @@ void xnn_init_qu8_conv_minmax_fp32_wasmsimd_params(
   uint8_t output_min,
   uint8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
@@ -223,6 +250,9 @@ void xnn_init_qs8_conv_minmax_rndnu_scalar_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
@@ -231,9 +261,9 @@ void xnn_init_qs8_conv_minmax_rndnu_scalar_params(
   assert(multiplier >= INT32_C(0x00800000));
   assert(multiplier <= INT32_C(0x00FFFFFF));
 
-  // Shift is in [24, 56] range.
+  // Shift is in [16, 56] range.
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
-  assert(shift >= 24);
+  assert(shift >= 16);
   assert(shift < 56);
   const int64_t rounding = INT64_C(1) << (shift - 1);
 
@@ -253,6 +283,9 @@ void xnn_init_qs8_conv_minmax_fp32_scalar_lrint_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_scalar_lrint.scale = scale;
   params->fp32_scalar_lrint.output_min_less_zero_point = (long) ((int32_t) output_min - (int32_t) output_zero_point);
   params->fp32_scalar_lrint.output_max_less_zero_point = (long) ((int32_t) output_max - (int32_t) output_zero_point);
@@ -266,6 +299,9 @@ void xnn_init_qs8_conv_minmax_fp32_scalar_magic_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_scalar_magic.scale = scale;
   params->fp32_scalar_magic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   params->fp32_scalar_magic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
@@ -281,6 +317,9 @@ void xnn_init_qs8_conv_minmax_fp32_sse2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse2.scale[i] = scale;
@@ -299,6 +338,9 @@ void xnn_init_qs8_conv_minmax_fp32_sse4_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_sse4.scale[i] = scale;
@@ -319,6 +361,9 @@ void xnn_init_qs8_conv_minmax_fp32_avx2_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 8; i++) {
     params->fp32_avx2.scale[i] = scale;
@@ -339,6 +384,9 @@ void xnn_init_qs8_conv_minmax_fp32_avx512_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   for (uint32_t i = 0; i < 16; i++) {
     params->fp32_avx512.scale[i] = scale;
@@ -361,6 +409,9 @@ void xnn_init_qs8_conv_minmax_fp32_neon_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_neon.scale = scale;
   params->fp32_neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   params->fp32_neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
@@ -375,6 +426,9 @@ void xnn_init_qs8_conv_minmax_fp32_neonv8_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   params->fp32_neonv8.scale = scale;
   params->fp32_neonv8.output_zero_point = (int16_t) output_zero_point;
   params->fp32_neonv8.output_min = output_min;
@@ -388,6 +442,9 @@ void xnn_init_qs8_conv_minmax_rndnu_neon_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   // Compute requantization parameters.
   const uint32_t scale_bits = fp32_to_bits(scale);
 
@@ -396,9 +453,9 @@ void xnn_init_qs8_conv_minmax_rndnu_neon_params(
   assert(multiplier >= INT32_C(0x40000000));
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
-  // Shift is in [0, 31] range.
+  // Shift is in [-8, 31] range.
   const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
-  assert(shift >= 0);
+  assert(shift >= -8);
   assert(shift < 32);
 
   // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
@@ -422,6 +479,9 @@ void xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
   int8_t output_min,
   int8_t output_max)
 {
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;

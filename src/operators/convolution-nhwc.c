@@ -514,10 +514,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
   }
 
   const float requantization_scale = input_scale * kernel_scale / output_scale;
-  if (requantization_scale >= 1.0f) {
+  if (requantization_scale >= 256.0f) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
-      "requantization scale %.7g is greater or equal to 1.0",
+      "requantization scale %.7g is greater or equal to 256.0",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
@@ -628,10 +628,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
   }
 
   const float requantization_scale = input_scale * kernel_scale / output_scale;
-  if (requantization_scale >= 1.0f) {
+  if (requantization_scale >= 256.0f) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
-      "requantization scale %.7g is greater or equal to 1.0",
+      "requantization scale %.7g is greater or equal to 256.0",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
@@ -744,10 +744,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
   float* requantization_scale = XNN_SIMD_ALLOCA(groups * group_output_channels * sizeof(float));
   for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
     requantization_scale[output_channel] = input_scale * kernel_scale[output_channel] / output_scale;
-    if (requantization_scale[output_channel] >= 1.0f) {
+    if (requantization_scale[output_channel] >= 256.0f) {
       xnn_log_error(
         "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale in output channel #%zu: "
-        "requantization scale %.7g is greater or equal to 1.0",
+        "requantization scale %.7g is greater or equal to 256.0",
         xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
         input_scale, kernel_scale[output_channel], output_scale,
         output_channel, requantization_scale[output_channel]);

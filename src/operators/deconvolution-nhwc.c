@@ -327,10 +327,10 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
   }
 
   const float requantization_scale = input_scale * kernel_scale / output_scale;
-  if (requantization_scale >= 1.0f) {
+  if (requantization_scale >= 256.0f) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
-      "requantization scale %.7g is greater or equal to 1.0",
+      "requantization scale %.7g is greater or equal to 256.0",
       xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;
@@ -422,10 +422,10 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
   }
 
   const float requantization_scale = input_scale * kernel_scale / output_scale;
-  if (requantization_scale >= 1.0f) {
+  if (requantization_scale >= 256.0f) {
     xnn_log_error(
       "failed to create %s operator with %.7g input scale, %.7g kernel scale, and %.7g output scale: "
-      "requantization scale %.7g is greater or equal to 1.0",
+      "requantization scale %.7g is greater or equal to 256.0",
       xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qu8),
       input_scale, kernel_scale, output_scale, requantization_scale);
     return xnn_status_unsupported_parameter;

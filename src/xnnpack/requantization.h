@@ -22,15 +22,6 @@
 
 union xnn_qu8_requantization_params {
   struct {
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t min_less_zero_point;
-    int32_t max_less_zero_point;
-    int32_t zero_point;
-  } gemmlowp;
-  struct {
     float scale;
     long min_less_zero_point;
     long max_less_zero_point;
@@ -53,52 +44,6 @@ union xnn_qu8_requantization_params {
     int32_t zero_point;
   } rndnu;
 };
-
-static inline void xnn_init_qu8_requantization_gemmlowp_params(
-  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point,
-  uint8_t min,
-  uint8_t max)
-{
-  // Compute requantization parameters.
-  assert(scale < 1.0f);
-  assert(scale >= 0x1.0p-32f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
-
-  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
-  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
-  assert(multiplier >= INT32_C(0x40000000));
-  assert(multiplier <= INT32_C(0x7FFFFF80));
-
-  // Shift is in [0, 31] range.
-  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
-  assert(shift >= 0);
-  assert(shift < 32);
-
-  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-  const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->gemmlowp.multiplier = multiplier;
-  params->gemmlowp.remainder_mask = (int32_t) remainder_mask;
-  params->gemmlowp.remainder_threshold = (int32_t) remainder_threshold;
-  params->gemmlowp.shift = (uint32_t) shift;
-  params->gemmlowp.min_less_zero_point = (int32_t) (uint32_t) min - (int32_t) (uint32_t) zero_point;
-  params->gemmlowp.max_less_zero_point = (int32_t) (uint32_t) max - (int32_t) (uint32_t) zero_point;
-  params->gemmlowp.zero_point = (int32_t) (uint32_t) zero_point;
-}
-
-static inline uint8_t xnn_qu8_requantize_gemmlowp(
-  int32_t n,
-  union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)])
-{
-  const int64_t product = (int64_t) n * (int64_t) params->gemmlowp.multiplier;
-  const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
-  const int32_t remainder = (q31product & params->gemmlowp.remainder_mask) - (int32_t) (n < 0);
-  n = asr_s32(q31product, params->gemmlowp.shift) + (int32_t) (remainder > params->gemmlowp.remainder_threshold);
-  n = math_max_s32(n, params->gemmlowp.min_less_zero_point);
-  n = math_min_s32(n, params->gemmlowp.max_less_zero_point);
-  return (uint8_t) (n + params->gemmlowp.zero_point);
-}
 
 static inline void xnn_init_qu8_requantization_fp32_params(
   union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)],
@@ -175,13 +120,13 @@ static inline void xnn_init_qu8_requantization_rndnu_params(
   uint8_t min,
   uint8_t max)
 {
-  assert(scale < 1.0f);
+  assert(scale < 256.0f);
   assert(scale >= 0x1.0p-32f);
 
   const uint32_t scale_bits = fp32_to_bits(scale);
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
-  assert(shift >= 24);
+  assert(shift >= 16);
   assert(shift < 56);
 
   params->rndnu.multiplier = multiplier;
@@ -206,15 +151,6 @@ inline static uint8_t xnn_qu8_requantize_rndnu(
 
 
 union xnn_qs8_requantization_params {
-  struct {
-    int32_t multiplier;
-    int32_t remainder_mask;
-    int32_t remainder_threshold;
-    uint32_t shift;
-    int32_t min_less_zero_point;
-    int32_t max_less_zero_point;
-    int32_t zero_point;
-  } gemmlowp;
   struct {
     float scale;
     long min_less_zero_point;
@@ -260,52 +196,6 @@ typedef int8_t (*xnn_qs8_requantize_fn)(
 typedef uint8_t (*xnn_qu8_requantize_fn)(
   int32_t n,
   union xnn_qu8_requantization_params params[XNN_MIN_ELEMENTS(1)]);
-
-static inline void xnn_init_qs8_requantization_gemmlowp_params(
-  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point,
-  int8_t min,
-  int8_t max)
-{
-  // Compute requantization parameters.
-  assert(scale < 1.0f);
-  assert(scale >= 0x1.0p-32f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
-
-  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
-  const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
-  assert(multiplier >= INT32_C(0x40000000));
-  assert(multiplier <= INT32_C(0x7FFFFF80));
-
-  // Shift is in [0, 31] range.
-  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
-  assert(shift >= 0);
-  assert(shift < 32);
-
-  const uint32_t remainder_mask = (UINT32_C(1) << shift) - UINT32_C(1);
-  const uint32_t remainder_threshold = remainder_mask >> 1;
-  params->gemmlowp.multiplier = multiplier;
-  params->gemmlowp.remainder_mask = (int32_t) remainder_mask;
-  params->gemmlowp.remainder_threshold = (int32_t) remainder_threshold;
-  params->gemmlowp.shift = (uint32_t) shift;
-  params->gemmlowp.min_less_zero_point = (int32_t) min - (int32_t) zero_point;
-  params->gemmlowp.max_less_zero_point = (int32_t) max - (int32_t) zero_point;
-  params->gemmlowp.zero_point = (int32_t) zero_point;
-}
-
-static inline int8_t xnn_qs8_requantize_gemmlowp(
-  int32_t n,
-  union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)])
-{
-  const int64_t product = (int64_t) n * (int64_t) params->gemmlowp.multiplier;
-  const int32_t q31product = (int32_t) (uint32_t) ((uint64_t) (product + INT64_C(0x40000000)) >> 31);
-  const int32_t remainder = (q31product & params->gemmlowp.remainder_mask) - (int32_t) (n < 0);
-  n = asr_s32(q31product, params->gemmlowp.shift) + (int32_t) (remainder > params->gemmlowp.remainder_threshold);
-  n = math_max_s32(n, params->gemmlowp.min_less_zero_point);
-  n = math_min_s32(n, params->gemmlowp.max_less_zero_point);
-  return (int8_t) (n + params->gemmlowp.zero_point);
-}
 
 static inline void xnn_init_qs8_requantization_fp32_params(
   union xnn_qs8_requantization_params params[XNN_MIN_ELEMENTS(1)],
@@ -383,13 +273,13 @@ static inline void xnn_init_qs8_requantization_rndnu_params(
   int8_t min,
   int8_t max)
 {
-  assert(scale < 1.0f);
+  assert(scale < 256.0f);
   assert(scale >= 0x1.0p-32f);
 
   const uint32_t scale_bits = fp32_to_bits(scale);
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
-  assert(shift >= 24);
+  assert(shift >= 16);
   assert(shift < 56);
 
   params->rndnu.multiplier = multiplier;
