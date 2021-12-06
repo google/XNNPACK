@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <initializer_list>
 
 namespace xnnpack {
 namespace aarch32 {
@@ -26,14 +27,32 @@ constexpr CoreRegister sp = r13;
 constexpr CoreRegister lr = r14;
 constexpr CoreRegister pc = r15;
 
+struct CoreRegisterList {
+  CoreRegisterList(std::initializer_list<CoreRegister> rs) {
+    for (auto r : rs) {
+      list |= 1 << r.code;
+    }
+  }
+
+  bool has_more_than_one_register() { return (list & (list - 1)) != 0; }
+
+  // Bit i is set if CoreRegister is in the list.
+  uint16_t list = 0;
+};
+
+static inline bool operator==(int i, CoreRegisterList registers) {
+  return i == registers.list;
+}
+
 // Conditional execution, only support AL (always) for now.
 enum Condition : uint32_t {
-  kAL = 0xe0000000,
+  kAL = 0xE0000000,
 };
 
 enum class Error {
   kNoError,
   kOutOfMemory,
+  kInvalidOperand,
 };
 
 // A simple AAarch32 assembler.
@@ -45,12 +64,14 @@ class Assembler {
   ~Assembler();
 
   Assembler& add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  Assembler& push(CoreRegisterList registers);
 
   // Reset the assembler state (no memory is freed).
   void reset();
 
   // Get a pointer to the start of code buffer.
   const uint32_t* const start() { return buffer_; }
+  const Error error() { return error_; }
 
  private:
   // Emits a 32-bit value to the code buffer.

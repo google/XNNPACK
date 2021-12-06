@@ -33,6 +33,15 @@ Assembler& Assembler::add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
   return emit32(kAL | 0x8 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
 }
 
+Assembler& Assembler::push(CoreRegisterList registers) {
+  if (!registers.has_more_than_one_register()) {
+    // TODO(zhin): there is a different valid encoding for single register.
+    error_ = Error::kInvalidOperand;
+  }
+
+  return emit32(kAL | 0x92D << 16 | registers.list);
+}
+
 void Assembler::reset() {
   cursor_ = buffer_;
   error_ = Error::kNoError;
