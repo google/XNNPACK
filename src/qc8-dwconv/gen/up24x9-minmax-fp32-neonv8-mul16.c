@@ -30,9 +30,9 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up24x9__neonv8_mul16(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->neonv8.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->neonv8.output_max);
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);

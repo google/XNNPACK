@@ -205,7 +205,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4s2__neonv8_mlal(
     vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
     vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
 #if XNN_ARCH_ARM64
     const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
 
@@ -215,8 +215,8 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4s2__neonv8_mlal(
 
     int8x8_t vout0x01234567 = vqmovn_s16(vacc0x01234567);
 #endif
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
-    const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
+    const int8x8_t voutput_min = vld1_dup_s8(&params->neonv8.output_min);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->neonv8.output_max);
 
     vout0x01234567 = vmax_s8(vout0x01234567, voutput_min);
 

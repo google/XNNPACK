@@ -374,16 +374,16 @@ union xnn_qs8_minmax_params {
   } scalar_magic;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    int16_t output_zero_point;
-    uint8_t output_min;
-    uint8_t output_max;
-  } neon;
-  struct {
     float output_min_less_zero_point;
     float output_max_less_zero_point;
     float magic_bias;
     int32_t magic_bias_less_zero_point;
-  } neon_fp32;
+  } neon;
+  struct {
+    int16_t output_zero_point;
+    uint8_t output_min;
+    uint8_t output_max;
+  } neonv8;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

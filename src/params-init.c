@@ -615,21 +615,21 @@ void xnn_init_qs8_minmax_neon_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  params->neon.output_min = output_min;
-  params->neon.output_max = output_max;
+  params->neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->neon.magic_bias = 12582912.0f;
+  params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
-void xnn_init_qs8_minmax_neon_fp32_params(
+void xnn_init_qs8_minmax_neonv8_params(
   union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
 {
-  params->neon_fp32.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->neon_fp32.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->neon_fp32.magic_bias = 12582912.0f;
-  params->neon_fp32.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->neonv8.output_zero_point = (int16_t) output_zero_point;
+  params->neonv8.output_min = output_min;
+  params->neonv8.output_max = output_max;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

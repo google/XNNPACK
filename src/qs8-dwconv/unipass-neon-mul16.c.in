@@ -20,9 +20,7 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + ("neonv8" if ARMV8 and DATATYPE != "QC8" else "neon")
-$if REQUANTIZATION == "FP32" and DATATYPE == "QC8" and not ARMV8:
-  $PARAMS_STRUCT = "neon_fp32"
+$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + ("neonv8" if ARMV8 else "neon")
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $XINT8X8_T = "uint8x8_t" if DATATYPE == "QU8" else "int8x8_t"
 $XINT8X16_T = "uint8x16_t" if DATATYPE == "QU8" else "int8x16_t"

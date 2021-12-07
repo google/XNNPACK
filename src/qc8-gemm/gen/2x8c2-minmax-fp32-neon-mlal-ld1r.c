@@ -289,25 +289,25 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2__neon_mlal_ld1r(
     vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale4567);
     vfpacc1x4567 = vmulq_f32(vfpacc1x4567, vscale4567);
 
-    const float32x4_t voutput_min_less_zero_point = vld1q_dup_f32(&params->neon_fp32.output_min_less_zero_point);
+    const float32x4_t voutput_min_less_zero_point = vld1q_dup_f32(&params->neon.output_min_less_zero_point);
     vfpacc0x0123 = vmaxq_f32(vfpacc0x0123, voutput_min_less_zero_point);
     vfpacc0x4567 = vmaxq_f32(vfpacc0x4567, voutput_min_less_zero_point);
     vfpacc1x0123 = vmaxq_f32(vfpacc1x0123, voutput_min_less_zero_point);
     vfpacc1x4567 = vmaxq_f32(vfpacc1x4567, voutput_min_less_zero_point);
 
-    const float32x4_t voutput_max_less_zero_point = vld1q_dup_f32(&params->neon_fp32.output_max_less_zero_point);
+    const float32x4_t voutput_max_less_zero_point = vld1q_dup_f32(&params->neon.output_max_less_zero_point);
     vfpacc0x0123 = vminq_f32(vfpacc0x0123, voutput_max_less_zero_point);
     vfpacc0x4567 = vminq_f32(vfpacc0x4567, voutput_max_less_zero_point);
     vfpacc1x0123 = vminq_f32(vfpacc1x0123, voutput_max_less_zero_point);
     vfpacc1x4567 = vminq_f32(vfpacc1x4567, voutput_max_less_zero_point);
 
-    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon_fp32.magic_bias);
+    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
     vacc0x0123 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x0123, vmagic_bias));
     vacc0x4567 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x4567, vmagic_bias));
     vacc1x0123 = vreinterpretq_s32_f32(vaddq_f32(vfpacc1x0123, vmagic_bias));
     vacc1x4567 = vreinterpretq_s32_f32(vaddq_f32(vfpacc1x4567, vmagic_bias));
 
-    const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon_fp32.magic_bias_less_zero_point);
+    const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_zero_point);
     vacc0x0123 = vsubq_s32(vacc0x0123, vmagic_bias_less_zero_point);
     vacc0x4567 = vsubq_s32(vacc0x4567, vmagic_bias_less_zero_point);
     vacc1x0123 = vsubq_s32(vacc1x0123, vmagic_bias_less_zero_point);

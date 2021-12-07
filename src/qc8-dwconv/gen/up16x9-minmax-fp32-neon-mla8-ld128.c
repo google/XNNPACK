@@ -29,10 +29,10 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mla8_ld128(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float32x4_t voutput_min_less_zero_point = vld1q_dup_f32(&params->neon_fp32.output_min_less_zero_point);
-  const float32x4_t voutput_max_less_zero_point = vld1q_dup_f32(&params->neon_fp32.output_max_less_zero_point);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon_fp32.magic_bias);
-  const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon_fp32.magic_bias_less_zero_point);
+  const float32x4_t voutput_min_less_zero_point = vld1q_dup_f32(&params->neon.output_min_less_zero_point);
+  const float32x4_t voutput_max_less_zero_point = vld1q_dup_f32(&params->neon.output_max_less_zero_point);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
+  const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_zero_point);
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
