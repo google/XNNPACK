@@ -37,6 +37,9 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_INSTR_EQ(0xE92D0FF0, a.push({r4, r5, r6, r7, r8, r9, r10, r11}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({r1}));
+
+  EXPECT_INSTR_EQ(0xE0487002, a.sub(r7, r8, r2));
+  EXPECT_INSTR_EQ(0xE2525010, a.subs(r5, r2, 16));
 }
 
 TEST(AArch32Assembler, CoreRegisterList) {

@@ -78,6 +78,15 @@ Assembler& Assembler::push(CoreRegisterList registers) {
   return emit32(kAL | 0x92D << 16 | registers.list);
 }
 
+Assembler& Assembler::sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
+  return emit32(kAL | 0x4 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
+}
+
+Assembler& Assembler::subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 0x25 << 20 | Rn.code << 16 | Rd.code << 12 | imm);
+}
+
 void Assembler::reset() {
   cursor_ = buffer_;
   error_ = Error::kNoError;
