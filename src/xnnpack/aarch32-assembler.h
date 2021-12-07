@@ -124,6 +124,10 @@ class Assembler {
   ~Assembler();
 
   Assembler& add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
+  // constants in ARM instructions", for simplicity we start with uint8_t, which
+  // is fully representation using a "rotation" of 0.
+  Assembler& cmp(CoreRegister Rn, uint8_t imm);
   Assembler& ldr(CoreRegister Rt, MemOperand operand, int32_t offset);
   Assembler& ldr(CoreRegister Rt, MemOperand operand);
   Assembler& push(CoreRegisterList registers);

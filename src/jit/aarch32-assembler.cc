@@ -35,6 +35,10 @@ Assembler& Assembler::add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
   return emit32(kAL | 0x8 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
 }
 
+Assembler& Assembler::cmp(CoreRegister Rn, uint8_t imm) {
+  return emit32(kAL | 0x35 << 20 | Rn.code << 16 | imm);
+}
+
 Assembler& Assembler::ldr(CoreRegister rt, MemOperand op, int32_t offset) {
   return ldr(rt, MemOperand(op.base(), offset, AddressingMode::kPostIndexed));
 }

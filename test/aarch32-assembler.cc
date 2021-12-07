@@ -19,6 +19,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   EXPECT_INSTR_EQ(0xE0810002, a.add(r0, r1, r2));
 
+  EXPECT_INSTR_EQ(0xE3500002, a.cmp(r0, 2));
+
   // Offset addressing mode.
   EXPECT_INSTR_EQ(0xE59D7060, a.ldr(r7, mem[sp, 96]));
   // Post-indexed addressing mode.
