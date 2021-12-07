@@ -107,6 +107,21 @@ constexpr MemOperandHelper mem;
 // Conditional execution, only support AL (always) for now.
 enum Condition : uint32_t {
   kAL = 0xE0000000,
+  kNE = 0x10000000,
+  kCS = 0x20000000,
+  kCC = 0x30000000,
+  kMI = 0x40000000,
+  kPL = 0x50000000,
+  kVS = 0x60000000,
+  kVC = 0x70000000,
+  kHI = 0x80000000,
+  kLS = 0x90000000,
+  kGE = 0xa0000000,
+  kLT = 0xB0000000,
+  kGT = 0xC0000000,
+  kLE = 0xD0000000,
+  kHS = kCS,
+  kLO = kCC,
 };
 
 enum class Error {
@@ -130,6 +145,9 @@ class Assembler {
   Assembler& cmp(CoreRegister Rn, uint8_t imm);
   Assembler& ldr(CoreRegister Rt, MemOperand operand, int32_t offset);
   Assembler& ldr(CoreRegister Rt, MemOperand operand);
+  Assembler& mov(CoreRegister Rd, CoreRegister Rm);
+  Assembler& movlo(CoreRegister Rd, CoreRegister Rm);
+  Assembler& movls(CoreRegister Rd, CoreRegister Rm);
   Assembler& push(CoreRegisterList registers);
 
   // Reset the assembler state (no memory is freed).
@@ -142,6 +160,7 @@ class Assembler {
  private:
   // Emits a 32-bit value to the code buffer.
   Assembler& emit32(uint32_t value);
+  Assembler& mov(Condition c, CoreRegister Rd, CoreRegister Rm);
 
   // Pointer to start of code buffer.
   uint32_t* buffer_;

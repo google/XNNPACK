@@ -53,6 +53,22 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
                 op.base().code << 16 | rt.code << 12 | offset);
 }
 
+Assembler& Assembler::mov(CoreRegister Rd, CoreRegister Rm) {
+  return mov(kAL, Rd, Rm);
+}
+
+Assembler& Assembler::movlo(CoreRegister Rd, CoreRegister Rm) {
+  return mov(kLO, Rd, Rm);
+}
+
+Assembler& Assembler::movls(CoreRegister Rd, CoreRegister Rm) {
+  return mov(kLS, Rd, Rm);
+}
+
+Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
+  return emit32(c | 0x1A << 20 | Rd.code << 12 | Rm.code);
+}
+
 Assembler& Assembler::push(CoreRegisterList registers) {
   if (!registers.has_more_than_one_register()) {
     // TODO(zhin): there is a different valid encoding for single register.

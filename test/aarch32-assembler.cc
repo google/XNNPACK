@@ -30,6 +30,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(r7, MemOperand(sp, 4096)));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(r7, MemOperand(sp, -4096)));
 
+  EXPECT_INSTR_EQ(0x31A0C003, a.movlo(r12, r3));
+  EXPECT_INSTR_EQ(0x91A0A00C, a.movls(r10, r12));
+  EXPECT_INSTR_EQ(0xE1A0A00C, a.mov(r10, r12));
+
   EXPECT_INSTR_EQ(0xE92D0FF0, a.push({r4, r5, r6, r7, r8, r9, r10, r11}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({r1}));
