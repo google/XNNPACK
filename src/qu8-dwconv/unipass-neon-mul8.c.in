@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["RNDNU"]
-$assert DATATYPE in ["QU8"]
+$assert REQUANTIZATION == "RNDNU"
+$assert DATATYPE == "QU8"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8

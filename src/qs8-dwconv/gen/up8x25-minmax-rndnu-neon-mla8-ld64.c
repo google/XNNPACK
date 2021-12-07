@@ -331,14 +331,18 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mla8_ld64(
       vacc4567 = vrshlq_s32(vacc4567, vright_post_shift);
 
 #if XNN_ARCH_ARM64
-      const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
+      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+
+      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
 
       int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#else
-      const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
+#else  // !XNN_ARCH_ARM64
+      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+
+      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
 
       int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#endif
+#endif  // !XNN_ARCH_ARM64
 
       vout01234567 = vmax_s8(vout01234567, voutput_min);
 
@@ -513,14 +517,16 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mla8_ld64(
         vacc4567 = vrshlq_s32(vacc4567, vright_post_shift);
 
 #if XNN_ARCH_ARM64
-        const int16x8_t vacc01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567), voutput_zero_point);
-        int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
+        int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
 #else
-        const int16x8_t vacc01234567 = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567)), voutput_zero_point);
-        int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
+        int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
 #endif
+        vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
+
+        int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
 
         vout01234567 = vmax_s8(vout01234567, voutput_min);
+
         vout01234567 = vmin_s8(vout01234567, voutput_max);
 
         if (c & 4) {

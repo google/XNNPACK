@@ -140,15 +140,17 @@ void xnn_init_qu8_conv_minmax_fp32_neon_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->fp32_neon.kernel_zero_point[0] = kernel_zero_point;
   params->fp32_neon.kernel_zero_point[1] = kernel_zero_point;
   params->fp32_neon.kernel_zero_point[2] = kernel_zero_point;
   params->fp32_neon.kernel_zero_point[3] = kernel_zero_point;
   params->fp32_neon.scale = scale;
-  params->fp32_neon.output_min_less_zero_point = (float) (int32_t) ((uint32_t) output_min - (uint32_t) output_zero_point);
-  params->fp32_neon.output_max_less_zero_point = (float) (int32_t) ((uint32_t) output_max - (uint32_t) output_zero_point);
   params->fp32_neon.magic_bias = 12582912.0f;
-  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) (uint32_t) output_zero_point;
+  params->fp32_neon.magic_min = magic_min;
+  params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_neon.output_max = output_max;
 }
 
 void xnn_init_qu8_conv_minmax_fp32_neonv8_params(
@@ -412,11 +414,13 @@ void xnn_init_qs8_conv_minmax_fp32_neon_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->fp32_neon.scale = scale;
-  params->fp32_neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->fp32_neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_neon.magic_bias = 12582912.0f;
-  params->fp32_neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_neon.magic_min = magic_min;
+  params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_neon.output_max = output_max;
 }
 
 void xnn_init_qs8_conv_minmax_fp32_neonv8_params(
@@ -615,10 +619,12 @@ void xnn_init_qs8_minmax_neon_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->neon.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->neon.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->neon.magic_min = magic_min;
+  params->neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->neon.output_max = output_max;
 }
 
 void xnn_init_qs8_minmax_neonv8_params(

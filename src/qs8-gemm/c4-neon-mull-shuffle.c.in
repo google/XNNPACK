@@ -195,90 +195,65 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4
           $for N in range(0, NR, 4):
             vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
       $else:
-        const float32x4_t voutput_min_less_zero_point = vld1q_dup_f32(&params->${PARAMS_STRUCT}.output_min_less_zero_point);
-        $for M in range(MR):
-          $for N in range(0, NR, 4):
-            vfpacc${M}x${ABC[N:N+4]} = vmaxq_f32(vfpacc${M}x${ABC[N:N+4]}, voutput_min_less_zero_point);
-
-        const float32x4_t voutput_max_less_zero_point = vld1q_dup_f32(&params->${PARAMS_STRUCT}.output_max_less_zero_point);
-        $for M in range(MR):
-          $for N in range(0, NR, 4):
-            vfpacc${M}x${ABC[N:N+4]} = vminq_f32(vfpacc${M}x${ABC[N:N+4]}, voutput_max_less_zero_point);
-
         const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
         $for M in range(MR):
           $for N in range(0, NR, 4):
             vacc${M}x${ABC[N:N+4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${M}x${ABC[N:N+4]}, vmagic_bias));
 
-        const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_zero_point);
+        const int32x4_t vmagic_min = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_min);
         $for M in range(MR):
           $for N in range(0, NR, 4):
-            vacc${M}x${ABC[N:N+4]} = vsubq_s32(vacc${M}x${ABC[N:N+4]}, vmagic_bias_less_zero_point);
+            vacc${M}x${ABC[N:N+4]} = vmaxq_s32(vacc${M}x${ABC[N:N+4]}, vmagic_min);
+
+        const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vsubq_s32(vacc${M}x${ABC[N:N+4]}, vmagic_bias_less_output_zero_point);
 
     $if REQUANTIZATION != "FP32" or ARMV8:
       const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
 #if XNN_ARCH_ARM64
-    $if REQUANTIZATION == "FP32" and not ARMV8:
+    $for M in range(MR):
+      $for N in range(0, NR, 8):
+        int16x8_t vacc${M}x${ABC[N:N+8]} = vqmovn_high_s32(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]});
+
+    $if REQUANTIZATION != "FP32" or ARMV8:
       $for M in range(MR):
         $for N in range(0, NR, 8):
-          const int16x8_t vacc${M}x${ABC[N:N+8]} = vuzp1q_s16(vreinterpretq_s16_s32(vacc${M}x${ABC[N:N+4]}), vreinterpretq_s16_s32(vacc${M}x${ABC[N+4:N+8]}));
+          vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vacc${M}x${ABC[N:N+8]}, voutput_zero_point);
 
-      $for M in range(MR):
-        $for N in range(0, NR, 16):
-          $if N + 8 < NR:
-            int8x16_t vout${M}x${ABC[N:N+16]} = vuzp1q_s8(vreinterpretq_s8_s16(vacc${M}x${ABC[N:N+8]}), vreinterpretq_s8_s16(vacc${M}x${ABC[N+8:N+16]}));
-          $elif M % 2 == 1:
-            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vuzp1q_s8(vreinterpretq_s8_s16(vacc${M-1}x${ABC[N:N+8]}), vreinterpretq_s8_s16(vacc${M}x${ABC[N:N+8]}));
-          $elif M + 1 == MR:
-            int8x8_t vout${M}x${ABC[N:N+8]} = vmovn_s16(vacc${M}x${ABC[N:N+8]});
-    $else:
-      $for M in range(MR):
-        $for N in range(0, NR, 8):
-          const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vacc${M}x${ABC[N+4:N+8]}), voutput_zero_point);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 16):
-          $if N + 8 < NR:
-            int8x16_t vout${M}x${ABC[N:N+16]} = vqmovn_high_s16(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
-          $elif M % 2 == 1:
-            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vqmovn_high_s16(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
-          $elif M + 1 == MR:
-            int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          int8x16_t vout${M}x${ABC[N:N+16]} = vqmovn_high_s16(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vacc${M}x${ABC[N+8:N+16]});
+        $elif M % 2 == 1:
+          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vqmovn_high_s16(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vacc${M}x${ABC[N:N+8]});
+        $elif M + 1 == MR:
+          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
 #else
-    $if REQUANTIZATION == "FP32" and not ARMV8:
+    $for M in range(MR):
+      $for N in range(0, NR, 8):
+        int16x8_t vacc${M}x${ABC[N:N+8]} = vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]}));
+
+    $if REQUANTIZATION != "FP32" or ARMV8:
       $for M in range(MR):
         $for N in range(0, NR, 8):
-          const int16x8_t vacc${M}x${ABC[N:N+8]} = vcombine_s16(vmovn_s32(vacc${M}x${ABC[N:N+4]}), vmovn_s32(vacc${M}x${ABC[N+4:N+8]}));
+          vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vacc${M}x${ABC[N:N+8]}, voutput_zero_point);
 
-      $for M in range(MR):
-        $for N in range(0, NR, 16):
-          $if N + 8 < NR:
-            int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vmovn_s16(vacc${M}x${ABC[N:N+8]}), vmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
-          $elif M % 2 == 1:
-            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vmovn_s16(vacc${M}x${ABC[N:N+8]}));
-          $elif M + 1 == MR:
-            int8x8_t vout${M}x${ABC[N:N+8]} = vmovn_s16(vacc${M}x${ABC[N:N+8]});
-    $else:
-      $for M in range(MR):
-        $for N in range(0, NR, 8):
-          const int16x8_t vacc${M}x${ABC[N:N+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]})), voutput_zero_point);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 16):
-          $if N + 8 < NR:
-            int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
-          $elif M % 2 == 1:
-            int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N:N+8]}));
-          $elif M + 1 == MR:
-            int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          int8x16_t vout${M}x${ABC[N:N+16]} = vcombine_s8(vqmovn_s16(vacc${M}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N+8:N+16]}));
+        $elif M % 2 == 1:
+          int8x16_t vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vcombine_s8(vqmovn_s16(vacc${M-1}x${ABC[N:N+8]}), vqmovn_s16(vacc${M}x${ABC[N:N+8]}));
+        $elif M + 1 == MR:
+          int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
 #endif
     $if REQUANTIZATION != "FP32" or ARMV8:
       $if NR == 8 and MR == 1:
         const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-        const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
       $else:
         const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-        const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
 
       $for M in range(MR):
         $for N in range(0, NR, 16):
@@ -292,17 +267,21 @@ void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4
             $else:
               vout${M}x${ABC[N:N+8]} = vmax_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_min));
 
-      $for M in range(MR):
-        $for N in range(0, NR, 16):
-          $if N + 8 < NR:
-            vout${M}x${ABC[N:N+16]} = vminq_s8(vout${M}x${ABC[N:N+16]}, voutput_max);
-          $elif M % 2 == 1:
-            vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vminq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_max);
-          $elif M + 1 == MR:
-            $if NR == 8 and MR == 1:
-              vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, voutput_max);
-            $else:
-              vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_max));
+    $if NR == 8 and MR == 1:
+      const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+    $else:
+      const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+    $for M in range(MR):
+      $for N in range(0, NR, 16):
+        $if N + 8 < NR:
+          vout${M}x${ABC[N:N+16]} = vminq_s8(vout${M}x${ABC[N:N+16]}, voutput_max);
+        $elif M % 2 == 1:
+          vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]} = vminq_s8(vout${M-1}x${ABC[N:N+8]}_${M}x${ABC[N:N+8]}, voutput_max);
+        $elif M + 1 == MR:
+          $if NR == 8 and MR == 1:
+            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, voutput_max);
+          $else:
+            vout${M}x${ABC[N:N+8]} = vmin_s8(vout${M}x${ABC[N:N+8]}, vget_low_s8(voutput_max));
 
     if (nc >= ${NR}) {
       $for M in range(MR):
