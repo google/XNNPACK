@@ -2,6 +2,12 @@
 
 #include <cmath>
 
+#define CHECK_OR_ERROR(check, error) \
+  if (!(check)) {                    \
+    error_ = error;                  \
+    return *this;                    \
+  }
+
 namespace xnnpack {
 namespace aarch32 {
 static const int DEFAULT_BUFFER_SIZE = 4096;
@@ -20,10 +26,7 @@ Assembler& Assembler::emit32(uint32_t value) {
     return *this;
   }
 
-  if (cursor_ == top_) {
-    error_ = Error::kOutOfMemory;
-    return *this;
-  }
+  CHECK_OR_ERROR(cursor_ < top_, Error::kOutOfMemory);
 
   *cursor_++ = value;
   return *this;
@@ -69,13 +72,26 @@ Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
   return emit32(c | 0x1A << 20 | Rd.code << 12 | Rm.code);
 }
 
+Assembler& Assembler::pld(MemOperand op) {
+  return emit32(0xF550'F000 | op.u() << 23 | op.base().code << 16 |
+                op.offset());
+}
+
 Assembler& Assembler::push(CoreRegisterList registers) {
-  if (!registers.has_more_than_one_register()) {
-    // TODO(zhin): there is a different valid encoding for single register.
-    error_ = Error::kInvalidOperand;
-  }
+  // TODO(zhin): there is a different valid encoding for single register.
+  CHECK_OR_ERROR(registers.has_more_than_one_register(),
+                 Error::kInvalidOperand);
 
   return emit32(kAL | 0x92D << 16 | registers.list);
+}
+
+Assembler& Assembler::sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
+  return emit32(kAL | 0x4 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
+}
+
+Assembler& Assembler::subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 0x25 << 20 | Rn.code << 16 | Rd.code << 12 | imm);
 }
 
 void Assembler::reset() {
