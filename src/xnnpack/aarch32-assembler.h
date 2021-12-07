@@ -27,6 +27,10 @@ constexpr CoreRegister sp = r13;
 constexpr CoreRegister lr = r14;
 constexpr CoreRegister pc = r15;
 
+static inline bool operator==(const CoreRegister lhs, const CoreRegister rhs) {
+  return lhs.code == rhs.code;
+}
+
 struct CoreRegisterList {
   CoreRegisterList(std::initializer_list<CoreRegister> rs) {
     for (auto r : rs) {
@@ -43,6 +47,62 @@ struct CoreRegisterList {
 static inline bool operator==(int i, CoreRegisterList registers) {
   return i == registers.list;
 }
+
+// A8.5 Addressing modes for memory access.
+enum class AddressingMode {
+  // [<Rn>, <offset>], offset applied to address in Rn.
+  kOffset,
+  // Pre-indexed not used, so not implemented.
+  // [<Rn>], <offset>, address from Rn, offset applied, written back to Rn.
+  kPostIndexed,
+};
+
+// Memory operands, operands for memory access instructions. See
+// "MemOperandHelper mem" for a nicer syntax that is closer to assembly.
+class MemOperand {
+ public:
+  MemOperand(CoreRegister rn, int32_t offset)
+      : mode_(AddressingMode::kOffset), rn_(rn), offset_(offset) {}
+
+  MemOperand(CoreRegister rn, int32_t offset, AddressingMode mode)
+      : mode_(mode), rn_(rn), offset_(offset) {}
+
+  CoreRegister base() const { return rn_; }
+  int32_t offset() const { return offset_; }
+  AddressingMode mode() const { return mode_; }
+
+  // These are bits used for encoding, named based on the encoding description.
+  int32_t u() { return offset_ >= 0; }
+  int32_t p() { return mode_ != AddressingMode::kPostIndexed; }
+  // Note, kPostIndexed will write back, but doesn't need to set bit w.
+  int32_t w() { return 0; }
+
+ private:
+  AddressingMode mode_;
+  CoreRegister rn_;
+  int32_t offset_;
+};
+
+static inline bool operator==(const MemOperand lhs, const MemOperand rhs) {
+  return lhs.mode() == rhs.mode() && lhs.base() == rhs.base() &&
+         lhs.offset() == rhs.offset();
+}
+
+static inline MemOperand operator,(CoreRegister r, int32_t offset) {
+  return MemOperand(r, offset);
+}
+
+// Helper struct for some syntax sugar to look like native assembly, see mem.
+struct MemOperandHelper {
+  const MemOperand operator[](MemOperand op) const { return op; }
+  const MemOperand operator[](CoreRegister r) const { return MemOperand(r, 0); }
+};
+
+// Use "mem" (and its overload of array subscript operator) to get some syntax
+// that looks closer to native assembly when accessing memory. For example:
+// - ldr(r0, mem[rn, offset]); // offset
+// - ldr(r0, mem[rn], offset); // post-indexed
+constexpr MemOperandHelper mem;
 
 // Conditional execution, only support AL (always) for now.
 enum Condition : uint32_t {
@@ -64,6 +124,8 @@ class Assembler {
   ~Assembler();
 
   Assembler& add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  Assembler& ldr(CoreRegister Rt, MemOperand operand, int32_t offset);
+  Assembler& ldr(CoreRegister Rt, MemOperand operand);
   Assembler& push(CoreRegisterList registers);
 
   // Reset the assembler state (no memory is freed).
