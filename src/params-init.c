@@ -2780,11 +2780,10 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_neon_params(
   int8_t output_min,
   int8_t output_max)
 {
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   params->neon.scale = scale;
   params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->neon.output_min = output_min;
   params->neon.output_max = output_max;
 }
 
@@ -2922,11 +2921,10 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_neon_params(
   uint8_t output_min,
   uint8_t output_max)
 {
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   params->neon.scale = scale;
   params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->neon.output_min = output_min;
   params->neon.output_max = output_max;
 }
 

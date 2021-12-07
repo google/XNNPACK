@@ -28,8 +28,8 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
 
   const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
   const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
-  const int32x4_t vmagic_min = vld1q_dup_s32(&params->neon.magic_min);
   const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_zero_point);
+  const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
   const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
   for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
     float32x4_t vx_lo = vld1q_f32(x); x += 4;
@@ -41,15 +41,13 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
     vx_lo = vaddq_f32(vx_lo, vmagic_bias);
     vx_hi = vaddq_f32(vx_hi, vmagic_bias);
 
-    int32x4_t vacc_lo = vmaxq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_min);
-    int32x4_t vacc_hi = vmaxq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_min);
-
-    vacc_lo = vsubq_s32(vacc_lo, vmagic_bias_less_zero_point);
-    vacc_hi = vsubq_s32(vacc_hi, vmagic_bias_less_zero_point);
+    const int32x4_t vacc_lo = vqsubq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_bias_less_zero_point);
+    const int32x4_t vacc_hi = vqsubq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_bias_less_zero_point);
 
     const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
 
     int8x8_t vy = vqmovn_s16(vacc);
+    vy = vmax_s8(vy, voutput_min);
     vy = vmin_s8(vy, voutput_max);
     vst1_s8(y, vy); y += 8;
   }
@@ -69,15 +67,13 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
     vx_lo = vaddq_f32(vx_lo, vmagic_bias);
     vx_hi = vaddq_f32(vx_hi, vmagic_bias);
 
-    int32x4_t vacc_lo = vmaxq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_min);
-    int32x4_t vacc_hi = vmaxq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_min);
-
-    vacc_lo = vsubq_s32(vacc_lo, vmagic_bias_less_zero_point);
-    vacc_hi = vsubq_s32(vacc_hi, vmagic_bias_less_zero_point);
+    const int32x4_t vacc_lo = vqsubq_s32(vreinterpretq_s32_f32(vx_lo), vmagic_bias_less_zero_point);
+    const int32x4_t vacc_hi = vqsubq_s32(vreinterpretq_s32_f32(vx_hi), vmagic_bias_less_zero_point);
 
     const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
 
     int8x8_t vy = vqmovn_s16(vacc);
+    vy = vmax_s8(vy, voutput_min);
     vy = vmin_s8(vy, voutput_max);
 
     if (n & (4 * sizeof(int8_t))) {
