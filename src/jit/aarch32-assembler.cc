@@ -69,6 +69,10 @@ Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
   return emit32(c | 0x1A << 20 | Rd.code << 12 | Rm.code);
 }
 
+Assembler& Assembler::pld(MemOperand op) {
+  return emit32(0xF550F000 | op.u() << 23 | op.base().code << 16 | op.offset());
+}
+
 Assembler& Assembler::push(CoreRegisterList registers) {
   if (!registers.has_more_than_one_register()) {
     // TODO(zhin): there is a different valid encoding for single register.

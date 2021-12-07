@@ -148,6 +148,7 @@ class Assembler {
   Assembler& mov(CoreRegister Rd, CoreRegister Rm);
   Assembler& movlo(CoreRegister Rd, CoreRegister Rm);
   Assembler& movls(CoreRegister Rd, CoreRegister Rm);
+  Assembler& pld(MemOperand operand);
   Assembler& push(CoreRegisterList registers);
   Assembler& sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
