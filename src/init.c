@@ -1689,6 +1689,7 @@ static void init(void) {
         xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_rndnu_neon_params;
         xnn_params.qu8.gemm.mr = 4;
         xnn_params.qu8.gemm.nr = 16;
+      }
     #endif  // XNN_ENABLE_ASSEMBLY
 
     xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul8;
