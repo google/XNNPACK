@@ -61,6 +61,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
 
     uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #endif
+
     vout01234567 = vmax_u8(vout01234567, voutput_min);
 
     vout01234567 = vmin_u8(vout01234567, voutput_max);
@@ -94,8 +95,8 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
       vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
       uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #endif
-      vout01234567 = vmax_u8(vout01234567, voutput_min);
 
+      vout01234567 = vmax_u8(vout01234567, voutput_min);
       vout01234567 = vmin_u8(vout01234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {

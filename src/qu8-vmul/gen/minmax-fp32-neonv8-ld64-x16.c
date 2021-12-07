@@ -77,6 +77,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld64_x16(
 
     uint8x16_t vout0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc01234567), vqmovun_s16(vacc89ABCDEF));
 #endif
+
     vout0123456789ABCDEF = vmaxq_u8(vout0123456789ABCDEF, voutput_min);
 
     vout0123456789ABCDEF = vminq_u8(vout0123456789ABCDEF, voutput_max);
@@ -112,8 +113,8 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld64_x16(
       vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
       uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
 #endif
-      vout01234567 = vmax_u8(vout01234567, vget_low_u8(voutput_min));
 
+      vout01234567 = vmax_u8(vout01234567, vget_low_u8(voutput_min));
       vout01234567 = vmin_u8(vout01234567, vget_low_u8(voutput_max));
 
       if XNN_LIKELY(n >= (8 * sizeof(uint8_t))) {
