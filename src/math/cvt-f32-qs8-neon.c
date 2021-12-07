@@ -20,7 +20,6 @@ void xnn_math_f32_qs8_cvt__neon(
 {
   assert(n % (8 * sizeof(int8_t)) == 0);
 
-  const int32x4_t vmin = vreinterpretq_s32_f32(vdupq_n_f32(12582912.0f - 128.0f - (float) output_zero_point));
   const float32x4_t vfmagic = vdupq_n_f32(12582912.0f);
   const int32x4_t vimagic = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) output_zero_point);
   for (; n != 0; n -= 8 * sizeof(int8_t)) {
@@ -33,11 +32,8 @@ void xnn_math_f32_qs8_cvt__neon(
     int32x4_t vy_lo = vreinterpretq_s32_f32(vx_lo);
     int32x4_t vy_hi = vreinterpretq_s32_f32(vx_hi);
 
-    vy_lo = vmaxq_s32(vy_lo, vmin);
-    vy_hi = vmaxq_s32(vy_hi, vmin);
-
-    vy_lo = vsubq_s32(vy_lo, vimagic);
-    vy_hi = vsubq_s32(vy_hi, vimagic);
+    vy_lo = vqsubq_s32(vy_lo, vimagic);
+    vy_hi = vqsubq_s32(vy_hi, vimagic);
 
     const int16x8_t vy = vcombine_s16(vqmovn_s32(vy_lo), vqmovn_s32(vy_hi));
 
