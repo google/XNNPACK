@@ -1,11 +1,16 @@
 #include <xnnpack/aarch32-assembler.h>
 
+#include <ios>
+
 #include <gtest/gtest.h>
 
-#define EXPECT_INSTR_EQ(expected, call) \
-  a.reset();                            \
-  call;                                 \
-  EXPECT_EQ(expected, *a.start())
+#define EXPECT_INSTR_EQ(expected, call)                                   \
+  a.reset();                                                              \
+  call;                                                                   \
+  EXPECT_EQ(expected, *a.start())                                         \
+      << "expected = 0x" << std::hex << std::setw(8) << std::setfill('0') \
+      << expected << std::endl                                            \
+      << "  actual = 0x" << *a.start();
 
 #define EXPECT_ERROR(expected, call) \
   a.reset();                         \
