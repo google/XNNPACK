@@ -1,7 +1,5 @@
 #include "xnnpack/aarch32-assembler.h"
 
-#include <string.h>
-
 #include <cmath>
 
 namespace xnnpack {
