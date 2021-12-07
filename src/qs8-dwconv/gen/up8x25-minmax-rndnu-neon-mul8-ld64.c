@@ -572,9 +572,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8_ld64(
         vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
 
         int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-
         vout01234567 = vmax_s8(vout01234567, voutput_min);
-
         vout01234567 = vmin_s8(vout01234567, voutput_max);
 
         if (c & 4) {

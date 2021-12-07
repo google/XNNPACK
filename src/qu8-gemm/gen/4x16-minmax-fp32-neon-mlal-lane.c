@@ -498,41 +498,23 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x16__neon_mlal_lane(
     vacc3x89AB = vreinterpretq_s32_f32(vaddq_f32(vfpacc3x89AB, vmagic_bias));
     vacc3xCDEF = vreinterpretq_s32_f32(vaddq_f32(vfpacc3xCDEF, vmagic_bias));
 
-    const int32x4_t vmagic_min = vld1q_dup_s32(&params->fp32_neon.magic_min);
-    vacc0x0123 = vmaxq_s32(vacc0x0123, vmagic_min);
-    vacc0x4567 = vmaxq_s32(vacc0x4567, vmagic_min);
-    vacc0x89AB = vmaxq_s32(vacc0x89AB, vmagic_min);
-    vacc0xCDEF = vmaxq_s32(vacc0xCDEF, vmagic_min);
-    vacc1x0123 = vmaxq_s32(vacc1x0123, vmagic_min);
-    vacc1x4567 = vmaxq_s32(vacc1x4567, vmagic_min);
-    vacc1x89AB = vmaxq_s32(vacc1x89AB, vmagic_min);
-    vacc1xCDEF = vmaxq_s32(vacc1xCDEF, vmagic_min);
-    vacc2x0123 = vmaxq_s32(vacc2x0123, vmagic_min);
-    vacc2x4567 = vmaxq_s32(vacc2x4567, vmagic_min);
-    vacc2x89AB = vmaxq_s32(vacc2x89AB, vmagic_min);
-    vacc2xCDEF = vmaxq_s32(vacc2xCDEF, vmagic_min);
-    vacc3x0123 = vmaxq_s32(vacc3x0123, vmagic_min);
-    vacc3x4567 = vmaxq_s32(vacc3x4567, vmagic_min);
-    vacc3x89AB = vmaxq_s32(vacc3x89AB, vmagic_min);
-    vacc3xCDEF = vmaxq_s32(vacc3xCDEF, vmagic_min);
-
     const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
-    vacc0x0123 = vsubq_s32(vacc0x0123, vmagic_bias_less_output_zero_point);
-    vacc0x4567 = vsubq_s32(vacc0x4567, vmagic_bias_less_output_zero_point);
-    vacc0x89AB = vsubq_s32(vacc0x89AB, vmagic_bias_less_output_zero_point);
-    vacc0xCDEF = vsubq_s32(vacc0xCDEF, vmagic_bias_less_output_zero_point);
-    vacc1x0123 = vsubq_s32(vacc1x0123, vmagic_bias_less_output_zero_point);
-    vacc1x4567 = vsubq_s32(vacc1x4567, vmagic_bias_less_output_zero_point);
-    vacc1x89AB = vsubq_s32(vacc1x89AB, vmagic_bias_less_output_zero_point);
-    vacc1xCDEF = vsubq_s32(vacc1xCDEF, vmagic_bias_less_output_zero_point);
-    vacc2x0123 = vsubq_s32(vacc2x0123, vmagic_bias_less_output_zero_point);
-    vacc2x4567 = vsubq_s32(vacc2x4567, vmagic_bias_less_output_zero_point);
-    vacc2x89AB = vsubq_s32(vacc2x89AB, vmagic_bias_less_output_zero_point);
-    vacc2xCDEF = vsubq_s32(vacc2xCDEF, vmagic_bias_less_output_zero_point);
-    vacc3x0123 = vsubq_s32(vacc3x0123, vmagic_bias_less_output_zero_point);
-    vacc3x4567 = vsubq_s32(vacc3x4567, vmagic_bias_less_output_zero_point);
-    vacc3x89AB = vsubq_s32(vacc3x89AB, vmagic_bias_less_output_zero_point);
-    vacc3xCDEF = vsubq_s32(vacc3xCDEF, vmagic_bias_less_output_zero_point);
+    vacc0x0123 = vqsubq_s32(vacc0x0123, vmagic_bias_less_output_zero_point);
+    vacc0x4567 = vqsubq_s32(vacc0x4567, vmagic_bias_less_output_zero_point);
+    vacc0x89AB = vqsubq_s32(vacc0x89AB, vmagic_bias_less_output_zero_point);
+    vacc0xCDEF = vqsubq_s32(vacc0xCDEF, vmagic_bias_less_output_zero_point);
+    vacc1x0123 = vqsubq_s32(vacc1x0123, vmagic_bias_less_output_zero_point);
+    vacc1x4567 = vqsubq_s32(vacc1x4567, vmagic_bias_less_output_zero_point);
+    vacc1x89AB = vqsubq_s32(vacc1x89AB, vmagic_bias_less_output_zero_point);
+    vacc1xCDEF = vqsubq_s32(vacc1xCDEF, vmagic_bias_less_output_zero_point);
+    vacc2x0123 = vqsubq_s32(vacc2x0123, vmagic_bias_less_output_zero_point);
+    vacc2x4567 = vqsubq_s32(vacc2x4567, vmagic_bias_less_output_zero_point);
+    vacc2x89AB = vqsubq_s32(vacc2x89AB, vmagic_bias_less_output_zero_point);
+    vacc2xCDEF = vqsubq_s32(vacc2xCDEF, vmagic_bias_less_output_zero_point);
+    vacc3x0123 = vqsubq_s32(vacc3x0123, vmagic_bias_less_output_zero_point);
+    vacc3x4567 = vqsubq_s32(vacc3x4567, vmagic_bias_less_output_zero_point);
+    vacc3x89AB = vqsubq_s32(vacc3x89AB, vmagic_bias_less_output_zero_point);
+    vacc3xCDEF = vqsubq_s32(vacc3xCDEF, vmagic_bias_less_output_zero_point);
 
 #if XNN_ARCH_ARM64
     int16x8_t vacc0x01234567 = vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567);
@@ -565,6 +547,12 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x16__neon_mlal_lane(
     uint8x16_t vout2x0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc2x01234567), vqmovun_s16(vacc2x89ABCDEF));
     uint8x16_t vout3x0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc3x01234567), vqmovun_s16(vacc3x89ABCDEF));
 #endif
+
+    const uint8x16_t voutput_min = vld1q_dup_u8(&params->fp32_neon.output_min);
+    vout0x0123456789ABCDEF = vmaxq_u8(vout0x0123456789ABCDEF, voutput_min);
+    vout1x0123456789ABCDEF = vmaxq_u8(vout1x0123456789ABCDEF, voutput_min);
+    vout2x0123456789ABCDEF = vmaxq_u8(vout2x0123456789ABCDEF, voutput_min);
+    vout3x0123456789ABCDEF = vmaxq_u8(vout3x0123456789ABCDEF, voutput_min);
 
     const uint8x16_t voutput_max = vld1q_dup_u8(&params->fp32_neon.output_max);
     vout0x0123456789ABCDEF = vminq_u8(vout0x0123456789ABCDEF, voutput_max);

@@ -304,8 +304,8 @@ union xnn_qu8_conv_minmax_params {
     uint8_t kernel_zero_point[4];
     float scale;
     float magic_bias;
-    int32_t magic_min;
     int32_t magic_bias_less_output_zero_point;
+    uint8_t output_min;
     uint8_t output_max;
   } fp32_neon;
   struct {
@@ -375,8 +375,8 @@ union xnn_qs8_minmax_params {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float magic_bias;
-    int32_t magic_min;
     int32_t magic_bias_less_output_zero_point;
+    int8_t output_min;
     int8_t output_max;
   } neon;
   struct {
@@ -443,8 +443,8 @@ union xnn_qs8_conv_minmax_params {
   struct {
     float scale;
     float magic_bias;
-    int32_t magic_min;
     int32_t magic_bias_less_output_zero_point;
+    int8_t output_min;
     int8_t output_max;
   } fp32_neon;
   struct {

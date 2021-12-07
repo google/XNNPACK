@@ -545,8 +545,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane(
     int8x16_t vout2x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc2x01234567), vqmovn_s16(vacc2x89ABCDEF));
     int8x16_t vout3x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc3x01234567), vqmovn_s16(vacc3x89ABCDEF));
 #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
 
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
     vout0x0123456789ABCDEF = vmaxq_s8(vout0x0123456789ABCDEF, voutput_min);
     vout1x0123456789ABCDEF = vmaxq_s8(vout1x0123456789ABCDEF, voutput_min);
     vout2x0123456789ABCDEF = vmaxq_s8(vout2x0123456789ABCDEF, voutput_min);

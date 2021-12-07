@@ -344,9 +344,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16(
         vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
 
         uint8x8_t vout01234567 = vqmovun_s16(vacc01234567);
-
         vout01234567 = vmax_u8(vout01234567, vget_low_u8(voutput_min));
-
         vout01234567 = vmin_u8(vout01234567, vget_low_u8(voutput_max));
 
         if XNN_LIKELY(c >= 8) {

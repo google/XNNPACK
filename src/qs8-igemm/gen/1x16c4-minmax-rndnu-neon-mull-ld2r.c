@@ -214,8 +214,8 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_1x16c4__neon_mull_ld2r(
 
     int8x16_t vout0x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc0x01234567), vqmovn_s16(vacc0x89ABCDEF));
 #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->rndnu_neon.output_min);
 
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->rndnu_neon.output_min);
     vout0x0123456789ABCDEF = vmaxq_s8(vout0x0123456789ABCDEF, voutput_min);
 
     const int8x16_t voutput_max = vld1q_dup_s8(&params->rndnu_neon.output_max);

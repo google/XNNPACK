@@ -47,17 +47,14 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
       const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
     $if not ARMV8:
       const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
-      const int32x4_t vmagic_min = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_min);
       const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
   $if REQUANTIZATION != "FP32" or ARMV8:
     const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
-    $if CHANNEL_TILE == 8:
-      const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-    $else:
-      const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
   $if CHANNEL_TILE == 8:
+    const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
     const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
   $else:
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
     const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
   do {
     $for K in range(KERNEL_TILE):
@@ -143,10 +140,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             vacc${ABC[C:C+4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[C:C+4]}, vmagic_bias));
 
           $for C in range(0, CHANNEL_TILE, 4):
-            vacc${ABC[C:C+4]} = vmaxq_s32(vacc${ABC[C:C+4]}, vmagic_min);
-
-          $for C in range(0, CHANNEL_TILE, 4):
-            vacc${ABC[C:C+4]} = vsubq_s32(vacc${ABC[C:C+4]}, vmagic_bias_less_output_zero_point);
+            vacc${ABC[C:C+4]} = vqsubq_s32(vacc${ABC[C:C+4]}, vmagic_bias_less_output_zero_point);
 
 #if XNN_ARCH_ARM64
       $for C in range(0, CHANNEL_TILE, 8):
@@ -176,14 +170,13 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
 #endif  // !XNN_ARCH_ARM64
 
-      $if REQUANTIZATION != "FP32" or ARMV8:
-        $for C in range(0, CHANNEL_TILE, 16):
-          $if C + 8 < CHANNEL_TILE:
-            vout${ABC[C:C+16]} = vmaxq_s8(vout${ABC[C:C+16]}, voutput_min);
-          $elif CHANNEL_TILE == 8:
-            vout${ABC[C:C+8]} = vmax_s8(vout${ABC[C:C+8]}, voutput_min);
-          $else:
-            vout${ABC[C:C+8]} = vmax_s8(vout${ABC[C:C+8]}, vget_low_s8(voutput_min));
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          vout${ABC[C:C+16]} = vmaxq_s8(vout${ABC[C:C+16]}, voutput_min);
+        $elif CHANNEL_TILE == 8:
+          vout${ABC[C:C+8]} = vmax_s8(vout${ABC[C:C+8]}, voutput_min);
+        $else:
+          vout${ABC[C:C+8]} = vmax_s8(vout${ABC[C:C+8]}, vget_low_s8(voutput_min));
 
       $for C in range(0, CHANNEL_TILE, 16):
         $if C + 8 < CHANNEL_TILE:
@@ -262,11 +255,8 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             vacc${ABC[0:4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[0:4]}, vmagic_bias));
             vacc${ABC[4:8]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[4:8]}, vmagic_bias));
 
-            vacc${ABC[0:4]} = vmaxq_s32(vacc${ABC[0:4]}, vmagic_min);
-            vacc${ABC[4:8]} = vmaxq_s32(vacc${ABC[4:8]}, vmagic_min);
-
-            vacc${ABC[0:4]} = vsubq_s32(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
-            vacc${ABC[4:8]} = vsubq_s32(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
+            vacc${ABC[0:4]} = vqsubq_s32(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
+            vacc${ABC[4:8]} = vqsubq_s32(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
 
 #if XNN_ARCH_ARM64
         int16x8_t vacc${ABC[0:8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]});
@@ -277,16 +267,11 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           vacc${ABC[0:8]} = vqaddq_s16(vacc${ABC[0:8]}, voutput_zero_point);
 
         int8x8_t vout${ABC[0:8]} = vqmovn_s16(vacc${ABC[0:8]});
-
-        $if REQUANTIZATION != "FP32" or ARMV8:
-          $if CHANNEL_TILE == 8:
-            vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, voutput_min);
-          $else:
-            vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, vget_low_s8(voutput_min));
-
         $if CHANNEL_TILE == 8:
+          vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, voutput_min);
           vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, voutput_max);
         $else:
+          vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, vget_low_s8(voutput_min));
           vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, vget_low_s8(voutput_max));
 
         $if CHANNEL_TILE > 8:

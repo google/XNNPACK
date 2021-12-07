@@ -215,8 +215,8 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2__neonv8_mlal_ld1r(
 
     int8x8_t vout0x01234567 = vqmovn_s16(vacc0x01234567);
 #endif
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neonv8.output_min);
 
+    const int8x8_t voutput_min = vld1_dup_s8(&params->neonv8.output_min);
     vout0x01234567 = vmax_s8(vout0x01234567, voutput_min);
 
     const int8x8_t voutput_max = vld1_dup_s8(&params->neonv8.output_max);

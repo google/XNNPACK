@@ -180,8 +180,8 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane(
 
     uint8x8_t vout0x01234567 = vqmovun_s16(vacc0x01234567);
 #endif
-    const uint8x8_t voutput_min = vld1_dup_u8(&params->rndnu_neon.output_min);
 
+    const uint8x8_t voutput_min = vld1_dup_u8(&params->rndnu_neon.output_min);
     vout0x01234567 = vmax_u8(vout0x01234567, voutput_min);
 
     const uint8x8_t voutput_max = vld1_dup_u8(&params->rndnu_neon.output_max);
