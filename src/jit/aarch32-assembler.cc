@@ -53,10 +53,6 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
                 op.base().code << 16 | rt.code << 12 | offset);
 }
 
-Assembler& Assembler::mov(CoreRegister Rd, CoreRegister Rm) {
-  return mov(kAL, Rd, Rm);
-}
-
 Assembler& Assembler::movlo(CoreRegister Rd, CoreRegister Rm) {
   return mov(kLO, Rd, Rm);
 }

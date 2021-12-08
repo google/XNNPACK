@@ -145,7 +145,6 @@ class Assembler {
   Assembler& cmp(CoreRegister Rn, uint8_t imm);
   Assembler& ldr(CoreRegister Rt, MemOperand operand, int32_t offset);
   Assembler& ldr(CoreRegister Rt, MemOperand operand);
-  Assembler& mov(CoreRegister Rd, CoreRegister Rm);
   Assembler& movlo(CoreRegister Rd, CoreRegister Rm);
   Assembler& movls(CoreRegister Rd, CoreRegister Rm);
   Assembler& pld(MemOperand operand);
