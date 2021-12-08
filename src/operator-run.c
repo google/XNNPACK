@@ -820,13 +820,18 @@ void xnn_compute_lut_contiguous(
 void xnn_compute_univector_strided(
     const struct univector_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
-    size_t batch_range /* always 1 */)
+    size_t batch_range)
 {
-  assert(batch_range == 1);
+  const size_t x_stride = context->x_stride;
+  const size_t y_stride = context->y_stride;
 
-  const void* x = (const void*) ((uintptr_t) context->x + context->x_stride * batch_index);
-  void* y = (void*) ((uintptr_t) context->y + context->y_stride * batch_index);
-  context->ukernel(context->n, x, y, &context->params);
+  const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
+  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+  do {
+    context->ukernel(context->n, x, y, &context->params);
+    x = (const void*) ((uintptr_t) x + x_stride);
+    y = (void*) ((uintptr_t) y + y_stride);
+  } while (--batch_range != 0);
 }
 
 void xnn_compute_univector_contiguous(
