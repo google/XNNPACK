@@ -8116,10 +8116,7 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    defines = [
-        "XNN_NO_F16_OPERATORS",
-        "XNN_NO_X16_OPERATORS",
-    ] + select({
+    defines = select({
         ":xnn_enable_qs8_explicit_true": [],
         ":xnn_enable_qs8_explicit_false": [
             "XNN_NO_QC8_OPERATORS",
