@@ -164,6 +164,8 @@ struct ConsecutiveRegisterList {
   // End must be >= start.
   ConsecutiveRegisterList(RegType s, RegType end)
       : start(s), length(end.code - s.code + 1) {}
+  ConsecutiveRegisterList(RegType start)
+      : ConsecutiveRegisterList(start, start) {}
 
   RegType start;
   int length;
@@ -312,14 +314,23 @@ class Assembler {
   Assembler& movlo(CoreRegister Rd, CoreRegister Rm);
   Assembler& movls(CoreRegister Rd, CoreRegister Rm);
   Assembler& pld(MemOperand operand);
-  Assembler& push(CoreRegisterList registers);
+  Assembler& push(CoreRegisterList regs);
   Assembler& sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm);
 
   // SIMD instructions.
-  Assembler& vpush(SRegisterList registers);
-  Assembler& vpush(DRegisterList registers);
+  // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
+  Assembler& vldm(CoreRegister rn, SRegisterList regs, bool wb);
+  Assembler& vldm(CoreRegister rn, DRegisterList regs, bool wb);
+  Assembler& vldm(CoreRegister rn, SRegisterList regs) {
+    return vldm(rn, regs, false);
+  }
+  Assembler& vldm(CoreRegister rn, DRegisterList regs) {
+    return vldm(rn, regs, false);
+  }
+  Assembler& vpush(SRegisterList regs);
+  Assembler& vpush(DRegisterList regs);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);

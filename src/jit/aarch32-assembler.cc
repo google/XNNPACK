@@ -141,13 +141,13 @@ Assembler& Assembler::pld(MemOperand op) {
   return emit32(0xF550F000 | op.u() << 23 | op.base().code << 16 | op.offset());
 }
 
-Assembler& Assembler::push(CoreRegisterList registers) {
-  if (!registers.has_more_than_one_register()) {
+Assembler& Assembler::push(CoreRegisterList regs) {
+  if (!regs.has_more_than_one_register()) {
     // TODO(zhin): there is a different valid encoding for single register.
     error_ = Error::kInvalidOperand;
   }
 
-  return emit32(kAL | 0x92D << 16 | registers.list);
+  return emit32(kAL | 0x92D << 16 | regs.list);
 }
 
 Assembler& Assembler::sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
@@ -159,12 +159,22 @@ Assembler& Assembler::subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm) {
   return emit32(kAL | 0x25 << 20 | Rn.code << 16 | Rd.code << 12 | imm);
 }
 
-Assembler& Assembler::vpush(SRegisterList registers) {
-  return emit32(kAL | encode(registers, 22, 12) | 0xD2D << 16 | 0xA << 8);
+Assembler& Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {
+  return emit32(kAL | 0x0C900A00 | wb << 21 | rn.code << 16 |
+                encode(regs, 22, 12));
 }
 
-Assembler& Assembler::vpush(DRegisterList registers) {
-  return emit32(kAL | encode(registers, 22, 12) | 0xD2D << 16 | 0xB << 8);
+Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
+  return emit32(kAL | 0x0C900B00 | wb << 21 | rn.code << 16 |
+                encode(regs, 22, 12));
+}
+
+Assembler& Assembler::vpush(SRegisterList regs) {
+  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xA << 8);
+}
+
+Assembler& Assembler::vpush(DRegisterList regs) {
+  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
 }
 
 void Assembler::reset() {
