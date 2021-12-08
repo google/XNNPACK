@@ -3618,11 +3618,11 @@ static void init(void) {
     };
 
     xnn_params.qs8.vadd = (struct vbinary_parameters) {
-      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__wasmsimd_x8,
-      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
-      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
+      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vadd_minmax_ukernel__wasmsimd_x32,
+      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x32,
+      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x32,
       .init.qs8_addsub = xnn_init_qs8_add_minmax_wasmsimd_params,
-      .element_tile = 8,
+      .element_tile = 32,
     };
     xnn_params.qs8.vmul = (struct vbinary_parameters) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8,
@@ -3679,11 +3679,11 @@ static void init(void) {
     };
 
     xnn_params.qu8.vadd = (struct vbinary_parameters) {
-      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8,
-      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x8,
-      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x8,
+      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vadd_minmax_ukernel__wasmsimd_x32,
+      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x32,
+      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x32,
       .init.qu8_addsub = xnn_init_qu8_add_minmax_wasmsimd_params,
-      .element_tile = 8,
+      .element_tile = 32,
     };
     xnn_params.qu8.vmul = (struct vbinary_parameters) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8,

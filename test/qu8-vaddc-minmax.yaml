@@ -46,6 +46,8 @@
   init: xnn_init_qu8_add_minmax_wasmsimd_params
 - name: xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x16
   init: xnn_init_qu8_add_minmax_wasmsimd_params
+- name: xnn_qu8_vaddc_minmax_ukernel__wasmsimd_x32
+  init: xnn_init_qu8_add_minmax_wasmsimd_params
 - name: xnn_qu8_vaddc_minmax_ukernel__scalar_x1
   init: xnn_init_qu8_add_minmax_scalar_params
 - name: xnn_qu8_vaddc_minmax_ukernel__scalar_x2
