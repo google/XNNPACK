@@ -52,8 +52,8 @@ Assembler& Assembler::emit32(uint32_t value) {
   return *this;
 }
 
-Assembler& Assembler::add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
-  return emit32(kAL | 0x8 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
+Assembler& Assembler::add(CoreRegister rd, CoreRegister rn, CoreRegister rm) {
+  return emit32(kAL | 0x8 << 20 | rn.code << 16 | rd.code << 12 | rm.code);
 }
 
 Assembler& Assembler::b(Condition c, Label& l) {
@@ -101,8 +101,8 @@ Assembler& Assembler::bind(Label& l) {
   return *this;
 }
 
-Assembler& Assembler::cmp(CoreRegister Rn, uint8_t imm) {
-  return emit32(kAL | 0x35 << 20 | Rn.code << 16 | imm);
+Assembler& Assembler::cmp(CoreRegister rn, uint8_t imm) {
+  return emit32(kAL | 0x35 << 20 | rn.code << 16 | imm);
 }
 
 Assembler& Assembler::ldr(CoreRegister rt, MemOperand op, int32_t offset) {
@@ -121,16 +121,16 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
                 op.base().code << 16 | rt.code << 12 | offset);
 }
 
-Assembler& Assembler::mov(CoreRegister Rd, CoreRegister Rm) {
-  return mov(kAL, Rd, Rm);
+Assembler& Assembler::mov(CoreRegister rd, CoreRegister rm) {
+  return mov(kAL, rd, rm);
 }
 
-Assembler& Assembler::movlo(CoreRegister Rd, CoreRegister Rm) {
-  return mov(kLO, Rd, Rm);
+Assembler& Assembler::movlo(CoreRegister rd, CoreRegister rm) {
+  return mov(kLO, rd, rm);
 }
 
-Assembler& Assembler::movls(CoreRegister Rd, CoreRegister Rm) {
-  return mov(kLS, Rd, Rm);
+Assembler& Assembler::movls(CoreRegister rd, CoreRegister rm) {
+  return mov(kLS, rd, rm);
 }
 
 Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
@@ -150,13 +150,13 @@ Assembler& Assembler::push(CoreRegisterList regs) {
   return emit32(kAL | 0x92D << 16 | regs.list);
 }
 
-Assembler& Assembler::sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
-  return emit32(kAL | 0x4 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
+Assembler& Assembler::sub(CoreRegister rd, CoreRegister rn, CoreRegister rm) {
+  return emit32(kAL | 0x4 << 20 | rn.code << 16 | rd.code << 12 | rm.code);
 }
 
-Assembler& Assembler::subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm) {
+Assembler& Assembler::subs(CoreRegister rd, CoreRegister rn, uint8_t imm) {
   // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
-  return emit32(kAL | 0x25 << 20 | Rn.code << 16 | Rd.code << 12 | imm);
+  return emit32(kAL | 0x25 << 20 | rn.code << 16 | rd.code << 12 | imm);
 }
 
 Assembler& Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {

@@ -298,7 +298,7 @@ class Assembler {
   explicit Assembler();
   ~Assembler();
 
-  Assembler& add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   Assembler& beq(Label& l) { return b(kEQ, l); }
   Assembler& bne(Label& l) { return b(kNE, l); }
   Assembler& bhi(Label& l) { return b(kHI, l); }
@@ -307,17 +307,17 @@ class Assembler {
   // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
   // constants in ARM instructions", for simplicity we start with uint8_t, which
   // is fully representation using a "rotation" of 0.
-  Assembler& cmp(CoreRegister Rn, uint8_t imm);
-  Assembler& ldr(CoreRegister Rt, MemOperand operand, int32_t offset);
-  Assembler& ldr(CoreRegister Rt, MemOperand operand);
-  Assembler& mov(CoreRegister Rd, CoreRegister Rm);
-  Assembler& movlo(CoreRegister Rd, CoreRegister Rm);
-  Assembler& movls(CoreRegister Rd, CoreRegister Rm);
+  Assembler& cmp(CoreRegister rn, uint8_t imm);
+  Assembler& ldr(CoreRegister rt, MemOperand operand, int32_t offset);
+  Assembler& ldr(CoreRegister rt, MemOperand operand);
+  Assembler& mov(CoreRegister rd, CoreRegister rm);
+  Assembler& movlo(CoreRegister rd, CoreRegister rm);
+  Assembler& movls(CoreRegister rd, CoreRegister rm);
   Assembler& pld(MemOperand operand);
   Assembler& push(CoreRegisterList regs);
-  Assembler& sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
-  Assembler& subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm);
+  Assembler& subs(CoreRegister rd, CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
   // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
@@ -346,7 +346,7 @@ class Assembler {
  private:
   // Emits a 32-bit value to the code buffer.
   Assembler& emit32(uint32_t value);
-  Assembler& mov(Condition c, CoreRegister Rd, CoreRegister Rm);
+  Assembler& mov(Condition c, CoreRegister rd, CoreRegister rm);
   Assembler& b(Condition c, Label& l);
 
   // Pointer to start of code buffer.
