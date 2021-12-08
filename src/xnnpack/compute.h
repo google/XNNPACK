@@ -846,9 +846,19 @@ struct univector_strided_context {
   size_t y_stride;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_u8_minmax_params u8_output;
-    union xnn_f32_minmax_params f32_output;
+    union xnn_s8_minmax_params s8_minmax;
+    union xnn_u8_minmax_params u8_minmax;
+    struct xnn_f16_hswish_params f16_hswish;
+    union xnn_f32_abs_params f32_abs;
+    union xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
+    union xnn_f32_lrelu_params f32_lrelu;
+    union xnn_f32_minmax_params f32_minmax;
+    union xnn_f32_neg_params f32_neg;
+    union xnn_f32_rnd_params f32_rnd;
+    union xnn_f32_sqrt_params f32_sqrt;
+    union xnn_f32_qs8_cvt_params f32_qs8_cvt;
+    union xnn_f32_qu8_cvt_params f32_qu8_cvt;
   } params;
 };
 
@@ -864,11 +874,23 @@ struct univector_contiguous_context {
   size_t x_stride;
   void* y;
   size_t y_stride;
+  uint16_t log2_xsize;
+  uint16_t log2_ysize;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_u8_minmax_params u8_output;
-    union xnn_f32_minmax_params f32_output;
+    union xnn_s8_minmax_params s8_minmax;
+    union xnn_u8_minmax_params u8_minmax;
+    struct xnn_f16_hswish_params f16_hswish;
+    union xnn_f32_abs_params f32_abs;
+    union xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
+    union xnn_f32_lrelu_params f32_lrelu;
+    union xnn_f32_minmax_params f32_minmax;
+    union xnn_f32_neg_params f32_neg;
+    union xnn_f32_rnd_params f32_rnd;
+    union xnn_f32_sqrt_params f32_sqrt;
+    union xnn_f32_qs8_cvt_params f32_qs8_cvt;
+    union xnn_f32_qu8_cvt_params f32_qu8_cvt;
   } params;
 };
 

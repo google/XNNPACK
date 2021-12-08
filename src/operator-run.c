@@ -834,7 +834,9 @@ void xnn_compute_univector_contiguous(
     size_t offset,
     size_t size)
 {
-  const void* x = (const void*) ((uintptr_t) context->x + offset);
+  const uint32_t log2_xsize = context->log2_xsize;
+  const uint32_t log2_ysize = context->log2_ysize;
+  const void* x = (const void*) ((uintptr_t) context->x + ((offset >> log2_ysize) << log2_xsize));
   void* y = (void*) ((uintptr_t) context->y + offset);
   context->ukernel(size, x, y, &context->params);
 }
