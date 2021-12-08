@@ -138,6 +138,9 @@ constexpr DRegister d31{31};
 
 struct QRegister {
   uint8_t code;
+  // Encode code * 2.
+  uint8_t d() const { return (code & 0x8) >> 3; }
+  uint8_t vd() const { return (code & 0x7) << 1; }
 };
 
 constexpr QRegister q0{0};
@@ -329,6 +332,14 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, DRegisterList regs) {
     return vldm(rn, regs, false);
   }
+  // VMOV.F32 <Sd>, <Sm>; encoding A2.
+  Assembler& vmov(SRegister sd, SRegister sm);
+  // VMOV <Dm>, <Rt>, <Rt2>; encoding A1.
+  Assembler& vmov(DRegister dm, CoreRegister rt, CoreRegister rt2);
+  // VMOV <Dd>, <Dm>; encoding A1.
+  Assembler& vmov(DRegister dd, DRegister dm);
+  // VMOV <Qd>, <Qm>; encoding A1.
+  Assembler& vmov(QRegister qd, QRegister qm);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
 

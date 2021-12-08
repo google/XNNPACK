@@ -17,8 +17,19 @@ bool branch_offset_valid(ptrdiff_t offset) {
   return offset < kInt24Max && offset > kInt24Min;
 }
 
-uint32_t encode(SRegisterList regs, uint32_t single_bit_pos,
-                uint32_t four_bits_pos) {
+uint32_t encode(SRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos;
+}
+
+uint32_t encode(DRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos;
+}
+
+uint32_t encode(QRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos;
+}
+
+uint32_t encode(SRegisterList regs, uint32_t single_bit_pos, uint32_t four_bits_pos) {
   const SRegister r = regs.start;
   return r.d() << single_bit_pos | r.vd() << four_bits_pos | regs.length;
 }
@@ -167,6 +178,25 @@ Assembler& Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {
 Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
   return emit32(kAL | 0x0C900B00 | wb << 21 | rn.code << 16 |
                 encode(regs, 22, 12));
+}
+
+Assembler& Assembler::vmov(SRegister sd, SRegister sm) {
+  return emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
+}
+
+Assembler& Assembler::vmov(DRegister dm, CoreRegister rt, CoreRegister rt2) {
+  return emit32(kAL | 0x0C400B10 | rt2.code << 16 | rt.code << 12 |
+                encode(dm, 5, 0));
+}
+
+Assembler& Assembler::vmov(DRegister dd, DRegister dm) {
+  return emit32(0xF2600110 | encode(dd, 22, 12) | encode(dm, 7, 16) |
+                encode(dm, 5, 0));
+}
+
+Assembler& Assembler::vmov(QRegister qd, QRegister qm) {
+  return emit32(0xF2200150 | encode(qd, 22, 12) | encode(qm, 7, 16) |
+                encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vpush(SRegisterList regs) {

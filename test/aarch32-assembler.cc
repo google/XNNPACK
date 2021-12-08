@@ -57,6 +57,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xECB30A01, a.vldm(r3, {s0}, true));
   CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
 
+  CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));
+  CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
+  CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
+  CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
+
   CHECK_ENCODING(0xED2D4A08, a.vpush({s8, s15}));
   CHECK_ENCODING(0xED2DAA04, a.vpush({s20, s23}));
   CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
