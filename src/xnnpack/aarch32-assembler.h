@@ -332,6 +332,7 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, DRegisterList regs) {
     return vldm(rn, regs, false);
   }
+  Assembler& vldr(DRegister dd, MemOperand op);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
   Assembler& vmov(SRegister sd, SRegister sm);
   // VMOV <Dm>, <Rt>, <Rt2>; encoding A1.

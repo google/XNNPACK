@@ -180,6 +180,17 @@ Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
                 encode(regs, 22, 12));
 }
 
+Assembler& Assembler::vldr(DRegister dd, MemOperand op) {
+  // TOOD(zhin): post-increment not used in any microkernels, so not implemented yet.
+  if (op.mode() != AddressingMode::kOffset || std::abs(op.offset()) > UINT8_MAX) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(kAL | 0x0D100B00 | op.u() << 23 | encode(dd, 22, 12) |
+                op.base().code << 16 | op.offset() >> 2);
+}
+
 Assembler& Assembler::vmov(SRegister sd, SRegister sm) {
   return emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }

@@ -57,6 +57,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xECB30A01, a.vldm(r3, {s0}, true));
   CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
 
+  CHECK_ENCODING(0xED99FB0E, a.vldr(d15, mem[r9, 56]));
+  EXPECT_ERROR(Error::kInvalidOperand,
+               a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
+
   CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
