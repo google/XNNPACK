@@ -17,6 +17,18 @@ bool branch_offset_valid(ptrdiff_t offset) {
   return offset < kInt24Max && offset > kInt24Min;
 }
 
+uint32_t encode(SRegisterList regs, uint32_t single_bit_pos,
+                uint32_t four_bits_pos) {
+  const SRegister r = regs.start;
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos | regs.length;
+}
+
+uint32_t encode(DRegisterList regs, uint32_t single_bit_pos,
+                uint32_t four_bits_pos) {
+  const DRegister r = regs.start;
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos | regs.length * 2;
+}
+
 Assembler::Assembler() {
   buffer_ = new uint32_t[DEFAULT_BUFFER_SIZE];
   cursor_ = buffer_;
@@ -145,6 +157,14 @@ Assembler& Assembler::sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
 Assembler& Assembler::subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm) {
   // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
   return emit32(kAL | 0x25 << 20 | Rn.code << 16 | Rd.code << 12 | imm);
+}
+
+Assembler& Assembler::vpush(SRegisterList registers) {
+  return emit32(kAL | encode(registers, 22, 12) | 0xD2D << 16 | 0xA << 8);
+}
+
+Assembler& Assembler::vpush(DRegisterList registers) {
+  return emit32(kAL | encode(registers, 22, 12) | 0xD2D << 16 | 0xB << 8);
 }
 
 void Assembler::reset() {

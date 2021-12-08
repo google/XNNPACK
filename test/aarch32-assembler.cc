@@ -50,6 +50,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xE0487002, a.sub(r7, r8, r2));
   CHECK_ENCODING(0xE2525010, a.subs(r5, r2, 16));
+
+  CHECK_ENCODING(0xED2D4A08, a.vpush({s8, s15}));
+  CHECK_ENCODING(0xED2DAA04, a.vpush({s20, s23}));
+  CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
+  CHECK_ENCODING(0xED6D4B08, a.vpush({d20, d23}));
 }
 
 TEST(AArch32Assembler, Label) {
@@ -111,6 +116,16 @@ TEST(AArch32Assembler, CoreRegisterList) {
   EXPECT_FALSE(CoreRegisterList({r0}).has_more_than_one_register());
   EXPECT_FALSE(CoreRegisterList({r1}).has_more_than_one_register());
   EXPECT_TRUE(CoreRegisterList({r0, r1}).has_more_than_one_register());
+}
+
+TEST(AArch32Assembler, ConsecutiveRegisterList) {
+  SRegisterList s1 = SRegisterList(s0, s9);
+  EXPECT_EQ(s1.start, s0);
+  EXPECT_EQ(s1.length, 10);
+
+  DRegisterList d1 = DRegisterList(d4, d5);
+  EXPECT_EQ(d1.start, d4);
+  EXPECT_EQ(d1.length, 2);
 }
 
 TEST(AArch32Assembler, MemOperand) {

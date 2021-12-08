@@ -4,6 +4,7 @@
 
 namespace xnnpack {
 namespace aarch32 {
+
 struct CoreRegister {
   uint8_t code;
 };
@@ -48,6 +49,128 @@ struct CoreRegisterList {
 static inline bool operator==(int i, CoreRegisterList registers) {
   return i == registers.list;
 }
+
+struct SRegister {
+  uint8_t code;
+  uint8_t d() const { return code & 0x1; }
+  uint8_t vd() const { return (code & 0x1e) >> 1; }
+};
+
+static inline bool operator==(const SRegister lhs, const SRegister rhs) {
+  return lhs.code == rhs.code;
+}
+
+constexpr SRegister s0{0};
+constexpr SRegister s1{1};
+constexpr SRegister s2{2};
+constexpr SRegister s3{3};
+constexpr SRegister s4{4};
+constexpr SRegister s5{5};
+constexpr SRegister s6{6};
+constexpr SRegister s7{7};
+constexpr SRegister s8{8};
+constexpr SRegister s9{9};
+constexpr SRegister s10{10};
+constexpr SRegister s11{11};
+constexpr SRegister s12{12};
+constexpr SRegister s13{13};
+constexpr SRegister s14{14};
+constexpr SRegister s15{15};
+constexpr SRegister s16{16};
+constexpr SRegister s17{17};
+constexpr SRegister s18{18};
+constexpr SRegister s19{19};
+constexpr SRegister s20{20};
+constexpr SRegister s21{21};
+constexpr SRegister s22{22};
+constexpr SRegister s23{23};
+constexpr SRegister s24{24};
+constexpr SRegister s25{25};
+constexpr SRegister s26{26};
+constexpr SRegister s27{27};
+constexpr SRegister s28{28};
+constexpr SRegister s29{29};
+constexpr SRegister s30{30};
+constexpr SRegister s31{31};
+
+struct DRegister {
+  uint8_t code;
+  uint8_t d() const { return (code & 0x10) >> 4; }
+  uint8_t vd() const { return code & 0xf; }
+};
+
+static inline bool operator==(const DRegister lhs, const DRegister rhs) {
+  return lhs.code == rhs.code;
+}
+
+constexpr DRegister d0{0};
+constexpr DRegister d1{1};
+constexpr DRegister d2{2};
+constexpr DRegister d3{3};
+constexpr DRegister d4{4};
+constexpr DRegister d5{5};
+constexpr DRegister d6{6};
+constexpr DRegister d7{7};
+constexpr DRegister d8{8};
+constexpr DRegister d9{9};
+constexpr DRegister d10{10};
+constexpr DRegister d11{11};
+constexpr DRegister d12{12};
+constexpr DRegister d13{13};
+constexpr DRegister d14{14};
+constexpr DRegister d15{15};
+constexpr DRegister d16{16};
+constexpr DRegister d17{17};
+constexpr DRegister d18{18};
+constexpr DRegister d19{19};
+constexpr DRegister d20{20};
+constexpr DRegister d21{21};
+constexpr DRegister d22{22};
+constexpr DRegister d23{23};
+constexpr DRegister d24{24};
+constexpr DRegister d25{25};
+constexpr DRegister d26{26};
+constexpr DRegister d27{27};
+constexpr DRegister d28{28};
+constexpr DRegister d29{29};
+constexpr DRegister d30{30};
+constexpr DRegister d31{31};
+
+struct QRegister {
+  uint8_t code;
+};
+
+constexpr QRegister q0{0};
+constexpr QRegister q1{1};
+constexpr QRegister q2{2};
+constexpr QRegister q3{3};
+constexpr QRegister q4{4};
+constexpr QRegister q5{5};
+constexpr QRegister q6{6};
+constexpr QRegister q7{7};
+constexpr QRegister q8{8};
+constexpr QRegister q9{9};
+constexpr QRegister q10{10};
+constexpr QRegister q11{11};
+constexpr QRegister q12{12};
+constexpr QRegister q13{13};
+constexpr QRegister q14{14};
+constexpr QRegister q15{15};
+
+// SIMD register lists are used in a more restrictive way, compared to core
+// registers, only consecutive registers are used as an operand to instruction.
+template <typename RegType>
+struct ConsecutiveRegisterList {
+  // End must be >= start.
+  ConsecutiveRegisterList(RegType s, RegType end)
+      : start(s), length(end.code - s.code + 1) {}
+
+  RegType start;
+  int length;
+};
+
+using SRegisterList = ConsecutiveRegisterList<SRegister>;
+using DRegisterList = ConsecutiveRegisterList<DRegister>;
 
 constexpr size_t max_label_users = 10;
 // Label is a target of a branch. You call Assembler::bind to bind a label to an
@@ -193,6 +316,10 @@ class Assembler {
   Assembler& sub(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm);
+
+  // SIMD instructions.
+  Assembler& vpush(SRegisterList registers);
+  Assembler& vpush(DRegisterList registers);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
