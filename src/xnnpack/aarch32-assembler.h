@@ -1,3 +1,4 @@
+#include <array>
 #include <cstdint>
 #include <initializer_list>
 
@@ -47,6 +48,36 @@ struct CoreRegisterList {
 static inline bool operator==(int i, CoreRegisterList registers) {
   return i == registers.list;
 }
+
+constexpr size_t max_label_users = 10;
+// Label is a target of a branch. You call Assembler::bind to bind a label to an
+// actual location in the instruction stream.
+//
+// ```
+// Label l;
+// b(kAl, l1); // branch to an unbound label is fine, it will be patched later.
+// a.bind(l); // binds label to this location in the instruction stream.
+// b(kAl, l1); // branch to an already bound label.
+// ```
+struct Label {
+  // Location of label within Assembler buffer.
+  uint32_t* offset = nullptr;
+  // A label can only be bound once, binding it again leads to an error.
+  bool bound = (offset != nullptr);
+  // All users of this label, recorded by their offset in the Assembler buffer.
+  std::array<uint32_t*, max_label_users> users = {0};
+  size_t num_users = 0;
+
+  // Records a user (e.g. branch instruction) of this label.
+  // Returns true if success, false if number of users exceeds maximum.
+  bool add_use(uint32_t* offset) {
+    if (num_users >= max_label_users) {
+      return false;
+    }
+    users[num_users++] = offset;
+    return true;
+  }
+};
 
 // A8.5 Addressing modes for memory access.
 enum class AddressingMode {
@@ -106,7 +137,7 @@ constexpr MemOperandHelper mem;
 
 // Conditional execution, only support AL (always) for now.
 enum Condition : uint32_t {
-  kAL = 0xE0000000,
+  kEQ = 0x00000000,
   kNE = 0x10000000,
   kCS = 0x20000000,
   kCC = 0x30000000,
@@ -120,6 +151,7 @@ enum Condition : uint32_t {
   kLT = 0xB0000000,
   kGT = 0xC0000000,
   kLE = 0xD0000000,
+  kAL = 0xE0000000,
   kHS = kCS,
   kLO = kCC,
 };
@@ -128,6 +160,9 @@ enum class Error {
   kNoError,
   kOutOfMemory,
   kInvalidOperand,
+  kLabelAlreadyBound,
+  kLabelOffsetOutOfBounds,
+  kLabelHasTooManyUsers,
 };
 
 // A simple AAarch32 assembler.
@@ -139,6 +174,11 @@ class Assembler {
   ~Assembler();
 
   Assembler& add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm);
+  Assembler& beq(Label& l) { return b(kEQ, l); }
+  Assembler& bne(Label& l) { return b(kNE, l); }
+  Assembler& bhi(Label& l) { return b(kHI, l); }
+  Assembler& bhs(Label& l) { return b(kHS, l); }
+  Assembler& blo(Label& l) { return b(kLO, l); }
   // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
   // constants in ARM instructions", for simplicity we start with uint8_t, which
   // is fully representation using a "rotation" of 0.
@@ -154,17 +194,22 @@ class Assembler {
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& subs(CoreRegister Rd, CoreRegister Rn, uint8_t imm);
 
+  // Binds Label l to the current location in the code buffer.
+  Assembler& bind(Label& l);
+
   // Reset the assembler state (no memory is freed).
   void reset();
 
   // Get a pointer to the start of code buffer.
   const uint32_t* const start() { return buffer_; }
+  const uint32_t* const offset() { return cursor_; }
   const Error error() { return error_; }
 
  private:
   // Emits a 32-bit value to the code buffer.
   Assembler& emit32(uint32_t value);
   Assembler& mov(Condition c, CoreRegister Rd, CoreRegister Rm);
+  Assembler& b(Condition c, Label& l);
 
   // Pointer to start of code buffer.
   uint32_t* buffer_;

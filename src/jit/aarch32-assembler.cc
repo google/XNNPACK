@@ -6,6 +6,17 @@ namespace xnnpack {
 namespace aarch32 {
 static const int DEFAULT_BUFFER_SIZE = 4096;
 
+// PC register contains current address of instruction + 8 (2 instructions).
+constexpr ptrdiff_t kPCDelta = 2;
+// Constants used for checking branch offsets bounds.
+constexpr ptrdiff_t kInt24Max = 8388607;
+constexpr ptrdiff_t kInt24Min = -8388608;
+
+// Check if a branch offset is valid, it must fit in 24 bits.
+bool branch_offset_valid(ptrdiff_t offset) {
+  return offset < kInt24Max && offset > kInt24Min;
+}
+
 Assembler::Assembler() {
   buffer_ = new uint32_t[DEFAULT_BUFFER_SIZE];
   cursor_ = buffer_;
@@ -31,6 +42,51 @@ Assembler& Assembler::emit32(uint32_t value) {
 
 Assembler& Assembler::add(CoreRegister Rd, CoreRegister Rn, CoreRegister Rm) {
   return emit32(kAL | 0x8 << 20 | Rn.code << 16 | Rd.code << 12 | Rm.code);
+}
+
+Assembler& Assembler::b(Condition c, Label& l) {
+  if (l.bound) {
+    // Offset is relative to after this b instruction + kPCDelta.
+    const ptrdiff_t offset = l.offset - cursor_ - kPCDelta;
+    if (!branch_offset_valid(offset)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+
+    // No need to shift by 2 since our offset is already in terms of uint32_t.
+    return emit32(c | 0xA << 24 | (offset & 0x00FFFFFF));
+  } else {
+    if (!l.add_use(cursor_)) {
+      error_ = Error::kLabelHasTooManyUsers;
+      return *this;
+    }
+    // Emit 0 offset first, will patch it up when label is bound later.
+    return emit32(c | 0xA << 24);
+  }
+}
+
+Assembler& Assembler::bind(Label& l) {
+  if (l.bound) {
+    error_ = Error::kLabelAlreadyBound;
+    return *this;
+  }
+
+  l.bound = true;
+  l.offset = cursor_;
+
+  // Patch all users.
+  for (size_t i = 0; i < l.num_users; i++) {
+    uint32_t* user = l.users[i];
+    const ptrdiff_t offset = l.offset - user - kPCDelta;
+
+    if (!branch_offset_valid(offset)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+
+    *user = (*user | (offset & 0x00FFFFFF));
+  }
+  return *this;
 }
 
 Assembler& Assembler::cmp(CoreRegister Rn, uint8_t imm) {
