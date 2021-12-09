@@ -93,10 +93,25 @@ constexpr SRegister s29{29};
 constexpr SRegister s30{30};
 constexpr SRegister s31{31};
 
+// Define DRegisterLane before DRegister so that we can have the operator[] overloading for nice syntax.
+struct DRegisterLane {
+  uint8_t code;
+  uint8_t lane;
+};
+
+static inline bool operator==(const DRegisterLane lhs, const DRegisterLane rhs) {
+  return lhs.code == rhs.code && lhs.lane == rhs.lane;
+}
+
 struct DRegister {
   uint8_t code;
+
   uint8_t d() const { return (code & 0x10) >> 4; }
   uint8_t vd() const { return code & 0xf; }
+
+  const DRegisterLane operator[](std::size_t pos) const {
+    return DRegisterLane{code, static_cast<uint8_t>(pos)};
+  }
 };
 
 static inline bool operator==(const DRegister lhs, const DRegister rhs) {
@@ -301,6 +316,7 @@ enum class Error {
   kLabelAlreadyBound,
   kLabelOffsetOutOfBounds,
   kLabelHasTooManyUsers,
+  kInvalidLaneIndex,
 };
 
 // A simple AAarch32 assembler.
@@ -344,6 +360,8 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, SRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldr(DRegister dd, MemOperand op);
+  // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
+  Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
   Assembler& vmov(SRegister sd, SRegister sm);
   // VMOV <Dm>, <Rt>, <Rt2>; encoding A1.

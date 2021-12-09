@@ -68,6 +68,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
 
+  CHECK_ENCODING(0xF3E80140, a.vmla_f32(q8, q4, d0[0]));
+  CHECK_ENCODING(0xF3EC0160, a.vmla_f32(q8, q6, d0[1]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmla_f32(q8, q4, d0[2]));
+
   CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
@@ -152,6 +156,11 @@ TEST(AArch32Assembler, ConsecutiveRegisterList) {
 
 TEST(AArch32Assembler, MemOperand) {
   EXPECT_EQ(MemOperand(r0, 4, AddressingMode::kOffset), (mem[r0, 4]));
+}
+
+TEST(AArch32Assembler, DRegisterLane) {
+  EXPECT_EQ((DRegisterLane{2, 0}), d2[0]);
+  EXPECT_EQ((DRegisterLane{2, 1}), d2[1]);
 }
 }  // namespace aarch32
 }  // namespace xnnpack
