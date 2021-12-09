@@ -71,6 +71,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
 
+  CHECK_ENCODING(0xF24ECFC4, a.vmax_f32(q14, q15, q2));
+
+  CHECK_ENCODING(0xF220EFC6, a.vmin_f32(q7, q8, q3));
+
   CHECK_ENCODING(0xF3E80140, a.vmla_f32(q8, q4, d0[0]));
   CHECK_ENCODING(0xF3EC0160, a.vmla_f32(q8, q6, d0[1]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmla_f32(q8, q4, d0[2]));

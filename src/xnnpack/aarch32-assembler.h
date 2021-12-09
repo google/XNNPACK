@@ -363,6 +363,8 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, SRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldr(DRegister dd, MemOperand op);
+  Assembler& vmax_f32(QRegister qd, QRegister qn, QRegister qm);
+  Assembler& vmin_f32(QRegister qd, QRegister qn, QRegister qm);
   // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
   Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.

@@ -222,6 +222,14 @@ Assembler& Assembler::vldr(DRegister dd, MemOperand op) {
   return emit32(kAL | 0x0D100B00 | op.u() << 23 | encode(dd, 22, 12) | op.base().code << 16 | op.offset() >> 2);
 }
 
+Assembler& Assembler::vmax_f32(QRegister qd, QRegister qn, QRegister qm) {
+  return emit32(kAL | 0xF2000F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vmin_f32(QRegister qd, QRegister qn, QRegister qm) {
+  return emit32(kAL | 0xF2200F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
 Assembler& Assembler::vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm) {
   if (dm.lane > 1) {
     error_ = Error::kInvalidLaneIndex;
