@@ -349,6 +349,7 @@ class Assembler {
   Assembler& movlo(CoreRegister rd, CoreRegister rm);
   Assembler& movls(CoreRegister rd, CoreRegister rm);
   Assembler& pld(MemOperand operand);
+  Assembler& pop(CoreRegisterList regs);
   Assembler& push(CoreRegisterList regs);
   Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
@@ -379,6 +380,7 @@ class Assembler {
   Assembler& vmov(DRegister dd, DRegister dm);
   // VMOV <Qd>, <Qm>; encoding A1.
   Assembler& vmov(QRegister qd, QRegister qm);
+  Assembler& vpop(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
   // VST1.32 <list>, [<Rn>]{!} (multiple single elements).

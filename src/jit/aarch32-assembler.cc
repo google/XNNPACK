@@ -177,6 +177,16 @@ Assembler& Assembler::pld(MemOperand op) {
   return emit32(0xF550F000 | op.u() << 23 | op.base().code << 16 | op.offset());
 }
 
+Assembler& Assembler::pop(CoreRegisterList regs) {
+  if (!regs.has_more_than_one_register()) {
+    // TODO(zhin): there is a different valid encoding for single register.
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(kAL | 0x8BD << 16 | regs.list);
+}
+
 Assembler& Assembler::push(CoreRegisterList regs) {
   if (!regs.has_more_than_one_register()) {
     // TODO(zhin): there is a different valid encoding for single register.
@@ -271,6 +281,10 @@ Assembler& Assembler::vmov(DRegister dd, DRegister dm) {
 
 Assembler& Assembler::vmov(QRegister qd, QRegister qm) {
   return emit32(0xF2200150 | encode(qd, 22, 12) | encode(qm, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vpop(DRegisterList regs) {
+  return emit32(kAL | encode(regs, 22, 12) | 0xCBD << 16 | 0xB << 8);
 }
 
 Assembler& Assembler::vpush(SRegisterList regs) {

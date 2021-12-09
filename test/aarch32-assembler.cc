@@ -43,6 +43,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0x91A0A00C, a.movls(r10, r12));
   CHECK_ENCODING(0xE1A0A00C, a.mov(r10, r12));
 
+  CHECK_ENCODING(0xE8BD0FF0, a.pop({r4, r5, r6, r7, r8, r9, r10, r11}));
+  EXPECT_ERROR(Error::kInvalidOperand, a.pop({}));
+  EXPECT_ERROR(Error::kInvalidOperand, a.pop({r1}));
+
   CHECK_ENCODING(0xE92D0FF0, a.push({r4, r5, r6, r7, r8, r9, r10, r11}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({}));
   EXPECT_ERROR(Error::kInvalidOperand, a.push({r1}));
@@ -83,6 +87,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
   CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
+
+  CHECK_ENCODING(0xECBD8B10, a.vpop({d8, d15}));
 
   CHECK_ENCODING(0xED2D4A08, a.vpush({s8, s15}));
   CHECK_ENCODING(0xED2DAA04, a.vpush({s20, s23}));
