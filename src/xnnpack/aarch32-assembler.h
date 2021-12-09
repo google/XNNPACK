@@ -349,6 +349,7 @@ class Assembler {
   Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& subs(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  Assembler& tst(CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).

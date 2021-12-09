@@ -177,6 +177,11 @@ Assembler& Assembler::subs(CoreRegister rd, CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x25 << 20 | rn.code << 16 | rd.code << 12 | imm);
 }
 
+Assembler& Assembler::tst(CoreRegister rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 0x31 << 20 | rn.code << 16 | imm);
+}
+
 Assembler& Assembler::vld1_32(DRegisterList regs, MemOperand op) {
   if (regs.length != 1) {
     // Unimplemented since only length 1 is used in microkernels.
