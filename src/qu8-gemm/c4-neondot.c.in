@@ -6,7 +6,7 @@
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 32
-$assert REQUANTIZATION == "RNDNU"
+$assert REQUANTIZATION in ["FP32", "RNDNU"]
 #include <assert.h>
 
 #include <arm_neon.h>

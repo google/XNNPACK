@@ -219,6 +219,8 @@ tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D R
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c &
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c &
 
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c &
+tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/4x8-minmax-fp32-neon-mlal-lane.c &
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c &
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c &
 
@@ -612,6 +614,10 @@ tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=32 -D REQUANTIZATION=RND
 tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=32 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/2x32c4-minmax-rndnu-neondot.c &
 tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=32 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/3x32c4-minmax-rndnu-neondot.c &
 
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/1x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/2x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/4x16c4-minmax-fp32-neondot.c &
+
 ############################### AArch64 assembly ##############################
 ### Cortex-A53 lane micro-kernels
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-cortex-a53.S &
@@ -669,6 +675,9 @@ tools/xngen src/qu8-gemm/4x8c4-aarch64-neondot-cortex-a55.S.in  -D REQUANTIZATIO
 tools/xngen src/qu8-gemm/4x8c4-aarch64-neondot-ld128.S.in        -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-ld128.S &
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S &
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S &
+
+tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S &
+tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S &
 
 ### C8 / C16 micro-kernels
 tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c8-minmax-rndnu-aarch64-neon-mlal-cortex-a53.S &

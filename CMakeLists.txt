@@ -2100,15 +2100,19 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up32x25-minmax-rndnu-neon-mul16.c
   src/qu8-gavgpool/7p7x-minmax-neon-c8.c
   src/qu8-gavgpool/7x-minmax-neon-c8.c
+  src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-gemm/gen/4x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/4x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-igemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-fp32-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
@@ -2903,15 +2907,18 @@ SET(ALL_NEONDOT_MICROKERNEL_SRCS
   src/qs8-igemm/gen/8x8c4-minmax-rndnu-neondot.c
   src/qs8-igemm/gen/8x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
+  src/qu8-gemm/gen/1x16c4-minmax-fp32-neondot.c
   src/qu8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/1x32c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/2x8c4-minmax-rndnu-neondot.c
+  src/qu8-gemm/gen/2x16c4-minmax-fp32-neondot.c
   src/qu8-gemm/gen/2x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/2x32c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/3x8c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/3x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/3x32c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/4x8c4-minmax-rndnu-neondot.c
+  src/qu8-gemm/gen/4x16c4-minmax-fp32-neondot.c
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/5x8c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/5x16c4-minmax-rndnu-neondot.c
@@ -2920,15 +2927,18 @@ SET(ALL_NEONDOT_MICROKERNEL_SRCS
   src/qu8-gemm/gen/8x8c4-minmax-rndnu-neondot.c
   src/qu8-gemm/gen/8x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
+  src/qu8-igemm/gen/1x16c4-minmax-fp32-neondot.c
   src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/1x32c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/2x8c4-minmax-rndnu-neondot.c
+  src/qu8-igemm/gen/2x16c4-minmax-fp32-neondot.c
   src/qu8-igemm/gen/2x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/2x32c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/3x8c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/3x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/3x32c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
+  src/qu8-igemm/gen/4x16c4-minmax-fp32-neondot.c
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/5x8c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/5x16c4-minmax-rndnu-neondot.c
@@ -5358,6 +5368,8 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
   src/qu8-gemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
+  src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
+  src/qu8-gemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
   src/qu8-gemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S
   src/qu8-igemm/gen/4x8c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
@@ -5368,6 +5380,8 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a53.S
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-cortex-a75.S
   src/qu8-igemm/gen/4x16-minmax-rndnu-aarch64-neon-mlal-lane-prfm-ld64.S
+  src/qu8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-cortex-a55.S
+  src/qu8-igemm/gen/4x16c4-minmax-fp32-aarch64-neondot-ld128.S
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-cortex-a55.S
   src/qu8-igemm/gen/4x16c4-minmax-rndnu-aarch64-neondot-ld128.S)
 
