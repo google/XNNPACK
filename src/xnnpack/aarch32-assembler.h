@@ -97,6 +97,9 @@ constexpr SRegister s31{31};
 struct DRegisterLane {
   uint8_t code;
   uint8_t lane;
+
+  uint8_t d() const { return (code & 0x10) >> 4; }
+  uint8_t vd() const { return code & 0xf; }
 };
 
 static inline bool operator==(const DRegisterLane lhs, const DRegisterLane rhs) {
@@ -317,6 +320,7 @@ enum class Error {
   kLabelOffsetOutOfBounds,
   kLabelHasTooManyUsers,
   kInvalidLaneIndex,
+  kInvalidRegisterListLength,
 };
 
 // A simple AAarch32 assembler.
@@ -377,6 +381,12 @@ class Assembler {
   Assembler& vmov(QRegister qd, QRegister qm);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
+  // VST1.32 <list>, [<Rn>]{!} (multiple single elements).
+  Assembler& vst1_32(DRegisterList regs, MemOperand op);
+  // VST1.32 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
+  Assembler& vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm);
+  // VST1.32 <list>, [<Rn>]{!} (single element form one lane).
+  Assembler& vst1_32(DRegisterLane dd, MemOperand op);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
