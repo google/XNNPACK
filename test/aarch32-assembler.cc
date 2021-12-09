@@ -26,6 +26,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   Assembler a;
 
   CHECK_ENCODING(0xE0810002, a.add(r0, r1, r2));
+  CHECK_ENCODING(0xE28A9080, a.add(r9, r10, 128));
 
   CHECK_ENCODING(0xE3500002, a.cmp(r0, 2));
 

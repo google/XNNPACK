@@ -68,6 +68,11 @@ Assembler& Assembler::add(CoreRegister rd, CoreRegister rn, CoreRegister rm) {
   return emit32(kAL | 0x8 << 20 | rn.code << 16 | rd.code << 12 | rm.code);
 }
 
+Assembler& Assembler::add(CoreRegister rd, CoreRegister rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 0x28 << 20 | rn.code << 16 | rd.code << 12 | imm);
+}
+
 Assembler& Assembler::b(Condition c, Label& l) {
   if (l.bound) {
     // Offset is relative to after this b instruction + kPCDelta.
@@ -157,6 +162,7 @@ Assembler& Assembler::push(CoreRegisterList regs) {
   if (!regs.has_more_than_one_register()) {
     // TODO(zhin): there is a different valid encoding for single register.
     error_ = Error::kInvalidOperand;
+    return *this;
   }
 
   return emit32(kAL | 0x92D << 16 | regs.list);
