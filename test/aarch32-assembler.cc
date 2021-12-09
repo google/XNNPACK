@@ -4,10 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#define EXPECT_INSTR(expected, actual)                                       \
-  EXPECT_EQ(expected, actual) << "expected = 0x" << std::hex << std::setw(8) \
-                              << std::setfill('0') << expected << std::endl  \
-                              << "  actual = 0x" << actual;
+// clang-format off
+#define EXPECT_INSTR(expected, actual)                                                                        \
+  EXPECT_EQ(expected, actual) << "expected = 0x" << std::hex << std::setw(8) << std::setfill('0') << expected \
+                              << std::endl << "  actual = 0x" << actual;
+// clang-format on
 
 #define CHECK_ENCODING(expected, call) \
   a.reset();                           \
@@ -58,8 +59,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
 
   CHECK_ENCODING(0xED99FB0E, a.vldr(d15, mem[r9, 56]));
-  EXPECT_ERROR(Error::kInvalidOperand,
-               a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
 
   CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));

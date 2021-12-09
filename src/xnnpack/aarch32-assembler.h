@@ -166,7 +166,8 @@ template <typename RegType>
 struct ConsecutiveRegisterList {
   // End must be >= start.
   ConsecutiveRegisterList(RegType s, RegType end)
-      : start(s), length(end.code - s.code + 1) {}
+      : start(s),
+        length(end.code - s.code + 1) {}
   ConsecutiveRegisterList(RegType start)
       : ConsecutiveRegisterList(start, start) {}
 
@@ -221,10 +222,14 @@ enum class AddressingMode {
 class MemOperand {
  public:
   MemOperand(CoreRegister rn, int32_t offset)
-      : mode_(AddressingMode::kOffset), rn_(rn), offset_(offset) {}
+      : mode_(AddressingMode::kOffset),
+        rn_(rn),
+        offset_(offset) {}
 
   MemOperand(CoreRegister rn, int32_t offset, AddressingMode mode)
-      : mode_(mode), rn_(rn), offset_(offset) {}
+      : mode_(mode),
+        rn_(rn),
+        offset_(offset) {}
 
   CoreRegister base() const { return rn_; }
   int32_t offset() const { return offset_; }
@@ -243,8 +248,7 @@ class MemOperand {
 };
 
 static inline bool operator==(const MemOperand lhs, const MemOperand rhs) {
-  return lhs.mode() == rhs.mode() && lhs.base() == rhs.base() &&
-         lhs.offset() == rhs.offset();
+  return lhs.mode() == rhs.mode() && lhs.base() == rhs.base() && lhs.offset() == rhs.offset();
 }
 
 static inline MemOperand operator,(CoreRegister r, int32_t offset) {
@@ -326,12 +330,8 @@ class Assembler {
   // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
   Assembler& vldm(CoreRegister rn, SRegisterList regs, bool wb);
   Assembler& vldm(CoreRegister rn, DRegisterList regs, bool wb);
-  Assembler& vldm(CoreRegister rn, SRegisterList regs) {
-    return vldm(rn, regs, false);
-  }
-  Assembler& vldm(CoreRegister rn, DRegisterList regs) {
-    return vldm(rn, regs, false);
-  }
+  Assembler& vldm(CoreRegister rn, SRegisterList regs) { return vldm(rn, regs, false); }
+  Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldr(DRegister dd, MemOperand op);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
   Assembler& vmov(SRegister sd, SRegister sm);

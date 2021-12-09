@@ -1,0 +1,4 @@
+BasedOnStyle: Google
+AllowShortFunctionsOnASingleLine: Inline
+PackConstructorInitializers: Never
+ColumnLimit: 120
