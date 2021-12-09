@@ -25,6 +25,10 @@ uint32_t encode(DRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
   return r.d() << single_bit_pos | r.vd() << four_bits_pos;
 }
 
+uint32_t encode(DRegisterLane r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
+  return r.d() << single_bit_pos | r.vd() << four_bits_pos;
+}
+
 uint32_t encode(QRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
   return r.d() << single_bit_pos | r.vd() << four_bits_pos;
 }
@@ -37,6 +41,21 @@ uint32_t encode(SRegisterList regs, uint32_t single_bit_pos, uint32_t four_bits_
 uint32_t encode(DRegisterList regs, uint32_t single_bit_pos, uint32_t four_bits_pos) {
   const DRegister r = regs.start;
   return r.d() << single_bit_pos | r.vd() << four_bits_pos | regs.length * 2;
+}
+
+// Return value of 0 is invalid, indicates error.
+uint32_t encode_regs_length_to_type(DRegisterList regs) {
+  switch (regs.length) {
+    case 1:
+      return 0x7;
+    case 2:
+      return 0xA;
+    case 3:
+      return 0x6;
+    case 4:
+      return 0x2;
+  }
+  return 0;
 }
 
 Assembler::Assembler() {
@@ -260,6 +279,42 @@ Assembler& Assembler::vpush(SRegisterList regs) {
 
 Assembler& Assembler::vpush(DRegisterList regs) {
   return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
+}
+
+Assembler& Assembler::vst1_32(DRegisterList regs, MemOperand op) {
+  uint8_t type = encode_regs_length_to_type(regs);
+  if (!type) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
+
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(0xF400'0080 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | rm);
+}
+
+Assembler& Assembler::vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) {
+  if (rm.code == 0b1101 || rm.code == 0b1111) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  uint8_t type = encode_regs_length_to_type(regs);
+  if (!type) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
+
+  return emit32(0xF400'0080 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | rm.code);
+}
+
+Assembler& Assembler::vst1_32(DRegisterLane dd, MemOperand op) {
+  if (dd.lane > 1) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(0xF480'0800 | encode(dd, 22, 12) | op.base().code << 16 | dd.lane << 5 | rm);
 }
 
 void Assembler::reset() {
