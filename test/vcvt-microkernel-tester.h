@@ -97,7 +97,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(float), input.data(), output.data(), nullptr /* params */);
+      vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), nullptr /* params */);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -121,7 +121,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT16_C(0x7E));
 
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), nullptr /* params */);
+      vcvt(batch_size() * sizeof(float), input.data(), output.data(), nullptr /* params */);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -159,7 +159,7 @@ class VCvtMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(int8_t), input.data(), output.data(), &params);
+      vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
 
       // Compute reference results
       for (size_t i = 0; i < batch_size(); i++) {
@@ -205,7 +205,7 @@ class VCvtMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(uint8_t), input.data(), output.data(), &params);
+      vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
 
       // Compute reference results
       for (size_t i = 0; i < batch_size(); i++) {

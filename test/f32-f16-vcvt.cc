@@ -977,6 +977,7 @@ TEST(F32_F16_VCVT__SCALAR_BITCAST_X1, batch_gt_1) {
   }
 }
 
+
 TEST(F32_F16_VCVT__SCALAR_BITCAST_X2, batch_eq_2) {
   VCvtMicrokernelTester()
     .batch_size(2)
@@ -1006,6 +1007,7 @@ TEST(F32_F16_VCVT__SCALAR_BITCAST_X2, batch_gt_2) {
       .Test(xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2);
   }
 }
+
 
 TEST(F32_F16_VCVT__SCALAR_BITCAST_X3, batch_eq_3) {
   VCvtMicrokernelTester()
@@ -1037,6 +1039,7 @@ TEST(F32_F16_VCVT__SCALAR_BITCAST_X3, batch_gt_3) {
   }
 }
 
+
 TEST(F32_F16_VCVT__SCALAR_BITCAST_X4, batch_eq_4) {
   VCvtMicrokernelTester()
     .batch_size(4)
@@ -1067,6 +1070,7 @@ TEST(F32_F16_VCVT__SCALAR_BITCAST_X4, batch_gt_4) {
   }
 }
 
+
 TEST(F32_F16_VCVT__SCALAR_FABSF_X1, batch_eq_1) {
   VCvtMicrokernelTester()
     .batch_size(1)
@@ -1080,6 +1084,7 @@ TEST(F32_F16_VCVT__SCALAR_FABSF_X1, batch_gt_1) {
       .Test(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1);
   }
 }
+
 
 TEST(F32_F16_VCVT__SCALAR_FABSF_X2, batch_eq_2) {
   VCvtMicrokernelTester()
@@ -1111,6 +1116,7 @@ TEST(F32_F16_VCVT__SCALAR_FABSF_X2, batch_gt_2) {
   }
 }
 
+
 TEST(F32_F16_VCVT__SCALAR_FABSF_X3, batch_eq_3) {
   VCvtMicrokernelTester()
     .batch_size(3)
@@ -1140,6 +1146,7 @@ TEST(F32_F16_VCVT__SCALAR_FABSF_X3, batch_gt_3) {
       .Test(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3);
   }
 }
+
 
 TEST(F32_F16_VCVT__SCALAR_FABSF_X4, batch_eq_4) {
   VCvtMicrokernelTester()

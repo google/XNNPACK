@@ -22,7 +22,7 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int32_x16(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int32_x16(
   const __m128i vdenorm_cutoff = _mm_set1_epi32(0x04000000);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
+  for (; n >= 16 * sizeof(uint16_t); n -= 16 * sizeof(uint16_t)) {
     const __m128i vh0 = _mm_loadu_si128((const __m128i*) i);
     const __m128i vh1 = _mm_loadu_si128((const __m128i*) (i + 8));
     i += 16;
@@ -84,7 +84,7 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int32_x16(
     _mm_storeu_ps(output + 12, _mm_castsi128_ps(vf3));
     output += 16;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
     const __m128i vh = _mm_loadu_si128((const __m128i*) i);
     i += 8;
 
@@ -137,7 +137,7 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int32_x16(
     __m128i vf = _mm_or_si128(vsign_lo,
       _mm_or_si128(_mm_and_si128(vmask_lo, vnorm_lo), _mm_andnot_si128(vmask_lo, vdenorm_lo)));
 
-    if (n & (4 * sizeof(float))) {
+    if (n & (4 * sizeof(uint16_t))) {
       _mm_storeu_ps(output, _mm_castsi128_ps(vf));
       output += 4;
 
@@ -145,13 +145,13 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int32_x16(
       vf = _mm_or_si128(vsign_hi,
         _mm_or_si128(_mm_and_si128(vmask_hi, vnorm_hi), _mm_andnot_si128(vmask_hi, vdenorm_hi)));
     }
-    if (n & (2 * sizeof(float))) {
+    if (n & (2 * sizeof(uint16_t))) {
       _mm_storel_pi((__m64*) output, _mm_castsi128_ps(vf));
       output += 2;
 
       vf = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vf), _mm_castsi128_ps(vf)));
     }
-    if (n & (1 * sizeof(float))) {
+    if (n & (1 * sizeof(uint16_t))) {
       _mm_store_ss(output, _mm_castsi128_ps(vf));
     }
   }

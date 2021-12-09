@@ -22,13 +22,16 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x16(
     const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
 
   const __m128 vscale = _mm_load_ps(params->sse2.scale);
   const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse2.output_max_less_zero_point);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
 
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
+  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(x);
     __m128 vx4567 = _mm_loadu_ps(x + 4);
     __m128 vx89AB = _mm_loadu_ps(x + 8);
@@ -64,7 +67,7 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x16(
     _mm_storeu_si128((__m128i*) y, vy0123456789ABCDEF);
     y += 16;
   }
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     __m128 vx_lo = _mm_loadu_ps(x);
     __m128 vx_hi = _mm_loadu_ps(x + 4);
     x += 8;
@@ -88,10 +91,7 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x16(
   }
   if XNN_UNLIKELY(n != 0) {
     __m128 vx_lo = _mm_loadu_ps(x);
-    const float* x_hi = x + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint8_t))) == 0) {
-      x_hi = x;
-    }
+    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
     __m128 vx_hi = _mm_loadu_ps(x_hi);
 
     vx_lo = _mm_mul_ps(vx_lo, vscale);
@@ -108,19 +108,19 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x16(
     vy = _mm_packus_epi16(vy, vy);
     vy = _mm_max_epu8(vy, voutput_min);
 
-    if (n & (4 * sizeof(uint8_t))) {
+    if (n & (4 * sizeof(float))) {
       *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     {
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
-      if (n & (2 * sizeof(uint8_t))) {
+      if (n & (2 * sizeof(float))) {
         *((uint16_t*) y) = (uint16_t) vy_lo;
         y += 2;
         vy_lo >>= 16;
       }
-      if (n & (1 * sizeof(uint8_t))) {
+      if (n & (1 * sizeof(float))) {
         *y = (uint8_t) vy_lo;
       }
     }

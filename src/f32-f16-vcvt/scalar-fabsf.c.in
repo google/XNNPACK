@@ -21,7 +21,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x${BATCH_TILE}(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -36,7 +36,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x${BATCH_TILE}(
 
   uint16_t* o = (uint16_t*) output;
   $if BATCH_TILE > 1:
-    for (; n >= ${BATCH_TILE} * sizeof(uint16_t); n -= ${BATCH_TILE} * sizeof(uint16_t)) {
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(BATCH_TILE):
         const float vx${N} = input[${N}];
       input += ${BATCH_TILE};
@@ -124,7 +124,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x${BATCH_TILE}(
 
       *o++ = vh;
 
-      n -= sizeof(uint16_t);
+      n -= sizeof(float);
     } while (n != 0);
   $elif BATCH_TILE == 2:
     if XNN_UNLIKELY(n != 0) {
@@ -195,7 +195,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x${BATCH_TILE}(
 
         *o++ = vh;
 
-        n -= sizeof(uint16_t);
+        n -= sizeof(float);
       } while (n != 0);
     }
 }

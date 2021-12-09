@@ -22,7 +22,7 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x24(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -37,7 +37,7 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x24(
   const __m128i vnanh = _mm_set1_epi16(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 24 * sizeof(uint16_t); n -= 24 * sizeof(uint16_t)) {
+  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);
     const __m128 vx1 = _mm_loadu_ps(input + 4);
     const __m128 vx2 = _mm_loadu_ps(input + 8);
@@ -164,7 +164,7 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x24(
     _mm_storeu_si128((__m128i*) (o + 16), vh2);
     o += 24;
   }
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m128 vx_lo = _mm_loadu_ps(input);
     const __m128 vx_hi = _mm_loadu_ps(input + 4);
     input += 8;
@@ -216,10 +216,7 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x24(
   }
   if XNN_UNPREDICTABLE(n != 0) {
     const __m128 vx_lo = _mm_loadu_ps(input);
-    const float* input_hi = input + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint16_t))) == 0) {
-      input_hi = input;
-    }
+    const float* input_hi = (const float*) ((uintptr_t) input + (n & (4 * sizeof(float))));
     const __m128 vx_hi = _mm_loadu_ps(input_hi);
 
     const __m128 vabsx_lo = _mm_and_ps(vx_lo, vnonsign_mask);
@@ -264,17 +261,17 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x24(
 
     __m128i vh = _mm_or_si128(vabsh, vsignh);
 
-    if (n & (4 * sizeof(uint16_t))) {
+    if (n & (4 * sizeof(float))) {
       _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);
       o += 4;
     }
-    if (n & (2 * sizeof(uint16_t))) {
+    if (n & (2 * sizeof(float))) {
       *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
-    if (n & (1 * sizeof(uint16_t))) {
+    if (n & (1 * sizeof(float))) {
       *o = (uint16_t) _mm_extract_epi16(vh, 0);
     }
   }

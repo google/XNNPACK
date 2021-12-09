@@ -23,6 +23,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x24(
     const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
@@ -30,7 +31,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x24(
   const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_cvt.output_zero_point);
   const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd_cvt.output_min);
   const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_cvt.output_max);
-  for (; n >= 24 * sizeof(uint8_t); n -= 24 * sizeof(uint8_t)) {
+  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(x);
     v128_t vx4567 = wasm_v128_load(x + 4);
     v128_t vx89AB = wasm_v128_load(x + 8);
@@ -81,7 +82,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x24(
     *((double*) (y + 16)) = wasm_f64x2_extract_lane(vyGHIJKLMN, 0);
     y += 24;
   }
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     v128_t vx_lo = wasm_v128_load(x);
     v128_t vx_hi = wasm_v128_load(x + 4);
     x += 8;
@@ -106,13 +107,10 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x24(
     y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint8_t));
-    assert(n <= 7 * sizeof(uint8_t));
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
     v128_t vx_lo = wasm_v128_load(x);
-    const float* x_hi = x + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint8_t))) == 0) {
-      x_hi = x;
-    }
+    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
     v128_t vx_hi = wasm_v128_load(x_hi);
 
     vx_lo = wasm_f32x4_mul(vx_lo, vscale);
@@ -131,18 +129,18 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x24(
     vy = wasm_u8x16_max(vy, voutput_min);
     vy = wasm_u8x16_min(vy, voutput_max);
 
-    if (n & (4 * sizeof(uint8_t))) {
+    if (n & (4 * sizeof(float))) {
       *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
       y += 4;
       vy = wasm_u64x2_shr(vy, 32);
     }
     uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
-    if (n & (2 * sizeof(uint8_t))) {
+    if (n & (2 * sizeof(float))) {
       *((uint16_t*) y) = (uint16_t) vy_lo;
       y += 2;
       vy_lo >>= 16;
     }
-    if (n & (1 * sizeof(uint8_t))) {
+    if (n & (1 * sizeof(float))) {
       *y = (uint8_t) vy_lo;
     }
   }

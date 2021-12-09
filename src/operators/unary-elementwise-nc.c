@@ -125,14 +125,14 @@ static enum xnn_status setup_unary_elementwise_nc(
       memcpy(&unary_elementwise_op->context.univector_contiguous.params, params, params_size);
     }
 
-    const size_t range = (batch_size * channels) << log2_output_size;
+    const size_t range = (batch_size * channels) << log2_input_size;
     unary_elementwise_op->compute.type = xnn_parallelization_type_1d_tile_1d;
     unary_elementwise_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
     unary_elementwise_op->compute.range[0] = range;
     unary_elementwise_op->compute.tile[0] = (num_threads == 1) ? range : block_size;
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
-      .n = channels << log2_output_size,
+      .n = channels << log2_input_size,
       .x = input,
       .x_stride = input_stride << log2_input_size,
       .y = output,

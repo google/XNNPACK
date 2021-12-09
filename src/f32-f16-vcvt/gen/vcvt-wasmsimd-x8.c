@@ -22,7 +22,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x8(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -36,7 +36,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x8(
   const v128_t vnanh = wasm_i16x8_const_splat(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx_lo = wasm_v128_load(input);
     const v128_t vx_hi = wasm_v128_load(input + 4);
     input += 8;
@@ -88,10 +88,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x8(
   }
   if XNN_UNPREDICTABLE(n != 0) {
     const v128_t vx_lo = wasm_v128_load(input);
-    const float* input_hi = input + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint16_t))) == 0) {
-      input_hi = input;
-    }
+    const float* input_hi = (const float*) ((uintptr_t) input + (n & (4 * sizeof(float))));
     const v128_t vx_hi = wasm_v128_load(input_hi);
 
     const v128_t vabsx_lo = wasm_f32x4_abs(vx_lo);
@@ -136,18 +133,18 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x8(
 
     v128_t vh = wasm_v128_or(vabsh, vsignh);
 
-    if (n & (4 * sizeof(uint16_t))) {
+    if (n & (4 * sizeof(float))) {
       *((double*) o) = wasm_f64x2_extract_lane(vh, 0);
       vh = wasm_v64x2_shuffle(vh, vh, 1, 1);
       o += 4;
     }
-    if (n & (2 * sizeof(uint16_t))) {
+    if (n & (2 * sizeof(float))) {
       *((float*) o) = (float) wasm_f32x4_extract_lane(vh, 0);
       vh = wasm_i64x2_shr(vh, 32);
       o += 2;
     }
     const uint32_t vh_lo = wasm_i32x4_extract_lane(vh, 0);
-    if (n & (1 * sizeof(uint16_t))) {
+    if (n & (1 * sizeof(float))) {
       *o = (uint16_t) vh_lo;
     }
   }

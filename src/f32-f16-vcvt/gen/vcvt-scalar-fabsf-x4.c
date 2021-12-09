@@ -24,7 +24,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -38,7 +38,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4(
   const uint16_t vnanh = UINT16_C(0x7E00);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 4 * sizeof(uint16_t); n -= 4 * sizeof(uint16_t)) {
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float vx0 = input[0];
     const float vx1 = input[1];
     const float vx2 = input[2];
@@ -170,7 +170,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4(
 
       *o++ = vh;
 
-      n -= sizeof(uint16_t);
+      n -= sizeof(float);
     } while (n != 0);
   }
 }

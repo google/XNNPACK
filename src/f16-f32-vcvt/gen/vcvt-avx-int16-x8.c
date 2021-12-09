@@ -22,7 +22,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x8(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x8(
   const __m128i vdenorm_cutoff = _mm_set1_epi16(0x0400);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
     const __m128i vh = _mm_loadu_si128((const __m128i*) i);
     i += 8;
 
@@ -84,20 +84,20 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x8(
     __m128i vf = _mm_or_si128(_mm_unpacklo_epi16(_mm_setzero_si128(), vsign),
       _mm_blendv_epi8(vdenorm_lo, vnorm_lo, _mm_cvtepi16_epi32(vmask)));
 
-    if (n & (4 * sizeof(float))) {
+    if (n & (4 * sizeof(uint16_t))) {
       _mm_storeu_ps(output, _mm_castsi128_ps(vf));
       output += 4;
 
       vf = _mm_or_si128(_mm_unpackhi_epi16(_mm_setzero_si128(), vsign),
         _mm_blendv_epi8(vdenorm_hi, vnorm_hi, _mm_unpackhi_epi16(vmask, vmask)));
     }
-    if (n & (2 * sizeof(float))) {
+    if (n & (2 * sizeof(uint16_t))) {
       _mm_storel_pi((__m64*) output, _mm_castsi128_ps(vf));
       output += 2;
 
       vf = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vf), _mm_castsi128_ps(vf)));
     }
-    if (n & (1 * sizeof(float))) {
+    if (n & (1 * sizeof(uint16_t))) {
       _mm_store_ss(output, _mm_castsi128_ps(vf));
     }
   }

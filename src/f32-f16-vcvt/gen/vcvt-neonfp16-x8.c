@@ -22,12 +22,12 @@ void xnn_f32_f16_vcvt_ukernel__neonfp16_x8(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const float32x4_t vf0 = vld1q_f32(input); input += 4;
     const float32x4_t vf1 = vld1q_f32(input); input += 4;
 
@@ -35,7 +35,7 @@ void xnn_f32_f16_vcvt_ukernel__neonfp16_x8(
 
     vst1q_u16(o, vh0); o += 8;
   }
-  for (; n >= 4 * sizeof(uint16_t); n -= 4 * sizeof(uint16_t)) {
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float32x4_t vf = vld1q_f32(input); input += 4;
 
     const uint16x4_t vh = vreinterpret_u16_f16(vcvt_f16_f32(vf));
@@ -43,18 +43,18 @@ void xnn_f32_f16_vcvt_ukernel__neonfp16_x8(
     vst1_u16(o, vh); o += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n % sizeof(uint16_t) == 0);
-    assert(n >= 1 * sizeof(uint16_t));
-    assert(n <= 3 * sizeof(uint16_t));
+    assert(n % sizeof(float) == 0);
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 3 * sizeof(float));
     const float32x4_t vf = vld1q_f32(input);
 
     uint16x4_t vh = vreinterpret_u16_f16(vcvt_f16_f32(vf));
 
-    if (n & (2 * sizeof(uint16_t))) {
+    if (n & (2 * sizeof(float))) {
       vst1_lane_u32((void*) o, vreinterpret_u32_u16(vh), 0); o += 2;
       vh = vext_u16(vh, vh, 2);
     }
-    if (n & (1 * sizeof(uint16_t))) {
+    if (n & (1 * sizeof(float))) {
       vst1_lane_u16(o, vh, 0);
     }
   }

@@ -23,6 +23,7 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x16(
     const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
@@ -30,7 +31,7 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x16(
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
   const uint8x16_t voutput_min = vld1q_dup_u8(&params->neonv8.output_min);
   const uint8x16_t voutput_max = vld1q_dup_u8(&params->neonv8.output_max);
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
+  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(x); x += 4;
     float32x4_t vx4567 = vld1q_f32(x); x += 4;
     float32x4_t vx89AB = vld1q_f32(x); x += 4;
@@ -60,7 +61,7 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x16(
 
     vst1q_u8(y, vy0123456789ABCDEF); y += 16;
   }
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     float32x4_t vx_lo = vld1q_f32(x); x += 4;
     float32x4_t vx_hi = vld1q_f32(x); x += 4;
 
@@ -79,13 +80,10 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x16(
     vst1_u8(y, vy); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint8_t));
-    assert(n <= 7 * sizeof(uint8_t));
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
     float32x4_t vx_lo = vld1q_f32(x);
-    const float* x_hi = x + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(uint8_t))) == 0) {
-      x_hi = x;
-    }
+    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
     float32x4_t vx_hi = vld1q_f32(x_hi);
 
     vx_lo = vmulq_f32(vx_lo, vscale);
@@ -101,15 +99,15 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x16(
     vy = vmax_u8(vy, vget_low_u8(voutput_min));
     vy = vmin_u8(vy, vget_low_u8(voutput_max));
 
-    if (n & (4 * sizeof(uint8_t))) {
+    if (n & (4 * sizeof(float))) {
       vst1_lane_u32((void*) y, vreinterpret_u32_u8(vy), 0); y += 4;
       vy = vext_u8(vy, vy, 4);
     }
-    if (n & (2 * sizeof(uint8_t))) {
+    if (n & (2 * sizeof(float))) {
       vst1_lane_u16((void*) y, vreinterpret_u16_u8(vy), 0); y += 2;
       vy = vext_u8(vy, vy, 2);
     }
-    if (n & (1 * sizeof(uint8_t))) {
+    if (n & (1 * sizeof(float))) {
       vst1_lane_u8(y, vy, 0);
     }
   }

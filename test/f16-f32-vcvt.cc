@@ -1701,6 +1701,7 @@ TEST(F16_F32_VCVT__SCALAR_FLOAT_X1, batch_gt_1) {
   }
 }
 
+
 TEST(F16_F32_VCVT__SCALAR_FLOAT_X2, batch_eq_2) {
   VCvtMicrokernelTester()
     .batch_size(2)
@@ -1731,6 +1732,7 @@ TEST(F16_F32_VCVT__SCALAR_FLOAT_X2, batch_gt_2) {
   }
 }
 
+
 TEST(F16_F32_VCVT__SCALAR_FLOAT_X3, batch_eq_3) {
   VCvtMicrokernelTester()
     .batch_size(3)
@@ -1760,6 +1762,7 @@ TEST(F16_F32_VCVT__SCALAR_FLOAT_X3, batch_gt_3) {
       .Test(xnn_f16_f32_vcvt_ukernel__scalar_float_x3);
   }
 }
+
 
 TEST(F16_F32_VCVT__SCALAR_FLOAT_X4, batch_eq_4) {
   VCvtMicrokernelTester()

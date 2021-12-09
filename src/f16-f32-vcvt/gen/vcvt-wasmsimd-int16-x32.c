@@ -22,7 +22,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
   const v128_t vdenorm_cutoff = wasm_i16x8_const_splat(0x0400);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
+  for (; n >= 32 * sizeof(uint16_t); n -= 32 * sizeof(uint16_t)) {
     const v128_t vh0 = wasm_v128_load(i);
     const v128_t vh1 = wasm_v128_load(i + 8);
     const v128_t vh2 = wasm_v128_load(i + 16);
@@ -120,7 +120,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
     wasm_v128_store(output + 28, vf7);
     output += 32;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
     const v128_t vh = wasm_v128_load(i);
     i += 8;
 
@@ -153,8 +153,8 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
     output += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
+    assert(n >= 1 * sizeof(uint16_t));
+    assert(n <= 7 * sizeof(uint16_t));
     const v128_t vh = wasm_v128_load(i);
 
     const v128_t vsign = wasm_v128_and(vh, vsign_mask);
@@ -177,7 +177,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
     v128_t vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 0, 8, 1, 9, 2, 10, 3, 11),
       wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo));
 
-    if (n & (4 * sizeof(float))) {
+    if (n & (4 * sizeof(uint16_t))) {
       wasm_v128_store(output, vf);
       output += 4;
 
@@ -185,13 +185,13 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x32(
       vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15),
         wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi));
     }
-    if (n & (2 * sizeof(float))) {
+    if (n & (2 * sizeof(uint16_t))) {
       *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
       output += 2;
 
       vf = wasm_v64x2_shuffle(vf, vf, 1, 1);
     }
-    if (n & (1 * sizeof(float))) {
+    if (n & (1 * sizeof(uint16_t))) {
       *((float*) output) = wasm_f32x4_extract_lane(vf, 0);
     }
   }

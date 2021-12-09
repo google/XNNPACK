@@ -22,7 +22,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x1(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,6 +34,6 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x1(
 
     *output++ = vf;
 
-    n -= sizeof(float);
+    n -= sizeof(uint16_t);
   } while (n != 0);
 }

@@ -24,7 +24,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -71,6 +71,6 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
 
     *o++ = vh;
 
-    n -= sizeof(uint16_t);
+    n -= sizeof(float);
   } while (n != 0);
 }

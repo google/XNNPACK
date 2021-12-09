@@ -23,12 +23,12 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x16(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
+  for (; n >= 16 * sizeof(uint16_t); n -= 16 * sizeof(uint16_t)) {
     const __m512 vacc = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i*) i));
     i += 16;
 
@@ -36,11 +36,11 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x16(
     output += 16;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
+    assert(n >= 1 * sizeof(uint16_t));
+    assert(n <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
+    n >>= 1 /* log2(sizeof(uint16_t)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
 
     const __m512 vacc = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, i));

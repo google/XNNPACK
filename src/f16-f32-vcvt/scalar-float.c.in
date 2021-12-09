@@ -20,7 +20,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x${BATCH_TILE}(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -32,7 +32,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x${BATCH_TILE}(
     const uint32_t vmagic_mask = UINT32_C(0x3F000000);
     const float vmagic_bias = 0.5f;
     const uint32_t vdenormalized_cutoff = UINT32_C(0x08000000);
-    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+    for (; n >= ${BATCH_TILE} * sizeof(uint16_t); n -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(BATCH_TILE):
         const uint16_t vh${N} = i[${N}];
       i += ${BATCH_TILE};
@@ -67,7 +67,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x${BATCH_TILE}(
 
       *output++ = vf;
 
-      n -= sizeof(float);
+      n -= sizeof(uint16_t);
     } while (n != 0);
   $elif BATCH_TILE == 2:
     if XNN_UNLIKELY(n != 0) {
@@ -86,7 +86,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x${BATCH_TILE}(
 
         *output++ = vf;
 
-        n -= sizeof(float);
+        n -= sizeof(uint16_t);
       } while (n != 0);
     }
 }

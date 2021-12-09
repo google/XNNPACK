@@ -22,7 +22,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x2(
     const void* params)
 {
   assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -33,7 +33,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_float_x2(
   const uint32_t vmagic_mask = UINT32_C(0x3F000000);
   const float vmagic_bias = 0.5f;
   const uint32_t vdenormalized_cutoff = UINT32_C(0x08000000);
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
+  for (; n >= 2 * sizeof(uint16_t); n -= 2 * sizeof(uint16_t)) {
     const uint16_t vh0 = i[0];
     const uint16_t vh1 = i[1];
     i += 2;

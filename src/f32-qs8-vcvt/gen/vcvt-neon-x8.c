@@ -23,6 +23,7 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
     const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
@@ -31,7 +32,7 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
   const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_zero_point);
   const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
   const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
-  for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     float32x4_t vx_lo = vld1q_f32(x); x += 4;
     float32x4_t vx_hi = vld1q_f32(x); x += 4;
 
@@ -52,13 +53,10 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
     vst1_s8(y, vy); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(int8_t));
-    assert(n <= 7 * sizeof(int8_t));
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
     float32x4_t vx_lo = vld1q_f32(x);
-    const float* x_hi = x + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(int8_t))) == 0) {
-      x_hi = x;
-    }
+    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
     float32x4_t vx_hi = vld1q_f32(x_hi);
 
     vx_lo = vmulq_f32(vx_lo, vscale);
@@ -76,15 +74,15 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x8(
     vy = vmax_s8(vy, voutput_min);
     vy = vmin_s8(vy, voutput_max);
 
-    if (n & (4 * sizeof(int8_t))) {
+    if (n & (4 * sizeof(float))) {
       vst1_lane_u32((void*) y, vreinterpret_u32_s8(vy), 0); y += 4;
       vy = vext_s8(vy, vy, 4);
     }
-    if (n & (2 * sizeof(int8_t))) {
+    if (n & (2 * sizeof(float))) {
       vst1_lane_u16((void*) y, vreinterpret_u16_s8(vy), 0); y += 2;
       vy = vext_s8(vy, vy, 2);
     }
-    if (n & (1 * sizeof(int8_t))) {
+    if (n & (1 * sizeof(float))) {
       vst1_lane_s8(y, vy, 0);
     }
   }

@@ -23,6 +23,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4(
     const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
@@ -32,7 +33,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4(
   const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
   const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
 
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     float vx0 = x[0];
     float vx1 = x[1];
     float vx2 = x[2];
@@ -88,7 +89,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4(
 
       *y++ = (uint8_t) vy;
 
-      n -= sizeof(uint8_t);
+      n -= sizeof(float);
     } while (n != 0);
   }
 }

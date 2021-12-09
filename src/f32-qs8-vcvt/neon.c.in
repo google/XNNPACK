@@ -40,6 +40,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
     const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
 {
   assert(n != 0);
+  assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
@@ -53,7 +54,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
     const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neon.output_min);
     const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neon.output_max);
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):
         float32x4_t vx${ABC[N:N+4]} = vld1q_f32(x); x += 4;
 
@@ -93,7 +94,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
         $else:
           ${VST1_X8}(y, vy${ABC[N:N+8]}); y += 8;
     }
-  for (; n >= 8 * sizeof(${XINT8_T}); n -= 8 * sizeof(${XINT8_T})) {
+  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     float32x4_t vx_lo = vld1q_f32(x); x += 4;
     float32x4_t vx_hi = vld1q_f32(x); x += 4;
 
@@ -118,13 +119,10 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
     ${VST1_X8}(y, vy); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(${XINT8_T}));
-    assert(n <= 7 * sizeof(${XINT8_T}));
+    assert(n >= 1 * sizeof(float));
+    assert(n <= 7 * sizeof(float));
     float32x4_t vx_lo = vld1q_f32(x);
-    const float* x_hi = x + 4;
-    if XNN_UNPREDICTABLE((n & (4 * sizeof(${XINT8_T}))) == 0) {
-      x_hi = x;
-    }
+    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
     float32x4_t vx_hi = vld1q_f32(x_hi);
 
     vx_lo = vmulq_f32(vx_lo, vscale);
@@ -146,15 +144,15 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
       vy = ${VMAX_X8}(vy, voutput_min);
       vy = ${VMIN_X8}(vy, voutput_max);
 
-    if (n & (4 * sizeof(${XINT8_T}))) {
+    if (n & (4 * sizeof(float))) {
       vst1_lane_u32((void*) y, ${VREINTERPRET_U32_X8}(vy), 0); y += 4;
       vy = ${VEXT_X8}(vy, vy, 4);
     }
-    if (n & (2 * sizeof(${XINT8_T}))) {
+    if (n & (2 * sizeof(float))) {
       vst1_lane_u16((void*) y, ${VREINTERPRET_U16_X8}(vy), 0); y += 2;
       vy = ${VEXT_X8}(vy, vy, 2);
     }
-    if (n & (1 * sizeof(${XINT8_T}))) {
+    if (n & (1 * sizeof(float))) {
       ${VST1_LANE_X8}(y, vy, 0);
     }
   }
