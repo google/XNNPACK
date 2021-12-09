@@ -137,6 +137,10 @@ Assembler& Assembler::bind(Label& l) {
   return *this;
 }
 
+Assembler &Assembler::bx(CoreRegister rm) {
+  return emit32(kAL | 0x12fff10 | rm.code);
+}
+
 Assembler& Assembler::cmp(CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x35 << 20 | rn.code << 16 | imm);
 }

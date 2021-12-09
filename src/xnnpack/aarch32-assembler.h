@@ -339,6 +339,7 @@ class Assembler {
   Assembler& bhi(Label& l) { return b(kHI, l); }
   Assembler& bhs(Label& l) { return b(kHS, l); }
   Assembler& blo(Label& l) { return b(kLO, l); }
+  Assembler& bx(CoreRegister rm);
   // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
   // constants in ARM instructions", for simplicity we start with uint8_t, which
   // is fully representation using a "rotation" of 0.
