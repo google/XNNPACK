@@ -8,14 +8,11 @@
 
 #pragma once
 
+#include <pthreadpool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include <pthreadpool.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/compute.h>
-
+#include <xnnpack/params.h>
 
 enum xnn_ukernel_type {
   xnn_ukernel_type_default = 0,
@@ -300,13 +297,14 @@ struct xnn_operator {
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
-    // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
-    // to Global Average Pooling operation.
+    // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to
+    // switch to Global Average Pooling operation.
     struct {
       union xnn_qs8_avgpool_params qs8_avgpool;
       union xnn_qs8_avgpool_params qs8_gavgpool;
     };
-    // Quantized Add parameters are sensitive to order of inputs, so we initialize an extra copy with the reversed order.
+    // Quantized Add parameters are sensitive to order of inputs, so we initialize an extra copy with the reversed
+    // order.
     struct {
       union xnn_qs8_addsub_minmax_params qs8_addsub;
       union xnn_qs8_addsub_minmax_params qs8_raddsub;
@@ -324,8 +322,8 @@ struct xnn_operator {
       union xnn_qu8_mul_minmax_params qu8_rmul;
     };
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
-    // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
-    // to Global Average Pooling operation.
+    // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to
+    // switch to Global Average Pooling operation.
     struct {
       union xnn_qu8_avgpool_params qu8_avgpool;
       union xnn_qu8_avgpool_params qu8_gavgpool;

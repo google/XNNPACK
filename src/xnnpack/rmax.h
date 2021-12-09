@@ -10,19 +10,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
 #include <xnnpack/common.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-#define DECLARE_F32_RMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* x,                              \
-      float* y);
+#define DECLARE_F32_RMAX_UKERNEL_FUNCTION(fn_name) XNN_INTERNAL void fn_name(size_t n, const float* x, float* y);
 
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__neon)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__sse)
@@ -32,17 +26,11 @@ DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__wasmsimd_arm)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__wasmsimd_x86)
 DECLARE_F32_RMAX_UKERNEL_FUNCTION(xnn_f32_rmax_ukernel__scalar)
 
-
-#define DECLARE_U8_RMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                      \
-      size_t n,                                   \
-      const uint8_t* x,                           \
-      uint8_t* y);
+#define DECLARE_U8_RMAX_UKERNEL_FUNCTION(fn_name) XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y);
 
 DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__neon)
 DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__sse2)
 DECLARE_U8_RMAX_UKERNEL_FUNCTION(xnn_u8_rmax_ukernel__scalar)
-
 
 #ifdef __cplusplus
 }  // extern "C"

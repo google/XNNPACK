@@ -10,29 +10,20 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DECLARE_F16_VBINOP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-        size_t n,                                    \
-        const void* a,                               \
-        const void* b,                               \
-        void* y,                                     \
-        const struct xnn_f16_default_params* params);
+#define DECLARE_F16_VBINOP_UKERNEL_FUNCTION(fn_name)                         \
+  XNN_INTERNAL void fn_name(size_t n, const void* a, const void* b, void* y, \
+                            const struct xnn_f16_default_params* params);
 
-#define DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t n,                                             \
-      const void* a,                                        \
-      const void* b,                                        \
-      void* y,                                              \
-      const struct xnn_f16_minmax_params* params);
+#define DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name)                  \
+  XNN_INTERNAL void fn_name(size_t n, const void* a, const void* b, void* y, \
+                            const struct xnn_f16_minmax_params* params);
 
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x16)
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x8)
@@ -70,29 +61,17 @@ DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vsubc_minmax_ukernel__neonfp1
 DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x8)
 DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16)
 
-#define DECLARE_F32_VBINOP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const float* a,                                \
-      const float* b,                                \
-      float* y,                                      \
-      const union xnn_f32_default_params* params);
+#define DECLARE_F32_VBINOP_UKERNEL_FUNCTION(fn_name)                            \
+  XNN_INTERNAL void fn_name(size_t n, const float* a, const float* b, float* y, \
+                            const union xnn_f32_default_params* params);
 
-#define DECLARE_F32_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t n,                                             \
-      const float* a,                                       \
-      const float* b,                                       \
-      float* y,                                             \
-      const union xnn_f32_minmax_params* params);
+#define DECLARE_F32_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name)                     \
+  XNN_INTERNAL void fn_name(size_t n, const float* a, const float* b, float* y, \
+                            const union xnn_f32_minmax_params* params);
 
-#define DECLARE_F32_VBINOP_RELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                              \
-      size_t n,                                           \
-      const float* a,                                     \
-      const float* b,                                     \
-      float* y,                                           \
-      const union xnn_f32_relu_params* params);
+#define DECLARE_F32_VBINOP_RELU_UKERNEL_FUNCTION(fn_name)                       \
+  XNN_INTERNAL void fn_name(size_t n, const float* a, const float* b, float* y, \
+                            const union xnn_f32_relu_params* params);
 
 DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vmax_ukernel__neon_x4)
 DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vmax_ukernel__neon_x8)

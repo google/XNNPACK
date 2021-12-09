@@ -4,18 +4,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <stdlib.h>
+
 #include <cstddef>
 #include <limits>
 #include <memory>
 #include <type_traits>
 #include <utility>
 
-#include <stdlib.h>
-
 #if defined(__ANDROID__) || defined(_WIN32) || defined(__CYGWIN__)
-  #include <malloc.h>
+#include <malloc.h>
 #endif
-
 
 template <typename T, size_t Alignment>
 class AlignedAllocator;
@@ -57,25 +56,17 @@ class AlignedAllocator {
   inline AlignedAllocator() noexcept {}
 
   template <class U>
-  inline AlignedAllocator(
-      const AlignedAllocator<U, Alignment>& other) noexcept {}
+  inline AlignedAllocator(const AlignedAllocator<U, Alignment>& other) noexcept {}
 
   inline size_type max_size() const noexcept {
-    return (std::numeric_limits<size_type>::max() - size_type(Alignment)) /
-        sizeof(T);
+    return (std::numeric_limits<size_type>::max() - size_type(Alignment)) / sizeof(T);
   }
 
-  inline pointer address(reference x) const noexcept {
-    return std::addressof(x);
-  }
+  inline pointer address(reference x) const noexcept { return std::addressof(x); }
 
-  inline const_pointer address(const_reference x) const noexcept {
-    return std::addressof(x);
-  }
+  inline const_pointer address(const_reference x) const noexcept { return std::addressof(x); }
 
-  inline pointer allocate(
-      size_type n,
-      typename AlignedAllocator<void, Alignment>::const_pointer hint = 0) {
+  inline pointer allocate(size_type n, typename AlignedAllocator<void, Alignment>::const_pointer hint = 0) {
 #if defined(_WIN32)
     void* memory = nullptr;
     memory = _aligned_malloc(n * sizeof(T), Alignment);

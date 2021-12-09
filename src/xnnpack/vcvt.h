@@ -7,21 +7,15 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 #define DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t n,                                        \
-      const void* input,                               \
-      float* output,                                   \
-      const void* params);
+  XNN_INTERNAL void fn_name(size_t n, const void* input, float* output, const void* params);
 
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__neon_int16_x8)
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__neon_int16_x16)
@@ -87,13 +81,8 @@ DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__scalar_float_x2)
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__scalar_float_x3)
 DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__scalar_float_x4)
 
-
 #define DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t n,                                        \
-      const float* input,                              \
-      void* output,                                    \
-      const void* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* input, void* output, const void* params);
 
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__neon_x8)
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__neon_x16)
@@ -139,13 +128,8 @@ DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x2)
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3)
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x4)
 
-
 #define DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t n,                                        \
-      const float* input,                              \
-      int8_t* output,                                  \
-      const union xnn_f32_qs8_cvt_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* input, int8_t* output, const union xnn_f32_qs8_cvt_params* params);
 
 DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(xnn_f32_qs8_vcvt_ukernel__neon_x8)
 DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(xnn_f32_qs8_vcvt_ukernel__neon_x16)
@@ -203,13 +187,8 @@ DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(xnn_f32_qs8_vcvt_ukernel__scalar_magic_imi
 DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x3)
 DECLARE_F32_QS8_VCVT_UKERNEL_FUNCTION(xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x4)
 
-
 #define DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t n,                                        \
-      const float* input,                              \
-      uint8_t* output,                                 \
-      const union xnn_f32_qu8_cvt_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* input, uint8_t* output, const union xnn_f32_qu8_cvt_params* params);
 
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__neon_x8)
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__neon_x16)
@@ -261,7 +240,6 @@ DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_imi
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x2)
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3)
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4)
-
 
 #ifdef __cplusplus
 }  // extern "C"

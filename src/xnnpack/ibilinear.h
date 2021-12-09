@@ -7,24 +7,16 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-#define DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                            \
-      size_t output_pixels,                             \
-      size_t channels,                                  \
-      const float** input,                              \
-      size_t input_offset,                              \
-      const float* weights,                             \
-      float* output,                                    \
-      size_t output_increment);
+#define DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(fn_name)                                                      \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels, const float** input, size_t input_offset, \
+                            const float* weights, float* output, size_t output_increment);
 
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__scalar_c1)
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__scalar_c2)
@@ -42,15 +34,9 @@ DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__sse_c8)
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__wasmsimd_c4)
 DECLARE_F32_IBILINEAR_UKERNEL_FUNCTION(xnn_f32_ibilinear_ukernel__wasmsimd_c8)
 
-#define DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t output_pixels,                            \
-      size_t channels,                                 \
-      const int8_t** input,                            \
-      size_t input_offset,                             \
-      const int16_t* weights,                          \
-      int8_t* output,                                  \
-      size_t output_increment);
+#define DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(fn_name)                                                        \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels, const int8_t** input, size_t input_offset, \
+                            const int16_t* weights, int8_t* output, size_t output_increment);
 
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__scalar_c1)
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__scalar_c2)
@@ -71,15 +57,9 @@ DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c8)
 DECLARE_S8_IBILINEAR_UKERNEL_FUNCTION(xnn_s8_ibilinear_ukernel__wasmsimd_mul32_c16)
 
-#define DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t output_pixels,                            \
-      size_t channels,                                 \
-      const uint8_t** input,                           \
-      size_t input_offset,                             \
-      const int16_t* weights,                          \
-      uint8_t* output,                                 \
-      size_t output_increment);
+#define DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(fn_name)                                                         \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels, const uint8_t** input, size_t input_offset, \
+                            const int16_t* weights, uint8_t* output, size_t output_increment);
 
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__scalar_c1)
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__scalar_c2)
@@ -100,15 +80,9 @@ DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__wasmsimd_mul32_c8)
 DECLARE_U8_IBILINEAR_UKERNEL_FUNCTION(xnn_u8_ibilinear_ukernel__wasmsimd_mul32_c16)
 
-#define DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t output_pixels,                                 \
-      size_t channels,                                      \
-      const float** input,                                  \
-      size_t input_offset,                                  \
-      const float* weights,                                 \
-      float* output,                                        \
-      size_t input_increment);
+#define DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name)                                                  \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t channels, const float** input, size_t input_offset, \
+                            const float* weights, float* output, size_t input_increment);
 
 DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__scalar_p1)
 DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__scalar_p2)

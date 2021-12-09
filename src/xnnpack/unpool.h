@@ -7,29 +7,21 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-#define DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-    size_t p,                                        \
-    size_t c,                                        \
-    uint32_t f,                                      \
-    const uint32_t* input,                           \
-    const uint32_t* index,                           \
-    uint32_t** output);
+#define DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(fn_name)                                                      \
+  XNN_INTERNAL void fn_name(size_t p, size_t c, uint32_t f, const uint32_t* input, const uint32_t* index, \
+                            uint32_t** output);
 
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__neon)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__sse2)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__wasmsimd)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__scalar)
-
 
 #ifdef __cplusplus
 }  // extern "C"

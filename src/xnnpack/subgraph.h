@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
 #include <xnnpack.h>
 
 #define XNN_MAX_INPUTS 3
@@ -95,17 +94,11 @@ struct xnn_blob {
 struct xnn_node;
 struct xnn_operator_data;
 
-typedef enum xnn_status (*xnn_create_operator_fn)(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata);
+typedef enum xnn_status (*xnn_create_operator_fn)(const struct xnn_node* node, const struct xnn_value* values,
+                                                  size_t num_values, struct xnn_operator_data* opdata);
 
-typedef enum xnn_status (*xnn_setup_operator_fn)(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
-  pthreadpool_t threadpool);
+typedef enum xnn_status (*xnn_setup_operator_fn)(const struct xnn_operator_data* opdata, const struct xnn_blob* blobs,
+                                                 size_t num_blobs, pthreadpool_t threadpool);
 
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
@@ -320,17 +313,13 @@ struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
-size_t xnn_tensor_get_size(
-  xnn_subgraph_t subgraph,
-  uint32_t value_id);
+size_t xnn_tensor_get_size(xnn_subgraph_t subgraph, uint32_t value_id);
 
 // Product of all shape dimensions
-size_t xnn_shape_multiply_all_dims(
-  const struct xnn_shape shape[1]);
+size_t xnn_shape_multiply_all_dims(const struct xnn_shape shape[1]);
 
 // Product of all shape dimensions, except for the last (channel) one
-size_t xnn_shape_multiply_non_channel_dims(
-  const struct xnn_shape shape[1]);
+size_t xnn_shape_multiply_non_channel_dims(const struct xnn_shape shape[1]);
 
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
@@ -338,7 +327,6 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
 
 void xnn_node_clear(struct xnn_node* node);
 void xnn_value_clear(struct xnn_value* value);
-
 
 #ifdef __cplusplus
 }  // extern "C"

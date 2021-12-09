@@ -5,62 +5,32 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*xnn_f32_unary_math_function)(
-  size_t n,
-  const float* input,
-  float* output);
+typedef void (*xnn_f32_unary_math_function)(size_t n, const float* input, float* output);
 
-typedef void (*xnn_f32_ext_unary_math_function)(
-  size_t n,
-  const float* input,
-  float* output_mantissa,
-  float* output_exponent);
+typedef void (*xnn_f32_ext_unary_math_function)(size_t n, const float* input, float* output_mantissa,
+                                                float* output_exponent);
 
-#define DECLARE_F32_UNARY_MATH_FUNCTION(fn_name) \
-  void fn_name(                                  \
-    size_t n,                                    \
-    const float* input,                          \
-    float* output);
+#define DECLARE_F32_UNARY_MATH_FUNCTION(fn_name) void fn_name(size_t n, const float* input, float* output);
 
-#define DECLARE_F16_F32_CVT_MATH_FUNCTION(fn_name) \
-  void fn_name(                                    \
-    size_t n,                                      \
-    const void* input,                             \
-    float* output);
+#define DECLARE_F16_F32_CVT_MATH_FUNCTION(fn_name) void fn_name(size_t n, const void* input, float* output);
 
-#define DECLARE_F32_F16_CVT_MATH_FUNCTION(fn_name) \
-  void fn_name(                                    \
-    size_t n,                                      \
-    const float* input,                            \
-    void* output);
+#define DECLARE_F32_F16_CVT_MATH_FUNCTION(fn_name) void fn_name(size_t n, const float* input, void* output);
 
 #define DECLARE_F32_QS8_CVT_MATH_FUNCTION(fn_name) \
-  void fn_name(                                    \
-    size_t n,                                      \
-    const float* input,                            \
-    int8_t* output,                                \
-    int8_t output_zero_point);
+  void fn_name(size_t n, const float* input, int8_t* output, int8_t output_zero_point);
 
 #define DECLARE_F32_QU8_CVT_MATH_FUNCTION(fn_name) \
-  void fn_name(                                    \
-    size_t n,                                      \
-    const float* input,                            \
-    uint8_t* output,                               \
-    uint8_t output_zero_point);
+  void fn_name(size_t n, const float* input, uint8_t* output, uint8_t output_zero_point);
 
 #define DECLARE_F32_EXT_UNARY_MATH_FUNCTION(fn_name) \
-  void fn_name(                                      \
-    size_t n,                                        \
-    const float* input,                              \
-    float* output_mantissa,                          \
-    float* output_exponent);
+  void fn_name(size_t n, const float* input, float* output_mantissa, float* output_exponent);
 
 DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neon_int16)
 DECLARE_F16_F32_CVT_MATH_FUNCTION(xnn_math_f16_f32_cvt__neon_int32)

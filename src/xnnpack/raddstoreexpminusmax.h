@@ -7,21 +7,15 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                       \
-      size_t n,                                                    \
-      const float* input,                                          \
-      float* output,                                               \
-      float* sum,                                                  \
-      float max);
+  XNN_INTERNAL void fn_name(size_t n, const float* input, float* output, float* sum, float max);
 
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x4)
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x8)

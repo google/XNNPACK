@@ -7,54 +7,33 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 #define DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const void* x,                                 \
-      void* y,                                       \
-      const struct xnn_f16_minmax_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const void* x, void* y, const struct xnn_f16_minmax_params* params);
 
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x8)
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x16)
 
-
 #define DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                          \
-      size_t n,                                       \
-      const void* x,                                  \
-      void* y,                                        \
-      const struct xnn_f16_hswish_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const void* x, void* y, const struct xnn_f16_hswish_params* params);
 
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x16)
 
-
 #define DECLARE_F16_VRELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const void* x,                                \
-      void* y,                                      \
-      const struct xnn_f16_relu_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const void* x, void* y, const struct xnn_f16_relu_params* params);
 
 DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x8)
 DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x16)
 
-
 #define DECLARE_F32_VABS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* x,                              \
-      float* y,                                    \
-      const union xnn_f32_abs_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_abs_params* params);
 
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__neon_x4)
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__neon_x8)
@@ -75,13 +54,8 @@ DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__scalar_x1)
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__scalar_x2)
 DECLARE_F32_VABS_UKERNEL_FUNCTION(xnn_f32_vabs_ukernel__scalar_x4)
 
-
 #define DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const float* x,                                \
-      float* y,                                      \
-      const union xnn_f32_minmax_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(xnn_f32_vclamp_ukernel__neon_x4)
 DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(xnn_f32_vclamp_ukernel__neon_x8)
@@ -102,13 +76,8 @@ DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(xnn_f32_vclamp_ukernel__scalar_x1)
 DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(xnn_f32_vclamp_ukernel__scalar_x2)
 DECLARE_F32_VCLAMP_UKERNEL_FUNCTION(xnn_f32_vclamp_ukernel__scalar_x4)
 
-
 #define DECLARE_F32_VELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* x,                              \
-      float* y,                                    \
-      const union xnn_f32_elu_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_elu_params* params);
 
 DECLARE_F32_VELU_UKERNEL_FUNCTION(xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x4)
 DECLARE_F32_VELU_UKERNEL_FUNCTION(xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8)
@@ -305,13 +274,8 @@ DECLARE_F32_VELU_UKERNEL_FUNCTION(xnn_f32_velu_ukernel__scalar_rr2_p6_x4)
 DECLARE_F32_VELU_UKERNEL_FUNCTION(xnn_f32_velu_ukernel__scalar_rr2_p6_x5)
 DECLARE_F32_VELU_UKERNEL_FUNCTION(xnn_f32_velu_ukernel__scalar_rr2_p6_x6)
 
-
 #define DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                          \
-      size_t n,                                       \
-      const float* x,                                 \
-      float* y,                                       \
-      const union xnn_f32_hswish_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_hswish_params* params);
 
 DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__neon_x4)
 DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__neon_x8)
@@ -341,14 +305,8 @@ DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__scalar_x1)
 DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__scalar_x2)
 DECLARE_F32_VHSWISH_UKERNEL_FUNCTION(xnn_f32_vhswish_ukernel__scalar_x4)
 
-
 #define DECLARE_F32_VLRELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const float* x,                                \
-      float* y,                                      \
-      const union xnn_f32_lrelu_params* params);
-
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_lrelu_params* params);
 
 DECLARE_F32_VLRELU_UKERNEL_FUNCTION(xnn_f32_vlrelu_ukernel__neon_x4)
 DECLARE_F32_VLRELU_UKERNEL_FUNCTION(xnn_f32_vlrelu_ukernel__neon_x8)
@@ -382,14 +340,8 @@ DECLARE_F32_VLRELU_UKERNEL_FUNCTION(xnn_f32_vlrelu_ukernel__scalar_x1)
 DECLARE_F32_VLRELU_UKERNEL_FUNCTION(xnn_f32_vlrelu_ukernel__scalar_x2)
 DECLARE_F32_VLRELU_UKERNEL_FUNCTION(xnn_f32_vlrelu_ukernel__scalar_x4)
 
-
 #define DECLARE_F32_VNEG_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* x,                              \
-      float* y,                                    \
-      const union xnn_f32_neg_params* params);
-
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_neg_params* params);
 
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__neon_x4)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__neon_x8)
@@ -410,13 +362,8 @@ DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__scalar_x1)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__scalar_x2)
 DECLARE_F32_VNEG_UKERNEL_FUNCTION(xnn_f32_vneg_ukernel__scalar_x4)
 
-
 #define DECLARE_F32_VRELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const float* x,                               \
-      float* y,                                     \
-      const union xnn_f32_relu_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_relu_params* params);
 
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__neon_x4)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__neon_x8)
@@ -441,13 +388,8 @@ DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x1)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x2)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x4)
 
-
 #define DECLARE_F32_VRND_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                       \
-      size_t n,                                    \
-      const float* x,                              \
-      float* y,                                    \
-      const union xnn_f32_rnd_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_rnd_params* params);
 
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndne_ukernel__neon_x4)
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndne_ukernel__neon_x8)
@@ -535,13 +477,8 @@ DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x1)
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x2)
 DECLARE_F32_VRND_UKERNEL_FUNCTION(xnn_f32_vrndd_ukernel__scalar_libm_x4)
 
-
 #define DECLARE_F32_VSQRT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const float* x,                               \
-      float* y,                                     \
-      const union xnn_f32_sqrt_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const union xnn_f32_sqrt_params* params);
 
 DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__neon_sqrt_x4)
 DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__neon_sqrt_x8)
@@ -599,13 +536,8 @@ DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__scalar_sqrt_x1)
 DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__scalar_sqrt_x2)
 DECLARE_F32_VSQRT_UKERNEL_FUNCTION(xnn_f32_vsqrt_ukernel__scalar_sqrt_x4)
 
-
 #define DECLARE_F32_VUNARY_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const float* x,                                \
-      float* y,                                      \
-      const void* params);
+  XNN_INTERNAL void fn_name(size_t n, const float* x, float* y, const void* params);
 
 DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x4)
 DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x8)
@@ -896,13 +828,8 @@ DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x1)
 DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x2)
 DECLARE_F32_VUNARY_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x4)
 
-
 #define DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const int8_t* x,                              \
-      int8_t* y,                                    \
-      const union xnn_s8_minmax_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y, const union xnn_s8_minmax_params* params);
 
 DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__neon_x64)
 DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse2_x64)
@@ -910,26 +837,16 @@ DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse41_x64)
 DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__wasmsimd_x64)
 DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__scalar_x4)
 
-
 #define DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const uint8_t* x,                             \
-      uint8_t* y,                                   \
-      const union xnn_u8_minmax_params* params);
+  XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y, const union xnn_u8_minmax_params* params);
 
 DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__neon_x64)
 DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__sse2_x64)
 DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_x64)
 DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__scalar_x4)
 
-
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t size,                                  \
-      const void* input,                            \
-      void* output,                                 \
-      const void* params);
+  XNN_INTERNAL void fn_name(size_t size, const void* input, void* output, const void* params);
 
 DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__memcpy)
 

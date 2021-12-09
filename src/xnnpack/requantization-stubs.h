@@ -8,34 +8,20 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
-
+#include <stdint.h>
 #include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef void (*xnn_qu8_requantization_function)(size_t n, const int32_t* input, float scale, uint8_t zero_point,
+                                                uint8_t qmin, uint8_t qmax, uint8_t* output);
 
-typedef void (*xnn_qu8_requantization_function)(
-    size_t n,
-    const int32_t* input,
-    float scale,
-    uint8_t zero_point,
-    uint8_t qmin,
-    uint8_t qmax,
-    uint8_t* output);
-
-#define DECLARE_QU8_REQUANTIZATION_FUNCTION(fn_name) \
-    void fn_name(                                    \
-        size_t n,                                    \
-        const int32_t* input,                        \
-        float scale,                                 \
-        uint8_t zero_point,                          \
-        uint8_t qmin,                                \
-        uint8_t qmax,                                \
-        uint8_t* output);
+#define DECLARE_QU8_REQUANTIZATION_FUNCTION(fn_name)                                                        \
+  void fn_name(size_t n, const int32_t* input, float scale, uint8_t zero_point, uint8_t qmin, uint8_t qmax, \
+               uint8_t* output);
 
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_fp32__neon)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_fp32__sse2)
@@ -58,25 +44,12 @@ DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_signed64)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_unsigned32)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__scalar_unsigned64)
 
+typedef void (*xnn_qs8_requantization_function)(size_t n, const int32_t* input, float scale, int8_t zero_point,
+                                                int8_t qmin, int8_t qmax, int8_t* output);
 
-typedef void (*xnn_qs8_requantization_function)(
-    size_t n,
-    const int32_t* input,
-    float scale,
-    int8_t zero_point,
-    int8_t qmin,
-    int8_t qmax,
-    int8_t* output);
-
-#define DECLARE_QS8_REQUANTIZATION_FUNCTION(fn_name) \
-    void fn_name(                                    \
-        size_t n,                                    \
-        const int32_t* input,                        \
-        float scale,                                 \
-        int8_t zero_point,                           \
-        int8_t qmin,                                 \
-        int8_t qmax,                                 \
-        int8_t* output);
+#define DECLARE_QS8_REQUANTIZATION_FUNCTION(fn_name)                                                     \
+  void fn_name(size_t n, const int32_t* input, float scale, int8_t zero_point, int8_t qmin, int8_t qmax, \
+               int8_t* output);
 
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_fp32__neon)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_fp32__sse2)
@@ -105,7 +78,6 @@ DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__neon_qdmulh)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse4_sra)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse4_srl)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__scalar)
-
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -8,15 +8,13 @@
 
 #pragma once
 
-#include <inttypes.h>
-
 #include <clog.h>
-
+#include <inttypes.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
 #ifndef XNN_LOG_LEVEL
-  #error "Undefined XNN_LOG_LEVEL"
+#error "Undefined XNN_LOG_LEVEL"
 #endif
 
 CLOG_DEFINE_LOG_DEBUG(xnn_log_debug, "XNNPACK", XNN_LOG_LEVEL);
@@ -30,21 +28,21 @@ extern "C" {
 #endif
 
 #if XNN_LOG_LEVEL == 0
-  inline static const char* xnn_datatype_to_string(enum xnn_datatype type) {
-    return "Unknown";
-  }
+inline static const char* xnn_datatype_to_string(enum xnn_datatype type) {
+  return "Unknown";
+}
 
-  inline static const char* xnn_node_type_to_string(enum xnn_node_type type) {
-    return "Unknown";
-  }
+inline static const char* xnn_node_type_to_string(enum xnn_node_type type) {
+  return "Unknown";
+}
 
-  inline static const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
-    return "Unknown";
-  }
+inline static const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
+  return "Unknown";
+}
 #else
-  const char* xnn_datatype_to_string(enum xnn_datatype type);
-  const char* xnn_node_type_to_string(enum xnn_node_type type);
-  const char* xnn_operator_type_to_string(enum xnn_operator_type type);
+const char* xnn_datatype_to_string(enum xnn_datatype type);
+const char* xnn_node_type_to_string(enum xnn_node_type type);
+const char* xnn_operator_type_to_string(enum xnn_operator_type type);
 #endif
 
 #ifdef __cplusplus

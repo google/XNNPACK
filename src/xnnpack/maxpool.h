@@ -10,26 +10,17 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-#define DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                 \
-      size_t output_pixels,                                  \
-      size_t kernel_size,                                    \
-      size_t channels,                                       \
-      const float** input,                                   \
-      size_t input_offset,                                   \
-      float* output,                                         \
-      size_t input_increment,                                \
-      size_t output_increment,                               \
-      const union xnn_f32_minmax_params* params);
+#define DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name)                                                     \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t kernel_size, size_t channels, const float** input,      \
+                            size_t input_offset, float* output, size_t input_increment, size_t output_increment, \
+                            const union xnn_f32_minmax_params* params);
 
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4)
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4)
@@ -38,43 +29,26 @@ DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x_
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__wasm_c1)
 DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1)
 
-
-#define DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t output_pixels,                                 \
-      size_t kernel_size,                                   \
-      size_t channels,                                      \
-      const uint8_t** input,                                \
-      size_t input_offset,                                  \
-      uint8_t* output,                                      \
-      size_t input_increment,                               \
-      size_t output_increment,                              \
-      const union xnn_u8_minmax_params* params);
+#define DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name)                                                        \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t kernel_size, size_t channels, const uint8_t** input,      \
+                            size_t input_offset, uint8_t* output, size_t input_increment, size_t output_increment, \
+                            const union xnn_u8_minmax_params* params);
 
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16)
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16)
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16)
 DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1)
 
-
-#define DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t output_pixels,                                 \
-      size_t kernel_size,                                   \
-      size_t channels,                                      \
-      const int8_t** input,                                 \
-      size_t input_offset,                                  \
-      int8_t* output,                                       \
-      size_t input_increment,                               \
-      size_t output_increment,                              \
-      const union xnn_s8_minmax_params* params);
+#define DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name)                                                       \
+  XNN_INTERNAL void fn_name(size_t output_pixels, size_t kernel_size, size_t channels, const int8_t** input,      \
+                            size_t input_offset, int8_t* output, size_t input_increment, size_t output_increment, \
+                            const union xnn_s8_minmax_params* params);
 
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1)
-
 
 #ifdef __cplusplus
 }  // extern "C"

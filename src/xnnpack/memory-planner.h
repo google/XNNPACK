@@ -8,10 +8,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
 #include <xnnpack.h>
-#include <xnnpack/common.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,8 +49,8 @@ inline static void xnn_release_value_allocation_tracker(struct xnn_value_allocat
 // Add a to-be-allocated xnn_value (referred by 'value_id') of size 'tensor_size' to the allocation tracker.
 // Note: this function assumes 'value_id's added in increasing order for simplicity as it's called inside a loop
 // iterating over 'subgraph->values'.
-XNN_INTERNAL void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
-                                                   uint32_t value_id, size_t tensor_size);
+XNN_INTERNAL void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker, uint32_t value_id,
+                                                   size_t tensor_size);
 
 // Plan the exact the memory allocation for intermediate tensors according to the xnn_value allocation tracker.
 XNN_INTERNAL void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker);
