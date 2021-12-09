@@ -241,6 +241,12 @@ class MemOperand {
   // Note, kPostIndexed will write back, but doesn't need to set bit w.
   int32_t w() { return 0; }
 
+  // Overload postfix increment to indicate a post-indexed addressing mode for load/stores.
+  MemOperand operator++(int) {
+    mode_ = AddressingMode::kPostIndexed;
+    return *this;
+  }
+
  private:
   AddressingMode mode_;
   CoreRegister rn_;
@@ -258,7 +264,7 @@ static inline MemOperand operator,(CoreRegister r, int32_t offset) {
 // Helper struct for some syntax sugar to look like native assembly, see mem.
 struct MemOperandHelper {
   const MemOperand operator[](MemOperand op) const { return op; }
-  const MemOperand operator[](CoreRegister r) const { return MemOperand(r, 0); }
+  MemOperand operator[](CoreRegister r) const { return MemOperand(r, 0); }
 };
 
 // Use "mem" (and its overload of array subscript operator) to get some syntax
@@ -327,6 +333,11 @@ class Assembler {
   Assembler& subs(CoreRegister rd, CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
+  // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
+  Assembler& vld1_32(DRegisterList regs, MemOperand op);
+  // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
+  // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
+  Assembler& vld1r_32(DRegisterList regs, MemOperand op);
   // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
   Assembler& vldm(CoreRegister rn, SRegisterList regs, bool wb);
   Assembler& vldm(CoreRegister rn, DRegisterList regs, bool wb);

@@ -171,6 +171,28 @@ Assembler& Assembler::subs(CoreRegister rd, CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x25 << 20 | rn.code << 16 | rd.code << 12 | imm);
 }
 
+Assembler& Assembler::vld1_32(DRegisterList regs, MemOperand op) {
+  if (regs.length != 1) {
+    // Unimplemented since only length 1 is used in microkernels.
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(0xF4200780 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
+}
+
+Assembler& Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
+  if (regs.length != 2) {
+    // Unimplemented since only length 2 used in microkernels.
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(0xF4A00CA0 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
+}
+
 Assembler& Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {
   return emit32(kAL | 0x0C900A00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
 }
