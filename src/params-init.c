@@ -2997,3 +2997,27 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
   }
 }
 #endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_init_qs8_f32_cvt_neon_params(
+  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t zero_point)
+{
+  params->neon.minus_zero_point[0] = -(int16_t) zero_point;
+  params->neon.minus_zero_point[1] = -(int16_t) zero_point;
+  params->neon.scale = scale;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_init_qu8_f32_cvt_neon_params(
+  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point)
+{
+  params->neon.minus_zero_point[0] = -(int16_t) zero_point;
+  params->neon.minus_zero_point[1] = -(int16_t) zero_point;
+  params->neon.scale = scale;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

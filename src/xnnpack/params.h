@@ -969,6 +969,32 @@ union xnn_f32_qu8_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD
 };
 
+union xnn_qs8_f32_cvt_params {
+  struct {
+    int32_t zero_point;
+    float scale;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int16_t minus_zero_point[2];
+    float scale;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
+union xnn_qu8_f32_cvt_params {
+  struct {
+    int32_t zero_point;
+    float scale;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int16_t minus_zero_point[2];
+    float scale;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
 typedef void (*xnn_ppmm_ukernel_function)(
     size_t mr,
     size_t nc,
@@ -2164,6 +2190,18 @@ typedef void (*xnn_f32_qu8_vcvt_ukernel_function)(
     uint8_t* output,
     const union xnn_f32_qu8_cvt_params* params);
 
+typedef void (*xnn_qs8_f32_vcvt_ukernel_function)(
+    size_t n,
+    const int8_t* input,
+    float* output,
+    const union xnn_qs8_f32_cvt_params* params);
+
+typedef void (*xnn_qu8_f32_vcvt_ukernel_function)(
+    size_t n,
+    const uint8_t* input,
+    float* output,
+    const union xnn_qu8_f32_cvt_params* params);
+
 typedef void (*xnn_vmulcaddc_ukernel_function)(
     size_t m,
     size_t c,
@@ -2274,6 +2312,16 @@ typedef void (*xnn_init_f32_qu8_cvt_params_fn)(
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
+
+typedef void (*xnn_init_qs8_f32_cvt_params_fn)(
+  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t zero_point);
+
+typedef void (*xnn_init_qu8_f32_cvt_params_fn)(
+  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point);
 
 typedef void (*xnn_init_qs8_minmax_params_fn)(
   union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],

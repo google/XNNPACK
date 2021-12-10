@@ -1605,6 +1605,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up32x9-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/up32x25-minmax-rndnu-neon-mul16.c
+  src/qs8-f32-vcvt/gen/vcvt-neon-x8.c
+  src/qs8-f32-vcvt/gen/vcvt-neon-x16.c
+  src/qs8-f32-vcvt/gen/vcvt-neon-x24.c
+  src/qs8-f32-vcvt/gen/vcvt-neon-x32.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c8-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c16-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c24-acc2.c
@@ -2098,6 +2102,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/up32x25-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/up32x25-minmax-rndnu-neon-mul16.c
+  src/qu8-f32-vcvt/gen/vcvt-neon-x8.c
+  src/qu8-f32-vcvt/gen/vcvt-neon-x16.c
+  src/qu8-f32-vcvt/gen/vcvt-neon-x24.c
+  src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
   src/qu8-gavgpool/7p7x-minmax-neon-c8.c
   src/qu8-gavgpool/7x-minmax-neon-c8.c
   src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
@@ -7133,6 +7141,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qs8-dwconv-minmax-rndnu-test qs8-dwconv-minmax-rndnu-test)
 
+  ADD_EXECUTABLE(qs8-f32-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-f32-vcvt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qs8-f32-vcvt-test qs8-f32-vcvt-test)
+
   ADD_EXECUTABLE(qs8-gavgpool-minmax-test test/qs8-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qs8-gavgpool-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -7249,6 +7266,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-rndnu-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-dwconv-minmax-rndnu-test qu8-dwconv-minmax-rndnu-test)
+
+  ADD_EXECUTABLE(qu8-f32-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-f32-vcvt-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-f32-vcvt-test qu8-f32-vcvt-test)
 
   ADD_EXECUTABLE(qu8-gavgpool-minmax-test test/qu8-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-gavgpool-minmax-test PROPERTIES

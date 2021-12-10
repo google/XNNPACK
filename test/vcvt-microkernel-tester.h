@@ -225,6 +225,84 @@ class VCvtMicrokernelTester {
     }
   }
 
+  void Test(xnn_qs8_f32_vcvt_ukernel_function vcvt, xnn_init_qs8_f32_cvt_params_fn init_params = nullptr) const {
+    ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution =
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    auto i8rng = std::bind(distribution, std::ref(rng));
+
+    std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<float> output(batch_size());
+    std::vector<float> output_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      union xnn_qs8_f32_cvt_params params;
+      if (init_params) {
+        init_params(&params, scale(), zero_point());
+      }
+
+      // Call optimized micro-kernel.
+      vcvt(batch_size() * sizeof(int8_t), input.data(), output.data(), &params);
+
+      // Compute reference results
+      for (size_t i = 0; i < batch_size(); i++) {
+        output_ref[i] = float(int16_t(input[i]) - zero_point()) * scale();
+      }
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(output[i], output_ref[i])
+          << "at " << i << " / " << batch_size()
+          << ", x[" << i << "] = " << int32_t(input[i]);
+      }
+    }
+  }
+
+  void Test(xnn_qu8_f32_vcvt_ukernel_function vcvt, xnn_init_qu8_f32_cvt_params_fn init_params = nullptr) const {
+    ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution =
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+    auto u8rng = std::bind(distribution, std::ref(rng));
+
+    std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<float> output(batch_size());
+    std::vector<float> output_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      union xnn_qu8_f32_cvt_params params;
+      if (init_params) {
+        init_params(&params, scale(), zero_point());
+      }
+
+      // Call optimized micro-kernel.
+      vcvt(batch_size() * sizeof(uint8_t), input.data(), output.data(), &params);
+
+      // Compute reference results
+      for (size_t i = 0; i < batch_size(); i++) {
+        output_ref[i] = float(int16_t(input[i]) - zero_point()) * scale();
+      }
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(output[i], output_ref[i])
+          << "at " << i << " / " << batch_size()
+          << ", x[" << i << "] = " << int32_t(input[i]);
+      }
+    }
+  }
+
  private:
   float scale_ = 1.75f;
   int16_t zero_point_ = 1;

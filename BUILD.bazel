@@ -2639,6 +2639,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qs8-dwconv/gen/up32x9-minmax-rndnu-neon-mul16.c",
     "src/qs8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c",
     "src/qs8-dwconv/gen/up32x25-minmax-rndnu-neon-mul16.c",
+    "src/qs8-f32-vcvt/gen/vcvt-neon-x8.c",
+    "src/qs8-f32-vcvt/gen/vcvt-neon-x16.c",
+    "src/qs8-f32-vcvt/gen/vcvt-neon-x24.c",
+    "src/qs8-f32-vcvt/gen/vcvt-neon-x32.c",
     "src/qs8-gavgpool/gen/7p7x-minmax-neon-c8-acc2.c",
     "src/qs8-gavgpool/gen/7p7x-minmax-neon-c16-acc2.c",
     "src/qs8-gavgpool/gen/7p7x-minmax-neon-c24-acc2.c",
@@ -3132,6 +3136,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qu8-dwconv/gen/up32x25-minmax-fp32-neon-mul16.c",
     "src/qu8-dwconv/gen/up32x25-minmax-rndnu-neon-mul8.c",
     "src/qu8-dwconv/gen/up32x25-minmax-rndnu-neon-mul16.c",
+    "src/qu8-f32-vcvt/gen/vcvt-neon-x8.c",
+    "src/qu8-f32-vcvt/gen/vcvt-neon-x16.c",
+    "src/qu8-f32-vcvt/gen/vcvt-neon-x24.c",
+    "src/qu8-f32-vcvt/gen/vcvt-neon-x32.c",
     "src/qu8-gavgpool/7p7x-minmax-neon-c8.c",
     "src/qu8-gavgpool/7x-minmax-neon-c8.c",
     "src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c",
@@ -9726,24 +9734,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_qs8_vcvt_test",
-    srcs = [
-        "test/f32-qs8-vcvt.cc",
-        "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "f32_qu8_vcvt_test",
-    srcs = [
-        "test/f32-qu8-vcvt.cc",
-        "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f32_gavgpool_minmax_test",
     srcs = [
         "test/f32-gavgpool-minmax.cc",
@@ -9857,6 +9847,24 @@ xnnpack_unit_test(
         "test/f32-prelu.cc",
         "test/prelu-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_qs8_vcvt_test",
+    srcs = [
+        "test/f32-qs8-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_qu8_vcvt_test",
+    srcs = [
+        "test/f32-qu8-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -10443,6 +10451,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_f32_vcvt_test",
+    srcs = [
+        "test/qs8-f32-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "qs8_gavgpool_minmax_test",
     srcs = [
         "test/qs8-gavgpool-minmax.cc",
@@ -10572,6 +10589,15 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "qu8_f32_vcvt_test",
+    srcs = [
+        "test/qu8-f32-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

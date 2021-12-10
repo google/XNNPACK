@@ -263,6 +263,32 @@ DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_imi
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x4)
 
 
+#define DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                           \
+      size_t n,                                        \
+      const int8_t* input,                             \
+      float* output,                                   \
+      const union xnn_qs8_f32_cvt_params* params);
+
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__neon_x8)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__neon_x16)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__neon_x24)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__neon_x32)
+
+
+#define DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                           \
+      size_t n,                                        \
+      const uint8_t* input,                            \
+      float* output,                                   \
+      const union xnn_qu8_f32_cvt_params* params);
+
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__neon_x8)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__neon_x16)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__neon_x24)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__neon_x32)
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
