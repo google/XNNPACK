@@ -35,3 +35,11 @@
   init: xnn_init_qu8_f32_cvt_wasmsimd_params
 - name: xnn_qu8_f32_vcvt_ukernel__wasmsimd_x32
   init: xnn_init_qu8_f32_cvt_wasmsimd_params
+- name: xnn_qu8_f32_vcvt_ukernel__scalar_x1
+  init: xnn_init_qu8_f32_cvt_scalar_params
+- name: xnn_qu8_f32_vcvt_ukernel__scalar_x2
+  init: xnn_init_qu8_f32_cvt_scalar_params
+- name: xnn_qu8_f32_vcvt_ukernel__scalar_x3
+  init: xnn_init_qu8_f32_cvt_scalar_params
+- name: xnn_qu8_f32_vcvt_ukernel__scalar_x4
+  init: xnn_init_qu8_f32_cvt_scalar_params

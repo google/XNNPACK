@@ -1,0 +1,81 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/vcvt.h>
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
+    size_t n,
+    const ${XINT8_T}* x,
+    float* y,
+    const union xnn_${DATATYPE.lower()}_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+{
+  assert(n != 0);
+  assert(n % sizeof(${XINT8_T}) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const int32_t vzero_point = params->scalar.zero_point;
+  const float vscale = params->scalar.scale;
+
+  $if BATCH_TILE > 1:
+    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(BATCH_TILE):
+        int32_t vx${N} = (int32_t) x[${N}];
+      x += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        vx${N} -= vzero_point;
+
+      $for N in range(BATCH_TILE):
+        float vy${N} = (float) vx${N};
+
+      $for N in range(BATCH_TILE):
+        vy${N} *= vscale;
+
+      $for N in range(BATCH_TILE):
+        y[${N}] = vy${N};
+      y += ${BATCH_TILE};
+    }
+  $if BATCH_TILE == 1:
+    do {
+      int32_t vx = *x++;
+      vx -= vzero_point;
+
+      float vy = (float) vx;
+      vy *= vscale;
+      *y++ = vy;
+
+      n -= sizeof(${XINT8_T});
+    } while (n != 0);
+  $elif BATCH_TILE == 2:
+    if XNN_UNLIKELY(n != 0) {
+      int32_t vx = *x;
+      vx -= vzero_point;
+
+      float vy = (float) vx;
+      vy *= vscale;
+      *y = vy;
+    }
+  $else:
+    if XNN_UNLIKELY(n != 0) {
+      do {
+        int32_t vx = *x++;
+        vx -= vzero_point;
+
+        float vy = (float) vx;
+        vy *= vscale;
+        *y++ = vy;
+
+        n -= sizeof(${XINT8_T});
+      } while (n != 0);
+    }
+}

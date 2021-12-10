@@ -912,6 +912,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-magic.c
   src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-lrint.c
   src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-magic.c
+  src/qs8-f32-vcvt/gen/vcvt-scalar-x1.c
+  src/qs8-f32-vcvt/gen/vcvt-scalar-x2.c
+  src/qs8-f32-vcvt/gen/vcvt-scalar-x3.c
+  src/qs8-f32-vcvt/gen/vcvt-scalar-x4.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c1.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c2.c
   src/qs8-gavgpool/gen/7p7x-minmax-scalar-c4.c
@@ -999,6 +1003,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up4x9-minmax-fp32-scalar-magic.c
   src/qu8-dwconv/gen/up4x25-minmax-fp32-scalar-lrint.c
   src/qu8-dwconv/gen/up4x25-minmax-fp32-scalar-magic.c
+  src/qu8-f32-vcvt/gen/vcvt-scalar-x1.c
+  src/qu8-f32-vcvt/gen/vcvt-scalar-x2.c
+  src/qu8-f32-vcvt/gen/vcvt-scalar-x3.c
+  src/qu8-f32-vcvt/gen/vcvt-scalar-x4.c
   src/qu8-gavgpool/7p7x-minmax-scalar-c1.c
   src/qu8-gavgpool/7x-minmax-scalar-c1.c
   src/qu8-gemm/gen/1x2-minmax-fp32-scalar-lrint.c

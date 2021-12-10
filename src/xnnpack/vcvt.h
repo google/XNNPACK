@@ -290,6 +290,11 @@ DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__wasmsimd_x16)
 DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__wasmsimd_x24)
 DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__wasmsimd_x32)
 
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x1)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x2)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x3)
+DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x4)
+
 
 #define DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
@@ -317,6 +322,11 @@ DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__wasmsimd_x8)
 DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__wasmsimd_x16)
 DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__wasmsimd_x24)
 DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__wasmsimd_x32)
+
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__scalar_x1)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__scalar_x2)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__scalar_x3)
+DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(xnn_qu8_f32_vcvt_ukernel__scalar_x4)
 
 
 #ifdef __cplusplus
