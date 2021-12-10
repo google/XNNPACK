@@ -980,6 +980,12 @@ union xnn_qs8_f32_cvt_params {
     float scale;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int32_t minus_zero_point[4];
+    XNN_ALIGN(16) float scale[4];
+  } sse4;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_qu8_f32_cvt_params {
@@ -993,6 +999,12 @@ union xnn_qu8_f32_cvt_params {
     float scale;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int32_t minus_zero_point[4];
+    XNN_ALIGN(16) float scale[4];
+  } sse4;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 typedef void (*xnn_ppmm_ukernel_function)(

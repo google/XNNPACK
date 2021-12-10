@@ -3010,6 +3010,19 @@ XNN_INTERNAL void xnn_init_qs8_f32_cvt_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qs8_f32_cvt_sse4_params(
+  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t zero_point)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse4.minus_zero_point[i] = -(int32_t) zero_point;
+    params->sse4.scale[i] = scale;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 XNN_INTERNAL void xnn_init_qu8_f32_cvt_neon_params(
   union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -3021,3 +3034,16 @@ XNN_INTERNAL void xnn_init_qu8_f32_cvt_neon_params(
   params->neon.scale = scale;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qu8_f32_cvt_sse4_params(
+  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse4.minus_zero_point[i] = -(int32_t) zero_point;
+    params->sse4.scale[i] = scale;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

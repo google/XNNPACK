@@ -11,3 +11,11 @@
   init: xnn_init_qs8_f32_cvt_neon_params
 - name: xnn_qs8_f32_vcvt_ukernel__neon_x32
   init: xnn_init_qs8_f32_cvt_neon_params
+- name: xnn_qs8_f32_vcvt_ukernel__sse41_x8
+  init: xnn_init_qs8_f32_cvt_sse4_params
+- name: xnn_qs8_f32_vcvt_ukernel__sse41_x16
+  init: xnn_init_qs8_f32_cvt_sse4_params
+- name: xnn_qs8_f32_vcvt_ukernel__sse41_x24
+  init: xnn_init_qs8_f32_cvt_sse4_params
+- name: xnn_qs8_f32_vcvt_ukernel__sse41_x32
+  init: xnn_init_qs8_f32_cvt_sse4_params
