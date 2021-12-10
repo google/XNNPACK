@@ -2589,14 +2589,6 @@ SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neonv8-ld64-x16.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
-  src/f32-vrnd/gen/vrndd-neonv8-x4.c
-  src/f32-vrnd/gen/vrndd-neonv8-x8.c
-  src/f32-vrnd/gen/vrndne-neonv8-x4.c
-  src/f32-vrnd/gen/vrndne-neonv8-x8.c
-  src/f32-vrnd/gen/vrndu-neonv8-x4.c
-  src/f32-vrnd/gen/vrndu-neonv8-x8.c
-  src/f32-vrnd/gen/vrndz-neonv8-x4.c
-  src/f32-vrnd/gen/vrndz-neonv8-x8.c
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x8.c
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x16.c
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x24.c
@@ -2605,6 +2597,14 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x16.c
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x24.c
   src/f32-qu8-vcvt/gen/vcvt-neonv8-x32.c
+  src/f32-vrnd/gen/vrndd-neonv8-x4.c
+  src/f32-vrnd/gen/vrndd-neonv8-x8.c
+  src/f32-vrnd/gen/vrndne-neonv8-x4.c
+  src/f32-vrnd/gen/vrndne-neonv8-x8.c
+  src/f32-vrnd/gen/vrndu-neonv8-x4.c
+  src/f32-vrnd/gen/vrndu-neonv8-x8.c
+  src/f32-vrnd/gen/vrndz-neonv8-x4.c
+  src/f32-vrnd/gen/vrndz-neonv8-x8.c
   src/math/cvt-f32-qs8-neonv8.c
   src/math/cvt-f32-qu8-neonv8.c
   src/math/roundd-neonv8.c

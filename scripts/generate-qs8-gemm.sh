@@ -585,8 +585,6 @@ tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP3
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qc8-gemm/gen/6x16c4-minmax-fp32-neondot.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qc8-gemm/gen/8x16c4-minmax-fp32-neondot.c &
 
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c4-minmax-fp32-neondot.c &
-
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/1x8c4-minmax-rndnu-neondot.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x8c4-minmax-rndnu-neondot.c &
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/6x8c4-minmax-rndnu-neondot.c &
