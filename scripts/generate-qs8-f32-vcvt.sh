@@ -16,6 +16,16 @@ tools/xngen src/qs8-f32-vcvt/neon.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/q
 tools/xngen src/qs8-f32-vcvt/neon.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/vcvt-neon-x32.c &
 
 ################################# x86 128-bit #################################
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse2-x8.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse2-x16.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse2-x24.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse2-x32.c &
+
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=8  -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/vcvt-sse2-x8.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/vcvt-sse2-x16.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/vcvt-sse2-x24.c &
+tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/vcvt-sse2-x32.c &
+
 tools/xngen src/qs8-f32-vcvt/sse4.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse41-x8.c &
 tools/xngen src/qs8-f32-vcvt/sse4.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse41-x16.c &
 tools/xngen src/qs8-f32-vcvt/sse4.c.in -D BATCH_TILE=24 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/vcvt-sse41-x24.c &

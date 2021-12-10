@@ -982,6 +982,12 @@ union xnn_qs8_f32_cvt_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) uint8_t sign_mask[16];
+    XNN_ALIGN(16) uint16_t magic_exp[8];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) float scale[4];
+  } sse2;
+  struct {
     XNN_ALIGN(16) int32_t minus_zero_point[4];
     XNN_ALIGN(16) float scale[4];
   } sse4;
@@ -1006,6 +1012,11 @@ union xnn_qu8_f32_cvt_params {
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) uint16_t magic_exp[8];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) float scale[4];
+  } sse2;
   struct {
     XNN_ALIGN(16) int32_t minus_zero_point[4];
     XNN_ALIGN(16) float scale[4];

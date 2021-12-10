@@ -3011,6 +3011,24 @@ XNN_INTERNAL void xnn_init_qs8_f32_cvt_neon_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qs8_f32_cvt_sse2_params(
+  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t zero_point)
+{
+  for (uint32_t i = 0; i < 16; i++) {
+    params->sse2.sign_mask[i] = UINT8_C(0x80);
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.magic_exp[i] = UINT16_C(0x4B00);
+  }
+  const float magic_bias = (float) (INT32_C(0x00800080) + (int32_t) zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.magic_bias[i] = magic_bias;
+    params->sse2.scale[i] = scale;
+  }
+}
+
 XNN_INTERNAL void xnn_init_qs8_f32_cvt_sse4_params(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -3050,6 +3068,21 @@ XNN_INTERNAL void xnn_init_qu8_f32_cvt_neon_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qu8_f32_cvt_sse2_params(
+  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t zero_point)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.magic_exp[i] = UINT16_C(0x4B00);
+  }
+  const float magic_bias = (float) (INT32_C(0x00800000) + (int32_t) zero_point);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.magic_bias[i] = magic_bias;
+    params->sse2.scale[i] = scale;
+  }
+}
+
 XNN_INTERNAL void xnn_init_qu8_f32_cvt_sse4_params(
   union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,

@@ -3404,6 +3404,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up16x25-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/up24x9-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/up24x25-minmax-fp32-sse2-mul16.c
+  src/qs8-f32-vcvt/gen/vcvt-sse2-x8.c
+  src/qs8-f32-vcvt/gen/vcvt-sse2-x16.c
+  src/qs8-f32-vcvt/gen/vcvt-sse2-x24.c
+  src/qs8-f32-vcvt/gen/vcvt-sse2-x32.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse2-c8-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse2-c16-acc2.c
   src/qs8-gavgpool/gen/7p7x-minmax-sse2-c24-acc2.c
@@ -3466,6 +3470,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up8x25-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/up16x9-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/up16x25-minmax-fp32-sse2-mul16.c
+  src/qu8-f32-vcvt/gen/vcvt-sse2-x8.c
+  src/qu8-f32-vcvt/gen/vcvt-sse2-x16.c
+  src/qu8-f32-vcvt/gen/vcvt-sse2-x24.c
+  src/qu8-f32-vcvt/gen/vcvt-sse2-x32.c
   src/qu8-gavgpool/7p7x-minmax-sse2-c8.c
   src/qu8-gavgpool/7x-minmax-sse2-c8.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse2-ld64.c
