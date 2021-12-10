@@ -19,3 +19,11 @@
   init: xnn_init_qs8_f32_cvt_sse4_params
 - name: xnn_qs8_f32_vcvt_ukernel__sse41_x32
   init: xnn_init_qs8_f32_cvt_sse4_params
+- name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x8
+  init: xnn_init_qs8_f32_cvt_wasmsimd_params
+- name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x16
+  init: xnn_init_qs8_f32_cvt_wasmsimd_params
+- name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x24
+  init: xnn_init_qs8_f32_cvt_wasmsimd_params
+- name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x32
+  init: xnn_init_qs8_f32_cvt_wasmsimd_params
