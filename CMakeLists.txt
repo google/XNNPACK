@@ -8107,6 +8107,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
+  ADD_EXECUTABLE(qs8-f32-vcvt-bench bench/qs8-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-f32-vcvt-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
     CXX_STANDARD 11
@@ -8154,6 +8162,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-vmulc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(qu8-f32-vcvt-bench bench/qu8-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-f32-vcvt-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES

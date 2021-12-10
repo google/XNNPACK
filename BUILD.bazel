@@ -8331,6 +8331,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_f32_vcvt_bench",
+    srcs = [
+        "bench/qs8-f32-vcvt.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_gemm_bench",
     srcs = [
         "bench/gemm.h",
@@ -8382,6 +8391,15 @@ xnnpack_benchmark(
     name = "qs8_vmulc_bench",
     srcs = [
         "bench/qs8-vmulc.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_f32_vcvt_bench",
+    srcs = [
+        "bench/qu8-f32-vcvt.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
