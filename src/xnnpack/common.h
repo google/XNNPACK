@@ -97,6 +97,12 @@
   #define XNN_PLATFORM_WEB 0
 #endif
 
+#if defined(_WIN32)
+  #define XNN_PLATFORM_WINDOWS 1
+#else
+  #define XNN_PLATFORM_WINDOWS 0
+#endif
+
 // Define compile identification macros
 
 #if defined(__clang__)

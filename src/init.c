@@ -63,7 +63,7 @@
   #define XNN_ENABLE_ASSEMBLY 1
 #endif
 
-#ifdef _WIN32
+#if XNN_PLATFORM_WINDOWS
   static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
 #else
   static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
@@ -5160,7 +5160,7 @@ static void init(void) {
   xnn_params.init_flags = init_flags;
 }
 
-#ifdef _WIN32
+#if XNN_PLATFORM_WINDOWS
   static BOOL CALLBACK init_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init();
     return TRUE;
@@ -5181,7 +5181,7 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
   #else
     __sync_bool_compare_and_swap(&init_allocator, NULL, allocator);
   #endif
-  #ifdef _WIN32
+  #if XNN_PLATFORM_WINDOWS
     InitOnceExecuteOnce(&init_guard, &init_windows, NULL, NULL);
   #else
     pthread_once(&init_guard, &init);

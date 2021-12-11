@@ -35,9 +35,9 @@ static void* xnn_aligned_allocate(void* context, size_t alignment, size_t size) 
 #if XNN_ARCH_WASM
   assert(alignment <= 2 * sizeof(void*));
   return malloc(size);
-#elif defined(__ANDROID__)
+#elif XNN_PLATFORM_ANDROID
   return memalign(alignment, size);
-#elif defined(_WIN32)
+#elif XNN_PLATFORM_WINDOWS
   return _aligned_malloc(size, alignment);
 #else
   void* memory_ptr = NULL;
