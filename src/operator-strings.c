@@ -60,6 +60,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Convert (NC, F32, QS8)";
     case xnn_operator_type_convert_nc_f32_qu8:
       return "Convert (NC, F32, QU8)";
+    case xnn_operator_type_convert_nc_qs8_f32:
+      return "Convert (NC, QS8, F32)";
+    case xnn_operator_type_convert_nc_qu8_f32:
+      return "Convert (NC, QU8, F32)";
     case xnn_operator_type_convolution_nhwc_f16:
       return "Convolution (NHWC, F16)";
     case xnn_operator_type_convolution_nhwc_f32:

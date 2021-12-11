@@ -2531,6 +2531,8 @@ struct vunary_parameters {
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
+    xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
+    xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
     xnn_init_s8_minmax_params_fn s8_minmax;
     xnn_init_u8_minmax_params_fn u8_minmax;
   } init;
@@ -2874,6 +2876,8 @@ struct xnn_parameters {
     xnn_univector_ukernel_function f32_to_f16;
     struct vunary_parameters f32_to_qs8;
     struct vunary_parameters f32_to_qu8;
+    struct vunary_parameters qs8_to_f32;
+    struct vunary_parameters qu8_to_f32;
   } vcvt;
   struct {
     xnn_unpool_ukernel_function unpool;
