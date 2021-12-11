@@ -53,6 +53,22 @@ static enum xnn_status create_convert_operator(
         node->flags,
         &opdata->operator_object);
       break;
+    case xnn_compute_type_qs8_to_fp32:
+      status = xnn_create_convert_nc_qs8_f32(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        values[input_id].quantization.scale,
+        (int8_t) values[input_id].quantization.zero_point,
+        node->flags,
+        &opdata->operator_object);
+      break;
+    case xnn_compute_type_qu8_to_fp32:
+      status = xnn_create_convert_nc_qu8_f32(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        values[input_id].quantization.scale,
+        (uint8_t) values[input_id].quantization.zero_point,
+        node->flags,
+        &opdata->operator_object);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -101,9 +117,54 @@ static enum xnn_status setup_convert_operator(
         input_data,
         output_data,
         threadpool);
+    case xnn_operator_type_convert_nc_qs8_f32:
+      return xnn_setup_convert_nc_qs8_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+    case xnn_operator_type_convert_nc_qu8_f32:
+      return xnn_setup_convert_nc_qu8_f32(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
     default:
       XNN_UNREACHABLE;
   }
+}
+
+static inline enum xnn_compute_type validate_datatypes(
+  enum xnn_datatype input_datatype,
+  enum xnn_datatype output_datatype)
+{
+  switch (input_datatype) {
+    case xnn_datatype_fp32:
+      switch (output_datatype) {
+        case xnn_datatype_qint8:
+          return xnn_compute_type_fp32_to_qs8;
+        case xnn_datatype_quint8:
+          return xnn_compute_type_fp32_to_qu8;
+        default:
+          break;
+      }
+      break;
+    case xnn_datatype_qint8:
+      if (output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_qs8_to_fp32;
+      }
+      break;
+    case xnn_datatype_quint8:
+      if (output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_qu8_to_fp32;
+      }
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+  return xnn_compute_type_invalid;
 }
 
 enum xnn_status xnn_define_convert(
@@ -135,6 +196,8 @@ enum xnn_status xnn_define_convert(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -159,13 +222,10 @@ enum xnn_status xnn_define_convert(
     return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
+    case xnn_datatype_fp32:
     case xnn_datatype_qint8:
-      compute_type = xnn_compute_type_fp32_to_qs8;
-      break;
     case xnn_datatype_quint8:
-      compute_type = xnn_compute_type_fp32_to_qu8;
       break;
     default:
       xnn_log_error(
@@ -173,6 +233,17 @@ enum xnn_status xnn_define_convert(
         xnn_node_type_to_string(xnn_node_type_convert), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
+  }
+
+  enum xnn_compute_type compute_type = validate_datatypes(input_value->datatype, output_value->datatype);
+  if (compute_type == xnn_compute_type_invalid) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+      ": mismatching datatypes across input (%s) and output (%s)",
+      xnn_node_type_to_string(xnn_node_type_convert), input_id, output_id,
+      xnn_datatype_to_string(input_value->datatype),
+      xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

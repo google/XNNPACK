@@ -115,6 +115,8 @@ enum xnn_compute_type {
   xnn_compute_type_qu8,
   xnn_compute_type_fp32_to_qs8,
   xnn_compute_type_fp32_to_qu8,
+  xnn_compute_type_qs8_to_fp32,
+  xnn_compute_type_qu8_to_fp32,
 };
 
 enum xnn_node_type {
