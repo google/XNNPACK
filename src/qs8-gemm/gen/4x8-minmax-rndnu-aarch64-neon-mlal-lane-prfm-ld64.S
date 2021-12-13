@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in
+//   Template: src/qs8-gemm/4x8-aarch64-neon-mlal-lane-ld64.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64(
+# void xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_prfm_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -29,14 +29,14 @@
 # A1 x15 v1
 # A2 x13 v2
 # A3  x4 v3
-# B   x5 v4  v5
-# C0  x6 v16 v20 v24 v28
-# C1  x8 v17 v21 v25 v29
-# C2  x9 v18 v22 v26 v30
-# C3  x7 v19 v23 v27 v31
-# unused v7 v8 v9 v10 v11 v12 v13 v14 v15
+# B   x5 v5
+# C0  x6 v24 v28
+# C1  x8 v25 v29
+# C2  x9 v26 v30
+# C3  x7 v27 v31
+# unused v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64
+BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_prfm_ld64
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -61,14 +61,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         .p2align 3
 0:
         # Load initial bias from w into accumulators
-        LDP     q16, q20, [x5], 32
-        MOV     v17.16b, v16.16b
-        MOV     v18.16b, v16.16b
         LDP     q24, q28, [x5], 32
-        MOV     v19.16b, v16.16b
-        MOV     v21.16b, v20.16b
-        MOV     v22.16b, v20.16b
-        MOV     v23.16b, v20.16b
         SUBS    x0, x2, 8               // k = kc - 8
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
@@ -83,170 +76,104 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         .p2align 3
 1:
         LD1     {v0.8b},  [x3], 8
-        LDP     d4, d5, [x5], 16
+        LDR     d5, [x5], 8
         LD1     {v1.8b}, [x15], 8
         LD1     {v2.8b}, [x13], 8
         LD1     {v3.8b},  [x4], 8
         SXTL    v0.8h, v0.8b
-        SXTL    v4.8h, v4.8b
         SXTL    v5.8h, v5.8b
         SXTL    v1.8h, v1.8b
         SXTL    v2.8h, v2.8b
         SXTL    v3.8h, v3.8b
-        SMLAL   v16.4s, v4.4h, v0.h[0]
-        SMLAL2  v20.4s, v4.8h, v0.h[0]
+        PRFM    PLDL1KEEP, [x13, 128]
         SMLAL   v24.4s, v5.4h, v0.h[0]
         SMLAL2  v28.4s, v5.8h, v0.h[0]
-        SMLAL   v17.4s, v4.4h, v1.h[0]
-        SMLAL2  v21.4s, v4.8h, v1.h[0]
+        PRFM    PLDL1KEEP, [x15, 128]
+        PRFM    PLDL1KEEP, [x3, 128]
         SMLAL   v25.4s, v5.4h, v1.h[0]
         SMLAL2  v29.4s, v5.8h, v1.h[0]
-        SMLAL   v18.4s, v4.4h, v2.h[0]
-        SMLAL2  v22.4s, v4.8h, v2.h[0]
+        PRFM    PLDL1KEEP, [x4, 128]
+        PRFM    PLDL1KEEP, [x5, 448]
         SMLAL   v26.4s, v5.4h, v2.h[0]
         SMLAL2  v30.4s, v5.8h, v2.h[0]
-        SMLAL   v19.4s, v4.4h, v3.h[0]
-        SMLAL2  v23.4s, v4.8h, v3.h[0]
+        PRFM    PLDL1KEEP, [x5, 512]
         SMLAL   v27.4s, v5.4h, v3.h[0]
         SMLAL2  v31.4s, v5.8h, v3.h[0]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[1]
-        SMLAL2  v20.4s, v4.8h, v0.h[1]
         SMLAL   v24.4s, v5.4h, v0.h[1]
         SMLAL2  v28.4s, v5.8h, v0.h[1]
-        SMLAL   v17.4s, v4.4h, v1.h[1]
-        SMLAL2  v21.4s, v4.8h, v1.h[1]
         SMLAL   v25.4s, v5.4h, v1.h[1]
         SMLAL2  v29.4s, v5.8h, v1.h[1]
-        SMLAL   v18.4s, v4.4h, v2.h[1]
-        SMLAL2  v22.4s, v4.8h, v2.h[1]
         SMLAL   v26.4s, v5.4h, v2.h[1]
         SMLAL2  v30.4s, v5.8h, v2.h[1]
-        SMLAL   v19.4s, v4.4h, v3.h[1]
-        SMLAL2  v23.4s, v4.8h, v3.h[1]
         SMLAL   v27.4s, v5.4h, v3.h[1]
         SMLAL2  v31.4s, v5.8h, v3.h[1]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[2]
-        SMLAL2  v20.4s, v4.8h, v0.h[2]
         SMLAL   v24.4s, v5.4h, v0.h[2]
         SMLAL2  v28.4s, v5.8h, v0.h[2]
-        SMLAL   v17.4s, v4.4h, v1.h[2]
-        SMLAL2  v21.4s, v4.8h, v1.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SMLAL   v18.4s, v4.4h, v2.h[2]
-        SMLAL2  v22.4s, v4.8h, v2.h[2]
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
-        SMLAL   v19.4s, v4.4h, v3.h[2]
-        SMLAL2  v23.4s, v4.8h, v3.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
         SMLAL2  v31.4s, v5.8h, v3.h[2]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[3]
-        SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v24.4s, v5.4h, v0.h[3]
         SMLAL2  v28.4s, v5.8h, v0.h[3]
-        SMLAL   v17.4s, v4.4h, v1.h[3]
-        SMLAL2  v21.4s, v4.8h, v1.h[3]
         SMLAL   v25.4s, v5.4h, v1.h[3]
         SMLAL2  v29.4s, v5.8h, v1.h[3]
-        SMLAL   v18.4s, v4.4h, v2.h[3]
-        SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v26.4s, v5.4h, v2.h[3]
         SMLAL2  v30.4s, v5.8h, v2.h[3]
-        SMLAL   v19.4s, v4.4h, v3.h[3]
-        SMLAL2  v23.4s, v4.8h, v3.h[3]
         SMLAL   v27.4s, v5.4h, v3.h[3]
         SMLAL2  v31.4s, v5.8h, v3.h[3]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[4]
-        SMLAL2  v20.4s, v4.8h, v0.h[4]
         SMLAL   v24.4s, v5.4h, v0.h[4]
         SMLAL2  v28.4s, v5.8h, v0.h[4]
-        SMLAL   v17.4s, v4.4h, v1.h[4]
-        SMLAL2  v21.4s, v4.8h, v1.h[4]
         SMLAL   v25.4s, v5.4h, v1.h[4]
         SMLAL2  v29.4s, v5.8h, v1.h[4]
-        SMLAL   v18.4s, v4.4h, v2.h[4]
-        SMLAL2  v22.4s, v4.8h, v2.h[4]
         SMLAL   v26.4s, v5.4h, v2.h[4]
         SMLAL2  v30.4s, v5.8h, v2.h[4]
-        SMLAL   v19.4s, v4.4h, v3.h[4]
-        SMLAL2  v23.4s, v4.8h, v3.h[4]
         SMLAL   v27.4s, v5.4h, v3.h[4]
         SMLAL2  v31.4s, v5.8h, v3.h[4]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[5]
-        SMLAL2  v20.4s, v4.8h, v0.h[5]
         SMLAL   v24.4s, v5.4h, v0.h[5]
         SMLAL2  v28.4s, v5.8h, v0.h[5]
-        SMLAL   v17.4s, v4.4h, v1.h[5]
-        SMLAL2  v21.4s, v4.8h, v1.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SMLAL   v18.4s, v4.4h, v2.h[5]
-        SMLAL2  v22.4s, v4.8h, v2.h[5]
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
-        SMLAL   v19.4s, v4.4h, v3.h[5]
-        SMLAL2  v23.4s, v4.8h, v3.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[6]
-        SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v24.4s, v5.4h, v0.h[6]
         SMLAL2  v28.4s, v5.8h, v0.h[6]
-        SMLAL   v17.4s, v4.4h, v1.h[6]
-        SMLAL2  v21.4s, v4.8h, v1.h[6]
         SMLAL   v25.4s, v5.4h, v1.h[6]
         SMLAL2  v29.4s, v5.8h, v1.h[6]
-        SMLAL   v18.4s, v4.4h, v2.h[6]
-        SMLAL2  v22.4s, v4.8h, v2.h[6]
         SMLAL   v26.4s, v5.4h, v2.h[6]
         SMLAL2  v30.4s, v5.8h, v2.h[6]
-        SMLAL   v19.4s, v4.4h, v3.h[6]
-        SMLAL2  v23.4s, v4.8h, v3.h[6]
         SMLAL   v27.4s, v5.4h, v3.h[6]
         SMLAL2  v31.4s, v5.8h, v3.h[6]
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[7]
-        SMLAL2  v20.4s, v4.8h, v0.h[7]
         SMLAL   v24.4s, v5.4h, v0.h[7]
         SMLAL2  v28.4s, v5.8h, v0.h[7]
-        SMLAL   v17.4s, v4.4h, v1.h[7]
-        SMLAL2  v21.4s, v4.8h, v1.h[7]
         SMLAL   v25.4s, v5.4h, v1.h[7]
         SMLAL2  v29.4s, v5.8h, v1.h[7]
-        SMLAL   v18.4s, v4.4h, v2.h[7]
-        SMLAL2  v22.4s, v4.8h, v2.h[7]
         SMLAL   v26.4s, v5.4h, v2.h[7]
         SMLAL2  v30.4s, v5.8h, v2.h[7]
-        SMLAL   v19.4s, v4.4h, v3.h[7]
-        SMLAL2  v23.4s, v4.8h, v3.h[7]
         SMLAL   v27.4s, v5.4h, v3.h[7]
         SMLAL2  v31.4s, v5.8h, v3.h[7]
 
@@ -258,118 +185,76 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         CBNZ    x0, 3f
 
 2:
-        SCVTF   v16.4s, v16.4s
-        SCVTF   v17.4s, v17.4s
-        # Apply params - scale, bias and clamp
+        # Apply params - preshift, scale, postshift, bias and clamp
         LD1R    {v4.4s}, [x11], 4
-        SCVTF   v18.4s, v18.4s
-        SCVTF   v19.4s, v19.4s
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v23.4s, v23.4s
-        SCVTF   v24.4s, v24.4s
-        SCVTF   v25.4s, v25.4s
-        SCVTF   v26.4s, v26.4s
-        SCVTF   v27.4s, v27.4s
-        SCVTF   v28.4s, v28.4s
-        SCVTF   v29.4s, v29.4s
-        SCVTF   v30.4s, v30.4s
-        SCVTF   v31.4s, v31.4s
+        SQSHL   v24.4s, v24.4s, v4.4s   // shift to upper bits
+        SQSHL   v25.4s, v25.4s, v4.4s
+        SQSHL   v26.4s, v26.4s, v4.4s
+        SQSHL   v27.4s, v27.4s, v4.4s
+        LD1R    {v5.4s}, [x11], 4
+        SQSHL   v28.4s, v28.4s, v4.4s
+        SQSHL   v29.4s, v29.4s, v4.4s
+        SQSHL   v30.4s, v30.4s, v4.4s
+        SQSHL   v31.4s, v31.4s, v4.4s
+        LD1R    {v6.4s}, [x11], 4
+        SQDMULH v24.4s, v24.4s, v5.4s   // scale without rounding
+        SQDMULH v25.4s, v25.4s, v5.4s
+        SQDMULH v26.4s, v26.4s, v5.4s
+        SQDMULH v27.4s, v27.4s, v5.4s
+        SQDMULH v28.4s, v28.4s, v5.4s
+        SQDMULH v29.4s, v29.4s, v5.4s
+        SQDMULH v30.4s, v30.4s, v5.4s
+        SQDMULH v31.4s, v31.4s, v5.4s
+        SRSHL   v24.4s, v24.4s, v6.4s   // signed rounding shift left
+        SRSHL   v25.4s, v25.4s, v6.4s
+        SRSHL   v26.4s, v26.4s, v6.4s
+        SRSHL   v27.4s, v27.4s, v6.4s
+        SRSHL   v28.4s, v28.4s, v6.4s
+        SRSHL   v29.4s, v29.4s, v6.4s
+        SRSHL   v30.4s, v30.4s, v6.4s
+        SRSHL   v31.4s, v31.4s, v6.4s
 
-        FMUL    v16.4s, v16.4s, v4.4s
-        FMUL    v17.4s, v17.4s, v4.4s
-        FMUL    v18.4s, v18.4s, v4.4s
-        FMUL    v19.4s, v19.4s, v4.4s
-        FMUL    v20.4s, v20.4s, v4.4s
-        FMUL    v21.4s, v21.4s, v4.4s
-        FMUL    v22.4s, v22.4s, v4.4s
-        FMUL    v23.4s, v23.4s, v4.4s
-        FMUL    v24.4s, v24.4s, v4.4s
-        FMUL    v25.4s, v25.4s, v4.4s
-        FMUL    v26.4s, v26.4s, v4.4s
-        FMUL    v27.4s, v27.4s, v4.4s
-        FMUL    v28.4s, v28.4s, v4.4s
-        FMUL    v29.4s, v29.4s, v4.4s
-        FMUL    v30.4s, v30.4s, v4.4s
-        FMUL    v31.4s, v31.4s, v4.4s
-
-        FCVTNS  v16.4s, v16.4s
-        FCVTNS  v17.4s, v17.4s
-        FCVTNS  v18.4s, v18.4s
-        FCVTNS  v19.4s, v19.4s
-        FCVTNS  v20.4s, v20.4s
-        FCVTNS  v21.4s, v21.4s
-        FCVTNS  v22.4s, v22.4s
-        FCVTNS  v23.4s, v23.4s
-        FCVTNS  v24.4s, v24.4s
-        FCVTNS  v25.4s, v25.4s
-        FCVTNS  v26.4s, v26.4s
-        FCVTNS  v27.4s, v27.4s
-        FCVTNS  v28.4s, v28.4s
-        FCVTNS  v29.4s, v29.4s
-        FCVTNS  v30.4s, v30.4s
-        FCVTNS  v31.4s, v31.4s
-
-        SQXTN   v16.4h, v16.4s
-        SQXTN   v17.4h, v17.4s
-        SQXTN   v18.4h, v18.4s
-        SQXTN   v19.4h, v19.4s
         SQXTN   v24.4h, v24.4s
         SQXTN   v25.4h, v25.4s
         SQXTN   v26.4h, v26.4s
         SQXTN   v27.4h, v27.4s
         LD1R    {v6.8h}, [x11], 2       // add bias
-
-        SQXTN2  v16.8h, v20.4s
-        SQXTN2  v17.8h, v21.4s
-        SQXTN2  v18.8h, v22.4s
-        SQXTN2  v19.8h, v23.4s
         SQXTN2  v24.8h, v28.4s
         SQXTN2  v25.8h, v29.4s
         SQXTN2  v26.8h, v30.4s
         SQXTN2  v27.8h, v31.4s
+        LD1R    {v4.8b}, [x11], 1       // clamp min value
 
-        SQADD   v16.8h, v16.8h, v6.8h
-        SQADD   v17.8h, v17.8h, v6.8h
-        SQADD   v18.8h, v18.8h, v6.8h
-        SQADD   v19.8h, v19.8h, v6.8h
         SQADD   v24.8h, v24.8h, v6.8h
         SQADD   v25.8h, v25.8h, v6.8h
         SQADD   v26.8h, v26.8h, v6.8h
         SQADD   v27.8h, v27.8h, v6.8h
-        LD1R    {v4.16b}, [x11], 1      // clamp min value
+        LD1R    {v5.8b}, [x11]          // clamp max value
+        SQXTN  v0.8b, v24.8h
+        SQXTN  v1.8b, v25.8h
+        SQXTN  v2.8b, v26.8h
+        SQXTN  v3.8b, v27.8h
+        SUB     x11, x11, 15             // rewind params pointer
 
-        SQXTN   v0.8b, v16.8h
-        SQXTN   v1.8b, v17.8h
-        SQXTN   v2.8b, v18.8h
-        SQXTN   v3.8b, v19.8h
-        LD1R    {v5.16b}, [x11]         // clamp max value
-        SQXTN2  v0.16b, v24.8h
-        SQXTN2  v1.16b, v25.8h
-        SQXTN2  v2.16b, v26.8h
-        SQXTN2  v3.16b, v27.8h
-        SUB     x11, x11, 7             // rewind params pointer
-
-        SMAX    v0.16b, v0.16b, v4.16b
-        SMAX    v1.16b, v1.16b, v4.16b
-        SMAX    v2.16b, v2.16b, v4.16b
-        SMAX    v3.16b, v3.16b, v4.16b
-        SUBS    x1, x1, 16
-        SMIN    v0.16b, v0.16b, v5.16b
-        SMIN    v1.16b, v1.16b, v5.16b
-        SMIN    v2.16b, v2.16b, v5.16b
-        SMIN    v3.16b, v3.16b, v5.16b
+        SMAX    v0.8b, v0.8b, v4.8b
+        SMAX    v1.8b, v1.8b, v4.8b
+        SMAX    v2.8b, v2.8b, v4.8b
+        SMAX    v3.8b, v3.8b, v4.8b
+        SUBS    x1, x1, 8
+        SMIN    v0.8b, v0.8b, v5.8b
+        SMIN    v1.8b, v1.8b, v5.8b
+        SMIN    v2.8b, v2.8b, v5.8b
+        SMIN    v3.8b, v3.8b, v5.8b
         B.LO    4f
 
-        # Store full 4 x 16
-        ST1     {v0.16b}, [x6], x12
+        # Store full 4 x 8
+        ST1     {v0.8b}, [x6], x12
         SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v1.16b}, [x8], x12
+        ST1     {v1.8b}, [x8], x12
         SUB     x15, x15, x2            // a1 -= kc
-        ST1     {v2.16b}, [x9], x12
+        ST1     {v2.8b}, [x9], x12
         SUB     x13, x13, x2            // a2 -= kc
-        ST1     {v3.16b}, [x7], x12
+        ST1     {v3.8b}, [x7], x12
         SUB     x4,  x4, x2             // a3 -= kc
         B.NE    0b
         RET
@@ -380,159 +265,96 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         AND     x0, x2, 7               // kc remainder 1 to 7
 
         LD1     {v0.8b},  [x3], x0
-        LDP     d4, d5, [x5], 16
+        LDR     d5, [x5], 8
         LD1     {v1.8b}, [x15], x0
         LD1     {v2.8b}, [x13], x0
         LD1     {v3.8b},  [x4], x0
         SXTL    v0.8h, v0.8b
-        SXTL    v4.8h, v4.8b
         SXTL    v5.8h, v5.8b
         SXTL    v1.8h, v1.8b
         SXTL    v2.8h, v2.8b
         SXTL    v3.8h, v3.8b
-        SMLAL   v16.4s, v4.4h, v0.h[0]
-        SMLAL2  v20.4s, v4.8h, v0.h[0]
         SMLAL   v24.4s, v5.4h, v0.h[0]
         SMLAL2  v28.4s, v5.8h, v0.h[0]
-        SMLAL   v17.4s, v4.4h, v1.h[0]
-        SMLAL2  v21.4s, v4.8h, v1.h[0]
         SMLAL   v25.4s, v5.4h, v1.h[0]
         SMLAL2  v29.4s, v5.8h, v1.h[0]
-        SMLAL   v18.4s, v4.4h, v2.h[0]
-        SMLAL2  v22.4s, v4.8h, v2.h[0]
         SMLAL   v26.4s, v5.4h, v2.h[0]
         SMLAL2  v30.4s, v5.8h, v2.h[0]
-        SMLAL   v19.4s, v4.4h, v3.h[0]
-        SMLAL2  v23.4s, v4.8h, v3.h[0]
         SMLAL   v27.4s, v5.4h, v3.h[0]
         SMLAL2  v31.4s, v5.8h, v3.h[0]
         CMP     x0, 2
         B.LO    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[1]
-        SMLAL2  v20.4s, v4.8h, v0.h[1]
         SMLAL   v24.4s, v5.4h, v0.h[1]
         SMLAL2  v28.4s, v5.8h, v0.h[1]
-        SMLAL   v17.4s, v4.4h, v1.h[1]
-        SMLAL2  v21.4s, v4.8h, v1.h[1]
         SMLAL   v25.4s, v5.4h, v1.h[1]
         SMLAL2  v29.4s, v5.8h, v1.h[1]
-        SMLAL   v18.4s, v4.4h, v2.h[1]
-        SMLAL2  v22.4s, v4.8h, v2.h[1]
         SMLAL   v26.4s, v5.4h, v2.h[1]
         SMLAL2  v30.4s, v5.8h, v2.h[1]
-        SMLAL   v19.4s, v4.4h, v3.h[1]
-        SMLAL2  v23.4s, v4.8h, v3.h[1]
         SMLAL   v27.4s, v5.4h, v3.h[1]
         SMLAL2  v31.4s, v5.8h, v3.h[1]
         B.EQ    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[2]
-        SMLAL2  v20.4s, v4.8h, v0.h[2]
         SMLAL   v24.4s, v5.4h, v0.h[2]
         SMLAL2  v28.4s, v5.8h, v0.h[2]
-        SMLAL   v17.4s, v4.4h, v1.h[2]
-        SMLAL2  v21.4s, v4.8h, v1.h[2]
         SMLAL   v25.4s, v5.4h, v1.h[2]
         SMLAL2  v29.4s, v5.8h, v1.h[2]
-        SMLAL   v18.4s, v4.4h, v2.h[2]
-        SMLAL2  v22.4s, v4.8h, v2.h[2]
         SMLAL   v26.4s, v5.4h, v2.h[2]
         SMLAL2  v30.4s, v5.8h, v2.h[2]
-        SMLAL   v19.4s, v4.4h, v3.h[2]
-        SMLAL2  v23.4s, v4.8h, v3.h[2]
         SMLAL   v27.4s, v5.4h, v3.h[2]
         SMLAL2  v31.4s, v5.8h, v3.h[2]
         CMP     x0, 4
         B.LO    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[3]
-        SMLAL2  v20.4s, v4.8h, v0.h[3]
         SMLAL   v24.4s, v5.4h, v0.h[3]
         SMLAL2  v28.4s, v5.8h, v0.h[3]
-        SMLAL   v17.4s, v4.4h, v1.h[3]
-        SMLAL2  v21.4s, v4.8h, v1.h[3]
         SMLAL   v25.4s, v5.4h, v1.h[3]
         SMLAL2  v29.4s, v5.8h, v1.h[3]
-        SMLAL   v18.4s, v4.4h, v2.h[3]
-        SMLAL2  v22.4s, v4.8h, v2.h[3]
         SMLAL   v26.4s, v5.4h, v2.h[3]
         SMLAL2  v30.4s, v5.8h, v2.h[3]
-        SMLAL   v19.4s, v4.4h, v3.h[3]
-        SMLAL2  v23.4s, v4.8h, v3.h[3]
         SMLAL   v27.4s, v5.4h, v3.h[3]
         SMLAL2  v31.4s, v5.8h, v3.h[3]
         B.EQ    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[4]
-        SMLAL2  v20.4s, v4.8h, v0.h[4]
         SMLAL   v24.4s, v5.4h, v0.h[4]
         SMLAL2  v28.4s, v5.8h, v0.h[4]
-        SMLAL   v17.4s, v4.4h, v1.h[4]
-        SMLAL2  v21.4s, v4.8h, v1.h[4]
         SMLAL   v25.4s, v5.4h, v1.h[4]
         SMLAL2  v29.4s, v5.8h, v1.h[4]
-        SMLAL   v18.4s, v4.4h, v2.h[4]
-        SMLAL2  v22.4s, v4.8h, v2.h[4]
         SMLAL   v26.4s, v5.4h, v2.h[4]
         SMLAL2  v30.4s, v5.8h, v2.h[4]
-        SMLAL   v19.4s, v4.4h, v3.h[4]
-        SMLAL2  v23.4s, v4.8h, v3.h[4]
         SMLAL   v27.4s, v5.4h, v3.h[4]
         SMLAL2  v31.4s, v5.8h, v3.h[4]
         CMP     x0, 6
         B.LO    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[5]
-        SMLAL2  v20.4s, v4.8h, v0.h[5]
         SMLAL   v24.4s, v5.4h, v0.h[5]
         SMLAL2  v28.4s, v5.8h, v0.h[5]
-        SMLAL   v17.4s, v4.4h, v1.h[5]
-        SMLAL2  v21.4s, v4.8h, v1.h[5]
         SMLAL   v25.4s, v5.4h, v1.h[5]
         SMLAL2  v29.4s, v5.8h, v1.h[5]
-        SMLAL   v18.4s, v4.4h, v2.h[5]
-        SMLAL2  v22.4s, v4.8h, v2.h[5]
         SMLAL   v26.4s, v5.4h, v2.h[5]
         SMLAL2  v30.4s, v5.8h, v2.h[5]
-        SMLAL   v19.4s, v4.4h, v3.h[5]
-        SMLAL2  v23.4s, v4.8h, v3.h[5]
         SMLAL   v27.4s, v5.4h, v3.h[5]
         SMLAL2  v31.4s, v5.8h, v3.h[5]
         B.EQ    2b
 
-        LDP     d4, d5, [x5], 16
-        SXTL    v4.8h, v4.8b
+        LDR     d5, [x5], 8
         SXTL    v5.8h, v5.8b
-        SMLAL   v16.4s, v4.4h, v0.h[6]
-        SMLAL2  v20.4s, v4.8h, v0.h[6]
         SMLAL   v24.4s, v5.4h, v0.h[6]
         SMLAL2  v28.4s, v5.8h, v0.h[6]
-        SMLAL   v17.4s, v4.4h, v1.h[6]
-        SMLAL2  v21.4s, v4.8h, v1.h[6]
         SMLAL   v25.4s, v5.4h, v1.h[6]
         SMLAL2  v29.4s, v5.8h, v1.h[6]
-        SMLAL   v18.4s, v4.4h, v2.h[6]
-        SMLAL2  v22.4s, v4.8h, v2.h[6]
         SMLAL   v26.4s, v5.4h, v2.h[6]
         SMLAL2  v30.4s, v5.8h, v2.h[6]
-        SMLAL   v19.4s, v4.4h, v3.h[6]
-        SMLAL2  v23.4s, v4.8h, v3.h[6]
         SMLAL   v27.4s, v5.4h, v3.h[6]
         SMLAL2  v31.4s, v5.8h, v3.h[6]
         B       2b
@@ -540,17 +362,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         # Store odd width
         .p2align 3
 4:
-        TBZ     x1, 3, 5f
-        STR     d0, [x6], 8
-        STR     d1, [x8], 8
-        DUP     d0, v0.d[1]
-        DUP     d1, v1.d[1]
-        STR     d2, [x9], 8
-        STR     d3, [x7], 8
-        DUP     d2, v2.d[1]
-        DUP     d3, v3.d[1]
-5:
-        TBZ     x1, 2, 6f
+        TBZ     x1, 2, 5f
         STR     s0, [x6], 4
         STR     s1, [x8], 4
         DUP     s0, v0.s[1]
@@ -559,8 +371,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         STR     s3, [x7], 4
         DUP     s2, v2.s[1]
         DUP     s3, v3.s[1]
-6:
-        TBZ     x1, 1, 7f
+5:
+        TBZ     x1, 1, 6f
         STR     h0, [x6], 2
         STR     h1, [x8], 2
         DUP     h0, v0.h[1]
@@ -569,16 +381,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld6
         STR     h3, [x7], 2
         DUP     h2, v2.h[1]
         DUP     h3, v3.h[1]
-7:
-        TBZ     x1, 0, 8f
+6:
+        TBZ     x1, 0, 7f
         STR     b0, [x6]
         STR     b1, [x8]
         STR     b2, [x9]
         STR     b3, [x7]
-8:
+7:
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64
+END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_prfm_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

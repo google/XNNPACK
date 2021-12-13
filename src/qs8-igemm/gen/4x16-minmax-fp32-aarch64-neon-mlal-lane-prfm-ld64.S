@@ -31,13 +31,12 @@
 # A1  x14  v1
 # A2  x15  v2
 # A3  x20  v3
-# B    x5  v4  v5  v6
+# B    x5  v4  v5
 # C0   x6 v16 v20 v24 v28
 # C1  x16 v17 v21 v25 v29
 # C2  x17 v18 v22 v26 v30
 # C3   x7 v19 v23 v27 v31
 # unused  v7 v8 v9 v10 v11 v12 v13 v14 v15
-# x11, x21 temp for Cortex-A53 loads
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64
 
@@ -53,7 +52,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         CMP     x0, 4                   // if mr < 4
-        STP     x20, x21, [sp, -16]!    // Save x20-x21 on stack
+        STR     x20, [sp, -16]!         // Save x20 on stack
         ADD     x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
@@ -404,8 +403,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         # nc loop
         B.HI    0b
 
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 16
         RET
 
         # Remainder- 1 to 7 bytes of A
@@ -610,8 +609,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_pr
         STR     b1, [x16]
         STR     b0, [x6]
 9:
-        # Restore x20-x21 from stack
-        LDP     x20, x21, [sp], 16
+        # Restore x20 from stack
+        LDR     x20, [sp], 16
         RET
 
 END_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64

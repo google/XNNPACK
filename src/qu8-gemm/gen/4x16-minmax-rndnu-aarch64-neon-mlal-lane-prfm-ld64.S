@@ -40,15 +40,13 @@
 # A1 x15 v1
 # A2 x13 v2
 # A3  x4 v3
-# B   x5 v4  v5  v6
+# B   x5 v4  v5
 # C0  x6 v16 v20 v24 v28
 # C1  x8 v17 v21 v25 v29
 # C2  x9 v18 v22 v26 v30
 # C3  x7 v19 v23 v27 v31
 # zero_point  v7
 # unused v8 v9 v10 v11 v12 v13 v14 v15
-
-# x10 x17 a53 temp registers
 
 BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64
 
