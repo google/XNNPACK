@@ -36,6 +36,8 @@ XNNPACK implements the following neural network operators:
 - Bankers' Rounding (rounding to nearest, ties to even)
 - Ceiling (rounding to integer above)
 - Clamp (includes ReLU and ReLU6)
+- Convert (includes fixed-point and half-precision quantization and
+  dequantization)
 - Copy
 - ELU
 - Floor (rounding to integer below)
