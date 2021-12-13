@@ -24,7 +24,10 @@ def xnnpack_msvc_std_copts():
 
 def xnnpack_std_cxxopts():
     """Compiler flags to specify language standard for C++ sources."""
-    return ["-std=gnu++11"]
+    return select({
+        "windows_x86_64_clang": ["/std:gnu++11"],
+        "//conditions:default": ["-std=gnu++11"],
+    })
 
 def xnnpack_optional_ruy_copts():
     """Compiler flags to optionally enable Ruy benchmarks."""
