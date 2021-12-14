@@ -25,7 +25,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x4c8__wasmsimd_dot16x2_ld64(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 4);

@@ -13,7 +13,7 @@
 #include <xnnpack/maxpool.h>
 
 
-XNN_DISABLE_TSAN void xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16(
+void xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,

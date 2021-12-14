@@ -25,7 +25,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane_prfm(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 4);

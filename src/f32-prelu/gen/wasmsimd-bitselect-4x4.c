@@ -22,7 +22,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x4(
     size_t input_stride,
     const float*restrict weights,
     float*restrict output,
-    size_t output_stride) XNN_DISABLE_TSAN
+    size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

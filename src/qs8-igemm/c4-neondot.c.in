@@ -33,7 +33,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

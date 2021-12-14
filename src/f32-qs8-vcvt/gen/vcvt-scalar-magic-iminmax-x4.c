@@ -20,7 +20,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x4(
     size_t n,
     const float* x,
     int8_t* y,
-    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
