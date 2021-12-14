@@ -1,3 +1,5 @@
+#include <xnnpack/allocator.h>
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -325,12 +327,10 @@ enum class Error {
 };
 
 // A simple AAarch32 assembler.
-// Right now it allocates its own memory (using `new`) to write code into (for
-// testing), but will be updated to be more customizable.
 class Assembler {
  public:
-  explicit Assembler();
-  ~Assembler();
+  // Takes an xnn_code_buffer with a pointer to allocated memory.
+  explicit Assembler(xnn_code_buffer* buf);
 
   Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
@@ -395,13 +395,18 @@ class Assembler {
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
 
+  // Finish assembly of code, this should be the last function called on an
+  // instance of Assembler. Returns a pointer to the start of code region.
+  void* finalize();
   // Reset the assembler state (no memory is freed).
   void reset();
 
   // Get a pointer to the start of code buffer.
-  const uint32_t* const start() { return buffer_; }
-  const uint32_t* const offset() { return cursor_; }
-  const Error error() { return error_; }
+  const uint32_t* start() const { return buffer_; }
+  const uint32_t* offset() const { return cursor_; }
+  // Returns the number of bytes of code actually in the buffer.
+  size_t code_size_in_bytes() const { return (cursor_ - buffer_) * 4; }
+  const Error error() const { return error_; }
 
  private:
   // Emits a 32-bit value to the code buffer.
@@ -416,7 +421,11 @@ class Assembler {
   // Pointer to out-of-bounds of code buffer.
   uint32_t* top_;
   // Errors encountered while assembling code.
-  Error error_;
+  Error error_ = Error::kNoError;
+  // Holds an xnn_code_buffer, will write code to its code pointer, and unmap
+  // unused pages on finalizing.
+  xnn_code_buffer* xnn_buffer = nullptr;
 };
+
 }  // namespace aarch32
 }  // namespace xnnpack

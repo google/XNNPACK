@@ -8084,11 +8084,38 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "aarch32_assembler",
+    name = "jit",
     srcs = [
         "src/jit/aarch32-assembler.cc",
+        "src/jit/memory.c",
     ],
-    hdrs = INTERNAL_HDRS + ["src/xnnpack/aarch32-assembler.h"],
+    hdrs = INTERNAL_HDRS + [
+        "src/xnnpack/aarch32-assembler.h",
+    ],
+    copts = LOGGING_COPTS,
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":logging_utils",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "jit_test_mode",
+    srcs = [
+        "src/jit/aarch32-assembler.cc",
+        "src/jit/memory.c",
+    ],
+    hdrs = INTERNAL_HDRS + [
+        "src/xnnpack/aarch32-assembler.h",
+    ],
+    copts = LOGGING_COPTS + [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":logging_utils",
+    ],
 )
 
 xnnpack_cc_library(
@@ -11331,7 +11358,8 @@ xnnpack_unit_test(
         "test/aarch32-assembler.cc",
     ],
     deps = [
-        ":aarch32_assembler",
+        ":XNNPACK",
+        ":jit_test_mode",
     ],
 )
 

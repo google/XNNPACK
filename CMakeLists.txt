@@ -251,7 +251,8 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-2048.c)
 
 SET (JIT_SRCS
-  src/jit/aarch32-assembler.cc)
+  src/jit/aarch32-assembler.cc
+  src/jit/memory.c)
 
 SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c

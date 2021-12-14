@@ -1,4 +1,6 @@
 #include <xnnpack/aarch32-assembler.h>
+#include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
 
 #include <ios>
 
@@ -23,7 +25,9 @@
 namespace xnnpack {
 namespace aarch32 {
 TEST(AArch32Assembler, InstructionEncoding) {
-  Assembler a;
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
 
   CHECK_ENCODING(0xE0810002, a.add(r0, r1, r2));
   CHECK_ENCODING(0xE28A9080, a.add(r9, r10, 128));
@@ -108,10 +112,14 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4CB080F, a.vst1_32(d16[0], mem[r11]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
+
+  xnn_release_code_memory(&b);
 }
 
 TEST(AArch32Assembler, Label) {
-  Assembler a;
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
 
   Label l1;
   a.add(r0, r0, r0);
@@ -159,6 +167,8 @@ TEST(AArch32Assembler, Label) {
     a.beq(lfail);
   }
   EXPECT_EQ(Error::kLabelHasTooManyUsers, a.error());
+
+  xnn_release_code_memory(&b);
 }
 
 TEST(AArch32Assembler, CoreRegisterList) {
@@ -189,5 +199,35 @@ TEST(AArch32Assembler, DRegisterLane) {
   EXPECT_EQ((DRegisterLane{2, 0}), d2[0]);
   EXPECT_EQ((DRegisterLane{2, 1}), d2[1]);
 }
+
+TEST(AArch32Assembler, CodeBufferOverflow) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, 4);
+  Assembler a(&b);
+  a.add(r0, r0, 2);
+  EXPECT_EQ(Error::kNoError, a.error());
+
+  a.bx(lr);
+  EXPECT_EQ(Error::kOutOfMemory, a.error());
+  xnn_release_code_memory(&b);
+}
+
+#if XNN_ARCH_ARM
+TEST(AArch32Assembler, JitAllocCodeBuffer) {
+  typedef uint32_t (*Func)(uint32_t);
+
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+
+  Assembler a(&b);
+  a.add(r0, r0, 2).bx(lr);
+
+  Func fn = reinterpret_cast<Func>(a.finalize());
+
+  ASSERT_EQ(3, fn(1));
+
+  xnn_release_code_memory(&b);
+}
+#endif
 }  // namespace aarch32
 }  // namespace xnnpack

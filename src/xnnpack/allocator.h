@@ -82,3 +82,31 @@ inline static void xnn_release_simd_memory(void* memory_pointer) {
   #define XNN_SIMD_ALLOCA(size) \
     ((void*) ((((uintptr_t) alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
 #endif
+
+#define XNN_DEFAULT_CODE_BUFFER_SIZE 131072  // 128kb.
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct xnn_code_buffer {
+  // Pointer to allocated, externally managed memory.
+  void* code;
+  // Actual size of instructions (bytes). It is only safe to access code within
+  // this size.
+  size_t size;
+  // Maximum capacity of the buffer pointer to by `code`. This is the size of
+  // the currently mapped memory.
+  size_t capacity;
+};
+
+// Allocates a code region and associates it with `buf`.
+enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size);
+// Finalize buffer, users won't need to call this directly, called by Assembler.
+enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf);
+// Free all memory associated with `buf`.
+enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

@@ -58,15 +58,11 @@ uint32_t encode_regs_length_to_type(DRegisterList regs) {
   return 0;
 }
 
-Assembler::Assembler() {
-  buffer_ = new uint32_t[DEFAULT_BUFFER_SIZE];
+Assembler::Assembler(xnn_code_buffer* buf) {
+  buffer_ = reinterpret_cast<uint32_t*>(buf->code);
   cursor_ = buffer_;
-  top_ = buffer_ + DEFAULT_BUFFER_SIZE;
-  error_ = Error::kNoError;
-}
-
-Assembler::~Assembler() {
-  delete[] buffer_;
+  top_ = buffer_ + (buf->capacity / 4);
+  xnn_buffer = buf;
 }
 
 Assembler& Assembler::emit32(uint32_t value) {
@@ -333,6 +329,12 @@ Assembler& Assembler::vst1_32(DRegisterLane dd, MemOperand op) {
 
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
   return emit32(0xF480'0800 | encode(dd, 22, 12) | op.base().code << 16 | dd.lane << 5 | rm);
+}
+
+void* Assembler::finalize() {
+  xnn_buffer->size = code_size_in_bytes();
+  xnn_finalize_code_memory(xnn_buffer);
+  return reinterpret_cast<void*>(buffer_);
 }
 
 void Assembler::reset() {
