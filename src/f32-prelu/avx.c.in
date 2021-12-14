@@ -114,36 +114,41 @@ void xnn_f32_prelu_ukernel__avx_${ROW_TILE}x${CHANNEL_TILE}(
       $for M in range(ROW_TILE):
         __m256 vacc${M} = _mm256_blendv_ps(vi${M}, vprod${M}, vi${M});
 
-      // _mm256_maskstore_ps(o${M}, vmask, vacc${M}) could be used here, but triggers msan failures (probably an msan bug).
-      $for M in range(ROW_TILE):
-        __m128 vacc${M}_lo = _mm256_castps256_ps128(vacc${M});
-      if (c & (4 * sizeof(float))) {
+      #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
         $for M in range(ROW_TILE):
-          _mm_storeu_ps(o${M}, vacc${M}_lo);
+          __m128 vacc${M}_lo = _mm256_castps256_ps128(vacc${M});
+        if (c & (4 * sizeof(float))) {
+          $for M in range(ROW_TILE):
+            _mm_storeu_ps(o${M}, vacc${M}_lo);
 
-        $for M in range(ROW_TILE):
-          vacc${M}_lo = _mm256_extractf128_ps(vacc${M}, 1);
+          $for M in range(ROW_TILE):
+            vacc${M}_lo = _mm256_extractf128_ps(vacc${M}, 1);
 
-        $for M in range(ROW_TILE):
-          o${M} += 4;
-      }
-      if (c & (2 * sizeof(float))) {
-        $for M in range(ROW_TILE):
-          _mm_storel_pi((__m64*) o${M}, vacc${M}_lo);
+          $for M in range(ROW_TILE):
+            o${M} += 4;
+        }
+        if (c & (2 * sizeof(float))) {
+          $for M in range(ROW_TILE):
+            _mm_storel_pi((__m64*) o${M}, vacc${M}_lo);
 
-        $for M in range(ROW_TILE):
-          vacc${M}_lo = _mm_movehl_ps(vacc${M}_lo, vacc${M}_lo);
+          $for M in range(ROW_TILE):
+            vacc${M}_lo = _mm_movehl_ps(vacc${M}_lo, vacc${M}_lo);
 
-        $for M in range(ROW_TILE):
-          o${M} += 2;
-      }
-      if (c & (1 * sizeof(float))) {
-        $for M in range(ROW_TILE):
-          _mm_store_ss(o${M}, vacc${M}_lo);
+          $for M in range(ROW_TILE):
+            o${M} += 2;
+        }
+        if (c & (1 * sizeof(float))) {
+          $for M in range(ROW_TILE):
+            _mm_store_ss(o${M}, vacc${M}_lo);
 
+          $for M in range(ROW_TILE):
+            o${M} += 1;
+        }
+      #else
+        // Triggers spurious MSan failures in the calling code.
         $for M in range(ROW_TILE):
-          o${M} += 1;
-      }
+          _mm256_maskstore_ps(o${M}, vmask, vacc${M});
+      #endif
     }
     $for M in range(ROW_TILE):
       i${M} = (const float*) ((uintptr_t) i${M} + input_increment);

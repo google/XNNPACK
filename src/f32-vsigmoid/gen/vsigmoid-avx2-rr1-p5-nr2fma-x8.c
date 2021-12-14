@@ -101,20 +101,24 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_x8(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    // _mm256_maskstore_ps(y, vmask, vf) could be used here, but triggers msan failures (probably an msan bug).
-    __m128 vf_lo = _mm256_castps256_ps128(vf);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vf_lo);
-      vf_lo = _mm256_extractf128_ps(vf, 1);
-      y += 4;
-    }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vf_lo);
-      vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
-      y += 2;
-    }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vf_lo);
-    }
+    #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+      __m128 vf_lo = _mm256_castps256_ps128(vf);
+      if (n & (4 * sizeof(float))) {
+        _mm_storeu_ps(y, vf_lo);
+        vf_lo = _mm256_extractf128_ps(vf, 1);
+        y += 4;
+      }
+      if (n & (2 * sizeof(float))) {
+        _mm_storel_pi((__m64*) y, vf_lo);
+        vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
+        y += 2;
+      }
+      if (n & (1 * sizeof(float))) {
+        _mm_store_ss(y, vf_lo);
+      }
+    #else
+      // Triggers spurious MSan failures in the calling code.
+      _mm256_maskstore_ps(y, vmask, vf);
+    #endif
   }
 }

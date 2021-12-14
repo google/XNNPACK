@@ -51,20 +51,24 @@ void xnn_f32_vclamp_ukernel__avx_x8(
     vacc = _mm256_max_ps(vacc, vy_min);
     vacc = _mm256_min_ps(vacc, vy_max);
 
-    // _mm256_maskstore_ps(y, vmask, vacc) could be used here, but triggers msan failures (probably an msan bug).
-    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vacc_lo);
-      vacc_lo = _mm256_extractf128_ps(vacc, 1);
-      y += 4;
-    }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vacc_lo);
-      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
-      y += 2;
-    }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vacc_lo);
-    }
+    #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+      __m128 vacc_lo = _mm256_castps256_ps128(vacc);
+      if (n & (4 * sizeof(float))) {
+        _mm_storeu_ps(y, vacc_lo);
+        vacc_lo = _mm256_extractf128_ps(vacc, 1);
+        y += 4;
+      }
+      if (n & (2 * sizeof(float))) {
+        _mm_storel_pi((__m64*) y, vacc_lo);
+        vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
+        y += 2;
+      }
+      if (n & (1 * sizeof(float))) {
+        _mm_store_ss(y, vacc_lo);
+      }
+    #else
+      // Triggers spurious MSan failures in the calling code.
+      _mm256_maskstore_ps(y, vmask, vacc);
+    #endif
   }
 }

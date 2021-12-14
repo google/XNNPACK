@@ -148,20 +148,24 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x16(
     vx = _mm256_mul_ps(vx, vbeta);
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
-    // _mm256_maskstore_ps(y, vmask, vf) could be used here, but triggers msan failures (probably an msan bug).
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
-      y += 4;
-    }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      y += 2;
-    }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy_lo);
-    }
+    #if XNN_COMPILER_HAS_FEATURE(memory_sanitizer)
+      __m128 vy_lo = _mm256_castps256_ps128(vy);
+      if (n & (4 * sizeof(float))) {
+        _mm_storeu_ps(y, vy_lo);
+        vy_lo = _mm256_extractf128_ps(vy, 1);
+        y += 4;
+      }
+      if (n & (2 * sizeof(float))) {
+        _mm_storel_pi((__m64*) y, vy_lo);
+        vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+        y += 2;
+      }
+      if (n & (1 * sizeof(float))) {
+        _mm_store_ss(y, vy_lo);
+      }
+    #else
+      // Triggers spurious MSan failures in the calling code.
+      _mm256_maskstore_ps(y, vmask, vy);
+    #endif
   }
 }
