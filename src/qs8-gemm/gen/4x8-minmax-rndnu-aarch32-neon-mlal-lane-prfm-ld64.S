@@ -88,37 +88,33 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VLDM    r5!, {d14-d15}          // RNDNU params
         LDR     r7, [sp, 112]           // cn_stride
 
+        PLD     [r9,  64]               // Prefetch B
+        PLD     [r9, 128]
+        PLD     [r9, 192]
+        PLD     [r9, 256]
+        PLD     [r9, 320]
+        PLD     [r9, 384]
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
         SUBS    r5, r2, 8               // k = kc - 8
 
-        PLD     [r3,   0]               // Prefetch A
-        PLD     [r3,  64]
-        PLD     [r12,  0]
-        PLD     [r12, 64]
         VMOV    q10, q8
-        PLD     [r10,  0]
-        PLD     [r10, 64]
+        PLD     [r3,  64]               // Prefetch A
         VMOV    q11, q9
-        PLD     [r0,   0]
-        PLD     [r0,  64]
+        PLD     [r12, 64]
         VMOV    q12, q8
-        PLD     [r9,   0]               // Prefetch B
-        PLD     [r9,  64]
+        PLD     [r10, 64]
         VMOV    q13, q9
-        PLD     [r9, 128]
-        PLD     [r9, 192]
+        PLD     [r0,  64]
         VMOV    q14, q8
-        PLD     [r9, 256]
-        PLD     [r9, 320]
         VMOV    q15, q9
-        PLD     [r9, 384]
-        PLD     [r9, 448]
         BLO     3f                      // less than 8 channels?
 
         # Main loop - 8 bytes
+        # 64 bytes for weights.
         .p2align 3
 1:
         VLD1.8  {d0},  [r3]!  // A0
@@ -126,24 +122,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VLD1.8  {d2}, [r12]!  // A1
         VLD1.8  {d4}, [r10]!  // A2
         VLD1.8  {d6},  [r0]!  // A3
-        VMOVL.S8   q0, d0
-        VMOVL.S8   q4, d8
+        SUBS    r5, r5, 8
         PLD     [r3, 128]
-        VMOVL.S8   q1, d2
-        VMOVL.S8   q2, d4
+        VMOVL.S8   q0, d0
         PLD    [r12, 128]
+        VMOVL.S8   q4, d8
+        PLD    [r10, 128]
+        VMOVL.S8   q1, d2
+        PLD     [r0, 128]
+        VMOVL.S8   q2, d4
+        PLD     [r9, 448]
         VMOVL.S8   q3, d6
         VMLAL.S16  q8, d8, d0[0]
-        PLD    [r10, 128]
         VMLAL.S16  q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
-        PLD     [r0, 128]
         VMLAL.S16 q11, d9, d2[0]
         VMLAL.S16 q12, d8, d4[0]
-        PLD     [r9, 448]
         VMLAL.S16 q13, d9, d4[0]
         VMLAL.S16 q14, d8, d6[0]
-        PLD     [r9, 512]
         VMLAL.S16 q15, d9, d6[0]
 
         VLD1.8  {d8},  [r9]!
@@ -222,8 +218,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q13, d9, d5[3]
         VMLAL.S16 q14, d8, d7[3]
         VMLAL.S16 q15, d9, d7[3]
-
-        SUBS    r5, r5, 8
         BHS     1b
 
         # Is there a remainder?- 1-7 bytes of A

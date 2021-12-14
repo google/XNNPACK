@@ -88,6 +88,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld6
         VLDM    r5!, {d14-d15}          // RNDNU params
         LDR     r7, [sp, 112]           // cn_stride
 
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
@@ -103,6 +104,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld6
         BLO     3f                      // less than 8 channels?
 
         # Main loop - 8 bytes
+        # 64 bytes for weights.
         .p2align 3
 1:
         VLD1.8  {d0},  [r3]!  // A0
@@ -110,6 +112,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld6
         VLD1.8  {d2}, [r12]!  // A1
         VLD1.8  {d4}, [r10]!  // A2
         VLD1.8  {d6},  [r0]!  // A3
+        SUBS    r5, r5, 8
         VMOVL.S8   q0, d0
         VMOVL.S8   q4, d8
         VMOVL.S8   q1, d2
@@ -200,8 +203,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld6
         VMLAL.S16 q13, d9, d5[3]
         VMLAL.S16 q14, d8, d7[3]
         VMLAL.S16 q15, d9, d7[3]
-
-        SUBS    r5, r5, 8
         BHS     1b
 
         # Is there a remainder?- 1-7 bytes of A

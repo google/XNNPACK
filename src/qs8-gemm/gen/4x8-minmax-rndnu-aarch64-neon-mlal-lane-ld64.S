@@ -58,17 +58,20 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_ld6
         CSEL    x4, x13, x4, LO         //   a3 = a2
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         LDP     q24, q28, [x5], 32
         SUBS    x0, x2, 8               // k = kc - 8
+
         MOV     v25.16b, v24.16b
         MOV     v26.16b, v24.16b
         MOV     v27.16b, v24.16b
         MOV     v29.16b, v28.16b
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
+
         # Is there at least 8 bytes for main loop?
         B.LO    3f
 
@@ -80,6 +83,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_ld6
         LD1     {v1.8b}, [x15], 8
         LD1     {v2.8b}, [x13], 8
         LD1     {v3.8b},  [x4], 8
+        SUBS    x0, x0, 8
         SXTL    v0.8h, v0.8b
         SXTL    v5.8h, v5.8b
         SXTL    v1.8h, v1.8b
@@ -170,8 +174,6 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_ld6
         SMLAL2  v30.4s, v5.8h, v2.h[7]
         SMLAL   v27.4s, v5.4h, v3.h[7]
         SMLAL2  v31.4s, v5.8h, v3.h[7]
-
-        SUBS    x0, x0, 8
         B.HS    1b
 
         AND     x0, x2, 7               // kc remainder 0 to 7

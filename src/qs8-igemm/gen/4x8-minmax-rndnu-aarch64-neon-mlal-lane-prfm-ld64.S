@@ -57,6 +57,13 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_pr
         CSEL    x7,  x17, x7, LO        //   c3 = c2
 
 
+        PRFM    PLDL1KEEP, [x5,  64]    // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 128]
+        PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 384]
+
         .p2align 3
 0:
         # Load initial bias from w into accumulators
@@ -88,6 +95,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_pr
         ADD     x20, x20, x8            // a3 += a_offset
         CSEL    x20, x12, x20, EQ       //   a3 = zero, else += a3 + a_offset
 
+        PRFM    PLDL1KEEP, [x13, 64]    // Prefetch A
+        PRFM    PLDL1KEEP, [x14, 64]
+        PRFM    PLDL1KEEP, [x15, 64]
+        PRFM    PLDL1KEEP, [x20, 64]
         # Is there at least 8 bytes for main loop?
         SUBS    x0, x2, 8               // k = kc - 8
         B.LO    4f
@@ -100,23 +111,23 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_pr
         LD1     {v1.8b}, [x14], 8
         LD1     {v2.8b}, [x15], 8
         LD1     {v3.8b}, [x20], 8
-        SXTL    v0.8h, v0.8b
-        SXTL    v5.8h, v5.8b
-        SXTL    v1.8h, v1.8b
-        SXTL    v2.8h, v2.8b
-        SXTL    v3.8h, v3.8b
+        SUBS    x0, x0, 8
         PRFM    PLDL1KEEP, [x13, 128]
+        SXTL    v0.8h, v0.8b
+        PRFM    PLDL1KEEP, [x14, 128]
+        SXTL    v5.8h, v5.8b
+        PRFM    PLDL1KEEP, [x15, 128]
+        SXTL    v1.8h, v1.8b
+        PRFM    PLDL1KEEP, [x20, 128]
+        SXTL    v2.8h, v2.8b
+        PRFM    PLDL1KEEP, [x5, 448]
+        SXTL    v3.8h, v3.8b
         SMLAL   v24.4s, v5.4h, v0.h[0]
         SMLAL2  v28.4s, v5.8h, v0.h[0]
-        PRFM    PLDL1KEEP, [x14, 128]
-        PRFM    PLDL1KEEP, [x15, 128]
         SMLAL   v25.4s, v5.4h, v1.h[0]
         SMLAL2  v29.4s, v5.8h, v1.h[0]
-        PRFM    PLDL1KEEP, [x20, 128]
-        PRFM    PLDL1KEEP, [x5, 448]
         SMLAL   v26.4s, v5.4h, v2.h[0]
         SMLAL2  v30.4s, v5.8h, v2.h[0]
-        PRFM    PLDL1KEEP, [x5, 512]
         SMLAL   v27.4s, v5.4h, v3.h[0]
         SMLAL2  v31.4s, v5.8h, v3.h[0]
 
@@ -196,8 +207,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_pr
         SMLAL2  v30.4s, v5.8h, v2.h[7]
         SMLAL   v27.4s, v5.4h, v3.h[7]
         SMLAL2  v31.4s, v5.8h, v3.h[7]
-
-        SUBS    x0, x0, 8
         B.HS    2b
 
         AND     x0, x2, 7               // kc remainder 0 to 7
