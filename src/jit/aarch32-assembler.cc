@@ -352,12 +352,12 @@ Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op, Cor
 }
 
 Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
-  if ((size == k8 && dd.lane > 7) || (size == k32 && dd.lane > 1)) {
+  if ((size == k8 && dd.lane > 7) || (size == k16 && dd.lane > 3) || (size == k32 && dd.lane > 1)) {
     error_ = Error::kInvalidLaneIndex;
     return *this;
   }
 
-  const uint8_t shift = size == k8 ? 5 : 7;
+  const uint8_t shift = size == k8 ? 5 : size == k16 ? 6 : 7;
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
   return emit32(0xF480'0000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
 }

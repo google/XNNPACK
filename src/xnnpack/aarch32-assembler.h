@@ -328,6 +328,7 @@ enum class Error {
 
 enum DataSize {
   k8 = 0,
+  k16 = 1,
   k32 = 2,
 };
 
@@ -402,6 +403,12 @@ class Assembler {
   Assembler& vst1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k8, regs, op, rm); }
   // VST1.8 <list>, [<Rn>]{!} (single element form one lane).
   Assembler& vst1_8(DRegisterLane dd, MemOperand op) { return vst1(k8, dd, op); }
+  // VST1.16 <list>, [<Rn>]{!} (multiple single elements).
+  Assembler& vst1_16(DRegisterList regs, MemOperand op) { return vst1(k16, regs, op); }
+  // VST1.16 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
+  Assembler& vst1_16(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k16, regs, op, rm); }
+  // VST1.16 <list>, [<Rn>]{!} (single element form one lane).
+  Assembler& vst1_16(DRegisterLane dd, MemOperand op) { return vst1(k16, dd, op); }
   // VST1.32 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vst1_32(DRegisterList regs, MemOperand op) { return vst1(k32, regs, op); }
   // VST1.32 <list>, [<Rn>]{!}, <Rm> (multiple single elements).

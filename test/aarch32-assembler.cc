@@ -112,10 +112,19 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
   CHECK_ENCODING(0xED6D4B08, a.vpush({d20, d23}));
 
+  CHECK_ENCODING(0xF40B070F, a.vst1_8({d0}, mem[r11]));
+  CHECK_ENCODING(0xF40B070D, a.vst1_8({d0}, mem[r11]++));
   CHECK_ENCODING(0xF40B0707, a.vst1_8({d0}, mem[r11], r7));
   CHECK_ENCODING(0xF48B000F, a.vst1_8({d0[0]}, mem[r11]));
   CHECK_ENCODING(0xF48B00EF, a.vst1_8({d0[7]}, mem[r11]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_8(d0[8], mem[r11]));
+
+  CHECK_ENCODING(0xF40B074F, a.vst1_16({d0}, mem[r11]));
+  CHECK_ENCODING(0xF40B074D, a.vst1_16({d0}, mem[r11]++));
+  CHECK_ENCODING(0xF40B0747, a.vst1_16({d0}, mem[r11], r7));
+  CHECK_ENCODING(0xF48B040F, a.vst1_16({d0[0]}, mem[r11]));
+  CHECK_ENCODING(0xF48B04CF, a.vst1_16({d0[3]}, mem[r11]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_16(d0[4], mem[r11]));
 
   CHECK_ENCODING(0xF44B0280, a.vst1_32({d16, d19}, mem[r11], r0));
   EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0, d4}, mem[r11], r0));
