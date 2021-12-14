@@ -75,7 +75,7 @@ class ConvertOperatorTester {
 
   inline ConvertOperatorTester& scale(float scale) {
     assert(scale >= 0.0f);
-    assert(isnormal(scale));
+    assert(std::isnormal(scale));
     this->scale_ = scale;
     return *this;
   }
