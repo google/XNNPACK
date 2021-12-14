@@ -39,7 +39,7 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   $if LD128:
     #if XNN_ARCH_ARM64

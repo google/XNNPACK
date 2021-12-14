@@ -21,7 +21,7 @@ void xnn_f32_vrdivc_minmax_ukernel__sse_x4(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

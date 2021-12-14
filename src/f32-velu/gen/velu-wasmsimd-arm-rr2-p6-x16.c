@@ -19,7 +19,7 @@ void xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x16(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

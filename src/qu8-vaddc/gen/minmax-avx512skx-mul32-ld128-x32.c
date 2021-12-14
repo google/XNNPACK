@@ -20,7 +20,7 @@ void xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x32(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m128i vshift = _mm_loadu_si32(params->avx512.shift);

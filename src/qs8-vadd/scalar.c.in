@@ -17,7 +17,7 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__scalar_x${BATCH_TILE}(
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vbias = params->scalar.bias;
   const int32_t va_multiplier = params->scalar.a_multiplier;

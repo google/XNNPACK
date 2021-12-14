@@ -19,7 +19,7 @@ void xnn_f32_vlrelu_ukernel__sse2_x8(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

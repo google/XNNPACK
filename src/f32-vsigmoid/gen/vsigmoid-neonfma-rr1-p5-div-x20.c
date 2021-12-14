@@ -19,7 +19,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x20(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_DISABLE_TSAN
+    const void* params) XNN_OOB_READS
 {
   assert(n % sizeof(float) == 0);
 

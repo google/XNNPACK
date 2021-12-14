@@ -19,7 +19,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 
 {
   const v128_t va_zero_point = wasm_v128_load(params->fp32_wasmsimd.a_zero_point);

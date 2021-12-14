@@ -14,7 +14,7 @@ void xnn_u8_vclamp_ukernel__neon_x64(
     size_t n,
     const uint8_t* x,
     uint8_t* y,
-    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
 

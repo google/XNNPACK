@@ -19,7 +19,7 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x32(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
   const int32_t vshift = params->wasmsimd.shift;

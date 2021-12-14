@@ -20,7 +20,7 @@ void xnn_f32_vsqr_ukernel__wasmsimd_x8(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_DISABLE_TSAN
+    const void* params) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

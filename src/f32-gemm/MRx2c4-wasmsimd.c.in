@@ -26,7 +26,7 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__wasmsimd${ARCH_SUFF
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

@@ -20,7 +20,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld128_x16(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   #if XNN_ARCH_ARM64
     const uint8x16_t va_zero_point = vld1q_dup_u8(params->fp32_neonv8.a_zero_point);

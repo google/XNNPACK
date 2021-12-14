@@ -21,7 +21,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c24_acc2(
     size_t input_stride,
     const int8_t* zero,
     int8_t* output,
-    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(rows <= 7);

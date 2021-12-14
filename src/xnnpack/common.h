@@ -226,6 +226,8 @@
   #define XNN_DISABLE_MSAN
 #endif
 
+#define XNN_OOB_READS XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+
 #if defined(__GNUC__)
   #define XNN_INTRINSIC inline __attribute__((__always_inline__, __artificial__))
 #elif defined(_MSC_VER)

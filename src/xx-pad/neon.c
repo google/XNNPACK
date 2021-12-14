@@ -19,7 +19,7 @@ void xnn_xx_pad_ukernel__neon(
     size_t input_stride,
     void* output,
     size_t output_stride,
-    uint32_t fill_pattern) XNN_DISABLE_TSAN
+    uint32_t fill_pattern) XNN_OOB_READS
 {
   const size_t input_increment = input_stride - channels;
   const size_t output_increment = output_stride - (pre_padding + channels + post_padding);

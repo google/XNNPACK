@@ -21,7 +21,7 @@ void xnn_f32_vrndne_ukernel__avx512f_x16(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

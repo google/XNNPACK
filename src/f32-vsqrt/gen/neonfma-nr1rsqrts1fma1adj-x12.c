@@ -20,7 +20,7 @@ void xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x12(
     size_t n,
     const float* x,
     float* y,
-    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

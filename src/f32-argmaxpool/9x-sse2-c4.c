@@ -19,7 +19,7 @@ void xnn_f32_argmaxpool_ukernel_9x__sse2_c4(
     float* output,
     uint32_t* index,
     size_t input_increment,
-    size_t output_increment) XNN_DISABLE_TSAN
+    size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(pooling_elements != 0);

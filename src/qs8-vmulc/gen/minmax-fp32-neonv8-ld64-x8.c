@@ -20,7 +20,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const int8x8_t va_zero_point = vld1_dup_s8(params->fp32_neonv8.a_zero_point);
   const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);

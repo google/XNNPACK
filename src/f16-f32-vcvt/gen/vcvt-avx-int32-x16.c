@@ -19,7 +19,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int32_x16(
     size_t n,
     const void* input,
     float* output,
-    const void* params)
+    const void* params) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);

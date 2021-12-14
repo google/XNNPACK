@@ -20,7 +20,7 @@ void xnn_f32_vmin_ukernel__wasmsimd_arm_x16(
     const float* a,
     const float* b,
     float* y,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

@@ -22,7 +22,7 @@ void xnn_f16_prelu_ukernel__neonfp16arith_${ROW_TILE}x${CHANNEL_TILE}(
     size_t input_stride,
     const void* restrict weights,
     void* restrict output,
-    size_t output_stride) XNN_DISABLE_TSAN
+    size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

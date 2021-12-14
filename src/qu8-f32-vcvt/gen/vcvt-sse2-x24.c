@@ -20,7 +20,7 @@ void xnn_qu8_f32_vcvt_ukernel__sse2_x24(
     size_t n,
     const uint8_t* x,
     float* y,
-    const union xnn_qu8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint8_t) == 0);

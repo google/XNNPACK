@@ -20,7 +20,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__scalar_x4(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t va_zero_point = params->fp32_scalar.a_zero_point;
   const int32_t vb_zero_point = params->fp32_scalar.b_zero_point;

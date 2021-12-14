@@ -22,7 +22,7 @@ void xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_c8(
     size_t input_offset,
     const int16_t*restrict weights,
     uint8_t*restrict output,
-    size_t output_increment) XNN_DISABLE_TSAN
+    size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(channels != 0);

@@ -20,7 +20,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x16(
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
-    const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.a_multiplier);
   const __m128i vshift = _mm_loadu_si32(params->sse4_mul32.shift);

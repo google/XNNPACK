@@ -30,7 +30,7 @@ void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
     size_t n,
     const float* x,
     float* y,
-    ${PARAMS}) XNN_DISABLE_TSAN
+    ${PARAMS}) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);

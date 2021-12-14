@@ -28,7 +28,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}
     size_t output_increment,
     size_t input_offset,
     const float* zero,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

@@ -21,7 +21,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_nr2recps_x8(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_DISABLE_TSAN
+    const void* params) XNN_OOB_READS
 {
   assert(n % sizeof(float) == 0);
 

@@ -21,7 +21,7 @@ void xnn_f32_ibilinear_chw_ukernel__neon_p4(
     size_t input_offset,
     const float*restrict weights,
     float*restrict output,
-    size_t input_increment) XNN_DISABLE_TSAN
+    size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(channels != 0);

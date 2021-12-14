@@ -17,7 +17,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8(
     size_t input_stride,
     const void* zero,
     void* output_ptr,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(rows <= 7);

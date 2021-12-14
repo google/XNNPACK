@@ -20,7 +20,7 @@ void xnn_f16_vmax_ukernel__neonfp16arith_x8(
     const void* restrict a_ptr,
     const void* restrict b_ptr,
     void* restrict y_ptr,
-    const struct xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const struct xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);

@@ -25,7 +25,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
     const int8_t* zero,
     int32_t* buffer,
     int8_t* output,
-    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows > ${ROW_TILE});
   assert(channels != 0);

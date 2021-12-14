@@ -20,7 +20,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x8(
     const float* input,
     float* output,
     float* sum,
-    float max) XNN_DISABLE_TSAN
+    float max) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 

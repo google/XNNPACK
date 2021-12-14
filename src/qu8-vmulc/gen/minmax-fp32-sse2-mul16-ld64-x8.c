@@ -19,7 +19,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 
 {
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);

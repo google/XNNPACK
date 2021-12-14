@@ -14,7 +14,7 @@ void xnn_s8_vclamp_ukernel__sse2_x64(
     size_t n,
     const int8_t* x,
     int8_t* y,
-    const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN
+    const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
 

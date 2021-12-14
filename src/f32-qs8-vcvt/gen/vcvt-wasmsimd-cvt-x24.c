@@ -20,7 +20,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x24(
     size_t n,
     const float* x,
     int8_t* y,
-    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_TSAN XNN_DISABLE_MSAN
+    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
