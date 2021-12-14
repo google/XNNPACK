@@ -81,7 +81,7 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   buf->capacity = page_aligned_code_size;
 
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
-#if !defined(XNN_ARCH_WASM) && !defined(XNN_ARCH_WASMSIMD)
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   __builtin___clear_cache(buf->code, (uint8_t*) buf->code + buf->capacity);
 #endif
 
