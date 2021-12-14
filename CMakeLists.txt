@@ -7829,6 +7829,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE .)
   TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils)
 
+  ADD_EXECUTABLE(convert-bench bench/convert.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(convert-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(convert-bench PRIVATE .)
+  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(convolution-bench bench/convolution.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
     CXX_STANDARD 11

@@ -8822,6 +8822,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "convert_bench",
+    srcs = [
+        "bench/convert.cc",
+    ],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["bench/convolution.cc"],
     copts = xnnpack_optional_tflite_copts() + xnnpack_optional_armcl_copts(),
