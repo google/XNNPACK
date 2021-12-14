@@ -372,8 +372,21 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x96_acc6(
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
 
-    // Store up to 7 outputs at a time.
-    _mm256_maskstore_ps(output, vmask, vf);
+    // Store up to 7 outputs using divide-and-conquer algorithm.
+    __m128 vf_lo = _mm256_castps256_ps128(vf);
+    if (elements & (4 * sizeof(float))) {
+      _mm_storeu_ps(output, vf_lo);
+      vf_lo = _mm256_extractf128_ps(vf, 1);
+      output += 4;
+    }
+    if (elements & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vf_lo);
+      vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
+      output += 2;
+    }
+    if (elements & (1 * sizeof(float))) {
+      _mm_store_ss(output, vf_lo);
+    }
 
     // Accumulate computed exponents. And addend with mask to leave unmasked 32-bit lanes unchanged.
     vacc = _mm256_add_ps(vacc, _mm256_and_ps(vf, _mm256_castsi256_ps(vmask)));

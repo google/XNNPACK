@@ -222,7 +222,6 @@ void xnn_f32_velu_ukernel__avx2_rr1_p6_x48(
     vx = _mm256_mul_ps(vx, vbeta);
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
-    // _mm256_maskstore_ps(y, vmask, vf) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vy_lo);

@@ -206,7 +206,6 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x32(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    // _mm256_maskstore_ps(y, vmask, vf) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vf_lo = _mm256_castps256_ps128(vf);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vf_lo);

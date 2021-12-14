@@ -114,7 +114,6 @@ void xnn_f32_prelu_ukernel__avx_${ROW_TILE}x${CHANNEL_TILE}(
       $for M in range(ROW_TILE):
         __m256 vacc${M} = _mm256_blendv_ps(vi${M}, vprod${M}, vi${M});
 
-      // _mm256_maskstore_ps(o${M}, vmask, vacc${M}) could be used here, but triggers msan failures (probably an msan bug).
       $for M in range(ROW_TILE):
         __m128 vacc${M}_lo = _mm256_castps256_ps128(vacc${M});
       if (c & (4 * sizeof(float))) {

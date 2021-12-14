@@ -112,7 +112,6 @@ void xnn_f32_prelu_ukernel__avx_2x16(
       __m256 vacc0 = _mm256_blendv_ps(vi0, vprod0, vi0);
       __m256 vacc1 = _mm256_blendv_ps(vi1, vprod1, vi1);
 
-      // _mm256_maskstore_ps(o1, vmask, vacc1) could be used here, but triggers msan failures (probably an msan bug).
       __m128 vacc0_lo = _mm256_castps256_ps128(vacc0);
       __m128 vacc1_lo = _mm256_castps256_ps128(vacc1);
       if (c & (4 * sizeof(float))) {

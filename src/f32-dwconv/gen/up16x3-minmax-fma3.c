@@ -150,7 +150,6 @@ void xnn_f32_dwconv_minmax_ukernel_up16x3__fma3(
       __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
       vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
 
-      // _mm256_maskstore_ps(output, vmask, vacc01234567); output += c; could be used here, but triggers msan failures (probably an msan bug).
       __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
       if (c & 4) {
         _mm_storeu_ps(output, vacc0123);

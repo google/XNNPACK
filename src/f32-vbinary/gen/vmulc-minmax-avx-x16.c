@@ -74,7 +74,6 @@ void xnn_f32_vmulc_minmax_ukernel__avx_x16(
     vy = _mm256_max_ps(vy, vy_min);
     vy = _mm256_min_ps(vy, vy_max);
 
-    // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vy_lo);

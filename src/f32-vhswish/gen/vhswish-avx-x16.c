@@ -78,7 +78,6 @@ void xnn_f32_vhswish_ukernel__avx_x16(
     vacc = _mm256_min_ps(vacc, vone);
     vacc = _mm256_mul_ps(vacc, vx);
 
-    // _mm256_maskstore_ps(y, vmask, vacc) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vacc_lo);

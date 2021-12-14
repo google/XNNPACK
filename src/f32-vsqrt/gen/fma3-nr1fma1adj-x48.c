@@ -130,7 +130,6 @@ void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x48(
     const __m256 vadjustment = _mm256_fnmadd_ps(vsqrtx, vsqrtx, vx);
     const __m256 vy = _mm256_fmadd_ps(vhalfrsqrtx, vadjustment, vsqrtx);
 
-    // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vy_lo);

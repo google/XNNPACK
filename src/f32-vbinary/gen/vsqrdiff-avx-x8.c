@@ -57,7 +57,6 @@ void xnn_f32_vsqrdiff_ukernel__avx_x8(
     __m256 vy = _mm256_sub_ps(va, vb);
     vy = _mm256_mul_ps(vy, vy);
 
-    // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vy_lo);

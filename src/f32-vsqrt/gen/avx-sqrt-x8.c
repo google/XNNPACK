@@ -41,7 +41,6 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_x8(
     const __m256 vx = _mm256_maskload_ps(x, vmask);
     const __m256 vy = _mm256_sqrt_ps(vx);
 
-    // _mm256_maskstore_ps(y, vmask, vy) could be used here, but triggers msan failures (probably an msan bug).
     __m128 vy_lo = _mm256_castps256_ps128(vy);
     if (n & (4 * sizeof(float))) {
       _mm_storeu_ps(y, vy_lo);
