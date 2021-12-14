@@ -325,40 +325,41 @@ Assembler& Assembler::vpush(DRegisterList regs) {
   return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
 }
 
-Assembler& Assembler::vst1_32(DRegisterList regs, MemOperand op) {
-  uint8_t type = encode_regs_length_to_type(regs);
+Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op) {
+  const uint8_t type = encode_regs_length_to_type(regs);
   if (!type) {
     error_ = Error::kInvalidRegisterListLength;
     return *this;
   }
 
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF400'0080 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | rm);
+  return emit32(0xF400'0000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
 }
 
-Assembler& Assembler::vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) {
+Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm) {
   if (rm.code == 0b1101 || rm.code == 0b1111) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
 
-  uint8_t type = encode_regs_length_to_type(regs);
+  const uint8_t type = encode_regs_length_to_type(regs);
   if (!type) {
     error_ = Error::kInvalidRegisterListLength;
     return *this;
   }
 
-  return emit32(0xF400'0080 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | rm.code);
+  return emit32(0xF400'0000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm.code);
 }
 
-Assembler& Assembler::vst1_32(DRegisterLane dd, MemOperand op) {
-  if (dd.lane > 1) {
+Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
+  if ((size == k8 && dd.lane > 7) || (size == k32 && dd.lane > 1)) {
     error_ = Error::kInvalidLaneIndex;
     return *this;
   }
 
+  const uint8_t shift = size == k8 ? 5 : 7;
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF480'0800 | encode(dd, 22, 12) | op.base().code << 16 | dd.lane << 5 | rm);
+  return emit32(0xF480'0000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
 }
 
 void* Assembler::finalize() {

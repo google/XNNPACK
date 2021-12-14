@@ -326,6 +326,11 @@ enum class Error {
   kInvalidRegisterListLength,
 };
 
+enum DataSize {
+  k8 = 0,
+  k32 = 2,
+};
+
 // A simple AAarch32 assembler.
 class Assembler {
  public:
@@ -391,12 +396,18 @@ class Assembler {
   Assembler& vpop(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
+  // VST1.8 <list>, [<Rn>]{!} (multiple single elements).
+  Assembler& vst1_8(DRegisterList regs, MemOperand op) { return vst1(k8, regs, op); }
+  // VST1.8 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
+  Assembler& vst1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k8, regs, op, rm); }
+  // VST1.8 <list>, [<Rn>]{!} (single element form one lane).
+  Assembler& vst1_8(DRegisterLane dd, MemOperand op) { return vst1(k8, dd, op); }
   // VST1.32 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vst1_32(DRegisterList regs, MemOperand op);
+  Assembler& vst1_32(DRegisterList regs, MemOperand op) { return vst1(k32, regs, op); }
   // VST1.32 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
-  Assembler& vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm);
+  Assembler& vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k32, regs, op, rm); }
   // VST1.32 <list>, [<Rn>]{!} (single element form one lane).
-  Assembler& vst1_32(DRegisterLane dd, MemOperand op);
+  Assembler& vst1_32(DRegisterLane dd, MemOperand op) { return vst1(k32, dd, op); }
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
@@ -419,6 +430,9 @@ class Assembler {
   Assembler& emit32(uint32_t value);
   Assembler& mov(Condition c, CoreRegister rd, CoreRegister rm);
   Assembler& b(Condition c, Label& l);
+  Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
+  Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
+  Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);
 
   // Pointer to start of code buffer.
   uint32_t* buffer_;

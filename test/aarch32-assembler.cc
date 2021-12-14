@@ -112,6 +112,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
   CHECK_ENCODING(0xED6D4B08, a.vpush({d20, d23}));
 
+  CHECK_ENCODING(0xF40B0707, a.vst1_8({d0}, mem[r11], r7));
+  CHECK_ENCODING(0xF48B000F, a.vst1_8({d0[0]}, mem[r11]));
+  CHECK_ENCODING(0xF48B00EF, a.vst1_8({d0[7]}, mem[r11]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_8(d0[8], mem[r11]));
+
   CHECK_ENCODING(0xF44B0280, a.vst1_32({d16, d19}, mem[r11], r0));
   EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0, d4}, mem[r11], r0));
   EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16, d19}, mem[r11], sp));
@@ -121,6 +126,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4CB080F, a.vst1_32({d16[0]}, mem[r11]));
   // The surrounding braces are optional, but makes it look closer to native assembly.
   CHECK_ENCODING(0xF4CB080F, a.vst1_32(d16[0], mem[r11]));
+  CHECK_ENCODING(0xF4CB088F, a.vst1_32(d16[1], mem[r11]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
 
