@@ -359,6 +359,8 @@ class Assembler {
   Assembler& tst(CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
+  // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
+  Assembler& vld1_8(DRegisterList regs, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_32(DRegisterList regs, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
@@ -374,6 +376,8 @@ class Assembler {
   Assembler& vmin_f32(QRegister qd, QRegister qn, QRegister qm);
   // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
   Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
+  // VMLAL.S16 <Qd>, <Dn>, <Dm[x]>
+  Assembler& vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
   Assembler& vmov(SRegister sd, SRegister sm);
   // VMOV <Dm>, <Rt>, <Rt2>; encoding A1.
@@ -382,6 +386,8 @@ class Assembler {
   Assembler& vmov(DRegister dd, DRegister dm);
   // VMOV <Qd>, <Qm>; encoding A1.
   Assembler& vmov(QRegister qd, QRegister qm);
+  // VMOVL.S8 <Qd>, <Dm>
+  Assembler& vmovl_s8(QRegister qd, DRegister dm);
   Assembler& vpop(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);

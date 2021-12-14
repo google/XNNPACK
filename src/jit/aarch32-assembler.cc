@@ -211,6 +211,17 @@ Assembler& Assembler::tst(CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x31 << 20 | rn.code << 16 | imm);
 }
 
+Assembler& Assembler::vld1_8(DRegisterList regs, MemOperand op) {
+  if (regs.length != 1) {
+    // Unimplemented since only length 1 is used in microkernels.
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(0xF4200700 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
+}
+
 Assembler& Assembler::vld1_32(DRegisterList regs, MemOperand op) {
   if (regs.length != 1) {
     // Unimplemented since only length 1 is used in microkernels.
@@ -267,6 +278,21 @@ Assembler& Assembler::vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm) {
   return emit32(0xF3A00140 | encode(qd, 22, 12) | encode(qn, 7, 16) | dm.lane << 5 | dm.code);
 }
 
+Assembler& Assembler::vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm) {
+  if (dm.lane > 3) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+  if (dm.code > 7) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  uint8_t lane_top = dm.lane >> 1;
+  uint8_t lane_bot = dm.lane & 1;
+  return emit32(0xF2900240 | encode(qd, 22, 12) | encode(dn, 7, 16) | lane_top << 5 | lane_bot << 3 | dm.code);
+}
+
 Assembler& Assembler::vmov(SRegister sd, SRegister sm) {
   return emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
@@ -281,6 +307,10 @@ Assembler& Assembler::vmov(DRegister dd, DRegister dm) {
 
 Assembler& Assembler::vmov(QRegister qd, QRegister qm) {
   return emit32(0xF2200150 | encode(qd, 22, 12) | encode(qm, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vmovl_s8(QRegister qd, DRegister dm) {
+  return emit32(0xF2880A10 | encode(qd, 22, 12) | encode(dm, 5, 0));
 }
 
 Assembler& Assembler::vpop(DRegisterList regs) {

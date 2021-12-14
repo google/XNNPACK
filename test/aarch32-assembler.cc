@@ -65,6 +65,9 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xE315000F, a.tst(r5, 15));
 
+  CHECK_ENCODING(0xF423070F, a.vld1_8({d0}, mem[r3]));
+  CHECK_ENCODING(0xF423070D, a.vld1_8({d0}, mem[r3]++));
+
   CHECK_ENCODING(0xF42C178F, a.vld1_32({d1}, mem[r12]));
   CHECK_ENCODING(0xF42C178D, a.vld1_32({d1}, mem[r12]++));
 
@@ -89,10 +92,18 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF3EC0160, a.vmla_f32(q8, q6, d0[1]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmla_f32(q8, q4, d0[2]));
 
+  CHECK_ENCODING(0xF2D9E246, a.vmlal_s16(q15, d9, d6[0]));
+  CHECK_ENCODING(0xF2D8424A, a.vmlal_s16(q10, d8, d2[1]));
+  CHECK_ENCODING(0xF2D88264, a.vmlal_s16(q12, d8, d4[2]));
+  CHECK_ENCODING(0xF2D8626A, a.vmlal_s16(q11, d8, d2[3]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmlal_s16(q15, d9, d6[4]));
+
   CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
   CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
+
+  CHECK_ENCODING(0xF2880A10, a.vmovl_s8(q0, d0));
 
   CHECK_ENCODING(0xECBD8B10, a.vpop({d8, d15}));
 
