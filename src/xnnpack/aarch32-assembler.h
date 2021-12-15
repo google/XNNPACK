@@ -368,6 +368,7 @@ class Assembler {
   Assembler& vdup_8(QRegister qd, DRegisterLane dm) { return vdup(k8, qd, dm); }
   Assembler& vdup_16(QRegister qd, DRegisterLane dm) { return vdup(k16, qd, dm); }
   Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
+  Assembler& vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_8(DRegisterList regs, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
@@ -404,6 +405,7 @@ class Assembler {
   Assembler& vpush(DRegisterList regs);
   Assembler& vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
+  Assembler& vqmovn_s32(DRegister dd, QRegister qm);
   Assembler& vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
   Assembler& vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
   // VST1.8 <list>, [<Rn>]{!} (multiple single elements).

@@ -239,6 +239,14 @@ Assembler& Assembler::vdup(DataSize size, QRegister qd, DRegisterLane dm) {
   return emit32(0xF3B00C40 | imm4 << 16 | encode(qd, 22, 12) | encode(dm, 5, 0));
 }
 
+Assembler& Assembler::vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4) {
+  if (imm4 > 15) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(0xF2B00040 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0) | imm4 << 8);
+}
+
 Assembler& Assembler::vld1_8(DRegisterList regs, MemOperand op) {
   if (regs.length != 1) {
     // Unimplemented since only length 1 is used in microkernels.
@@ -375,6 +383,10 @@ Assembler& Assembler::vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm) 
     return *this;
   }
   return emit32(0xF3A00C40 | encode(qd, 22, 12) | encode(qn, 7, 16) | dm.lane << 5 | dm.code);
+}
+
+Assembler& Assembler::vqmovn_s32(DRegister dd, QRegister qm) {
+  return emit32(0xF3B60280 | encode(dd, 22, 12) | encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vqshl_s32(QRegister qd, QRegister qm, QRegister qn) {
