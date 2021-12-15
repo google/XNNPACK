@@ -379,7 +379,9 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldr(DRegister dd, MemOperand op);
   Assembler& vmax_f32(QRegister qd, QRegister qn, QRegister qm);
+  Assembler& vmax_s8(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vmin_f32(QRegister qd, QRegister qn, QRegister qm);
+  Assembler& vmin_s8(QRegister qd, QRegister qn, QRegister qm);
   // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
   Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMLAL.S16 <Qd>, <Dn>, <Dm[x]>
@@ -397,6 +399,10 @@ class Assembler {
   Assembler& vpop(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
+  Assembler& vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
+  Assembler& vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
+  Assembler& vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
+  Assembler& vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
   // VST1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vst1_8(DRegisterList regs, MemOperand op) { return vst1(k8, regs, op); }
   // VST1.8 <list>, [<Rn>]{!}, <Rm> (multiple single elements).

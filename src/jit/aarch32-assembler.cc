@@ -263,11 +263,19 @@ Assembler& Assembler::vldr(DRegister dd, MemOperand op) {
 }
 
 Assembler& Assembler::vmax_f32(QRegister qd, QRegister qn, QRegister qm) {
-  return emit32(kAL | 0xF2000F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+  return emit32(0xF2000F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vmax_s8(QRegister qd, QRegister qn, QRegister qm) {
+ return emit32(0xF2000640 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vmin_f32(QRegister qd, QRegister qn, QRegister qm) {
-  return emit32(kAL | 0xF2200F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+  return emit32(0xF2200F40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vmin_s8(QRegister qd, QRegister qn, QRegister qm) {
+ return emit32(0xF2000650 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm) {
@@ -323,6 +331,30 @@ Assembler& Assembler::vpush(SRegisterList regs) {
 
 Assembler& Assembler::vpush(DRegisterList regs) {
   return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
+}
+
+Assembler& Assembler::vqadd_s16(QRegister qd, QRegister qn, QRegister qm) {
+  return emit32(0xF2100050 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm) {
+  if (dm.code > 15) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  if (dm.lane > 1) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+  return emit32(0xF3A00C40 | encode(qd, 22, 12) | encode(qn, 7, 16) | dm.lane << 5 | dm.code);
+}
+
+Assembler& Assembler::vqshl_s32(QRegister qd, QRegister qm, QRegister qn) {
+  return emit32(0xF2200450 | encode(qd, 22, 12) | encode(qm, 5, 0) | encode(qn, 7, 16));
+}
+
+Assembler& Assembler::vrshl_s32(QRegister qd, QRegister qm, QRegister qn) {
+  return emit32(0xF2200540 | encode(qd, 22, 12) | encode(qm, 5, 0) | encode(qn, 7, 16));
 }
 
 Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op) {

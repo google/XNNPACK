@@ -84,8 +84,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
 
+  CHECK_ENCODING(0xF20E26C6, a.vmax_s8(q1, q15, q3));
   CHECK_ENCODING(0xF24ECFC4, a.vmax_f32(q14, q15, q2));
 
+  CHECK_ENCODING(0xF20E26D6, a.vmin_s8(q1, q15, q3));
   CHECK_ENCODING(0xF220EFC6, a.vmin_f32(q7, q8, q3));
 
   CHECK_ENCODING(0xF3E80140, a.vmla_f32(q8, q4, d0[0]));
@@ -111,6 +113,17 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xED2DAA04, a.vpush({s20, s23}));
   CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
   CHECK_ENCODING(0xED6D4B08, a.vpush({d20, d23}));
+
+  CHECK_ENCODING(0xF25E00D2, a.vqadd_s16(q8, q15, q1));
+
+  CHECK_ENCODING(0xF3A82CCE, a.vqdmulh_s32(q1, q12, d14[0]));
+  CHECK_ENCODING(0xF3A82CEE, a.vqdmulh_s32(q1, q12, d14[1]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vqdmulh_s32(q1, q12, d14[2]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vqdmulh_s32(q1, q12, d16[0]));
+
+  CHECK_ENCODING(0xF22C247E, a.vqshl_s32(q1, q15, q6));
+
+  CHECK_ENCODING(0xF264C560, a.vrshl_s32(q14, q8, q2));
 
   CHECK_ENCODING(0xF40B070F, a.vst1_8({d0}, mem[r11]));
   CHECK_ENCODING(0xF40B070D, a.vst1_8({d0}, mem[r11]++));
