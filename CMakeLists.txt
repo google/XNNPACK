@@ -3199,7 +3199,8 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/sqrt-sse-hh1mac.c
   src/math/sqrt-sse-nr1mac.c
   src/math/sqrt-sse-nr2mac.c
-  src/x32-packx/x4-sse.c)
+  src/x32-packx/x4-sse.c
+  src/x32-transpose/4x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c
@@ -7556,6 +7557,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x32-depthtospace2d-chw2hwc-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(x32-depthtospace2d-chw2hwc-test x32-depthtospace2d-chw2hwc-test)
 
+  ADD_EXECUTABLE(x32-transpose-test test/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x32-transpose-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x32-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x32-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(x32-transpose-test x32-transpose-test)
+
   ADD_EXECUTABLE(x32-zip-test test/x32-zip.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x32-zip-test PROPERTIES
     CXX_STANDARD 11
@@ -8309,4 +8319,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(x32-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x32-transpose-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x32-transpose-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x32-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 ENDIF()
