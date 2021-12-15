@@ -365,6 +365,9 @@ class Assembler {
   Assembler& tst(CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
+  Assembler& vdup_8(QRegister qd, DRegisterLane dm) { return vdup(k8, qd, dm); }
+  Assembler& vdup_16(QRegister qd, DRegisterLane dm) { return vdup(k16, qd, dm); }
+  Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_8(DRegisterList regs, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
@@ -443,6 +446,7 @@ class Assembler {
   Assembler& emit32(uint32_t value);
   Assembler& mov(Condition c, CoreRegister rd, CoreRegister rm);
   Assembler& b(Condition c, Label& l);
+  Assembler& vdup(DataSize size, QRegister qd, DRegisterLane dm);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);

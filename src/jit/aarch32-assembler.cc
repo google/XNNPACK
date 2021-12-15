@@ -211,6 +211,34 @@ Assembler& Assembler::tst(CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x31 << 20 | rn.code << 16 | imm);
 }
 
+Assembler& Assembler::vdup(DataSize size, QRegister qd, DRegisterLane dm) {
+  uint8_t imm4 = 0;
+  switch (size) {
+    case k8:
+      if (dm.lane > 7) {
+        error_ = Error::kInvalidLaneIndex;
+        return *this;
+      }
+      imm4 = 1 | ((dm.lane & 0x7) << 1);
+      break;
+    case k16:
+      if (dm.lane > 3) {
+        error_ = Error::kInvalidLaneIndex;
+        return *this;
+      }
+      imm4 = 2 | ((dm.lane & 0x3) << 2);
+      break;
+    case k32:
+      if (dm.lane > 1) {
+        error_ = Error::kInvalidLaneIndex;
+        return *this;
+      }
+      imm4 = 4 | ((dm.lane & 0x1) << 3);
+      break;
+  }
+  return emit32(0xF3B00C40 | imm4 << 16 | encode(qd, 22, 12) | encode(dm, 5, 0));
+}
+
 Assembler& Assembler::vld1_8(DRegisterList regs, MemOperand op) {
   if (regs.length != 1) {
     // Unimplemented since only length 1 is used in microkernels.
