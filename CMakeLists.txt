@@ -3906,6 +3906,8 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/1x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/5x16-minmax-avx-broadcast.c
   src/f32-prelu/gen/avx-2x16.c
+  src/f32-qs8-vcvt/gen/vcvt-avx-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-avx-x32.c
   src/f32-vbinary/gen/vadd-minmax-avx-x16.c
   src/f32-vbinary/gen/vaddc-minmax-avx-x16.c
   src/f32-vbinary/gen/vdiv-minmax-avx-x16.c
@@ -4021,6 +4023,14 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/7x8-minmax-avx-broadcast.c
   src/f32-prelu/gen/avx-2x8.c
   src/f32-prelu/gen/avx-2x16.c
+  src/f32-qs8-vcvt/gen/vcvt-avx-x8.c
+  src/f32-qs8-vcvt/gen/vcvt-avx-x16.c
+  src/f32-qs8-vcvt/gen/vcvt-avx-x24.c
+  src/f32-qs8-vcvt/gen/vcvt-avx-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-avx-x8.c
+  src/f32-qu8-vcvt/gen/vcvt-avx-x16.c
+  src/f32-qu8-vcvt/gen/vcvt-avx-x24.c
+  src/f32-qu8-vcvt/gen/vcvt-avx-x32.c
   src/f32-rmax/avx.c
   src/f32-vbinary/gen/vadd-minmax-avx-x8.c
   src/f32-vbinary/gen/vadd-minmax-avx-x16.c

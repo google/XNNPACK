@@ -132,7 +132,7 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_x24(
       vy = _mm_srli_epi32(vy, 16);
     }
     if (n & (1 * sizeof(float))) {
-      *y = (int8_t) _mm_extract_epi16(vy, 0);
+      *y = (int8_t) _mm_extract_epi8(vy, 0);
     }
   }
 }

@@ -2831,6 +2831,32 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_sse4_params(
     params->sse4.output_min[i] = output_min;
   }
 }
+
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_avx_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.scale[i] = scale;
+    params->avx.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx.output_min[i] = output_min;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
@@ -2952,6 +2978,32 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_sse2_params(
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->sse2.output_min[i] = output_min;
+  }
+}
+
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_avx_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.scale[i] = scale;
+    params->avx.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx.output_min[i] = output_min;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

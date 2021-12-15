@@ -143,7 +143,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
         vy = _mm_srli_epi32(vy, 16);
       }
       if (n & (1 * sizeof(float))) {
-        *y = (${XINT8_T}) _mm_extract_epi16(vy, 0);
+        *y = (${XINT8_T}) _mm_extract_epi8(vy, 0);
       }
     $else:
       {
