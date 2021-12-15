@@ -164,7 +164,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
 
-  xnn_release_code_memory(&b);
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
 TEST(AArch32Assembler, Label) {
@@ -219,7 +219,7 @@ TEST(AArch32Assembler, Label) {
   }
   EXPECT_EQ(Error::kLabelHasTooManyUsers, a.error());
 
-  xnn_release_code_memory(&b);
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
 TEST(AArch32Assembler, CoreRegisterList) {
@@ -260,7 +260,14 @@ TEST(AArch32Assembler, CodeBufferOverflow) {
 
   a.bx(lr);
   EXPECT_EQ(Error::kOutOfMemory, a.error());
-  xnn_release_code_memory(&b);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+TEST(AArch32Assembler, AllocateAndRelease) {
+  xnn_code_buffer b;
+  ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
 #if XNN_ARCH_ARM
@@ -277,7 +284,7 @@ TEST(AArch32Assembler, JitAllocCodeBuffer) {
 
   ASSERT_EQ(3, fn(1));
 
-  xnn_release_code_memory(&b);
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 #endif
 }  // namespace aarch32
