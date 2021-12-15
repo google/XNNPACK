@@ -2891,6 +2891,50 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_avx2_params(
     params->avx2.mask_table[i] = 0;
   }
 }
+
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_avx512_params(
+  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.scale[i] = scale;
+    params->avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 64; i++) {
+    params->avx512.output_min[i] = output_min;
+  }
+  params->avx512.shuffle512_mask[0] = 0;
+  params->avx512.shuffle512_mask[1] = 4;
+  params->avx512.shuffle512_mask[2] = 8;
+  params->avx512.shuffle512_mask[3] = 12;
+  params->avx512.shuffle512_mask[4] = 1;
+  params->avx512.shuffle512_mask[5] = 5;
+  params->avx512.shuffle512_mask[6] = 9;
+  params->avx512.shuffle512_mask[7] = 13;
+  params->avx512.shuffle512_mask[8] = 2;
+  params->avx512.shuffle512_mask[9] = 6;
+  params->avx512.shuffle512_mask[10] = 10;
+  params->avx512.shuffle512_mask[11] = 14;
+  params->avx512.shuffle512_mask[12] = 3;
+  params->avx512.shuffle512_mask[13] = 7;
+  params->avx512.shuffle512_mask[14] = 11;
+  params->avx512.shuffle512_mask[15] = 15;
+  params->avx512.shuffle256_mask[0] = 0;
+  params->avx512.shuffle256_mask[1] = 4;
+  params->avx512.shuffle256_mask[2] = 2;
+  params->avx512.shuffle256_mask[3] = 6;
+  params->avx512.shuffle256_mask[4] = 1;
+  params->avx512.shuffle256_mask[5] = 5;
+  params->avx512.shuffle256_mask[6] = 3;
+  params->avx512.shuffle256_mask[7] = 7;
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD
@@ -3073,6 +3117,50 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_avx2_params(
   for (uint32_t i = 7; i < 14; i++) {
     params->avx2.mask_table[i] = 0;
   }
+}
+
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_avx512_params(
+  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx512.scale[i] = scale;
+    params->avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
+  }
+  for (uint32_t i = 0; i < 32; i++) {
+    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+  for (uint32_t i = 0; i < 64; i++) {
+    params->avx512.output_min[i] = output_min;
+  }
+  params->avx512.shuffle512_mask[0] = 0;
+  params->avx512.shuffle512_mask[1] = 4;
+  params->avx512.shuffle512_mask[2] = 8;
+  params->avx512.shuffle512_mask[3] = 12;
+  params->avx512.shuffle512_mask[4] = 1;
+  params->avx512.shuffle512_mask[5] = 5;
+  params->avx512.shuffle512_mask[6] = 9;
+  params->avx512.shuffle512_mask[7] = 13;
+  params->avx512.shuffle512_mask[8] = 2;
+  params->avx512.shuffle512_mask[9] = 6;
+  params->avx512.shuffle512_mask[10] = 10;
+  params->avx512.shuffle512_mask[11] = 14;
+  params->avx512.shuffle512_mask[12] = 3;
+  params->avx512.shuffle512_mask[13] = 7;
+  params->avx512.shuffle512_mask[14] = 11;
+  params->avx512.shuffle512_mask[15] = 15;
+  params->avx512.shuffle256_mask[0] = 0;
+  params->avx512.shuffle256_mask[1] = 4;
+  params->avx512.shuffle256_mask[2] = 2;
+  params->avx512.shuffle256_mask[3] = 6;
+  params->avx512.shuffle256_mask[4] = 1;
+  params->avx512.shuffle256_mask[5] = 5;
+  params->avx512.shuffle256_mask[6] = 3;
+  params->avx512.shuffle256_mask[7] = 7;
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

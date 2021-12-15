@@ -51,6 +51,14 @@
   init: xnn_init_f32_qs8_cvt_avx2_params
 - name: xnn_f32_qs8_vcvt_ukernel__avx2_x64
   init: xnn_init_f32_qs8_cvt_avx2_params
+- name: xnn_f32_qs8_vcvt_ukernel__avx512skx_x32
+  init: xnn_init_f32_qs8_cvt_avx512_params
+- name: xnn_f32_qs8_vcvt_ukernel__avx512skx_x64
+  init: xnn_init_f32_qs8_cvt_avx512_params
+- name: xnn_f32_qs8_vcvt_ukernel__avx512skx_x96
+  init: xnn_init_f32_qs8_cvt_avx512_params
+- name: xnn_f32_qs8_vcvt_ukernel__avx512skx_x128
+  init: xnn_init_f32_qs8_cvt_avx512_params
 - name: xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x8
   init: xnn_init_f32_qs8_cvt_wasmsimd_cvt_params
 - name: xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x16

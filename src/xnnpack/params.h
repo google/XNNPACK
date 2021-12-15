@@ -911,6 +911,14 @@ union xnn_f32_qs8_cvt_params {
     XNN_ALIGN(32) int8_t output_min[32];
     int32_t mask_table[14];
   } avx2;
+  struct {
+    XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) int8_t output_min[64];
+    XNN_ALIGN(64) uint32_t shuffle512_mask[16];
+    XNN_ALIGN(32) uint32_t shuffle256_mask[8];
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {
@@ -981,6 +989,14 @@ union xnn_f32_qu8_cvt_params {
     XNN_ALIGN(32) uint8_t output_min[32];
     int32_t mask_table[14];
   } avx2;
+  struct {
+    XNN_ALIGN(64) float scale[16];
+    XNN_ALIGN(64) float output_max_less_zero_point[16];
+    XNN_ALIGN(64) int16_t output_zero_point[32];
+    XNN_ALIGN(64) uint8_t output_min[64];
+    XNN_ALIGN(64) uint32_t shuffle512_mask[16];
+    XNN_ALIGN(32) uint32_t shuffle256_mask[8];
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD
   struct {

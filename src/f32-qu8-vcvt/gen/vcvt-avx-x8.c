@@ -19,7 +19,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx_x8(
     size_t n,
     const float* x,
     uint8_t* y,
-    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
