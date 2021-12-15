@@ -4555,6 +4555,8 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/math/sqrt-fma3-nr2fma.c)
 
 SET(PROD_AVX2_MICROKERNEL_SRCS
+  src/f32-qs8-vcvt/gen/vcvt-avx2-x64.c
+  src/f32-qu8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x56.c
   src/f32-vsigmoid/gen/vsigmoid-avx2-rr1-p5-div-x40.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-avx2-mul32.c
@@ -4582,6 +4584,14 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx2-x128.c)
 
 SET(ALL_AVX2_MICROKERNEL_SRCS
+  src/f32-qs8-vcvt/gen/vcvt-avx2-x16.c
+  src/f32-qs8-vcvt/gen/vcvt-avx2-x32.c
+  src/f32-qs8-vcvt/gen/vcvt-avx2-x48.c
+  src/f32-qs8-vcvt/gen/vcvt-avx2-x64.c
+  src/f32-qu8-vcvt/gen/vcvt-avx2-x16.c
+  src/f32-qu8-vcvt/gen/vcvt-avx2-x32.c
+  src/f32-qu8-vcvt/gen/vcvt-avx2-x48.c
+  src/f32-qu8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-raddexpminusmax/gen/avx2-p5-x64-acc2.c
   src/f32-raddexpminusmax/gen/avx2-p5-x64-acc4.c
   src/f32-raddexpminusmax/gen/avx2-p5-x64.c
