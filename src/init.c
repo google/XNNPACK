@@ -3573,7 +3573,18 @@ static void init(void) {
         .element_tile = 32,
       };
     }
-    if (cpuinfo_has_x86_avx()) {
+    if (cpuinfo_has_x86_avx2()) {
+      xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_f32_vcvt_ukernel__avx2_x16,
+        .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_avx_params,
+        .element_tile = 16,
+      };
+      xnn_params.vcvt.qu8_to_f32 = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_f32_vcvt_ukernel__avx2_x16,
+        .init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_avx_params,
+        .element_tile = 16,
+      };
+    } else if (cpuinfo_has_x86_avx()) {
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_qs8_f32_vcvt_ukernel__avx_x32,
         .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_avx_params,

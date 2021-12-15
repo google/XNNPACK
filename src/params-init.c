@@ -3262,10 +3262,8 @@ XNN_INTERNAL void xnn_init_qs8_f32_cvt_avx_params(
   float scale,
   int8_t zero_point)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
-  }
   for (uint32_t i = 0; i < 8; i++) {
+    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
     params->avx.scale[i] = scale;
   }
 }
@@ -3339,10 +3337,8 @@ XNN_INTERNAL void xnn_init_qu8_f32_cvt_avx_params(
   float scale,
   uint8_t zero_point)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
-  }
   for (uint32_t i = 0; i < 8; i++) {
+    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
     params->avx.scale[i] = scale;
   }
 }

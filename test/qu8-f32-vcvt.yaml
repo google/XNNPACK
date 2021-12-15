@@ -35,6 +35,14 @@
   init: xnn_init_qu8_f32_cvt_avx_params
 - name: xnn_qu8_f32_vcvt_ukernel__avx_x32
   init: xnn_init_qu8_f32_cvt_avx_params
+- name: xnn_qu8_f32_vcvt_ukernel__avx2_x8
+  init: xnn_init_qu8_f32_cvt_avx_params
+- name: xnn_qu8_f32_vcvt_ukernel__avx2_x16
+  init: xnn_init_qu8_f32_cvt_avx_params
+- name: xnn_qu8_f32_vcvt_ukernel__avx2_x24
+  init: xnn_init_qu8_f32_cvt_avx_params
+- name: xnn_qu8_f32_vcvt_ukernel__avx2_x32
+  init: xnn_init_qu8_f32_cvt_avx_params
 - name: xnn_qu8_f32_vcvt_ukernel__wasmsimd_x8
   init: xnn_init_qu8_f32_cvt_wasmsimd_params
 - name: xnn_qu8_f32_vcvt_ukernel__wasmsimd_x16
