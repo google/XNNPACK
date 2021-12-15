@@ -93,6 +93,31 @@ static void qu8_f32_vcvt(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_f32_vcvt, avx_x8,
+                    xnn_qu8_f32_vcvt_ukernel__avx_x8,
+                    xnn_init_qu8_f32_cvt_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_f32_vcvt, avx_x16,
+                    xnn_qu8_f32_vcvt_ukernel__avx_x16,
+                    xnn_init_qu8_f32_cvt_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_f32_vcvt, avx_x24,
+                    xnn_qu8_f32_vcvt_ukernel__avx_x24,
+                    xnn_init_qu8_f32_cvt_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_f32_vcvt, avx_x32,
+                    xnn_qu8_f32_vcvt_ukernel__avx_x32,
+                    xnn_init_qu8_f32_cvt_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(qu8_f32_vcvt, sse41_x8,
                     xnn_qu8_f32_vcvt_ukernel__sse41_x8,
                     xnn_init_qu8_f32_cvt_sse4_params,
