@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "xnnpack/aarch32-assembler.h"
+#include "xnnpack/math.h"
 
 #include <cmath>
 
@@ -66,7 +67,7 @@ uint32_t encode_regs_length_to_type(DRegisterList regs) {
 Assembler::Assembler(xnn_code_buffer* buf) {
   buffer_ = reinterpret_cast<uint32_t*>(buf->code);
   cursor_ = buffer_;
-  top_ = buffer_ + (buf->capacity / 4);
+  top_ = buffer_ + (buf->capacity / kInstructionSizeInBytes);
   xnn_buffer = buf;
 }
 
@@ -176,6 +177,10 @@ Assembler& Assembler::movls(CoreRegister rd, CoreRegister rm) {
 
 Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
   return emit32(c | 0x1A << 20 | Rd.code << 12 | Rm.code);
+}
+
+Assembler& Assembler::nop() {
+  return emit32(kAL | 0x0320F000);
 }
 
 Assembler& Assembler::pld(MemOperand op) {
@@ -437,6 +442,22 @@ Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
   const uint8_t shift = size == k8 ? 5 : size == k16 ? 6 : 7;
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
   return emit32(0xF480'0000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
+}
+
+Assembler& Assembler::align(uint8_t n) {
+  if (!is_po2(n) || (n % kInstructionSizeInBytes != 0)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  uintptr_t cursor = reinterpret_cast<uintptr_t>(cursor_);
+  const uintptr_t target = round_up_po2(cursor, n);
+  while (cursor < target) {
+    nop();
+    cursor += kInstructionSizeInBytes;
+  }
+
+  return *this;
 }
 
 void* Assembler::finalize() {

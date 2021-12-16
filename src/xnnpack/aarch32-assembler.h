@@ -13,6 +13,8 @@
 namespace xnnpack {
 namespace aarch32 {
 
+constexpr size_t kInstructionSizeInBytes = 4;
+
 struct CoreRegister {
   uint8_t code;
 };
@@ -361,6 +363,7 @@ class Assembler {
   Assembler& mov(CoreRegister rd, CoreRegister rm);
   Assembler& movlo(CoreRegister rd, CoreRegister rm);
   Assembler& movls(CoreRegister rd, CoreRegister rm);
+  Assembler& nop();
   Assembler& pld(MemOperand operand);
   Assembler& pop(CoreRegisterList regs);
   Assembler& push(CoreRegisterList regs);
@@ -434,6 +437,8 @@ class Assembler {
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
+  // Align the cursor to specified number of bytes, `n` must be a power of 2.
+  Assembler& align(uint8_t n);
 
   // Finish assembly of code, this should be the last function called on an
   // instance of Assembler. Returns a pointer to the start of code region.
@@ -445,7 +450,7 @@ class Assembler {
   const uint32_t* start() const { return buffer_; }
   const uint32_t* offset() const { return cursor_; }
   // Returns the number of bytes of code actually in the buffer.
-  size_t code_size_in_bytes() const { return (cursor_ - buffer_) * 4; }
+  size_t code_size_in_bytes() const { return (cursor_ - buffer_) * kInstructionSizeInBytes; }
   const Error error() const { return error_; }
 
  private:

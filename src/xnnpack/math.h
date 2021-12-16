@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <assert.h>
@@ -45,9 +46,11 @@ inline static size_t round_up(size_t n, size_t q) {
   return divide_round_up(n, q) * q;
 }
 
+inline static bool is_po2(size_t n) {
+  return (n != 0) && ((n & (n - 1)) == 0);
+}
 inline static size_t round_down_po2(size_t n, size_t q) {
-  assert(q != 0);
-  assert((q & (q - 1)) == 0);
+  assert(is_po2(q));
   return n & -q;
 }
 

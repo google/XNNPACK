@@ -54,6 +54,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0x91A0A00C, a.movls(r10, r12));
   CHECK_ENCODING(0xE1A0A00C, a.mov(r10, r12));
 
+  CHECK_ENCODING(0xE320F000, a.nop());
+
   CHECK_ENCODING(0xE8BD0FF0, a.pop({r4, r5, r6, r7, r8, r9, r10, r11}));
   EXPECT_ERROR(Error::kInvalidOperand, a.pop({}));
   EXPECT_ERROR(Error::kInvalidOperand, a.pop({r1}));
@@ -223,6 +225,48 @@ TEST(AArch32Assembler, Label) {
     a.beq(lfail);
   }
   EXPECT_EQ(Error::kLabelHasTooManyUsers, a.error());
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+TEST(AArch32Assembler, Align) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
+
+  a.add(r0, r1, r2);
+  a.align(4);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x3);
+  EXPECT_EQ(4, a.code_size_in_bytes());
+
+  a.align(8);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x7);
+  EXPECT_EQ(8, a.code_size_in_bytes());
+
+  a.add(r0, r1, r2);
+  a.align(8);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x7);
+  EXPECT_EQ(16, a.code_size_in_bytes());
+
+  a.add(r0, r1, r2);
+  EXPECT_EQ(20, a.code_size_in_bytes());
+
+  a.align(16);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0xF);
+  EXPECT_EQ(32, a.code_size_in_bytes());
+
+  a.add(r0, r1, r2);
+  a.add(r0, r1, r2);
+  EXPECT_EQ(40, a.code_size_in_bytes());
+
+  a.align(16);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0xF);
+  EXPECT_EQ(48, a.code_size_in_bytes());
+
+  // Not power-of-two.
+  EXPECT_ERROR(Error::kInvalidOperand, a.align(6));
+  // Is power-of-two but is not a multiple of instruction size.
+  EXPECT_ERROR(Error::kInvalidOperand, a.align(2));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
