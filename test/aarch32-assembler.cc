@@ -208,10 +208,13 @@ TEST(AArch32Assembler, Label) {
   a.bhs(l1);
   auto b5 = a.offset();
   a.blo(l1);
+  auto b6 = a.offset();
+  a.b(l1);
 
   EXPECT_INSTR(0x8AFFFFFD, *b3);
   EXPECT_INSTR(0x2AFFFFFC, *b4);
   EXPECT_INSTR(0x3AFFFFFB, *b5);
+  EXPECT_INSTR(0xEAFFFFFA, *b6);
 
   // Binding a bound label is an error.
   a.bind(l1);

@@ -348,6 +348,7 @@ class Assembler {
   Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& add(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  Assembler& b(Label& l) { return b(kAL, l); }
   Assembler& beq(Label& l) { return b(kEQ, l); }
   Assembler& bne(Label& l) { return b(kNE, l); }
   Assembler& bhi(Label& l) { return b(kHI, l); }
