@@ -6356,6 +6356,7 @@ AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S",
     "src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S",
     "src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S",
+    "src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S",
 ]
 
 AARCH64_ASM_MICROKERNEL_SRCS = [
@@ -7732,6 +7733,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "asm_microkernels",
     hdrs = ["src/xnnpack/assembly.h"],
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+dotprod",
+        "-mfpu=neon-fp-armv8",
+    ],
     aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
     aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,

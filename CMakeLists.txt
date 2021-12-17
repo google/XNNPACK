@@ -5273,7 +5273,8 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-ld64.S
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-pld-cortex-a75.S
   src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
-  src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S)
+  src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
+  src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S
@@ -5588,6 +5589,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   ELSE()
     SET_PROPERTY(SOURCE ${ALL_NEONV8_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8-a -mfpu=neon-fp-armv8 ")
     SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
+    SET_PROPERTY(SOURCE ${AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
   ENDIF()
   # Workground the neon detection bug in ARM v8
   # Related links:
