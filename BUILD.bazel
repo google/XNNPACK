@@ -4197,7 +4197,6 @@ ALL_SSE_MICROKERNEL_SRCS = [
     "src/f32-spmm/gen/8x1-minmax-sse.c",
     "src/f32-spmm/gen/16x1-minmax-sse.c",
     "src/f32-spmm/gen/32x1-minmax-sse.c",
-    "src/x32-transpose/4x4-sse.c",
     "src/f32-vbinary/gen/vadd-minmax-sse-x4.c",
     "src/f32-vbinary/gen/vadd-minmax-sse-x8.c",
     "src/f32-vbinary/gen/vaddc-minmax-sse-x4.c",
@@ -4256,6 +4255,7 @@ ALL_SSE_MICROKERNEL_SRCS = [
     "src/math/sqrt-sse-nr1mac.c",
     "src/math/sqrt-sse-nr2mac.c",
     "src/x32-packx/x4-sse.c",
+    "src/x32-transpose/4x4-sse.c",
 ]
 
 PROD_SSE2_MICROKERNEL_SRCS = [
@@ -6607,11 +6607,11 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/raddstoreexpminusmax.h",
     "src/xnnpack/rmax.h",
     "src/xnnpack/spmm.h",
+    "src/xnnpack/transpose.h",
     "src/xnnpack/unpool.h",
     "src/xnnpack/vaddsub.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
-    "src/xnnpack/transpose.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscale.h",

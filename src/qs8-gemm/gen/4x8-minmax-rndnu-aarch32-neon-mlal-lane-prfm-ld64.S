@@ -117,24 +117,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         # 64 bytes for weights.
         .p2align 3
 1:
-        VLD1.8  {d0},  [r3]!  // A0
-        VLD1.8  {d8},  [r9]!  // B
-        VLD1.8  {d2}, [r12]!  // A1
-        VLD1.8  {d4}, [r10]!  // A2
-        VLD1.8  {d6},  [r0]!  // A3
+        VLD1.8  {d0},  [r3]!            // A0
+        VLD1.8  {d8},  [r9]!            // B
+        VLD1.8  {d2}, [r12]!            // A1
+        VLD1.8  {d4}, [r10]!            // A2
+        VLD1.8  {d6},  [r0]!            // A3
         SUBS    r5, r5, 8
         PLD     [r3, 128]
-        VMOVL.S8   q0, d0
-        PLD    [r12, 128]
-        VMOVL.S8   q4, d8
-        PLD    [r10, 128]
-        VMOVL.S8   q1, d2
+        VMOVL.S8 q0, d0
+        PLD     [r12, 128]
+        VMOVL.S8 q4, d8
+        PLD     [r10, 128]
+        VMOVL.S8 q1, d2
         PLD     [r0, 128]
-        VMOVL.S8   q2, d4
+        VMOVL.S8 q2, d4
         PLD     [r9, 448]
-        VMOVL.S8   q3, d6
-        VMLAL.S16  q8, d8, d0[0]
-        VMLAL.S16  q9, d9, d0[0]
+        VMOVL.S8 q3, d6
+        VMLAL.S16 q8, d8, d0[0]
+        VMLAL.S16 q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
         VMLAL.S16 q11, d9, d2[0]
         VMLAL.S16 q12, d8, d4[0]
@@ -143,9 +143,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d6[0]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[1]
-        VMLAL.S16  q9, d9, d0[1]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[1]
+        VMLAL.S16 q9, d9, d0[1]
         VMLAL.S16 q10, d8, d2[1]
         VMLAL.S16 q11, d9, d2[1]
         VMLAL.S16 q12, d8, d4[1]
@@ -154,9 +154,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d6[1]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[2]
-        VMLAL.S16  q9, d9, d0[2]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[2]
+        VMLAL.S16 q9, d9, d0[2]
         VMLAL.S16 q10, d8, d2[2]
         VMLAL.S16 q11, d9, d2[2]
         VMLAL.S16 q12, d8, d4[2]
@@ -165,9 +165,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d6[2]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[3]
-        VMLAL.S16  q9, d9, d0[3]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[3]
+        VMLAL.S16 q9, d9, d0[3]
         VMLAL.S16 q10, d8, d2[3]
         VMLAL.S16 q11, d9, d2[3]
         VMLAL.S16 q12, d8, d4[3]
@@ -176,9 +176,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d6[3]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[0]
-        VMLAL.S16  q9, d9, d1[0]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[0]
+        VMLAL.S16 q9, d9, d1[0]
         VMLAL.S16 q10, d8, d3[0]
         VMLAL.S16 q11, d9, d3[0]
         VMLAL.S16 q12, d8, d5[0]
@@ -187,9 +187,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d7[0]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[1]
-        VMLAL.S16  q9, d9, d1[1]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[1]
+        VMLAL.S16 q9, d9, d1[1]
         VMLAL.S16 q10, d8, d3[1]
         VMLAL.S16 q11, d9, d3[1]
         VMLAL.S16 q12, d8, d5[1]
@@ -198,9 +198,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d7[1]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[2]
-        VMLAL.S16  q9, d9, d1[2]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[2]
+        VMLAL.S16 q9, d9, d1[2]
         VMLAL.S16 q10, d8, d3[2]
         VMLAL.S16 q11, d9, d3[2]
         VMLAL.S16 q12, d8, d5[2]
@@ -209,9 +209,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q15, d9, d7[2]
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[3]
-        VMLAL.S16  q9, d9, d1[3]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[3]
+        VMLAL.S16 q9, d9, d1[3]
         VMLAL.S16 q10, d8, d3[3]
         VMLAL.S16 q11, d9, d3[3]
         VMLAL.S16 q12, d8, d5[3]
@@ -226,10 +226,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 
 2:
         # RNDNU quantization
-        VDUP.32 q0, d14[0]  // right_pre_shift
+        VDUP.32 q0, d14[0]              // right_pre_shift
 
-        VQSHL.S32  q8,  q8, q0
-        VQSHL.S32  q9,  q9, q0
+        VQSHL.S32 q8,  q8, q0
+        VQSHL.S32 q9,  q9, q0
         VQSHL.S32 q10, q10, q0
         VQSHL.S32 q12, q12, q0
         VQSHL.S32 q11, q11, q0
@@ -237,10 +237,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
 
-        VDUP.32 q2, d15[0]  // right_post_shift
+        VDUP.32 q2, d15[0]              // right_post_shift
 
-        VQDMULH.S32  q8,  q8, d14[1]  // multiplier
-        VQDMULH.S32  q9,  q9, d14[1]
+        VQDMULH.S32 q8,  q8, d14[1]     // multiplier
+        VQDMULH.S32 q9,  q9, d14[1]
         VQDMULH.S32 q10, q10, d14[1]
         VQDMULH.S32 q12, q12, d14[1]
         VQDMULH.S32 q11, q11, d14[1]
@@ -248,8 +248,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VQDMULH.S32 q14, q14, d14[1]
         VQDMULH.S32 q15, q15, d14[1]
 
-        VRSHL.S32  q8,  q8, q2
-        VRSHL.S32  q9,  q9, q2
+        VRSHL.S32 q8,  q8, q2
+        VRSHL.S32 q9,  q9, q2
         VRSHL.S32 q10, q10, q2
         VRSHL.S32 q12, q12, q2
         VRSHL.S32 q11, q11, q2
@@ -257,7 +257,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2
 
-        VDUP.16 q0, d15[2]  // output_zero_point
+        VDUP.16 q0, d15[2]              // output_zero_point
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -268,19 +268,19 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VQMOVN.S32 d22, q14
         VQMOVN.S32 d23, q15
 
-        VQADD.S16  q8,  q8, q0
-        VQADD.S16  q9,  q9, q0
+        VQADD.S16 q8,  q8, q0
+        VQADD.S16 q9,  q9, q0
         VQADD.S16 q10, q10, q0
         VQADD.S16 q11, q11, q0
 
-        VDUP.8  q12, d15[6]  // output_min
+        VDUP.8  q12, d15[6]             // output_min
 
         VQMOVN.S16 d0,  q8
         VQMOVN.S16 d1,  q9
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d15[7]  // output_min
+        VDUP.8  q13, d15[7]             // output_min
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
@@ -317,13 +317,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VLD1.8  {d4}, [r10], r5
         VLD1.8  {d6},  [r0], r5
 
-        VMOVL.S8   q0, d0
-        VMOVL.S8   q4, d8
-        VMOVL.S8   q1, d2
-        VMOVL.S8   q2, d4
-        VMOVL.S8   q3, d6
-        VMLAL.S16  q8, d8, d0[0]
-        VMLAL.S16  q9, d9, d0[0]
+        VMOVL.S8 q0, d0
+        VMOVL.S8 q4, d8
+        VMOVL.S8 q1, d2
+        VMOVL.S8 q2, d4
+        VMOVL.S8 q3, d6
+        VMLAL.S16 q8, d8, d0[0]
+        VMLAL.S16 q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
         VMLAL.S16 q11, d9, d2[0]
         VMLAL.S16 q12, d8, d4[0]
@@ -334,9 +334,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BLO     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[1]
-        VMLAL.S16  q9, d9, d0[1]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[1]
+        VMLAL.S16 q9, d9, d0[1]
         VMLAL.S16 q10, d8, d2[1]
         VMLAL.S16 q11, d9, d2[1]
         VMLAL.S16 q12, d8, d4[1]
@@ -346,9 +346,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BEQ     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[2]
-        VMLAL.S16  q9, d9, d0[2]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[2]
+        VMLAL.S16 q9, d9, d0[2]
         VMLAL.S16 q10, d8, d2[2]
         VMLAL.S16 q11, d9, d2[2]
         VMLAL.S16 q12, d8, d4[2]
@@ -359,9 +359,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BLO     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d0[3]
-        VMLAL.S16  q9, d9, d0[3]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d0[3]
+        VMLAL.S16 q9, d9, d0[3]
         VMLAL.S16 q10, d8, d2[3]
         VMLAL.S16 q11, d9, d2[3]
         VMLAL.S16 q12, d8, d4[3]
@@ -371,9 +371,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BEQ     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[0]
-        VMLAL.S16  q9, d9, d1[0]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[0]
+        VMLAL.S16 q9, d9, d1[0]
         VMLAL.S16 q10, d8, d3[0]
         VMLAL.S16 q11, d9, d3[0]
         VMLAL.S16 q12, d8, d5[0]
@@ -384,9 +384,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BLO     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[1]
-        VMLAL.S16  q9, d9, d1[1]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[1]
+        VMLAL.S16 q9, d9, d1[1]
         VMLAL.S16 q10, d8, d3[1]
         VMLAL.S16 q11, d9, d3[1]
         VMLAL.S16 q12, d8, d5[1]
@@ -396,9 +396,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BEQ     2b
 
         VLD1.8  {d8},  [r9]!
-        VMOVL.S8   q4, d8
-        VMLAL.S16  q8, d8, d1[2]
-        VMLAL.S16  q9, d9, d1[2]
+        VMOVL.S8 q4, d8
+        VMLAL.S16 q8, d8, d1[2]
+        VMLAL.S16 q9, d9, d1[2]
         VMLAL.S16 q10, d8, d3[2]
         VMLAL.S16 q11, d9, d3[2]
         VMLAL.S16 q12, d8, d5[2]
@@ -411,16 +411,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         .p2align 3
 4:
         TST     r1, 4
-        BEQ     10f
+        BEQ     5f
         VST1.32 {d0[0]}, [r11]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-10:
+5:
         TST     r1, 2
-        BEQ     11f
+        BEQ     6f
         VST1.16 {d0[0]}, [r11]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d2[0]}, [r8]!
@@ -428,15 +428,15 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-11:
+6:
         TST     r1, 1
-        BEQ     12f
+        BEQ     7f
         VST1.8  {d0[0]}, [r11]
         VST1.8  {d1[0]}, [r4]
         VST1.8  {d2[0]}, [r8]
         VST1.8  {d3[0]}, [r6]
 
-12:
+7:
         VPOP    {d8-d15}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
