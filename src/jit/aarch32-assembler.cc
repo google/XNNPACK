@@ -94,6 +94,16 @@ Assembler& Assembler::add(CoreRegister rd, CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x28 << 20 | rn.code << 16 | rd.code << 12 | imm);
 }
 
+Assembler& Assembler::adds(CoreRegister rd, CoreRegister rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 0x29 << 20 | rn.code << 16 | rd.code << 12 | imm);
+}
+
+Assembler& Assembler::and_(CoreRegister rd, CoreRegister rn, uint8_t imm) {
+  // Rotation = 0, since imm is limited to 8 bits and fits in encoding.
+  return emit32(kAL | 1 << 25 | rn.code << 16 | rd.code << 12 | imm);
+}
+
 Assembler& Assembler::b(Condition c, Label& l) {
   if (l.bound) {
     // Offset is relative to after this b instruction + kPCDelta.
@@ -409,6 +419,10 @@ Assembler& Assembler::vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm) 
     return *this;
   }
   return emit32(0xF3A00C40 | encode(qd, 22, 12) | encode(qn, 7, 16) | dm.lane << 5 | dm.code);
+}
+
+Assembler& Assembler::vqmovn_s16(DRegister dd, QRegister qm) {
+  return emit32(0xF3B20280 | encode(dd, 22, 12) | encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vqmovn_s32(DRegister dd, QRegister qm) {

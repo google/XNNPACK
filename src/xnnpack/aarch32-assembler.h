@@ -349,6 +349,8 @@ class Assembler {
   Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& add(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  Assembler& adds(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  Assembler& and_(CoreRegister rd, CoreRegister rn, uint8_t imm);
   Assembler& b(Label& l) { return b(kAL, l); }
   Assembler& beq(Label& l) { return b(kEQ, l); }
   Assembler& bne(Label& l) { return b(kNE, l); }
@@ -424,6 +426,7 @@ class Assembler {
   Assembler& vpush(DRegisterList regs);
   Assembler& vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
+  Assembler& vqmovn_s16(DRegister dd, QRegister qm);
   Assembler& vqmovn_s32(DRegister dd, QRegister qm);
   Assembler& vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
   Assembler& vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
