@@ -430,6 +430,7 @@ class Assembler {
   Assembler& vqmovn_s32(DRegister dd, QRegister qm);
   Assembler& vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
   Assembler& vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
+  Assembler& vsdot_s8(QRegister qd, QRegister qn, DRegisterLane dm);
   // VST1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vst1_8(DRegisterList regs, MemOperand op) { return vst1(k8, regs, op); }
   // VST1.8 <list>, [<Rn>]{!}, <Rm> (multiple single elements).

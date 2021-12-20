@@ -159,6 +159,9 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xF264C560, a.vrshl_s32(q14, q8, q2));
 
+  CHECK_ENCODING(0xFE666D41, a.vsdot_s8(q11, q3, d1[0]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vsdot_s8(q11, q3, d1[2]));
+
   CHECK_ENCODING(0xF40B070F, a.vst1_8({d0}, mem[r11]));
   CHECK_ENCODING(0xF40B070D, a.vst1_8({d0}, mem[r11]++));
   CHECK_ENCODING(0xF40B0707, a.vst1_8({d0}, mem[r11], r7));

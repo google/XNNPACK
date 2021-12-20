@@ -437,6 +437,14 @@ Assembler& Assembler::vrshl_s32(QRegister qd, QRegister qm, QRegister qn) {
   return emit32(0xF2200540 | encode(qd, 22, 12) | encode(qm, 5, 0) | encode(qn, 7, 16));
 }
 
+Assembler& Assembler::vsdot_s8(QRegister qd, QRegister qn, DRegisterLane dm) {
+  if (dm.lane > 1) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+  return emit32(0xFE200D40 | encode(qd, 22, 12) | encode(qn, 7, 16) | dm.lane << 5 | dm.code);
+}
+
 Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op) {
   const uint8_t type = encode_regs_length_to_type(regs);
   if (!type) {
