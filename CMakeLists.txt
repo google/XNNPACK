@@ -2170,6 +2170,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
   src/x32-packx/x4-neon-st4.c
+  src/x32-transpose/4x4-neon-tbl.c
+  src/x32-transpose/4x4-neon-zip.c
   src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
@@ -2566,7 +2568,8 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-neon-tbx128x4-x16.c
   src/x8-lut/gen/lut-neon-tbx128x4-x32.c
   src/x8-lut/gen/lut-neon-tbx128x4-x48.c
-  src/x8-lut/gen/lut-neon-tbx128x4-x64.c)
+  src/x8-lut/gen/lut-neon-tbx128x4-x64.c
+  src/x32-transpose/4x4-aarch64-tbl.c)
 
 SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x32.c

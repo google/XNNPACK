@@ -4,3 +4,6 @@
 # LICENSE file in the root directory of this source tree.
 
 - name: xnn_x32_transpose_ukernel__4x4_sse
+- name: xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl
+- name: xnn_x32_transpose_ukernel__4x4_neon_tbl
+- name: xnn_x32_transpose_ukernel__4x4_neon_zip
