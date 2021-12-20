@@ -345,6 +345,7 @@ class Assembler {
   // Takes an xnn_code_buffer with a pointer to allocated memory.
   explicit Assembler(xnn_code_buffer* buf);
 
+  Assembler& add(CoreRegister rn, CoreRegister rm) { return add(rn, rn, rm); }
   Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& add(CoreRegister rd, CoreRegister rn, uint8_t imm);
@@ -395,6 +396,8 @@ class Assembler {
   Assembler& vmax_s8(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vmin_f32(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vmin_s8(QRegister qd, QRegister qn, QRegister qm);
+  // VMLA.F32 <Sd>, <Sn>, <Sm>
+  Assembler& vmla_f32(SRegister sd, SRegister sn, SRegister sm);
   // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
   Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMLAL.S16 <Qd>, <Dn>, <Dm[x]>
@@ -407,6 +410,10 @@ class Assembler {
   Assembler& vmov(DRegister dd, DRegister dm);
   // VMOV <Qd>, <Qm>; encoding A1.
   Assembler& vmov(QRegister qd, QRegister qm);
+  // VMOV_F32 <Sd>, <Sm>
+  Assembler& vmov_f32(SRegister sd, SRegister sm);
+  // VMOV_F64 <Dd>, <Dm>
+  Assembler& vmov_f64(DRegister dd, DRegister dm);
   // VMOVL.S8 <Qd>, <Dm>
   Assembler& vmovl_s8(QRegister qd, DRegister dm);
   Assembler& vpop(DRegisterList regs);
@@ -435,6 +442,8 @@ class Assembler {
   Assembler& vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k32, regs, op, rm); }
   // VST1.32 <list>, [<Rn>]{!} (single element form one lane).
   Assembler& vst1_32(DRegisterLane dd, MemOperand op) { return vst1(k32, dd, op); }
+  // VSTM <Rn>{!}, <list>, consecutive 64-bit registers.
+  Assembler& vstm(CoreRegister rn, DRegisterList regs, bool wb);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);

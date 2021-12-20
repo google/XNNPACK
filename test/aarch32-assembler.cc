@@ -34,6 +34,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
 
+  CHECK_ENCODING(0xE086600B, a.add(r6, r11));
   CHECK_ENCODING(0xE0810002, a.add(r0, r1, r2));
   CHECK_ENCODING(0xE28A9080, a.add(r9, r10, 128));
 
@@ -107,6 +108,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF20E26D6, a.vmin_s8(q1, q15, q3));
   CHECK_ENCODING(0xF220EFC6, a.vmin_f32(q7, q8, q3));
 
+  CHECK_ENCODING(0xEE04AA01, a.vmla_f32(s20, s8, s2));
+
   CHECK_ENCODING(0xF3E80140, a.vmla_f32(q8, q4, d0[0]));
   CHECK_ENCODING(0xF3EC0160, a.vmla_f32(q8, q6, d0[1]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmla_f32(q8, q4, d0[2]));
@@ -121,6 +124,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
   CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
+
+  CHECK_ENCODING(0xEEB08A49, a.vmov_f32(s16, s18));
+
+  CHECK_ENCODING(0xEEB0AB48, a.vmov_f64(d10, d8));
 
   CHECK_ENCODING(0xF2880A10, a.vmovl_s8(q0, d0));
 
@@ -170,6 +177,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4CB088F, a.vst1_32(d16[1], mem[r11]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
+
+  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8, d9}, false));
+  CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstm(r6, {d8, d28}, true));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }

@@ -324,6 +324,10 @@ Assembler& Assembler::vmin_s8(QRegister qd, QRegister qn, QRegister qm) {
  return emit32(0xF2000650 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
 }
 
+Assembler& Assembler::vmla_f32(SRegister sd, SRegister sn, SRegister sm) {
+  return emit32(kAL | 0x0E000A00 | encode(sd, 22, 12) | encode (sn, 7, 16) | encode(sm, 5, 0));
+}
+
 Assembler& Assembler::vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm) {
   if (dm.lane > 1) {
     error_ = Error::kInvalidLaneIndex;
@@ -361,6 +365,14 @@ Assembler& Assembler::vmov(DRegister dd, DRegister dm) {
 
 Assembler& Assembler::vmov(QRegister qd, QRegister qm) {
   return emit32(0xF2200150 | encode(qd, 22, 12) | encode(qm, 7, 16) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vmov_f32(SRegister sd, SRegister sm) {
+  return emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
+}
+
+Assembler& Assembler::vmov_f64(DRegister dd, DRegister dm) {
+  return emit32(kAL | 0x0EB00B40 | encode(dd, 22, 12) | encode(dm, 5, 0));
 }
 
 Assembler& Assembler::vmovl_s8(QRegister qd, DRegister dm) {
@@ -442,6 +454,14 @@ Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
   const uint8_t shift = size == k8 ? 5 : size == k16 ? 6 : 7;
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
   return emit32(0xF480'0000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
+}
+
+Assembler& Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
+  if (regs.length == 0 || regs.length > 16) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(kAL | 0x0C800B00 | wb << 21 | rn.code << 16 |  encode(regs.start, 22, 12) | regs.length << 1);
 }
 
 Assembler& Assembler::align(uint8_t n) {
