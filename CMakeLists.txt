@@ -3827,6 +3827,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
   src/x16-transpose/4x8-sse2.c
+  src/x16-transpose/8x8-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c

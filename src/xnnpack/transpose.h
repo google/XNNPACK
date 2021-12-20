@@ -56,6 +56,7 @@ DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_wasmsimd);
                             size_t block_height);
 
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__4x8_sse2);
+DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__8x8_sse2);
 
 #ifdef __cplusplus
 }  // extern "C"

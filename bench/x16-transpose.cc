@@ -52,9 +52,15 @@ static void x16_transpose(
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(x16_transpose, sse2_32, xnn_x16_transpose_ukernel__4x8_sse2, 32)
       ->UseRealTime();
+  BENCHMARK_CAPTURE(x16_transpose, sse2_64, xnn_x16_transpose_ukernel__4x8_sse2, 64)
+      ->UseRealTime();
   BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__4x8_sse2, 117)
       ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_1024, xnn_x16_transpose_ukernel__4x8_sse2, 1024)
+  BENCHMARK_CAPTURE(x16_transpose, sse2_32, xnn_x16_transpose_ukernel__8x8_sse2, 32)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(x16_transpose, sse2_64, xnn_x16_transpose_ukernel__8x8_sse2, 64)
+      ->UseRealTime();
+  BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__8x8_sse2, 117)
       ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
