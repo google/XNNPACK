@@ -221,6 +221,10 @@ Assembler& Assembler::tst(CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x31 << 20 | rn.code << 16 | imm);
 }
 
+Assembler& Assembler::vcmpe_f32(SRegister sd, SRegister sm) {
+  return emit32(kAL | 0x0EB40AC0 | encode(sd, 22, 12) | encode(sm, 5, 0));
+}
+
 Assembler& Assembler::vdup(DataSize size, QRegister qd, DRegisterLane dm) {
   uint8_t imm4 = 0;
   switch (size) {
@@ -367,8 +371,8 @@ Assembler& Assembler::vmov(QRegister qd, QRegister qm) {
   return emit32(0xF2200150 | encode(qd, 22, 12) | encode(qm, 7, 16) | encode(qm, 5, 0));
 }
 
-Assembler& Assembler::vmov_f32(SRegister sd, SRegister sm) {
-  return emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
+Assembler& Assembler::vmov_f32(Condition c, SRegister sd, SRegister sm) {
+  return emit32(c | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
 
 Assembler& Assembler::vmov_f64(DRegister dd, DRegister dm) {

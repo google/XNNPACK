@@ -73,6 +73,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xE315000F, a.tst(r5, 15));
 
+  CHECK_ENCODING(0xEEB44AC8, a.vcmpe_f32(s8, s16));
+
   CHECK_ENCODING(0xF3FF8C4F, a.vdup_8(q12, d15[7]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_8(q12, d15[8]));
   CHECK_ENCODING(0xF3FE8C4F, a.vdup_16(q12, d15[3]));
@@ -126,6 +128,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
 
   CHECK_ENCODING(0xEEB08A49, a.vmov_f32(s16, s18));
+  CHECK_ENCODING(0x5EB08A44, a.vmovpl_f32(s16, s8));
+  CHECK_ENCODING(0x4EB08A64, a.vmovmi_f32(s16, s9));
 
   CHECK_ENCODING(0xEEB0AB48, a.vmov_f64(d10, d8));
 

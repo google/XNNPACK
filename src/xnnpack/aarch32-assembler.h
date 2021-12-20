@@ -375,6 +375,7 @@ class Assembler {
   Assembler& tst(CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
+  Assembler& vcmpe_f32(SRegister sd, SRegister sm);
   Assembler& vdup_8(QRegister qd, DRegisterLane dm) { return vdup(k8, qd, dm); }
   Assembler& vdup_16(QRegister qd, DRegisterLane dm) { return vdup(k16, qd, dm); }
   Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
@@ -411,7 +412,9 @@ class Assembler {
   // VMOV <Qd>, <Qm>; encoding A1.
   Assembler& vmov(QRegister qd, QRegister qm);
   // VMOV_F32 <Sd>, <Sm>
-  Assembler& vmov_f32(SRegister sd, SRegister sm);
+  Assembler& vmov_f32(SRegister sd, SRegister sm) { return vmov_f32(kAL, sd, sm); }
+  Assembler& vmovpl_f32(SRegister sd, SRegister sm) { return vmov_f32(kPL, sd, sm); }
+  Assembler& vmovmi_f32(SRegister sd, SRegister sm) { return vmov_f32(kMI, sd, sm); }
   // VMOV_F64 <Dd>, <Dm>
   Assembler& vmov_f64(DRegister dd, DRegister dm);
   // VMOVL.S8 <Qd>, <Dm>
@@ -469,6 +472,7 @@ class Assembler {
   Assembler& mov(Condition c, CoreRegister rd, CoreRegister rm);
   Assembler& b(Condition c, Label& l);
   Assembler& vdup(DataSize size, QRegister qd, DRegisterLane dm);
+  Assembler& vmov_f32(Condition c, SRegister sd, SRegister sm);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);
