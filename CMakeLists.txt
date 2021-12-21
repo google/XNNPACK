@@ -5662,6 +5662,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86|x86_64|AMD64)$" OR IOS_ARCH 
   ENDIF()
 ENDIF()
 TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(jit PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "restrict=")
@@ -5732,6 +5733,7 @@ IF(NOT TARGET clog)
   ENDIF()
 ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE clog)
+TARGET_LINK_LIBRARIES(jit PRIVATE clog)
 
 # ---[ Configure cpuinfo
 IF(NOT TARGET cpuinfo)
@@ -5774,8 +5776,9 @@ IF(NOT TARGET pthreadpool)
 ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE pthreadpool)
-TARGET_LINK_LIBRARIES(packing PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(indirection PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(jit PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(packing PRIVATE pthreadpool)
 
 # ---[ Configure FXdiv
 IF(NOT TARGET fxdiv)
@@ -7631,8 +7634,8 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE src)
-  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE gtest gtest_main)
+  TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE pthreadpool gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
@@ -7913,7 +7916,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convert-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(convolution-bench bench/convolution.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
