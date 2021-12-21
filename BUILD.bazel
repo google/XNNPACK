@@ -11689,6 +11689,19 @@ config_setting(
 )
 
 config_setting(
+    name = "emscripten_relaxedsimd",
+    flag_values = {
+        "//tools/cpp:cc_target_os": "emscripten",
+    },
+    values = {
+        "cpu": "wasm",
+        "features": "wasm_simd",
+        "copt": "-mrelaxed-simd",
+        "linkopt": "-mrelaxed-simd",
+    },
+)
+
+config_setting(
     name = "ios_armv7",
     values = {
         "apple_platform_type": "ios",

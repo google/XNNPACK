@@ -1281,7 +1281,7 @@ constexpr int kBlockSize = 1024;
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(CVT__WASMSIMD, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
@@ -1508,7 +1508,7 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 TEST(CVT__SCALAR_BITCAST, positive_normal) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);

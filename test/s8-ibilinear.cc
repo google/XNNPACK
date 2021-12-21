@@ -680,7 +680,7 @@ TEST(S8_IBILINEAR__SCALAR_C4, output_stride) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_IBILINEAR__WASMSIMD_DOT16X2_C8, channels_eq_8) {
     IBilinearMicrokernelTester()
       .pixels(1)
@@ -749,10 +749,10 @@ TEST(S8_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_IBILINEAR__WASMSIMD_DOT16X2_C16, channels_eq_16) {
     IBilinearMicrokernelTester()
       .pixels(1)
@@ -821,10 +821,10 @@ TEST(S8_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_IBILINEAR__WASMSIMD_MUL32_C8, channels_eq_8) {
     IBilinearMicrokernelTester()
       .pixels(1)
@@ -893,10 +893,10 @@ TEST(S8_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_IBILINEAR__WASMSIMD_MUL32_C16, channels_eq_16) {
     IBilinearMicrokernelTester()
       .pixels(1)
@@ -965,4 +965,4 @@ TEST(S8_IBILINEAR__SCALAR_C4, output_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

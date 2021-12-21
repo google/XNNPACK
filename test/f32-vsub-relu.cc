@@ -18,7 +18,7 @@
 #include "vbinary-microkernel-tester.h"
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASMSIMD_X4, batch_eq_4) {
     VBinaryMicrokernelTester()
       .batch_size(4)
@@ -76,10 +76,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasmsimd_x4, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASMSIMD_X8, batch_eq_8) {
     VBinaryMicrokernelTester()
       .batch_size(8)
@@ -137,10 +137,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasmsimd_x8, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASMSIMD_X16, batch_eq_16) {
     VBinaryMicrokernelTester()
       .batch_size(16)
@@ -198,10 +198,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasmsimd_x16, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASM_X1, batch_eq_1) {
     VBinaryMicrokernelTester()
       .batch_size(1)
@@ -243,10 +243,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasm_x1, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASM_X2, batch_eq_2) {
     VBinaryMicrokernelTester()
       .batch_size(2)
@@ -304,10 +304,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasm_x2, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASM_X4, batch_eq_4) {
     VBinaryMicrokernelTester()
       .batch_size(4)
@@ -365,10 +365,10 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasm_x4, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSUB_RELU__WASM_X8, batch_eq_8) {
     VBinaryMicrokernelTester()
       .batch_size(8)
@@ -426,7 +426,7 @@
         .Test(xnn_f32_vsub_relu_ukernel__wasm_x8, VBinaryMicrokernelTester::OpType::Sub);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_VSUB_RELU__SCALAR_X1, batch_eq_1) {

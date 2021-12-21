@@ -146,7 +146,7 @@ BENCHMARK_CAPTURE(qs8_vmulc, neon_ld64_x8,
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_vmulc, wasmsimd_mul32_ld64_x8,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8,
                     xnn_init_qs8_mul_minmax_fp32_wasmsimd_params)
@@ -157,7 +157,7 @@ BENCHMARK_CAPTURE(qs8_vmulc, neon_ld64_x8,
                     xnn_init_qs8_mul_minmax_fp32_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(qs8_vmulc, scalar_x1,
                   xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x1,

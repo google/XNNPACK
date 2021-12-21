@@ -1104,7 +1104,7 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_ANDNOT, negative_zero) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1166,10 +1166,10 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_MAX, negative_zero) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1231,10 +1231,10 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_ANDNOT, negative_zero) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1296,10 +1296,10 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_MAX, negative_zero) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1361,7 +1361,7 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT4_P4, negative_zero) {

@@ -1040,7 +1040,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void qu8_gemm_1x4c8__wasmsimd_mul32_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64,
@@ -1084,7 +1084,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qu8_gemm_1x4c8__wasmsimd_mul32_ld128)
   BENCHMARK_GEMM(qu8_gemm_2x4c8__wasmsimd_mul32_ld128)
   BENCHMARK_GEMM(qu8_gemm_3x4c8__wasmsimd_mul32_ld128)
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 static void qu8_gemm_1x2__scalar_lrint(benchmark::State& state, const char* net) {

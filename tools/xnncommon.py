@@ -27,6 +27,7 @@ _ARCH_TO_MACRO_MAP = {
   "x86-64": "XNN_ARCH_X86_64",
   "wasm": "XNN_ARCH_WASM",
   "wasmsimd": "XNN_ARCH_WASMSIMD",
+  "wasmrelaxedsimd": "XNN_ARCH_WASMRELAXEDSIMD",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -48,8 +49,9 @@ _ISA_TO_ARCH_MAP = {
   "avx512f": ["x86-32", "x86-64"],
   "avx512skx": ["x86-32", "x86-64"],
   "wasm32": ["wasm", "wasmsimd"],
-  "wasm": ["wasm", "wasmsimd"],
-  "wasmsimd": ["wasmsimd"],
+  "wasm": ["wasm", "wasmsimd", "wasmrelaxedsimd"],
+  "wasmsimd": ["wasmsimd", "wasmrelaxedsimd"],
+  "wasmrelaxedsimd": ["wasmrelaxedsimd"],
 }
 
 _ISA_TO_CHECK_MAP = {

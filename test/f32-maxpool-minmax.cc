@@ -1794,7 +1794,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_MAXPOOL_MINMAX_9P8X__WASMSIMD_ARM_C4, channels_eq_4_unipass_fulltile) {
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
@@ -2608,10 +2608,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_MAXPOOL_MINMAX_9P8X__WASMSIMD_X86_C4, channels_eq_4_unipass_fulltile) {
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
@@ -3425,10 +3425,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_MAXPOOL_MINMAX_9P8X__WASM_C1, channels_eq_1_unipass_fulltile) {
     MaxPoolMicrokernelTester()
       .pooling_elements(9)
@@ -3868,7 +3868,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_MAXPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_unipass_fulltile) {

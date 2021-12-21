@@ -147,7 +147,7 @@ static void qu8_vmul(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qu8_vmul, wasmsimd_mul32_ld64_x8,
                     xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8,
                     xnn_init_qu8_mul_minmax_fp32_wasmsimd_params)
@@ -158,7 +158,7 @@ static void qu8_vmul(
                     xnn_init_qu8_mul_minmax_fp32_wasmsimd_params)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(qu8_vmul, scalar_x1,
                   xnn_qu8_vmul_minmax_fp32_ukernel__scalar_x1,

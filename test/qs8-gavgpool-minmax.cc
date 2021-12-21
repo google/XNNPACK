@@ -5519,7 +5519,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7X__WASMSIMD_C8_ACC2, channels_eq_8_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(7)
@@ -5659,10 +5659,10 @@
         .Test(xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c8_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7X__WASMSIMD_C16_ACC2, channels_eq_16_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(7)
@@ -5802,10 +5802,10 @@
         .Test(xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c16_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7X__WASMSIMD_C24_ACC2, channels_eq_24_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(7)
@@ -5945,10 +5945,10 @@
         .Test(xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c24_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7P7X__WASMSIMD_C8_ACC2, channels_eq_8_2pass_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(14)
@@ -6186,10 +6186,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7P7X__WASMSIMD_C16_ACC2, channels_eq_16_2pass_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(14)
@@ -6427,10 +6427,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QS8_GAVGPOOL_MINMAX_7P7X__WASMSIMD_C24_ACC2, channels_eq_24_2pass_fulltile) {
     GAvgPoolMicrokernelTester()
       .rows(14)
@@ -6668,7 +6668,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(QS8_GAVGPOOL_MINMAX_7X__SCALAR_C1, channels_eq_1_fulltile) {

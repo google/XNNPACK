@@ -905,7 +905,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void f32_gemm_3x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_3x8__wasmsimd_arm_loadsplat, 3, 8, 1, 1,
       xnn_init_f32_minmax_scalar_params);
@@ -1051,7 +1051,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__wasmsimd_arm_splat)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__wasmsimd_x86_splat)
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 static void f32_gemm_1x4__scalar(benchmark::State& state, const char* net) {

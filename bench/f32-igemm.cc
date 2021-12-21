@@ -643,7 +643,7 @@ static void IGEMMBenchmark(benchmark::State& state,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void f32_igemm_3x8__wasmsimd_arm_loadsplat(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_arm_loadsplat, 3, 8, 1, 1,
       xnn_init_f32_minmax_scalar_params);
@@ -788,7 +788,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_4x8s4__wasmsimd_x86)
   BENCHMARK_CONV(f32_igemm_5x8s4__wasmsimd_x86)
   BENCHMARK_CONV(f32_igemm_6x8s4__wasmsimd_x86)
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 static void f32_igemm_1x4__scalar(benchmark::State& state, const char* net) {

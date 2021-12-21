@@ -193,7 +193,7 @@ static void ExpM1Error(benchmark::State& state,
     ->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(ExpM1Error, wasmsimd_rr2_lut16_p3_andnot,
                     xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot)
     ->Unit(benchmark::kMillisecond)
@@ -210,7 +210,7 @@ static void ExpM1Error(benchmark::State& state,
                     xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(ExpM1Error, scalar_rr2_lut4_p4,
                   xnn_math_f32_expm1minus__scalar_rr2_lut4_p4)

@@ -156,7 +156,7 @@ class Requantization : public benchmark::Fixture {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_F(Requantization, fp32__wasmsimd)(benchmark::State& state) {
     for (auto _ : state) {
       xnn_qu8_requantize_fp32__wasmsimd(
@@ -170,7 +170,7 @@ class Requantization : public benchmark::Fixture {
           n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 BENCHMARK_F(Requantization, fp32__scalar_lrintf)(benchmark::State& state) {

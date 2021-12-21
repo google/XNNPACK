@@ -255,7 +255,7 @@ static void f16_f32_vcvt(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f16_f32_vcvt, wasmsimd_int16_x8,
                     xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
@@ -289,7 +289,7 @@ static void f16_f32_vcvt(
                     xnn_f16_f32_vcvt_ukernel__wasmsimd_int32_x32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f16_f32_vcvt, scalar_float_x1,
                   xnn_f16_f32_vcvt_ukernel__scalar_float_x1)

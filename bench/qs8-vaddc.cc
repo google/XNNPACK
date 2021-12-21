@@ -291,7 +291,7 @@ static void qs8_vaddc(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_vaddc, wasmsimd_x8,
                     xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x8,
                     xnn_init_qs8_add_minmax_wasmsimd_params)
@@ -312,7 +312,7 @@ static void qs8_vaddc(
                     xnn_init_qs8_add_minmax_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(qs8_vaddc, scalar_x1,
                   xnn_qs8_vaddc_minmax_ukernel__scalar_x1,

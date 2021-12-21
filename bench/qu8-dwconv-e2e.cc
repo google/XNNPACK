@@ -249,7 +249,7 @@ static void DWConvEnd2EndBenchmark(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void qu8_dwconv_up8x9__wasmsimd_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__wasmsimd_mul16,
@@ -265,7 +265,7 @@ static void DWConvEnd2EndBenchmark(
 
   BENCHMARK_QU8_END2END(qu8_dwconv_up8x9__wasmsimd_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_up16x9__wasmsimd_mul16);
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 static void qu8_dwconv_up1x9__scalar_lrint(benchmark::State& state, models::ExecutionPlanFactory model) {

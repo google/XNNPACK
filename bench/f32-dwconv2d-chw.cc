@@ -710,7 +710,7 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__sse_3x4_acc2)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void dwconv2d_chw_3x3p1__wasmsimd_arm_loadsplat_1x4(benchmark::State& state, const char* net) {
     DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_arm_loadsplat_1x4, 3, 3, 1, 1);
   }
@@ -1396,7 +1396,7 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_x86_splat_2x4_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_x86_splat_2x4_acc3)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__wasmsimd_x86_splat_3x4_acc2)
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 static void dwconv2d_chw_3x3p1__scalar_1x1(benchmark::State& state, const char* net) {
   DWConv2DBenchmark(state, xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_1x1, 3, 3, 1, 1);

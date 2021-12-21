@@ -1712,7 +1712,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_PPMM_MINMAX_4X8__WASMSIMD_ARM_SPLAT, k_eq_1) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2027,10 +2027,10 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_arm_splat, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_PPMM_MINMAX_4X8__WASMSIMD_X86_SPLAT, k_eq_1) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2345,7 +2345,7 @@
       .cm_stride(11)
       .Test(xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_x86_splat, xnn_init_f32_minmax_scalar_params);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_PPMM_MINMAX_4X2__SCALAR, k_eq_1) {

@@ -1053,7 +1053,7 @@ constexpr int kBlockSize = 1024;
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(ROUNDNE__WASMSIMD_ADDSUB, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1257,9 +1257,9 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(ROUNDNE__WASMSIMD_NATIVE, positive_normal) {
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -1463,7 +1463,7 @@ constexpr int kBlockSize = 1024;
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 TEST(ROUNDNE__SCALAR_ADDSUB, positive_normal) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);

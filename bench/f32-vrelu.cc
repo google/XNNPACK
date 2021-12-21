@@ -106,7 +106,7 @@ static void f32_vrelu(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vrelu, wasm_x1,
                     xnn_f32_vrelu_ukernel__wasm_x1)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -141,9 +141,9 @@ static void f32_vrelu(
                     xnn_f32_vrelu_ukernel__wasm32_shr_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_x4,
                     xnn_f32_vrelu_ukernel__wasmsimd_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -158,7 +158,7 @@ static void f32_vrelu(
                     xnn_f32_vrelu_ukernel__wasmsimd_x16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_vrelu, scalar_x1,
                   xnn_f32_vrelu_ukernel__scalar_x1)

@@ -277,7 +277,7 @@ static void f32_vsqrt(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vsqrt, wasmsimd_sqrt_x4,
                     xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -286,7 +286,7 @@ static void f32_vsqrt(
                     xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_vsqrt, scalar_sqrt_x1,
                   xnn_f32_vsqrt_ukernel__scalar_sqrt_x1)

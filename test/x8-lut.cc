@@ -1042,7 +1042,7 @@ TEST(X8_LUT__SCALAR_X16, inplace) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(X8_LUT__WASMSIMD_X16, batch_eq_16) {
     LUTMicrokernelTester()
       .batch_size(16)
@@ -1081,10 +1081,10 @@ TEST(X8_LUT__SCALAR_X16, inplace) {
         .Test(xnn_x8_lut_ukernel__wasmsimd_x16);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(X8_LUT__WASMSIMD_X32, batch_eq_32) {
     LUTMicrokernelTester()
       .batch_size(32)
@@ -1123,10 +1123,10 @@ TEST(X8_LUT__SCALAR_X16, inplace) {
         .Test(xnn_x8_lut_ukernel__wasmsimd_x32);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(X8_LUT__WASMSIMD_X48, batch_eq_48) {
     LUTMicrokernelTester()
       .batch_size(48)
@@ -1165,10 +1165,10 @@ TEST(X8_LUT__SCALAR_X16, inplace) {
         .Test(xnn_x8_lut_ukernel__wasmsimd_x48);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(X8_LUT__WASMSIMD_X64, batch_eq_64) {
     LUTMicrokernelTester()
       .batch_size(64)
@@ -1207,4 +1207,4 @@ TEST(X8_LUT__SCALAR_X16, inplace) {
         .Test(xnn_x8_lut_ukernel__wasmsimd_x64);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

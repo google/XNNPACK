@@ -3125,7 +3125,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X4, elements_eq_4) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(4)
@@ -3155,10 +3155,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x4);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X8, elements_eq_8) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(8)
@@ -3188,10 +3188,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x8);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X8_ACC2, elements_eq_8) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(8)
@@ -3221,10 +3221,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x8_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X12, elements_eq_12) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(12)
@@ -3254,10 +3254,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x12);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X12_ACC2, elements_eq_12) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(12)
@@ -3287,10 +3287,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x12_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X12_ACC3, elements_eq_12) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(12)
@@ -3320,10 +3320,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x12_acc3);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X16, elements_eq_16) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(16)
@@ -3353,10 +3353,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X16_ACC2, elements_eq_16) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(16)
@@ -3386,10 +3386,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X16_ACC4, elements_eq_16) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(16)
@@ -3419,10 +3419,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x16_acc4);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X20, elements_eq_20) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(20)
@@ -3452,10 +3452,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X20_ACC2, elements_eq_20) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(20)
@@ -3485,10 +3485,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20_acc2);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_RADDSTOREEXPMINUSMAX__WASMSIMD_P5_X20_ACC5, elements_eq_20) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(20)
@@ -3518,7 +3518,7 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20_acc5);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_RADDSTOREEXPMINUSMAX__SCALAR_P5_X1, elements_eq_1) {

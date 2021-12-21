@@ -562,7 +562,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_ARM_X4, batch_eq_4) {
     VBinaryMicrokernelTester()
       .batch_size(4)
@@ -620,10 +620,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_arm_x4, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_ARM_X8, batch_eq_8) {
     VBinaryMicrokernelTester()
       .batch_size(8)
@@ -681,10 +681,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_arm_x8, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_ARM_X16, batch_eq_16) {
     VBinaryMicrokernelTester()
       .batch_size(16)
@@ -742,10 +742,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_arm_x16, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_X86_X4, batch_eq_4) {
     VBinaryMicrokernelTester()
       .batch_size(4)
@@ -803,10 +803,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_x86_x4, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_X86_X8, batch_eq_8) {
     VBinaryMicrokernelTester()
       .batch_size(8)
@@ -864,10 +864,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_x86_x8, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASMSIMD_X86_X16, batch_eq_16) {
     VBinaryMicrokernelTester()
       .batch_size(16)
@@ -925,10 +925,10 @@
         .Test(xnn_f32_vmin_ukernel__wasmsimd_x86_x16, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASM_X1, batch_eq_1) {
     VBinaryMicrokernelTester()
       .batch_size(1)
@@ -970,10 +970,10 @@
         .Test(xnn_f32_vmin_ukernel__wasm_x1, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASM_X2, batch_eq_2) {
     VBinaryMicrokernelTester()
       .batch_size(2)
@@ -1031,10 +1031,10 @@
         .Test(xnn_f32_vmin_ukernel__wasm_x2, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASM_X4, batch_eq_4) {
     VBinaryMicrokernelTester()
       .batch_size(4)
@@ -1092,10 +1092,10 @@
         .Test(xnn_f32_vmin_ukernel__wasm_x4, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VMIN__WASM_X8, batch_eq_8) {
     VBinaryMicrokernelTester()
       .batch_size(8)
@@ -1153,7 +1153,7 @@
         .Test(xnn_f32_vmin_ukernel__wasm_x8, VBinaryMicrokernelTester::OpType::Min);
     }
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_VMIN__SCALAR_X1, batch_eq_1) {

@@ -76,7 +76,7 @@ struct xnn_parameters xnn_params = {
 };
 
 static void init(void) {
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   // Unlike most other architectures, on x86/x86-64 when floating-point instructions
   // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
   // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction
@@ -3677,7 +3677,7 @@ static void init(void) {
     };
   #endif
 
-#elif XNN_ARCH_WASMSIMD
+#elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
   /**************************** QC8 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS

@@ -1121,7 +1121,7 @@ static void f32_vsigmoid(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vsigmoid, wasmsimd_lut64_p2_div_x4,
                     xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -1171,7 +1171,7 @@ static void f32_vsigmoid(
                     xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x24)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_vsigmoid, scalar_lut2048_p1_div_x1,
                   xnn_f32_vsigmoid_ukernel__scalar_lut2048_p1_div_x1)

@@ -22,7 +22,7 @@
 #include "gemm-microkernel-tester.h"
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(1)
@@ -422,10 +422,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(4)
@@ -825,10 +825,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(5)
@@ -1228,10 +1228,10 @@
       .cm_stride(11)
       .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_4X2C4__WASMSIMD, k_eq_4) {
     GemmMicrokernelTester()
       .mr(4)
@@ -1631,10 +1631,10 @@
       .cm_stride(5)
       .Test(xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd);
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1) {
     GemmMicrokernelTester()
       .mr(1)
@@ -1938,10 +1938,10 @@
       .cm_stride(7)
       .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_2X4__WASM, k_eq_1) {
     GemmMicrokernelTester()
       .mr(2)
@@ -2245,10 +2245,10 @@
       .cm_stride(7)
       .Test(xnn_f32_gemm_relu_ukernel_2x4__wasm);
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_4X4__WASM, k_eq_1) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2552,10 +2552,10 @@
       .cm_stride(7)
       .Test(xnn_f32_gemm_relu_ukernel_4x4__wasm);
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_GEMM_RELU_4X2__WASM, k_eq_1) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2859,7 +2859,7 @@
       .cm_stride(5)
       .Test(xnn_f32_gemm_relu_ukernel_4x2__wasm);
   }
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1) {

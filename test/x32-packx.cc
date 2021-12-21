@@ -231,7 +231,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(X32_PACKX_4X__WASMSIMD, k_eq_4) {
     PackMicrokernelTester()
       .mr(4)
@@ -326,7 +326,7 @@
         .Test(xnn_x32_packx_ukernel_4x__wasmsimd);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(X32_PACKX_2X__SCALAR, k_eq_1) {

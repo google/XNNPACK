@@ -240,7 +240,7 @@ static void f32_qs8_vcvt(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_qs8_vcvt, wasmsimd_cvt_x8,
                     xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x8,
                     xnn_init_f32_qs8_cvt_wasmsimd_cvt_params)
@@ -282,9 +282,9 @@ static void f32_qs8_vcvt(
                     xnn_init_f32_qs8_cvt_wasmsimd_magic_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_magic_fminmax_x1,
                     xnn_f32_qs8_vcvt_ukernel__wasm_magic_fminmax_x1,
                     xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
@@ -305,7 +305,7 @@ static void f32_qs8_vcvt(
                     xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_fminmax_x1,
                   xnn_f32_qs8_vcvt_ukernel__scalar_magic_fminmax_x1,

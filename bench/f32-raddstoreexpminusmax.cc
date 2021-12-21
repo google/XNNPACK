@@ -421,7 +421,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc5)->Apply(CharacteristicArguments)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, wasmsimd_p5_x4,
     xnn_f32_rmax_ukernel__wasmsimd_arm,
     xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x4)->Apply(CharacteristicArguments)->UseRealTime();
@@ -458,7 +458,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, wasmsimd_p5_x20_acc5,
     xnn_f32_rmax_ukernel__wasmsimd_arm,
     xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20_acc5)->Apply(CharacteristicArguments)->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, scalar_lut64_p2_x1,
   xnn_f32_rmax_ukernel__scalar,

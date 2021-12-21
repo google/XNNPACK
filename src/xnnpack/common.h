@@ -52,16 +52,23 @@
 #endif
 
 #if defined(__wasm__)
-  #if defined(__wasm_simd128__)
-    #define XNN_ARCH_WASMSIMD 1
+  #if defined(__wasm_relaxed_simd__)
     #define XNN_ARCH_WASM 0
+    #define XNN_ARCH_WASMSIMD 0
+    #define XNN_ARCH_WASMRELAXEDSIMD 1
+  #elif defined(__wasm_simd128__)
+    #define XNN_ARCH_WASM 0
+    #define XNN_ARCH_WASMSIMD 1
+    #define XNN_ARCH_WASMRELAXEDSIMD 0
   #else
     #define XNN_ARCH_WASM 1
     #define XNN_ARCH_WASMSIMD 0
+    #define XNN_ARCH_WASMRELAXEDSIMD 0
   #endif
 #else
   #define XNN_ARCH_WASM 0
   #define XNN_ARCH_WASMSIMD 0
+  #define XNN_ARCH_WASMRELAXEDSIMD 0
 #endif
 
 // Define platform identification macros

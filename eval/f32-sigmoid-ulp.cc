@@ -512,7 +512,7 @@ static void SigmoidError(benchmark::State& state,
     ->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(SigmoidError, wasmsimd_rr2_lut64_p2_div,
                     xnn_math_f32_sigmoid__wasmsimd_rr2_lut64_p2_div)
     ->Unit(benchmark::kMillisecond)
@@ -521,7 +521,7 @@ static void SigmoidError(benchmark::State& state,
                     xnn_math_f32_sigmoid__wasmsimd_rr2_p5_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(SigmoidError, scalar_rr2_lut64_p2_div,
                   xnn_math_f32_sigmoid__scalar_rr2_lut64_p2_div)

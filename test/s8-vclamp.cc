@@ -230,7 +230,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(S8_VCLAMP__WASMSIMD_X64, batch_eq_64) {
     VUnaryMicrokernelTester()
       .batch_size(64)
@@ -291,7 +291,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(S8_VCLAMP__SCALAR_X4, batch_eq_4) {

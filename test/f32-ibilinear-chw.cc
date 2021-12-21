@@ -236,7 +236,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
 }
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_IBILINEAR_CHW__WASMSIMD_P4, pixels_eq_4) {
     IBilinearMicrokernelTester()
       .pixels(4)
@@ -314,10 +314,10 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_IBILINEAR_CHW__WASMSIMD_P8, pixels_eq_8) {
     IBilinearMicrokernelTester()
       .pixels(8)
@@ -395,7 +395,7 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
       }
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

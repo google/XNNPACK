@@ -967,7 +967,7 @@ static void GEMMEnd2EndBenchmark(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   static void f32_gemm_3x8__wasmsimd_arm_loadsplat(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_3x8__wasmsimd_arm_loadsplat,
@@ -1214,7 +1214,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_gemm_4x8s4__wasmsimd_x86);
   BENCHMARK_FP32_END2END(f32_gemm_5x8s4__wasmsimd_x86);
   BENCHMARK_FP32_END2END(f32_gemm_6x8s4__wasmsimd_x86);
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ARCH_WASM

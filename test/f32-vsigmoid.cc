@@ -9981,7 +9981,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X4, batch_eq_4) {
     VUnaryMicrokernelTester()
       .batch_size(4)
@@ -10020,10 +10020,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x4, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X8, batch_eq_8) {
     VUnaryMicrokernelTester()
       .batch_size(8)
@@ -10062,10 +10062,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x8, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X12, batch_eq_12) {
     VUnaryMicrokernelTester()
       .batch_size(12)
@@ -10104,10 +10104,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x12, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X16, batch_eq_16) {
     VUnaryMicrokernelTester()
       .batch_size(16)
@@ -10146,10 +10146,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x16, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X20, batch_eq_20) {
     VUnaryMicrokernelTester()
       .batch_size(20)
@@ -10188,10 +10188,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x20, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_P5_DIV_X24, batch_eq_24) {
     VUnaryMicrokernelTester()
       .batch_size(24)
@@ -10230,10 +10230,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_p5_div_x24, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X4, batch_eq_4) {
     VUnaryMicrokernelTester()
       .batch_size(4)
@@ -10272,10 +10272,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x4, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X8, batch_eq_8) {
     VUnaryMicrokernelTester()
       .batch_size(8)
@@ -10314,10 +10314,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x8, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X12, batch_eq_12) {
     VUnaryMicrokernelTester()
       .batch_size(12)
@@ -10356,10 +10356,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x12, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X16, batch_eq_16) {
     VUnaryMicrokernelTester()
       .batch_size(16)
@@ -10398,10 +10398,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x16, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X20, batch_eq_20) {
     VUnaryMicrokernelTester()
       .batch_size(20)
@@ -10440,10 +10440,10 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x20, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSIGMOID__WASMSIMD_LUT64_P2_DIV_X24, batch_eq_24) {
     VUnaryMicrokernelTester()
       .batch_size(24)
@@ -10482,7 +10482,7 @@
         .Test(xnn_f32_vsigmoid_ukernel__wasmsimd_lut64_p2_div_x24, VUnaryMicrokernelTester::OpType::Sigmoid);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_VSIGMOID__SCALAR_LUT2048_P1_DIV_X1, batch_eq_1) {

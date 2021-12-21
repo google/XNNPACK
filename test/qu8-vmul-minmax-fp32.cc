@@ -1938,7 +1938,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QU8_VMUL_MINMAX_FP32__WASMSIMD_MUL32_LD64_X8, batch_eq_8) {
     VMulMicrokernelTester()
       .batch_size(8)
@@ -2080,10 +2080,10 @@
         .Test(xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8, xnn_init_qu8_mul_minmax_fp32_wasmsimd_params, xnn_init_qu8_requantization_fp32_params, xnn_qu8_requantize_fp32);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(QU8_VMUL_MINMAX_FP32__WASMSIMD_MUL32_LD64_X16, batch_eq_16) {
     VMulMicrokernelTester()
       .batch_size(16)
@@ -2225,7 +2225,7 @@
         .Test(xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16, xnn_init_qu8_mul_minmax_fp32_wasmsimd_params, xnn_init_qu8_requantization_fp32_params, xnn_qu8_requantize_fp32);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(QU8_VMUL_MINMAX_FP32__SCALAR_X1, batch_eq_1) {

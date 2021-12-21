@@ -120,7 +120,7 @@ static void f32_vhswish(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x4,
                     xnn_f32_vhswish_ukernel__wasmsimd_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -133,9 +133,9 @@ static void f32_vhswish(
                     xnn_f32_vhswish_ukernel__wasmsimd_x16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vhswish, wasm_x1,
                     xnn_f32_vhswish_ukernel__wasm_x1)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -148,7 +148,7 @@ static void f32_vhswish(
                     xnn_f32_vhswish_ukernel__wasm_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(f32_vhswish, scalar_x1,
                   xnn_f32_vhswish_ukernel__scalar_x1)

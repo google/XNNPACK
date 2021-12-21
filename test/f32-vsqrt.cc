@@ -1991,7 +1991,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSQRT__WASMSIMD_SQRT_X4, batch_eq_4) {
     VUnaryMicrokernelTester()
       .batch_size(4)
@@ -2030,10 +2030,10 @@
         .Test(xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x4, VUnaryMicrokernelTester::OpType::SquareRoot);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(F32_VSQRT__WASMSIMD_SQRT_X8, batch_eq_8) {
     VUnaryMicrokernelTester()
       .batch_size(8)
@@ -2072,7 +2072,7 @@
         .Test(xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8, VUnaryMicrokernelTester::OpType::SquareRoot);
     }
   }
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 TEST(F32_VSQRT__SCALAR_SQRT_X1, batch_eq_1) {

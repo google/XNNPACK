@@ -154,7 +154,7 @@ static void x8_lut(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(x8_lut, wasmsimd_x16,
                     xnn_x8_lut_ukernel__wasmsimd_x16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
@@ -171,7 +171,7 @@ static void x8_lut(
                     xnn_x8_lut_ukernel__wasmsimd_x64)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 BENCHMARK_CAPTURE(x8_lut, scalar_x1,
                   xnn_x8_lut_ukernel__scalar_x1)
