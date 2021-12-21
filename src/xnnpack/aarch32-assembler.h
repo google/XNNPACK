@@ -398,6 +398,7 @@ class Assembler {
   Assembler& vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_8(DRegisterList regs, MemOperand op) { return vld1(k8, regs, op); }
+  Assembler& vld1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { return vld1(k8, regs, op, rm); }
   Assembler& vld1_8(QRegisterList regs, MemOperand op) { return vld1(k8, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_32(DRegisterList regs, MemOperand op) { return vld1(k32, regs, op); }
@@ -496,6 +497,7 @@ class Assembler {
   Assembler& vdup(DataSize size, QRegister qd, DRegisterLane dm);
   Assembler& vmov_f32(Condition c, SRegister sd, SRegister sm);
   Assembler& vld1(DataSize size, DRegisterList regs, MemOperand op);
+  Assembler& vld1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);

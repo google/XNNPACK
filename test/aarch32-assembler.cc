@@ -96,6 +96,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4230A0F, a.vld1_8({d0, d1}, mem[r3]));
   CHECK_ENCODING(0xF423060F, a.vld1_8({d0, d2}, mem[r3]));
   CHECK_ENCODING(0xF423020F, a.vld1_8({d0, d3}, mem[r3]));
+  CHECK_ENCODING(0xF42A4705, a.vld1_8({d4}, mem[r10], r5));
   CHECK_ENCODING(0xF4294A0D, a.vld1_8({q2}, mem[r9]++));
 
   CHECK_ENCODING(0xF42C178F, a.vld1_32({d1}, mem[r12]));

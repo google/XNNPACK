@@ -276,14 +276,18 @@ Assembler& Assembler::vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t i
 }
 
 Assembler& Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op) {
+  const uint8_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return vld1(size, regs, op, CoreRegister{rm});
+}
+
+Assembler& Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm) {
   const uint8_t type = encode_regs_length_to_type(regs);
   if (!type) {
     error_ = Error::kInvalidRegisterListLength;
     return *this;
   }
 
-  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF4200000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
+  return emit32(0xF4200000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm.code);
 }
 
 Assembler& Assembler::vld1_32(DRegisterLane dd, MemOperand op) {
