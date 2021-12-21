@@ -53,7 +53,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
 
         # Push 96 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
-        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +44
+        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
         SUB     sp, sp, 4                                        // 4
         VPUSH   {d8-d13}                                         // +48 = 96
 

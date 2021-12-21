@@ -45,7 +45,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .fpu    neon
 #endif
         # Push 104 bytes
-        PUSH    {r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +40
+        PUSH    {r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +40
         VPUSH   {d8-d15}                                     // +64 = 104
 
         LDR     r11, [sp, 112]          // c

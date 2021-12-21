@@ -46,7 +46,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7
 #endif
         # Push 112 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
-        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r14}  // +44
+        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
         SUB     sp, sp, 4                                        // 4
         VPUSH   {d8-d15}                                         // +64 = 112
 
