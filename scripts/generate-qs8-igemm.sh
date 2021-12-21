@@ -606,6 +606,10 @@ tools/xngen src/qu8-igemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP
 
 ############################### AArch32 assembly ##############################
 
+### Cortex-A53 lane micro-kernels
+tools/xngen src/qs8-igemm/4x8-aarch32-neon-mlal-lane-ld64.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-igemm/4x8-aarch32-neon-mlal-lane-ld64.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S &
+
 ### C4 micro-kernels
 tools/xngen src/qs8-igemm/4x8c4-aarch32-neondot-ld64.S.in -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-igemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S &
 
