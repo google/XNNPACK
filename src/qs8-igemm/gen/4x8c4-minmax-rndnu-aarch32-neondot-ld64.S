@@ -12,18 +12,18 @@
 .syntax unified
 
 // void xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(
-//     size_t mr,                            r0
-//     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5 -> sp + 52
-//     size_t ks,                            r3 -> sp + 56 -> r14
-//     const float**restrict a,  sp + 96 -> r2
-//     const void*restrict w,    sp + 100 -> r9
-//     uint8_t*restrict c,       sp + 104 -> r11
-//     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> (r7)
-//     size_t a_offset,          sp + 116 -> (r5)
-//     const float* zero,        sp + 120 -> (r7)
-//     minmax_params*params,     sp + 124 -> (r5)
+//     size_t mr,                                      r0
+//     size_t nc,                                      r1
+//     size_t kc,                                      r2 -> r5 -> sp + 52
+//     size_t ks,                                      r3 -> sp + 56 -> r14
+//     const int8_t**restrict a,           sp + 96  -> r2
+//     const void*restrict w,              sp + 100 -> r9
+//     int8_t*restrict c,                  sp + 104 -> r11
+//     size_t cm_stride,                   sp + 108 -> (r6)
+//     size_t cn_stride,                   sp + 112 -> (r7)
+//     size_t a_offset,                    sp + 116 -> (r5)
+//     const int8_t* zero,                 sp + 120 -> (r7)
+//     xnn_qs8_conv_minmax_params*params); sp + 124 -> (r5)
 
 // inner loop registers
 
