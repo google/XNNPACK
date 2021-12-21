@@ -474,6 +474,8 @@ class Assembler {
   Assembler& vst1_32(DRegisterLane dd, MemOperand op) { return vst1(k32, dd, op); }
   // VSTM <Rn>{!}, <list>, consecutive 64-bit registers.
   Assembler& vstm(CoreRegister rn, DRegisterList regs, bool wb);
+  // VSTR <Sd>, [Rn{, #+/-<imm>}], store single extension register to memory.
+  Assembler& vstr(SRegister rn, MemOperand op);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);

@@ -217,6 +217,12 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
   EXPECT_ERROR(Error::kInvalidOperand, a.vstm(r6, {d8, d28}, true));
 
+  CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
+  CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, MemOperand(r6, 8, AddressingMode::kPostIndexed)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 256]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 6]));
+
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 

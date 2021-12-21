@@ -506,6 +506,15 @@ Assembler& Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
   return emit32(kAL | 0x0C800B00 | wb << 21 | rn.code << 16 |  encode(regs.start, 22, 12) | regs.length << 1);
 }
 
+Assembler& Assembler::vstr(SRegister rn, MemOperand op) {
+  const uint32_t offset = op.offset();
+  if (op.mode() != AddressingMode::kOffset || offset > UINT8_MAX || offset % 4 != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(kAL | 0x0D000A00 | op.u() << 23 | op.base().code << 16 | encode(rn, 22, 12) | offset >> 2);
+}
+
 Assembler& Assembler::align(uint8_t n) {
   if (!is_po2(n) || (n % kInstructionSizeInBytes != 0)) {
     error_ = Error::kInvalidOperand;
