@@ -16,12 +16,12 @@
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
 //     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 96  -> (r7)
-//     const void*restrict w,    sp + 100 -> r9
-//     uint8_t*restrict c,       sp + 104 -> r11
-//     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 116 -> (r5)
+//     size_t a_stride,           sp + 80 -> (r7)
+//     const void*restrict w,     sp + 84 -> r9
+//     uint8_t*restrict c,        sp + 88 -> r11
+//     size_t cm_stride,          sp + 92 -> (r6)
+//     size_t cn_stride,          sp + 96 -> r7
+//     const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
 
 
 // inner loop registers
@@ -38,30 +38,30 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// Unused q6
+// unused q7
 
 // params structure is 16 bytes
 //  struct {
-//    int32_t right_pre_shift;    d14[0]
-//    int32_t multiplier;         d14[1]
-//    int32_t right_post_shift;   d15[0]
-//    int16_t output_zero_point;  d15[2]
-//    int8_t output_min;          d15[6]
-//    int8_t output_max;          d15[7]
+//    int32_t right_pre_shift;    d12[0]
+//    int32_t multiplier;         d12[1]
+//    int32_t right_post_shift;   d13[0]
+//    int16_t output_zero_point;  d13[2]
+//    int8_t output_min;          d13[6]
+//    int8_t output_max;          d13[7]
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
-        # Push 96 bytes
+        # Push 80 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        VPUSH   {d8-d15}                            // +64 = 96
+        VPUSH   {d8-d13}                            // +48 = 80
 
-        LDR     r7, [sp, 96]            // a_stride
+        LDR     r7, [sp, 80]            // a_stride
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
-        LDR     r11, [sp, 104]          // c
-        LDR     r6, [sp, 108]           // cm_stride
-        LDR     r9, [sp, 100]           // w
+        LDR     r11, [sp, 88]           // c
+        LDR     r6, [sp, 92]            // cm_stride
+        LDR     r9, [sp, 84]            // w
         BIC     r2, r2, 3
-        LDR     r5, [sp, 116]           // params
+        LDR     r5, [sp, 100]           // params
 
         # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
@@ -82,8 +82,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5!, {d14-d15}          // RNDNU params
-        LDR     r7, [sp, 112]           // cn_stride
+        VLDM    r5!, {d12-d13}          // RNDNU params
+        LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3
 0:
@@ -137,7 +137,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
 
 2:
         # RNDNU quantization
-        VDUP.32 q0, d14[0]              // right_pre_shift
+        VDUP.32 q0, d12[0]              // right_pre_shift
 
         VQSHL.S32 q8,  q8, q0
         VQSHL.S32 q9,  q9, q0
@@ -148,16 +148,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
 
-        VDUP.32 q2, d15[0]              // right_post_shift
+        VDUP.32 q2, d13[0]              // right_post_shift
 
-        VQDMULH.S32 q8,  q8, d14[1]     // multiplier
-        VQDMULH.S32 q9,  q9, d14[1]
-        VQDMULH.S32 q10, q10, d14[1]
-        VQDMULH.S32 q12, q12, d14[1]
-        VQDMULH.S32 q11, q11, d14[1]
-        VQDMULH.S32 q13, q13, d14[1]
-        VQDMULH.S32 q14, q14, d14[1]
-        VQDMULH.S32 q15, q15, d14[1]
+        VQDMULH.S32 q8,  q8, d12[1]     // multiplier
+        VQDMULH.S32 q9,  q9, d12[1]
+        VQDMULH.S32 q10, q10, d12[1]
+        VQDMULH.S32 q12, q12, d12[1]
+        VQDMULH.S32 q11, q11, d12[1]
+        VQDMULH.S32 q13, q13, d12[1]
+        VQDMULH.S32 q14, q14, d12[1]
+        VQDMULH.S32 q15, q15, d12[1]
 
         VRSHL.S32 q8,  q8, q2
         VRSHL.S32 q9,  q9, q2
@@ -168,7 +168,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2
 
-        VDUP.16 q0, d15[2]              // output_zero_point
+        VDUP.16 q0, d13[2]              // output_zero_point
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -184,14 +184,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VQADD.S16 q10, q10, q0
         VQADD.S16 q11, q11, q0
 
-        VDUP.8  q12, d15[6]             // output_min
+        VDUP.8  q12, d13[6]             // output_min
 
         VQMOVN.S16 d0,  q8
         VQMOVN.S16 d1,  q9
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d15[7]             // output_min
+        VDUP.8  q13, d13[7]             // output_min
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
@@ -213,7 +213,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         SUB     r0, r0, r2
         BHI     0b
 
-        VPOP    {d8-d15}
+        VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
@@ -267,7 +267,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VST1.8  {d3[0]}, [r6]
 
 7:
-        VPOP    {d8-d15}
+        VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
