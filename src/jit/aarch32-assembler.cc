@@ -149,6 +149,10 @@ Assembler& Assembler::bind(Label& l) {
   return *this;
 }
 
+Assembler& Assembler::bic(CoreRegister rd, CoreRegister rn, uint8_t imm) {
+  return emit32(kAL | 0x03C00000 | rn.code << 16 | rd.code << 12 | imm);
+}
+
 Assembler& Assembler::bx(CoreRegister rm) {
   return emit32(kAL | 0x12fff10 | rm.code);
 }
@@ -271,26 +275,15 @@ Assembler& Assembler::vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t i
   return emit32(0xF2B00040 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0) | imm4 << 8);
 }
 
-Assembler& Assembler::vld1_8(DRegisterList regs, MemOperand op) {
-  if (regs.length != 1) {
-    // Unimplemented since only length 1 is used in microkernels.
-    error_ = Error::kInvalidOperand;
+Assembler& Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op) {
+  const uint8_t type = encode_regs_length_to_type(regs);
+  if (!type) {
+    error_ = Error::kInvalidRegisterListLength;
     return *this;
   }
 
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF4200700 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
-}
-
-Assembler& Assembler::vld1_32(DRegisterList regs, MemOperand op) {
-  if (regs.length != 1) {
-    // Unimplemented since only length 1 is used in microkernels.
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
-
-  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF4200780 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
+  return emit32(0xF4200000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
 }
 
 Assembler& Assembler::vld1r_32(DRegisterList regs, MemOperand op) {

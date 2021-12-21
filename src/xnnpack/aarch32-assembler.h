@@ -196,6 +196,9 @@ struct ConsecutiveRegisterList {
   ConsecutiveRegisterList(RegType s, RegType end)
       : start(s),
         length(end.code - s.code + 1) {}
+  ConsecutiveRegisterList(RegType s, int len)
+      : start(s),
+        length(len) {}
   ConsecutiveRegisterList(RegType start)
       : ConsecutiveRegisterList(start, start) {}
 
@@ -205,6 +208,16 @@ struct ConsecutiveRegisterList {
 
 using SRegisterList = ConsecutiveRegisterList<SRegister>;
 using DRegisterList = ConsecutiveRegisterList<DRegister>;
+
+struct QRegisterList {
+  QRegisterList(QRegister s) : start(s) {}
+  // Explicit conversion to DRegisterList.
+  explicit operator DRegisterList() const {
+    return {{static_cast<uint8_t>(start.code * 2)}, 2};
+  }
+
+  QRegister start;
+};
 
 constexpr size_t max_label_users = 10;
 // Label is a target of a branch. You call Assembler::bind to bind a label to an
@@ -357,6 +370,7 @@ class Assembler {
   Assembler& bhi(Label& l) { return b(kHI, l); }
   Assembler& bhs(Label& l) { return b(kHS, l); }
   Assembler& blo(Label& l) { return b(kLO, l); }
+  Assembler& bic(CoreRegister rd, CoreRegister rn, uint8_t imm);
   Assembler& bx(CoreRegister rm);
   // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
   // constants in ARM instructions", for simplicity we start with uint8_t, which
@@ -383,9 +397,11 @@ class Assembler {
   Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
   Assembler& vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vld1_8(DRegisterList regs, MemOperand op);
+  Assembler& vld1_8(DRegisterList regs, MemOperand op) { return vld1(k8, regs, op); }
+  Assembler &vld1_8(QRegisterList regs, MemOperand op) { return vld1(k8, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vld1_32(DRegisterList regs, MemOperand op);
+  Assembler& vld1_32(DRegisterList regs, MemOperand op) { return vld1(k32, regs, op); }
+  Assembler& vld1_32(QRegisterList regs, MemOperand op) { return vld1(k32, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
   // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
   Assembler& vld1r_32(DRegisterList regs, MemOperand op);
@@ -477,6 +493,7 @@ class Assembler {
   Assembler& b(Condition c, Label& l);
   Assembler& vdup(DataSize size, QRegister qd, DRegisterLane dm);
   Assembler& vmov_f32(Condition c, SRegister sd, SRegister sm);
+  Assembler& vld1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);

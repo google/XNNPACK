@@ -17,9 +17,10 @@
                               << std::endl << "  actual = 0x" << actual;
 // clang-format on
 
-#define CHECK_ENCODING(expected, call) \
-  a.reset();                           \
-  call;                                \
+#define CHECK_ENCODING(expected, call)   \
+  a.reset();                             \
+  call;                                  \
+  EXPECT_EQ(Error::kNoError, a.error()); \
   EXPECT_INSTR(expected, *a.start())
 
 #define EXPECT_ERROR(expected, call) \
@@ -40,6 +41,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xE29D5008, a.adds(r5, r13, 8));
 
   CHECK_ENCODING(0xE2025007, a.and_(r5, r2, 7));
+
+  CHECK_ENCODING(0xE3CC2003, a.bic(r2, r12, 3));
 
   CHECK_ENCODING(0xE12FFF1E, a.bx(lr));
 
@@ -90,9 +93,17 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xF423070F, a.vld1_8({d0}, mem[r3]));
   CHECK_ENCODING(0xF423070D, a.vld1_8({d0}, mem[r3]++));
+  CHECK_ENCODING(0xF4230A0F, a.vld1_8({d0, d1}, mem[r3]));
+  CHECK_ENCODING(0xF423060F, a.vld1_8({d0, d2}, mem[r3]));
+  CHECK_ENCODING(0xF423020F, a.vld1_8({d0, d3}, mem[r3]));
+  CHECK_ENCODING(0xF4294A0D, a.vld1_8({q2}, mem[r9]++));
 
   CHECK_ENCODING(0xF42C178F, a.vld1_32({d1}, mem[r12]));
   CHECK_ENCODING(0xF42C178D, a.vld1_32({d1}, mem[r12]++));
+  CHECK_ENCODING(0xF42C1A8D, a.vld1_32({d1,d2}, mem[r12]++));
+  CHECK_ENCODING(0xF42C168D, a.vld1_32({d1,d3}, mem[r12]++));
+  CHECK_ENCODING(0xF42C128D, a.vld1_32({d1,d4}, mem[r12]++));
+  CHECK_ENCODING(0xF4294A8D, a.vld1_32({q2}, mem[r9]++));
 
   CHECK_ENCODING(0xF4A54CAF, a.vld1r_32({d4, d5}, mem[r5]));
   CHECK_ENCODING(0xF4A54CAD, a.vld1r_32({d4, d5}, mem[r5]++));
