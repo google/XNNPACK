@@ -103,6 +103,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF42C1A8D, a.vld1_32({d1,d2}, mem[r12]++));
   CHECK_ENCODING(0xF42C168D, a.vld1_32({d1,d3}, mem[r12]++));
   CHECK_ENCODING(0xF42C128D, a.vld1_32({d1,d4}, mem[r12]++));
+
+  CHECK_ENCODING(0xF4A8780F, a.vld1_32({d7[0]}, mem[r8]));
+  CHECK_ENCODING(0xF4A3488D, a.vld1_32({d4[1]}, mem[r3]++));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vld1_32({d0[2]}, mem[r3]));
+
   CHECK_ENCODING(0xF4294A8D, a.vld1_32({q2}, mem[r9]++));
 
   CHECK_ENCODING(0xF4A54CAF, a.vld1r_32({d4, d5}, mem[r5]));

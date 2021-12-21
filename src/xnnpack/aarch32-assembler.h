@@ -398,10 +398,12 @@ class Assembler {
   Assembler& vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_8(DRegisterList regs, MemOperand op) { return vld1(k8, regs, op); }
-  Assembler &vld1_8(QRegisterList regs, MemOperand op) { return vld1(k8, static_cast<DRegisterList>(regs), op); }
+  Assembler& vld1_8(QRegisterList regs, MemOperand op) { return vld1(k8, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
   Assembler& vld1_32(DRegisterList regs, MemOperand op) { return vld1(k32, regs, op); }
   Assembler& vld1_32(QRegisterList regs, MemOperand op) { return vld1(k32, static_cast<DRegisterList>(regs), op); }
+  // VLD1.32 <list>, [<Rn>]{!} (single element to one lane).
+  Assembler& vld1_32(DRegisterLane dd, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
   // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
   Assembler& vld1r_32(DRegisterList regs, MemOperand op);

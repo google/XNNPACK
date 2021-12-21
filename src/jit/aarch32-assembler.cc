@@ -286,6 +286,15 @@ Assembler& Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op) {
   return emit32(0xF4200000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
 }
 
+Assembler& Assembler::vld1_32(DRegisterLane dd, MemOperand op) {
+  if (dd.lane > 1) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
+  return emit32(kAL | 0xF4A00800 | dd.lane << 7 | encode(dd, 22, 12) | op.base().code << 16 | rm);
+}
+
 Assembler& Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
   if (regs.length != 2) {
     // Unimplemented since only length 2 used in microkernels.
