@@ -55,6 +55,7 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   const long res = sysconf(_SC_PAGESIZE);
   if (res == -1) {
     xnn_log_error("failed to get page size, error code: %d", errno);
+    return xnn_status_invalid_state;
   }
   const size_t page_size = res;
 #endif
