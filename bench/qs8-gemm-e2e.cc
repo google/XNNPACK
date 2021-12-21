@@ -79,7 +79,7 @@ static void GEMMEnd2EndBenchmark(
   static void qs8_gemm_4x8c4__aarch32_neondot_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64,
-      xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__neondot,
+      xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64,
       xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neondot,
       xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c4__neondot,
       xnn_init_qs8_conv_minmax_rndnu_neon_params,
