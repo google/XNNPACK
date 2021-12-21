@@ -379,6 +379,8 @@ class Assembler {
   Assembler& cmp(CoreRegister rn, CoreRegister rm);
   Assembler& ldr(CoreRegister rt, MemOperand operand, int32_t offset);
   Assembler& ldr(CoreRegister rt, MemOperand operand);
+  // LDRD <Rt>, <Rt2>, [<Rn>{, #+/-<imm>}].
+  Assembler& ldrd(CoreRegister rt, CoreRegister rt2, MemOperand op);
   Assembler& mov(CoreRegister rd, CoreRegister rm);
   Assembler& moveq(CoreRegister rd, CoreRegister rm) { return mov(kEQ, rd, rm); }
   Assembler& movlo(CoreRegister rd, CoreRegister rm) { return mov(kLO, rd, rm); }

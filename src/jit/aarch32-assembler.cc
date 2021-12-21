@@ -50,6 +50,10 @@ uint32_t encode(DRegisterList regs, uint32_t single_bit_pos, uint32_t four_bits_
   return r.d() << single_bit_pos | r.vd() << four_bits_pos | regs.length * 2;
 }
 
+uint32_t encode_mem_puw(MemOperand op) {
+  return op.p() << 24 | op.u() << 23 | op.w() << 21 | op.base().code << 16;
+}
+
 // Return value of 0 is invalid, indicates error.
 uint32_t encode_regs_length_to_type(DRegisterList regs) {
   switch (regs.length) {
@@ -177,8 +181,19 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
     return *this;
   }
 
-  return emit32(kAL | 0x41 << 20 | op.p() << 24 | op.u() << 23 | op.w() << 21 | op.base().code << 16 | rt.code << 12 |
-                offset);
+  return emit32(kAL | 0x41 << 20 | encode_mem_puw(op) | rt.code << 12 | offset);
+}
+
+Assembler& Assembler::ldrd(CoreRegister rt, CoreRegister rt2, MemOperand op) {
+  const int32_t offset = op.offset();
+  if ((std::abs(op.offset()) > UINT8_MAX) || (rt.code + 1 != rt2.code)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  const uint32_t offset_top = (offset & 0xF0) << 4;
+  const uint32_t offset_bot = (offset & 0xF);
+
+  return emit32(kAL | 0x004000D0 | encode_mem_puw(op) | rt.code << 12 | offset_top | offset_bot);
 }
 
 Assembler& Assembler::mov(CoreRegister rd, CoreRegister rm) {
@@ -223,8 +238,7 @@ Assembler& Assembler::str(CoreRegister rt, MemOperand op) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
-  return emit32(kAL | 1 << 26 | op.p() << 24 | op.u() << 23 | op.w() << 21 | op.base().code << 16 | rt.code << 12 |
-                offset);
+  return emit32(kAL | 1 << 26 | encode_mem_puw(op) | rt.code << 12 | offset);
 }
 
 Assembler& Assembler::sub(CoreRegister rd, CoreRegister rn, uint8_t imm) {
