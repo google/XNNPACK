@@ -167,6 +167,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xF2880A10, a.vmovl_s8(q0, d0));
 
+  CHECK_ENCODING(0xEEF1FA10, a.vmrs(APSR_nzcv, FPSCR));
+
   CHECK_ENCODING(0xECBD8B10, a.vpop({d8, d15}));
 
   CHECK_ENCODING(0xED2D4A08, a.vpush({s8, s15}));

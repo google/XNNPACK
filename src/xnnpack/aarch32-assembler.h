@@ -15,6 +15,12 @@ namespace aarch32 {
 
 constexpr size_t kInstructionSizeInBytes = 4;
 
+enum class SpecialFPRegister {
+  kFPSCR = 1,
+};
+
+constexpr SpecialFPRegister FPSCR = SpecialFPRegister::kFPSCR;
+
 struct CoreRegister {
   uint8_t code;
 };
@@ -38,6 +44,7 @@ constexpr CoreRegister r15{15};
 constexpr CoreRegister sp = r13;
 constexpr CoreRegister lr = r14;
 constexpr CoreRegister pc = r15;
+constexpr CoreRegister APSR_nzcv = r15;
 
 static inline bool operator==(const CoreRegister lhs, const CoreRegister rhs) {
   return lhs.code == rhs.code;
@@ -446,6 +453,7 @@ class Assembler {
   Assembler& vmov_f64(DRegister dd, DRegister dm);
   // VMOVL.S8 <Qd>, <Dm>
   Assembler& vmovl_s8(QRegister qd, DRegister dm);
+  Assembler& vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
   Assembler& vpop(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);

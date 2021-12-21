@@ -423,6 +423,10 @@ Assembler& Assembler::vmovl_s8(QRegister qd, DRegister dm) {
   return emit32(0xF2880A10 | encode(qd, 22, 12) | encode(dm, 5, 0));
 }
 
+Assembler& Assembler::vmrs(CoreRegister rt, SpecialFPRegister spec_reg) {
+  return emit32(kAL | 0x0EF00A10 | static_cast<uint32_t>(spec_reg) << 16 | rt.code << 12);
+}
+
 Assembler& Assembler::vpop(DRegisterList regs) {
   return emit32(kAL | encode(regs, 22, 12) | 0xCBD << 16 | 0xB << 8);
 }
