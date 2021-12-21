@@ -376,15 +376,18 @@ class Assembler {
   // constants in ARM instructions", for simplicity we start with uint8_t, which
   // is fully representation using a "rotation" of 0.
   Assembler& cmp(CoreRegister rn, uint8_t imm);
+  Assembler& cmp(CoreRegister rn, CoreRegister rm);
   Assembler& ldr(CoreRegister rt, MemOperand operand, int32_t offset);
   Assembler& ldr(CoreRegister rt, MemOperand operand);
   Assembler& mov(CoreRegister rd, CoreRegister rm);
-  Assembler& movlo(CoreRegister rd, CoreRegister rm);
-  Assembler& movls(CoreRegister rd, CoreRegister rm);
+  Assembler& moveq(CoreRegister rd, CoreRegister rm) { return mov(kEQ, rd, rm); }
+  Assembler& movlo(CoreRegister rd, CoreRegister rm) { return mov(kLO, rd, rm); }
+  Assembler& movls(CoreRegister rd, CoreRegister rm) { return mov(kLS, rd, rm); }
   Assembler& nop();
   Assembler& pld(MemOperand operand);
   Assembler& pop(CoreRegisterList regs);
   Assembler& push(CoreRegisterList regs);
+  Assembler& sub(CoreRegister rd, CoreRegister rn, uint8_t imm);
   Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
   Assembler& subs(CoreRegister rd, CoreRegister rn, uint8_t imm);

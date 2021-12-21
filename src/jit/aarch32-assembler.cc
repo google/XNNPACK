@@ -161,6 +161,10 @@ Assembler& Assembler::cmp(CoreRegister rn, uint8_t imm) {
   return emit32(kAL | 0x35 << 20 | rn.code << 16 | imm);
 }
 
+Assembler& Assembler::cmp(CoreRegister rn, CoreRegister rm) {
+  return emit32(kAL | 0x01500000 | rn.code << 16 | rm.code);
+}
+
 Assembler& Assembler::ldr(CoreRegister rt, MemOperand op, int32_t offset) {
   return ldr(rt, MemOperand(op.base(), offset, AddressingMode::kPostIndexed));
 }
@@ -179,14 +183,6 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
 
 Assembler& Assembler::mov(CoreRegister rd, CoreRegister rm) {
   return mov(kAL, rd, rm);
-}
-
-Assembler& Assembler::movlo(CoreRegister rd, CoreRegister rm) {
-  return mov(kLO, rd, rm);
-}
-
-Assembler& Assembler::movls(CoreRegister rd, CoreRegister rm) {
-  return mov(kLS, rd, rm);
 }
 
 Assembler& Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
@@ -219,6 +215,10 @@ Assembler& Assembler::push(CoreRegisterList regs) {
   }
 
   return emit32(kAL | 0x92D << 16 | regs.list);
+}
+
+Assembler& Assembler::sub(CoreRegister rd, CoreRegister rn, uint8_t imm) {
+  return emit32(kAL | 0x24 << 20 | rn.code << 16 | rd.code << 12 | imm);
 }
 
 Assembler& Assembler::sub(CoreRegister rd, CoreRegister rn, CoreRegister rm) {

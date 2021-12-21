@@ -47,6 +47,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xE12FFF1E, a.bx(lr));
 
   CHECK_ENCODING(0xE3500002, a.cmp(r0, 2));
+  CHECK_ENCODING(0xE1530007, a.cmp(r3, r7));
 
   // Offset addressing mode.
   CHECK_ENCODING(0xE59D7060, a.ldr(r7, mem[sp, 96]));
@@ -57,6 +58,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(r7, MemOperand(sp, 4096)));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(r7, MemOperand(sp, -4096)));
 
+  CHECK_ENCODING(0x01A0C007, a.moveq(r12, r7));
   CHECK_ENCODING(0x31A0C003, a.movlo(r12, r3));
   CHECK_ENCODING(0x91A0A00C, a.movls(r10, r12));
   CHECK_ENCODING(0xE1A0A00C, a.mov(r10, r12));
@@ -75,6 +77,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF5D3F040, a.pld(MemOperand(r3, 64)));
 
   CHECK_ENCODING(0xE0487002, a.sub(r7, r8, r2));
+  CHECK_ENCODING(0xE2425010, a.sub(r5, r2, 16));
   CHECK_ENCODING(0xE2525010, a.subs(r5, r2, 16));
 
   CHECK_ENCODING(0xE315000F, a.tst(r5, 15));
