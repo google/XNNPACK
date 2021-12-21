@@ -387,6 +387,7 @@ class Assembler {
   Assembler& pld(MemOperand operand);
   Assembler& pop(CoreRegisterList regs);
   Assembler& push(CoreRegisterList regs);
+  Assembler& str(CoreRegister rt, MemOperand op);
   Assembler& sub(CoreRegister rd, CoreRegister rn, uint8_t imm);
   Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.

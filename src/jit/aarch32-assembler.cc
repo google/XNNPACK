@@ -10,7 +10,8 @@
 
 namespace xnnpack {
 namespace aarch32 {
-static const int DEFAULT_BUFFER_SIZE = 4096;
+// Max value of imm that fits in ldr/str encoding (takes imm12, with a separate bit for sign).
+constexpr int32_t kUint12Max = 4095;
 
 // PC register contains current address of instruction + 8 (2 instructions).
 constexpr ptrdiff_t kPCDelta = 2;
@@ -171,8 +172,7 @@ Assembler& Assembler::ldr(CoreRegister rt, MemOperand op, int32_t offset) {
 
 Assembler& Assembler::ldr(CoreRegister rt, MemOperand op) {
   const int32_t offset = op.offset();
-  constexpr int32_t max_imm12 = 4095;
-  if (std::abs(offset) > max_imm12) {
+  if (std::abs(offset) > kUint12Max) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
@@ -215,6 +215,16 @@ Assembler& Assembler::push(CoreRegisterList regs) {
   }
 
   return emit32(kAL | 0x92D << 16 | regs.list);
+}
+
+Assembler& Assembler::str(CoreRegister rt, MemOperand op) {
+  const int32_t offset = op.offset();
+  if (std::abs(offset) > kUint12Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(kAL | 1 << 26 | op.p() << 24 | op.u() << 23 | op.w() << 21 | op.base().code << 16 | rt.code << 12 |
+                offset);
 }
 
 Assembler& Assembler::sub(CoreRegister rd, CoreRegister rn, uint8_t imm) {

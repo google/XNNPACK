@@ -76,6 +76,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF5D3F000, a.pld(MemOperand(r3, 0)));
   CHECK_ENCODING(0xF5D3F040, a.pld(MemOperand(r3, 64)));
 
+  CHECK_ENCODING(0xE58D5068, a.str(r5, mem[sp, 104]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(r5, MemOperand(sp, 4096)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(r5, MemOperand(sp, -4096)));
+
   CHECK_ENCODING(0xE0487002, a.sub(r7, r8, r2));
   CHECK_ENCODING(0xE2425010, a.sub(r5, r2, 16));
   CHECK_ENCODING(0xE2525010, a.subs(r5, r2, 16));
