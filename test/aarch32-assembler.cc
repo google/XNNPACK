@@ -133,8 +133,12 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
 
   CHECK_ENCODING(0xED99FB0E, a.vldr(d15, mem[r9, 56]));
+  CHECK_ENCODING(0xED99FBFF, a.vldr(d15, mem[r9, 1020]));
+  CHECK_ENCODING(0xED19FBFF, a.vldr(d15, mem[r9, -1020]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 256]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, -1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 1018]));
 
   CHECK_ENCODING(0xF20E26C6, a.vmax_s8(q1, q15, q3));
   CHECK_ENCODING(0xF24ECFC4, a.vmax_f32(q14, q15, q2));
@@ -226,9 +230,12 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
   CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));
+  CHECK_ENCODING(0xED868AFF, a.vstr(s16, mem[r6, 1020]));
+  CHECK_ENCODING(0xED068AFF, a.vstr(s16, mem[r6, -1020]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, MemOperand(r6, 8, AddressingMode::kPostIndexed)));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 256]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 6]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, -1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1018]));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }

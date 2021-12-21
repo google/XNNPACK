@@ -10,6 +10,8 @@
 
 namespace xnnpack {
 namespace aarch32 {
+// Max value of imm for vldr/str (takes imm8, but shift right by 2 when encoding).
+constexpr int32_t kUint10Max = 1023;
 // Max value of imm that fits in ldr/str encoding (takes imm12, with a separate bit for sign).
 constexpr int32_t kUint12Max = 4095;
 
@@ -343,13 +345,13 @@ Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
 }
 
 Assembler& Assembler::vldr(DRegister dd, MemOperand op) {
-  // TOOD(zhin): post-increment not used in any microkernels, so not implemented yet.
-  if (op.mode() != AddressingMode::kOffset || std::abs(op.offset()) > UINT8_MAX) {
+  const uint32_t offset = std::abs(op.offset());
+  if (op.mode() != AddressingMode::kOffset || offset > kUint10Max || offset % 4 != 0) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
 
-  return emit32(kAL | 0x0D100B00 | op.u() << 23 | encode(dd, 22, 12) | op.base().code << 16 | op.offset() >> 2);
+  return emit32(kAL | 0x0D100B00 | op.u() << 23 | encode(dd, 22, 12) | op.base().code << 16 | offset >> 2);
 }
 
 Assembler& Assembler::vmax_f32(QRegister qd, QRegister qn, QRegister qm) {
@@ -525,8 +527,8 @@ Assembler& Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
 }
 
 Assembler& Assembler::vstr(SRegister rn, MemOperand op) {
-  const uint32_t offset = op.offset();
-  if (op.mode() != AddressingMode::kOffset || offset > UINT8_MAX || offset % 4 != 0) {
+  const uint32_t offset = std::abs(op.offset());
+  if (op.mode() != AddressingMode::kOffset || offset > kUint10Max || offset % 4 != 0) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
