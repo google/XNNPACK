@@ -64,7 +64,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x64(
 
     vy048C159D26AE37BF = _mm512_max_epu8(vy048C159D26AE37BF, voutput_min);
 
-    const __m512i vy0123456789ABCDEF = _mm512_permutevar_epi32(vshuffle512_mask, vy048C159D26AE37BF);
+    const __m512i vy0123456789ABCDEF = _mm512_permutexvar_epi32(vshuffle512_mask, vy048C159D26AE37BF);
 
     _mm512_storeu_si512(y, vy0123456789ABCDEF);
     y += 64;

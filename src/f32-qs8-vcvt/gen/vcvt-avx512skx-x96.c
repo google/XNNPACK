@@ -77,7 +77,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x96(
     vy048C159D26AE37BF = _mm512_max_epi8(vy048C159D26AE37BF, voutput_min);
     vyGKIMHLJN = _mm256_max_epi8(vyGKIMHLJN, _mm512_castsi512_si256(voutput_min));
 
-    const __m512i vy0123456789ABCDEF = _mm512_permutevar_epi32(vshuffle512_mask, vy048C159D26AE37BF);
+    const __m512i vy0123456789ABCDEF = _mm512_permutexvar_epi32(vshuffle512_mask, vy048C159D26AE37BF);
     const __m256i vyGHIJKLMN = _mm256_permutevar8x32_epi32(vyGKIMHLJN, vshuffle256_mask);
 
     _mm512_storeu_si512(y, vy0123456789ABCDEF);

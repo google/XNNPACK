@@ -83,7 +83,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_x${BATCH_TILE}(
 
     $for N in range(0, SIMD_TILE, 16):
       $if N + 8 < SIMD_TILE:
-        const __m512i vy${ABC[N:N+16]} = _mm512_permutevar_epi32(vshuffle512_mask, vy${ABC[N]}${ABC[N+4]}${ABC[N+8]}${ABC[N+12]}${ABC[N+1]}${ABC[N+5]}${ABC[N+9]}${ABC[N+13]}${ABC[N+2]}${ABC[N+6]}${ABC[N+10]}${ABC[N+14]}${ABC[N+3]}${ABC[N+7]}${ABC[N+11]}${ABC[N+15]});
+        const __m512i vy${ABC[N:N+16]} = _mm512_permutexvar_epi32(vshuffle512_mask, vy${ABC[N]}${ABC[N+4]}${ABC[N+8]}${ABC[N+12]}${ABC[N+1]}${ABC[N+5]}${ABC[N+9]}${ABC[N+13]}${ABC[N+2]}${ABC[N+6]}${ABC[N+10]}${ABC[N+14]}${ABC[N+3]}${ABC[N+7]}${ABC[N+11]}${ABC[N+15]});
       $else:
         const __m256i vy${ABC[N:N+8]} = _mm256_permutevar8x32_epi32(vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]}, vshuffle256_mask);
 
