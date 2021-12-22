@@ -193,14 +193,14 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   const size_t pooling_size = pooling_height * pooling_width;
 
   const size_t indirection_buffer_size = sizeof(void*) * (batch_size * input_height * input_width * pooling_size);
-  void** indirection_buffer = (void**) xnn_reallocate_memory(unpooling_op->indirection_buffer, indirection_buffer_size);
+  const void** indirection_buffer = (const void**) xnn_reallocate_memory(unpooling_op->indirection_buffer, indirection_buffer_size);
   if (indirection_buffer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator indirection buffer",
       indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     return xnn_status_out_of_memory;
   }
-  unpooling_op->indirection_buffer = (const void**) indirection_buffer;
+  unpooling_op->indirection_buffer = indirection_buffer;
 
   xnn_indirection_init_unpool2d(unpooling_op, valid_batch_size, 2 /* log2(sizeof(type32)) */);
 

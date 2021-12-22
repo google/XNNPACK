@@ -34,7 +34,7 @@ void xnn_u8_ibilinear_ukernel__sse41_c16(
     const uint8_t* i3 = (const uint8_t*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
-    const __m128i valpha = _mm_cvtsi32_si128(*((int*) weights));
+    const __m128i valpha = _mm_cvtsi32_si128(*((const int*) weights));
     weights += 2;
     __m128i valphah = _mm_shufflelo_epi16(valpha, _MM_SHUFFLE(0, 0, 0, 0));
     valphah = _mm_unpacklo_epi64(valphah, valphah);

@@ -98,11 +98,11 @@ enum xnn_status xnn_create_runtime_v2(
   xnn_init_value_allocation_tracker(&mem_alloc_tracker, subgraph);
 
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
-    const struct xnn_value* value = &subgraph->values[i];
+    struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       blob->size = xnn_tensor_get_size(subgraph, i);
-      blob->data = (void*) value->data;
+      blob->data = (void*) (uintptr_t) value->data;
       if (blob->data == NULL) {
         if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
           // Value is purely internal to the runtime, and must be allocated in its workspace.

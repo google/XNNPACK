@@ -63,7 +63,7 @@ enum xnn_status xnn_create_constant_pad_nd_x8(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out)
 {
-  const uint32_t padding_pattern = *((uint8_t*) padding_value);
+  const uint32_t padding_pattern = *((const uint8_t*) padding_value);
   return create_constant_pad_nd(
     padding_pattern * UINT32_C(0x01010101), flags, xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
 }
@@ -74,7 +74,7 @@ enum xnn_status xnn_create_constant_pad_nd_x32(
   xnn_operator_t* constant_pad_op_out)
 {
   return create_constant_pad_nd(
-    *((uint32_t*) padding_value), flags, xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
+    *((const uint32_t*) padding_value), flags, xnn_operator_type_constant_pad_nd_x32, constant_pad_op_out);
 }
 
 static enum xnn_status setup_constant_pad_nd(

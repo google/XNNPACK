@@ -28,10 +28,10 @@ void xnn_x32_transpose_ukernel__4x4_sse(
   size_t bw = block_width;
   size_t bh = block_height;
 
-  const float *i0 = (float*) input;
-  const float *i1 = (float*) ((uintptr_t) i0 + input_stride);
-  const float *i2 = (float*) ((uintptr_t) i1 + input_stride);
-  const float *i3 = (float*) ((uintptr_t) i2 + input_stride);
+  const float *i0 = (const float*) input;
+  const float *i1 = (const float*) ((uintptr_t) i0 + input_stride);
+  const float *i2 = (const float*) ((uintptr_t) i1 + input_stride);
+  const float *i3 = (const float*) ((uintptr_t) i2 + input_stride);
 
   float *o0 = (float*) output;
   float *o1 = (float*) ((uintptr_t) o0 + output_stride);
@@ -61,10 +61,10 @@ void xnn_x32_transpose_ukernel__4x4_sse(
       _mm_storeu_ps(o2, v2);
       _mm_storeu_ps(o1, v1);
       _mm_storeu_ps(o0, v0);
-      i0 = (float*) ((uintptr_t) i0 + tile_height * input_stride);
-      i1 = (float*) ((uintptr_t) i1 + tile_height * input_stride);
-      i2 = (float*) ((uintptr_t) i2 + tile_height * input_stride);
-      i3 = (float*) ((uintptr_t) i3 + tile_height * input_stride);
+      i0 = (const float*) ((uintptr_t) i0 + tile_height * input_stride);
+      i1 = (const float*) ((uintptr_t) i1 + tile_height * input_stride);
+      i2 = (const float*) ((uintptr_t) i2 + tile_height * input_stride);
+      i3 = (const float*) ((uintptr_t) i3 + tile_height * input_stride);
       o0 = (float*) ((uintptr_t) o0 + tile_wbytes);
       o1 = (float*) ((uintptr_t) o1 + tile_wbytes);
       o2 = (float*) ((uintptr_t) o2 + tile_wbytes);
@@ -97,7 +97,7 @@ void xnn_x32_transpose_ukernel__4x4_sse(
         v1 = _mm_movehl_ps(v1, v1);
         v2 = _mm_movehl_ps(v2, v2);
         v3 = _mm_movehl_ps(v3, v3);
-        i0 = (float*) ((uintptr_t) i0 + 2 * input_stride);
+        i0 = (const float*) ((uintptr_t) i0 + 2 * input_stride);
         o0 = (float*) ((uintptr_t) o0 + 2 * sizeof(uint32_t));
         o1 = (float*) ((uintptr_t) o1 + 2 * sizeof(uint32_t));
         o2 = (float*) ((uintptr_t) o2 + 2 * sizeof(uint32_t));
@@ -108,14 +108,14 @@ void xnn_x32_transpose_ukernel__4x4_sse(
         _mm_store_ss(o2, v2);
         _mm_store_ss(o1, v1);
         _mm_store_ss(o0, v0);
-        i0 = (float*) ((uintptr_t) i0 + input_stride);
+        i0 = (const float*) ((uintptr_t) i0 + input_stride);
         o0 = (float*) ((uintptr_t) o0 + sizeof(uint32_t));
       }
     }
-    i0 = (float*) ((uintptr_t) i0 + input_reset);
-    i1 = (float*) ((uintptr_t) i0 + input_stride);
-    i2 = (float*) ((uintptr_t) i1 + input_stride);
-    i3 = (float*) ((uintptr_t) i2 + input_stride);
+    i0 = (const float*) ((uintptr_t) i0 + input_reset);
+    i1 = (const float*) ((uintptr_t) i0 + input_stride);
+    i2 = (const float*) ((uintptr_t) i1 + input_stride);
+    i3 = (const float*) ((uintptr_t) i2 + input_stride);
     o0 = (float*) ((uintptr_t) o0 + output_reset);
     o1 = (float*) ((uintptr_t) o0 + output_stride);
     o2 = (float*) ((uintptr_t) o1 + output_stride);

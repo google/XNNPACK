@@ -523,7 +523,7 @@ static enum xnn_status setup_convolution2d_nchw(
   uint32_t bias_element_size,
   uint32_t log2_output_element_size,
   const void* params,
-  const void* chw_params,
+  void* chw_params,
   size_t num_threads)
 {
   convolution_op->state = xnn_run_state_invalid;

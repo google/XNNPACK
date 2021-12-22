@@ -25,8 +25,8 @@ inline static bool value_lifecycle_overlap(const struct xnn_value_usage* a, cons
 // Use this comparison function to sort xnn_value_usage according to the
 // tensor_size in decreasing order.
 static inline int cmp_value_usage_tensor_size(const void* a, const void* b) {
-  const size_t tensor_size_a = (*(struct xnn_value_usage**)a)->tensor_size;
-  const size_t tensor_size_b = (*(struct xnn_value_usage**)b)->tensor_size;
+  const size_t tensor_size_a = (*(struct xnn_value_usage *const*)a)->tensor_size;
+  const size_t tensor_size_b = (*(struct xnn_value_usage *const*)b)->tensor_size;
   return (tensor_size_b > tensor_size_a) - (tensor_size_b < tensor_size_a);
 }
 
@@ -70,8 +70,8 @@ struct memory_block {
 // Use this comparison function to sort memory_block according to the 'start'
 // in increasing order.
 static inline int cmp_memory_block(const void* a, const void* b) {
-  const size_t start_a = ((struct memory_block*)a)->start;
-  const size_t start_b = ((struct memory_block*)b)->start;
+  const size_t start_a = ((const struct memory_block*)a)->start;
+  const size_t start_b = ((const struct memory_block*)b)->start;
   return (start_a > start_b) - (start_a < start_b);
 }
 

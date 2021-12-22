@@ -520,7 +520,7 @@ struct unpooling_context {
   const uint32_t* index;
   size_t index_height_stride;
   size_t index_width_stride;
-  void** indirect_output;
+  const void** indirect_output;
   size_t indirect_output_height_stride;
   size_t indirect_output_width_stride;
   size_t pooling_size;
