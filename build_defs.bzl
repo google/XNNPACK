@@ -74,6 +74,7 @@ def xnnpack_cc_library(
         aarch64_srcs = [],
         wasm_srcs = [],
         wasmsimd_srcs = [],
+        wasmrelaxedsimd_srcs = [],
         copts = [],
         gcc_copts = [],
         msvc_copts = [],
@@ -87,6 +88,7 @@ def xnnpack_cc_library(
         aarch64_copts = [],
         wasm_copts = [],
         wasmsimd_copts = [],
+        wasmrelaxedsimd_copts = [],
         optimized_copts = ["-O2"],
         hdrs = [],
         defines = [],
@@ -104,8 +106,10 @@ def xnnpack_cc_library(
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
-      wasm_srcs: The list of WebAssembly/MVP-specific source files.
-      wasmsimd_srcs: The list of WebAssembly/SIMD-specific source files.
+      wasm_srcs: The list of WebAssembly 1.0-specific source files.
+      wasmsimd_srcs: The list of WebAssembly SIMD-specific source files.
+      wasmrelaxedsimd_srcs: The list of WebAssembly Relaxed SIMD-specific
+                            source files.
       copts: The list of compiler flags to use in all builds. -I flags for
              include/ and src/ directories of XNNPACK are always prepended
              before these user-specified flags.
@@ -124,9 +128,11 @@ def xnnpack_cc_library(
                            with Apple Clang.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
-      wasm_copts: The list of compiler flags to use in WebAssembly/MVP builds.
-      wasmsimd_copts: The list of compiler flags to use in WebAssembly/SIMD
+      wasm_copts: The list of compiler flags to use in WebAssembly 1.0 builds.
+      wasmsimd_copts: The list of compiler flags to use in WebAssembly SIMD
                       builds.
+      wasmrelaxedsimd_copts: The list of compiler flags to use in WebAssembly
+                             Relaxed SIMD builds.
       optimized_copts: The list of compiler flags to use in optimized builds.
                        Defaults to -O2.
       hdrs: The list of header files published by this library to be textually
@@ -168,6 +174,7 @@ def xnnpack_cc_library(
             ":tvos_x86_64": x86_srcs,
             ":emscripten_wasm": wasm_srcs,
             ":emscripten_wasmsimd": wasmsimd_srcs,
+            ":emscripten_wasmrelaxedsimd": wasmrelaxedsimd_srcs,
             "//conditions:default": [],
         }),
         copts = [
@@ -203,6 +210,7 @@ def xnnpack_cc_library(
             ":tvos_x86_64": gcc_x86_copts,
             ":emscripten_wasm": wasm_copts,
             ":emscripten_wasmsimd": wasmsimd_copts,
+            ":emscripten_wasmrelaxedsimd": wasmrelaxedsimd_copts,
             "//conditions:default": [],
         }) + select({
             ":windows_x86_64_clang": ["/clang:" + opt for opt in gcc_copts],
@@ -240,18 +248,23 @@ def xnnpack_aggregate_library(
         aarch32_nonios_deps = [],
         aarch64_deps = [],
         wasm_deps = [],
-        wasmsimd_deps = []):
+        wasmsimd_deps = [],
+        wasmrelaxedsimd_deps = []):
     """Static library that aggregates architecture-specific dependencies.
 
     Args:
       name: The name of the library target to define.
       generic_deps: The list of libraries to link on all architectures.
       x86_deps: The list of libraries to link in x86 and x86-64 builds.
-      aarch32_ios_deps: The list of libraries to link in AArch32 iOS (incl WatchOS) builds.
-      aarch32_nonios_deps: The list of libraries to link in AArch32 non-iOS builds.
+      aarch32_ios_deps: The list of libraries to link in AArch32 iOS (incl
+                        WatchOS) builds.
+      aarch32_nonios_deps: The list of libraries to link in AArch32 non-iOS
+                           builds.
       aarch64_deps: The list of libraries to link in AArch32 builds.
-      wasm_deps: The list of libraries to link in WebAssembly (MVP) builds.
+      wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
       wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
+      wasmrelaxedsimd_deps: The list of libraries to link in WebAssembly
+                            Relaxed SIMD builds.
     """
 
     native.cc_library(
@@ -287,6 +300,7 @@ def xnnpack_aggregate_library(
             ":tvos_x86_64": x86_deps,
             ":emscripten_wasm": wasm_deps,
             ":emscripten_wasmsimd": wasmsimd_deps,
+            ":emscripten_wasmrelaxedsimd": wasmrelaxedsimd_deps,
         }),
     )
 

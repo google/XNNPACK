@@ -6755,6 +6755,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
+    wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
         ":tables",
@@ -6770,6 +6771,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
+    wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
         ":tables",
@@ -6789,6 +6791,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
+    wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
         ":tables",
@@ -7747,6 +7750,7 @@ xnnpack_cc_library(
     aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
     aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
+    wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
 )
 
@@ -7804,6 +7808,10 @@ xnnpack_aggregate_library(
         ":wasm_bench_microkernels",
         ":asm_microkernels",
     ],
+    wasmrelaxedsimd_deps = [
+        ":wasm_bench_microkernels",
+        ":asm_microkernels",
+    ],
     wasmsimd_deps = [
         ":wasm_bench_microkernels",
         ":asm_microkernels",
@@ -7855,6 +7863,10 @@ xnnpack_aggregate_library(
         ":wasm_prod_microkernels",
         ":asm_microkernels",
     ],
+    wasmrelaxedsimd_deps = [
+        ":wasm_prod_microkernels",
+        ":asm_microkernels",
+    ],
     wasmsimd_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -7903,6 +7915,10 @@ xnnpack_aggregate_library(
         ":scalar_test_microkernels",
     ],
     wasm_deps = [
+        ":wasm_test_microkernels",
+        ":asm_microkernels",
+    ],
+    wasmrelaxedsimd_deps = [
         ":wasm_test_microkernels",
         ":asm_microkernels",
     ],
@@ -11691,15 +11707,12 @@ config_setting(
 )
 
 config_setting(
-    name = "emscripten_relaxedsimd",
-    flag_values = {
-        "//tools/cpp:cc_target_os": "emscripten",
-    },
+    name = "emscripten_wasmrelaxedsimd",
     values = {
+        "crosstool_top": "@emsdk//emscripten_toolchain:everything",
         "cpu": "wasm",
-        "features": "wasm_simd",
+        "copt": "-msimd128",
         "copt": "-mrelaxed-simd",
-        "linkopt": "-mrelaxed-simd",
     },
 )
 
