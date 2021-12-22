@@ -283,7 +283,7 @@ $if KBLOCK > 1:
 TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t k = ${ADJKBLOCK + 1}; k < ${KBLOCK * 10 if KBLOCK == 1 else KBLOCK * 2}; k++) {
+  for (size_t k = ${ADJKBLOCK + 1}; k < ${ADJKBLOCK * 10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -299,10 +299,10 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
 }
 
 $if UKERNEL_TYPE.startswith("GEMM"):
-  TEST(${TEST_NAME}, k_gt_${KBLOCK}_strided_a) {
+  TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_strided_a) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if KBLOCK == 1 else KBLOCK * 2}; k++) {
+    for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -313,15 +313,15 @@ $if UKERNEL_TYPE.startswith("GEMM"):
         .m(${MR})
         .n(${NR})
         .k(k)
-        .a_stride(${next_prime(10 if KBLOCK == 1 else KBLOCK * 2 + 1)})
+        .a_stride(${next_prime(10 if ADJKBLOCK == 1 else ADJKBLOCK * 2 + 1)})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-TEST(${TEST_NAME}, k_gt_${KBLOCK}_subtile) {
+TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if KBLOCK == 1 else KBLOCK * 2}; k++) {
+  for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
     for (uint32_t m = 1; m <= ${MR}; m++) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
         GemmMicrokernelTester()
