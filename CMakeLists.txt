@@ -1174,9 +1174,11 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/vcvt-neon-x32.c
   src/qs8-gavgpool/gen/7p7x-minmax-neon-c8-acc2.c
   src/qs8-gavgpool/gen/7x-minmax-neon-c8-acc2.c
+  src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qs8-gemm/gen/2x8c2s4-minmax-rndnu-neon-mlal.c
+  src/qs8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qs8-igemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qs8-igemm/gen/2x8c2s4-minmax-rndnu-neon-mlal.c
