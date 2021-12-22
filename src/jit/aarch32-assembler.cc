@@ -489,7 +489,7 @@ Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op) {
   }
 
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF400'0000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
+  return emit32(0xF4000000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm);
 }
 
 Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm) {
@@ -504,7 +504,7 @@ Assembler& Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op, Cor
     return *this;
   }
 
-  return emit32(0xF400'0000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm.code);
+  return emit32(0xF4000000 | encode(regs.start, 22, 12) | op.base().code << 16 | type << 8 | size << 6 | rm.code);
 }
 
 Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
@@ -515,7 +515,7 @@ Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
 
   const uint8_t shift = size == k8 ? 5 : size == k16 ? 6 : 7;
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  return emit32(0xF480'0000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
+  return emit32(0xF4800000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
 }
 
 Assembler& Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
