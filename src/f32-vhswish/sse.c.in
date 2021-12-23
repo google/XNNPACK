@@ -8,7 +8,7 @@ $assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>

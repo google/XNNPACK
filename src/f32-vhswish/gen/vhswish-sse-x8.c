@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>
