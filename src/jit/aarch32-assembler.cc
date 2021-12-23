@@ -26,6 +26,14 @@ bool branch_offset_valid(ptrdiff_t offset) {
   return offset < kInt24Max && offset > kInt24Min;
 }
 
+bool invalid_register_list(DRegisterList regs) {
+  return regs.length == 0 || regs.length > 16 || regs.start.code + regs.length > 32;
+}
+
+bool invalid_register_list(SRegisterList regs) {
+  return regs.length == 0 || regs.start.code + regs.length > 32;
+}
+
 uint32_t encode(SRegister r, uint32_t single_bit_pos, uint32_t four_bits_pos) {
   return r.d() << single_bit_pos | r.vd() << four_bits_pos;
 }
@@ -337,10 +345,18 @@ Assembler& Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
 }
 
 Assembler& Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
   return emit32(kAL | 0x0C900A00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
 }
 
 Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
   return emit32(kAL | 0x0C900B00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
 }
 
@@ -430,15 +446,27 @@ Assembler& Assembler::vmrs(CoreRegister rt, SpecialFPRegister spec_reg) {
 }
 
 Assembler& Assembler::vpop(DRegisterList regs) {
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
   return emit32(kAL | encode(regs, 22, 12) | 0xCBD << 16 | 0xB << 8);
 }
 
-Assembler& Assembler::vpush(SRegisterList regs) {
-  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xA << 8);
+Assembler& Assembler::vpush(DRegisterList regs) {
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
+  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
 }
 
-Assembler& Assembler::vpush(DRegisterList regs) {
-  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xB << 8);
+Assembler& Assembler::vpush(SRegisterList regs) {
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
+    return *this;
+  }
+  return emit32(kAL | encode(regs, 22, 12) | 0xD2D << 16 | 0xA << 8);
 }
 
 Assembler& Assembler::vqadd_s16(QRegister qd, QRegister qn, QRegister qm) {
@@ -519,8 +547,8 @@ Assembler& Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
 }
 
 Assembler& Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
-  if (regs.length == 0 || regs.length > 16) {
-    error_ = Error::kInvalidOperand;
+  if (invalid_register_list(regs)) {
+    error_ = Error::kInvalidRegisterListLength;
     return *this;
   }
   return emit32(kAL | 0x0C800B00 | wb << 21 | rn.code << 16 |  encode(regs.start, 22, 12) | regs.length << 1);

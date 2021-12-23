@@ -203,24 +203,32 @@ struct ConsecutiveRegisterList {
   ConsecutiveRegisterList(RegType s, RegType end)
       : start(s),
         length(end.code - s.code + 1) {}
-  ConsecutiveRegisterList(RegType s, int len)
+  explicit ConsecutiveRegisterList(RegType s, int len)
       : start(s),
         length(len) {}
   ConsecutiveRegisterList(RegType start)
       : ConsecutiveRegisterList(start, start) {}
 
   RegType start;
-  int length;
+  uint8_t length;
 };
 
 using SRegisterList = ConsecutiveRegisterList<SRegister>;
 using DRegisterList = ConsecutiveRegisterList<DRegister>;
 
+static inline SRegisterList operator-(const SRegister lhs, const SRegister rhs) {
+  return SRegisterList(lhs, rhs);
+}
+
+static inline DRegisterList operator-(const DRegister lhs, const DRegister rhs) {
+  return DRegisterList(lhs, rhs);
+}
+
 struct QRegisterList {
   QRegisterList(QRegister s) : start(s) {}
   // Explicit conversion to DRegisterList.
   explicit operator DRegisterList() const {
-    return {{static_cast<uint8_t>(start.code * 2)}, 2};
+    return DRegisterList({static_cast<uint8_t>(start.code * 2)}, 2);
   }
 
   QRegister start;
@@ -455,8 +463,8 @@ class Assembler {
   Assembler& vmovl_s8(QRegister qd, DRegister dm);
   Assembler& vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
   Assembler& vpop(DRegisterList regs);
-  Assembler& vpush(SRegisterList regs);
   Assembler& vpush(DRegisterList regs);
+  Assembler& vpush(SRegisterList regs);
   Assembler& vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
   Assembler& vqmovn_s16(DRegister dd, QRegister qm);

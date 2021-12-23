@@ -105,17 +105,17 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xF423070F, a.vld1_8({d0}, mem[r3]));
   CHECK_ENCODING(0xF423070D, a.vld1_8({d0}, mem[r3]++));
-  CHECK_ENCODING(0xF4230A0F, a.vld1_8({d0, d1}, mem[r3]));
-  CHECK_ENCODING(0xF423060F, a.vld1_8({d0, d2}, mem[r3]));
-  CHECK_ENCODING(0xF423020F, a.vld1_8({d0, d3}, mem[r3]));
+  CHECK_ENCODING(0xF4230A0F, a.vld1_8({d0-d1}, mem[r3]));
+  CHECK_ENCODING(0xF423060F, a.vld1_8({d0-d2}, mem[r3]));
+  CHECK_ENCODING(0xF423020F, a.vld1_8({d0-d3}, mem[r3]));
   CHECK_ENCODING(0xF42A4705, a.vld1_8({d4}, mem[r10], r5));
   CHECK_ENCODING(0xF4294A0D, a.vld1_8({q2}, mem[r9]++));
 
   CHECK_ENCODING(0xF42C178F, a.vld1_32({d1}, mem[r12]));
   CHECK_ENCODING(0xF42C178D, a.vld1_32({d1}, mem[r12]++));
-  CHECK_ENCODING(0xF42C1A8D, a.vld1_32({d1,d2}, mem[r12]++));
-  CHECK_ENCODING(0xF42C168D, a.vld1_32({d1,d3}, mem[r12]++));
-  CHECK_ENCODING(0xF42C128D, a.vld1_32({d1,d4}, mem[r12]++));
+  CHECK_ENCODING(0xF42C1A8D, a.vld1_32({d1-d2}, mem[r12]++));
+  CHECK_ENCODING(0xF42C168D, a.vld1_32({d1-d3}, mem[r12]++));
+  CHECK_ENCODING(0xF42C128D, a.vld1_32({d1-d4}, mem[r12]++));
 
   CHECK_ENCODING(0xF4A8780F, a.vld1_32({d7[0]}, mem[r8]));
   CHECK_ENCODING(0xF4A3488D, a.vld1_32({d4[1]}, mem[r3]++));
@@ -126,11 +126,17 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4A54CAF, a.vld1r_32({d4, d5}, mem[r5]));
   CHECK_ENCODING(0xF4A54CAD, a.vld1r_32({d4, d5}, mem[r5]++));
 
-  CHECK_ENCODING(0xECF90B08, a.vldm(r9, {d16, d19}, true));
-  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8, d11}, false));
-  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8, d11}));
+  CHECK_ENCODING(0xECF90B08, a.vldm(r9, {d16-d19}, true));
+  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8-d11}, false));
+  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8-d11}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, {d8-d0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, {d0-d16}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, DRegisterList(d31, 2)));
+
   CHECK_ENCODING(0xECB30A01, a.vldm(r3, {s0}, true));
   CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, {s4-s0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, SRegisterList(s31, 2)));
 
   CHECK_ENCODING(0xED99FB0E, a.vldr(d15, mem[r9, 56]));
   CHECK_ENCODING(0xED99FBFF, a.vldr(d15, mem[r9, 1020]));
@@ -173,12 +179,21 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xEEF1FA10, a.vmrs(APSR_nzcv, FPSCR));
 
-  CHECK_ENCODING(0xECBD8B10, a.vpop({d8, d15}));
+  CHECK_ENCODING(0xECBD8B10, a.vpop({d8-d15}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpop({d0-d16}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpop({d4-d0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpop(DRegisterList(d31, 2)));
 
-  CHECK_ENCODING(0xED2D4A08, a.vpush({s8, s15}));
-  CHECK_ENCODING(0xED2DAA04, a.vpush({s20, s23}));
-  CHECK_ENCODING(0xED2D8B10, a.vpush({d8, d15}));
-  CHECK_ENCODING(0xED6D4B08, a.vpush({d20, d23}));
+  CHECK_ENCODING(0xED2D8B10, a.vpush({d8-d15}));
+  CHECK_ENCODING(0xED6D4B08, a.vpush({d20-d23}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpush({d8-d7}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpush({d0-d16}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpush(DRegisterList(d31, 2)));
+
+  CHECK_ENCODING(0xED2D4A08, a.vpush({s8-s15}));
+  CHECK_ENCODING(0xED2DAA04, a.vpush({s20-s23}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpush({s8-s2}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpush(SRegisterList(s31, 2)));
 
   CHECK_ENCODING(0xF25E00D2, a.vqadd_s16(q8, q15, q1));
 
@@ -211,12 +226,12 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF48B04CF, a.vst1_16({d0[3]}, mem[r11]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_16(d0[4], mem[r11]));
 
-  CHECK_ENCODING(0xF44B0280, a.vst1_32({d16, d19}, mem[r11], r0));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0, d4}, mem[r11], r0));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16, d19}, mem[r11], sp));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16, d19}, mem[r11], pc));
-  CHECK_ENCODING(0xF404168F, a.vst1_32({d1, d3}, mem[r4]));
-  CHECK_ENCODING(0xF44B0A8D, a.vst1_32({d16, d17}, mem[r11]++));
+  CHECK_ENCODING(0xF44B0280, a.vst1_32({d16-d19}, mem[r11], r0));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0-d4}, mem[r11], r0));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], sp));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], pc));
+  CHECK_ENCODING(0xF404168F, a.vst1_32({d1-d3}, mem[r4]));
+  CHECK_ENCODING(0xF44B0A8D, a.vst1_32({d16-d17}, mem[r11]++));
   CHECK_ENCODING(0xF4CB080F, a.vst1_32({d16[0]}, mem[r11]));
   // The surrounding braces are optional, but makes it look closer to native assembly.
   CHECK_ENCODING(0xF4CB080F, a.vst1_32(d16[0], mem[r11]));
@@ -224,9 +239,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
 
-  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8, d9}, false));
+  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8-d9}, false));
   CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstm(r6, {d8, d28}, true));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, {d8-d28}, true));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, DRegisterList(d31, 2), true));
 
   CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
   CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));
@@ -355,9 +371,17 @@ TEST(AArch32Assembler, ConsecutiveRegisterList) {
   EXPECT_EQ(s1.start, s0);
   EXPECT_EQ(s1.length, 10);
 
+  SRegisterList s2 = {s4 - s11};
+  EXPECT_EQ(s2.start, s4);
+  EXPECT_EQ(s2.length, 8);
+
   DRegisterList d1 = DRegisterList(d4, d5);
   EXPECT_EQ(d1.start, d4);
   EXPECT_EQ(d1.length, 2);
+
+  DRegisterList d2 = {d4 - d11};
+  EXPECT_EQ(d2.start, d4);
+  EXPECT_EQ(d2.length, 8);
 }
 
 TEST(AArch32Assembler, MemOperand) {
