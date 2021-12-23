@@ -7292,6 +7292,24 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "sse2_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse2"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = [
+        "src/amalgam/sse.c",
+        "src/amalgam/sse2.c",
+    ],
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse2_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -7341,6 +7359,21 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "ssse3_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mssse3"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = ["src/amalgam/ssse3.c"],
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "ssse3_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -7382,6 +7415,21 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "sse41_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-msse4.1"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:SSE2"],
+    x86_srcs = ["src/amalgam/sse41.c"],
     deps = [
         ":tables",
         "@FP16",
@@ -7705,6 +7753,24 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx512f_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mavx512f"],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = ["src/amalgam/avx512f.c"],
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "avx512f_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -7755,6 +7821,30 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
+    deps = [
+        ":tables",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "avx512skx_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx512f",
+        "-mavx512cd",
+        "-mavx512bw",
+        "-mavx512dq",
+        "-mavx512vl",
+    ],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = ["src/amalgam/avx512skx.c"],
     deps = [
         ":tables",
         "@FP16",
@@ -7872,6 +7962,61 @@ xnnpack_cc_library(
         "@FP16",
         "@clog",
         "@pthreadpool",
+    ],
+)
+
+xnnpack_aggregate_library(
+    name = "amalgam_microkernels",
+    aarch32_ios_deps = [
+        ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
+        ":neonfma_prod_microkernels",
+        ":neonv8_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    aarch32_nonios_deps = [
+        ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
+        ":neonfma_prod_microkernels",
+        ":neonv8_prod_microkernels",
+        ":neondot_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    aarch64_deps = [
+        ":neon_prod_microkernels",
+        ":neonfp16_prod_microkernels",
+        ":neonfma_prod_microkernels",
+        ":neonv8_prod_microkernels",
+        ":neonfp16arith_prod_microkernels",
+        ":neondot_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    generic_deps = [
+        ":scalar_prod_microkernels",
+    ],
+    wasm_deps = [
+        ":wasm_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    wasmrelaxedsimd_deps = [
+        ":wasm_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    wasmsimd_deps = [
+        ":wasm_prod_microkernels",
+        ":asm_microkernels",
+    ],
+    x86_deps = [
+        ":sse2_amalgam_microkernels",
+        ":ssse3_amalgam_microkernels",
+        ":sse41_amalgam_microkernels",
+        ":avx_prod_microkernels",
+        ":f16c_prod_microkernels",
+        ":xop_prod_microkernels",
+        ":fma3_prod_microkernels",
+        ":avx2_prod_microkernels",
+        ":avx512f_amalgam_microkernels",
+        ":avx512skx_amalgam_microkernels",
     ],
 )
 
@@ -8470,7 +8615,7 @@ xnnpack_cc_library(
         ":memory_planner",
         ":operator_run",
         ":operators",
-        ":prod_microkernels",
+        ":amalgam_microkernels",
         "@clog",
         "@FP16",
         "@pthreadpool",
