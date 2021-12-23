@@ -9,83 +9,83 @@
 - name: xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -93,23 +93,23 @@
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_pld_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-  pipelined: true
   assembly: true
+  pipelined: true
 - name: xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
