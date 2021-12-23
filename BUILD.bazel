@@ -2224,6 +2224,7 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/x8-lut/gen/lut-wasmsimd-x48.c",
     "src/x8-lut/gen/lut-wasmsimd-x64.c",
     "src/x32-packx/x4-wasmsimd.c",
+    "src/x32-transpose/4x4-wasmsimd.c",
     "src/x32-unpool/wasmsimd.c",
     "src/x32-zip/x2-wasmsimd.c",
     "src/x32-zip/x3-wasmsimd.c",
