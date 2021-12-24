@@ -542,12 +542,14 @@ enum xnn_status xnn_create_hardswish_nc_f16(
   }
 
   struct xnn_f16_hswish_params params;
-  xnn_init_f16_hswish_params(&params);
+  if (xnn_params.f16.hswish.init.f16_hswish != NULL) {
+    xnn_params.f16.hswish.init.f16_hswish(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_hardswish_nc_f16,
-    xnn_params.f16.hswish,
+    xnn_params.f16.hswish.ukernel,
     hardswish_op_out);
 }
 
@@ -559,12 +561,14 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     xnn_operator_t* hardswish_op_out)
 {
   union xnn_f32_hswish_params params;
-  xnn_init_f32_hswish_params(&params);
+  if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
+    xnn_params.f32.hswish.init.f32_hswish(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_hardswish_nc_f32,
-    xnn_params.f32.hswish,
+    xnn_params.f32.hswish.ukernel,
     hardswish_op_out);
 }
 

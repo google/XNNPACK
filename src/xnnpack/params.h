@@ -2487,6 +2487,9 @@ typedef void (*xnn_init_qu8_mul_minmax_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
+typedef void (*xnn_init_f16_hswish_params_fn)(
+  struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_init_f16_minmax_params_fn)(
   struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
@@ -2497,6 +2500,9 @@ typedef void (*xnn_init_f16_scaleminmax_params_fn)(
   uint16_t scale,
   uint16_t min,
   uint16_t max);
+
+typedef void (*xnn_init_f32_hswish_params_fn)(
+  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2598,7 +2604,9 @@ struct gemm_parameters {
 struct vunary_parameters {
   xnn_univector_ukernel_function ukernel;
   union {
+    xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_f32_hswish_params_fn f32_hswish;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
@@ -2879,7 +2887,7 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
-    xnn_univector_ukernel_function hswish;
+    struct vunary_parameters hswish;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
@@ -2898,7 +2906,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function abs;
     struct vunary_parameters clamp;
     xnn_univector_ukernel_function elu;
-    xnn_univector_ukernel_function hswish;
+    struct vunary_parameters hswish;
     xnn_univector_ukernel_function lrelu;
     xnn_univector_ukernel_function neg;
     xnn_univector_ukernel_function relu;
