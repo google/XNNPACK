@@ -26,9 +26,9 @@ void xnn_f32_vhswish_ukernel__fma3_x16(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vsixth = _mm256_broadcast_ps((const __m128*) params->sse.sixth);
-  const __m256 vhalf = _mm256_broadcast_ps((const __m128*) params->sse.half);
-  const __m256 vone = _mm256_broadcast_ps((const __m128*) params->sse.one);
+  const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
+  const __m256 vhalf = _mm256_load_ps(params->avx.half);
+  const __m256 vone = _mm256_load_ps(params->avx.one);
   const __m256 vzero = _mm256_setzero_ps();
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {

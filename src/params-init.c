@@ -1196,29 +1196,55 @@ void xnn_init_f16_hswish_params(
   params->six = UINT16_C(0x4600);
 }
 
-void xnn_init_f32_hswish_params(
-  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
-{
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.sixth[i] = 0x1.555556p-3f;
-      params->sse.half[i] = 0.5f;
-      params->sse.one[i] = 1.0f;
-    }
-  #else
-    params->scalar.sixth = 0x1.555556p-3f;
-    params->scalar.three = 3.0f;
-    params->scalar.six = 6.0f;
-  #endif
-}
-
-void xnn_init_scalar_f32_hswish_params(
+void xnn_init_f32_hswish_scalar_params(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
 {
   params->scalar.sixth = 0x1.555556p-3f;
   params->scalar.three = 3.0f;
   params->scalar.six = 6.0f;
 }
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_hswish_sse_params(
+  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.sixth[i] = 0x1.555556p-3f;
+    params->sse.half[i] = 0.5f;
+    params->sse.one[i] = 1.0f;
+  }
+}
+
+void xnn_init_f32_hswish_avx_params(
+  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.sixth[i] = 0x1.555556p-3f;
+    params->avx.half[i] = 0.5f;
+    params->avx.one[i] = 1.0f;
+  }
+}
+
+void xnn_init_f32_hswish_avx512_params(
+  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512.sixth = 0x1.555556p-3f;
+  params->avx512.half = 0.5f;
+  params->avx512.one = 1.0f;
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_hswish_wasmsimd_params(
+  union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd.sixth[i] = 0x1.555556p-3f;
+    params->wasmsimd.three[i] = 3.0f;
+    params->wasmsimd.six[i] = 6.0f;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 void xnn_init_f32_abs_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])

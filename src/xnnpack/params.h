@@ -280,7 +280,24 @@ union xnn_f32_hswish_params {
     XNN_ALIGN(16) float half[4];
     XNN_ALIGN(16) float one[4];
   } sse;
+  struct {
+    XNN_ALIGN(32) float sixth[8];
+    XNN_ALIGN(32) float half[8];
+    XNN_ALIGN(32) float one[8];
+  } avx;
+  struct {
+    float sixth;
+    float half;
+    float one;
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float sixth[2];
+    XNN_ALIGN(8) float three[2];
+    XNN_ALIGN(8) float six[2];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_qu8_conv_minmax_params {

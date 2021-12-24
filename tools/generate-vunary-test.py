@@ -203,11 +203,13 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
-  test_args = [ukernel, "VUnaryMicrokernelTester::OpType::" + op_type]
+  test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
-  elif not isa:
-    test_args.append("VUnaryMicrokernelTester::Variant::Scalar")
+  else:
+    test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
+    if not isa:
+      test_args.append("VUnaryMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,

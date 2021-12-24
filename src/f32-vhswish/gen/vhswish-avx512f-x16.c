@@ -25,24 +25,19 @@ void xnn_f32_vhswish_ukernel__avx512f_x16(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vsixth = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.sixth));
-  const __m512 vhalf = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.half));
-  const __m512 vone = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.one));
+  const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
+  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
+  const __m512 vone = _mm512_set1_ps(params->avx512.one);
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
+    const __m512 vx = _mm512_loadu_ps(x);
     x += 16;
-
-    __m512 vacc0123456789ABCDEF = _mm512_fmadd_ps(vx0123456789ABCDEF, vsixth, vhalf);
-
-    vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEF, vzero);
-
-    vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vone);
-
-    vacc0123456789ABCDEF = _mm512_mul_ps(vacc0123456789ABCDEF, vx0123456789ABCDEF);
-
-    _mm512_storeu_ps(y, vacc0123456789ABCDEF);
+    __m512 vacc = _mm512_fmadd_ps(vx, vsixth, vhalf);
+    vacc = _mm512_max_ps(vacc, vzero);
+    vacc = _mm512_min_ps(vacc, vone);
+    vacc = _mm512_mul_ps(vacc, vx);
+    _mm512_storeu_ps(y, vacc);
     y += 16;
   }
   if XNN_UNLIKELY(n != 0) {

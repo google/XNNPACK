@@ -22,7 +22,7 @@
     TEST_REQUIRES_ARM_NEON;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+      .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
   }
 
   TEST(S8_VCLAMP__NEON_X64, batch_div_64) {
@@ -30,7 +30,7 @@
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+        .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
     }
   }
 
@@ -39,7 +39,7 @@
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+        .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
     }
   }
 
@@ -48,7 +48,7 @@
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+        .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
     }
   }
 
@@ -58,7 +58,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+        .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
     }
   }
 
@@ -69,7 +69,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+          .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
       }
     }
   }
@@ -81,7 +81,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_s8_vclamp_ukernel__neon_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_neon_params);
+          .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
       }
     }
   }
@@ -93,7 +93,7 @@
     TEST_REQUIRES_X86_SSE2;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+      .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
   }
 
   TEST(S8_VCLAMP__SSE2_X64, batch_div_64) {
@@ -101,7 +101,7 @@
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+        .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
     }
   }
 
@@ -110,7 +110,7 @@
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+        .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
     }
   }
 
@@ -119,7 +119,7 @@
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+        .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
     }
   }
 
@@ -129,7 +129,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+        .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
     }
   }
 
@@ -140,7 +140,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+          .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
       }
     }
   }
@@ -152,7 +152,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_s8_vclamp_ukernel__sse2_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse2_params);
+          .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
       }
     }
   }
@@ -164,7 +164,7 @@
     TEST_REQUIRES_X86_SSE41;
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+      .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
   }
 
   TEST(S8_VCLAMP__SSE41_X64, batch_div_64) {
@@ -172,7 +172,7 @@
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+        .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
     }
   }
 
@@ -181,7 +181,7 @@
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+        .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
     }
   }
 
@@ -190,7 +190,7 @@
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+        .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
     }
   }
 
@@ -200,7 +200,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+        .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
     }
   }
 
@@ -211,7 +211,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+          .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
       }
     }
   }
@@ -223,7 +223,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_s8_vclamp_ukernel__sse41_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_sse4_params);
+          .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
       }
     }
   }
@@ -234,14 +234,14 @@
   TEST(S8_VCLAMP__WASMSIMD_X64, batch_eq_64) {
     VUnaryMicrokernelTester()
       .batch_size(64)
-      .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+      .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
   }
 
   TEST(S8_VCLAMP__WASMSIMD_X64, batch_div_64) {
     for (size_t batch_size = 128; batch_size < 640; batch_size += 64) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
     }
   }
 
@@ -249,7 +249,7 @@
     for (size_t batch_size = 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
     }
   }
 
@@ -257,7 +257,7 @@
     for (size_t batch_size = 65; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
     }
   }
 
@@ -266,7 +266,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+        .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
     }
   }
 
@@ -276,7 +276,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+          .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
       }
     }
   }
@@ -287,7 +287,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_wasmsimd_params);
+          .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
       }
     }
   }
@@ -297,14 +297,14 @@
 TEST(S8_VCLAMP__SCALAR_X4, batch_eq_4) {
   VUnaryMicrokernelTester()
     .batch_size(4)
-    .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+    .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
 }
 
 TEST(S8_VCLAMP__SCALAR_X4, batch_div_4) {
   for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+      .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
   }
 }
 
@@ -312,7 +312,7 @@ TEST(S8_VCLAMP__SCALAR_X4, batch_lt_4) {
   for (size_t batch_size = 1; batch_size < 4; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+      .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
   }
 }
 
@@ -320,7 +320,7 @@ TEST(S8_VCLAMP__SCALAR_X4, batch_gt_4) {
   for (size_t batch_size = 5; batch_size < 8; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
-      .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+      .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
   }
 }
 
@@ -329,7 +329,7 @@ TEST(S8_VCLAMP__SCALAR_X4, inplace) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .inplace(true)
-      .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+      .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
   }
 }
 
@@ -339,7 +339,7 @@ TEST(S8_VCLAMP__SCALAR_X4, qmin) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .qmin(qmin)
-        .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+        .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
     }
   }
 }
@@ -350,7 +350,7 @@ TEST(S8_VCLAMP__SCALAR_X4, qmax) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .qmax(qmax)
-        .Test(xnn_s8_vclamp_ukernel__scalar_x4, VUnaryMicrokernelTester::OpType::Clamp, xnn_init_s8_minmax_scalar_params);
+        .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);
     }
   }
 }

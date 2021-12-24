@@ -26,9 +26,7 @@ class VUnaryMicrokernelTester {
  public:
   enum class OpType {
     Abs,
-    Clamp,
     ELU,
-    HardSwish,
     LeakyReLU,
     Negate,
     ReLU,
@@ -133,14 +131,8 @@ class VUnaryMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
     switch (op_type) {
-      case OpType::Clamp:
-        distribution = std::uniform_real_distribution<float>(0.0f, 255.0f);
-        break;
       case OpType::ELU:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
-        break;
-      case OpType::HardSwish:
-        distribution = std::uniform_real_distribution<float>(-4.0f, 4.0f);
         break;
       case OpType::SquareRoot:
         distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
@@ -168,17 +160,11 @@ class VUnaryMicrokernelTester {
           case OpType::Abs:
             y_ref[i] = std::abs(x_data[i]);
             break;
-          case OpType::Clamp:
-            y_ref[i] = std::max(std::min(x_data[i], float(qmax())), float(qmin()));
-            break;
           case OpType::ELU:
           {
             y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
             break;
           }
-          case OpType::HardSwish:
-            y_ref[i] = (x_data[i] / 6.0f) * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f);
-            break;
           case OpType::LeakyReLU:
             y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
             break;
@@ -219,7 +205,6 @@ class VUnaryMicrokernelTester {
       union {
         union xnn_f32_abs_params abs;
         union xnn_f32_elu_params elu;
-        union xnn_f32_hswish_params hswish;
         union xnn_f32_lrelu_params lrelu;
         union xnn_f32_minmax_params minmax;
         union xnn_f32_neg_params neg;
@@ -238,16 +223,6 @@ class VUnaryMicrokernelTester {
               break;
           }
           break;
-        case OpType::Clamp:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_minmax_params(&params.minmax, float(qmin()), float(qmax()));
-              break;
-            case Variant::Scalar:
-              xnn_init_f32_minmax_scalar_params(&params.minmax, float(qmin()), float(qmax()));
-              break;
-          }
-          break;
         case OpType::ELU:
           switch (variant) {
             case Variant::Native:
@@ -257,16 +232,6 @@ class VUnaryMicrokernelTester {
               xnn_init_scalar_f32_elu_params(&params.elu, prescale(), alpha(), beta());
               break;
           }
-          break;
-        case OpType::HardSwish:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_hswish_params(&params.hswish);
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_hswish_params(&params.hswish);
-              break;
-          };
           break;
         case OpType::LeakyReLU:
           switch (variant) {
@@ -328,9 +293,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vclamp_ukernel_function vclamp, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
-    ASSERT_EQ(op_type, OpType::Clamp);
-
+  void Test(xnn_f32_vclamp_ukernel_function vclamp, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
@@ -367,15 +330,48 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_vhswish_ukernel_function vhswish, xnn_init_f32_hswish_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<double> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = (x_data[i] / 6.0f) * std::max(std::min(x_data[i] + 3.0f, 6.0f), 0.0f);
+      }
+
+      // Prepare parameters.
+      union xnn_f32_hswish_params params;
+      init_params(&params);
+
+      // Call optimized micro-kernel.
+      vhswish(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
   inline void Test(xnn_f32_vabs_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
   inline void Test(xnn_f32_velu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
-  }
-
-  inline void Test(xnn_f32_vhswish_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
@@ -404,11 +400,7 @@ class VUnaryMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
     switch (op_type) {
-      case OpType::Clamp:
-        distribution = std::uniform_real_distribution<float>(0.0f, 255.0f);
-        break;
       case OpType::ELU:
-      case OpType::HardSwish:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
         break;
       case OpType::SquareRoot:
@@ -435,15 +427,6 @@ class VUnaryMicrokernelTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
-          case OpType::Clamp:
-            y_ref[i] = std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]), float(qmax())), float(qmin()));
-            break;
-          case OpType::HardSwish:
-          {
-            const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
-            y_ref[i] = (x_value / 6.0f) * std::max(std::min(x_value + 3.0f, 6.0f), 0.0f);
-            break;
-          }
           case OpType::ReLU:
             y_ref[i] = std::max(fp16_ieee_to_fp32_value(x_data[i]), 0.0f);
             break;
@@ -454,17 +437,9 @@ class VUnaryMicrokernelTester {
 
       // Prepare parameters.
       union {
-        struct xnn_f16_hswish_params hswish;
         struct xnn_f16_minmax_params minmax;
       } params;
       switch (op_type) {
-        case OpType::HardSwish:
-          xnn_init_f16_hswish_params(&params.hswish);
-          break;
-        case OpType::Clamp:
-          xnn_init_f16_minmax_params(&params.minmax,
-            fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
-          break;
         case OpType::ReLU:
           break;
         default:
@@ -482,17 +457,84 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  inline void Test(xnn_f16_vclamp_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
+  void Test(xnn_f16_vclamp_ukernel_function vclamp, xnn_init_f16_minmax_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::max(std::min(fp16_ieee_to_fp32_value(x_data[i]), float(qmax())), float(qmin()));
+      }
+
+      // Prepare parameters.
+      struct xnn_f16_minmax_params params;
+      init_params(&params, fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
+
+      // Call optimized micro-kernel.
+      vclamp(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
   }
 
-  inline void Test(xnn_f16_vhswish_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f16_vunary_ukernel_function(vunary), op_type, variant);
+  void Test(xnn_f16_vhswish_ukernel_function vhswish, xnn_init_f16_hswish_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
+        y_ref[i] = (x_value / 6.0f) * std::max(std::min(x_value + 3.0f, 6.0f), 0.0f);
+      }
+
+      // Prepare parameters.
+      struct xnn_f16_hswish_params params;
+      init_params(&params);
+
+      // Call optimized micro-kernel.
+      vhswish(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
   }
 
-  void Test(xnn_s8_vunary_ukernel_function vunary, OpType op_type, xnn_init_s8_minmax_params_fn init_params) const {
-    ASSERT_EQ(op_type, OpType::Clamp);
-
+  void Test(xnn_s8_vclamp_ukernel_function vclamp, xnn_init_s8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -513,13 +555,7 @@ class VUnaryMicrokernelTester {
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-          case OpType::Clamp:
-            y_ref[i] = std::min(std::max(x_data[i], int8_t(qmin() - 0x80)), int8_t(qmax() - 0x80));
-            break;
-          default:
-            GTEST_FAIL() << "Unexpected op type";
-        }
+        y_ref[i] = std::min(std::max(x_data[i], int8_t(qmin() - 0x80)), int8_t(qmax() - 0x80));
       }
 
       // Prepare parameters.
@@ -527,7 +563,7 @@ class VUnaryMicrokernelTester {
       init_params(&params, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       // Call optimized micro-kernel.
-      vunary(batch_size() * sizeof(int8_t), x_data, y.data(), &params);
+      vclamp(batch_size() * sizeof(int8_t), x_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -537,13 +573,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  inline void Test(xnn_s8_vclamp_ukernel_function vunary, OpType op_type, xnn_init_s8_minmax_params_fn init_params) const {
-    Test(xnn_s8_vunary_ukernel_function(vunary), op_type, init_params);
-  }
-
-  void Test(xnn_u8_vunary_ukernel_function vunary, OpType op_type, xnn_init_u8_minmax_params_fn init_params) const {
-    ASSERT_EQ(op_type, OpType::Clamp);
-
+  void Test(xnn_u8_vclamp_ukernel_function vclamp, xnn_init_u8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(
@@ -563,13 +593,7 @@ class VUnaryMicrokernelTester {
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-          case OpType::Clamp:
-            y_ref[i] = std::min(std::max(x_data[i], qmin()), qmax());
-            break;
-          default:
-            GTEST_FAIL() << "Unexpected op type";
-        }
+        y_ref[i] = std::min(std::max(x_data[i], qmin()), qmax());
       }
 
       // Prepare parameters.
@@ -577,7 +601,7 @@ class VUnaryMicrokernelTester {
       init_params(&params, qmin(), qmax());
 
       // Call optimized micro-kernel.
-      vunary(batch_size() * sizeof(uint8_t), x_data, y.data(), &params);
+      vclamp(batch_size() * sizeof(uint8_t), x_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -585,10 +609,6 @@ class VUnaryMicrokernelTester {
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << uint32_t(x[i]);
       }
     }
-  }
-
-  inline void Test(xnn_u8_vclamp_ukernel_function vunary, OpType op_type, xnn_init_u8_minmax_params_fn init_params) const {
-    Test(xnn_u8_vunary_ukernel_function(vunary), op_type, init_params);
   }
 
  private:

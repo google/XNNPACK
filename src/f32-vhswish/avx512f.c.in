@@ -24,45 +24,45 @@ void xnn_f32_vhswish_ukernel__avx512f_x${BATCH_TILE}(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vsixth = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.sixth));
-  const __m512 vhalf = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.half));
-  const __m512 vone = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.one));
+  const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
+  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
+  const __m512 vone = _mm512_set1_ps(params->avx512.one);
   const __m512 vzero = _mm512_setzero_ps();
 
-  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-    const __m512 vx${ABC[0:16]} = _mm512_loadu_ps(x);
-    $for N in range(16, BATCH_TILE, 16):
-      const __m512 vx${ABC[N:N+16]} = _mm512_loadu_ps(x + ${N});
-    x += ${BATCH_TILE};
-
-    $for N in range(0, BATCH_TILE, 16):
-      __m512 vacc${ABC[N:N+16]} = _mm512_fmadd_ps(vx${ABC[N:N+16]}, vsixth, vhalf);
-
-    $for N in range(0, BATCH_TILE, 16):
-      vacc${ABC[N:N+16]} = _mm512_max_ps(vacc${ABC[N:N+16]}, vzero);
-
-    $for N in range(0, BATCH_TILE, 16):
-      vacc${ABC[N:N+16]} = _mm512_min_ps(vacc${ABC[N:N+16]}, vone);
-
-    $for N in range(0, BATCH_TILE, 16):
-      vacc${ABC[N:N+16]} = _mm512_mul_ps(vacc${ABC[N:N+16]}, vx${ABC[N:N+16]});
-
-    _mm512_storeu_ps(y, vacc${ABC[0:16]});
-    $for N in range(16, BATCH_TILE, 16):
-      _mm512_storeu_ps(y + ${N}, vacc${ABC[N:N+16]});
-    y += ${BATCH_TILE};
-  }
   $if BATCH_TILE > 16:
-    for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-      const __m512 vx = _mm512_loadu_ps(x);
-      x += 16;
-      __m512 vacc = _mm512_fmadd_ps(vx, vsixth, vhalf);
-      vacc = _mm512_max_ps(vacc, vzero);
-      vacc = _mm512_min_ps(vacc, vone);
-      vacc = _mm512_mul_ps(vacc, vx);
-      _mm512_storeu_ps(y, vacc);
-      y += 16;
+    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
+      const __m512 vx${ABC[0:16]} = _mm512_loadu_ps(x);
+      $for N in range(16, BATCH_TILE, 16):
+        const __m512 vx${ABC[N:N+16]} = _mm512_loadu_ps(x + ${N});
+      x += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 16):
+        __m512 vacc${ABC[N:N+16]} = _mm512_fmadd_ps(vx${ABC[N:N+16]}, vsixth, vhalf);
+
+      $for N in range(0, BATCH_TILE, 16):
+        vacc${ABC[N:N+16]} = _mm512_max_ps(vacc${ABC[N:N+16]}, vzero);
+
+      $for N in range(0, BATCH_TILE, 16):
+        vacc${ABC[N:N+16]} = _mm512_min_ps(vacc${ABC[N:N+16]}, vone);
+
+      $for N in range(0, BATCH_TILE, 16):
+        vacc${ABC[N:N+16]} = _mm512_mul_ps(vacc${ABC[N:N+16]}, vx${ABC[N:N+16]});
+
+      _mm512_storeu_ps(y, vacc${ABC[0:16]});
+      $for N in range(16, BATCH_TILE, 16):
+        _mm512_storeu_ps(y + ${N}, vacc${ABC[N:N+16]});
+      y += ${BATCH_TILE};
     }
+  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
+    const __m512 vx = _mm512_loadu_ps(x);
+    x += 16;
+    __m512 vacc = _mm512_fmadd_ps(vx, vsixth, vhalf);
+    vacc = _mm512_max_ps(vacc, vzero);
+    vacc = _mm512_min_ps(vacc, vone);
+    vacc = _mm512_mul_ps(vacc, vx);
+    _mm512_storeu_ps(y, vacc);
+    y += 16;
+  }
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 15 * sizeof(float));

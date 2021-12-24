@@ -26,26 +26,20 @@ void xnn_f32_vhswish_ukernel__avx_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vsixth = _mm256_broadcast_ps((const __m128*) params->sse.sixth);
-  const __m256 vhalf = _mm256_broadcast_ps((const __m128*) params->sse.half);
-  const __m256 vone = _mm256_broadcast_ps((const __m128*) params->sse.one);
+  const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
+  const __m256 vhalf = _mm256_load_ps(params->avx.half);
+  const __m256 vone = _mm256_load_ps(params->avx.one);
   const __m256 vzero = _mm256_setzero_ps();
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m256 vx01234567 = _mm256_loadu_ps(x);
+    const __m256 vx = _mm256_loadu_ps(x);
     x += 8;
-
-    __m256 vacc01234567 = _mm256_mul_ps(vx01234567, vsixth);
-
-    vacc01234567 = _mm256_add_ps(vacc01234567, vhalf);
-
-    vacc01234567 = _mm256_max_ps(vacc01234567, vzero);
-
-    vacc01234567 = _mm256_min_ps(vacc01234567, vone);
-
-    vacc01234567 = _mm256_mul_ps(vacc01234567, vx01234567);
-
-    _mm256_storeu_ps(y, vacc01234567);
+    __m256 vacc = _mm256_mul_ps(vx, vsixth);
+    vacc = _mm256_add_ps(vacc, vhalf);
+    vacc = _mm256_max_ps(vacc, vzero);
+    vacc = _mm256_min_ps(vacc, vone);
+    vacc = _mm256_mul_ps(vacc, vx);
+    _mm256_storeu_ps(y, vacc);
     y += 8;
   }
   if XNN_UNLIKELY(n != 0) {
