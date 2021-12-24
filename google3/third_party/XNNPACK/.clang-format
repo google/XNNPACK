@@ -1,5 +1,16 @@
-BasedOnStyle: Google
 AllowShortFunctionsOnASingleLine: Inline
 PackConstructorInitializers: Never
 ColumnLimit: 120
+AlignAfterOpenBracket: AlwaysBreak
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+BreakBeforeBraces: Stroustrup
 SpaceAfterCStyleCast: true
+PointerAlignment: Left
+ForEachMacros: ['XNN_UNPREDICTABLE', 'XNN_LIKELY', 'XNN_UNLIKELY']
+IfMacros: ['IF']
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterIfMacros: true
+  AfterForeachMacros: false
