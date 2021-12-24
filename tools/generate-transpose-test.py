@@ -34,7 +34,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(x32)_transpose_ukernel__(\d+)x(\d+)_(.+)$", name)
+  match = re.match(r"^xnn_(x\d+)_transpose_ukernel__(\d+)x(\d+)_(.+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   tile_height = int(match.group(2))

@@ -3498,6 +3498,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
+  src/x16-transpose/4x8-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
@@ -7505,6 +7506,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(u8-vclamp-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(u8-vclamp-test u8-vclamp-test)
 
+  ADD_EXECUTABLE(x16-transpose-test test/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x16-transpose-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x16-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x16-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(x16-transpose-test x16-transpose-test)
+
   ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x32-packx-test PROPERTIES
     CXX_STANDARD 11
@@ -8294,6 +8304,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(x16-transpose-bench bench/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x16-transpose-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x16-transpose-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x16-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(x32-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x32-transpose-bench PROPERTIES

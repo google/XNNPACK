@@ -1166,6 +1166,14 @@ typedef void (*xnn_f32_gemm_ukernel_function)(
     size_t cn_stride,
     const union xnn_f32_default_params* params);
 
+typedef void (*xnn_x16_transpose_ukernel_function)(
+    const uint16_t* a,
+    uint16_t* b,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_width,
+    size_t block_height);
+
 typedef void (*xnn_x32_transpose_ukernel_function)(
     const uint32_t* a,
     uint32_t* b,

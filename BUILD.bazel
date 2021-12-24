@@ -4702,6 +4702,7 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/x8-zip/x3-sse2.c",
     "src/x8-zip/x4-sse2.c",
     "src/x8-zip/xm-sse2.c",
+    "src/x16-transpose/4x8-sse2.c",
     "src/x32-unpool/sse2.c",
     "src/x32-zip/x2-sse2.c",
     "src/x32-zip/x3-sse2.c",
@@ -8969,6 +8970,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "x16_transpose_bench",
+    srcs = [
+        "bench/x16-transpose.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x32_transpose_bench",
     srcs = [
         "bench/x32-transpose.cc",
@@ -11245,6 +11255,15 @@ xnnpack_unit_test(
         "test/x32-packx.cc",
         "test/pack-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "x16_transpose_test",
+    srcs = [
+        "test/x16-transpose.cc",
+        "test/transpose-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

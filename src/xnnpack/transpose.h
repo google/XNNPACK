@@ -25,6 +25,16 @@ extern "C" {
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_sse);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_wasmsimd);
 
+#define DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(const uint16_t* input,      \
+                            uint16_t* output,           \
+                            size_t input_stride,        \
+                            size_t output_stride,       \
+                            size_t block_width,         \
+                            size_t block_height);
+
+DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__4x8_sse2);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
