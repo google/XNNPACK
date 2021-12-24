@@ -6683,6 +6683,7 @@ AARCH64_ASM_MICROKERNEL_SRCS = [
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [
+    "src/xnnpack/allocator.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
     "src/xnnpack/common.h",
@@ -6725,7 +6726,6 @@ INTERNAL_MICROKERNEL_HDRS = [
 
 INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "include/xnnpack.h",
-    "src/xnnpack/allocator.h",
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
@@ -8426,6 +8426,9 @@ xnnpack_cc_library(
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
+    ],
+    aarch32_srcs = [
+        "src/f32-gemm/4x8-aarch32-neon-cortex-a55.cc",
     ],
     copts = LOGGING_COPTS,
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -10214,7 +10217,10 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":jit",
+    ],
 )
 
 xnnpack_unit_test(

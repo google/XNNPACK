@@ -11,8 +11,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/params.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1506,6 +1507,8 @@ DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_2x4__s
 DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_3x4__scalar_magic)
 DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_4x4__scalar_magic)
 
+
+enum xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(struct xnn_code_buffer* code);
 
 #ifdef __cplusplus
 }  // extern "C"

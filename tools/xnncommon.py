@@ -104,12 +104,14 @@ def arch_to_macro(arch, isa):
     return _ARCH_TO_MACRO_MAP[arch]
 
 
-def postprocess_test_case(test_case, arch, isa, assembly=False):
+def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
   test_case = _remove_duplicate_newlines(test_case)
   if arch:
     guard = " || ".join(arch_to_macro(a, isa) for a in arch)
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
+    if jit:
+      guard += " && XNN_PLATFORM_JIT"
     return "#if %s\n" % guard + _indent(test_case) + "\n" + \
       "#endif  // %s\n" % guard
   else:

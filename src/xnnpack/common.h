@@ -110,6 +110,12 @@
   #define XNN_PLATFORM_WINDOWS 0
 #endif
 
+#if XNN_ARCH_ARM && !XNN_PLATFORM_IOS
+  #define XNN_PLATFORM_JIT 1
+#else
+  #define XNN_PLATFORM_JIT 0
+#endif
+
 // Define compile identification macros
 
 #if defined(__clang__)
