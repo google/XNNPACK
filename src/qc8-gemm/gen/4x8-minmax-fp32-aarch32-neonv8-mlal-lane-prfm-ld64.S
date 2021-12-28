@@ -1,32 +1,28 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
-$assert DATATYPE in ["QC8", "QS8", "QU8"]
-$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
 .syntax unified
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$ISA = "neonv8" if ARMV8 else "neon"
-// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
-//     size_t mr,                                      r0
-//     size_t nc,                                      r1
-//     size_t kc,                                      r2 -> r5 -> sp + 36
-//     size_t ks,                                      r3 -> sp + 40 -> r14
-//     const int8_t**restrict a,           sp + 80  -> r2
-//     const void*restrict w,              sp + 84  -> r9
-//     int8_t*restrict c,                  sp + 88  -> r11
-//     size_t cm_stride,                   sp + 92  -> (r6)
-//     size_t cn_stride,                   sp + 96  -> (r7)
-//     size_t a_offset,                    sp + 100 -> (r5)
-//     const int8_t* zero,                 sp + 104 -> (r7)
-//     ${PARAMS_UNION}*params); sp + 108 -> (r5)
+// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64(
+//     size_t mr,                            r0
+//     size_t nc,                            r1
+//     size_t kc,                            r2 -> r5
+//     const uint8_t*restrict a,             r3
+//     size_t a_stride,           sp + 64 -> (r7)
+//     const void*restrict w,     sp + 68 -> r9
+//     uint8_t*restrict c,        sp + 72 -> r11
+//     size_t cm_stride,          sp + 76 -> (r6)
+//     size_t cn_stride,          sp + 80 -> r7
+//     xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 84 -> (r5)
 
 // inner loop registers
 
@@ -42,135 +38,92 @@ $ISA = "neonv8" if ARMV8 else "neon"
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// Unused q6 q7
+// unused q6 q7
 
-$if REQUANTIZATION == "RNDNU":
-  // params structure is 16 bytes
-  //  struct {
-  //    int32_t right_pre_shift;    d10[0]
-  //    int32_t multiplier;         d10[1]
-  //    int32_t right_post_shift;   d11[0]
-  //    int16_t output_zero_point;  d11[2]
-  //    int8_t output_min;          d11[6]
-  //    int8_t output_max;          d11[7]
-  //  } rndnu_neon;
-$else:
-  // params structure is 4 bytes
-  //  struct {
-  //    int16_t output_zero_point;  d11[2]
-  //    int8_t output_min;          d11[6]
-  //    int8_t output_max;          d11[7]
-  //  } xnn_qs8_minmax_params.neonv8;
+// params structure is 4 bytes
+//  struct {
+//    int16_t output_zero_point;  d11[2]
+//    int8_t output_min;          d11[6]
+//    int8_t output_max;          d11[7]
+//  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
-        # Push 80 bytes
-        # r2 will be reloaded in outer loop.  r3 is ks
-        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
-        SUB     sp, sp, 4                                        // 4
-        VPUSH   {d8-d11}                                         // +32 = 80
+BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
+        # Push 64 bytes
+        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
+        VPUSH   {d8-d11}                            // +32 = 64
 
-        LDR     r11, [sp, 88]           // c
-        LDR     r6, [sp, 92]            // cm_stride
-        LDR     r2, [sp, 80]            // a
-        LDR     r9, [sp, 84]            // w
-        LDR     r5, [sp, 108]           // params
-        MOV     r14, r3                 // p = ks
+        LDR     r7, [sp, 64]            // a_stride
+        LDR     r11, [sp, 72]           // c
+        LDR     r6, [sp, 76]            // cm_stride
+        LDR     r9, [sp, 68]            // w
+        LDR     r5, [sp, 84]            // params
 
-        # Clamp C pointers
+        # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
+        ADD     r12, r3, r7             //   a1 = a0 + a_stride
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
+        MOVLO   r12, r3                 // a1
         MOVLO   r4, r11                 // c1
                                         // if mr > 2
+        ADD     r10, r12, r7            //   a2 = a1 + a_stride
         ADD     r8, r4, r6              //   c2 = c1 + cm_stride
+        MOVLS   r10, r12                // a2
         MOVLS   r8, r4                  // c2
+
         CMP     r0, 4                   // if mr >=4
+        ADD     r0, r10, r7             //   a3 = a2 + a_stride
         ADD     r6, r8, r6              //   c3 = c2 + cm_stride
+        MOVLO   r0, r10                 // a3
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        $if REQUANTIZATION == "RNDNU":
-          VLDM    r5, {d10-d11}           // RNDNU params
-        $else:
-          VLD1.32 {d11[]}, [r5]           // QC8 params
+        VLD1.32 {d11[]}, [r5]           // QC8 params
+        LDR     r7, [sp, 80]            // cn_stride
 
-        $if PREFETCH:
-          PLD     [r9,  64]               // Prefetch B
-          PLD     [r9, 128]
-          PLD     [r9, 192]
-          PLD     [r9, 256]
-          PLD     [r9, 320]
-          PLD     [r9, 384]
+        PLD     [r9,  64]               // Prefetch B
+        PLD     [r9, 128]
+        PLD     [r9, 192]
+        PLD     [r9, 256]
+        PLD     [r9, 320]
+        PLD     [r9, 384]
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
+        SUBS    r5, r2, 8               // k = kc - 8
+
         VMOV    q10, q8
+        PLD     [r3,  64]               // Prefetch A
         VMOV    q11, q9
+        PLD     [r12, 64]
         VMOV    q12, q8
+        PLD     [r10, 64]
         VMOV    q13, q9
+        PLD     [r0,  64]
         VMOV    q14, q8
         VMOV    q15, q9
-
-        .p2align 3
-1:
-        # Load next 4 A pointers
-        LDR     r3, [r2,  0]
-        LDR     r12, [r2,  4]
-        LDR     r10, [r2,  8]
-        LDR     r0, [r2, 12]
-        ADD     r2, r2, 16
-
-        $if PREFETCH:
-          PLD     [r3, 64]
-          PLD     [r12, 64]
-          PLD     [r10, 64]
-          PLD     [r0, 64]
-
-        # Add a_offset
-        LDR     r5, [sp, 100]           // a_offset
-        LDR     r7, [sp, 104]           // zero
-        CMP     r3,  r7                 // if a0 == zero
-        ADD     r3,  r3, r5             // a0 += a_offset
-        MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset
-        CMP     r12,  r7                // if a1 == zero
-        ADD     r12, r12, r5            // a1 += a_offset
-        MOVEQ   r12,  r7                //   a1 = zero, else += a1 + a_offset
-        CMP     r10,  r7                // if a2 == zero
-        ADD     r10, r10, r5            // a2 += a_offset
-        MOVEQ   r10,  r7                //   a2 = zero, else += a2 + a_offset
-        CMP     r0,  r7                 // if a3 == zero
-        ADD     r0,  r0, r5             // a3 += a_offset
-        LDR     r5, [sp, 36]            // kc
-        MOVEQ   r0,  r7                 //   a3 = zero, else += a3 + a_offset
-
-        SUBS    r5, r5, 8               // kc - 8
-        BLO     4f                      // less than 8 channels?
+        BLO     3f                      // less than 8 channels?
 
         # Main loop - 8 bytes
         # 64 bytes for weights.
         .p2align 3
-2:
+1:
         VLD1.8  {d0},  [r3]!            // A0
         VLD1.8  {d8},  [r9]!            // B
         VLD1.8  {d2}, [r12]!            // A1
         VLD1.8  {d4}, [r10]!            // A2
         VLD1.8  {d6},  [r0]!            // A3
         SUBS    r5, r5, 8
-        $if PREFETCH:
-          PLD     [r3, 128]
+        PLD     [r3, 128]
         VMOVL.S8 q0, d0
-        $if PREFETCH:
-          PLD     [r12, 128]
+        PLD     [r12, 128]
         VMOVL.S8 q4, d8
-        $if PREFETCH:
-          PLD     [r10, 128]
+        PLD     [r10, 128]
         VMOVL.S8 q1, d2
-        $if PREFETCH:
-          PLD     [r0, 128]
+        PLD     [r0, 128]
         VMOVL.S8 q2, d4
-        $if PREFETCH:
-          PLD     [r9, 448]
+        PLD     [r9, 448]
         VMOVL.S8 q3, d6
         VMLAL.S16 q8, d8, d0[0]
         VMLAL.S16 q9, d9, d0[0]
@@ -257,82 +210,42 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q13, d9, d5[3]
         VMLAL.S16 q14, d8, d7[3]
         VMLAL.S16 q15, d9, d7[3]
-        BHS     2b
+        BHS     1b
 
         # Is there a remainder?- 1-7 bytes of A
         ADDS    r5, r5, 8
-        BNE     4f
+        BNE     3f
 
-3:
-        # ks loop
-        SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
-        BHI     1b
+2:
+        # QC8 FP32 quantization
+        VLD1.8  {q0-q1},  [r9]!
 
-        LDR     r7, [sp, 96]            // cn_stride
-        LDR     r14, [sp, 40]           // p = ks
+        VCVT.F32.S32 q8,  q8
+        VCVT.F32.S32 q9,  q9
+        VCVT.F32.S32 q10, q10
+        VCVT.F32.S32 q11, q11
+        VCVT.F32.S32 q12, q12
+        VCVT.F32.S32 q13, q13
+        VCVT.F32.S32 q14, q14
+        VCVT.F32.S32 q15, q15
 
-        $if REQUANTIZATION == "RNDNU":
-          # RNDNU quantization
-          VDUP.32 q0, d10[0]              // right_pre_shift
+        VMUL.F32 q8,  q8, q0           // multiplier
+        VMUL.F32 q9,  q9, q1
+        VMUL.F32 q10, q10, q0
+        VMUL.F32 q11, q11, q1
+        VMUL.F32 q12, q12, q0
+        VMUL.F32 q13, q13, q1
+        VMUL.F32 q14, q14, q0
+        VMUL.F32 q15, q15, q1
 
-          VQSHL.S32 q8,  q8, q0
-          VQSHL.S32 q9,  q9, q0
-          VQSHL.S32 q10, q10, q0
-          VQSHL.S32 q11, q11, q0
-          VQSHL.S32 q12, q12, q0
-          VQSHL.S32 q13, q13, q0
-          VQSHL.S32 q14, q14, q0
-          VQSHL.S32 q15, q15, q0
-
-          VDUP.32 q2, d11[0]              // right_post_shift
-
-          VQDMULH.S32 q8,  q8, d10[1]     // multiplier
-          VQDMULH.S32 q9,  q9, d10[1]
-          VQDMULH.S32 q10, q10, d10[1]
-          VQDMULH.S32 q11, q11, d10[1]
-          VQDMULH.S32 q12, q12, d10[1]
-          VQDMULH.S32 q13, q13, d10[1]
-          VQDMULH.S32 q14, q14, d10[1]
-          VQDMULH.S32 q15, q15, d10[1]
-
-          VRSHL.S32 q8,  q8, q2
-          VRSHL.S32 q9,  q9, q2
-          VRSHL.S32 q10, q10, q2
-          VRSHL.S32 q11, q11, q2
-          VRSHL.S32 q12, q12, q2
-          VRSHL.S32 q13, q13, q2
-          VRSHL.S32 q14, q14, q2
-          VRSHL.S32 q15, q15, q2
-        $else:
-          # QC8 FP32 quantization
-          VLD1.8  {q0-q1},  [r9]!
-
-          VCVT.F32.S32 q8,  q8
-          VCVT.F32.S32 q9,  q9
-          VCVT.F32.S32 q10, q10
-          VCVT.F32.S32 q11, q11
-          VCVT.F32.S32 q12, q12
-          VCVT.F32.S32 q13, q13
-          VCVT.F32.S32 q14, q14
-          VCVT.F32.S32 q15, q15
-
-          VMUL.F32 q8,  q8, q0           // multiplier
-          VMUL.F32 q9,  q9, q1
-          VMUL.F32 q10, q10, q0
-          VMUL.F32 q11, q11, q1
-          VMUL.F32 q12, q12, q0
-          VMUL.F32 q13, q13, q1
-          VMUL.F32 q14, q14, q0
-          VMUL.F32 q15, q15, q1
-
-          VCVTN.S32.F32 q8,  q8
-          VCVTN.S32.F32 q9,  q9
-          VCVTN.S32.F32 q10, q10
-          VCVTN.S32.F32 q11, q11
-          VCVTN.S32.F32 q12, q12
-          VCVTN.S32.F32 q13, q13
-          VCVTN.S32.F32 q14, q14
-          VCVTN.S32.F32 q15, q15
+        VCVTN.S32.F32 q8,  q8
+        VCVTN.S32.F32 q9,  q9
+        VCVTN.S32.F32 q10, q10
+        VCVTN.S32.F32 q11, q11
+        VCVTN.S32.F32 q12, q12
+        VCVTN.S32.F32 q13, q13
+        VCVTN.S32.F32 q14, q14
+        VCVTN.S32.F32 q15, q15
 
         VDUP.16 q0, d11[2]              // output_zero_point
 
@@ -362,34 +275,37 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
 
-        SUBS    r1, r1, 8               // nc -= 8
+        SUBS    r1, r1, 8
 
         VMIN.S8 q0, q0, q13
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     5f
-        VST1.8  {d3}, [r6], r7
-        VST1.8  {d2}, [r8], r7
-        VST1.8  {d1}, [r4], r7
+        BLO     4f
         VST1.8  {d0}, [r11], r7
-        SUB     r2, r2, r14             // a -= ks
+        SUB     r3, r3, r2
+        VST1.8  {d1}, [r4], r7
+        SUB     r12, r12, r2
+        VST1.8  {d2}, [r8], r7
+        SUB     r10, r10, r2
+        VST1.8  {d3}, [r6], r7
+        SUB     r0, r0, r2
         BHI     0b
 
         VPOP    {d8-d11}
-        ADD     sp, sp, 12              // skip pad, r2, r3
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
-4:
+3:
         AND     r5, r5, 7               // kc remainder 1 to 7
 
-        VLD1.8  {d0},  [r3]
+        VLD1.8  {d0},  [r3], r5
         VLD1.8  {d8},  [r9]!
-        VLD1.8  {d2}, [r12]
-        VLD1.8  {d4}, [r10]
-        VLD1.8  {d6},  [r0]
+        VLD1.8  {d2}, [r12], r5
+        VLD1.8  {d4}, [r10], r5
+        VLD1.8  {d6},  [r0], r5
 
         VMOVL.S8 q0, d0
         VMOVL.S8 q4, d8
@@ -405,7 +321,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q14, d8, d6[0]
         VMLAL.S16 q15, d9, d6[0]
         CMP     r5, 2
-        BLO     3b
+        BLO     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -417,7 +333,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q13, d9, d4[1]
         VMLAL.S16 q14, d8, d6[1]
         VMLAL.S16 q15, d9, d6[1]
-        BEQ     3b
+        BEQ     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -430,7 +346,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q14, d8, d6[2]
         VMLAL.S16 q15, d9, d6[2]
         CMP     r5, 4
-        BLO     3b
+        BLO     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -442,7 +358,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q13, d9, d4[3]
         VMLAL.S16 q14, d8, d6[3]
         VMLAL.S16 q15, d9, d6[3]
-        BEQ     3b
+        BEQ     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -455,7 +371,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q14, d8, d7[0]
         VMLAL.S16 q15, d9, d7[0]
         CMP     r5, 6
-        BLO     3b
+        BLO     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -467,7 +383,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q13, d9, d5[1]
         VMLAL.S16 q14, d8, d7[1]
         VMLAL.S16 q15, d9, d7[1]
-        BEQ     3b
+        BEQ     2b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -479,44 +395,45 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
         VMLAL.S16 q15, d9, d7[2]
-        B       3b
+        B       2b
 
         # Store odd width
         .p2align 3
-5:
+4:
         TST     r1, 4
-        BEQ     6f
-        VST1.32 {d3[0]}, [r6]!
-        VST1.32 {d2[0]}, [r8]!
-        VST1.32 {d1[0]}, [r4]!
+        BEQ     5f
         VST1.32 {d0[0]}, [r11]!
+        VST1.32 {d1[0]}, [r4]!
+        VST1.32 {d2[0]}, [r8]!
+        VST1.32 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-6:
+5:
         TST     r1, 2
-        BEQ     7f
-        VST1.16 {d3[0]}, [r6]!
-        VST1.16 {d2[0]}, [r8]!
-        VST1.16 {d1[0]}, [r4]!
+        BEQ     6f
         VST1.16 {d0[0]}, [r11]!
+        VST1.16 {d1[0]}, [r4]!
+        VST1.16 {d2[0]}, [r8]!
+        VST1.16 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-7:
+6:
         TST     r1, 1
-        BEQ     8f
-        VST1.8  {d3[0]}, [r6]
-        VST1.8  {d2[0]}, [r8]
-        VST1.8  {d1[0]}, [r4]
+        BEQ     7f
         VST1.8  {d0[0]}, [r11]
+        VST1.8  {d1[0]}, [r4]
+        VST1.8  {d2[0]}, [r8]
+        VST1.8  {d3[0]}, [r6]
 
-8:
+7:
         VPOP    {d8-d11}
-        ADD     sp, sp, 12              // skip pad, r2, r3
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
-END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif
+

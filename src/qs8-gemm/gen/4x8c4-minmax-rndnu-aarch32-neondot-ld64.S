@@ -7,6 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <xnnpack/assembly.h>
 
 .syntax unified
@@ -21,8 +22,7 @@
 //     uint8_t*restrict c,        sp + 88 -> r11
 //     size_t cm_stride,          sp + 92 -> (r6)
 //     size_t cn_stride,          sp + 96 -> r7
-//     const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
-
+//     xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
 
 // inner loop registers
 
@@ -82,7 +82,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5!, {d12-d13}          // RNDNU params
+        VLDM    r5, {d12-d13}           // RNDNU params
         LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3
@@ -142,8 +142,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VQSHL.S32 q8,  q8, q0
         VQSHL.S32 q9,  q9, q0
         VQSHL.S32 q10, q10, q0
-        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q11, q11, q0
+        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q13, q13, q0
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
@@ -153,8 +153,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VQDMULH.S32 q8,  q8, d12[1]     // multiplier
         VQDMULH.S32 q9,  q9, d12[1]
         VQDMULH.S32 q10, q10, d12[1]
-        VQDMULH.S32 q12, q12, d12[1]
         VQDMULH.S32 q11, q11, d12[1]
+        VQDMULH.S32 q12, q12, d12[1]
         VQDMULH.S32 q13, q13, d12[1]
         VQDMULH.S32 q14, q14, d12[1]
         VQDMULH.S32 q15, q15, d12[1]
@@ -162,8 +162,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VRSHL.S32 q8,  q8, q2
         VRSHL.S32 q9,  q9, q2
         VRSHL.S32 q10, q10, q2
-        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q11, q11, q2
+        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q13, q13, q2
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2

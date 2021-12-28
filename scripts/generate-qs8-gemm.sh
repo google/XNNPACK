@@ -618,11 +618,15 @@ tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP3
 
 ############################### AArch32 assembly ##############################
 ### Cortex-A53 lane micro-kernels
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S &
+
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in      -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in      -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qc8-gemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S &
 
 ############################### AArch64 assembly ##############################
 ### Cortex-A53 lane micro-kernels

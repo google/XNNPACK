@@ -1,20 +1,18 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-igemm/4x8-aarch32-neon-mlal-lane-ld64.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
-$assert DATATYPE in ["QC8", "QS8", "QU8"]
-$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
 .syntax unified
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$ISA = "neonv8" if ARMV8 else "neon"
-// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+// void xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 36
@@ -26,7 +24,7 @@ $ISA = "neonv8" if ARMV8 else "neon"
 //     size_t cn_stride,                   sp + 96  -> (r7)
 //     size_t a_offset,                    sp + 100 -> (r5)
 //     const int8_t* zero,                 sp + 104 -> (r7)
-//     ${PARAMS_UNION}*params); sp + 108 -> (r5)
+//     xnn_qs8_minmax_params*params); sp + 108 -> (r5)
 
 // inner loop registers
 
@@ -44,25 +42,14 @@ $ISA = "neonv8" if ARMV8 else "neon"
 
 // Unused q6 q7
 
-$if REQUANTIZATION == "RNDNU":
-  // params structure is 16 bytes
-  //  struct {
-  //    int32_t right_pre_shift;    d10[0]
-  //    int32_t multiplier;         d10[1]
-  //    int32_t right_post_shift;   d11[0]
-  //    int16_t output_zero_point;  d11[2]
-  //    int8_t output_min;          d11[6]
-  //    int8_t output_max;          d11[7]
-  //  } rndnu_neon;
-$else:
-  // params structure is 4 bytes
-  //  struct {
-  //    int16_t output_zero_point;  d11[2]
-  //    int8_t output_min;          d11[6]
-  //    int8_t output_max;          d11[7]
-  //  } xnn_qs8_minmax_params.neonv8;
+// params structure is 4 bytes
+//  struct {
+//    int16_t output_zero_point;  d11[2]
+//    int8_t output_min;          d11[6]
+//    int8_t output_max;          d11[7]
+//  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
         # Push 80 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
@@ -88,18 +75,14 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        $if REQUANTIZATION == "RNDNU":
-          VLDM    r5, {d10-d11}           // RNDNU params
-        $else:
-          VLD1.32 {d11[]}, [r5]           // QC8 params
+        VLD1.32 {d11[]}, [r5]           // QC8 params
 
-        $if PREFETCH:
-          PLD     [r9,  64]               // Prefetch B
-          PLD     [r9, 128]
-          PLD     [r9, 192]
-          PLD     [r9, 256]
-          PLD     [r9, 320]
-          PLD     [r9, 384]
+        PLD     [r9,  64]               // Prefetch B
+        PLD     [r9, 128]
+        PLD     [r9, 192]
+        PLD     [r9, 256]
+        PLD     [r9, 320]
+        PLD     [r9, 384]
 
         .p2align 3
 0:
@@ -121,11 +104,10 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         LDR     r0, [r2, 12]
         ADD     r2, r2, 16
 
-        $if PREFETCH:
-          PLD     [r3, 64]
-          PLD     [r12, 64]
-          PLD     [r10, 64]
-          PLD     [r0, 64]
+        PLD     [r3, 64]
+        PLD     [r12, 64]
+        PLD     [r10, 64]
+        PLD     [r0, 64]
 
         # Add a_offset
         LDR     r5, [sp, 100]           // a_offset
@@ -157,20 +139,15 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VLD1.8  {d4}, [r10]!            // A2
         VLD1.8  {d6},  [r0]!            // A3
         SUBS    r5, r5, 8
-        $if PREFETCH:
-          PLD     [r3, 128]
+        PLD     [r3, 128]
         VMOVL.S8 q0, d0
-        $if PREFETCH:
-          PLD     [r12, 128]
+        PLD     [r12, 128]
         VMOVL.S8 q4, d8
-        $if PREFETCH:
-          PLD     [r10, 128]
+        PLD     [r10, 128]
         VMOVL.S8 q1, d2
-        $if PREFETCH:
-          PLD     [r0, 128]
+        PLD     [r0, 128]
         VMOVL.S8 q2, d4
-        $if PREFETCH:
-          PLD     [r9, 448]
+        PLD     [r9, 448]
         VMOVL.S8 q3, d6
         VMLAL.S16 q8, d8, d0[0]
         VMLAL.S16 q9, d9, d0[0]
@@ -271,68 +248,35 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         LDR     r7, [sp, 96]            // cn_stride
         LDR     r14, [sp, 40]           // p = ks
 
-        $if REQUANTIZATION == "RNDNU":
-          # RNDNU quantization
-          VDUP.32 q0, d10[0]              // right_pre_shift
+        # QC8 FP32 quantization
+        VLD1.8  {q0-q1},  [r9]!
 
-          VQSHL.S32 q8,  q8, q0
-          VQSHL.S32 q9,  q9, q0
-          VQSHL.S32 q10, q10, q0
-          VQSHL.S32 q11, q11, q0
-          VQSHL.S32 q12, q12, q0
-          VQSHL.S32 q13, q13, q0
-          VQSHL.S32 q14, q14, q0
-          VQSHL.S32 q15, q15, q0
+        VCVT.F32.S32 q8,  q8
+        VCVT.F32.S32 q9,  q9
+        VCVT.F32.S32 q10, q10
+        VCVT.F32.S32 q11, q11
+        VCVT.F32.S32 q12, q12
+        VCVT.F32.S32 q13, q13
+        VCVT.F32.S32 q14, q14
+        VCVT.F32.S32 q15, q15
 
-          VDUP.32 q2, d11[0]              // right_post_shift
+        VMUL.F32 q8,  q8, q0           // multiplier
+        VMUL.F32 q9,  q9, q1
+        VMUL.F32 q10, q10, q0
+        VMUL.F32 q11, q11, q1
+        VMUL.F32 q12, q12, q0
+        VMUL.F32 q13, q13, q1
+        VMUL.F32 q14, q14, q0
+        VMUL.F32 q15, q15, q1
 
-          VQDMULH.S32 q8,  q8, d10[1]     // multiplier
-          VQDMULH.S32 q9,  q9, d10[1]
-          VQDMULH.S32 q10, q10, d10[1]
-          VQDMULH.S32 q11, q11, d10[1]
-          VQDMULH.S32 q12, q12, d10[1]
-          VQDMULH.S32 q13, q13, d10[1]
-          VQDMULH.S32 q14, q14, d10[1]
-          VQDMULH.S32 q15, q15, d10[1]
-
-          VRSHL.S32 q8,  q8, q2
-          VRSHL.S32 q9,  q9, q2
-          VRSHL.S32 q10, q10, q2
-          VRSHL.S32 q11, q11, q2
-          VRSHL.S32 q12, q12, q2
-          VRSHL.S32 q13, q13, q2
-          VRSHL.S32 q14, q14, q2
-          VRSHL.S32 q15, q15, q2
-        $else:
-          # QC8 FP32 quantization
-          VLD1.8  {q0-q1},  [r9]!
-
-          VCVT.F32.S32 q8,  q8
-          VCVT.F32.S32 q9,  q9
-          VCVT.F32.S32 q10, q10
-          VCVT.F32.S32 q11, q11
-          VCVT.F32.S32 q12, q12
-          VCVT.F32.S32 q13, q13
-          VCVT.F32.S32 q14, q14
-          VCVT.F32.S32 q15, q15
-
-          VMUL.F32 q8,  q8, q0           // multiplier
-          VMUL.F32 q9,  q9, q1
-          VMUL.F32 q10, q10, q0
-          VMUL.F32 q11, q11, q1
-          VMUL.F32 q12, q12, q0
-          VMUL.F32 q13, q13, q1
-          VMUL.F32 q14, q14, q0
-          VMUL.F32 q15, q15, q1
-
-          VCVTN.S32.F32 q8,  q8
-          VCVTN.S32.F32 q9,  q9
-          VCVTN.S32.F32 q10, q10
-          VCVTN.S32.F32 q11, q11
-          VCVTN.S32.F32 q12, q12
-          VCVTN.S32.F32 q13, q13
-          VCVTN.S32.F32 q14, q14
-          VCVTN.S32.F32 q15, q15
+        VCVTN.S32.F32 q8,  q8
+        VCVTN.S32.F32 q9,  q9
+        VCVTN.S32.F32 q10, q10
+        VCVTN.S32.F32 q11, q11
+        VCVTN.S32.F32 q12, q12
+        VCVTN.S32.F32 q13, q13
+        VCVTN.S32.F32 q14, q14
+        VCVTN.S32.F32 q15, q15
 
         VDUP.16 q0, d11[2]              // output_zero_point
 
@@ -515,7 +459,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

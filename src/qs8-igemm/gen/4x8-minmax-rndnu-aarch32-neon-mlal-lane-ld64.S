@@ -7,11 +7,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <xnnpack/assembly.h>
 
 .syntax unified
 
-// void xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(
+// void xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 36
@@ -52,11 +53,6 @@
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
-        .arm
-#ifndef __APPLE__
-        .arch   armv7-a
-        .fpu    neon
-#endif
         # Push 80 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
@@ -82,7 +78,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5!, {d10-d11}          // RNDNU params
+        VLDM    r5, {d10-d11}           // RNDNU params
 
 
         .p2align 3
@@ -246,8 +242,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VQSHL.S32 q8,  q8, q0
         VQSHL.S32 q9,  q9, q0
         VQSHL.S32 q10, q10, q0
-        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q11, q11, q0
+        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q13, q13, q0
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
@@ -257,8 +253,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VQDMULH.S32 q8,  q8, d10[1]     // multiplier
         VQDMULH.S32 q9,  q9, d10[1]
         VQDMULH.S32 q10, q10, d10[1]
-        VQDMULH.S32 q12, q12, d10[1]
         VQDMULH.S32 q11, q11, d10[1]
+        VQDMULH.S32 q12, q12, d10[1]
         VQDMULH.S32 q13, q13, d10[1]
         VQDMULH.S32 q14, q14, d10[1]
         VQDMULH.S32 q15, q15, d10[1]
@@ -266,8 +262,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VRSHL.S32 q8,  q8, q2
         VRSHL.S32 q9,  q9, q2
         VRSHL.S32 q10, q10, q2
-        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q11, q11, q2
+        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q13, q13, q2
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2
