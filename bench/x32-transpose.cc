@@ -42,6 +42,11 @@ static void x32_transpose(
     transpose(x.data(), y.data(), ukernel_bytes, ukernel_bytes, ukernel_size,
               ukernel_size);
   }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
