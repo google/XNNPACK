@@ -13,6 +13,7 @@
 
 #include <gtest/gtest.h>
 
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
