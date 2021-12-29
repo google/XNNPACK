@@ -67,7 +67,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
 
   do {
     $for N in range(0, NR, 2):
-      int32x4_t vacc0x${ABC[N:N+2]} = vreinterpretq_s32_u64(vshll_n_u32(vld1_u32(w), 0)); w = (const void*) ((uintptr_t) w + 2 * sizeof(int32_t));
+      int32x4_t vacc0x${ABC[N:N+2]} = vreinterpretq_s32_u64(vmovl_u32(vld1_u32(w))); w = (const void*) ((uintptr_t) w + 2 * sizeof(int32_t));
     $for M in range(1, MR):
       $for N in range(0, NR, 2):
         int32x4_t vacc${M}x${ABC[N:N+2]} = vacc0x${ABC[N:N+2]};
