@@ -11979,7 +11979,7 @@ config_setting(
     values = {
         "crosstool_top": "@emsdk//emscripten_toolchain:everything",
         "cpu": "wasm",
-        "copt": "-msimd128",
+        "features": "wasm_simd",
     },
 )
 
@@ -11988,8 +11988,9 @@ config_setting(
     values = {
         "crosstool_top": "@emsdk//emscripten_toolchain:everything",
         "cpu": "wasm",
-        "copt": "-msimd128",
+        "features": "wasm_simd",
         "copt": "-mrelaxed-simd",
+        "linkopt": "-mrelaxed-simd",
     },
 )
 
