@@ -9,6 +9,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math-stubs.h>
 
 
