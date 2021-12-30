@@ -302,11 +302,16 @@ DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-XNN_INTERNAL void xnn_init_f32_sqrt_params(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+#define DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL void fn_name(                                \
+    union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
-XNN_INTERNAL void xnn_init_scalar_f32_sqrt_params(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(xnn_init_f32_sqrt_avx_params)
+  DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(xnn_init_f32_sqrt_fma_params)
+  DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(xnn_init_f32_sqrt_avx512_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 XNN_INTERNAL void xnn_init_f32_chw_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],

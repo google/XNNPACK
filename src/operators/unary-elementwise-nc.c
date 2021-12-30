@@ -663,12 +663,14 @@ enum xnn_status xnn_create_square_root_nc_f32(
     xnn_operator_t* sqrt_op_out)
 {
   union xnn_f32_sqrt_params params;
-  xnn_init_f32_sqrt_params(&params);
+  if (xnn_params.f32.sqrt.init.f32_sqrt != NULL) {
+    xnn_params.f32.sqrt.init.f32_sqrt(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_square_root_nc_f32,
-    xnn_params.f32.sqrt,
+    xnn_params.f32.sqrt.ukernel,
     sqrt_op_out);
 }
 
@@ -1213,7 +1215,7 @@ enum xnn_status xnn_setup_square_root_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
-    NULL, 0,
+    &sqrt_op->params.f32_sqrt, sizeof(sqrt_op->params.f32_sqrt),
     pthreadpool_get_threads_count(threadpool));
 }
 

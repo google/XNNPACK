@@ -8094,12 +8094,16 @@ void xnn_f32_vsqrt_ukernel__sse_sqrt_x4(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    do {
-      const __m128 vx = _mm_load_ss(x++);
-      const __m128 vy = _mm_sqrt_ss(vx);
-      _mm_store_ss(y++, vy);
-      n -= sizeof(float);
-    } while (n != 0);
+    const __m128 vx = _mm_loadu_ps(x);
+    __m128 vy = _mm_sqrt_ps(vx);
+    if (n & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) y, vy);
+      vy = _mm_movehl_ps(vy, vy);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      _mm_store_ss(y, vy);
+    }
   }
 }
 

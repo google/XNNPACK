@@ -25,7 +25,7 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x64(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vhalf = _mm512_set1_ps(params->fma.half);
+  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
   for (; n >= 64 * sizeof(float); n -= 64 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(x);
     const __m512 vx1 = _mm512_loadu_ps(x + 16);
@@ -101,7 +101,7 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x64(
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
 
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
-    const __m512 vrsqrtx = _mm512_rsqrt14_ps(vx);
+    const __m512 vrsqrtx = _mm512_maskz_rsqrt14_ps(vmask, vx);
     __m512 vsqrtx = _mm512_mul_ps(vrsqrtx, vx);
     __m512 vhalfrsqrtx = _mm512_mul_ps(vrsqrtx, vhalf);
     const __m512 vresidual = _mm512_fnmadd_ps(vsqrtx, vhalfrsqrtx, vhalf);

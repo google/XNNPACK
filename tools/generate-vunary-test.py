@@ -206,7 +206,7 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, isa):
   test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
-  else:
+  elif op_type != "SquareRoot":
     test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
     if not isa:
       test_args.append("VUnaryMicrokernelTester::Variant::Scalar")

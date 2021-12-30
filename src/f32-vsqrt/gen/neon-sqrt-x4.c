@@ -31,11 +31,16 @@ void xnn_f32_vsqrt_ukernel__neon_sqrt_x4(
     vst1q_f32(y, vy); y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    do {
-      const float vx = *x++;
-      const float vy = sqrtf(vx);
-      *y++ = vy;
-      n -= sizeof(float);
-    } while (n != 0);
+    const float32x4_t vx = vld1q_f32(x);
+
+    float32x2_t vy_lo = vsqrt_f32(vget_low_f32(vx));
+    const float32x2_t vx_hi = vget_high_f32(vx);
+    if (n & (2 * sizeof(float))) {
+      vst1_f32(y, vy_lo); y += 2;
+      vy_lo = vsqrt_f32(vx_hi);
+    }
+    if (n & (1 * sizeof(float))) {
+      vst1_lane_f32(y, vy_lo, 0);
+    }
   }
 }

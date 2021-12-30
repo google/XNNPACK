@@ -15,8 +15,6 @@
 #include <xnnpack/vunary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x8(
     size_t n,
     const float* x,
@@ -26,7 +24,7 @@ void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vhalf = _mm256_broadcast_ss(&params->fma.half);
+  const __m256 vhalf = _mm256_load_ps(params->fma.half);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_loadu_ps(x);
     x += 8;
@@ -46,7 +44,7 @@ void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x8(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->fma.mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
 

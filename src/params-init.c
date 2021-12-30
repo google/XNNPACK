@@ -1414,18 +1414,38 @@ void xnn_init_f32_lrelu_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-void xnn_init_f32_sqrt_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_sqrt_avx_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    params->fma.half = 0.5f;
-  #endif
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
 
-void xnn_init_scalar_f32_sqrt_params(
+void xnn_init_f32_sqrt_fma_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
 {
+  for (uint32_t i = 0; i < 8; i++) {
+    params->fma.half[i] = 0.5f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->fma.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->fma.mask_table[i] = 0;
+  }
 }
+
+void xnn_init_f32_sqrt_avx512_params(
+  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512.half = 0.5f;
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 void xnn_init_f32_chw_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],

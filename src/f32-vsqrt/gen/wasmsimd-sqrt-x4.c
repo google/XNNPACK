@@ -33,11 +33,15 @@ void xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x4(
     y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
-    do {
-      const float vx = *x++;
-      const float vy = sqrtf(vx);
-      *y++ = vy;
-      n -= sizeof(float);
-    } while (n != 0);
+    const v128_t vx = wasm_v128_load(x);
+    v128_t vy = wasm_f32x4_sqrt(vx);
+    if (n & (2 * sizeof(float))) {
+      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+      vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
+      y += 2;
+    }
+    if (n & (1 * sizeof(float))) {
+      *y = wasm_f32x4_extract_lane(vy, 0);
+    }
   }
 }

@@ -155,8 +155,15 @@ union xnn_f32_sqrt_params {
   char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
-    float half;
+    int32_t mask_table[14];
+  } avx;
+  struct {
+    XNN_ALIGN(32) float half[8];
+    int32_t mask_table[14];
   } fma;
+  struct {
+    float half;
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
@@ -2674,6 +2681,9 @@ typedef void (*xnn_init_f32_lrelu_params_fn)(
 typedef void (*xnn_init_f32_default_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_init_f32_sqrt_params_fn)(
+  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
@@ -2782,6 +2792,7 @@ struct vunary_parameters {
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
+    xnn_init_f32_sqrt_params_fn f32_sqrt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
     xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
     xnn_init_s8_minmax_params_fn s8_minmax;
@@ -3091,7 +3102,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function rndd;
     xnn_univector_ukernel_function sigmoid;
     xnn_univector_ukernel_function sqr;
-    xnn_univector_ukernel_function sqrt;
+    struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vdiv;

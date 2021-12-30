@@ -34,7 +34,6 @@ class VUnaryMicrokernelTester {
     RoundUp,
     RoundDown,
     Square,
-    SquareRoot,
     Sigmoid,
   };
 
@@ -133,9 +132,6 @@ class VUnaryMicrokernelTester {
       case OpType::ELU:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
         break;
-      case OpType::SquareRoot:
-        distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
-        break;
       default:
         break;
     }
@@ -184,9 +180,6 @@ class VUnaryMicrokernelTester {
             break;
           case OpType::Square:
             y_ref[i] = double(x_data[i]) * double(x_data[i]);
-            break;
-          case OpType::SquareRoot:
-            y_ref[i] = std::sqrt(double(x_data[i]));
             break;
           case OpType::Sigmoid:
           {
@@ -256,16 +249,6 @@ class VUnaryMicrokernelTester {
         case OpType::Sigmoid:
         case OpType::Square:
           break;
-        case OpType::SquareRoot:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_sqrt_params(&params.sqrt);
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_sqrt_params(&params.sqrt);
-              break;
-          }
-          break;
       }
 
       // Call optimized micro-kernel.
@@ -310,7 +293,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6f, std::abs(y_ref[i]) * 1.0e-5f))
+        ASSERT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -384,7 +367,46 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+        ASSERT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_vsqrt_ukernel_function vsqrt, xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 10.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::sqrt(x_data[i]);
+      }
+
+      // Prepare parameters.
+      union xnn_f32_sqrt_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vsqrt(batch_size() * sizeof(float), x_data, y.data(), init_params != nullptr ? &params : nullptr);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -410,10 +432,6 @@ class VUnaryMicrokernelTester {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
-  inline void Test(xnn_f32_vsqrt_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
-  }
-
   void Test(xnn_f16_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -421,9 +439,6 @@ class VUnaryMicrokernelTester {
     switch (op_type) {
       case OpType::ELU:
         distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
-        break;
-      case OpType::SquareRoot:
-        distribution = std::uniform_real_distribution<float>(0.0f, 10.0f);
         break;
       default:
         break;
