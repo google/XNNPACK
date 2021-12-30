@@ -1223,6 +1223,12 @@ void xnn_init_f32_hswish_avx_params(
     params->avx.half[i] = 0.5f;
     params->avx.one[i] = 1.0f;
   }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
 
 void xnn_init_f32_hswish_avx512_params(

@@ -284,6 +284,7 @@ union xnn_f32_hswish_params {
     XNN_ALIGN(32) float sixth[8];
     XNN_ALIGN(32) float half[8];
     XNN_ALIGN(32) float one[8];
+    int32_t mask_table[14];
   } avx;
   struct {
     float sixth;
