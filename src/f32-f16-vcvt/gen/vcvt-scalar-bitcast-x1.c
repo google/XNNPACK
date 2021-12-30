@@ -20,28 +20,28 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1(
     size_t n,
     const float* input,
     void* output,
-    const void* params)
+    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint32_t vnonsign_mask = UINT32_C(0x7FFFFFFF);
-  const uint32_t vexp_bias = UINT32_C(0x07800000);
-  const float vscale_to_inf = 0x1.0p+112f;
-  const uint32_t vexpw_max = UINT32_C(0x7F800000);
-  const float vscale_to_zero = 0x1.0p-110f;
-  const uint32_t vbias_min = UINT32_C(0x40000000);
-  const uint16_t vexph_mask = UINT16_C(0x7C00);
-  const uint16_t vmanth_mask = UINT16_C(0x0FFF);
-  const uint16_t vnanh = UINT16_C(0x7E00);
+  const uint32_t vnonsign_mask = params->scalar_bitcast.nonsign_mask;
+  const uint32_t vexp_bias = params->scalar_bitcast.exp_bias;
+  const float vscale_to_inf = params->scalar_bitcast.scale_to_inf;
+  const uint32_t vexpw_max = params->scalar_bitcast.expw_max;
+  const float vscale_to_zero = params->scalar_bitcast.scale_to_zero;
+  const uint32_t vbias_min = params->scalar_bitcast.bias_min;
+  const uint16_t vexph_mask = params->scalar_bitcast.exph_mask;
+  const uint16_t vmanth_mask = params->scalar_bitcast.manth_mask;
+  const uint16_t vnanh = params->scalar_bitcast.nanh;
 
+  const uint32_t* i = (const uint32_t*) input;
   uint16_t* o = (uint16_t*) output;
   do {
-    const float vx = *input++;
+    const uint32_t vw = *i++;
 
-    const uint32_t vw = fp32_to_bits(vx);
     const uint32_t vnonsignw = vw & vnonsign_mask;
 
     float vf = fp32_from_bits(vnonsignw);

@@ -16,13 +16,11 @@
 #include <xnnpack/vcvt.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_f16_vcvt_ukernel__f16c_x16(
     size_t n,
     const float* input,
     void* output,
-    const void* params)
+    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
@@ -49,7 +47,7 @@ void xnn_f32_f16_vcvt_ukernel__f16c_x16(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->f16c.mask_table[7] - n));
 
     const __m256 vf = _mm256_maskload_ps(input, vmask);
 

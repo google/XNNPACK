@@ -93,7 +93,7 @@ DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__scalar_x4)
       size_t n,                                        \
       const float* input,                              \
       void* output,                                    \
-      const void* params);
+      const union xnn_f32_f16_cvt_params* params);
 
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__neon_x8)
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__neon_x16)

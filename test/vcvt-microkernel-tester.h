@@ -113,7 +113,7 @@ class VCvtMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_f16_vcvt_ukernel_function vcvt) const {
+  void Test(xnn_f32_f16_vcvt_ukernel_function vcvt, xnn_init_f32_f16_cvt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-100.0f, 100.0f);
@@ -125,8 +125,13 @@ class VCvtMicrokernelTester {
       std::generate(input.begin(), input.end(), std::ref(f32rng));
       std::fill(output.begin(), output.end(), UINT16_C(0x7E));
 
+      union xnn_f32_f16_cvt_params params;
+      if (init_params) {
+        init_params(&params);
+      }
+
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(float), input.data(), output.data(), nullptr /* params */);
+      vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

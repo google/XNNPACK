@@ -922,6 +922,66 @@ union xnn_f16_f32_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f32_f16_cvt_params {
+  struct {
+    uint32_t nonsign_mask;
+    uint32_t exp_bias;
+    float scale_to_inf;
+    uint32_t expw_max;
+    float scale_to_zero;
+    uint32_t bias_min;
+    uint16_t exph_mask;
+    uint16_t manth_mask;
+    uint16_t nanh;
+  } scalar_bitcast;
+  struct {
+    float scale_to_inf;
+    uint32_t exp_bias;
+    float scale_to_zero;
+    uint32_t expw_max;
+    uint32_t bias_min;
+    uint16_t exph_mask;
+    uint16_t manth_mask;
+    uint16_t nanh;
+  } scalar_fabsf;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint32_t exp_bias;
+    float scale_to_inf;
+    uint32_t expw_max;
+    float scale_to_zero;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) uint32_t nonsign_mask[4];
+    XNN_ALIGN(16) uint32_t exp_bias[4];
+    XNN_ALIGN(16) float scale_to_inf[4];
+    XNN_ALIGN(16) uint32_t expw_max[4];
+    XNN_ALIGN(16) float scale_to_zero[4];
+    XNN_ALIGN(16) int16_t bias_min[8];
+    XNN_ALIGN(16) uint32_t manth_mask[4];
+    XNN_ALIGN(16) uint32_t exph_mask[4];
+    XNN_ALIGN(16) uint16_t nanh[8];
+  } sse2;
+  struct {
+    int32_t mask_table[14];
+  } f16c;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) uint32_t exp_bias[2];
+    XNN_ALIGN(8) float scale_to_inf[2];
+    XNN_ALIGN(8) uint32_t expw_max[2];
+    XNN_ALIGN(8) float scale_to_zero[2];
+    XNN_ALIGN(8) int16_t bias_min[4];
+    XNN_ALIGN(8) uint32_t manth_mask[2];
+    XNN_ALIGN(8) uint32_t exph_mask[2];
+    XNN_ALIGN(8) uint16_t nanh[4];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
 union xnn_f32_qs8_cvt_params {
   struct {
     float scale;
@@ -2358,7 +2418,7 @@ typedef void (*xnn_f32_f16_vcvt_ukernel_function)(
     size_t n,
     const float* input,
     void* output,
-    const void* params);
+    const union xnn_f32_f16_cvt_params* params);
 
 typedef void (*xnn_f32_qs8_vcvt_ukernel_function)(
     size_t n,
@@ -2483,6 +2543,9 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_function)(
 
 typedef void (*xnn_init_f16_f32_cvt_params_fn)(
   union xnn_f16_f32_cvt_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f32_f16_cvt_params_fn)(
+  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_qs8_cvt_params_fn)(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -2687,6 +2750,7 @@ struct vunary_parameters {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
@@ -3032,7 +3096,7 @@ struct xnn_parameters {
   } f32;
   struct {
     struct vunary_parameters f16_to_f32;
-    xnn_univector_ukernel_function f32_to_f16;
+    struct vunary_parameters f32_to_f16;
     struct vunary_parameters f32_to_qs8;
     struct vunary_parameters f32_to_qu8;
     struct vunary_parameters qs8_to_f32;

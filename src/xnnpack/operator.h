@@ -300,6 +300,7 @@ struct xnn_operator {
       union xnn_f32_scaleminmax_params f32_scaleminmax;
     };
     union xnn_f32_chw_params f32_chw;
+    union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;

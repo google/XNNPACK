@@ -889,22 +889,22 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x16(
     size_t n,
     const float* input,
     void* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vnonsign_mask = _mm_castsi128_ps(_mm_set1_epi32(0x7FFFFFFF));
-  const __m128i vexp_bias = _mm_set1_epi32(0x07800000);
-  const __m128 vscale_to_inf = _mm_set1_ps(0x1.0p+112f);
-  const __m128i vexpw_max = _mm_set1_epi32(0x7F800000);
-  const __m128 vscale_to_zero = _mm_set1_ps(0x1.0p-110f);
-  const __m128i vbias_min = _mm_set1_epi32(0x40008000);
-  const __m128i vmanth_mask = _mm_set1_epi32(0x0FFF);
-  const __m128i vexph_mask = _mm_set1_epi32(0x7C00);
-  const __m128i vnanh = _mm_set1_epi16(0x7E00);
+  const __m128 vnonsign_mask = _mm_load_ps((const float*) params->sse2.nonsign_mask);
+  const __m128i vexp_bias = _mm_load_si128((const __m128i*) params->sse2.exp_bias);
+  const __m128 vscale_to_inf = _mm_load_ps(params->sse2.scale_to_inf);
+  const __m128i vexpw_max = _mm_load_si128((const __m128i*) params->sse2.expw_max);
+  const __m128 vscale_to_zero = _mm_load_ps(params->sse2.scale_to_zero);
+  const __m128i vbias_min = _mm_load_si128((const __m128i*) params->sse2.bias_min);
+  const __m128i vmanth_mask = _mm_load_si128((const __m128i*) params->sse2.manth_mask);
+  const __m128i vexph_mask = _mm_load_si128((const __m128i*) params->sse2.exph_mask);
+  const __m128i vnanh = _mm_load_si128((const __m128i*) params->sse2.nanh);
 
   uint16_t* o = (uint16_t*) output;
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
