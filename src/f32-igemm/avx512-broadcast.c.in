@@ -82,8 +82,9 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
         w += ${NR};
 
         $for M in range(MR):
+          const __m512 va${M} = _mm512_set1_ps(*a${M});
           $for N in range(0, NR, 16):
-            vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(_mm512_set1_ps(*a${M}), vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
+            vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(va${M}, vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
 
         $for M in range(MR):
           a${M} += 1;

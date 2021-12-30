@@ -83,12 +83,18 @@ void xnn_f32_gemm_minmax_ukernel_6x16__avx512f_broadcast(
       const __m512 vb0123456789ABCDEF = _mm512_load_ps(w);
       w += 16;
 
-      vacc0x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a0), vb0123456789ABCDEF, vacc0x0123456789ABCDEF);
-      vacc1x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a1), vb0123456789ABCDEF, vacc1x0123456789ABCDEF);
-      vacc2x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a2), vb0123456789ABCDEF, vacc2x0123456789ABCDEF);
-      vacc3x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a3), vb0123456789ABCDEF, vacc3x0123456789ABCDEF);
-      vacc4x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a4), vb0123456789ABCDEF, vacc4x0123456789ABCDEF);
-      vacc5x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a5), vb0123456789ABCDEF, vacc5x0123456789ABCDEF);
+      const __m512 va0 = _mm512_set1_ps(*a0);
+      vacc0x0123456789ABCDEF = _mm512_fmadd_ps(va0, vb0123456789ABCDEF, vacc0x0123456789ABCDEF);
+      const __m512 va1 = _mm512_set1_ps(*a1);
+      vacc1x0123456789ABCDEF = _mm512_fmadd_ps(va1, vb0123456789ABCDEF, vacc1x0123456789ABCDEF);
+      const __m512 va2 = _mm512_set1_ps(*a2);
+      vacc2x0123456789ABCDEF = _mm512_fmadd_ps(va2, vb0123456789ABCDEF, vacc2x0123456789ABCDEF);
+      const __m512 va3 = _mm512_set1_ps(*a3);
+      vacc3x0123456789ABCDEF = _mm512_fmadd_ps(va3, vb0123456789ABCDEF, vacc3x0123456789ABCDEF);
+      const __m512 va4 = _mm512_set1_ps(*a4);
+      vacc4x0123456789ABCDEF = _mm512_fmadd_ps(va4, vb0123456789ABCDEF, vacc4x0123456789ABCDEF);
+      const __m512 va5 = _mm512_set1_ps(*a5);
+      vacc5x0123456789ABCDEF = _mm512_fmadd_ps(va5, vb0123456789ABCDEF, vacc5x0123456789ABCDEF);
 
       a0 += 1;
       a1 += 1;

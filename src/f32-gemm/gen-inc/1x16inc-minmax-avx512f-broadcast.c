@@ -50,7 +50,8 @@ void xnn_f32_gemminc_minmax_ukernel_1x16__avx512f_broadcast(
       const __m512 vb0123456789ABCDEF = _mm512_load_ps(w);
       w += 16;
 
-      vacc0x0123456789ABCDEF = _mm512_fmadd_ps(_mm512_set1_ps(*a0), vb0123456789ABCDEF, vacc0x0123456789ABCDEF);
+      const __m512 va0 = _mm512_set1_ps(*a0);
+      vacc0x0123456789ABCDEF = _mm512_fmadd_ps(va0, vb0123456789ABCDEF, vacc0x0123456789ABCDEF);
 
       a0 += 1;
 

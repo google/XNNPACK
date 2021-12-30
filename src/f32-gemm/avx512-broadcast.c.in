@@ -81,9 +81,10 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__avx512f_bro
         const __m512 vb${ABC[N:N+16]} = _mm512_load_ps(w + ${N});
       w += ${NR};
 
-      $for N in range(0, NR, 16):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(_mm512_set1_ps(*a${M}), vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
+      $for M in range(MR):
+        const __m512 va${M} = _mm512_set1_ps(*a${M});
+        $for N in range(0, NR, 16):
+          vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(va${M}, vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
 
       $for M in range(MR):
         a${M} += 1;
