@@ -2794,6 +2794,7 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels minmax;
   struct vbinary_fused_ukernels linear;
   union {
+    xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_qs8_addsub_minmax_params_fn qs8_addsub;
     xnn_init_qs8_mul_minmax_params_fn qs8_mul;
     xnn_init_qu8_addsub_minmax_params_fn qu8_addsub;

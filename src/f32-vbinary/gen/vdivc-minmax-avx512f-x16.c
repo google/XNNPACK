@@ -29,8 +29,8 @@ void xnn_f32_vdivc_minmax_ukernel__avx512f_x16(
   assert(b != NULL);
   assert(y != NULL);
 
-  const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
-  const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
+  const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
   const __m512 vb = _mm512_set1_ps(*b);
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {

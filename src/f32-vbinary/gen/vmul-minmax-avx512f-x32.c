@@ -29,8 +29,8 @@ void xnn_f32_vmul_minmax_ukernel__avx512f_x32(
   assert(b != NULL);
   assert(y != NULL);
 
-  const __m512 vy_min = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.min));
-  const __m512 vy_max = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.max));
+  const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
     const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);

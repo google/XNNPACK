@@ -299,7 +299,7 @@ class VBinaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
@@ -363,14 +363,7 @@ class VBinaryMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_minmax_params params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_minmax_params(&params, y_min, y_max);
-          break;
-        case Variant::Scalar:
-          xnn_init_f32_minmax_scalar_params(&params, y_min, y_max);
-          break;
-      }
+      init_params(&params, y_min, y_max);
 
       // Call optimized micro-kernel.
       vbinary_minmax(batch_size() * sizeof(float), a_data, b_data, y.data(), &params);

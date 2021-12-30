@@ -291,7 +291,12 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax,
     .vmulc_ukernel = xnn_params.f32.vmul.minmax.opc_ukernel,
   };
-  xnn_init_f32_minmax_params(&softmax_op->context.f32_three_pass_softmax.params, -INFINITY, INFINITY),
+  if (xnn_params.f32.vmul.linear.opc_ukernel != NULL) {
+    softmax_op->context.f32_three_pass_softmax.vmulc_ukernel = xnn_params.f32.vmul.linear.opc_ukernel;
+  };
+  if (xnn_params.f32.vmul.init.f32_minmax != NULL) {
+    xnn_params.f32.vmul.init.f32_minmax(&softmax_op->context.f32_three_pass_softmax.params, -INFINITY, INFINITY);
+  }
   softmax_op->compute.type = xnn_parallelization_type_1d;
   softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_three_pass_softmax;
   softmax_op->compute.range[0] = batch_size;

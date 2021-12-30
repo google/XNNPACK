@@ -30,8 +30,8 @@ void xnn_f32_vdiv_minmax_ukernel__avx_x16(
   assert(b != NULL);
   assert(y != NULL);
 
-  const __m256 vy_min = _mm256_broadcast_ps((const __m128*) params->sse.min);
-  const __m256 vy_max = _mm256_broadcast_ps((const __m128*) params->sse.max);
+  const __m256 vy_min = _mm256_load_ps(params->avx.min);
+  const __m256 vy_max = _mm256_load_ps(params->avx.max);
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const __m256 va01234567 = _mm256_loadu_ps(a);
