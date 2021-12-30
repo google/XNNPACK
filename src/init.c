@@ -4453,14 +4453,14 @@ static void init(void) {
     if (is_wasm_x86) {
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
+        .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
         .channel_tile = 4,
         .row_tile = 2,
       };
     } else {
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
+        .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
         .channel_tile = 4,
         .row_tile = 2,
       };
