@@ -1176,6 +1176,12 @@ void xnn_init_f32_minmax_avx_params(
     params->avx.min[i] = output_min;
     params->avx.max[i] = output_max;
   }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
