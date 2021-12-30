@@ -312,11 +312,15 @@ enum xnn_status xnn_create_convert_nc_f16_f32(
   uint32_t flags,
   xnn_operator_t* convert_op_out)
 {
+  union xnn_f16_f32_cvt_params params;
+  if (xnn_params.vcvt.f16_to_f32.init.f16_f32_cvt != NULL) {
+    xnn_params.vcvt.f16_to_f32.init.f16_f32_cvt(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
-    NULL, 0,
+    &params, sizeof(params),
     xnn_operator_type_convert_nc_f16_f32,
-    xnn_params.vcvt.f16_to_f32,
+    xnn_params.vcvt.f16_to_f32.ukernel,
     convert_op_out);
 }
 
@@ -843,7 +847,7 @@ enum xnn_status xnn_setup_convert_nc_f16_f32(
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     2 /* log2(sizeof(float)) */,
-    NULL, 0,
+    &convert_op->params.f16_f32_cvt, sizeof(convert_op->params.f16_f32_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 

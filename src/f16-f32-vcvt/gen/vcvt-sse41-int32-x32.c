@@ -19,19 +19,18 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int32_x32(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_set1_epi32(0x80000000);
-  const __m128i vexp_offset = _mm_set1_epi32(0x70000000);
-  const __m128 vexp_scale = _mm_set1_ps(0x1.0p-112f);
-  const __m128i vmagic_mask = _mm_set1_epi32(0x3F000000);
-  const __m128 vmagic_bias = _mm_set1_ps(0.5f);
-  const __m128i vdenorm_cutoff = _mm_set1_epi32(0x04000000);
+  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse_int32.sign_mask);
+  const __m128i vexp_offset = _mm_load_si128((const __m128i*) params->sse_int32.exp_offset);
+  const __m128 vexp_scale = _mm_load_ps(params->sse_int32.exp_scale);
+  const __m128i vmagic_bias = _mm_load_si128((const __m128i*) params->sse_int32.magic_bias);
+  const __m128i vdenorm_cutoff = _mm_load_si128((const __m128i*) params->sse_int32.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 32 * sizeof(uint16_t); n -= 32 * sizeof(uint16_t)) {
@@ -77,14 +76,14 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int32_x32(
     const __m128i vnorm6 = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign6, 3), vexp_offset)), vexp_scale));
     const __m128i vnorm7 = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign7, 3), vexp_offset)), vexp_scale));
 
-    const __m128i vdenorm0 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign0, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm1 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign1, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm2 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign2, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm3 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign3, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm4 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign4, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm5 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign5, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm6 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign6, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm7 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign7, 16), vmagic_mask)), vmagic_bias));
+    const __m128i vdenorm0 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign0, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm1 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign1, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm2 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign2, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm3 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign3, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm4 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign4, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm5 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign5, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm6 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign6, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm7 = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign7, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
 
     const __m128i vmask0 = _mm_cmpgt_epi32(vnonsign0, vdenorm_cutoff);
     const __m128i vmask1 = _mm_cmpgt_epi32(vnonsign1, vdenorm_cutoff);
@@ -130,8 +129,8 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int32_x32(
     const __m128i vnorm_lo = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign_lo, 3), vexp_offset)), vexp_scale));
     const __m128i vnorm_hi = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign_hi, 3), vexp_offset)), vexp_scale));
 
-    const __m128i vdenorm_lo = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_lo, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm_hi = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_hi, 16), vmagic_mask)), vmagic_bias));
+    const __m128i vdenorm_lo = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_lo, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm_hi = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_hi, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
 
     const __m128i vmask_lo = _mm_cmpgt_epi32(vnonsign_lo, vdenorm_cutoff);
     const __m128i vf_lo = _mm_or_si128(vsign_lo, _mm_blendv_epi8(vdenorm_lo, vnorm_lo, vmask_lo));
@@ -158,8 +157,8 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int32_x32(
     const __m128i vnorm_lo = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign_lo, 3), vexp_offset)), vexp_scale));
     const __m128i vnorm_hi = _mm_castps_si128(_mm_mul_ps(_mm_castsi128_ps(_mm_add_epi32(_mm_srli_epi32(vnonsign_hi, 3), vexp_offset)), vexp_scale));
 
-    const __m128i vdenorm_lo = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_lo, 16), vmagic_mask)), vmagic_bias));
-    const __m128i vdenorm_hi = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_hi, 16), vmagic_mask)), vmagic_bias));
+    const __m128i vdenorm_lo = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_lo, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
+    const __m128i vdenorm_hi = _mm_castps_si128(_mm_sub_ps(_mm_castsi128_ps(_mm_or_si128(_mm_srli_epi32(vnonsign_hi, 16), vmagic_bias)), _mm_castsi128_ps(vmagic_bias)));
 
     const __m128i vmask_lo = _mm_cmpgt_epi32(vnonsign_lo, vdenorm_cutoff);
     __m128i vf = _mm_or_si128(vsign_lo, _mm_blendv_epi8(vdenorm_lo, vnorm_lo, vmask_lo));

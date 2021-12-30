@@ -20,7 +20,7 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x16(
     size_t n,
     const void* input,
     float* output,
-    const void* params)
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);

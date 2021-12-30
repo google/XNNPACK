@@ -19,7 +19,7 @@ void xnn_f16_f32_vcvt_ukernel__neonfp16_x16(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);

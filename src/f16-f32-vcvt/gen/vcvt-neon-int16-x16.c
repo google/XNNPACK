@@ -19,7 +19,7 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);
@@ -28,9 +28,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
 
   const uint16x8_t vsign_mask = vmovq_n_u16(0x8000);
   const uint16x8_t vexp_offset = vmovq_n_u16(0x7000);
-  const float32x4_t vexp_scale = vmovq_n_f32(0x1.0p-112f);
-  const uint32x4_t vmagic_mask = vmovq_n_u32(0x3F000000);
-  const float32x4_t vmagic_bias = vmovq_n_f32(0.5f);
+  const float32x4_t vexp_scale = vld1q_dup_f32(&params->neon.exp_scale);
+  const uint32x4_t vmagic_bias = vmovq_n_u32(0x3F000000);
   const uint16x8_t vdenorm_cutoff = vmovq_n_u16(0x0400);
 
   const uint16_t* i = (const uint16_t*) input;
@@ -52,10 +51,10 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
     const float32x4_t vnorm2 = vmulq_f32(vreinterpretq_f32_u16(vprenorm1.val[0]), vexp_scale);
     const float32x4_t vnorm3 = vmulq_f32(vreinterpretq_f32_u16(vprenorm1.val[1]), vexp_scale);
 
-    const float32x4_t vdenorm0 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_low_u16(vnonsign0))), vmagic_bias);
-    const float32x4_t vdenorm1 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_high_u16(vnonsign0))), vmagic_bias);
-    const float32x4_t vdenorm2 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_low_u16(vnonsign1))), vmagic_bias);
-    const float32x4_t vdenorm3 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_high_u16(vnonsign1))), vmagic_bias);
+    const float32x4_t vdenorm0 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_low_u16(vnonsign0))), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm1 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_high_u16(vnonsign0))), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm2 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_low_u16(vnonsign1))), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm3 = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_high_u16(vnonsign1))), vreinterpretq_f32_u32(vmagic_bias));
 
     const uint16x8_t vmask0 = vcgtq_u16(vnonsign0, vdenorm_cutoff);
     const uint16x8_t vmask1 = vcgtq_u16(vnonsign1, vdenorm_cutoff);
@@ -90,8 +89,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
     const float32x4_t vnorm_lo = vmulq_f32(vreinterpretq_f32_u16(vprenorm.val[0]), vexp_scale);
     const float32x4_t vnorm_hi = vmulq_f32(vreinterpretq_f32_u16(vprenorm.val[1]), vexp_scale);
 
-    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_low_u16(vnonsign))), vmagic_bias);
-    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_high_u16(vnonsign))), vmagic_bias);
+    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_low_u16(vnonsign))), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_high_u16(vnonsign))), vreinterpretq_f32_u32(vmagic_bias));
 
     const uint16x8_t vmask = vcgtq_u16(vnonsign, vdenorm_cutoff);
 
@@ -117,8 +116,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
     const float32x4_t vnorm_lo = vmulq_f32(vreinterpretq_f32_u16(vprenorm.val[0]), vexp_scale);
     const float32x4_t vnorm_hi = vmulq_f32(vreinterpretq_f32_u16(vprenorm.val[1]), vexp_scale);
 
-    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_low_u16(vnonsign))), vmagic_bias);
-    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_mask, vget_high_u16(vnonsign))), vmagic_bias);
+    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_low_u16(vnonsign))), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vaddw_u16(vmagic_bias, vget_high_u16(vnonsign))), vreinterpretq_f32_u32(vmagic_bias));
 
     const uint16x8_t vmask = vcgtq_u16(vnonsign, vdenorm_cutoff);
 

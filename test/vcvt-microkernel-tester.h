@@ -83,7 +83,7 @@ class VCvtMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_f32_vcvt_ukernel_function vcvt) const {
+  void Test(xnn_f16_f32_vcvt_ukernel_function vcvt, xnn_init_f16_f32_cvt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-100.0f, 100.0f);
@@ -96,8 +96,13 @@ class VCvtMicrokernelTester {
       std::generate(input.begin(), input.end(), std::ref(f16rng));
       std::fill(output.begin(), output.end(), nanf(""));
 
+      union xnn_f16_f32_cvt_params params;
+      if (init_params) {
+        init_params(&params);
+      }
+
       // Call optimized micro-kernel.
-      vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), nullptr /* params */);
+      vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -133,7 +138,7 @@ class VCvtMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_qs8_vcvt_ukernel_function vcvt, xnn_init_f32_qs8_cvt_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_qs8_vcvt_ukernel_function vcvt, xnn_init_f32_qs8_cvt_params_fn init_params) const {
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
@@ -179,7 +184,7 @@ class VCvtMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_qu8_vcvt_ukernel_function vcvt, xnn_init_f32_qu8_cvt_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_qu8_vcvt_ukernel_function vcvt, xnn_init_f32_qu8_cvt_params_fn init_params) const {
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
@@ -200,9 +205,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       union xnn_f32_qu8_cvt_params params;
-      if (init_params) {
-        init_params(&params, scale(), zero_point(), qmin(), qmax());
-      }
+      init_params(&params, scale(), zero_point(), qmin(), qmax());
 
       // Call optimized micro-kernel.
       vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
@@ -225,7 +228,7 @@ class VCvtMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_f32_vcvt_ukernel_function vcvt, xnn_init_qs8_f32_cvt_params_fn init_params = nullptr) const {
+  void Test(xnn_qs8_f32_vcvt_ukernel_function vcvt, xnn_init_qs8_f32_cvt_params_fn init_params) const {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -243,9 +246,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       union xnn_qs8_f32_cvt_params params;
-      if (init_params) {
-        init_params(&params, scale(), zero_point());
-      }
+      init_params(&params, scale(), zero_point());
 
       // Call optimized micro-kernel.
       vcvt(batch_size() * sizeof(int8_t), input.data(), output.data(), &params);
@@ -264,7 +265,7 @@ class VCvtMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_f32_vcvt_ukernel_function vcvt, xnn_init_qu8_f32_cvt_params_fn init_params = nullptr) const {
+  void Test(xnn_qu8_f32_vcvt_ukernel_function vcvt, xnn_init_qu8_f32_cvt_params_fn init_params) const {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
@@ -282,9 +283,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       union xnn_qu8_f32_cvt_params params;
-      if (init_params) {
-        init_params(&params, scale(), zero_point());
-      }
+      init_params(&params, scale(), zero_point());
 
       // Call optimized micro-kernel.
       vcvt(batch_size() * sizeof(uint8_t), input.data(), output.data(), &params);

@@ -19,19 +19,18 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int32_x16(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vsign_mask = wasm_i32x4_const_splat(0x80000000);
-  const v128_t vexp_offset = wasm_i32x4_const_splat(0x70000000);
-  const v128_t vexp_scale = wasm_f32x4_const_splat(0x1.0p-112f);
-  const v128_t vmagic_mask = wasm_i32x4_const_splat(0x3F000000);
-  const v128_t vmagic_bias = wasm_f32x4_const_splat(0.5f);
-  const v128_t vdenorm_cutoff = wasm_i32x4_const_splat(0x04000000);
+  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd_int32.sign_mask);
+  const v128_t vexp_offset = wasm_v128_load64_splat(params->wasmsimd_int32.exp_offset);
+  const v128_t vexp_scale = wasm_v128_load64_splat(params->wasmsimd_int32.exp_scale);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_int32.magic_bias);
+  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int32.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 16 * sizeof(uint16_t); n -= 16 * sizeof(uint16_t)) {
@@ -60,10 +59,10 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int32_x16(
     const v128_t vnorm2 = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign2, 3), vexp_offset), vexp_scale);
     const v128_t vnorm3 = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign3, 3), vexp_offset), vexp_scale);
 
-    const v128_t vdenorm0 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign0, 16), vmagic_mask), vmagic_bias);
-    const v128_t vdenorm1 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign1, 16), vmagic_mask), vmagic_bias);
-    const v128_t vdenorm2 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign2, 16), vmagic_mask), vmagic_bias);
-    const v128_t vdenorm3 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign3, 16), vmagic_mask), vmagic_bias);
+    const v128_t vdenorm0 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign0, 16), vmagic_bias), vmagic_bias);
+    const v128_t vdenorm1 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign1, 16), vmagic_bias), vmagic_bias);
+    const v128_t vdenorm2 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign2, 16), vmagic_bias), vmagic_bias);
+    const v128_t vdenorm3 = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign3, 16), vmagic_bias), vmagic_bias);
 
     const v128_t vxmask0 = wasm_i32x4_gt(vnonsign0, vdenorm_cutoff);
     const v128_t vxmask1 = wasm_i32x4_gt(vnonsign1, vdenorm_cutoff);
@@ -98,8 +97,8 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int32_x16(
     const v128_t vnorm_lo = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign_lo, 3), vexp_offset), vexp_scale);
     const v128_t vnorm_hi = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign_hi, 3), vexp_offset), vexp_scale);
 
-    const v128_t vdenorm_lo = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_lo, 16), vmagic_mask), vmagic_bias);
-    const v128_t vdenorm_hi = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_hi, 16), vmagic_mask), vmagic_bias);
+    const v128_t vdenorm_lo = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_lo, 16), vmagic_bias), vmagic_bias);
+    const v128_t vdenorm_hi = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_hi, 16), vmagic_bias), vmagic_bias);
 
     const v128_t vxmask_lo = wasm_i32x4_gt(vnonsign_lo, vdenorm_cutoff);
     const v128_t vxmask_hi = wasm_i32x4_gt(vnonsign_hi, vdenorm_cutoff);
@@ -129,8 +128,8 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int32_x16(
     const v128_t vnorm_lo = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign_lo, 3), vexp_offset), vexp_scale);
     const v128_t vnorm_hi = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign_hi, 3), vexp_offset), vexp_scale);
 
-    const v128_t vdenorm_lo = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_lo, 16), vmagic_mask), vmagic_bias);
-    const v128_t vdenorm_hi = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_hi, 16), vmagic_mask), vmagic_bias);
+    const v128_t vdenorm_lo = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_lo, 16), vmagic_bias), vmagic_bias);
+    const v128_t vdenorm_hi = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign_hi, 16), vmagic_bias), vmagic_bias);
 
     const v128_t vxmask_lo = wasm_i32x4_gt(vnonsign_lo, vdenorm_cutoff);
     v128_t vf = wasm_v128_or(vsign_lo, wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo));

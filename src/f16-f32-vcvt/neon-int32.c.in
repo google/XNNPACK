@@ -19,7 +19,7 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);
@@ -28,9 +28,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
 
   const uint32x4_t vsign_mask = vmovq_n_u32(0x80000000);
   const uint32x4_t vexp_offset = vmovq_n_u32(0x70000000);
-  const float32x4_t vexp_scale = vmovq_n_f32(0x1.0p-112f);
-  const uint32x4_t vmagic_mask = vmovq_n_u32(0x3F000000);
-  const float32x4_t vmagic_bias = vmovq_n_f32(0.5f);
+  const float32x4_t vexp_scale = vld1q_dup_f32(&params->neon.exp_scale);
+  const uint32x4_t vmagic_bias = vmovq_n_u32(0x3F000000);
   const uint32x4_t vdenorm_cutoff = vmovq_n_u32(0x04000000);
 
   const uint16_t* i = (const uint16_t*) input;
@@ -53,7 +52,7 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
         const float32x4_t vnorm${N} = vmulq_f32(vreinterpretq_f32_u32(vsraq_n_u32(vexp_offset, vnonsign${N}, 3)), vexp_scale);
 
       $for N in range(2*SIMD_TILE):
-        const float32x4_t vdenorm${N} = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_mask, vnonsign${N}, 16)), vmagic_bias);
+        const float32x4_t vdenorm${N} = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_bias, vnonsign${N}, 16)), vreinterpretq_f32_u32(vmagic_bias));
 
       $for N in range(2*SIMD_TILE):
         const uint32x4_t vxmask${N} = vcgtq_u32(vnonsign${N}, vdenorm_cutoff);
@@ -79,8 +78,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
     const float32x4_t vnorm_lo = vmulq_f32(vreinterpretq_f32_u32(vsraq_n_u32(vexp_offset, vnonsign_lo, 3)), vexp_scale);
     const float32x4_t vnorm_hi = vmulq_f32(vreinterpretq_f32_u32(vsraq_n_u32(vexp_offset, vnonsign_hi, 3)), vexp_scale);
 
-    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_mask, vnonsign_lo, 16)), vmagic_bias);
-    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_mask, vnonsign_hi, 16)), vmagic_bias);
+    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_bias, vnonsign_lo, 16)), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_bias, vnonsign_hi, 16)), vreinterpretq_f32_u32(vmagic_bias));
 
     const uint32x4_t vxmask_lo = vcgtq_u32(vnonsign_lo, vdenorm_cutoff);
     const uint32x4_t vf_lo = vorrq_u32(vsign_lo, vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));
@@ -106,8 +105,8 @@ void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
     const float32x4_t vnorm_lo = vmulq_f32(vreinterpretq_f32_u32(vsraq_n_u32(vexp_offset, vnonsign_lo, 3)), vexp_scale);
     const float32x4_t vnorm_hi = vmulq_f32(vreinterpretq_f32_u32(vsraq_n_u32(vexp_offset, vnonsign_hi, 3)), vexp_scale);
 
-    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_mask, vnonsign_lo, 16)), vmagic_bias);
-    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_mask, vnonsign_hi, 16)), vmagic_bias);
+    const float32x4_t vdenorm_lo = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_bias, vnonsign_lo, 16)), vreinterpretq_f32_u32(vmagic_bias));
+    const float32x4_t vdenorm_hi = vsubq_f32(vreinterpretq_f32_u32(vsriq_n_u32(vmagic_bias, vnonsign_hi, 16)), vreinterpretq_f32_u32(vmagic_bias));
 
     const uint32x4_t vxmask_lo = vcgtq_u32(vnonsign_lo, vdenorm_cutoff);
     uint32x4_t vf = vorrq_u32(vsign_lo, vreinterpretq_u32_f32(vbslq_f32(vxmask_lo, vnorm_lo, vdenorm_lo)));

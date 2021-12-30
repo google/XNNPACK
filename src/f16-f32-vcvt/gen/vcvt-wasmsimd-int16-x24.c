@@ -19,19 +19,19 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x24(
     size_t n,
     const void* input,
     float* output,
-    const void* params) XNN_OOB_READS
+    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vsign_mask = wasm_i16x8_const_splat(0x8000);
-  const v128_t vexp_offset = wasm_i16x8_const_splat(0x7000);
-  const v128_t vexp_scale = wasm_f32x4_const_splat(0x1.0p-112f);
-  const v128_t vmagic_mask = wasm_i16x8_const_splat(0x3F00);
-  const v128_t vmagic_bias = wasm_f32x4_const_splat(0.5f);
-  const v128_t vdenorm_cutoff = wasm_i16x8_const_splat(0x0400);
+  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd_int16.sign_mask);
+  const v128_t vexp_offset = wasm_v128_load64_splat(params->wasmsimd_int16.exp_offset);
+  const v128_t vexp_scale = wasm_v128_load64_splat(params->wasmsimd_int16.exp_scale);
+  const v128_t vmagic_mask = wasm_v128_load64_splat(params->wasmsimd_int16.magic_mask);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_int16.magic_bias);
+  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int16.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; n >= 24 * sizeof(uint16_t); n -= 24 * sizeof(uint16_t)) {

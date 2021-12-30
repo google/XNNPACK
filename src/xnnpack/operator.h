@@ -281,6 +281,8 @@ struct xnn_operator {
   uint32_t flags;
 
   union {
+    union xnn_f16_f32_cvt_params f16_f32_cvt;
+    struct xnn_f16_hswish_params f16_hswish;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_lrelu_params f32_lrelu;
@@ -288,7 +290,6 @@ struct xnn_operator {
     union xnn_f32_rnd_params f32_rnd;
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool;
-    struct xnn_f16_hswish_params f16_hswish;
     union xnn_f32_hswish_params f32_hswish;
     struct xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;

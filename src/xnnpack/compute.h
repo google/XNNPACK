@@ -846,8 +846,7 @@ struct univector_strided_context {
   size_t y_stride;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_s8_minmax_params s8_minmax;
-    union xnn_u8_minmax_params u8_minmax;
+    union xnn_f16_f32_cvt_params f16_f32_cvt;
     struct xnn_f16_hswish_params f16_hswish;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_elu_params f32_elu;
@@ -855,10 +854,14 @@ struct univector_strided_context {
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
     union xnn_f32_neg_params f32_neg;
-    union xnn_f32_rnd_params f32_rnd;
-    union xnn_f32_sqrt_params f32_sqrt;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    union xnn_f32_rnd_params f32_rnd;
+    union xnn_f32_sqrt_params f32_sqrt;
+    union xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    union xnn_qu8_f32_cvt_params qu8_f32_cvt;
+    union xnn_s8_minmax_params s8_minmax;
+    union xnn_u8_minmax_params u8_minmax;
   } params;
 };
 
@@ -878,8 +881,7 @@ struct univector_contiguous_context {
   uint16_t log2_ysize;
   xnn_univector_ukernel_function ukernel;
   union {
-    union xnn_s8_minmax_params s8_minmax;
-    union xnn_u8_minmax_params u8_minmax;
+    union xnn_f16_f32_cvt_params f16_f32_cvt;
     struct xnn_f16_hswish_params f16_hswish;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_elu_params f32_elu;
@@ -887,10 +889,14 @@ struct univector_contiguous_context {
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
     union xnn_f32_neg_params f32_neg;
-    union xnn_f32_rnd_params f32_rnd;
-    union xnn_f32_sqrt_params f32_sqrt;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    union xnn_f32_rnd_params f32_rnd;
+    union xnn_f32_sqrt_params f32_sqrt;
+    union xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    union xnn_qu8_f32_cvt_params qu8_f32_cvt;
+    union xnn_s8_minmax_params s8_minmax;
+    union xnn_u8_minmax_params u8_minmax;
   } params;
 };
 

@@ -262,7 +262,7 @@ SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/xx-copy/memcpy.c)
 
 SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-x4.c
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
   src/f32-argmaxpool/9x-scalar-c1.c
@@ -404,10 +404,10 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/xx-pad/scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c
-  src/f16-f32-vcvt/gen/vcvt-scalar-float-x2.c
-  src/f16-f32-vcvt/gen/vcvt-scalar-float-x3.c
-  src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-x1.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-x2.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-x3.c
+  src/f16-f32-vcvt/gen/vcvt-scalar-x4.c
   src/f32-argmaxpool/4x-scalar-c1.c
   src/f32-argmaxpool/9p8x-scalar-c1.c
   src/f32-argmaxpool/9x-scalar-c1.c

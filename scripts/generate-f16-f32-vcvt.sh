@@ -69,10 +69,10 @@ tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=24 -o src/f16-f32
 tools/xngen src/f16-f32-vcvt/wasmsimd-int32.c.in -D BATCH_TILE=32 -o src/f16-f32-vcvt/gen/vcvt-wasmsimd-int32-x32.c &
 
 #################################### Scalar ###################################
-tools/xngen src/f16-f32-vcvt/scalar-float.c.in -D BATCH_TILE=1 -o src/f16-f32-vcvt/gen/vcvt-scalar-float-x1.c &
-tools/xngen src/f16-f32-vcvt/scalar-float.c.in -D BATCH_TILE=2 -o src/f16-f32-vcvt/gen/vcvt-scalar-float-x2.c &
-tools/xngen src/f16-f32-vcvt/scalar-float.c.in -D BATCH_TILE=3 -o src/f16-f32-vcvt/gen/vcvt-scalar-float-x3.c &
-tools/xngen src/f16-f32-vcvt/scalar-float.c.in -D BATCH_TILE=4 -o src/f16-f32-vcvt/gen/vcvt-scalar-float-x4.c &
+tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=1 -o src/f16-f32-vcvt/gen/vcvt-scalar-x1.c &
+tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/f16-f32-vcvt/gen/vcvt-scalar-x2.c &
+tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=3 -o src/f16-f32-vcvt/gen/vcvt-scalar-x3.c &
+tools/xngen src/f16-f32-vcvt/scalar.c.in -D BATCH_TILE=4 -o src/f16-f32-vcvt/gen/vcvt-scalar-x4.c &
 
 ################################## Unit tests #################################
 tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc &
