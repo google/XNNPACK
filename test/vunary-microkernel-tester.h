@@ -27,7 +27,6 @@ class VUnaryMicrokernelTester {
   enum class OpType {
     Abs,
     ELU,
-    LeakyReLU,
     Negate,
     ReLU,
     RoundToNearestEven,
@@ -165,9 +164,6 @@ class VUnaryMicrokernelTester {
             y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
             break;
           }
-          case OpType::LeakyReLU:
-            y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
-            break;
           case OpType::Negate:
             y_ref[i] = -x_data[i];
             break;
@@ -230,16 +226,6 @@ class VUnaryMicrokernelTester {
               break;
             case Variant::Scalar:
               xnn_init_scalar_f32_elu_params(&params.elu, prescale(), alpha(), beta());
-              break;
-          }
-          break;
-        case OpType::LeakyReLU:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_lrelu_params(&params.lrelu, slope());
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_lrelu_params(&params.lrelu, slope());
               break;
           }
           break;
@@ -367,15 +353,48 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_vlrelu_ukernel_function vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<double> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::signbit(x_data[i]) ? x_data[i] * slope() : x_data[i];
+      }
+
+      // Prepare parameters.
+      union xnn_f32_lrelu_params params;
+      init_params(&params, slope());
+
+      // Call optimized micro-kernel.
+      vlrelu(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
   inline void Test(xnn_f32_vabs_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
   inline void Test(xnn_f32_velu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
-  }
-
-  inline void Test(xnn_f32_vlrelu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 

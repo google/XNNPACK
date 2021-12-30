@@ -597,12 +597,14 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
   }
 
   union xnn_f32_lrelu_params params;
-  xnn_init_f32_lrelu_params(&params, negative_slope);
+  if (xnn_params.f32.lrelu.init.f32_lrelu != NULL) {
+    xnn_params.f32.lrelu.init.f32_lrelu(&params, negative_slope);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_leaky_relu_nc_f32,
-    xnn_params.f32.lrelu,
+    xnn_params.f32.lrelu.ukernel,
     leaky_relu_op_out);
 }
 

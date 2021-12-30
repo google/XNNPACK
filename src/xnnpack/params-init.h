@@ -275,13 +275,23 @@ XNN_INTERNAL void xnn_init_scalar_f32_elu_params(
   float alpha,
   float beta);
 
-XNN_INTERNAL void xnn_init_f32_lrelu_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope);
 
-XNN_INTERNAL void xnn_init_scalar_f32_lrelu_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope);
+#define DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                                \
+    union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    float slope);
+
+DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_sse_params)
+  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_avx_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 
 XNN_INTERNAL void xnn_init_f32_sqrt_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);

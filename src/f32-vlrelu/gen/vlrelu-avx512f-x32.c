@@ -25,7 +25,7 @@ void xnn_f32_vlrelu_ukernel__avx512f_x32(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vslope = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.slope));
+  const __m512 vslope = _mm512_set1_ps(params->scalar.slope);
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {

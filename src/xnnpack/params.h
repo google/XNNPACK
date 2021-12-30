@@ -128,7 +128,16 @@ union xnn_f32_lrelu_params {
   struct {
     XNN_ALIGN(16) float slope[4];
   } sse;
+  struct {
+    XNN_ALIGN(32) float slope[8];
+    int32_t mask_table[14];
+  } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float slope[2];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_f32_sqrt_params {
@@ -2647,6 +2656,10 @@ typedef void (*xnn_init_f16_scaleminmax_params_fn)(
 typedef void (*xnn_init_f32_hswish_params_fn)(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_init_f32_lrelu_params_fn)(
+  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float slope);
+
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
@@ -2749,9 +2762,10 @@ struct vunary_parameters {
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_hswish_params_fn f16_hswish;
-    xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
+    xnn_init_f32_lrelu_params_fn f32_lrelu;
+    xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
@@ -3052,7 +3066,7 @@ struct xnn_parameters {
     struct vunary_parameters clamp;
     xnn_univector_ukernel_function elu;
     struct vunary_parameters hswish;
-    xnn_univector_ukernel_function lrelu;
+    struct vunary_parameters lrelu;
     xnn_univector_ukernel_function neg;
     xnn_univector_ukernel_function relu;
     xnn_univector_ukernel_function rndne;

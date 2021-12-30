@@ -15,8 +15,6 @@
 #include <xnnpack/vunary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_vlrelu_ukernel__avx_x16(
     size_t n,
     const float* x,
@@ -26,7 +24,7 @@ void xnn_f32_vlrelu_ukernel__avx_x16(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m256 vslope = _mm256_broadcast_ps((const __m128*) params->sse.slope);
+  const __m256 vslope = _mm256_load_ps(params->avx.slope);
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(x);
     const __m256 vx89ABCDEF = _mm256_loadu_ps(x + 8);
@@ -53,7 +51,7 @@ void xnn_f32_vlrelu_ukernel__avx_x16(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
     __m256 vacc = _mm256_mul_ps(vx, vslope);

@@ -1340,25 +1340,48 @@ void xnn_init_scalar_f32_elu_params(
   params->scalar.beta = beta;
 }
 
-void xnn_init_f32_lrelu_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope)
-{
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.slope[i] = slope;
-    }
-  #else
-    params->scalar.slope = slope;
-  #endif
-}
-
-void xnn_init_scalar_f32_lrelu_params(
+void xnn_init_f32_lrelu_scalar_params(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope)
 {
   params->scalar.slope = slope;
 }
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_lrelu_sse_params(
+  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float slope)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.slope[i] = slope;
+  }
+}
+
+void xnn_init_f32_lrelu_avx_params(
+  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float slope)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.slope[i] = slope;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+}
+#endif
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_lrelu_wasmsimd_params(
+  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float slope)
+{
+  params->wasmsimd.slope[0] = slope;
+  params->wasmsimd.slope[1] = slope;
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 void xnn_init_f32_sqrt_params(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)])
