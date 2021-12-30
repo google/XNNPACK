@@ -62,8 +62,8 @@ void xnn_f32_gemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
     c4 = c3;
   }
 
-  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
     v128_t vacc0x0123 = wasm_v128_load(w + 0);
     v128_t vacc0x4567 = wasm_v128_load(w + 4);

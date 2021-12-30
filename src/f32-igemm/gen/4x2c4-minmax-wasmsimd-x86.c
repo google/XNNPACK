@@ -159,11 +159,11 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     vacc01x01 = wasm_f32x4_pmax(vmin, vacc01x01);
     vacc23x01 = wasm_f32x4_pmax(vmin, vacc23x01);
 
-    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
     vacc01x01 = wasm_f32x4_pmin(vmax, vacc01x01);
     vacc23x01 = wasm_f32x4_pmin(vmax, vacc23x01);
 

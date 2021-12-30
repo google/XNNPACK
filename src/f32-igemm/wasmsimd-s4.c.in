@@ -59,8 +59,8 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}s4__wasmsimd${ARCH_SUF
       }
 
   $if ACTIVATION == "MINMAX" and not X86:
-    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
     v128_t vacc0x${ABC[0:4]} = wasm_v128_load(w);
     $for N in range(4, NR, 4):
@@ -124,12 +124,12 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}s4__wasmsimd${ARCH_SUF
 
     $if ACTIVATION == "MINMAX":
       $if X86:
-        const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+        const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vmin, vacc${M}x${ABC[N:N+4]});
 
-        const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+        const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
         $for N in range(0, NR, 4):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vmax, vacc${M}x${ABC[N:N+4]});

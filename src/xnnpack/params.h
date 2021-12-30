@@ -65,6 +65,12 @@ union xnn_f32_minmax_params {
     int32_t mask_table[14];
   } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float min[2];
+    XNN_ALIGN(8) float max[2];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_f32_abs_params {

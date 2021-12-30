@@ -28,8 +28,8 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x4(
   assert(b != NULL);
   assert(y != NULL);
 
-  const v128_t vy_min = wasm_v128_load32_splat(&params->scalar.min);
-  const v128_t vy_max = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
   const v128_t vb = wasm_v128_load32_splat(b);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t va0123 = wasm_v128_load(a);

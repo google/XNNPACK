@@ -34,8 +34,8 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}
   assert(output_width != 0);
 
   $if ACTIVATION == "MINMAX":
-    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   $elif ACTIVATION == "RELU":
     const v128_t vzero = wasm_i32x4_const_splat(0);
   do {

@@ -203,27 +203,27 @@ XNN_INTERNAL void xnn_init_f16_minmax_params(
   uint16_t min,
   uint16_t max);
 
-XNN_INTERNAL void xnn_init_f32_minmax_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max);
+
+#define DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                                 \
+    union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float output_min,                                        \
+    float output_max);
+
+
+DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_params)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_INTERNAL void xnn_init_f32_minmax_sse_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max);
-
-XNN_INTERNAL void xnn_init_f32_minmax_avx_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max);
+  DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_sse_params)
+  DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_INTERNAL void xnn_init_f32_minmax_scalar_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max);
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
+
 
 XNN_INTERNAL void xnn_init_f16_hswish_params(
   struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
@@ -244,6 +244,7 @@ DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_scalar_params)
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 
 XNN_INTERNAL void xnn_init_f32_abs_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)]);

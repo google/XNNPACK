@@ -29,8 +29,8 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4(
   assert(mc % sizeof(float) == 0);
   assert(nc != 0);
 
-  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   size_t output_decrement = output_stride * nc - 4 * sizeof(float);
   while XNN_LIKELY(mc >= 4 * sizeof(float)) {
     const float*restrict w = weights;

@@ -294,7 +294,7 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
         "xnn_%s_requantize_%s" % \
           (datatype.lower(), requantization_type.lower())
       ]
-  elif not isa:
+  elif isa == "wasm" or not isa:
     test_args.append("%s::Variant::Scalar" % tester)
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
