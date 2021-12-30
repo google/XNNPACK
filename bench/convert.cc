@@ -26,7 +26,7 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-void xnnpack_convert_f16_f32(benchmark::State& state, const char* net) {
+void xnnpack_convert_f16_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -91,7 +91,7 @@ void xnnpack_convert_f16_f32(benchmark::State& state, const char* net) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void xnnpack_convert_f32_f16(benchmark::State& state, const char* net) {
+void xnnpack_convert_f32_f16(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -155,7 +155,7 @@ void xnnpack_convert_f32_f16(benchmark::State& state, const char* net) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void xnnpack_convert_f32_qs8(benchmark::State& state, const char* net) {
+void xnnpack_convert_f32_qs8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -221,7 +221,7 @@ void xnnpack_convert_f32_qs8(benchmark::State& state, const char* net) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void xnnpack_convert_f32_qu8(benchmark::State& state, const char* net) {
+void xnnpack_convert_f32_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -287,7 +287,7 @@ void xnnpack_convert_f32_qu8(benchmark::State& state, const char* net) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void xnnpack_convert_qs8_f32(benchmark::State& state, const char* net) {
+void xnnpack_convert_qs8_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -354,7 +354,7 @@ void xnnpack_convert_qs8_f32(benchmark::State& state, const char* net) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-void xnnpack_convert_qu8_f32(benchmark::State& state, const char* net) {
+void xnnpack_convert_qu8_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -422,7 +422,7 @@ void xnnpack_convert_qu8_f32(benchmark::State& state, const char* net) {
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-void tflite_convert_f16_f32(benchmark::State& state, const char* net) {
+void tflite_convert_f16_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -518,7 +518,7 @@ void tflite_convert_f16_f32(benchmark::State& state, const char* net) {
   interpreter.reset();
 }
 
-void tflite_convert_f32_qs8(benchmark::State& state, const char* net) {
+void tflite_convert_f32_qs8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -619,7 +619,7 @@ void tflite_convert_f32_qs8(benchmark::State& state, const char* net) {
   interpreter.reset();
 }
 
-void tflite_convert_f32_qu8(benchmark::State& state, const char* net) {
+void tflite_convert_f32_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -720,7 +720,7 @@ void tflite_convert_f32_qu8(benchmark::State& state, const char* net) {
   interpreter.reset();
 }
 
-void tflite_convert_qs8_f32(benchmark::State& state, const char* net) {
+void tflite_convert_qs8_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -823,7 +823,7 @@ void tflite_convert_qs8_f32(benchmark::State& state, const char* net) {
   interpreter.reset();
 }
 
-void tflite_convert_qu8_f32(benchmark::State& state, const char* net) {
+void tflite_convert_qu8_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -927,39 +927,39 @@ void tflite_convert_qu8_f32(benchmark::State& state, const char* net) {
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-BENCHMARK_CAPTURE(xnnpack_convert_f16_f32, xnnpack_f16_f32, "XNNPACK F16->F32")
+BENCHMARK(xnnpack_convert_f16_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convert_f32_f16, xnnpack_f32_f16, "XNNPACK F32->F16")
+BENCHMARK(xnnpack_convert_f32_f16)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convert_f32_qs8, xnnpack_f32_qs8, "XNNPACK F32->QS8")
+BENCHMARK(xnnpack_convert_f32_qs8)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convert_f32_qu8, xnnpack_f32_qu8, "XNNPACK F32->QU8")
+BENCHMARK(xnnpack_convert_f32_qu8)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convert_qs8_f32, xnnpack_qs8_f32, "XNNPACK QS8->F32")
+BENCHMARK(xnnpack_convert_qs8_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convert_qu8_f32, xnnpack_qu8_f32, "XNNPACK QU8->F32")
+BENCHMARK(xnnpack_convert_qu8_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
   ->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK_CAPTURE(tflite_convert_f16_f32, tflite_f16_f32, "TFLite F16->F32")
+  BENCHMARK(tflite_convert_f16_f32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convert_f32_qs8, tflite_f32_qs8, "TFLite F32->QS8")
+  BENCHMARK(tflite_convert_f32_qs8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convert_f32_qu8, tflite_f32_qu8, "TFLite F32->QU8")
+  BENCHMARK(tflite_convert_f32_qu8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convert_qs8_f32, tflite_qs8_f32, "TFLite QS8->F32")
+  BENCHMARK(tflite_convert_qs8_f32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convert_qu8_f32, tflite_qu8_f32, "TFLite QU8->F32")
+  BENCHMARK(tflite_convert_qu8_f32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, float>)
     ->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE

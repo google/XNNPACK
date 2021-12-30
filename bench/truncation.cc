@@ -18,14 +18,13 @@
 
 static void xnnpack_truncation_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
-  const size_t channels = state.range(1);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
 
-  std::vector<float> input(batch_size * channels);
-  std::vector<float> output(batch_size * channels);
+  std::vector<float> input(batch_size + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> output(batch_size);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::fill(output.begin(), output.end(), std::nanf(""));
 
@@ -37,7 +36,7 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
 
   xnn_operator_t truncation_op = nullptr;
   status = xnn_create_truncation_nc_f32(
-    channels, channels /* input stride */, channels /* output stride */,
+    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
     0 /* flags */, &truncation_op);
   if (status != xnn_status_success || truncation_op == nullptr) {
     state.SkipWithError("failed to create Truncation operator");
@@ -45,8 +44,7 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
   }
 
   status = xnn_setup_truncation_nc_f32(
-    truncation_op,
-    batch_size,
+    truncation_op, batch_size,
     input.data(), output.data(),
     nullptr /* thread pool */);
   if (status != xnn_status_success) {
@@ -73,27 +71,17 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  const size_t elements_per_iteration = batch_size * channels;
   state.counters["elements"] =
-    benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
+    benchmark::Counter(uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(float);
+  const size_t bytes_per_iteration = 2 * batch_size * sizeof(float);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-static void CharacteristicArguments(benchmark::internal::Benchmark* b)
-{
-  b->ArgNames({"N", "C"});
-
-  int32_t c = 16;
-  for (int32_t n = 224; n >= 7; n /= 2) {
-    b->Args({n * n, c});
-    c *= 2;
-  }
-}
-
-BENCHMARK(xnnpack_truncation_f32)->Apply(CharacteristicArguments)->UseRealTime();
+BENCHMARK(xnnpack_truncation_f32)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
