@@ -1139,6 +1139,19 @@ void xnn_init_f16_minmax_params(
   params->max = max;
 }
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_default_avx_params(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_init_f32_minmax_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,

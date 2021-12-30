@@ -42,6 +42,11 @@ struct xnn_f16_minmax_params {
 union xnn_f32_default_params {
   // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
   char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    int32_t mask_table[14];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_relu_params {
@@ -2666,6 +2671,9 @@ typedef void (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
 
+typedef void (*xnn_init_f32_default_params_fn)(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
@@ -2794,6 +2802,7 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels minmax;
   struct vbinary_fused_ukernels linear;
   union {
+    xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_qs8_addsub_minmax_params_fn qs8_addsub;
     xnn_init_qs8_mul_minmax_params_fn qs8_mul;

@@ -270,7 +270,7 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
     op_type: Operation type (ADD/MUL/SUB/etc).
     init_fn: C name of the function to initialize microkernel parameters.
     activation_type: Activation type (LINEAR/MINMAX/RELU).
-    requantization_type: Activation type (FP32/RNDNU).
+    requantization_type: Requantization type (FP32/RNDNU).
     tester: C++ name of the tester class.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
@@ -294,8 +294,6 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
         "xnn_%s_requantize_%s" % \
           (datatype.lower(), requantization_type.lower())
       ]
-  elif isa == "wasm" or not isa:
-    test_args.append("%s::Variant::Scalar" % tester)
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,

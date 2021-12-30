@@ -204,12 +204,20 @@ XNN_INTERNAL void xnn_init_f16_minmax_params(
   uint16_t max);
 
 
+#define DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL void fn_name(                                   \
+    union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_DEFAULT_PARAMS_FUNCTION(xnn_init_f32_default_avx_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                                 \
     union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)], \
     float output_min,                                        \
     float output_max);
-
 
 DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_params)
 

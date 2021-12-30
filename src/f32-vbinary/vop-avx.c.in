@@ -16,8 +16,6 @@ $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <xnnpack/vbinary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 $_MM256_OP_PS = {
 $  "ADD": lambda x, y: "_mm256_add_ps(%s, %s)" % (x, y),
 $  "DIV": lambda x, y: "_mm256_div_ps(%s, %s)" % (x, y),
@@ -96,7 +94,7 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
 
     const __m256 va = _mm256_maskload_ps(a, vmask);
     const __m256 vb = _mm256_maskload_ps(b, vmask);

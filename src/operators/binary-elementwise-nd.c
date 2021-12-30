@@ -369,10 +369,14 @@ enum xnn_status xnn_create_maximum_nd_f32(
     uint32_t flags,
     xnn_operator_t* maximum_op_out)
 {
+  union xnn_f32_default_params params;
+  if (xnn_params.f32.vmin.init.f32_default != NULL) {
+    xnn_params.f32.vmin.init.f32_default(&params);
+  }
   return create_binary_elementwise_nd(
     flags,
-    NULL /* params */,
-    0 /* params size */,
+    &params,
+    sizeof(params),
     XNN_INIT_FLAG_F32,
     xnn_operator_type_maximum_nd_f32,
     &xnn_params.f32.vmax.minmax,
@@ -383,10 +387,14 @@ enum xnn_status xnn_create_minimum_nd_f32(
     uint32_t flags,
     xnn_operator_t* minimum_op_out)
 {
+  union xnn_f32_default_params params;
+  if (xnn_params.f32.vmin.init.f32_default != NULL) {
+    xnn_params.f32.vmin.init.f32_default(&params);
+  }
   return create_binary_elementwise_nd(
     flags,
-    NULL /* params */,
-    0 /* params size */,
+    &params,
+    sizeof(params),
     XNN_INIT_FLAG_F32,
     xnn_operator_type_minimum_nd_f32,
     &xnn_params.f32.vmin.minmax,
@@ -569,10 +577,14 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     uint32_t flags,
     xnn_operator_t* squared_difference_op_out)
 {
+  union xnn_f32_default_params params;
+  if (xnn_params.f32.vmin.init.f32_default != NULL) {
+    xnn_params.f32.vmin.init.f32_default(&params);
+  }
   return create_binary_elementwise_nd(
     flags,
-    NULL /* params */,
-    0 /* params size */,
+    &params,
+    sizeof(params),
     XNN_INIT_FLAG_F32,
     xnn_operator_type_squared_difference_nd_f32,
     &xnn_params.f32.vsqrdiff.minmax,
