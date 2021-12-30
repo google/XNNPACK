@@ -100,7 +100,7 @@ static void init(void) {
   #endif
 
   if (cpuinfo_has_arm_neon()) {
-    /**************************** QC8 micro-kernels ****************************/
+    /**************************** QC8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_QC8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QC8;
 
@@ -167,7 +167,7 @@ static void init(void) {
       }
     #endif  // XNN_NO_QC8_OPERATORS
 
-    /**************************** QS8 micro-kernels ****************************/
+    /**************************** QS8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_QS8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -272,7 +272,7 @@ static void init(void) {
       }
     #endif  // XNN_NO_QS8_OPERATORS
 
-    /*************************** QU8 micro-kernels ***************************/
+    /*************************** QU8 AArch32 micro-kernels ***************************/
     #ifndef XNN_NO_QU8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -340,7 +340,7 @@ static void init(void) {
       }
     #endif  // XNN_NO_QU8_OPERATORS
 
-    /**************************** S8 micro-kernels ****************************/
+    /**************************** S8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
@@ -362,7 +362,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_S8_OPERATORS
 
-    /**************************** U8 micro-kernels ****************************/
+    /**************************** U8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
@@ -386,7 +386,7 @@ static void init(void) {
       xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
-    /**************************** X8 micro-kernels ****************************/
+    /**************************** X8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
@@ -399,7 +399,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_X8_OPERATORS
 
-    /**************************** F32 micro-kernels ****************************/
+    /**************************** F32 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_F32_OPERATORS
       init_flags |= XNN_INIT_FLAG_F32;
 
@@ -712,7 +712,7 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
-    /*************************** VCVT micro-kernels ***************************/
+    /*************************** VCVT AArch32 micro-kernels ***************************/
     #ifndef XNN_NO_VCVT_OPERATORS
       init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -772,7 +772,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_VCVT_OPERATORS
 
-    /**************************** X32 micro-kernels ****************************/
+    /**************************** X32 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
@@ -792,7 +792,7 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
 
-    /**************************** XX micro-kernels ****************************/
+    /**************************** XX AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_XX_OPERATORS
       init_flags |= XNN_INIT_FLAG_XX;
 
@@ -809,7 +809,7 @@ static void init(void) {
 
   } else if (!XNN_PLATFORM_MOBILE) {
 
-    /*************************** QS8 micro-kernels ***************************/
+    /*************************** QS8 AArch32 Pre-NEON micro-kernels ***************************/
     #ifndef XNN_NO_QS8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -851,7 +851,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_QS8_OPERATORS
 
-    /*************************** QU8 micro-kernels ***************************/
+    /*************************** QU8 AArch32 Pre-NEON micro-kernels ***************************/
     #ifndef XNN_NO_QU8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -899,7 +899,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_QU8_OPERATORS
 
-    /**************************** S8 micro-kernels ****************************/
+    /**************************** S8 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
@@ -921,7 +921,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_S8_OPERATORS
 
-    /**************************** U8 micro-kernels ****************************/
+    /**************************** U8 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
@@ -945,7 +945,7 @@ static void init(void) {
       xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
-    /**************************** X8 micro-kernels ****************************/
+    /**************************** X8 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
@@ -958,7 +958,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_X8_OPERATORS
 
-    /**************************** F32 micro-kernels ****************************/
+    /**************************** F32 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_F32_OPERATORS
       init_flags |= XNN_INIT_FLAG_F32;
 
@@ -1188,7 +1188,7 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
-    /*************************** VCVT micro-kernels ***************************/
+    /*************************** VCVT AArch32 Pre-NEON micro-kernels ***************************/
     #ifndef XNN_NO_VCVT_OPERATORS
       init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -1224,7 +1224,7 @@ static void init(void) {
       };
     #endif  // XNN_NO_VCVT_OPERATORS
 
-    /**************************** X32 micro-kernels ****************************/
+    /**************************** X32 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
@@ -1244,7 +1244,7 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_X32_OPERATORS
 
-    /**************************** XX micro-kernels ****************************/
+    /**************************** XX AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_XX_OPERATORS
       init_flags |= XNN_INIT_FLAG_XX;
 
@@ -1262,7 +1262,7 @@ static void init(void) {
 
 #elif XNN_ARCH_ARM64
 
-  /**************************** QC8 micro-kernels ****************************/
+  /**************************** QC8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
@@ -1453,7 +1453,7 @@ static void init(void) {
     xnn_params.qc8.dwconv[1].primary_tile = 25;
   #endif  // XNN_NO_QC8_OPERATORS
 
-  /**************************** QS8 micro-kernels ****************************/
+  /**************************** QS8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -1665,7 +1665,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 micro-kernels ****************************/
+  /**************************** QU8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -1836,7 +1836,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** S8 micro-kernels ****************************/
+  /**************************** S8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
@@ -1858,7 +1858,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_S8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -1882,7 +1882,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__neon;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 micro-kernels ****************************/
+  /**************************** X8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -1895,7 +1895,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F16 micro-kernels ****************************/
+  /**************************** F16 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
     if (cpuinfo_has_arm_neon_fp16_arith()) {
       init_flags |= XNN_INIT_FLAG_F16;
@@ -2011,7 +2011,7 @@ static void init(void) {
     }
   #endif  // XNN_NO_F16_OPERATORS
 
-  /**************************** F32 micro-kernels ****************************/
+  /**************************** F32 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -2417,7 +2417,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /*************************** VCVT micro-kernels ***************************/
+  /*************************** VCVT AArch64 micro-kernels ***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -2451,7 +2451,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_VCVT_OPERATORS
 
-  /**************************** X32 micro-kernels ****************************/
+  /**************************** X32 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -2471,7 +2471,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX micro-kernels ****************************/
+  /**************************** XX AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
@@ -2492,7 +2492,7 @@ static void init(void) {
     return;
   }
 
-  /**************************** QC8 micro-kernels ****************************/
+  /**************************** QC8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
@@ -2601,7 +2601,7 @@ static void init(void) {
     xnn_params.qc8.dwconv[1].primary_tile = 25;
   #endif  // XNN_NO_QC8_OPERATORS
 
-  /**************************** QS8 micro-kernels ****************************/
+  /**************************** QS8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -2805,7 +2805,7 @@ static void init(void) {
     }
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 micro-kernels ****************************/
+  /**************************** QU8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -3001,7 +3001,7 @@ static void init(void) {
     }
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
@@ -3042,7 +3042,7 @@ static void init(void) {
     }
   #endif  // XNN_NO_S8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -3074,7 +3074,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__sse2;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 micro-kernels ****************************/
+  /**************************** X8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -3096,7 +3096,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F32 micro-kernels ****************************/
+  /**************************** F32 x86 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -3635,7 +3635,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /*************************** VCVT micro-kernels ***************************/
+  /*************************** VCVT x86 micro-kernels ***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -3806,7 +3806,7 @@ static void init(void) {
     }
   #endif  // XNN_NO_VCVT_OPERATORS
 
-  /**************************** X32 micro-kernels ****************************/
+  /**************************** X32 x86 micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -3826,7 +3826,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX micro-kernels ****************************/
+  /**************************** XX x86 micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
@@ -3843,7 +3843,7 @@ static void init(void) {
 
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-  /**************************** QC8 micro-kernels ****************************/
+  /**************************** QC8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
@@ -3878,7 +3878,7 @@ static void init(void) {
     xnn_params.qc8.dwconv[1].primary_tile = 25;
   #endif  // XNN_NO_QC8_OPERATORS
 
-  /**************************** QS8 micro-kernels ****************************/
+  /**************************** QS8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -3934,7 +3934,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 micro-kernels ****************************/
+  /**************************** QU8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -3995,7 +3995,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** S8 micro-kernels ****************************/
+  /**************************** S8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
@@ -4025,7 +4025,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_S8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -4057,7 +4057,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 micro-kernels ****************************/
+  /**************************** X8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -4070,7 +4070,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F32 micro-kernels ****************************/
+  /**************************** F32 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -4519,7 +4519,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /*************************** VCVT micro-kernels ***************************/
+  /*************************** VCVT WAsm SIMD micro-kernels***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -4555,7 +4555,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_VCVT_OPERATORS
 
-  /**************************** X32 micro-kernels ****************************/
+  /**************************** X32 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -4575,7 +4575,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX micro-kernels ****************************/
+  /**************************** XX WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
@@ -4592,7 +4592,7 @@ static void init(void) {
 
 #elif XNN_ARCH_WASM
 
-  /**************************** QC8 micro-kernels ****************************/
+  /**************************** QC8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
@@ -4624,7 +4624,7 @@ static void init(void) {
     xnn_params.qc8.dwconv[1].primary_tile = 25;
   #endif  // XNN_NO_QC8_OPERATORS
 
-  /**************************** QS8 micro-kernels ****************************/
+  /**************************** QS8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -4677,7 +4677,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 micro-kernels ****************************/
+  /**************************** QU8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -4736,7 +4736,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** S8 micro-kernels ****************************/
+  /**************************** S8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
@@ -4758,7 +4758,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_S8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -4782,7 +4782,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 micro-kernels ****************************/
+  /**************************** X8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -4795,7 +4795,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F32 micro-kernels ****************************/
+  /**************************** F32 WAsm micro-kernels****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -5067,7 +5067,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /*************************** VCVT micro-kernels ***************************/
+  /*************************** VCVT WAsm micro-kernels***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
 
@@ -5116,7 +5116,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_VCVT_OPERATORS
 
-  /**************************** X32 micro-kernels ****************************/
+  /**************************** X32 WAsm micro-kernels****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -5136,7 +5136,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX micro-kernels ****************************/
+  /**************************** XX WAsm micro-kernels****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
@@ -5153,7 +5153,7 @@ static void init(void) {
 
 #elif XNN_ARCH_RISCV
 
-  /**************************** QS8 micro-kernels ****************************/
+  /**************************** QS8 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
@@ -5189,7 +5189,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 micro-kernels ****************************/
+  /**************************** QU8 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
@@ -5225,7 +5225,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** U8 micro-kernels ****************************/
+  /**************************** U8 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -5244,7 +5244,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 micro-kernels ****************************/
+  /**************************** X8 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -5257,7 +5257,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F32 micro-kernels ****************************/
+  /**************************** F32 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -5480,7 +5480,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /**************************** X32 micro-kernels ****************************/
+  /**************************** X32 RISCV micro-kernels ****************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -5500,7 +5500,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX micro-kernels ****************************/
+  /**************************** XX RISCV micro-kernels ****************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
