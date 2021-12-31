@@ -14,8 +14,6 @@
 #include <xnnpack/dwconv.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_dwconv_minmax_ukernel_up8x25__fma3(
     size_t channels,
     size_t output_width,
@@ -329,7 +327,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x25__fma3(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
