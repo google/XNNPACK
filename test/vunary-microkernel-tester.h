@@ -25,9 +25,7 @@
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
-    Abs,
     ELU,
-    Negate,
     ReLU,
     RoundToNearestEven,
     RoundTowardsZero,
@@ -152,17 +150,11 @@ class VUnaryMicrokernelTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
-          case OpType::Abs:
-            y_ref[i] = std::abs(x_data[i]);
-            break;
           case OpType::ELU:
           {
             y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
             break;
           }
-          case OpType::Negate:
-            y_ref[i] = -x_data[i];
-            break;
           case OpType::ReLU:
             y_ref[i] = std::max(x_data[i], 0.0f);
             break;
@@ -192,26 +184,12 @@ class VUnaryMicrokernelTester {
 
       // Prepare parameters.
       union {
-        union xnn_f32_abs_params abs;
         union xnn_f32_elu_params elu;
-        union xnn_f32_lrelu_params lrelu;
-        union xnn_f32_minmax_params minmax;
         union xnn_f32_neg_params neg;
         union xnn_f32_relu_params relu;
         union xnn_f32_rnd_params rnd;
-        union xnn_f32_sqrt_params sqrt;
       } params;
       switch (op_type) {
-        case OpType::Abs:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_abs_params(&params.abs);
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_abs_params(&params.abs);
-              break;
-          }
-          break;
         case OpType::ELU:
           switch (variant) {
             case Variant::Native:
@@ -219,16 +197,6 @@ class VUnaryMicrokernelTester {
               break;
             case Variant::Scalar:
               xnn_init_scalar_f32_elu_params(&params.elu, prescale(), alpha(), beta());
-              break;
-          }
-          break;
-        case OpType::Negate:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_neg_params(&params.neg);
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_neg_params(&params.neg);
               break;
           }
           break;
@@ -257,6 +225,45 @@ class VUnaryMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_vabs_ukernel_function vabs, xnn_init_f32_abs_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::abs(x_data[i]);
+      }
+
+      // Prepare parameters.
+      union xnn_f32_abs_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vabs(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -364,6 +371,84 @@ class VUnaryMicrokernelTester {
 
       // Call optimized micro-kernel.
       vlrelu(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_vneg_ukernel_function vneg, xnn_init_f32_neg_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = -x_data[i];
+      }
+
+      // Prepare parameters.
+      union xnn_f32_neg_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vneg(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_vsqr_ukernel_function vsqr, xnn_init_f32_default_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = x_data[i] * x_data[i];
+      }
+
+      // Prepare parameters.
+      union xnn_f32_default_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vsqr(batch_size() * sizeof(float), x_data, y.data(), &params);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

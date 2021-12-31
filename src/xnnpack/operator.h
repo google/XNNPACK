@@ -284,6 +284,7 @@ struct xnn_operator {
     union xnn_f16_f32_cvt_params f16_f32_cvt;
     struct xnn_f16_hswish_params f16_hswish;
     union xnn_f32_abs_params f32_abs;
+    union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_neg_params f32_neg;

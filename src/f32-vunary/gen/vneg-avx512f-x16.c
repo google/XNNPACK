@@ -27,7 +27,7 @@ void xnn_f32_vneg_ukernel__avx512f_x16(
   assert(x != NULL);
   assert(y != NULL);
 
-  const __m512i vsign_mask = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) params->sse.sign_mask));
+  const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512.sign_mask);
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(x);
     x += 16;

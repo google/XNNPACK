@@ -84,10 +84,17 @@ union xnn_f32_abs_params {
   struct {
     XNN_ALIGN(16) float nonsign_mask[4];
   } sse;
+  struct {
+    XNN_ALIGN(32) float nonsign_mask[8];
+    int32_t mask_table[14];
+  } avx;
+  struct {
+    uint32_t nonsign_mask;
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
-    float nonsign_mask;
+    XNN_ALIGN(8) float nonsign_mask[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
@@ -98,10 +105,17 @@ union xnn_f32_neg_params {
   struct {
     XNN_ALIGN(16) float sign_mask[4];
   } sse;
+  struct {
+    XNN_ALIGN(32) float sign_mask[8];
+    int32_t mask_table[14];
+  } avx;
+  struct {
+    uint32_t sign_mask;
+  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
-    float sign_mask;
+    XNN_ALIGN(8) float sign_mask[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
@@ -2357,6 +2371,13 @@ typedef void (*xnn_f32_velu_ukernel_function)(
     float* y,
     const union xnn_f32_elu_params* params);
 
+
+typedef void (*xnn_f32_vsqr_ukernel_function)(
+    size_t n,
+    const float* x,
+    float* y,
+    const union xnn_f32_default_params* params);
+
 typedef void (*xnn_f32_vsqrt_ukernel_function)(
     size_t n,
     const float* x,
@@ -2671,6 +2692,12 @@ typedef void (*xnn_init_f16_scaleminmax_params_fn)(
   uint16_t min,
   uint16_t max);
 
+typedef void (*xnn_init_f32_abs_params_fn)(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f32_default_params_fn)(
+  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_init_f32_hswish_params_fn)(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
 
@@ -2678,16 +2705,16 @@ typedef void (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
 
-typedef void (*xnn_init_f32_default_params_fn)(
-  union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_init_f32_sqrt_params_fn)(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max);
+
+typedef void (*xnn_init_f32_neg_params_fn)(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f32_sqrt_params_fn)(
+  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_s8_minmax_params_fn)(
   union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2786,10 +2813,13 @@ struct vunary_parameters {
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_hswish_params_fn f16_hswish;
+    xnn_init_f32_abs_params_fn f32_abs;
+    xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
     xnn_init_f32_hswish_params_fn f32_hswish;
     xnn_init_f32_lrelu_params_fn f32_lrelu;
     xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_f32_neg_params_fn f32_neg;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
@@ -3089,19 +3119,19 @@ struct xnn_parameters {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
-    xnn_univector_ukernel_function abs;
+    struct vunary_parameters abs;
     struct vunary_parameters clamp;
     xnn_univector_ukernel_function elu;
     struct vunary_parameters hswish;
     struct vunary_parameters lrelu;
-    xnn_univector_ukernel_function neg;
+    struct vunary_parameters neg;
     xnn_univector_ukernel_function relu;
     xnn_univector_ukernel_function rndne;
     xnn_univector_ukernel_function rndz;
     xnn_univector_ukernel_function rndu;
     xnn_univector_ukernel_function rndd;
     xnn_univector_ukernel_function sigmoid;
-    xnn_univector_ukernel_function sqr;
+    struct vunary_parameters sqr;
     struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;

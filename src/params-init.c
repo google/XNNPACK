@@ -1289,39 +1289,83 @@ void xnn_init_f32_hswish_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-void xnn_init_f32_abs_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_abs_sse_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.nonsign_mask[i] = math_nonsign_mask_f32();
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    params->wasmsimd.nonsign_mask = math_nonsign_mask_f32();
-  #endif
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.nonsign_mask[i] = math_nonsign_mask_f32();
+  }
 }
 
-void xnn_init_scalar_f32_abs_params(
+void xnn_init_f32_abs_avx_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
 {
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.nonsign_mask[i] = math_nonsign_mask_f32();
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
 
-void xnn_init_f32_neg_params(
+void xnn_init_f32_abs_avx512_params(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512.nonsign_mask = UINT32_C(0x7FFFFFFF);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_abs_wasmsimd_params(
+  union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->wasmsimd.nonsign_mask[0] = math_nonsign_mask_f32();
+  params->wasmsimd.nonsign_mask[1] = math_nonsign_mask_f32();
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_neg_sse_params(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.sign_mask[i] = -0.0f;
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    params->wasmsimd.sign_mask = -0.0f;
-  #endif
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.sign_mask[i] = -0.0f;
+  }
 }
 
-void xnn_init_scalar_f32_neg_params(
+void xnn_init_f32_neg_avx_params(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
 {
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.sign_mask[i] = -0.0f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
+
+void xnn_init_f32_neg_avx512_params(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512.sign_mask = UINT32_C(0x80000000);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_neg_wasmsimd_params(
+  union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->wasmsimd.sign_mask[0] = -0.0f;
+  params->wasmsimd.sign_mask[1] = -0.0f;
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 void xnn_init_f32_rnd_params(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])

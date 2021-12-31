@@ -262,12 +262,14 @@ enum xnn_status xnn_create_abs_nc_f32(
     xnn_operator_t* abs_op_out)
 {
   union xnn_f32_abs_params params;
-  xnn_init_f32_abs_params(&params);
+  if (xnn_params.f32.abs.init.f32_abs != NULL) {
+    xnn_params.f32.abs.init.f32_abs(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_abs_nc_f32,
-    xnn_params.f32.abs,
+    xnn_params.f32.abs.ukernel,
     abs_op_out);
 }
 
@@ -616,12 +618,14 @@ enum xnn_status xnn_create_negate_nc_f32(
     xnn_operator_t* negate_op_out)
 {
   union xnn_f32_neg_params params;
-  xnn_init_f32_neg_params(&params);
+  if (xnn_params.f32.neg.init.f32_neg != NULL) {
+    xnn_params.f32.neg.init.f32_neg(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_negate_nc_f32,
-    xnn_params.f32.neg,
+    xnn_params.f32.neg.ukernel,
     negate_op_out);
 }
 
@@ -647,11 +651,15 @@ enum xnn_status xnn_create_square_nc_f32(
     uint32_t flags,
     xnn_operator_t* square_op_out)
 {
+  union xnn_f32_default_params params;
+  if (xnn_params.f32.sqr.init.f32_default != NULL) {
+    xnn_params.f32.sqr.init.f32_default(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
-    NULL, 0,
+    &params, sizeof(params),
     xnn_operator_type_square_nc_f32,
-    xnn_params.f32.sqr,
+    xnn_params.f32.sqr.ukernel,
     square_op_out);
 }
 
@@ -1191,7 +1199,7 @@ enum xnn_status xnn_setup_square_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
-    NULL, 0,
+    &square_op->params.f32_default, sizeof(square_op->params.f32_default),
     pthreadpool_get_threads_count(threadpool));
 }
 
