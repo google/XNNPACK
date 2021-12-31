@@ -7855,6 +7855,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils)
 
   # ---[ Build operator-level microbenchmarks
+  ADD_EXECUTABLE(abs-bench bench/abs.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(abs-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(abs-bench PRIVATE .)
+  TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(average-pooling-bench PROPERTIES
     CXX_STANDARD 11
@@ -7959,6 +7967,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE .)
   TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark bench-utils)
 
+  ADD_EXECUTABLE(negate-bench bench/negate.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(negate-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(negate-bench PRIVATE .)
+  TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK benchmark bench-utils)
+
   ADD_EXECUTABLE(prelu-bench bench/prelu.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(prelu-bench PROPERTIES
     CXX_STANDARD 11
@@ -7982,6 +7998,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
   TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils)
+
+  ADD_EXECUTABLE(square-bench bench/square.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(square-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
+  TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK benchmark bench-utils)
 
   ADD_EXECUTABLE(square-root-bench bench/square-root.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(square-root-bench PROPERTIES

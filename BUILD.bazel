@@ -9184,6 +9184,14 @@ xnnpack_benchmark(
 ########################### Benchmarks for operators ###########################
 
 xnnpack_benchmark(
+    name = "abs_bench",
+    srcs = ["bench/abs.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "average_pooling_bench",
     srcs = ["bench/average-pooling.cc"],
     copts = xnnpack_optional_tflite_copts(),
@@ -9284,6 +9292,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "negate_bench",
+    srcs = ["bench/negate.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "sigmoid_bench",
     srcs = ["bench/sigmoid.cc"],
     copts = xnnpack_optional_tflite_copts(),
@@ -9302,6 +9318,14 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "softmax_bench",
     srcs = ["bench/softmax.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "square_bench",
+    srcs = ["bench/square.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
