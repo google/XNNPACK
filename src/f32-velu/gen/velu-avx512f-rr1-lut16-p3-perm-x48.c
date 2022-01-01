@@ -25,19 +25,16 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x48(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const __m512 vprescale = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.prescale));
-  const __m512 valpha = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.alpha));
-  const __m512 vbeta = _mm512_broadcast_f32x4(_mm_load_ps(params->sse.beta));
-
-  const __m512 vsat_cutoff = _mm512_set1_ps(-0x1.154246p+4f);
-  const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p19f);
-  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
-  const __m512i vtable = _mm512_set_epi32(
-    0x3F7D257D, 0x3F7AC0C7, 0x3F78CCDF, 0x3F7744FD, 0x3F76248C, 0x3F75672A, 0x3F7508A4, 0x3F7504F3,
-    0x3F75583F, 0x3F75FED7, 0x3F76F532, 0x3F7837F0, 0x3F79C3D3, 0x3F7B95C2, 0x3F7DAAC3, 0x3F800000);
-  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E43p-1f);
-  const __m512 vc3 = _mm512_set1_ps(0x1.55561Cp-3f);
-  const __m512 vc2 = _mm512_set1_ps(0x1.0001ECp-1f);
+  const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_lut16_p3.prescale);
+  const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_lut16_p3.alpha);
+  const __m512 vbeta = _mm512_set1_ps(params->avx512_rr1_lut16_p3.beta);
+  const __m512 vsat_cutoff = _mm512_set1_ps(params->avx512_rr1_lut16_p3.sat_cutoff);
+  const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr1_lut16_p3.magic_bias);
+  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_lut16_p3.log2e);
+  const __m512 vminus_ln2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.minus_ln2);
+  const __m512 vc3 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c3);
+  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c2);
+  const __m512i vtable = _mm512_load_si512(params->avx512_rr1_lut16_p3.table);
 
   for (; n >= 48 * sizeof(float); n -= 48 * sizeof(float)) {
     __m512 vx0 = _mm512_loadu_ps(x);

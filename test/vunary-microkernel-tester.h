@@ -25,7 +25,6 @@
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
-    ELU,
     ReLU,
     RoundToNearestEven,
     RoundTowardsZero,
@@ -126,13 +125,6 @@ class VUnaryMicrokernelTester {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
-    switch (op_type) {
-      case OpType::ELU:
-        distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
-        break;
-      default:
-        break;
-    }
     auto f32rng = std::bind(distribution, std::ref(rng));
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
@@ -150,11 +142,6 @@ class VUnaryMicrokernelTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         switch (op_type) {
-          case OpType::ELU:
-          {
-            y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
-            break;
-          }
           case OpType::ReLU:
             y_ref[i] = std::max(x_data[i], 0.0f);
             break;
@@ -190,16 +177,6 @@ class VUnaryMicrokernelTester {
         union xnn_f32_rnd_params rnd;
       } params;
       switch (op_type) {
-        case OpType::ELU:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_elu_params(&params.elu, prescale(), alpha(), beta());
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_elu_params(&params.elu, prescale(), alpha(), beta());
-              break;
-          }
-          break;
         case OpType::RoundToNearestEven:
         case OpType::RoundTowardsZero:
         case OpType::RoundUp:
@@ -301,6 +278,43 @@ class VUnaryMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
+  void Test(xnn_f32_velu_ukernel_function velu, xnn_init_f32_elu_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-20.0f, 20.0f), std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<double> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::signbit(x_data[i]) ? alpha() * std::expm1(double(x_data[i]) * prescale()) : double(x_data[i]) * beta();
+      }
+
+      // Prepare parameters.
+      union xnn_f32_elu_params params;
+      init_params(&params, prescale(), alpha(), beta());
+
+      // Call optimized micro-kernel.
+      velu(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -521,13 +535,6 @@ class VUnaryMicrokernelTester {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
-    switch (op_type) {
-      case OpType::ELU:
-        distribution = std::uniform_real_distribution<float>(-20.0f, 20.0f);
-        break;
-      default:
-        break;
-    }
     auto f32rng = std::bind(distribution, std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 

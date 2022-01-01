@@ -25,19 +25,17 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x56(
 {
   assert(n % sizeof(float) == 0);
 
-  const __m256 vprescale = _mm256_broadcast_ps((const __m128*) params->sse.prescale);
-  const __m256 valpha = _mm256_broadcast_ps((const __m128*) params->sse.alpha);
-  const __m256 vbeta = _mm256_broadcast_ps((const __m128*) params->sse.beta);
-
-  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.154246p+4f);
-  const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p20f);
-  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
-  const __m256i vtable = _mm256_set_epi32(
-    0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000);
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
-  const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-5f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555C20p-3f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.000000p-1f);
+  const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_lut8_p4.prescale);
+  const __m256 valpha = _mm256_load_ps(params->avx2_rr1_lut8_p4.alpha);
+  const __m256 vbeta = _mm256_load_ps(params->avx2_rr1_lut8_p4.beta);
+  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_lut8_p4.sat_cutoff);
+  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_lut8_p4.magic_bias);
+  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_lut8_p4.log2e);
+  const __m256i vtable = _mm256_load_si256((const __m256i*) params->avx2_rr1_lut8_p4.table);
+  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_lut8_p4.minus_ln2);
+  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_lut8_p4.c4);
+  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_lut8_p4.c3);
+  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_lut8_p4.c2);
 
   for (; n >= 56 * sizeof(float); n -= 56 * sizeof(float)) {
     __m256 vx0 = _mm256_loadu_ps(x);
@@ -212,7 +210,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x56(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_lut8_p4.mask_table[7] - n));
 
     __m256 vx = _mm256_maskload_ps(x, vmask);
 

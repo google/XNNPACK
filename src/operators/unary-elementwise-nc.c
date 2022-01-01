@@ -506,12 +506,14 @@ enum xnn_status xnn_create_elu_nc_f32(
   }
 
   union xnn_f32_elu_params params;
-  xnn_init_f32_elu_params(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  if (xnn_params.f32.elu.init.f32_elu != NULL) {
+    xnn_params.f32.elu.init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_elu_nc_f32,
-    xnn_params.f32.elu,
+    xnn_params.f32.elu.ukernel,
     elu_op_out);
 }
 

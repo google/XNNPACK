@@ -584,9 +584,17 @@ static void init(void) {
         .element_tile = 8,
       };
       if (cpuinfo_has_arm_neon_fma()) {
-        xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neonfma_rr1_p6_x8;
+        xnn_params.f32.elu = (struct vunary_parameters) {
+          .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neonfma_rr1_p6_x8,
+          .init.f32_elu = xnn_init_f32_elu_neonfma_rr1_p6_params,
+          .element_tile = 8,
+        };
       } else {
-        xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8;
+        xnn_params.f32.elu = (struct vunary_parameters) {
+          .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8,
+          .init.f32_elu = xnn_init_f32_elu_neon_rr2_lut16_p3_params,
+          .element_tile = 8,
+        };
       }
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f32_vhswish_ukernel__neon_x16,
@@ -1076,7 +1084,11 @@ static void init(void) {
         .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
         .element_tile = 4,
       };
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4,
+        .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
+        .element_tile = 4,
+      };
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f32_vhswish_ukernel__scalar_x4,
         .init.f32_hswish = xnn_init_f32_hswish_scalar_params,
@@ -2321,7 +2333,11 @@ static void init(void) {
       .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
       .element_tile = 8,
     };
-    xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x16;
+    xnn_params.f32.elu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x16,
+      .init.f32_elu = xnn_init_f32_elu_neonfma_rr1_lut16_p3_params,
+      .element_tile = 16,
+    };
     xnn_params.f32.hswish = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vhswish_ukernel__neon_x16,
       .init.f32_hswish = xnn_init_f32_hswish_scalar_params,
@@ -3364,13 +3380,29 @@ static void init(void) {
       };
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64,
+        .init.f32_elu = xnn_init_f32_elu_avx512_rr1_lut16_p3_params,
+        .element_tile = 64,
+      };
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x56;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x56,
+        .init.f32_elu = xnn_init_f32_elu_avx2_rr1_lut4_p4_params,
+        .element_tile = 56,
+      };
     } else if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx()) {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32,
+        .init.f32_elu = xnn_init_f32_elu_avx_rr2_lut4_p4_params,
+        .element_tile = 32,
+      };
     } else {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x12;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x12,
+        .init.f32_elu = xnn_init_f32_elu_sse2_rr2_lut16_p3_params,
+        .element_tile = 12,
+      };
     }
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
       xnn_params.f32.hswish = (struct vunary_parameters) {
@@ -4363,9 +4395,17 @@ static void init(void) {
       };
     }
     if (is_wasm_x86) {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20,
+        .init.f32_elu = xnn_init_f32_elu_wasmsimd_rr2_p6_params,
+        .element_tile = 20,
+      };
     } else {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x20;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x20,
+        .init.f32_elu = xnn_init_f32_elu_wasmsimd_rr2_p6_params,
+        .element_tile = 20,
+      };
     }
     xnn_params.f32.hswish = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vhswish_ukernel__wasmsimd_x16,
@@ -5053,9 +5093,17 @@ static void init(void) {
       };
     }
     if (is_wasm_x86) {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2,
+        .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
+        .element_tile = 2,
+      };
     } else {
-      xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasm_rr2_p6_x6;
+      xnn_params.f32.elu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__wasm_rr2_p6_x6,
+        .init.f32_elu = xnn_init_f32_elu_scalar_rr2_p6_params,
+        .element_tile = 6,
+      };
     }
     xnn_params.f32.lrelu = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4,
@@ -5501,7 +5549,11 @@ static void init(void) {
       .init.f32_hswish = xnn_init_f32_hswish_scalar_params,
       .element_tile = 4,
     };
-    xnn_params.f32.elu = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2;
+    xnn_params.f32.elu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2,
+      .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
+      .element_tile = 2,
+    };
     xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
     xnn_params.f32.neg = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4,
