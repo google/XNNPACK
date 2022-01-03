@@ -23,17 +23,17 @@ void xnn_f32_vsigmoid_ukernel__neon_rr2_p5_nr2recps_x4(
 {
   assert(n % sizeof(float) == 0);
 
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->scalar_rr2_p5.magic_bias);
-  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->scalar_rr2_p5.minus_log2e);
-  const float32x4_t vln2_hi = vld1q_dup_f32(&params->scalar_rr2_p5.ln2_hi);
-  const float32x4_t vln2_lo = vld1q_dup_f32(&params->scalar_rr2_p5.ln2_lo);
-  const float32x4_t vc5 = vld1q_dup_f32(&params->scalar_rr2_p5.c5);
-  const float32x4_t vc4 = vld1q_dup_f32(&params->scalar_rr2_p5.c4);
-  const float32x4_t vc3 = vld1q_dup_f32(&params->scalar_rr2_p5.c3);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->scalar_rr2_p5.c2);
-  const float32x4_t vc1 = vld1q_dup_f32(&params->scalar_rr2_p5.c1);
-  const float32x4_t vone = vld1q_dup_f32(&params->scalar_rr2_p5.one);
-  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->scalar_rr2_p5.denorm_cutoff);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon_rr2_p5.magic_bias);
+  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neon_rr2_p5.minus_log2e);
+  const float32x4_t vln2_hi = vld1q_dup_f32(&params->neon_rr2_p5.ln2_hi);
+  const float32x4_t vln2_lo = vld1q_dup_f32(&params->neon_rr2_p5.ln2_lo);
+  const float32x4_t vc5 = vld1q_dup_f32(&params->neon_rr2_p5.c5);
+  const float32x4_t vc4 = vld1q_dup_f32(&params->neon_rr2_p5.c4);
+  const float32x4_t vc3 = vld1q_dup_f32(&params->neon_rr2_p5.c3);
+  const float32x4_t vc2 = vld1q_dup_f32(&params->neon_rr2_p5.c2);
+  const float32x4_t vc1 = vld1q_dup_f32(&params->neon_rr2_p5.c1);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
+  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neon_rr2_p5.denorm_cutoff);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(x); x += 4;

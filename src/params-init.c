@@ -1330,6 +1330,43 @@ void xnn_init_f32_sigmoid_scalar_rr2_p5_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f32_sigmoid_neon_rr2_lut64_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neon_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->neon_rr2_lut64_p2.minus_log2e = -0x1.715476p0f;
+  params->neon_rr2_lut64_p2.ln2_hi = 0x1.630000p-1f;
+  params->neon_rr2_lut64_p2.ln2_lo = -0x1.BD0106p-13f;
+  params->neon_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->neon_rr2_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_neon_rr2_lut2048_p1_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neon_rr2_lut2048_p1.magic_bias = 0x1.800000p12f;
+  params->neon_rr2_lut2048_p1.minus_log2e = -0x1.715476p0f;
+  params->neon_rr2_lut2048_p1.ln2_hi = 0x1.600000p-1f;
+  params->neon_rr2_lut2048_p1.ln2_lo = 0x1.7217F8p-8f;
+  params->neon_rr2_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
+  params->neon_rr2_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_neon_rr2_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neon_rr2_p5.magic_bias = 0x1.8000FEp23f;
+  params->neon_rr2_p5.minus_log2e = -0x1.715476p0f;
+  params->neon_rr2_p5.ln2_hi = 0x1.62E400p-1f;
+  params->neon_rr2_p5.ln2_lo = 0x1.7F7D1Cp-20f;
+  params->neon_rr2_p5.c5 = -0x1.0F9F9Cp-7f;
+  params->neon_rr2_p5.c4 = 0x1.573A1Ap-5f;
+  params->neon_rr2_p5.c3 = -0x1.555A80p-3f;
+  params->neon_rr2_p5.c2 = 0x1.FFFDC6p-2f;
+  params->neon_rr2_p5.c1 = -0x1.FFFFF6p-1f;
+  params->neon_rr2_p5.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
 void xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -1337,7 +1374,6 @@ void xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params(
   params->neonfma_rr1_lut2048_p1.minus_log2e = -0x1.715476p0f;
   params->neonfma_rr1_lut2048_p1.ln2 = 0x1.62E430p-1f;
   params->neonfma_rr1_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
-  params->neonfma_rr1_lut2048_p1.one = 1.0f;
   params->neonfma_rr1_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
 }
 
@@ -1348,7 +1384,6 @@ void xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params(
   params->neonfma_rr1_lut64_p2.minus_log2e = -0x1.715476p0f;
   params->neonfma_rr1_lut64_p2.ln2 = 0x1.62E430p-1f;
   params->neonfma_rr1_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
-  params->neonfma_rr1_lut64_p2.one = 1.0f;
   params->neonfma_rr1_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
 }
 
@@ -1363,7 +1398,6 @@ void xnn_init_f32_sigmoid_neonfma_rr1_p5_params(
   params->neonfma_rr1_p5.c3 = -0x1.555A80p-3f;
   params->neonfma_rr1_p5.c2 = 0x1.FFFDC6p-2f;
   params->neonfma_rr1_p5.c1 = -0x1.FFFFF6p-1f;
-  params->neonfma_rr1_p5.one = 1.0f;
   params->neonfma_rr1_p5.denorm_cutoff = 0x1.5D589Ep+6f;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

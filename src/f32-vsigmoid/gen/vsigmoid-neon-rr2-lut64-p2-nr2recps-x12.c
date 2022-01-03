@@ -25,14 +25,14 @@ void xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x12(
 {
   assert(n % sizeof(float) == 0);
 
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.magic_bias);
-  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.minus_log2e);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon_rr2_lut64_p2.magic_bias);
+  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neon_rr2_lut64_p2.minus_log2e);
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
-  const float32x4_t vln2_hi = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.ln2_hi);
-  const float32x4_t vln2_lo = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.ln2_lo);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.c2);
-  const float32x4_t vone = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.one);
-  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->scalar_rr2_lut64_p2.denorm_cutoff);
+  const float32x4_t vln2_hi = vld1q_dup_f32(&params->neon_rr2_lut64_p2.ln2_hi);
+  const float32x4_t vln2_lo = vld1q_dup_f32(&params->neon_rr2_lut64_p2.ln2_lo);
+  const float32x4_t vc2 = vld1q_dup_f32(&params->neon_rr2_lut64_p2.c2);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
+  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neon_rr2_lut64_p2.denorm_cutoff);
 
   for (; n >= 12 * sizeof(float); n -= 12 * sizeof(float)) {
     const float32x4_t vx0123 = vld1q_f32(x); x += 4;

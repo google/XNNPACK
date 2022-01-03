@@ -467,9 +467,36 @@ union xnn_f32_sigmoid_params {
   struct {
     float magic_bias;
     float minus_log2e;
+    float ln2_hi;
+    float ln2_lo;
+    float c1;
+    float denorm_cutoff;
+  } neon_rr2_lut2048_p1;
+  struct {
+    float magic_bias;
+    float minus_log2e;
+    float ln2_hi;
+    float ln2_lo;
+    float c2;
+    float denorm_cutoff;
+  } neon_rr2_lut64_p2;
+  struct {
+    float magic_bias;
+    float minus_log2e;
+    float ln2_hi;
+    float ln2_lo;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float denorm_cutoff;
+  } neon_rr2_p5;
+  struct {
+    float magic_bias;
+    float minus_log2e;
     float ln2;
     float c1;
-    float one;
     float denorm_cutoff;
   } neonfma_rr1_lut2048_p1;
   struct {
@@ -477,7 +504,6 @@ union xnn_f32_sigmoid_params {
     float minus_log2e;
     float ln2;
     float c2;
-    float one;
     float denorm_cutoff;
   } neonfma_rr1_lut64_p2;
   struct {
@@ -489,7 +515,6 @@ union xnn_f32_sigmoid_params {
     float c3;
     float c2;
     float c1;
-    float one;
     float denorm_cutoff;
   } neonfma_rr1_p5;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

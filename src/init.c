@@ -623,7 +623,7 @@ static void init(void) {
       }
       xnn_params.f32.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x8,
-        .init.f32_sigmoid = xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params,
+        .init.f32_sigmoid = xnn_init_f32_sigmoid_neon_rr2_lut64_p2_params,
         .element_tile = 8,
       };
       xnn_params.f32.sqr = (struct vunary_parameters) {

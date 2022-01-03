@@ -30,7 +30,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_nr2fma_x8(
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
   const float32x4_t vln2 = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.ln2);
   const float32x4_t vc2 = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.c2);
-  const float32x4_t vone = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.one);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
   const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.denorm_cutoff);
 
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
