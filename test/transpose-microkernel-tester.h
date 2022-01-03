@@ -8,12 +8,10 @@
 #include <xnnpack.h>
 #include <xnnpack/params.h>
 
-#include <algorithm>
+#include <numeric>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
-#include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -59,14 +57,10 @@ class TransposeMicrokernelTester {
   inline size_t iterations() const { return this->iterations_; }
 
   void Test(xnn_x32_transpose_ukernel_function transpose) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
-
     std::vector<uint32_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u32rng));
+      std::iota(input.begin(), input.end(), 0);
       std::fill(output.begin(), output.end(), 0);
 
       // Call optimized micro-kernel.
@@ -89,14 +83,10 @@ class TransposeMicrokernelTester {
   }
 
   void Test(xnn_x16_transpose_ukernel_function transpose) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), rng);
-
     std::vector<uint16_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u16rng));
+      std::iota(input.begin(), input.end(), 0);
       std::fill(output.begin(), output.end(), 0);
 
       // Call optimized micro-kernel.
