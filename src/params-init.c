@@ -1289,6 +1289,296 @@ void xnn_init_f32_hswish_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+void xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->scalar_rr2_lut64_p2.minus_log2e = -0x1.715476p0f;
+  params->scalar_rr2_lut64_p2.ln2_hi = 0x1.630000p-1f;
+  params->scalar_rr2_lut64_p2.ln2_lo = -0x1.BD0106p-13f;
+  params->scalar_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->scalar_rr2_lut64_p2.one = 1.0f;
+  params->scalar_rr2_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_rr2_lut2048_p1.magic_bias = 0x1.800000p12f;
+  params->scalar_rr2_lut2048_p1.minus_log2e = -0x1.715476p0f;
+  params->scalar_rr2_lut2048_p1.ln2_hi = 0x1.600000p-1f;
+  params->scalar_rr2_lut2048_p1.ln2_lo = 0x1.7217F8p-8f;
+  params->scalar_rr2_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
+  params->scalar_rr2_lut2048_p1.one = 1.0f;
+  params->scalar_rr2_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_scalar_rr2_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_rr2_p5.magic_bias = 0x1.8000FEp23f;
+  params->scalar_rr2_p5.minus_log2e = -0x1.715476p0f;
+  params->scalar_rr2_p5.ln2_hi = 0x1.62E400p-1f;
+  params->scalar_rr2_p5.ln2_lo = 0x1.7F7D1Cp-20f;
+  params->scalar_rr2_p5.c5 = -0x1.0F9F9Cp-7f;
+  params->scalar_rr2_p5.c4 = 0x1.573A1Ap-5f;
+  params->scalar_rr2_p5.c3 = -0x1.555A80p-3f;
+  params->scalar_rr2_p5.c2 = 0x1.FFFDC6p-2f;
+  params->scalar_rr2_p5.c1 = -0x1.FFFFF6p-1f;
+  params->scalar_rr2_p5.one = 1.0f;
+  params->scalar_rr2_p5.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfma_rr1_lut2048_p1.magic_bias = 0x1.800000p12f;
+  params->neonfma_rr1_lut2048_p1.minus_log2e = -0x1.715476p0f;
+  params->neonfma_rr1_lut2048_p1.ln2 = 0x1.62E430p-1f;
+  params->neonfma_rr1_lut2048_p1.c1 = -0x1.FFFFFEp-1f;
+  params->neonfma_rr1_lut2048_p1.one = 1.0f;
+  params->neonfma_rr1_lut2048_p1.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfma_rr1_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->neonfma_rr1_lut64_p2.minus_log2e = -0x1.715476p0f;
+  params->neonfma_rr1_lut64_p2.ln2 = 0x1.62E430p-1f;
+  params->neonfma_rr1_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->neonfma_rr1_lut64_p2.one = 1.0f;
+  params->neonfma_rr1_lut64_p2.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+
+void xnn_init_f32_sigmoid_neonfma_rr1_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfma_rr1_p5.magic_bias = 0x1.8000FEp23f;
+  params->neonfma_rr1_p5.minus_log2e = -0x1.715476p0f;
+  params->neonfma_rr1_p5.ln2 = 0x1.62E430p-1f;
+  params->neonfma_rr1_p5.c5 = -0x1.0F9F9Cp-7f;
+  params->neonfma_rr1_p5.c4 = 0x1.573A1Ap-5f;
+  params->neonfma_rr1_p5.c3 = -0x1.555A80p-3f;
+  params->neonfma_rr1_p5.c2 = 0x1.FFFDC6p-2f;
+  params->neonfma_rr1_p5.c1 = -0x1.FFFFF6p-1f;
+  params->neonfma_rr1_p5.one = 1.0f;
+  params->neonfma_rr1_p5.denorm_cutoff = 0x1.5D589Ep+6f;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2_rr2_lut64_p2.sign_mask[i] = -0.0f;
+    params->sse2_rr2_lut64_p2.magic_bias[i] = 0x1.800000p17f;
+    params->sse2_rr2_lut64_p2.log2e[i] = 0x1.715476p0f;
+    params->sse2_rr2_lut64_p2.index_mask[i] = UINT32_C(0x3F);
+    params->sse2_rr2_lut64_p2.minus_ln2_hi[i] = -0x1.630000p-1f;
+    params->sse2_rr2_lut64_p2.minus_ln2_lo[i] = 0x1.BD0106p-13f;
+    params->sse2_rr2_lut64_p2.c2[i] = 0x1.FFFF0Ap-2f;
+    params->sse2_rr2_lut64_p2.one[i] = 1.0f;
+    params->sse2_rr2_lut64_p2.denorm_cutoff[i] = -0x1.5D589Ep+6f;
+  }
+}
+
+void xnn_init_f32_sigmoid_sse2_rr2_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2_rr2_p5.sign_mask[i] = -0.0f;
+    params->sse2_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->sse2_rr2_p5.log2e[i] = 0x1.715476p0f;
+    params->sse2_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
+    params->sse2_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
+    params->sse2_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->sse2_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->sse2_rr2_p5.c3[i] = 0x1.555A80p-3f;
+    params->sse2_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->sse2_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->sse2_rr2_p5.one[i] = 1.0f;
+    params->sse2_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
+  }
+}
+
+void xnn_init_f32_sigmoid_avx_rr2_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_rr2_p5.sign_mask[i] = -0.0f;
+    params->avx_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx_rr2_p5.log2e[i] = 0x1.715476p0f;
+    params->avx_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
+    params->avx_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
+    params->avx_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->avx_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->avx_rr2_p5.c3[i] = 0x1.555A80p-3f;
+    params->avx_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->avx_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->avx_rr2_p5.one[i] = 1.0f;
+    params->avx_rr2_p5.two[i] = 2.0f;
+    params->avx_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx_rr2_p5.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx_rr2_p5.mask_table[i] = 0;
+  }
+}
+
+void xnn_init_f32_sigmoid_avx2_rr1_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2_rr1_p5.sign_mask[i] = -0.0f;
+    params->avx2_rr1_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx2_rr1_p5.log2e[i] = 0x1.715476p0f;
+    params->avx2_rr1_p5.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx2_rr1_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->avx2_rr1_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->avx2_rr1_p5.c3[i] = 0x1.555A80p-3f;
+    params->avx2_rr1_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->avx2_rr1_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->avx2_rr1_p5.one[i] = 1.0f;
+    params->avx2_rr1_p5.denorm_cutoff[i] = -0x1.5D589Ep+6f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx2_rr1_p5.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx2_rr1_p5.mask_table[i] = 0;
+  }
+}
+
+void xnn_init_f32_sigmoid_avx512_rr1_lut16_p3_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512_rr1_lut16_p3.sign_mask = UINT32_C(0x80000000);
+  params->avx512_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
+  params->avx512_rr1_lut16_p3.log2e = 0x1.715476p0f;
+  params->avx512_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
+  params->avx512_rr1_lut16_p3.c3 = 0x1.55559Ap-3f;
+  params->avx512_rr1_lut16_p3.c2 = 0x1.00021Ep-1f;
+  params->avx512_rr1_lut16_p3.one = 1.0f;
+  params->avx512_rr1_lut16_p3.table[ 0] = 0x1.000000p+0f;
+  params->avx512_rr1_lut16_p3.table[ 1] = 0x1.0B5586p+0f;
+  params->avx512_rr1_lut16_p3.table[ 2] = 0x1.172B84p+0f;
+  params->avx512_rr1_lut16_p3.table[ 3] = 0x1.2387A6p+0f;
+  params->avx512_rr1_lut16_p3.table[ 4] = 0x1.306FE0p+0f;
+  params->avx512_rr1_lut16_p3.table[ 5] = 0x1.3DEA64p+0f;
+  params->avx512_rr1_lut16_p3.table[ 6] = 0x1.4BFDAEp+0f;
+  params->avx512_rr1_lut16_p3.table[ 7] = 0x1.5AB07Ep+0f;
+  params->avx512_rr1_lut16_p3.table[ 8] = 0x1.6A09E6p+0f;
+  params->avx512_rr1_lut16_p3.table[ 9] = 0x1.7A1148p+0f;
+  params->avx512_rr1_lut16_p3.table[10] = 0x1.8ACE54p+0f;
+  params->avx512_rr1_lut16_p3.table[11] = 0x1.9C4918p+0f;
+  params->avx512_rr1_lut16_p3.table[12] = 0x1.AE89FAp+0f;
+  params->avx512_rr1_lut16_p3.table[13] = 0x1.C199BEp+0f;
+  params->avx512_rr1_lut16_p3.table[14] = 0x1.D5818Ep+0f;
+  params->avx512_rr1_lut16_p3.table[15] = 0x1.EA4AFAp+0f;
+}
+
+void xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512_rr2_lut32_p2.sign_mask = UINT32_C(0x80000000);
+  params->avx512_rr2_lut32_p2.magic_bias = 0x1.800000p18f;
+  params->avx512_rr2_lut32_p2.log2e = 0x1.715476p0f;
+  params->avx512_rr2_lut32_p2.minus_ln2_hi = -0x1.62E430p-1f;
+  params->avx512_rr2_lut32_p2.minus_ln2_lo = 0x1.05C61p-29f;
+  params->avx512_rr2_lut32_p2.c2 = 0x1.000000p-1f;
+  params->avx512_rr2_lut32_p2.c1 = 0x1.0000F6p-0f;
+  params->avx512_rr2_lut32_p2.one = 1.0f;
+
+  params->avx512_rr2_lut32_p2.table_lo[ 0] = 0x1.000000p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 1] = 0x1.059B0Ep+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 2] = 0x1.0B5586p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 3] = 0x1.11301Ep+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 4] = 0x1.172B84p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 5] = 0x1.1D4874p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 6] = 0x1.2387A6p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 7] = 0x1.29E9E0p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 8] = 0x1.306FE0p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[ 9] = 0x1.371A74p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[10] = 0x1.3DEA64p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[11] = 0x1.44E086p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[12] = 0x1.4BFDAEp+0f;
+  params->avx512_rr2_lut32_p2.table_lo[13] = 0x1.5342B6p+0f;
+  params->avx512_rr2_lut32_p2.table_lo[14] = 0x1.5AB07Ep+0f;
+  params->avx512_rr2_lut32_p2.table_lo[15] = 0x1.6247ECp+0f;
+
+  params->avx512_rr2_lut32_p2.table_hi[ 0] = 0x1.6A09E6p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 1] = 0x1.71F75Ep+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 2] = 0x1.7A1148p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 3] = 0x1.82589Ap+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 4] = 0x1.8ACE54p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 5] = 0x1.93737Cp+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 6] = 0x1.9C4918p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 7] = 0x1.A5503Cp+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 8] = 0x1.AE89FAp+0f;
+  params->avx512_rr2_lut32_p2.table_hi[ 9] = 0x1.B7F770p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[10] = 0x1.C199BEp+0f;
+  params->avx512_rr2_lut32_p2.table_hi[11] = 0x1.CB720Ep+0f;
+  params->avx512_rr2_lut32_p2.table_hi[12] = 0x1.D5818Ep+0f;
+  params->avx512_rr2_lut32_p2.table_hi[13] = 0x1.DFC974p+0f;
+  params->avx512_rr2_lut32_p2.table_hi[14] = 0x1.EA4AFAp+0f;
+  params->avx512_rr2_lut32_p2.table_hi[15] = 0x1.F50766p+0f;
+}
+
+void xnn_init_f32_sigmoid_avx512_rr1_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512_rr1_p5.sign_mask = UINT32_C(0x80000000);
+  params->avx512_rr1_p5.log2e = 0x1.715476p0f;
+  params->avx512_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
+  params->avx512_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
+  params->avx512_rr1_p5.c4 = 0x1.573A1Ap-5f;
+  params->avx512_rr1_p5.c3 = 0x1.555A80p-3f;
+  params->avx512_rr1_p5.c2 = 0x1.FFFDC6p-2f;
+  params->avx512_rr1_p5.c1 = 0x1.FFFFF6p-1f;
+  params->avx512_rr1_p5.one = 1.0f;
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd_rr2_lut64_p2.magic_bias[i] = 0x1.800000p17f;
+    params->wasmsimd_rr2_lut64_p2.minus_log2e[i] = -0x1.715476p0f;
+    params->wasmsimd_rr2_lut64_p2.index_mask[i] = UINT32_C(0x3F);
+    params->wasmsimd_rr2_lut64_p2.ln2_hi[i] = 0x1.630000p-1f;
+    params->wasmsimd_rr2_lut64_p2.ln2_lo[i] = -0x1.BD0106p-13f;
+    params->wasmsimd_rr2_lut64_p2.c2[i] = 0x1.FFFF0Ap-2f;
+    params->wasmsimd_rr2_lut64_p2.one[i] = 1.0f;
+    params->wasmsimd_rr2_lut64_p2.denorm_cutoff[i] = 0x1.5D589Ep+6f;
+  }
+}
+
+void xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params(
+  union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->wasmsimd_rr2_p5.minus_log2e[i] = -0x1.715476p+0f;
+    params->wasmsimd_rr2_p5.ln2_hi[i] = 0x1.62E400p-1f;
+    params->wasmsimd_rr2_p5.ln2_lo[i] = 0x1.7F7D1Cp-20f;
+    params->wasmsimd_rr2_p5.c5[i] = -0x1.0F9F9Cp-7f;
+    params->wasmsimd_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->wasmsimd_rr2_p5.c3[i] = -0x1.555A80p-3f;
+    params->wasmsimd_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->wasmsimd_rr2_p5.c1[i] = -0x1.FFFFF6p-1f;
+    params->wasmsimd_rr2_p5.one[i] = 1.0f;
+    params->wasmsimd_rr2_p5.denorm_cutoff[i] = 0x1.5D589Ep+6f;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f32_abs_sse_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
@@ -1478,7 +1768,7 @@ void xnn_init_f32_elu_neonfma_rr1_lut16_p3_params(
   params->neonfma_rr1_lut16_p3.sat_cutoff = -0x1.154246p+4f;
   params->neonfma_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
   params->neonfma_rr1_lut16_p3.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_lut16_p3.minus_ln2 = -0x1.62E43p-1f;
+  params->neonfma_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
   params->neonfma_rr1_lut16_p3.c3 = 0x1.55561Cp-3f;
   params->neonfma_rr1_lut16_p3.c2 = 0x1.0001ECp-1f;
 }
@@ -1495,7 +1785,7 @@ void xnn_init_f32_elu_neonfma_rr1_p6_params(
   params->neonfma_rr1_p6.sat_cutoff = -0x1.154246p+4f;
   params->neonfma_rr1_p6.magic_bias = 0x1.8000FEp23f;
   params->neonfma_rr1_p6.log2e = 0x1.715476p+0f;
-  params->neonfma_rr1_p6.minus_ln2 = -0x1.62E43p-1f;
+  params->neonfma_rr1_p6.minus_ln2 = -0x1.62E430p-1f;
   params->neonfma_rr1_p6.c6 = 0x1.6b7338p-10f;
   params->neonfma_rr1_p6.c5 = 0x1.12278Ep-7f;
   params->neonfma_rr1_p6.c4 = 0x1.555716p-5f;
@@ -1662,7 +1952,7 @@ void xnn_init_f32_elu_avx2_rr1_lut16_p3_params(
     params->avx2_rr1_lut16_p3.magic_bias[i] = 0x1.800000p19f;
     params->avx2_rr1_lut16_p3.log2e[i] = 0x1.715476p+0f;
     params->avx2_rr1_lut16_p3.index_mask[i] = UINT32_C(0xF);
-    params->avx2_rr1_lut16_p3.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_lut16_p3.minus_ln2[i] = -0x1.62E430p-1f;
     params->avx2_rr1_lut16_p3.c3[i] = 0x1.55561Cp-3f;
     params->avx2_rr1_lut16_p3.c2[i] = 0x1.0001ECp-1f;
   }
@@ -1697,7 +1987,7 @@ void xnn_init_f32_elu_avx2_rr1_lut8_p4_params(
   params->avx2_rr1_lut8_p4.table[6] = UINT32_C(0x3F7744FD);
   params->avx2_rr1_lut8_p4.table[7] = UINT32_C(0x3F7AC0C7);
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut8_p4.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_lut8_p4.minus_ln2[i] = -0x1.62E430p-1f;
     params->avx2_rr1_lut8_p4.c4[i] = 0x1.5558ECp-5f;
     params->avx2_rr1_lut8_p4.c3[i] = 0x1.555C20p-3f;
     params->avx2_rr1_lut8_p4.c2[i] = 0x1.000000p-1f;
@@ -1733,7 +2023,7 @@ void xnn_init_f32_elu_avx2_rr1_lut4_p4_params(
   params->avx2_rr1_lut4_p4.table[6] = 0x1.EA09E6p-1f;
   params->avx2_rr1_lut4_p4.table[7] = 0x1.EE89FAp-1f;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx2_rr1_lut4_p4.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_lut4_p4.minus_ln2[i] = -0x1.62E430p-1f;
     params->avx2_rr1_lut4_p4.c4[i] = 0x1.554F9Ap-5f;
     params->avx2_rr1_lut4_p4.c3[i] = 0x1.557082p-3f;
     params->avx2_rr1_lut4_p4.c2[i] = 0x1.000002p-1f;
@@ -1759,7 +2049,7 @@ void xnn_init_f32_elu_avx2_rr1_p6_params(
     params->avx2_rr1_p6.sat_cutoff[i] = -0x1.154246p+4f;
     params->avx2_rr1_p6.magic_bias[i] = 0x1.8000FEp23f;
     params->avx2_rr1_p6.log2e[i] = 0x1.715476p+0f;
-    params->avx2_rr1_p6.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_p6.minus_ln2[i] = -0x1.62E430p-1f;
     params->avx2_rr1_p6.c6[i] = 0x1.6B7338p-10f;
     params->avx2_rr1_p6.c5[i] = 0x1.12278Ep-7f;
     params->avx2_rr1_p6.c4[i] = 0x1.555716p-5f;
@@ -1786,7 +2076,7 @@ void xnn_init_f32_elu_avx512_rr1_lut16_p3_params(
   params->avx512_rr1_lut16_p3.sat_cutoff = -0x1.154246p+4f;
   params->avx512_rr1_lut16_p3.magic_bias = 0x1.800000p19f;
   params->avx512_rr1_lut16_p3.log2e = 0x1.715476p+0f;
-  params->avx512_rr1_lut16_p3.minus_ln2 = -0x1.62E43p-1f;
+  params->avx512_rr1_lut16_p3.minus_ln2 = -0x1.62E430p-1f;
   params->avx512_rr1_lut16_p3.c3 = 0x1.55561Cp-3f;
   params->avx512_rr1_lut16_p3.c2 = 0x1.0001ECp-1f;
   params->avx512_rr1_lut16_p3.table[ 0] = UINT32_C(0x3F800000);
@@ -1819,7 +2109,7 @@ void xnn_init_f32_elu_avx512_rr1_p6_params(
   params->avx512_rr1_p6.sat_cutoff = -0x1.154246p+4f;
   params->avx512_rr1_p6.magic_bias = 0x1.8000FEp23f;
   params->avx512_rr1_p6.log2e = 0x1.715476p+0f;
-  params->avx512_rr1_p6.minus_ln2 = -0x1.62E43p-1f;
+  params->avx512_rr1_p6.minus_ln2 = -0x1.62E430p-1f;
   params->avx512_rr1_p6.c6 = 0x1.6B7338p-10f;
   params->avx512_rr1_p6.c5 = 0x1.12278Ep-7f;
   params->avx512_rr1_p6.c4 = 0x1.555716p-5f;

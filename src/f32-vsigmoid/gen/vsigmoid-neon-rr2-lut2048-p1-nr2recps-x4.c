@@ -21,18 +21,18 @@ void xnn_f32_vsigmoid_ukernel__neon_rr2_lut2048_p1_nr2recps_x4(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_OOB_READS
+    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n % sizeof(float) == 0);
 
-  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p12f);
-  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p0f);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.magic_bias);
+  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.minus_log2e);
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x7FF));
-  const float32x4_t vln2_hi = vmovq_n_f32(0x1.600000p-1f);
-  const float32x4_t vln2_lo = vmovq_n_f32(0x1.7217F8p-8f);
-  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFFEp-1f);
-  const float32x4_t vone = vmovq_n_f32(1.0f);
-  const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep+6f);
+  const float32x4_t vln2_hi = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.ln2_hi);
+  const float32x4_t vln2_lo = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.ln2_lo);
+  const float32x4_t vc1 = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.c1);
+  const float32x4_t vone = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.one);
+  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->scalar_rr2_lut2048_p1.denorm_cutoff);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(x); x += 4;

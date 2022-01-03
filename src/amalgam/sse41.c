@@ -775,11 +775,11 @@ void xnn_f32_vrndz_ukernel__sse41_x8(
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__sse41_lut64_p2_div_x8(
+void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x8(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_OOB_READS
+    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n % sizeof(float) == 0);
 

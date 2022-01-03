@@ -19,20 +19,20 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_nr2fma_x4(
     size_t n,
     const float* x,
     float* y,
-    const void* params) XNN_OOB_READS
+    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n % sizeof(float) == 0);
 
-  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp23f);
-  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
-  const float32x4_t vln2 = vmovq_n_f32(0x1.62E43p-1f);
-  const float32x4_t vc5 = vmovq_n_f32(-0x1.0F9F9Cp-7f);
-  const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
-  const float32x4_t vc3 = vmovq_n_f32(-0x1.555A80p-3f);
-  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFDC6p-2f);
-  const float32x4_t vc1 = vmovq_n_f32(-0x1.FFFFF6p-1f);
-  const float32x4_t vone = vmovq_n_f32(1.0f);
-  const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep+6f);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neonfma_rr1_p5.magic_bias);
+  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neonfma_rr1_p5.minus_log2e);
+  const float32x4_t vln2 = vld1q_dup_f32(&params->neonfma_rr1_p5.ln2);
+  const float32x4_t vc5 = vld1q_dup_f32(&params->neonfma_rr1_p5.c5);
+  const float32x4_t vc4 = vld1q_dup_f32(&params->neonfma_rr1_p5.c4);
+  const float32x4_t vc3 = vld1q_dup_f32(&params->neonfma_rr1_p5.c3);
+  const float32x4_t vc2 = vld1q_dup_f32(&params->neonfma_rr1_p5.c2);
+  const float32x4_t vc1 = vld1q_dup_f32(&params->neonfma_rr1_p5.c1);
+  const float32x4_t vone = vld1q_dup_f32(&params->neonfma_rr1_p5.one);
+  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neonfma_rr1_p5.denorm_cutoff);
 
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(x); x += 4;

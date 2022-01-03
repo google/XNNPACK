@@ -638,11 +638,15 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
     uint32_t flags,
     xnn_operator_t* sigmoid_op_out)
 {
+  union xnn_f32_sigmoid_params params;
+  if (xnn_params.f32.sigmoid.init.f32_sigmoid != NULL) {
+    xnn_params.f32.sigmoid.init.f32_sigmoid(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
-    NULL, 0,
+    &params, sizeof(params),
     xnn_operator_type_sigmoid_nc_f32,
-    xnn_params.f32.sigmoid,
+    xnn_params.f32.sigmoid.ukernel,
     sigmoid_op_out);
 }
 
@@ -1177,7 +1181,7 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
-    NULL, 0,
+    &sigmoid_op->params.f32_sigmoid, sizeof(sigmoid_op->params.f32_sigmoid),
     pthreadpool_get_threads_count(threadpool));
 }
 

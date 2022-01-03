@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vsigmoid/avx-p5.c.in
+//   Template: src/f32-vsigmoid/avx-rr2-p5.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,28 +15,26 @@
 #include <xnnpack/vunary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x16(
     size_t n,
     const float* x,
     float* y,
-    const void* params)
+    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n % sizeof(float) == 0);
 
-  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
-  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
-  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
-  const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);
-  const __m256 vminus_ln2_lo = _mm256_set1_ps(0x1.05C61p-29f);
-  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
-  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
-  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
-  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep+6f);
+  const __m256 vsign_mask = _mm256_load_ps(params->avx_rr2_p5.sign_mask);
+  const __m256 vmagic_bias = _mm256_load_ps(params->avx_rr2_p5.magic_bias);
+  const __m256 vlog2e = _mm256_load_ps(params->avx_rr2_p5.log2e);
+  const __m256 vminus_ln2_hi = _mm256_load_ps(params->avx_rr2_p5.minus_ln2_hi);
+  const __m256 vminus_ln2_lo = _mm256_load_ps(params->avx_rr2_p5.minus_ln2_lo);
+  const __m256 vc5 = _mm256_load_ps(params->avx_rr2_p5.c5);
+  const __m256 vc4 = _mm256_load_ps(params->avx_rr2_p5.c4);
+  const __m256 vc3 = _mm256_load_ps(params->avx_rr2_p5.c3);
+  const __m256 vc2 = _mm256_load_ps(params->avx_rr2_p5.c2);
+  const __m256 vc1 = _mm256_load_ps(params->avx_rr2_p5.c1);
+  const __m256 vone = _mm256_load_ps(params->avx_rr2_p5.one);
+  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx_rr2_p5.denorm_cutoff);
 
   for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
     const __m256 vx0 = _mm256_loadu_ps(x);
@@ -136,7 +134,7 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x16(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx_rr2_p5.mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
 

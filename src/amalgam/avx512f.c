@@ -2830,7 +2830,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
     size_t n,
     const float* x,
     float* y,
-    const void* params)
+    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n % sizeof(float) == 0);
 
