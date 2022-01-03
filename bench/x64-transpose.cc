@@ -17,9 +17,9 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-static void x16_transpose(
+static void x64_transpose(
     benchmark::State& state,
-    xnn_x16_transpose_ukernel_function transpose,
+    xnn_x64_transpose_ukernel_function transpose,
     size_t ukernel_size,
     benchmark::utils::IsaCheckFunction isa_check = nullptr) {
   if (isa_check && !isa_check(state)) {
@@ -28,14 +28,14 @@ static void x16_transpose(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), rng);
-  const size_t ukernel_bytes = ukernel_size * sizeof(uint16_t);
+  auto u64rng = std::bind(std::uniform_int_distribution<uint64_t>(), rng);
+  const size_t ukernel_bytes = ukernel_size * sizeof(uint64_t);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(
-      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(
-      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::generate(x.begin(), x.end(), std::ref(u16rng));
+  std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> x(
+      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint64_t));
+  std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> y(
+      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint64_t));
+  std::generate(x.begin(), x.end(), std::ref(u64rng));
   std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
@@ -50,17 +50,11 @@ static void x16_transpose(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(x16_transpose, sse2_32, xnn_x16_transpose_ukernel__4x8_sse2, 32)
+  BENCHMARK_CAPTURE(x64_transpose, sse2_32, xnn_x64_transpose_ukernel__2x2_sse2, 32)
       ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_64, xnn_x16_transpose_ukernel__4x8_sse2, 64)
+  BENCHMARK_CAPTURE(x64_transpose, sse2_117, xnn_x64_transpose_ukernel__2x2_sse2, 117)
       ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__4x8_sse2, 117)
-      ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_32, xnn_x16_transpose_ukernel__8x8_sse2, 32)
-      ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_64, xnn_x16_transpose_ukernel__8x8_sse2, 64)
-      ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__8x8_sse2, 117)
+  BENCHMARK_CAPTURE(x64_transpose, sse2_1024, xnn_x64_transpose_ukernel__2x2_sse2, 1024)
       ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

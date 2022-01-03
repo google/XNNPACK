@@ -3,5 +3,4 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-- name: xnn_x16_transpose_ukernel__4x8_sse2
-- name: xnn_x16_transpose_ukernel__8x8_sse2
+- name: xnn_x64_transpose_ukernel__2x2_sse2
