@@ -3,8 +3,12 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
-"""Converts hand written assembly (.S files) to C++ files using the JIT."""
+"""Converts hand written assembly (.S files) to C++ files using the JIT.
 
+Takes a single argument, an assembly file, and prints converted output to stdout.
+"""
+
+import argparse
 import datetime
 import re
 import sys
@@ -139,8 +143,7 @@ def fix_fn_name(name):
 IGNORE_LINES = [r'\s*\.\w+']
 
 
-def main(argv):
-  input_file = argv[0]
+def main(input_file):
   # Whether we are in the copyright section.
   in_copyright = False
   # Whether we are in the microkernel function.
@@ -382,4 +385,7 @@ def main(argv):
 
 
 if __name__ == '__main__':
-  main(sys.argv[1:])
+  parser = argparse.ArgumentParser(description='Convert assembly to to JIT C++, writes to stdout.')
+  parser.add_argument('input_file', help='Input assembly filename')
+  args = parser.parse_args()
+  main(args.input_file)
