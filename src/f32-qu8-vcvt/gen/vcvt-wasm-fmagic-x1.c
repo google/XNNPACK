@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-qs8-vcvt/scalar-magic-iminmax.c.in
+//   Template: src/f32-qs8-vcvt/scalar-fmagic.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,7 +16,7 @@
 #include <fp16.h>
 
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1(
+void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x1(
     size_t n,
     const float* x,
     uint8_t* y,
@@ -27,20 +27,20 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x1(
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic_iminmax.scale;
-  const float vmagic_bias = params->scalar_magic_iminmax.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic_iminmax.magic_min;
-  const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
+  const float vscale = params->scalar_fmagic.scale;
+  const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
+  const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
+  const float vmagic_bias = params->scalar_fmagic.magic_bias;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
 
   do {
     float vx = *x++;
     vx *= vscale;
+    vx = __builtin_wasm_max_f32(vx, voutput_min_less_zero_point);
+    vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
     vx += vmagic_bias;
 
     int32_t vy = (int32_t) fp32_to_bits(vx);
-    vy = math_max_s32(vy, vmagic_min);
-    vy = math_min_s32(vy, vmagic_max);
     vy -= vmagic_bias_less_zero_point;
 
     *y++ = (uint8_t) vy;

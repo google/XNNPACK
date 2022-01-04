@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-qs8-vcvt/scalar-magic-iminmax.c.in
+//   Template: src/f32-qs8-vcvt/scalar-imagic.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,22 +16,22 @@
 #include <fp16.h>
 
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3(
+void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x3(
     size_t n,
     const float* x,
-    uint8_t* y,
-    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    int8_t* y,
+    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(n != 0);
   assert(n % sizeof(float) == 0);
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic_iminmax.scale;
-  const float vmagic_bias = params->scalar_magic_iminmax.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic_iminmax.magic_min;
-  const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
+  const float vscale = params->scalar_imagic.scale;
+  const float vmagic_bias = params->scalar_imagic.magic_bias;
+  const int32_t vmagic_min = params->scalar_imagic.magic_min;
+  const int32_t vmagic_max = params->scalar_imagic.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
   for (; n >= 3 * sizeof(float); n -= 3 * sizeof(float)) {
     float vx0 = x[0];
@@ -63,9 +63,9 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3(
     vy1 -= vmagic_bias_less_zero_point;
     vy2 -= vmagic_bias_less_zero_point;
 
-    y[0] = (uint8_t) vy0;
-    y[1] = (uint8_t) vy1;
-    y[2] = (uint8_t) vy2;
+    y[0] = (int8_t) vy0;
+    y[1] = (int8_t) vy1;
+    y[2] = (int8_t) vy2;
     y += 3;
   }
   if XNN_UNLIKELY(n != 0) {
@@ -79,7 +79,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_magic_iminmax_x3(
       vy = math_min_s32(vy, vmagic_max);
       vy -= vmagic_bias_less_zero_point;
 
-      *y++ = (uint8_t) vy;
+      *y++ = (int8_t) vy;
 
       n -= sizeof(float);
     } while (n != 0);

@@ -14,7 +14,7 @@ $assert BATCH_TILE >= 1
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_iminmax_x${BATCH_TILE}(
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_x${BATCH_TILE}(
     size_t n,
     const float* x,
     ${XINT8_T}* y,
@@ -25,11 +25,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_magic_iminmax_x${BATCH_TIL
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic_iminmax.scale;
-  const float vmagic_bias = params->scalar_magic_iminmax.magic_bias;
-  const int32_t vmagic_min = params->scalar_magic_iminmax.magic_min;
-  const int32_t vmagic_max = params->scalar_magic_iminmax.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_iminmax.magic_bias_less_zero_point;
+  const float vscale = params->scalar_imagic.scale;
+  const float vmagic_bias = params->scalar_imagic.magic_bias;
+  const int32_t vmagic_min = params->scalar_imagic.magic_min;
+  const int32_t vmagic_max = params->scalar_imagic.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
   $if BATCH_TILE > 1:
     for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {

@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-qs8-vcvt/scalar-magic-fminmax.c.in
+//   Template: src/f32-qs8-vcvt/scalar-imagic.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,7 +16,7 @@
 #include <fp16.h>
 
 
-void xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2(
+void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x2(
     size_t n,
     const float* x,
     uint8_t* y,
@@ -27,11 +27,11 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2(
   assert(x != NULL);
   assert(y != NULL);
 
-  const float vscale = params->scalar_magic_fminmax.scale;
-  const float voutput_min_less_zero_point = params->scalar_magic_fminmax.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->scalar_magic_fminmax.output_max_less_zero_point;
-  const float vmagic_bias = params->scalar_magic_fminmax.magic_bias;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_magic_fminmax.magic_bias_less_zero_point;
+  const float vscale = params->scalar_imagic.scale;
+  const float vmagic_bias = params->scalar_imagic.magic_bias;
+  const int32_t vmagic_min = params->scalar_imagic.magic_min;
+  const int32_t vmagic_max = params->scalar_imagic.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
   for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
     float vx0 = x[0];
@@ -41,17 +41,17 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2(
     vx0 *= vscale;
     vx1 *= vscale;
 
-    vx0 = __builtin_wasm_max_f32(vx0, voutput_min_less_zero_point);
-    vx1 = __builtin_wasm_max_f32(vx1, voutput_min_less_zero_point);
-
-    vx0 = __builtin_wasm_min_f32(vx0, voutput_max_less_zero_point);
-    vx1 = __builtin_wasm_min_f32(vx1, voutput_max_less_zero_point);
-
     vx0 += vmagic_bias;
     vx1 += vmagic_bias;
 
     int32_t vy0 = (int32_t) fp32_to_bits(vx0);
     int32_t vy1 = (int32_t) fp32_to_bits(vx1);
+
+    vy0 = math_max_s32(vy0, vmagic_min);
+    vy1 = math_max_s32(vy1, vmagic_min);
+
+    vy0 = math_min_s32(vy0, vmagic_max);
+    vy1 = math_min_s32(vy1, vmagic_max);
 
     vy0 -= vmagic_bias_less_zero_point;
     vy1 -= vmagic_bias_less_zero_point;
@@ -63,11 +63,11 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_magic_fminmax_x2(
   if XNN_UNLIKELY(n != 0) {
     float vx = *x;
     vx *= vscale;
-    vx = __builtin_wasm_max_f32(vx, voutput_min_less_zero_point);
-    vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
     vx += vmagic_bias;
 
     int32_t vy = (int32_t) fp32_to_bits(vx);
+    vy = math_max_s32(vy, vmagic_min);
+    vy = math_min_s32(vy, vmagic_max);
     vy -= vmagic_bias_less_zero_point;
 
     *y = (uint8_t) vy;

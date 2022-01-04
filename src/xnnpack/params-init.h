@@ -618,8 +618,8 @@ DECLARE_INIT_F32_F16_CVT_PARAMS_FUNCTION(xnn_init_f32_f16_cvt_scalar_fabsf_param
     int8_t output_min,                                        \
     int8_t output_max);
 
-DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
-DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params)
+DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_fmagic_params)
+DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_imagic_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_neon_params)
@@ -648,8 +648,8 @@ DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_magic_iminm
     uint8_t output_min,                                       \
     uint8_t output_max);
 
-DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params)
-DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params)
+DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_fmagic_params)
+DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_imagic_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_neon_params)

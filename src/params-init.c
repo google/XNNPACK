@@ -3850,21 +3850,21 @@ XNN_INTERNAL void xnn_init_f32_f16_cvt_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params(
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_fmagic_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
 {
-  params->scalar_magic_fminmax.scale = scale;
-  params->scalar_magic_fminmax.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_magic_fminmax.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_magic_fminmax.magic_bias = 12582912.0f;
-  params->scalar_magic_fminmax.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->scalar_fmagic.scale = scale;
+  params->scalar_fmagic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->scalar_fmagic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->scalar_fmagic.magic_bias = 12582912.0f;
+  params->scalar_fmagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
-XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params(
+XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_imagic_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -3873,11 +3873,11 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params(
 {
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_magic_iminmax.scale = scale;
-  params->scalar_magic_iminmax.magic_bias = 12582912.0f;
-  params->scalar_magic_iminmax.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->scalar_magic_iminmax.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
-  params->scalar_magic_iminmax.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->scalar_imagic.scale = scale;
+  params->scalar_imagic.magic_bias = 12582912.0f;
+  params->scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  params->scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -4095,21 +4095,21 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_magic_fminmax_params(
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_fmagic_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max)
 {
-  params->scalar_magic_fminmax.scale = scale;
-  params->scalar_magic_fminmax.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_magic_fminmax.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_magic_fminmax.magic_bias = 12582912.0f;
-  params->scalar_magic_fminmax.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->scalar_fmagic.scale = scale;
+  params->scalar_fmagic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->scalar_fmagic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->scalar_fmagic.magic_bias = 12582912.0f;
+  params->scalar_fmagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
-XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params(
+XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_imagic_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t output_zero_point,
@@ -4118,11 +4118,11 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_magic_iminmax_params(
 {
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_magic_iminmax.scale = scale;
-  params->scalar_magic_iminmax.magic_bias = 12582912.0f;
-  params->scalar_magic_iminmax.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->scalar_magic_iminmax.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
-  params->scalar_magic_iminmax.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->scalar_imagic.scale = scale;
+  params->scalar_imagic.magic_bias = 12582912.0f;
+  params->scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  params->scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

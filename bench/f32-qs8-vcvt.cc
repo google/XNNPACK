@@ -285,67 +285,67 @@ static void f32_qs8_vcvt(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_magic_fminmax_x1,
-                    xnn_f32_qs8_vcvt_ukernel__wasm_magic_fminmax_x1,
-                    xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_fmagic_x1,
+                    xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x1,
+                    xnn_init_f32_qs8_cvt_scalar_fmagic_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_magic_fminmax_x2,
-                    xnn_f32_qs8_vcvt_ukernel__wasm_magic_fminmax_x2,
-                    xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_fmagic_x2,
+                    xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x2,
+                    xnn_init_f32_qs8_cvt_scalar_fmagic_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_magic_fminmax_x3,
-                    xnn_f32_qs8_vcvt_ukernel__wasm_magic_fminmax_x3,
-                    xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_fmagic_x3,
+                    xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x3,
+                    xnn_init_f32_qs8_cvt_scalar_fmagic_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_magic_fminmax_x4,
-                    xnn_f32_qs8_vcvt_ukernel__wasm_magic_fminmax_x4,
-                    xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, wasm_fmagic_x4,
+                    xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x4,
+                    xnn_init_f32_qs8_cvt_scalar_fmagic_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_fminmax_x1,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_fminmax_x1,
-                  xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_fmagic_x1,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x1,
+                  xnn_init_f32_qs8_cvt_scalar_fmagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_fminmax_x2,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_fminmax_x2,
-                  xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_fmagic_x2,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x2,
+                  xnn_init_f32_qs8_cvt_scalar_fmagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_fminmax_x3,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_fminmax_x3,
-                  xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_fmagic_x3,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x3,
+                  xnn_init_f32_qs8_cvt_scalar_fmagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_fminmax_x4,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_fminmax_x4,
-                  xnn_init_f32_qs8_cvt_scalar_magic_fminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_fmagic_x4,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x4,
+                  xnn_init_f32_qs8_cvt_scalar_fmagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
 
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_iminmax_x1,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x1,
-                  xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_imagic_x1,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x1,
+                  xnn_init_f32_qs8_cvt_scalar_imagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_iminmax_x2,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x2,
-                  xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_imagic_x2,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x2,
+                  xnn_init_f32_qs8_cvt_scalar_imagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_iminmax_x3,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x3,
-                  xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_imagic_x3,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x3,
+                  xnn_init_f32_qs8_cvt_scalar_imagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_magic_iminmax_x4,
-                  xnn_f32_qs8_vcvt_ukernel__scalar_magic_iminmax_x4,
-                  xnn_init_f32_qs8_cvt_scalar_magic_iminmax_params)
+BENCHMARK_CAPTURE(f32_qs8_vcvt, scalar_imagic_x4,
+                  xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x4,
+                  xnn_init_f32_qs8_cvt_scalar_imagic_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
   ->UseRealTime();
 

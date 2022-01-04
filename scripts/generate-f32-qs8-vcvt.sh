@@ -95,36 +95,36 @@ tools/xngen src/f32-qs8-vcvt/wasmsimd-magic.c.in -D BATCH_TILE=24 -D DATATYPE=QU
 tools/xngen src/f32-qs8-vcvt/wasmsimd-magic.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-wasmsimd-magic-x32.c &
 
 ##################################### WAsm ####################################
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-magic-fminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-magic-fminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-magic-fminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-magic-fminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-fmagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-fmagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-fmagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -D WASM=1 -o src/f32-qs8-vcvt/gen/vcvt-wasm-fmagic-x4.c &
 
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-magic-fminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-magic-fminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-magic-fminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-magic-fminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-fmagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-fmagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-fmagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -D WASM=1 -o src/f32-qu8-vcvt/gen/vcvt-wasm-fmagic-x4.c &
 
 #################################### Scalar ###################################
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-fminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-fmagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-fmagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-fmagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-fmagic-x4.c &
 
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-fminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-fminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-fmagic.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x4.c &
 
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x4.c &
 
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x1.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x2.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x3.c &
-tools/xngen src/f32-qs8-vcvt/scalar-magic-iminmax.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-magic-iminmax-x4.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x4.c &
 
 ################################## Unit tests #################################
 tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc &
