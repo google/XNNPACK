@@ -6867,7 +6867,7 @@ xnnpack_cc_library(
     srcs = ALL_SCALAR_MICROKERNEL_SRCS,
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
@@ -6883,7 +6883,7 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     aarch32_copts = ["-marm"],
     aarch32_srcs = PROD_SCALAR_AARCH32_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
@@ -6905,7 +6905,7 @@ xnnpack_cc_library(
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":tables",
@@ -6918,7 +6918,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "wasm_bench_microkernels",
     hdrs = INTERNAL_HDRS,
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
@@ -6934,7 +6934,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "wasm_prod_microkernels",
     hdrs = INTERNAL_HDRS,
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
@@ -6954,7 +6954,7 @@ xnnpack_cc_library(
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_copts = xnnpack_gcc_std_copts() + ["-fno-math-errno"],
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = ALL_WASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
