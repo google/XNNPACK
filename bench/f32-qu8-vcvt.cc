@@ -324,6 +324,27 @@ BENCHMARK_CAPTURE(f32_qu8_vcvt, scalar_imagic_x4,
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
   ->UseRealTime();
 
+BENCHMARK_CAPTURE(f32_qu8_vcvt, scalar_lrintf_x1,
+                  xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x1,
+                  xnn_init_f32_qu8_cvt_scalar_lrintf_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_qu8_vcvt, scalar_lrintf_x2,
+                  xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x2,
+                  xnn_init_f32_qu8_cvt_scalar_lrintf_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_qu8_vcvt, scalar_lrintf_x3,
+                  xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x3,
+                  xnn_init_f32_qu8_cvt_scalar_lrintf_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_qu8_vcvt, scalar_lrintf_x4,
+                  xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4,
+                  xnn_init_f32_qu8_cvt_scalar_lrintf_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint8_t>)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

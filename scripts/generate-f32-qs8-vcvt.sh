@@ -126,6 +126,16 @@ tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x3.c &
 tools/xngen src/f32-qs8-vcvt/scalar-imagic.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x4.c &
 
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=3 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -D WASM=0 -o src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x4.c &
+
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=1 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x1.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=2 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x2.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=3 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x3.c &
+tools/xngen src/f32-qs8-vcvt/scalar-lrintf.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -D WASM=0 -o src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x4.c &
+
 ################################## Unit tests #################################
 tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc &
 tools/generate-vcvt-test.py --spec test/f32-qu8-vcvt.yaml --output test/f32-qu8-vcvt.cc &

@@ -547,6 +547,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x2.c
   src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x3.c
   src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x4.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x1.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x2.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x3.c
+  src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x4.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x1.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x2.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-fmagic-x3.c
@@ -555,6 +559,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x2.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x3.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x4.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x1.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x2.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x3.c
+  src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x4.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x1.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2-acc2.c
   src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2.c

@@ -91,3 +91,11 @@
   init: xnn_init_f32_qu8_cvt_scalar_imagic_params
 - name: xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x4
   init: xnn_init_f32_qu8_cvt_scalar_imagic_params
+- name: xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x1
+  init: xnn_init_f32_qu8_cvt_scalar_lrintf_params
+- name: xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x2
+  init: xnn_init_f32_qu8_cvt_scalar_lrintf_params
+- name: xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x3
+  init: xnn_init_f32_qu8_cvt_scalar_lrintf_params
+- name: xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4
+  init: xnn_init_f32_qu8_cvt_scalar_lrintf_params
