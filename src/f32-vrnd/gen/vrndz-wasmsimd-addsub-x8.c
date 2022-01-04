@@ -25,9 +25,9 @@ void xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
-  const v128_t vmagic_number = wasm_f32x4_const_splat(0x1.000000p+23f);
-  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd.sign_mask);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd.magic_bias);
+  const v128_t vone = wasm_v128_load64_splat(params->wasmsimd.one);
   for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x);
     const v128_t vx4567 = wasm_v128_load(x + 4);
@@ -36,11 +36,11 @@ void xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8(
     const v128_t vabsx0123 = wasm_v128_andnot(vx0123, vsign_mask);
     const v128_t vabsx4567 = wasm_v128_andnot(vx4567, vsign_mask);
 
-    const v128_t vrndmask0123 = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx0123));
-    const v128_t vrndmask4567 = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx4567));
+    const v128_t vrndmask0123 = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx0123));
+    const v128_t vrndmask4567 = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx4567));
 
-    const v128_t vrndabsx0123 = wasm_f32x4_sub(wasm_f32x4_add(vabsx0123, vmagic_number), vmagic_number);
-    const v128_t vrndabsx4567 = wasm_f32x4_sub(wasm_f32x4_add(vabsx4567, vmagic_number), vmagic_number);
+    const v128_t vrndabsx0123 = wasm_f32x4_sub(wasm_f32x4_add(vabsx0123, vmagic_bias), vmagic_bias);
+    const v128_t vrndabsx4567 = wasm_f32x4_sub(wasm_f32x4_add(vabsx4567, vmagic_bias), vmagic_bias);
 
     const v128_t vadjustment0123 = wasm_v128_and(wasm_f32x4_lt(vabsx0123, vrndabsx0123), vone);
     const v128_t vadjustment4567 = wasm_v128_and(wasm_f32x4_lt(vabsx4567, vrndabsx4567), vone);
@@ -60,8 +60,8 @@ void xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8(
     x += 4;
 
     const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
+    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx));
+    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_bias), vmagic_bias);
     const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
     const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
     const v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);
@@ -73,8 +73,8 @@ void xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8(
     const v128_t vx = wasm_v128_load(x);
 
     const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
+    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx));
+    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_bias), vmagic_bias);
     const v128_t vadjustment = wasm_v128_and(wasm_f32x4_lt(vabsx, vrndabsx), vone);
     const v128_t vflrabsx = wasm_f32x4_sub(vrndabsx, vadjustment);
     v128_t vy = wasm_v128_bitselect(vx, vflrabsx, vrndmask);

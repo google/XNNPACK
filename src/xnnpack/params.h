@@ -127,7 +127,17 @@ union xnn_f32_rnd_params {
     XNN_ALIGN(16) float sign_mask[4];
     XNN_ALIGN(16) float one[4];
   } sse2;
+  struct {
+    int32_t mask_table[14];
+  } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float sign_mask[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) float one[2];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 union xnn_f32_elu_params {
@@ -3195,6 +3205,9 @@ typedef void (*xnn_init_f32_minmax_params_fn)(
 typedef void (*xnn_init_f32_neg_params_fn)(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_init_f32_rnd_params_fn)(
+  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_init_f32_sigmoid_params_fn)(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
 
@@ -3308,6 +3321,7 @@ struct vunary_parameters {
     xnn_init_f32_neg_params_fn f32_neg;
     xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
+    xnn_init_f32_rnd_params_fn f32_rnd;
     xnn_init_f32_sigmoid_params_fn f32_sigmoid;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
@@ -3613,10 +3627,10 @@ struct xnn_parameters {
     struct vunary_parameters lrelu;
     struct vunary_parameters neg;
     xnn_univector_ukernel_function relu;
-    xnn_univector_ukernel_function rndne;
-    xnn_univector_ukernel_function rndz;
-    xnn_univector_ukernel_function rndu;
-    xnn_univector_ukernel_function rndd;
+    struct vunary_parameters rndne;
+    struct vunary_parameters rndz;
+    struct vunary_parameters rndu;
+    struct vunary_parameters rndd;
     struct vunary_parameters sigmoid;
     struct vunary_parameters sqr;
     struct vunary_parameters sqrt;

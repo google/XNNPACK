@@ -204,8 +204,11 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel]
-  if init_fn:
-    test_args.append(init_fn)
+  if init_fn or op_type.startswith("Round"):
+    if op_type.startswith("Round"):
+      test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
+    if init_fn is not None:
+      test_args.append(init_fn)
   elif op_type not in ["Abs", "Negate", "Square", "SquareRoot"]:
     test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
     if not isa:

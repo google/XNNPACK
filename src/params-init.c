@@ -1691,23 +1691,40 @@ void xnn_init_f32_neg_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-void xnn_init_f32_rnd_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_rnd_sse2_params(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.sign_mask[i] = -0.0f;
-    }
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.one[i] = 1.0f;
-    }
-  #endif
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.sign_mask[i] = -0.0f;
+    params->sse2.one[i] = 1.0f;
+  }
 }
 
-void xnn_init_scalar_f32_rnd_params(
+void xnn_init_f32_rnd_avx_params(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
 {
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
 }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_rnd_wasmsimd_params(
+  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->wasmsimd.sign_mask[0] = -0.0f;
+  params->wasmsimd.sign_mask[1] = -0.0f;
+  params->wasmsimd.magic_bias[0] = 0x1.000000p+23f;
+  params->wasmsimd.magic_bias[1] = 0x1.000000p+23f;
+  params->wasmsimd.one[0] = 1.0f;
+  params->wasmsimd.one[1] = 1.0f;
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 void xnn_init_f32_elu_scalar_rr2_lut16_p3_params(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],

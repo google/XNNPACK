@@ -25,16 +25,16 @@ void xnn_f32_vrndu_ukernel__wasmsimd_addsub_x4(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
-  const v128_t vmagic_number = wasm_f32x4_const_splat(0x1.000000p+23f);
-  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+  const v128_t vsign_mask = wasm_v128_load64_splat(params->wasmsimd.sign_mask);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd.magic_bias);
+  const v128_t vone = wasm_v128_load64_splat(params->wasmsimd.one);
   for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(x);
     x += 4;
 
     const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
+    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx));
+    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_bias), vmagic_bias);
     const v128_t vrndx = wasm_v128_bitselect(vx, vrndabsx, vrndmask);
     const v128_t vadjmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vx, vrndx));
     const v128_t vadjrndx = wasm_f32x4_add(vrndx, vone);
@@ -47,8 +47,8 @@ void xnn_f32_vrndu_ukernel__wasmsimd_addsub_x4(
     const v128_t vx = wasm_v128_load(x);
 
     const v128_t vabsx = wasm_v128_andnot(vx, vsign_mask);
-    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_number, vabsx));
-    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_number), vmagic_number);
+    const v128_t vrndmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vmagic_bias, vabsx));
+    const v128_t vrndabsx = wasm_f32x4_sub(wasm_f32x4_add(vabsx, vmagic_bias), vmagic_bias);
     const v128_t vrndx = wasm_v128_bitselect(vx, vrndabsx, vrndmask);
     const v128_t vadjmask = wasm_v128_or(vsign_mask, wasm_f32x4_le(vx, vrndx));
     const v128_t vadjrndx = wasm_f32x4_add(vrndx, vone);

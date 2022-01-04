@@ -16,8 +16,6 @@
 #include <xnnpack/vunary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_vrndd_ukernel__avx_x8(
     size_t n,
     const float* x,
@@ -39,7 +37,7 @@ void xnn_f32_vrndd_ukernel__avx_x8(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
     const __m256 vy = _mm256_round_ps(vx, _MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);

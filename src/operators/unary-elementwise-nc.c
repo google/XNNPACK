@@ -281,12 +281,14 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
     xnn_operator_t* rounding_op_out)
 {
   union xnn_f32_rnd_params params;
-  xnn_init_f32_rnd_params(&params);
+  if (xnn_params.f32.rndne.init.f32_rnd != NULL) {
+    xnn_params.f32.rndne.init.f32_rnd(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_bankers_rounding_nc_f32,
-    xnn_params.f32.rndne,
+    xnn_params.f32.rndne.ukernel,
     rounding_op_out);
 }
 
@@ -298,12 +300,14 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     xnn_operator_t* ceiling_op_out)
 {
   union xnn_f32_rnd_params params;
-  xnn_init_f32_rnd_params(&params);
+  if (xnn_params.f32.rndu.init.f32_rnd != NULL) {
+    xnn_params.f32.rndu.init.f32_rnd(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_ceiling_nc_f32,
-    xnn_params.f32.rndu,
+    xnn_params.f32.rndu.ukernel,
     ceiling_op_out);
 }
 
@@ -525,12 +529,14 @@ enum xnn_status xnn_create_floor_nc_f32(
     xnn_operator_t* floor_op_out)
 {
   union xnn_f32_rnd_params params;
-  xnn_init_f32_rnd_params(&params);
+  if (xnn_params.f32.rndd.init.f32_rnd != NULL) {
+    xnn_params.f32.rndd.init.f32_rnd(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_floor_nc_f32,
-    xnn_params.f32.rndd,
+    xnn_params.f32.rndd.ukernel,
     floor_op_out);
 }
 
@@ -696,12 +702,14 @@ enum xnn_status xnn_create_truncation_nc_f32(
     xnn_operator_t* truncation_op_out)
 {
   union xnn_f32_rnd_params params;
-  xnn_init_f32_rnd_params(&params);
+  if (xnn_params.f32.rndz.init.f32_rnd != NULL) {
+    xnn_params.f32.rndz.init.f32_rnd(&params);
+  }
   return create_unary_elementwise_nc(
     channels, input_stride, output_stride, flags,
     &params, sizeof(params),
     xnn_operator_type_truncation_nc_f32,
-    xnn_params.f32.rndz,
+    xnn_params.f32.rndz.ukernel,
     truncation_op_out);
 }
 

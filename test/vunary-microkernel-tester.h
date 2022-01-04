@@ -143,46 +143,14 @@ class VUnaryMicrokernelTester {
           case OpType::ReLU:
             y_ref[i] = std::max(x_data[i], 0.0f);
             break;
-          case OpType::RoundToNearestEven:
-            y_ref[i] = std::nearbyint(double(x_data[i]));
-            break;
-          case OpType::RoundTowardsZero:
-            y_ref[i] = std::trunc(double(x_data[i]));
-            break;
-          case OpType::RoundUp:
-            y_ref[i] = std::ceil(double(x_data[i]));
-            break;
-          case OpType::RoundDown:
-            y_ref[i] = std::floor(double(x_data[i]));
-            break;
+          default:
+            GTEST_FAIL() << "Unexpected operation type";
+            return;
         }
       }
 
-      // Prepare parameters.
-      union {
-        union xnn_f32_relu_params relu;
-        union xnn_f32_rnd_params rnd;
-      } params;
-      switch (op_type) {
-        case OpType::RoundToNearestEven:
-        case OpType::RoundTowardsZero:
-        case OpType::RoundUp:
-        case OpType::RoundDown:
-          switch (variant) {
-            case Variant::Native:
-              xnn_init_f32_rnd_params(&params.rnd);
-              break;
-            case Variant::Scalar:
-              xnn_init_scalar_f32_rnd_params(&params.rnd);
-              break;
-          }
-          break;
-        case OpType::ReLU:
-          break;
-      }
-
       // Call optimized micro-kernel.
-      vunary(batch_size() * sizeof(float), x_data, y.data(), &params);
+      vunary(batch_size() * sizeof(float), x_data, y.data(), nullptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -418,6 +386,62 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_vround_ukernel_function vrnd, OpType op_type, xnn_init_f32_rnd_params_fn init_params = nullptr) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution = std::uniform_real_distribution<float>(-5.0f, 5.0f);
+    auto f32rng = std::bind(distribution, std::ref(rng));
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f32rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        switch (op_type) {
+          case OpType::RoundToNearestEven:
+            y_ref[i] = std::nearbyint(double(x_data[i]));
+            break;
+          case OpType::RoundTowardsZero:
+            y_ref[i] = std::trunc(double(x_data[i]));
+            break;
+          case OpType::RoundUp:
+            y_ref[i] = std::ceil(double(x_data[i]));
+            break;
+          case OpType::RoundDown:
+            y_ref[i] = std::floor(double(x_data[i]));
+            break;
+          default:
+            GTEST_FAIL() << "Unexpected operation type";
+            return;
+        }
+      }
+
+      // Prepare parameters.
+      xnn_f32_rnd_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      vrnd(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y[i], y_ref[i])
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
   void Test(xnn_f32_vsigmoid_ukernel_function vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -548,10 +572,6 @@ class VUnaryMicrokernelTester {
   }
 
   inline void Test(xnn_f32_vrelu_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
-  }
-
-  inline void Test(xnn_f32_vround_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
