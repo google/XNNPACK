@@ -16,12 +16,15 @@ from primes import next_prime
 import xngen
 import xnncommon
 
-
-parser = argparse.ArgumentParser(description='XNNPACK generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Spec (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
+parser = argparse.ArgumentParser(description="XNNPACK generator")
+parser.add_argument(
+    "-s", "--spec", metavar="FILE", required=True, help="Spec (YAML) file")
+parser.add_argument(
+    "-o",
+    "--output",
+    metavar="FILE",
+    required=True,
+    help="Output (C++ source) file")
 parser.set_defaults(defines=list())
 
 
@@ -1076,8 +1079,8 @@ $if DATATYPE == "qu8":
 """
 
 
-def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
-                        k_block, init_fn, requantization, is_pipelined, isa, jit):
+def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
+                        requantization, is_pipelined, isa, jit):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -1088,15 +1091,15 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
     sr: SR parameter of the GEMM micro-kernel.
     xw: boolean indicator for microkernel with extended weights.
     k_block: Number of K values processed per one iteration of the main loop of
-             the micro-kernel.
+      the micro-kernel.
     init_fn: C name of the function to initialize microkernel parameters.
     requantization: name of the requantization scheme used by the microkernel.
     is_pipelined: Indicates if the micro-kernel is implemented with software
-                  pipelining. Additional test cases are generated for software
-                  pipelined micro-kernels to separately test prologue + epiloque
-                  of the pipelined loop and iteration of the pipelined loop.
+      pipelining. Additional test cases are generated for software pipelined
+      micro-kernels to separately test prologue + epiloque of the pipelined loop
+      and iteration of the pipelined loop.
     isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
+      will skip execution if the host processor doesn't support this ISA.
     jit: if we are generating test code for JIT codegen.
 
   Returns:
@@ -1134,31 +1137,32 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw,
   if jit:
     if "minmax" in init_fn:
       activation = "minmax"
-    test_args[0] = 'reinterpret_cast<xnn_%s_%s_%s_ukernel_function>(code_buffer.code)' % (
-        datatype, ukernel_type, activation)
+    sig = "xnn_%s_%s_%s_ukernel_function" % (datatype, ukernel_type, activation)
+    test_args[0] = "reinterpret_cast<%s>(code_buffer.code)" % sig
 
-  return xngen.preprocess(GEMM_TEST_CODE, {
-      "TEST_NAME": ukernel_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "UKERNEL_TYPE": ukernel_type.upper(),
-      "DATATYPE": datatype,
-      "ACTIVATION": activation.upper(),
-      "MR": mr,
-      "NR": nr,
-      "KR": kr,
-      "SR": sr,
-      "EXTENDED_WEIGHTS": xw,
-      "KBLOCK": k_block,
-      "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
-      "IS_PIPELINED": is_pipelined,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-      "next_prime": next_prime,
-      "JIT_CODEGEN": jit,
-      "JIT_DECLARE_BUFFER": jit_declare_buffer,
-      "JIT_ALLOCATE_CODE_MEMORY": jit_allocate_code_memory,
-      "JIT_GENERATE_CODE": jit_generate_code,
-      "JIT_RELEASE_CODE_MEMORY": jit_release_code_memory,
-  })
+  return xngen.preprocess(
+      GEMM_TEST_CODE, {
+          "TEST_NAME": ukernel_name.upper().replace("UKERNEL_", ""),
+          "TEST_ARGS": test_args,
+          "UKERNEL_TYPE": ukernel_type.upper(),
+          "DATATYPE": datatype,
+          "ACTIVATION": activation.upper(),
+          "MR": mr,
+          "NR": nr,
+          "KR": kr,
+          "SR": sr,
+          "EXTENDED_WEIGHTS": xw,
+          "KBLOCK": k_block,
+          "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
+          "IS_PIPELINED": is_pipelined,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+          "next_prime": next_prime,
+          "JIT_CODEGEN": jit,
+          "JIT_DECLARE_BUFFER": jit_declare_buffer,
+          "JIT_ALLOCATE_CODE_MEMORY": jit_allocate_code_memory,
+          "JIT_GENERATE_CODE": jit_generate_code,
+          "JIT_RELEASE_CODE_MEMORY": jit_release_code_memory,
+      })
 
 
 def main(args):
@@ -1193,7 +1197,8 @@ def main(args):
 #include <xnnpack/igemm.h>
 #include <xnnpack/ppmm.h>
 #include "gemm-microkernel-tester.h"
-""".format(specification=options.spec, generator=sys.argv[0])
+""".format(
+    specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
@@ -1201,15 +1206,17 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      jit = name.startswith('xnn_generate')
+      jit = name.startswith("xnn_generate")
       mr, nr, kr, sr, xw, requantization, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(
-        name, mr, nr, kr, sr, xw, k_block, init_fn, requantization, pipelined, isa, jit)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly, jit)
+      test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
+                                      init_fn, requantization, pipelined, isa,
+                                      jit)
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa,
+                                                        assembly, jit)
 
     txt_changed = True
     if os.path.exists(options.output):
@@ -1219,6 +1226,7 @@ def main(args):
     if txt_changed:
       with codecs.open(options.output, "w", encoding="utf-8") as output_file:
         output_file.write(tests)
+
 
 if __name__ == "__main__":
   main(sys.argv[1:])
