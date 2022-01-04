@@ -1087,54 +1087,6 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-static void qu8_gemm_1x2__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    1, 2, 1, 1);
-}
-static void qu8_gemm_2x2__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    2, 2, 1, 1);
-}
-static void qu8_gemm_3x2__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_3x2__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    3, 2, 1, 1);
-}
-static void qu8_gemm_4x2__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    4, 2, 1, 1);
-}
-static void qu8_gemm_1x4__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    1, 4, 1, 1);
-}
-static void qu8_gemm_2x4__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    2, 4, 1, 1);
-}
-static void qu8_gemm_3x4__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    3, 4, 1, 1);
-}
-static void qu8_gemm_4x4__scalar_lrintf(benchmark::State& state, const char* net) {
-  GEMMBenchmark(state,
-    xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf,
-    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
-    4, 4, 1, 1);
-}
 static void qu8_gemm_1x2__scalar_fmagic(benchmark::State& state, const char* net) {
   GEMMBenchmark(state,
     xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic,
@@ -1184,14 +1136,103 @@ static void qu8_gemm_4x4__scalar_fmagic(benchmark::State& state, const char* net
     4, 4, 1, 1);
 }
 
-BENCHMARK_GEMM(qu8_gemm_1x2__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_2x2__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_3x2__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_4x2__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_1x4__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_2x4__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_3x4__scalar_lrintf)
-BENCHMARK_GEMM(qu8_gemm_4x4__scalar_lrintf)
+static void qu8_gemm_1x2__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    1, 2, 1, 1);
+}
+static void qu8_gemm_2x2__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    2, 2, 1, 1);
+}
+static void qu8_gemm_3x2__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_3x2__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    3, 2, 1, 1);
+}
+static void qu8_gemm_4x2__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_4x2__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    4, 2, 1, 1);
+}
+static void qu8_gemm_1x4__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    1, 4, 1, 1);
+}
+static void qu8_gemm_2x4__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_2x4__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    2, 4, 1, 1);
+}
+static void qu8_gemm_3x4__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    3, 4, 1, 1);
+}
+static void qu8_gemm_4x4__scalar_imagic(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_imagic,
+    xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+    4, 4, 1, 1);
+}
+
+static void qu8_gemm_1x2__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    1, 2, 1, 1);
+}
+static void qu8_gemm_2x2__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    2, 2, 1, 1);
+}
+static void qu8_gemm_3x2__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_3x2__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    3, 2, 1, 1);
+}
+static void qu8_gemm_4x2__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    4, 2, 1, 1);
+}
+static void qu8_gemm_1x4__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    1, 4, 1, 1);
+}
+static void qu8_gemm_2x4__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    2, 4, 1, 1);
+}
+static void qu8_gemm_3x4__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    3, 4, 1, 1);
+}
+static void qu8_gemm_4x4__scalar_lrintf(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf,
+    xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+    4, 4, 1, 1);
+}
 
 BENCHMARK_GEMM(qu8_gemm_1x2__scalar_fmagic)
 BENCHMARK_GEMM(qu8_gemm_2x2__scalar_fmagic)
@@ -1201,6 +1242,24 @@ BENCHMARK_GEMM(qu8_gemm_1x4__scalar_fmagic)
 BENCHMARK_GEMM(qu8_gemm_2x4__scalar_fmagic)
 BENCHMARK_GEMM(qu8_gemm_3x4__scalar_fmagic)
 BENCHMARK_GEMM(qu8_gemm_4x4__scalar_fmagic)
+
+BENCHMARK_GEMM(qu8_gemm_1x2__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_2x2__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_3x2__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_4x2__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_1x4__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_2x4__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_3x4__scalar_imagic)
+BENCHMARK_GEMM(qu8_gemm_4x4__scalar_imagic)
+
+BENCHMARK_GEMM(qu8_gemm_1x2__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_2x2__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_3x2__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_4x2__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_1x4__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_2x4__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_3x4__scalar_lrintf)
+BENCHMARK_GEMM(qu8_gemm_4x4__scalar_lrintf)
 
 
 #ifdef BENCHMARK_RUY

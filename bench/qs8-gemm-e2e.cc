@@ -2708,7 +2708,6 @@ static void qs8_gemm_2x2__scalar_fmagic(benchmark::State& state, models::Executi
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
     2 /* mr */, 2 /* nr */);
 }
-
 static void qs8_gemm_3x2__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
     xnn_qs8_gemm_minmax_fp32_ukernel_3x2__scalar_fmagic,
@@ -2718,7 +2717,6 @@ static void qs8_gemm_3x2__scalar_fmagic(benchmark::State& state, models::Executi
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
     3 /* mr */, 2 /* nr */);
 }
-
 static void qs8_gemm_4x2__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
     xnn_qs8_gemm_minmax_fp32_ukernel_4x2__scalar_fmagic,
@@ -2728,7 +2726,6 @@ static void qs8_gemm_4x2__scalar_fmagic(benchmark::State& state, models::Executi
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
     4 /* mr */, 2 /* nr */);
 }
-
 static void qs8_gemm_2x4__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
     xnn_qs8_gemm_minmax_fp32_ukernel_2x4__scalar_fmagic,
@@ -2738,7 +2735,6 @@ static void qs8_gemm_2x4__scalar_fmagic(benchmark::State& state, models::Executi
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
     2 /* mr */, 4 /* nr */);
 }
-
 static void qs8_gemm_3x4__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
     xnn_qs8_gemm_minmax_fp32_ukernel_3x4__scalar_fmagic,
@@ -2748,7 +2744,6 @@ static void qs8_gemm_3x4__scalar_fmagic(benchmark::State& state, models::Executi
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
     3 /* mr */, 4 /* nr */);
 }
-
 static void qs8_gemm_4x4__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   GEMMEnd2EndBenchmark(state, model,
     xnn_qs8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic,
@@ -2759,12 +2754,136 @@ static void qs8_gemm_4x4__scalar_fmagic(benchmark::State& state, models::Executi
     4 /* mr */, 4 /* nr */);
 }
 
+static void qs8_gemm_2x2__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    2 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_3x2__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_3x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_3x2__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    3 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_4x2__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_4x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_4x2__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    4 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_2x4__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_2x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    2 /* mr */, 4 /* nr */);
+}
+static void qs8_gemm_3x4__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_3x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_3x4__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    3 /* mr */, 4 /* nr */);
+}
+static void qs8_gemm_4x4__scalar_imagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_4x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic,
+    xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+    4 /* mr */, 4 /* nr */);
+}
+
+static void qs8_gemm_2x2__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    2 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_3x2__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_3x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    3 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_4x2__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    4 /* mr */, 2 /* nr */);
+}
+static void qs8_gemm_2x4__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    2 /* mr */, 4 /* nr */);
+}
+static void qs8_gemm_3x4__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    3 /* mr */, 4 /* nr */);
+}
+static void qs8_gemm_4x4__scalar_lrintf(benchmark::State& state, models::ExecutionPlanFactory model) {
+  GEMMEnd2EndBenchmark(state, model,
+    xnn_qs8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf,
+    xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
+    xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+    4 /* mr */, 4 /* nr */);
+}
+
 BENCHMARK_QS8_END2END(qs8_gemm_2x2__scalar_fmagic)
 BENCHMARK_QS8_END2END(qs8_gemm_3x2__scalar_fmagic)
 BENCHMARK_QS8_END2END(qs8_gemm_4x2__scalar_fmagic)
 BENCHMARK_QS8_END2END(qs8_gemm_2x4__scalar_fmagic)
 BENCHMARK_QS8_END2END(qs8_gemm_3x4__scalar_fmagic)
 BENCHMARK_QS8_END2END(qs8_gemm_4x4__scalar_fmagic)
+
+BENCHMARK_QS8_END2END(qs8_gemm_2x2__scalar_imagic)
+BENCHMARK_QS8_END2END(qs8_gemm_3x2__scalar_imagic)
+BENCHMARK_QS8_END2END(qs8_gemm_4x2__scalar_imagic)
+BENCHMARK_QS8_END2END(qs8_gemm_2x4__scalar_imagic)
+BENCHMARK_QS8_END2END(qs8_gemm_3x4__scalar_imagic)
+BENCHMARK_QS8_END2END(qs8_gemm_4x4__scalar_imagic)
+
+BENCHMARK_QS8_END2END(qs8_gemm_2x2__scalar_lrintf)
+BENCHMARK_QS8_END2END(qs8_gemm_3x2__scalar_lrintf)
+BENCHMARK_QS8_END2END(qs8_gemm_4x2__scalar_lrintf)
+BENCHMARK_QS8_END2END(qs8_gemm_2x4__scalar_lrintf)
+BENCHMARK_QS8_END2END(qs8_gemm_3x4__scalar_lrintf)
+BENCHMARK_QS8_END2END(qs8_gemm_4x4__scalar_lrintf)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
