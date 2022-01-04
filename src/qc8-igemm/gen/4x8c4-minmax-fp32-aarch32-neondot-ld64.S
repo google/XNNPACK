@@ -175,7 +175,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VCVT.F32.S32 q14, q14
         VCVT.F32.S32 q15, q15
 
-        VMUL.F32 q8,  q8, q0           // multiplier
+        VMUL.F32 q8,  q8, q0            // multiplier
         VMUL.F32 q9,  q9, q1
         VMUL.F32 q10, q10, q0
         VMUL.F32 q11, q11, q1
