@@ -64,7 +64,7 @@ void xnn_f32_vmulc_minmax_ukernel__avx_x16(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
 
     const __m256 va = _mm256_maskload_ps(a, vmask);
 

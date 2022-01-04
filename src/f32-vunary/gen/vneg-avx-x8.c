@@ -39,7 +39,7 @@ void xnn_f32_vneg_ukernel__avx_x8(
   if XNN_UNLIKELY(n != 0) {
     assert(n >= 1 * sizeof(float));
     assert(n <= 7 * sizeof(float));
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
 
     const __m256 vx = _mm256_maskload_ps(x, vmask);
     const __m256 vy = _mm256_xor_ps(vx, vsign_mask);

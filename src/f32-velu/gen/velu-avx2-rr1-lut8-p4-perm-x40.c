@@ -15,8 +15,6 @@
 #include <xnnpack/vunary.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x40(
     size_t n,
     const float* x,
