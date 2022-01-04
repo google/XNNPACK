@@ -13,6 +13,7 @@
 
 #include <fp16/bitcasts.h>
 
+#include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
 
@@ -29,8 +30,8 @@ void xnn_qu8_requantize_fp32__scalar_lrintf(
   assert(scale < 1.0f);
   assert(scale >= 0x1.0p-32f);
 
-  const long lmin = (long) ((int32_t)(uint32_t) qmin - (int32_t)(uint32_t) zero_point);
-  const long lmax = (long) ((int32_t)(uint32_t) qmax - (int32_t)(uint32_t) zero_point);
+  const float fmin = (float) ((int32_t) (uint32_t) qmin - (int32_t) (uint32_t) zero_point);
+  const float fmax = (float) ((int32_t) (uint32_t) qmax - (int32_t) (uint32_t) zero_point);
   for (; n != 0; n -= 4) {
     const int32_t x = input[0];
     const int32_t y = input[1];
@@ -43,20 +44,20 @@ void xnn_qu8_requantize_fp32__scalar_lrintf(
     const float z_scaled = (float) z * scale;
     const float w_scaled = (float) w * scale;
 
-    const long x_rounded = lrintf(x_scaled);
-    const long y_rounded = lrintf(y_scaled);
-    const long z_rounded = lrintf(z_scaled);
-    const long w_rounded = lrintf(w_scaled);
+    const float x_clamped = math_min_f32(math_max_f32(x_scaled, fmin), fmax);
+    const float y_clamped = math_min_f32(math_max_f32(y_scaled, fmin), fmax);
+    const float z_clamped = math_min_f32(math_max_f32(z_scaled, fmin), fmax);
+    const float w_clamped = math_min_f32(math_max_f32(w_scaled, fmin), fmax);
 
-    const int32_t x_clamped = (int32_t)(x_rounded < lmin ? lmin : x_rounded > lmax ? lmax : x_rounded);
-    const int32_t y_clamped = (int32_t)(y_rounded < lmin ? lmin : y_rounded > lmax ? lmax : y_rounded);
-    const int32_t z_clamped = (int32_t)(z_rounded < lmin ? lmin : z_rounded > lmax ? lmax : z_rounded);
-    const int32_t w_clamped = (int32_t)(w_rounded < lmin ? lmin : w_rounded > lmax ? lmax : w_rounded);
+    const int32_t x_rounded = (int32_t) lrintf(x_clamped);
+    const int32_t y_rounded = (int32_t) lrintf(y_clamped);
+    const int32_t z_rounded = (int32_t) lrintf(z_clamped);
+    const int32_t w_rounded = (int32_t) lrintf(w_clamped);
 
-    const int32_t x_biased = x_clamped + (int32_t)(uint32_t) zero_point;
-    const int32_t y_biased = y_clamped + (int32_t)(uint32_t) zero_point;
-    const int32_t z_biased = z_clamped + (int32_t)(uint32_t) zero_point;
-    const int32_t w_biased = w_clamped + (int32_t)(uint32_t) zero_point;
+    const int32_t x_biased = x_rounded + (int32_t) (uint32_t) zero_point;
+    const int32_t y_biased = y_rounded + (int32_t) (uint32_t) zero_point;
+    const int32_t z_biased = z_rounded + (int32_t) (uint32_t) zero_point;
+    const int32_t w_biased = w_rounded + (int32_t) (uint32_t) zero_point;
 
     output[0] = (uint8_t) x_biased;
     output[1] = (uint8_t) y_biased;

@@ -284,12 +284,12 @@ TEST(QU8_FP32__SCALAR_LRINTF, random_cases) {
  * FP32-based scalar implementation using magic trick for FP32->INT32 conversion.
  */
 
-TEST(QU8_FP32__SCALAR_MAGIC, random_cases) {
+TEST(QU8_FP32__SCALAR_FMAGIC, random_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .iterations(1000)
-    .TestRandomCasesApproximate(xnn_qu8_requantize_fp32__scalar_magic);
+    .TestRandomCasesApproximate(xnn_qu8_requantize_fp32__scalar_fmagic);
 }
 
 

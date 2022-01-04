@@ -180,9 +180,9 @@ BENCHMARK_F(Requantization, fp32__scalar_lrintf)(benchmark::State& state) {
   }
 }
 
-BENCHMARK_F(Requantization, fp32__scalar_magic)(benchmark::State& state) {
+BENCHMARK_F(Requantization, fp32__scalar_fmagic)(benchmark::State& state) {
   for (auto _ : state) {
-    xnn_qu8_requantize_fp32__scalar_magic(
+    xnn_qu8_requantize_fp32__scalar_fmagic(
         n(), input(), 0x1.0p-12f /* scale */, 128 /* zero point */, 1 /* qmin */, 254 /* qmax */, output());
   }
 }
