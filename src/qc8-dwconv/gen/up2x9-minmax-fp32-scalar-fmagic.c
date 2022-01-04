@@ -242,6 +242,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_fmagic(
       typedef XNN_UNALIGNED float unaligned_float;
       const float vscale = *((const unaligned_float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 18 * sizeof(int8_t)));
       float vfpacc = (float) vacc * vscale;
+
       vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
       vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
       vfpacc += vmagic_bias;

@@ -4,12 +4,12 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION == "FP32"
-$assert VARIANT in ["FMAGIC", "LRINTF"]
+$assert VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
-$elif VARIANT == "FMAGIC":
+$elif VARIANT in ["FMAGIC", "IMAGIC"]:
 
   #include <fp16.h>
 
@@ -148,6 +148,30 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
       $for M in range(MR):
         $for N in range(NR):
           int32_t vout${M}x${N} = (int32_t) fp32_to_bits(vfpacc${M}x${N}) - vmagic_bias_less_output_zero_point;
+    $elif VARIANT == "IMAGIC":
+      const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
+      $for M in range(MR):
+        $for N in range(NR):
+          vfpacc${M}x${N} += vmagic_bias;
+
+      $for M in range(MR):
+        $for N in range(NR):
+          int32_t vout${M}x${N} = (int32_t) fp32_to_bits(vfpacc${M}x${N});
+
+      const int32_t vmagic_min = params->${PARAMS_STRUCT}.magic_min;
+      $for M in range(MR):
+        $for N in range(NR):
+          vout${M}x${N} = math_max_s32(vout${M}x${N}, vmagic_min);
+
+      const int32_t vmagic_max = params->${PARAMS_STRUCT}.magic_max;
+      $for M in range(MR):
+        $for N in range(NR):
+          vout${M}x${N} = math_min_s32(vout${M}x${N}, vmagic_max);
+
+      const int32_t vmagic_bias_less_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_zero_point;
+      $for M in range(MR):
+        $for N in range(NR):
+          vout${M}x${N} -= vmagic_bias_less_zero_point;
     $elif VARIANT == "LRINTF":
       const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
       $for M in range(MR):

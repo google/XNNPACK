@@ -248,6 +248,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__scalar_fmagic(
       w = (const void*) ((uintptr_t) w + sizeof(int32_t) + 25 * sizeof(uint8_t));
 
       float vfpacc = (float) vacc * vscale;
+
       vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
       vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
       vfpacc += vmagic_bias;

@@ -692,6 +692,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x25__scalar_lrintf(
         k += 1;
 
         float vfpacc = (float) vacc * vscale;
+
         vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
         vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
         const int32_t vrndacc = (int32_t) lrintf(vfpacc);

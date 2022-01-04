@@ -244,11 +244,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up1x25__scalar_lrintf(
 
       w = (const void*) ((uintptr_t) w + sizeof(int32_t) + 25 * sizeof(int8_t));
 
-      const float vfpacc = (float) vacc * vscale;
-      long vrndacc = lrintf(vfpacc);
-      vrndacc = XNN_UNPREDICTABLE(vrndacc < voutput_min_less_zero_point) ? voutput_min_less_zero_point : vrndacc;
-      vrndacc = XNN_UNPREDICTABLE(vrndacc > voutput_max_less_zero_point) ? voutput_max_less_zero_point : vrndacc;
-      int32_t vout = (int32_t) vrndacc + voutput_zero_point;
+      float vfpacc = (float) vacc * vscale;
+
+      vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
+      vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
+      const int32_t vrndacc = (int32_t) lrintf(vfpacc);
+      int32_t vout = vrndacc + voutput_zero_point;
 
       *output++ = (int8_t) vout;
     } while (--c != 0);

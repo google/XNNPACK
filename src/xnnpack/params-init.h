@@ -26,8 +26,9 @@ extern "C" {
     uint8_t output_min,                                           \
     uint8_t output_max);
 
-DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params)
 DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params)
+DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params)
+DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_neon_params)
@@ -54,8 +55,9 @@ DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scala
     int8_t output_min,                                            \
     int8_t output_max);
 
-DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params)
 DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params)
+DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params)
+DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_neon_params)
@@ -90,8 +92,9 @@ XNN_INTERNAL void xnn_init_qc8_scale_fp32_params(
     int8_t output_min,                                       \
     int8_t output_max);
 
-DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_lrintf_params)
 DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_fmagic_params)
+DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_imagic_params)
+DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_lrintf_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_neon_params)

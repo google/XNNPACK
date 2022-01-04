@@ -829,16 +829,24 @@ union xnn_qu8_conv_minmax_params {
     float scale;
     float output_min_less_zero_point;
     float output_max_less_zero_point;
-    int32_t output_zero_point;
-  } fp32_scalar_lrintf;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } fp32_scalar_fmagic;
+  struct {
+    int32_t kernel_zero_point;
+    float scale;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_max;
+    int32_t magic_bias_less_zero_point;
+  } fp32_scalar_imagic;
   struct {
     int32_t kernel_zero_point;
     float scale;
     float output_min_less_zero_point;
     float output_max_less_zero_point;
-    float magic_bias;
-    int32_t magic_bias_less_output_zero_point;
-  } fp32_scalar_fmagic;
+    int32_t output_zero_point;
+  } fp32_scalar_lrintf;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t kernel_zero_point[4];
@@ -902,16 +910,22 @@ union xnn_qu8_conv_minmax_params {
 
 union xnn_qs8_minmax_params {
   struct {
-    float output_min_less_zero_point;
-    float output_max_less_zero_point;
-    int32_t output_zero_point;
-  } scalar_lrintf;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_max;
+    int32_t magic_bias_less_zero_point;
+  } scalar_imagic;
   struct {
     float output_min_less_zero_point;
     float output_max_less_zero_point;
     float magic_bias;
     int32_t magic_bias_less_output_zero_point;
   } scalar_fmagic;
+  struct {
+    float output_min_less_zero_point;
+    float output_max_less_zero_point;
+    int32_t output_zero_point;
+  } scalar_lrintf;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float magic_bias;
@@ -962,15 +976,22 @@ union xnn_qs8_conv_minmax_params {
     float scale;
     float output_min_less_zero_point;
     float output_max_less_zero_point;
-    int32_t output_zero_point;
-  } fp32_scalar_lrintf;
+    float magic_bias;
+    int32_t magic_bias_less_output_zero_point;
+  } fp32_scalar_fmagic;
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_min;
+    int32_t magic_max;
+    int32_t magic_bias_less_zero_point;
+  } fp32_scalar_imagic;
   struct {
     float scale;
     float output_min_less_zero_point;
     float output_max_less_zero_point;
-    float magic_bias;
-    int32_t magic_bias_less_output_zero_point;
-  } fp32_scalar_fmagic;
+    int32_t output_zero_point;
+  } fp32_scalar_lrintf;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float scale;
