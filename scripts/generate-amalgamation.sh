@@ -8,6 +8,7 @@ tools/amalgamate-microkernels.py -s PROD_SSE_MICROKERNEL_SRCS -o src/amalgam/sse
 tools/amalgamate-microkernels.py -s PROD_SSE2_MICROKERNEL_SRCS -o src/amalgam/sse2.c &
 tools/amalgamate-microkernels.py -s PROD_SSSE3_MICROKERNEL_SRCS -o src/amalgam/ssse3.c &
 tools/amalgamate-microkernels.py -s PROD_SSE41_MICROKERNEL_SRCS -o src/amalgam/sse41.c &
+tools/amalgamate-microkernels.py -s PROD_F16C_MICROKERNEL_SRCS -o src/amalgam/f16c.c &
 tools/amalgamate-microkernels.py -s PROD_AVX512F_MICROKERNEL_SRCS -o src/amalgam/avx512f.c &
 tools/amalgamate-microkernels.py -s PROD_AVX512SKX_MICROKERNEL_SRCS -o src/amalgam/avx512skx.c &
 

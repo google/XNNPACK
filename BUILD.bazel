@@ -7880,6 +7880,21 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "f16c_amalgam_microkernels",
+    hdrs = INTERNAL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mf16c"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = ["src/amalgam/f16c.c"],
+    deps = [
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "f16c_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -8352,7 +8367,7 @@ xnnpack_aggregate_library(
         ":ssse3_amalgam_microkernels",
         ":sse41_amalgam_microkernels",
         ":avx_prod_microkernels",
-        ":f16c_prod_microkernels",
+        ":f16c_amalgam_microkernels",
         ":xop_prod_microkernels",
         ":fma3_prod_microkernels",
         ":avx2_prod_microkernels",
