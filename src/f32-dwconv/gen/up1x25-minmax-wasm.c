@@ -165,103 +165,103 @@ void xnn_f32_dwconv_minmax_ukernel_up1x25__wasm(
 
       const float vi0 = *i0++;
       const float vk0 = w[1];
-      vacc0p0 += vi0 * vk0;
+      vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
-      vacc0p0 += vi1 * vk1;
+      vacc0p0 = math_muladd_f32(vi1, vk1, vacc0p0);
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
-      vacc0p0 += vi2 * vk2;
+      vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
 
       const float vi3 = *i3++;
       const float vk3 = w[4];
-      vacc0p0 += vi3 * vk3;
+      vacc0p0 = math_muladd_f32(vi3, vk3, vacc0p0);
 
       const float vi4 = *i4++;
       const float vk4 = w[5];
-      vacc0p0 += vi4 * vk4;
+      vacc0p0 = math_muladd_f32(vi4, vk4, vacc0p0);
 
       const float vi5 = *i5++;
       const float vk5 = w[6];
-      vacc0p0 += vi5 * vk5;
+      vacc0p0 = math_muladd_f32(vi5, vk5, vacc0p0);
 
       const float vi6 = *i6++;
       const float vk6 = w[7];
-      vacc0p0 += vi6 * vk6;
+      vacc0p0 = math_muladd_f32(vi6, vk6, vacc0p0);
 
       const float vi7 = *i7++;
       const float vk7 = w[8];
-      vacc0p0 += vi7 * vk7;
+      vacc0p0 = math_muladd_f32(vi7, vk7, vacc0p0);
 
       const float vi8 = *i8++;
       const float vk8 = w[9];
-      vacc0p0 += vi8 * vk8;
+      vacc0p0 = math_muladd_f32(vi8, vk8, vacc0p0);
 
       const float vi9 = *i9++;
       const float vk9 = w[10];
-      vacc0p0 += vi9 * vk9;
+      vacc0p0 = math_muladd_f32(vi9, vk9, vacc0p0);
 
       const float vi10 = *i10++;
       const float vk10 = w[11];
-      vacc0p0 += vi10 * vk10;
+      vacc0p0 = math_muladd_f32(vi10, vk10, vacc0p0);
 
       const float vi11 = *i11++;
       const float vk11 = w[12];
-      vacc0p0 += vi11 * vk11;
+      vacc0p0 = math_muladd_f32(vi11, vk11, vacc0p0);
 
       const float vi12 = *i12++;
       const float vk12 = w[13];
-      vacc0p0 += vi12 * vk12;
+      vacc0p0 = math_muladd_f32(vi12, vk12, vacc0p0);
 
       const float vi13 = *i13++;
       const float vk13 = w[14];
-      vacc0p0 += vi13 * vk13;
+      vacc0p0 = math_muladd_f32(vi13, vk13, vacc0p0);
 
       const float vi14 = *i14++;
       const float vk14 = w[15];
-      vacc0p0 += vi14 * vk14;
+      vacc0p0 = math_muladd_f32(vi14, vk14, vacc0p0);
 
       const float vi15 = *i15++;
       const float vk15 = w[16];
-      vacc0p0 += vi15 * vk15;
+      vacc0p0 = math_muladd_f32(vi15, vk15, vacc0p0);
 
       const float vi16 = *i16++;
       const float vk16 = w[17];
-      vacc0p0 += vi16 * vk16;
+      vacc0p0 = math_muladd_f32(vi16, vk16, vacc0p0);
 
       const float vi17 = *i17++;
       const float vk17 = w[18];
-      vacc0p0 += vi17 * vk17;
+      vacc0p0 = math_muladd_f32(vi17, vk17, vacc0p0);
 
       const float vi18 = *i18++;
       const float vk18 = w[19];
-      vacc0p0 += vi18 * vk18;
+      vacc0p0 = math_muladd_f32(vi18, vk18, vacc0p0);
 
       const float vi19 = *i19++;
       const float vk19 = w[20];
-      vacc0p0 += vi19 * vk19;
+      vacc0p0 = math_muladd_f32(vi19, vk19, vacc0p0);
 
       const float vi20 = *i20++;
       const float vk20 = w[21];
-      vacc0p0 += vi20 * vk20;
+      vacc0p0 = math_muladd_f32(vi20, vk20, vacc0p0);
 
       const float vi21 = *i21++;
       const float vk21 = w[22];
-      vacc0p0 += vi21 * vk21;
+      vacc0p0 = math_muladd_f32(vi21, vk21, vacc0p0);
 
       const float vi22 = *i22++;
       const float vk22 = w[23];
-      vacc0p0 += vi22 * vk22;
+      vacc0p0 = math_muladd_f32(vi22, vk22, vacc0p0);
 
       const float vi23 = *i23++;
       const float vk23 = w[24];
-      vacc0p0 += vi23 * vk23;
+      vacc0p0 = math_muladd_f32(vi23, vk23, vacc0p0);
 
       const float vi24 = *i24++;
       const float vk24 = w[25];
-      vacc0p0 += vi24 * vk24;
+      vacc0p0 = math_muladd_f32(vi24, vk24, vacc0p0);
 
       w += 26;
 

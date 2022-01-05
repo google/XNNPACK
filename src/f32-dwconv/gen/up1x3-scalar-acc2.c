@@ -53,7 +53,7 @@ void xnn_f32_dwconv_ukernel_up1x3__scalar_acc2(
 
       const float vi0 = *i0++;
       const float vk0 = w[1];
-      vacc0p0 += vi0 * vk0;
+      vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
@@ -61,7 +61,7 @@ void xnn_f32_dwconv_ukernel_up1x3__scalar_acc2(
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
-      vacc0p0 += vi2 * vk2;
+      vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
 
       w += 4;
 

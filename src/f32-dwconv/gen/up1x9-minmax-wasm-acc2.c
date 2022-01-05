@@ -85,7 +85,7 @@ void xnn_f32_dwconv_minmax_ukernel_up1x9__wasm_acc2(
 
       const float vi0 = *i0++;
       const float vk0 = w[1];
-      vacc0p0 += vi0 * vk0;
+      vacc0p0 = math_muladd_f32(vi0, vk0, vacc0p0);
 
       const float vi1 = *i1++;
       const float vk1 = w[2];
@@ -93,31 +93,31 @@ void xnn_f32_dwconv_minmax_ukernel_up1x9__wasm_acc2(
 
       const float vi2 = *i2++;
       const float vk2 = w[3];
-      vacc0p0 += vi2 * vk2;
+      vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
 
       const float vi3 = *i3++;
       const float vk3 = w[4];
-      vacc0p1 += vi3 * vk3;
+      vacc0p1 = math_muladd_f32(vi3, vk3, vacc0p1);
 
       const float vi4 = *i4++;
       const float vk4 = w[5];
-      vacc0p0 += vi4 * vk4;
+      vacc0p0 = math_muladd_f32(vi4, vk4, vacc0p0);
 
       const float vi5 = *i5++;
       const float vk5 = w[6];
-      vacc0p1 += vi5 * vk5;
+      vacc0p1 = math_muladd_f32(vi5, vk5, vacc0p1);
 
       const float vi6 = *i6++;
       const float vk6 = w[7];
-      vacc0p0 += vi6 * vk6;
+      vacc0p0 = math_muladd_f32(vi6, vk6, vacc0p0);
 
       const float vi7 = *i7++;
       const float vk7 = w[8];
-      vacc0p1 += vi7 * vk7;
+      vacc0p1 = math_muladd_f32(vi7, vk7, vacc0p1);
 
       const float vi8 = *i8++;
       const float vk8 = w[9];
-      vacc0p0 += vi8 * vk8;
+      vacc0p0 = math_muladd_f32(vi8, vk8, vacc0p0);
 
       w += 10;
 

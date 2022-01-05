@@ -88,7 +88,7 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}
 
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}${N} += va${M} * vb${N};
+            vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
 
         k -= sizeof(float);
       } while (k != 0);

@@ -101,14 +101,14 @@ void xnn_f32_igemm_minmax_ukernel_4x2__wasm(
         const float vb1 = w[1];
         w += 2;
 
-        vacc00 += va0 * vb0;
-        vacc01 += va0 * vb1;
-        vacc10 += va1 * vb0;
-        vacc11 += va1 * vb1;
-        vacc20 += va2 * vb0;
-        vacc21 += va2 * vb1;
-        vacc30 += va3 * vb0;
-        vacc31 += va3 * vb1;
+        vacc00 = math_muladd_f32(va0, vb0, vacc00);
+        vacc01 = math_muladd_f32(va0, vb1, vacc01);
+        vacc10 = math_muladd_f32(va1, vb0, vacc10);
+        vacc11 = math_muladd_f32(va1, vb1, vacc11);
+        vacc20 = math_muladd_f32(va2, vb0, vacc20);
+        vacc21 = math_muladd_f32(va2, vb1, vacc21);
+        vacc30 = math_muladd_f32(va3, vb0, vacc30);
+        vacc31 = math_muladd_f32(va3, vb1, vacc31);
 
         k -= sizeof(float);
       } while (k != 0);

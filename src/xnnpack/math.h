@@ -80,6 +80,16 @@ inline static uint32_t math_max_u32(uint32_t a, uint32_t b) {
   return XNN_UNPREDICTABLE(a > b) ? a : b;
 }
 
+inline static float math_muladd_f32(float x, float y, float acc) {
+  #if defined(__GNUC__) && defined(__FP_FAST_FMAF)
+    return __builtin_fmaf(x, y, acc);
+  #elif defined(__clang__) && defined(__riscv)
+    return __builtin_fmaf(x, y, acc);
+  #else
+    return x * y + acc;
+  #endif
+}
+
 inline static float math_min_f32(float a, float b) {
   #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
     return __builtin_fminf(a, b);
