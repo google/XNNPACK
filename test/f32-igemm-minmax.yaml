@@ -67,7 +67,7 @@
   k-block: 4
   assembly: true
   pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_pld_cortex_a75
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   assembly: true
