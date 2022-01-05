@@ -72,6 +72,7 @@ def xnnpack_cc_library(
         x86_srcs = [],
         aarch32_srcs = [],
         aarch64_srcs = [],
+        riscv_srcs = [],
         wasm_srcs = [],
         wasmsimd_srcs = [],
         wasmrelaxedsimd_srcs = [],
@@ -86,6 +87,7 @@ def xnnpack_cc_library(
         apple_aarch32_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
+        riscv_copts = [],
         wasm_copts = [],
         wasmsimd_copts = [],
         wasmrelaxedsimd_copts = [],
@@ -106,6 +108,7 @@ def xnnpack_cc_library(
       x86_srcs: The list of x86-specific source files.
       aarch32_srcs: The list of AArch32-specific source files.
       aarch64_srcs: The list of AArch64-specific source files.
+      riscv_srcs: The list of RISC-V-specific source files.
       wasm_srcs: The list of WebAssembly 1.0-specific source files.
       wasmsimd_srcs: The list of WebAssembly SIMD-specific source files.
       wasmrelaxedsimd_srcs: The list of WebAssembly Relaxed SIMD-specific
@@ -128,6 +131,7 @@ def xnnpack_cc_library(
                            with Apple Clang.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
+      riscv_copts: The list of compiler flags to use in RISC-V builds.
       wasm_copts: The list of compiler flags to use in WebAssembly 1.0 builds.
       wasmsimd_copts: The list of compiler flags to use in WebAssembly SIMD
                       builds.
@@ -247,6 +251,7 @@ def xnnpack_aggregate_library(
         aarch32_ios_deps = [],
         aarch32_nonios_deps = [],
         aarch64_deps = [],
+        riscv_deps = [],
         wasm_deps = [],
         wasmsimd_deps = [],
         wasmrelaxedsimd_deps = []):
@@ -260,7 +265,8 @@ def xnnpack_aggregate_library(
                         WatchOS) builds.
       aarch32_nonios_deps: The list of libraries to link in AArch32 non-iOS
                            builds.
-      aarch64_deps: The list of libraries to link in AArch32 builds.
+      aarch64_deps: The list of libraries to link in AArch64 builds.
+      riscv_deps: The list of libraries to link in RISC-V builds.
       wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
       wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
       wasmrelaxedsimd_deps: The list of libraries to link in WebAssembly
