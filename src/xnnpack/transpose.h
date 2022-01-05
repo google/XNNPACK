@@ -22,6 +22,7 @@ extern "C" {
                             size_t block_width,         \
                             size_t block_height);
 
+DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_sse);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_wasmsimd);
 

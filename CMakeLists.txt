@@ -2754,7 +2754,8 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-neon-tbx128x4-x16.c
   src/x8-lut/gen/lut-neon-tbx128x4-x32.c
   src/x8-lut/gen/lut-neon-tbx128x4-x48.c
-  src/x8-lut/gen/lut-neon-tbx128x4-x64.c)
+  src/x8-lut/gen/lut-neon-tbx128x4-x64.c
+  src/x32-transpose/4x4-aarch64-tbl.c)
 
 SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x32.c
