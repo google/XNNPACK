@@ -110,10 +110,10 @@ void xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl(
         vres3_low = vget_high_u8(vres3);
       }
       if (bh & 1) {
-        vst1_lane_u32((void*) o3, vres3_low, 0);
-        vst1_lane_u32((void*) o2, vres2_low, 0);
-        vst1_lane_u32((void*) o1, vres1_low, 0);
-        vst1_lane_u32((void*) o0, vres0_low, 0);
+        vst1_lane_u32((void*) o3, vreinterpret_u32_u8(vres3_low), 0);
+        vst1_lane_u32((void*) o2, vreinterpret_u32_u8(vres2_low), 0);
+        vst1_lane_u32((void*) o1, vreinterpret_u32_u8(vres1_low), 0);
+        vst1_lane_u32((void*) o0, vreinterpret_u32_u8(vres0_low), 0);
       }
     }
     i0 = (const uint8_t*) ((uintptr_t) i0 + input_reset);
