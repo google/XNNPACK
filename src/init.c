@@ -5563,24 +5563,46 @@ static void init(void) {
 
 #elif XNN_ARCH_RISCV
 
-  /**************************** QS8 RISCV micro-kernels ****************************/
+  /************************** QC8 RISC-V micro-kernels **************************/
+  #ifndef XNN_NO_QC8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_QC8;
+
+    xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_scalar_lrintf_params;
+    xnn_params.qc8.gemm.mr = 3;
+    xnn_params.qc8.gemm.nr = 4;
+
+    xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrintf;
+    xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_scalar_lrintf_params;
+    xnn_params.qc8.dwconv[0].channel_tile = 2;
+    xnn_params.qc8.dwconv[0].primary_tile = 9;
+    xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__scalar_lrintf;
+    xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_scalar_lrintf_params;
+    xnn_params.qc8.dwconv[1].channel_tile = 2;
+    xnn_params.qc8.dwconv[1].primary_tile = 25;
+  #endif  // XNN_NO_QS8_OPERATORS
+
+  /************************** QS8 RISC-V micro-kernels **************************/
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_3x4__scalar);
-    xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_3x4__scalar);
-    xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_rndnu_ukernel_1x4__scalar);
-    xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_rndnu_ukernel_1x4__scalar);
-    xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_rndnu_scalar_params;
+    xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params;
     xnn_params.qs8.gemm.mr = 3;
     xnn_params.qs8.gemm.nr = 4;
 
-    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up2x9__scalar;
-    xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_scalar_params;
+    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrintf;
+    xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params;
     xnn_params.qs8.dwconv[0].channel_tile = 2;
     xnn_params.qs8.dwconv[0].primary_tile = 9;
-    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_rndnu_ukernel_up2x25__scalar;
-    xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_scalar_params;
+    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x25__scalar_lrintf;
+    xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params;
     xnn_params.qs8.dwconv[1].channel_tile = 2;
     xnn_params.qs8.dwconv[1].primary_tile = 25;
 
@@ -5597,22 +5619,35 @@ static void init(void) {
       .init.qs8_addsub = xnn_init_qs8_add_minmax_scalar_params,
       .element_tile = 4,
     };
+    xnn_params.qs8.vmul = (struct vbinary_parameters) {
+      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x4,
+      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x4,
+      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x4,
+      .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params,
+      .element_tile = 4,
+    };
   #endif  // XNN_NO_QS8_OPERATORS
 
-  /**************************** QU8 RISCV micro-kernels ****************************/
+  /************************** QU8 RISC-V micro-kernels **************************/
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_gemmlowp_ukernel_2x2__scalar);
-    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_gemmlowp_ukernel_2x2__scalar);
-    xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_gemmlowp_scalar_params;
-    xnn_params.qu8.gemm.mr = 2;
-    xnn_params.qu8.gemm.nr = 2;
+    xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf);
+    xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf);
+    xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params;
+    xnn_params.qu8.gemm.mr = 3;
+    xnn_params.qu8.gemm.nr = 4;
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_gemmlowp_ukernel_up1x9__scalar;
-    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_gemmlowp_scalar_params;
-    xnn_params.qu8.dwconv[0].channel_tile = 1;
+    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrintf;
+    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params;
+    xnn_params.qu8.dwconv[0].channel_tile = 2;
     xnn_params.qu8.dwconv[0].primary_tile = 9;
+    xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__scalar_lrintf;
+    xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params;
+    xnn_params.qu8.dwconv[1].channel_tile = 2;
+    xnn_params.qu8.dwconv[1].primary_tile = 25;
 
     xnn_params.qu8.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_unipass_ukernel_function) xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1,
@@ -5633,9 +5668,38 @@ static void init(void) {
       .init.qu8_addsub = xnn_init_qu8_add_minmax_scalar_params,
       .element_tile = 4,
     };
+    xnn_params.qu8.vmul = (struct vbinary_parameters) {
+      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmul_minmax_fp32_ukernel__scalar_x4,
+      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
+      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
+      .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params,
+      .element_tile = 4,
+    };
   #endif  // XNN_NO_QU8_OPERATORS
 
-  /**************************** U8 RISCV micro-kernels ****************************/
+  /************************** S8 RISC-V micro-kernels ***************************/
+  #ifndef XNN_NO_S8_OPERATORS
+    init_flags |= XNN_INIT_FLAG_S8;
+
+    xnn_params.s8.clamp = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_s8_vclamp_ukernel__scalar_x4,
+      .init.s8_minmax = xnn_init_s8_minmax_scalar_params,
+      .element_tile = 4,
+    };
+    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_s8_ibilinear_ukernel__scalar_c1,
+      .pixel_tile = 1,
+      .channel_tile = 1,
+    };
+    xnn_params.s8.maxpool = (struct maxpool_parameters) {
+      .ukernel = (xnn_maxpool_ukernel_function) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
+      .init.s8 = xnn_init_s8_minmax_scalar_params,
+      .mr = 9,
+      .qr = 8,
+    };
+  #endif  // XNN_NO_S8_OPERATORS
+
+  /************************** U8 RISC-V micro-kernels ***************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
@@ -5643,6 +5707,11 @@ static void init(void) {
       .ukernel = (xnn_univector_ukernel_function) xnn_u8_vclamp_ukernel__scalar_x4,
       .init.u8_minmax = xnn_init_u8_minmax_scalar_params,
       .element_tile = 4,
+    };
+    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
+      .ukernel = (xnn_ibilinear_ukernel_function) xnn_u8_ibilinear_ukernel__scalar_c1,
+      .pixel_tile = 1,
+      .channel_tile = 1,
     };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_function) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
@@ -5654,7 +5723,7 @@ static void init(void) {
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
-  /**************************** X8 RISCV micro-kernels ****************************/
+  /************************** X8 RISC-V micro-kernels ***************************/
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
@@ -5667,7 +5736,7 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
-  /**************************** F32 RISCV micro-kernels ****************************/
+  /************************** F32 RISC-V micro-kernels **************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
@@ -5764,38 +5833,45 @@ static void init(void) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vabs_ukernel__scalar_x4,
       .element_tile = 4,
     };
-    xnn_params.f32.clamp = (xnn_univector_ukernel_function) xnn_f32_vclamp_ukernel__scalar_x4;
+    xnn_params.f32.clamp = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vclamp_ukernel__scalar_x4,
+      .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
+      .element_tile = 4,
+    };
+    xnn_params.f32.elu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4,
+      .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
+      .element_tile = 4,
+    };
     xnn_params.f32.hswish = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vhswish_ukernel__scalar_x4,
       .init.f32_hswish = xnn_init_f32_hswish_scalar_params,
       .element_tile = 4,
     };
-    xnn_params.f32.elu = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2,
-      .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
-      .element_tile = 2,
+    xnn_params.f32.lrelu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4,
+      .init.f32_lrelu = xnn_init_f32_lrelu_scalar_params,
+      .element_tile = 4,
     };
-    xnn_params.f32.lrelu = (xnn_univector_ukernel_function) xnn_f32_vlrelu_ukernel__scalar_x4;
     xnn_params.f32.neg = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vneg_ukernel__scalar_x4,
       .element_tile = 4,
     };
-    xnn_params.f32.relu = (xnn_univector_ukernel_function) xnn_f32_vrelu_ukernel__scalar_x8;
     xnn_params.f32.rndne = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x4,
-      .element_tile = 4,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__scalar_libm_x1,
+      .element_tile = 1,
     };
     xnn_params.f32.rndz = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x4,
-      .element_tile = 4,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__scalar_libm_x1,
+      .element_tile = 1,
     };
     xnn_params.f32.rndu = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__scalar_libm_x4,
-      .element_tile = 4,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__scalar_libm_x1,
+      .element_tile = 1,
     };
     xnn_params.f32.rndd = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__scalar_libm_x4,
-      .element_tile = 4,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__scalar_libm_x1,
+      .element_tile = 1,
     };
     xnn_params.f32.sigmoid = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2,
@@ -5812,7 +5888,7 @@ static void init(void) {
     };
     xnn_params.f32.prelu = (struct prelu_parameters) {
       .ukernel = (xnn_prelu_ukernel_function) xnn_f32_prelu_ukernel__scalar_2x4,
-      .row_tile = 2,
+      .row_tile = 4,
       .channel_tile = 4,
     };
     xnn_params.f32.raddstoreexpminusmax = xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4_acc2;
@@ -5825,11 +5901,11 @@ static void init(void) {
       .element_tile = 8,
     };
     xnn_params.f32.vdiv = (struct vbinary_parameters) {
-      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_minmax_ukernel__scalar_x8,
-      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_minmax_ukernel__scalar_x8,
-      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_minmax_ukernel__scalar_x8,
+      .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdiv_minmax_ukernel__scalar_x2,
+      .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vdivc_minmax_ukernel__scalar_x2,
+      .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vrdivc_minmax_ukernel__scalar_x2,
       .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
-      .element_tile = 8,
+      .element_tile = 2,
     };
     xnn_params.f32.vmax = (struct vbinary_parameters) {
       .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f32_vmax_ukernel__scalar_x8,
@@ -5926,7 +6002,43 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
-  /**************************** X32 RISCV micro-kernels ****************************/
+  /************************** VCVT RISC-V micro-kernels *************************/
+  #ifndef XNN_NO_VCVT_OPERATORS
+    init_flags |= XNN_INIT_FLAG_VCVT;
+
+    xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f16_f32_vcvt_ukernel__scalar_x4,
+      .init.f16_f32_cvt = xnn_init_f16_f32_cvt_scalar_params,
+      .element_tile = 4,
+    };
+    xnn_params.vcvt.f32_to_f16 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x2,
+      .init.f32_f16_cvt = xnn_init_f32_f16_cvt_scalar_fabsf_params,
+      .element_tile = 2,
+    };
+    xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_x4,
+      .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_lrintf_params,
+      .element_tile = 4,
+    };
+    xnn_params.vcvt.f32_to_qu8 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4,
+      .init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_lrintf_params,
+      .element_tile = 4,
+    };
+    xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qs8_f32_vcvt_ukernel__scalar_x4,
+      .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params,
+      .element_tile = 4,
+    };
+    xnn_params.vcvt.qu8_to_f32 = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qu8_f32_vcvt_ukernel__scalar_x4,
+      .init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params,
+      .element_tile = 4,
+    };
+  #endif  // XNN_NO_VCVT_OPERATORS
+
+  /************************** X32 RISC-V micro-kernels **************************/
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
@@ -5946,7 +6058,7 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX RISCV micro-kernels ****************************/
+  /************************** XX RISC-V micro-kernels ***************************/
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
@@ -5959,7 +6071,7 @@ static void init(void) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__scalar,
       .row_tile = 1,
     };
-  #endif
+  #endif  // XNN_NO_XX_OPERATORS
 
 #else
   #error "Unsupported architecture"
@@ -5977,11 +6089,11 @@ static void init(void) {
 #endif
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  #ifndef __EMSCRIPTEN__
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
     if (!cpuinfo_initialize()) {
       return xnn_status_out_of_memory;
     }
-  #endif
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   if (allocator == NULL) {
     allocator = &xnn_default_allocator;
   }
@@ -6003,8 +6115,8 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 }
 
 enum xnn_status xnn_deinitialize(void) {
-  #ifndef __EMSCRIPTEN__
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
     cpuinfo_deinitialize();
-  #endif
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   return xnn_status_success;
 }
