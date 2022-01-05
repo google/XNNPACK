@@ -1788,6 +1788,41 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_gemm_2x2__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x2__wasm_fmagic, 2, 2, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+  static void qs8_gemm_3x2__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_3x2__wasm_fmagic, 3, 2, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+  static void qs8_gemm_4x2__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic, 4, 2, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+  static void qs8_gemm_2x4__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x4__wasm_fmagic, 2, 4, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+  static void qs8_gemm_3x4__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_3x4__wasm_fmagic, 3, 4, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+  static void qs8_gemm_4x4__wasm_fmagic(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic, 4, 4, 1, 1,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);
+  }
+
+  BENCHMARK_GEMM(qs8_gemm_2x2__wasm_fmagic)
+  BENCHMARK_GEMM(qs8_gemm_3x2__wasm_fmagic)
+  BENCHMARK_GEMM(qs8_gemm_4x2__wasm_fmagic)
+  BENCHMARK_GEMM(qs8_gemm_2x4__wasm_fmagic)
+  BENCHMARK_GEMM(qs8_gemm_3x4__wasm_fmagic)
+  BENCHMARK_GEMM(qs8_gemm_4x4__wasm_fmagic)
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 static void qs8_gemm_2x2__scalar_fmagic(benchmark::State& state, const char* net) {
   GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic, 2, 2, 1, 1,
     xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params);

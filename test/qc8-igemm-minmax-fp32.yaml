@@ -506,6 +506,30 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_mul16_ld128
   init: xnn_init_qs8_minmax_wasmsimd_params
   k-block: 8
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x2__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x2__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x2__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x4__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic
+  init: xnn_init_qs8_minmax_scalar_fmagic_params
+  k-block: 1
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic
   init: xnn_init_qs8_minmax_scalar_fmagic_params
   k-block: 1

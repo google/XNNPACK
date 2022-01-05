@@ -410,6 +410,33 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_dwconv_up16x9__wasmsimd_mul16_add16);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void qs8_dwconv_up1x9__wasm_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up1x9__wasm_fmagic,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+      1 /* channel tile */, 9 /* primary tile */);
+  }
+  static void qs8_dwconv_up2x9__wasm_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up2x9__wasm_fmagic,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+      2 /* channel tile */, 9 /* primary tile */);
+  }
+  static void qs8_dwconv_up4x9__wasm_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__wasm_fmagic,
+      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+      4 /* channel tile */, 9 /* primary tile */);
+  }
+
+  BENCHMARK_QS8_END2END(qs8_dwconv_up1x9__wasm_fmagic);
+  BENCHMARK_QS8_END2END(qs8_dwconv_up2x9__wasm_fmagic);
+  BENCHMARK_QS8_END2END(qs8_dwconv_up4x9__wasm_fmagic);
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 static void qs8_dwconv_up1x9__scalar_fmagic(benchmark::State& state, models::ExecutionPlanFactory model) {
   DWConvEnd2EndBenchmark(state, model,
     xnn_qs8_dwconv_minmax_fp32_ukernel_up1x9__scalar_fmagic,

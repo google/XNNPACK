@@ -4934,31 +4934,42 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_QC8;
 
     if (is_wasm_x86) {
-      xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_scalar_imagic_params;
       xnn_params.qc8.gemm.mr = 2;
       xnn_params.qc8.gemm.nr = 2;
     } else {
-      xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
-      xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
+      xnn_params.qc8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qc8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qc8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
+      xnn_params.qc8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
       xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
       xnn_params.qc8.gemm.mr = 4;
       xnn_params.qc8.gemm.nr = 4;
     }
 
-    xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_fmagic;
-    xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
-    xnn_params.qc8.dwconv[0].channel_tile = 2;
-    xnn_params.qc8.dwconv[0].primary_tile = 9;
-    xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__scalar_fmagic;
-    xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
-    xnn_params.qc8.dwconv[1].channel_tile = 2;
-    xnn_params.qc8.dwconv[1].primary_tile = 25;
+    if (is_wasm_x86) {
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_imagic;
+      xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_scalar_imagic_params;
+      xnn_params.qc8.dwconv[0].channel_tile = 2;
+      xnn_params.qc8.dwconv[0].primary_tile = 9;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up1x25__scalar_imagic;
+      xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_scalar_imagic_params;
+      xnn_params.qc8.dwconv[1].channel_tile = 1;
+      xnn_params.qc8.dwconv[1].primary_tile = 25;
+    } else {
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__wasm_fmagic;
+      xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.dwconv[0].channel_tile = 2;
+      xnn_params.qc8.dwconv[0].primary_tile = 9;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__wasm_fmagic;
+      xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.dwconv[1].channel_tile = 2;
+      xnn_params.qc8.dwconv[1].primary_tile = 25;
+    }
   #endif  // XNN_NO_QC8_OPERATORS
 
   /**************************** QS8 WAsm micro-kernels****************************/
@@ -4966,31 +4977,42 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_QS8;
 
     if (is_wasm_x86) {
-      xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params;
       xnn_params.qs8.gemm.mr = 2;
       xnn_params.qs8.gemm.nr = 2;
     } else {
-      xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
+      xnn_params.qs8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qs8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qs8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
+      xnn_params.qs8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
       xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
       xnn_params.qs8.gemm.mr = 4;
       xnn_params.qs8.gemm.nr = 4;
     }
 
-    xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x9__scalar_fmagic;
-    xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
-    xnn_params.qs8.dwconv[0].channel_tile = 2;
-    xnn_params.qs8.dwconv[0].primary_tile = 9;
-    xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x25__scalar_fmagic;
-    xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
-    xnn_params.qs8.dwconv[1].channel_tile = 2;
-    xnn_params.qs8.dwconv[1].primary_tile = 25;
+    if (is_wasm_x86) {
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x9__scalar_imagic;
+      xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params;
+      xnn_params.qs8.dwconv[0].channel_tile = 2;
+      xnn_params.qs8.dwconv[0].primary_tile = 9;
+      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up1x25__scalar_imagic;
+      xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params;
+      xnn_params.qs8.dwconv[1].channel_tile = 1;
+      xnn_params.qs8.dwconv[1].primary_tile = 25;
+    } else {
+      xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x9__wasm_fmagic;
+      xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qs8.dwconv[0].channel_tile = 2;
+      xnn_params.qs8.dwconv[0].primary_tile = 9;
+      xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up2x25__wasm_fmagic;
+      xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qs8.dwconv[1].channel_tile = 2;
+      xnn_params.qs8.dwconv[1].primary_tile = 25;
+    }
 
     xnn_params.qs8.gavgpool = (struct gavgpool_parameters) {
       .up = (xnn_gavgpool_unipass_ukernel_function) xnn_qs8_gavgpool_minmax_ukernel_7x__scalar_c4,
@@ -5019,31 +5041,42 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_QU8;
 
     if (is_wasm_x86) {
-      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
+      xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic);
+      xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params;
       xnn_params.qu8.gemm.mr = 2;
       xnn_params.qu8.gemm.nr = 2;
     } else {
-      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_fmagic);
+      xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic);
+      xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
+      xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic);
       xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
       xnn_params.qu8.gemm.mr = 4;
       xnn_params.qu8.gemm.nr = 4;
     }
 
-    xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_fmagic;
-    xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
-    xnn_params.qu8.dwconv[0].channel_tile = 2;
-    xnn_params.qu8.dwconv[0].primary_tile = 9;
-    xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__scalar_fmagic;
-    xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
-    xnn_params.qu8.dwconv[1].channel_tile = 2;
-    xnn_params.qu8.dwconv[1].primary_tile = 25;
+    if (is_wasm_x86) {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_imagic;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 2;
+      xnn_params.qu8.dwconv[0].primary_tile = 9;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__scalar_imagic;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 1;
+      xnn_params.qu8.dwconv[1].primary_tile = 25;
+    } else {
+      xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__wasm_fmagic;
+      xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qu8.dwconv[0].channel_tile = 2;
+      xnn_params.qu8.dwconv[0].primary_tile = 9;
+      xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__wasm_fmagic;
+      xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qu8.dwconv[1].channel_tile = 2;
+      xnn_params.qu8.dwconv[1].primary_tile = 25;
+    }
 
     xnn_params.qu8.avgpool = (struct avgpool_parameters) {
       .up = (xnn_avgpool_unipass_ukernel_function) xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1,

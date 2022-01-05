@@ -58,6 +58,12 @@
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up24x9__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x9__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x9__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x9__scalar_fmagic
   init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x9__scalar_fmagic
@@ -132,6 +138,12 @@
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up24x25__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
+- name: xnn_qu8_dwconv_minmax_fp32_ukernel_up4x25__wasm_fmagic
+  init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up1x25__scalar_fmagic
   init: xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_up2x25__scalar_fmagic
