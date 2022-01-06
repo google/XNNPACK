@@ -19,9 +19,9 @@ extern "C" {
   XNN_INTERNAL void fn_name(                                       \
       size_t n,                                                    \
       const float* input,                                          \
+      const float* max,                                            \
       float* output,                                               \
-      float* sum,                                                  \
-      float max);
+      float* sum);
 
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x4)
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_p5_x8)

@@ -18,9 +18,9 @@
 void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_p5_scalef_x144_acc3(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max)
+    float* sum)
 {
   assert(elements % sizeof(float) == 0);
 
@@ -35,7 +35,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_p5_scalef_x144_acc3(
   const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
   const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
 
-  const __m512 vi_max = _mm512_set1_ps(max);
+  const __m512 vi_max = _mm512_set1_ps(*max);
 
   __m512 vacc0 = _mm512_setzero_ps();
   __m512 vacc1 = _mm512_setzero_ps();

@@ -18,9 +18,9 @@
 void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x4(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max) XNN_OOB_READS
+    float* sum) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
@@ -37,7 +37,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neonfma_p5_x4(
   const float32x4_t vc4 = vmovq_n_f32(0x1.573A1Ap-5f);
   const float32x4_t vc5 = vmovq_n_f32(0x1.0F9F9Cp-7f);
 
-  const float32x4_t vi_max = vdupq_n_f32(max);
+  const float32x4_t vi_max = vld1q_dup_f32(max);
 
   float32x4_t vacc = vmovq_n_f32(0.0f);
   for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {

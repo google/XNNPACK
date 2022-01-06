@@ -19,9 +19,9 @@ static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0
 void xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x96(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max)
+    float* sum)
 {
   assert(elements % sizeof(float) == 0);
 
@@ -38,7 +38,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_p5_x96(
   const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
   const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
 
-  const __m256 vi_max = _mm256_set1_ps(max);
+  const __m256 vi_max = _mm256_broadcast_ss(max);
 
   __m256 vacc0 = _mm256_setzero_ps();
   for (; elements >= 96 * sizeof(float); elements -= 96 * sizeof(float)) {

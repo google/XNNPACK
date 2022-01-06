@@ -21,9 +21,9 @@ extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float vi_max)
+    float* sum)
 {
   assert(elements % sizeof(float) == 0);
 
@@ -38,6 +38,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_lut64_p2_x4_acc2(
   const float vc2 = 0x1.FFFF0Ap-2f;
 
   const uint32_t vindex_mask = UINT32_C(0x3F);
+
+  const float vi_max = *max;
 
   float vacc0 = 0.0f;
   float vacc1 = 0.0f;

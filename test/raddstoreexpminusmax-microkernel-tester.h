@@ -65,7 +65,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       float sum = std::nanf("");
-      raddstoreexpminusmax(elements() * sizeof(float), x.data(), y.data(), &sum, x_max);
+      raddstoreexpminusmax(elements() * sizeof(float), x.data(), &x_max, y.data(), &sum);
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {

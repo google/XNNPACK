@@ -18,9 +18,9 @@
 void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max) XNN_OOB_READS
+    float* sum) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
@@ -38,7 +38,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_p5_x20(
   const v128_t vc4 = wasm_f32x4_const_splat(0x1.573A1Ap-5f);
   const v128_t vc5 = wasm_f32x4_const_splat(0x1.0F9F9Cp-7f);
 
-  const v128_t vi_max = wasm_f32x4_splat(max);
+  const v128_t vi_max = wasm_v128_load32_splat(max);
 
   v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   for (; elements >= 20 * sizeof(float); elements -= 20 * sizeof(float)) {

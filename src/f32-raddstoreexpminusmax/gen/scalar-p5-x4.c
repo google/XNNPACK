@@ -18,9 +18,9 @@
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float vi_max)
+    float* sum)
 {
   assert(elements % sizeof(float) == 0);
 
@@ -37,6 +37,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_p5_x4(
   const float vc3 = 0x1.555A80p-3f;
   const float vc4 = 0x1.573A1Ap-5f;
   const float vc5 = 0x1.0F9F9Cp-7f;
+
+  const float vi_max = *max;
 
   float vacc0 = 0.0f;
   for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {

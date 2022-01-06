@@ -18,9 +18,9 @@
 void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max) XNN_OOB_READS
+    float* sum) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
@@ -38,7 +38,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2(
   const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
   const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
 
-  const __m128 vi_max = _mm_set1_ps(max);
+  const __m128 vi_max = _mm_load1_ps(max);
 
   __m128 vacc0 = _mm_setzero_ps();
   __m128 vacc1 = _mm_setzero_ps();

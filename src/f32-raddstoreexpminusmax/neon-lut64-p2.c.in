@@ -21,9 +21,9 @@ extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_lut64_p2_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max) XNN_OOB_READS
+    float* sum) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
@@ -43,7 +43,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_lut64
 
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
 
-  const float32x4_t vi_max = vdupq_n_f32(max);
+  const float32x4_t vi_max = vld1q_dup_f32(max);
 
   $if ELEMENTS_TILE > 4:
     $for K in range(ACCUMULATORS):

@@ -56,7 +56,7 @@ static void f32_raddstoreexpminusmax(
     state.ResumeTiming();
 
     float y_sum = nanf("");
-    raddstoreexpminusmax(elements * sizeof(float), x.data(), y.data() + buffer_index * packed_elements, &y_sum, x_max);
+    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

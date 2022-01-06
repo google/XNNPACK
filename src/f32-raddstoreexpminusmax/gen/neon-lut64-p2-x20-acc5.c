@@ -20,9 +20,9 @@ extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 void xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc5(
     size_t elements,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max) XNN_OOB_READS
+    float* sum) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
@@ -38,7 +38,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_lut64_p2_x20_acc5(
 
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
 
-  const float32x4_t vi_max = vdupq_n_f32(max);
+  const float32x4_t vi_max = vld1q_dup_f32(max);
 
   float32x4_t vacc0 = vmovq_n_f32(0.0f);
   float32x4_t vacc1 = vmovq_n_f32(0.0f);

@@ -278,7 +278,7 @@ static void ThreePassSoftMaxWithReloading(
     float x_max = nanf("");
     rmax(elements * sizeof(float), x.data(), &x_max);
     float y_sum = nanf("");
-    raddstoreexpminusmax(elements * sizeof(float), x.data(), y.data() + packed_elements * buffer_index, &y_sum, x_max);
+    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + packed_elements * buffer_index, &y_sum);
     vscale(elements * sizeof(float), y.data() + packed_elements * buffer_index, y.data() + packed_elements * buffer_index, 1.0f / y_sum);
     const auto end = std::chrono::high_resolution_clock::now();
 

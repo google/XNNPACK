@@ -3069,9 +3069,9 @@ typedef void (*xnn_f32_raddexpminusmax_ukernel_function)(
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_function)(
     size_t n,
     const float* input,
+    const float* max,
     float* output,
-    float* sum,
-    float max);
+    float* sum);
 
 typedef void (*xnn_f32_vscaleexpminusmax_ukernel_function)(
     size_t n,
