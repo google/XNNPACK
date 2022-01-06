@@ -4347,7 +4347,6 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-avx-x16.c
   src/f32-vrnd/gen/vrndz-avx-x8.c
   src/f32-vrnd/gen/vrndz-avx-x16.c
-  src/f32-vscale/avx-x32.c
   src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x8.c
   src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x16.c
   src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x24.c
@@ -5281,7 +5280,6 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-avx512f-x32.c
   src/f32-vrnd/gen/vrndz-avx512f-x16.c
   src/f32-vrnd/gen/vrndz-avx512f-x32.c
-  src/f32-vscale/avx512f-x64.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x16.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x32.c
   src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x48.c

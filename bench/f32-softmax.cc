@@ -14,7 +14,7 @@
 #include <xnnpack/raddextexp.h>
 #include <xnnpack/raddstoreexpminusmax.h>
 #include <xnnpack/rmax.h>
-#include <xnnpack/vscale.h>
+#include <xnnpack/vbinary.h>
 #include <xnnpack/vscaleexpminusmax.h>
 #include <xnnpack/vscaleextexp.h>
 
@@ -245,7 +245,8 @@ static void ThreePassSoftMaxWithReloading(
   xnn_f32_rmax_ukernel_function rmax,
   xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax,
   xnn_init_f32_expminus_params_fn init_expminus_params,
-  xnn_f32_vscale_ukernel_function vscale,
+  xnn_f32_vbinary_minmax_ukernel_function vmulc,
+  xnn_init_f32_minmax_params_fn init_minmax_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -270,7 +271,9 @@ static void ThreePassSoftMaxWithReloading(
   benchmark::utils::DisableDenormals();
 
   xnn_f32_expminus_params expminus_params;
+  xnn_f32_minmax_params minmax_params;
   init_expminus_params(&expminus_params);
+  init_minmax_params(&minmax_params, -INFINITY, INFINITY);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -284,7 +287,8 @@ static void ThreePassSoftMaxWithReloading(
     rmax(elements * sizeof(float), x.data(), &x_max);
     float y_sum = nanf("");
     raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + packed_elements * buffer_index, &y_sum, &expminus_params);
-    vscale(elements * sizeof(float), y.data() + packed_elements * buffer_index, y.data() + packed_elements * buffer_index, 1.0f / y_sum);
+    const float inv_y_sum = 1.0f / y_sum;
+    vmulc(elements * sizeof(float), y.data() + packed_elements * buffer_index, &inv_y_sum, y.data() + packed_elements * buffer_index, &minmax_params);
     const auto end = std::chrono::high_resolution_clock::now();
 
     const auto elapsed_seconds =
@@ -390,7 +394,8 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_rmax_ukernel__avx,
     xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x64_acc2,
     xnn_init_f32_expminus_avx2_rr1_p5_params,
-    xnn_f32_vscale_ukernel__avx_x32,
+    xnn_f32_vmulc_minmax_ukernel__avx_x16,
+    xnn_init_f32_minmax_avx_params,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
 
   BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,
@@ -406,7 +411,8 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_rmax_ukernel__avx512f,
     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_x128_acc2,
     xnn_init_f32_expminus_avx512_rr1_p5_params,
-    xnn_f32_vscale_ukernel__avx512f_x64,
+    xnn_f32_vmulc_minmax_ukernel__avx512f_x32,
+    xnn_init_f32_minmax_scalar_params,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

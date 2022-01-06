@@ -5596,7 +5596,6 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/vrndu-avx-x16.c",
     "src/f32-vrnd/gen/vrndz-avx-x8.c",
     "src/f32-vrnd/gen/vrndz-avx-x16.c",
-    "src/f32-vscale/avx-x32.c",
     "src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x8.c",
     "src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x16.c",
     "src/f32-vsigmoid/gen/vsigmoid-avx-rr2-p5-div-x24.c",
@@ -6538,7 +6537,6 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/vrndu-avx512f-x32.c",
     "src/f32-vrnd/gen/vrndz-avx512f-x16.c",
     "src/f32-vrnd/gen/vrndz-avx512f-x32.c",
-    "src/f32-vscale/avx512f-x64.c",
     "src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x16.c",
     "src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x32.c",
     "src/f32-vscaleexpminusmax/gen/avx512f-p5-scalef-x48.c",
@@ -7076,7 +7074,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vcvt.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
-    "src/xnnpack/vscale.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
@@ -11147,15 +11144,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrndd.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "f32_vscale_test",
-    srcs = [
-        "test/f32-vscale.cc",
-        "test/vscale-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
