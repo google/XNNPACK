@@ -93,6 +93,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xEEB44AC8, a.vcmpe_f32(s8, s16));
 
+  CHECK_ENCODING(0xF3FBE646, a.vcvt_f32_s32(q15, q3));
+  CHECK_ENCODING(0xF3FB6748, a.vcvt_s32_f32(q11, q4));
+
+  CHECK_ENCODING(0xF3FB6148, a.vcvtn_s32_f32(q11, q4));
+
   CHECK_ENCODING(0xF3FF8C4F, a.vdup_8(q12, d15[7]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_8(q12, d15[8]));
   CHECK_ENCODING(0xF3FE8C4F, a.vdup_16(q12, d15[3]));
@@ -178,6 +183,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF2880A10, a.vmovl_s8(q0, d0));
 
   CHECK_ENCODING(0xEEF1FA10, a.vmrs(APSR_nzcv, FPSCR));
+
+  CHECK_ENCODING(0xF34E2DD2, a.vmul_f32(q9, q15, q1));
 
   CHECK_ENCODING(0xECBD8B10, a.vpop({d8-d15}));
   EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vpop({d0-d16}));
@@ -367,21 +374,37 @@ TEST(AArch32Assembler, CoreRegisterList) {
 }
 
 TEST(AArch32Assembler, ConsecutiveRegisterList) {
-  SRegisterList s1 = SRegisterList(s0, s9);
-  EXPECT_EQ(s1.start, s0);
-  EXPECT_EQ(s1.length, 10);
+  SRegisterList s_list_1 = SRegisterList(s0, s9);
+  EXPECT_EQ(s_list_1.start, s0);
+  EXPECT_EQ(s_list_1.length, 10);
 
-  SRegisterList s2 = {s4 - s11};
-  EXPECT_EQ(s2.start, s4);
-  EXPECT_EQ(s2.length, 8);
+  SRegisterList s_list_2 = {s4 - s11};
+  EXPECT_EQ(s_list_2.start, s4);
+  EXPECT_EQ(s_list_2.length, 8);
 
-  DRegisterList d1 = DRegisterList(d4, d5);
-  EXPECT_EQ(d1.start, d4);
-  EXPECT_EQ(d1.length, 2);
+  DRegisterList d_list_1 = DRegisterList(d4, d5);
+  EXPECT_EQ(d_list_1.start, d4);
+  EXPECT_EQ(d_list_1.length, 2);
 
-  DRegisterList d2 = {d4 - d11};
-  EXPECT_EQ(d2.start, d4);
-  EXPECT_EQ(d2.length, 8);
+  DRegisterList d_list_2 = {d4 - d11};
+  EXPECT_EQ(d_list_2.start, d4);
+  EXPECT_EQ(d_list_2.length, 8);
+
+  QRegisterList q_list_1 = {q3-q3};
+  EXPECT_EQ(q_list_1.start, q3);
+  EXPECT_EQ(q_list_1.length, 1);
+
+  DRegisterList d_from_q_1 = static_cast<DRegisterList>(q_list_1);
+  EXPECT_EQ(d_from_q_1.start, d6);
+  EXPECT_EQ(d_from_q_1.length, 2);
+
+  QRegisterList q_list_2 = {q4-q9};
+  EXPECT_EQ(q_list_2.start, q4);
+  EXPECT_EQ(q_list_2.length, 6);
+
+  DRegisterList d_from_q_2 = static_cast<DRegisterList>(q_list_2);
+  EXPECT_EQ(d_from_q_2.start, d8);
+  EXPECT_EQ(d_from_q_2.length, 12);
 }
 
 TEST(AArch32Assembler, MemOperand) {

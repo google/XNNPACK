@@ -178,6 +178,10 @@ struct QRegister {
   uint8_t vd() const { return (code & 0x7) << 1; }
 };
 
+static inline bool operator==(const QRegister lhs, const QRegister rhs) {
+  return lhs.code == rhs.code;
+}
+
 constexpr QRegister q0{0};
 constexpr QRegister q1{1};
 constexpr QRegister q2{2};
@@ -225,14 +229,20 @@ static inline DRegisterList operator-(const DRegister lhs, const DRegister rhs) 
 }
 
 struct QRegisterList {
-  QRegisterList(QRegister s) : start(s) {}
+  QRegisterList(QRegister s) : start(s), length(1) {}
+  QRegisterList(QRegister s, QRegister end) : start(s), length(end.code - s.code + 1) {}
   // Explicit conversion to DRegisterList.
   explicit operator DRegisterList() const {
-    return DRegisterList({static_cast<uint8_t>(start.code * 2)}, 2);
+    return DRegisterList({static_cast<uint8_t>(start.code * 2)}, length * 2);
   }
 
   QRegister start;
+  uint8_t length;
 };
+
+static inline QRegisterList operator-(const QRegister lhs, const QRegister rhs) {
+  return QRegisterList(lhs, rhs);
+}
 
 constexpr size_t max_label_users = 10;
 // Label is a target of a branch. You call Assembler::bind to bind a label to an
@@ -413,6 +423,9 @@ class Assembler {
 
   // SIMD instructions.
   Assembler& vcmpe_f32(SRegister sd, SRegister sm);
+  Assembler& vcvt_f32_s32(QRegister qd, QRegister qm);
+  Assembler& vcvt_s32_f32(QRegister qd, QRegister qm);
+  Assembler& vcvtn_s32_f32(QRegister qd, QRegister qm);
   Assembler& vdup_8(QRegister qd, DRegisterLane dm) { return vdup(k8, qd, dm); }
   Assembler& vdup_16(QRegister qd, DRegisterLane dm) { return vdup(k16, qd, dm); }
   Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
@@ -462,6 +475,7 @@ class Assembler {
   // VMOVL.S8 <Qd>, <Dm>
   Assembler& vmovl_s8(QRegister qd, DRegister dm);
   Assembler& vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
+  Assembler& vmul_f32(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vpop(DRegisterList regs);
   Assembler& vpush(DRegisterList regs);
   Assembler& vpush(SRegisterList regs);

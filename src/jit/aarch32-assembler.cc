@@ -273,6 +273,18 @@ Assembler& Assembler::vcmpe_f32(SRegister sd, SRegister sm) {
   return emit32(kAL | 0x0EB40AC0 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
 
+Assembler& Assembler::vcvt_f32_s32(QRegister qd, QRegister qm) {
+  return emit32(0xF3BB0640 | encode(qd, 22, 12) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vcvt_s32_f32(QRegister qd, QRegister qm) {
+  return emit32(0xF3BB0740 | encode(qd, 22, 12) | encode(qm, 5, 0));
+}
+
+Assembler& Assembler::vcvtn_s32_f32(QRegister qd, QRegister qm) {
+  return emit32(0xF3BB0140 | encode(qd, 22, 12) | encode(qm, 5, 0));
+}
+
 Assembler& Assembler::vdup(DataSize size, QRegister qd, DRegisterLane dm) {
   uint8_t imm4 = 0;
   switch (size) {
@@ -443,6 +455,10 @@ Assembler& Assembler::vmovl_s8(QRegister qd, DRegister dm) {
 
 Assembler& Assembler::vmrs(CoreRegister rt, SpecialFPRegister spec_reg) {
   return emit32(kAL | 0x0EF00A10 | static_cast<uint32_t>(spec_reg) << 16 | rt.code << 12);
+}
+
+Assembler& Assembler::vmul_f32(QRegister qd, QRegister qn, QRegister qm) {
+  return emit32(0xF3000D50 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
 }
 
 Assembler& Assembler::vpop(DRegisterList regs) {
