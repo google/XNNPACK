@@ -7033,6 +7033,8 @@ JIT_AARCH32_SRCS = [
     "src/f32-igemm/4x8-aarch32-neon-cortex-a7.cc",
     "src/f32-igemm/4x8-aarch32-neon-ld64.cc",
     "src/f32-igemm/4x8-aarch32-neon-cortex-a75.cc",
+    "src/qc8-gemm/4x8c4-fp32-aarch32-neondot-ld64.cc",
+    "src/qc8-igemm/4x8c4-fp32-aarch32-neondot-ld64.cc",
     "src/qs8-gemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc",
     "src/qs8-gemm/4x8c4-rndnu-aarch32-neondot-ld64.cc",
     "src/qs8-igemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc",

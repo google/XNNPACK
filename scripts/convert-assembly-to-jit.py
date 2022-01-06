@@ -120,7 +120,7 @@ def fix_replicate_instruction(s):
 
 
 def fix_instr_name(s):
-  return s.replace('.', '_', 1).replace('and', 'and_', 1)
+  return s.replace('.', '_', 2).replace('and', 'and_', 1)
 
 
 def fix_comments(s):

@@ -1599,6 +1599,8 @@ enum xnn_status xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_
 enum xnn_status xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64(struct xnn_code_buffer* code);
 enum xnn_status xnn_generate_qs8_gemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code);
 
+enum xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
