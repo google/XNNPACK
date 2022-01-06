@@ -10328,6 +10328,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10338,6 +10339,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -10572,6 +10574,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         ":jit",
@@ -10687,6 +10690,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         ":jit",
@@ -10700,6 +10704,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11354,6 +11359,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11396,6 +11402,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         ":jit",
@@ -11435,6 +11442,7 @@ xnnpack_unit_test(
         "test/qs8-requantization.cc",
         "test/requantization-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11501,6 +11509,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11541,6 +11550,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11562,6 +11572,7 @@ xnnpack_unit_test(
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11572,6 +11583,7 @@ xnnpack_unit_test(
         "test/qu8-requantization.cc",
         "test/requantization-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11808,6 +11820,7 @@ xnnpack_unit_test(
         "test/add-nd.cc",
         "test/binary-elementwise-operator-tester.h",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -11826,6 +11839,7 @@ xnnpack_unit_test(
         "test/average-pooling-nhwc.cc",
         "test/average-pooling-operator-tester.h",
     ] + OPERATOR_TEST_PARAMS_HDRS,
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -11871,6 +11885,7 @@ xnnpack_unit_test(
         "test/constant-pad-nd.cc",
         "test/constant-pad-operator-tester.h",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -11890,6 +11905,7 @@ xnnpack_unit_test(
         "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12048,6 +12064,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12129,6 +12146,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/squared-difference-nd.cc",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12138,6 +12156,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd.cc",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
