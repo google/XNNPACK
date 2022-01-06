@@ -82,6 +82,7 @@ def main(args):
   amalgam_includes.discard("#include <emmintrin.h>")
   amalgam_includes.discard("#include <immintrin.h>")
   amalgam_includes.discard("#include <nmmintrin.h>")
+  amalgam_includes.discard("#include <smmintrin.h>")
   amalgam_includes.discard("#include <tmmintrin.h>")
   amalgam_includes.discard("#include <xmmintrin.h>")
 
