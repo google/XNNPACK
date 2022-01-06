@@ -21,7 +21,8 @@ extern "C" {
       const float* input,                                          \
       const float* max,                                            \
       float* output,                                               \
-      float* sum);
+      float* sum,                                                  \
+      const union xnn_f32_expminus_params* params);
 
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x4)
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8)

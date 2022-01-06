@@ -2238,6 +2238,157 @@ void xnn_init_f32_elu_wasmsimd_rr2_p6_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+void xnn_init_f32_expminus_scalar_rr2_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_rr2_p5.log2e = 0x1.715476p+0f;
+  params->scalar_rr2_p5.magic_bias = 0x1.8000FEp23f;
+  params->scalar_rr2_p5.minus_ln2_hi = -0x1.62E400p-1f;
+  params->scalar_rr2_p5.minus_ln2_lo = -0x1.7F7D1Cp-20f;
+  params->scalar_rr2_p5.c5 = 0x1.0F9F9Cp-7f;
+  params->scalar_rr2_p5.c4 = 0x1.573A1Ap-5f;
+  params->scalar_rr2_p5.c3 = 0x1.555A80p-3f;
+  params->scalar_rr2_p5.c2 = 0x1.FFFDC6p-2f;
+  params->scalar_rr2_p5.c1 = 0x1.FFFFF6p-1f;
+  params->scalar_rr2_p5.denorm_cutoff = -0x1.5D589Ep6f;
+}
+
+void xnn_init_f32_expminus_scalar_rr2_lut64_p2_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_rr2_lut64_p2.log2e  = 0x1.715476p0f;
+  params->scalar_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->scalar_rr2_lut64_p2.minus_ln2_hi = -0x1.630000p-1f;
+  params->scalar_rr2_lut64_p2.minus_ln2_lo = 0x1.BD0106p-13f;
+  params->scalar_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->scalar_rr2_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
+}
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f32_expminus_neon_rr2_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neon_rr2_p5.log2e = 0x1.715476p+0f;
+  params->neon_rr2_p5.magic_bias = 0x1.8000FEp23f;
+  params->neon_rr2_p5.minus_ln2_hi = -0x1.62E400p-1f;
+  params->neon_rr2_p5.minus_ln2_lo = -0x1.7F7D1Cp-20f;
+  params->neon_rr2_p5.c5 = 0x1.0F9F9Cp-7f;
+  params->neon_rr2_p5.c4 = 0x1.573A1Ap-5f;
+  params->neon_rr2_p5.c3 = 0x1.555A80p-3f;
+  params->neon_rr2_p5.c2 = 0x1.FFFDC6p-2f;
+  params->neon_rr2_p5.c1 = 0x1.FFFFF6p-1f;
+  params->neon_rr2_p5.denorm_cutoff = -0x1.5D589Ep6f;
+}
+
+void xnn_init_f32_expminus_neon_rr2_lut64_p2_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neon_rr2_lut64_p2.log2e = 0x1.715476p+0f;
+  params->neon_rr2_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->neon_rr2_lut64_p2.minus_ln2_hi = -0x1.62E400p-1f;
+  params->neon_rr2_lut64_p2.minus_ln2_lo = -0x1.7F7D1Cp-20f;
+  params->neon_rr2_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->neon_rr2_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
+}
+
+void xnn_init_f32_expminus_neonfma_rr1_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfma_rr1_p5.log2e = 0x1.715476p+0f;
+  params->neonfma_rr1_p5.magic_bias = 0x1.8000FEp23f;
+  params->neonfma_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
+  params->neonfma_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
+  params->neonfma_rr1_p5.c4 = 0x1.573A1Ap-5f;
+  params->neonfma_rr1_p5.c3 = 0x1.555A80p-3f;
+  params->neonfma_rr1_p5.c2 = 0x1.FFFDC6p-2f;
+  params->neonfma_rr1_p5.c1 = 0x1.FFFFF6p-1f;
+  params->neonfma_rr1_p5.denorm_cutoff = -0x1.5D589Ep6f;
+}
+
+void xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfma_rr1_lut64_p2.log2e = 0x1.715476p+0f;
+  params->neonfma_rr1_lut64_p2.magic_bias = 0x1.800000p17f;
+  params->neonfma_rr1_lut64_p2.minus_ln2 = -0x1.62E430p-1f;
+  params->neonfma_rr1_lut64_p2.c2 = 0x1.FFFF0Ap-2f;
+  params->neonfma_rr1_lut64_p2.denorm_cutoff = -0x1.5D589Ep6f;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_expminus_sse2_rr2_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2_rr2_p5.log2e[i] = 0x1.715476p+0f;
+    params->sse2_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->sse2_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
+    params->sse2_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
+    params->sse2_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->sse2_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->sse2_rr2_p5.c3[i] = 0x1.555A80p-3f;
+    params->sse2_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->sse2_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->sse2_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
+  }
+}
+
+void xnn_init_f32_expminus_avx2_rr1_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2_rr1_p5.log2e[i] = 0x1.715476p+0f;
+    params->avx2_rr1_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx2_rr1_p5.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx2_rr1_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->avx2_rr1_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->avx2_rr1_p5.c3[i] = 0x1.555A80p-3f;
+    params->avx2_rr1_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->avx2_rr1_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->avx2_rr1_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx2_rr1_p5.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx2_rr1_p5.mask_table[i] = 0;
+  }
+}
+
+void xnn_init_f32_expminus_avx512_rr1_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->avx512_rr1_p5.log2e = 0x1.715476p+0f;
+  params->avx512_rr1_p5.minus_ln2 = -0x1.62E430p-1f;
+  params->avx512_rr1_p5.c5 = 0x1.0F9F9Cp-7f;
+  params->avx512_rr1_p5.c4 = 0x1.573A1Ap-5f;
+  params->avx512_rr1_p5.c3 = 0x1.555A80p-3f;
+  params->avx512_rr1_p5.c2 = 0x1.FFFDC6p-2f;
+  params->avx512_rr1_p5.c1 = 0x1.FFFFF6p-1f;
+  params->avx512_rr1_p5.c0 = 1.0f;
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+void xnn_init_f32_expminus_wasmsimd_rr2_p5_params(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd_rr2_p5.log2e[i] = 0x1.715476p+0f;
+    params->wasmsimd_rr2_p5.magic_bias[i] = 0x1.8000FEp23f;
+    params->wasmsimd_rr2_p5.minus_ln2_hi[i] = -0x1.62E400p-1f;
+    params->wasmsimd_rr2_p5.minus_ln2_lo[i] = -0x1.7F7D1Cp-20f;
+    params->wasmsimd_rr2_p5.c5[i] = 0x1.0F9F9Cp-7f;
+    params->wasmsimd_rr2_p5.c4[i] = 0x1.573A1Ap-5f;
+    params->wasmsimd_rr2_p5.c3[i] = 0x1.555A80p-3f;
+    params->wasmsimd_rr2_p5.c2[i] = 0x1.FFFDC6p-2f;
+    params->wasmsimd_rr2_p5.c1[i] = 0x1.FFFFF6p-1f;
+    params->wasmsimd_rr2_p5.denorm_cutoff[i] = -0x1.5D589Ep6f;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 void xnn_init_f32_lrelu_scalar_params(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope)

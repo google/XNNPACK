@@ -875,11 +875,11 @@ void xnn_compute_f32_three_pass_softmax(
 
   // Second pass: reduce-add & store exp(x-x_max)
   float y_sum;
-  context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum);
+  context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum, &context->expminus_params);
 
   // Third pass: scale y
   const float y_scale = 1.0f / y_sum;
-  context->vmulc_ukernel(n, y, &y_scale, y, &context->params);
+  context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
 }
 
 void xnn_compute_vmulcaddc(

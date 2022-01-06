@@ -42,7 +42,7 @@ TEST(${TEST_NAME}, elements_eq_${ELEMENTS_TILE}) {
     ${ISA_CHECK};
   RAddStoreExpMinusMaxMicrokernelTester()
     .elements(${ELEMENTS_TILE})
-    .Test(${TEST_FUNCTION});
+    .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
 }
 
 $if ELEMENTS_TILE > 1:
@@ -52,7 +52,7 @@ $if ELEMENTS_TILE > 1:
     for (size_t elements = ${ELEMENTS_TILE*2}; elements < ${ELEMENTS_TILE*10}; elements += ${ELEMENTS_TILE}) {
       RAddStoreExpMinusMaxMicrokernelTester()
         .elements(elements)
-        .Test(${TEST_FUNCTION});
+        .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
     }
   }
 
@@ -62,7 +62,7 @@ $if ELEMENTS_TILE > 1:
     for (size_t elements = 1; elements < ${ELEMENTS_TILE}; elements++) {
       RAddStoreExpMinusMaxMicrokernelTester()
         .elements(elements)
-        .Test(${TEST_FUNCTION});
+        .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
     }
   }
 
@@ -72,17 +72,18 @@ TEST(${TEST_NAME}, elements_gt_${ELEMENTS_TILE}) {
   for (size_t elements = ${ELEMENTS_TILE+1}; elements < ${10 if ELEMENTS_TILE == 1 else ELEMENTS_TILE*2}; elements++) {
     RAddStoreExpMinusMaxMicrokernelTester()
       .elements(elements)
-      .Test(${TEST_FUNCTION});
+      .Test(${TEST_FUNCTION}, ${INIT_FUNCTION});
   }
 }
 """
 
 
-def generate_test_cases(ukernel, elements_tile, isa):
+def generate_test_cases(ukernel, init_fn, elements_tile, isa):
   """Generates all tests cases for a RAddStoreExpMinusMax micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    init_fn: C name of the function to initialize microkernel parameters.
     elements_tile: Number of batch elements processed per one iteration of the
                    inner loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -95,6 +96,7 @@ def generate_test_cases(ukernel, elements_tile, isa):
   _, datatype, _ = ukernel.split("_", 2)
   return xngen.preprocess(RADDSTOREEXPMINUSMAX_TEST_TEMPLATE, {
       "TEST_FUNCTION": ukernel,
+      "INIT_FUNCTION": init_fn,
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "DATATYPE": datatype,
       "ELEMENTS_TILE": elements_tile,
@@ -132,12 +134,13 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       elements_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, elements_tile, isa)
+      test_case = generate_test_cases(name, init_fn, elements_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

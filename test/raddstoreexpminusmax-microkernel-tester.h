@@ -17,6 +17,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/params.h>
+#include <xnnpack/params-init.h>
 
 
 class RAddStoreExpMinusMaxMicrokernelTester {
@@ -40,7 +41,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax) const {
+  void Test(xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax, xnn_init_f32_expminus_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
@@ -65,7 +66,9 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       float sum = std::nanf("");
-      raddstoreexpminusmax(elements() * sizeof(float), x.data(), &x_max, y.data(), &sum);
+      xnn_f32_expminus_params params;
+      init_params(&params);
+      raddstoreexpminusmax(elements() * sizeof(float), x.data(), &x_max, y.data(), &sum, &params);
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {

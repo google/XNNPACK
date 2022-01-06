@@ -23,23 +23,19 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc4(
     const float* input,
     const float* max,
     float* output,
-    float* sum)
+    float* sum,
+    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(elements % sizeof(float) == 0);
 
-  const float vmagic_bias = 0x1.800000p23f;
-  // The smallest x for which expf(x) is normalized.
-  const float vdenorm_cutoff = -0x1.5D589Ep6f;
-  const float vlog2e_x64  = 0x1.715476p6f;
-  // Last 13 bits are zeroes
-  const float vminus_ln2_o64_hi = -0x1.630000p-7f;
-  const float vminus_ln2_o64_lo =  0x1.BD0106p-19f;
-
-  const float vc2 = 0x1.FFFF0Ap-2f;
-
-  const uint32_t vindex_mask = UINT32_C(0x3F);
-
   const float vi_max = *max;
+  const float vlog2e = params->scalar_rr2_lut64_p2.log2e;
+  const float vmagic_bias = params->scalar_rr2_lut64_p2.magic_bias;
+  const uint32_t vindex_mask = UINT32_C(0x3F);
+  const float vminus_ln2_hi = params->scalar_rr2_lut64_p2.minus_ln2_hi;
+  const float vminus_ln2_lo = params->scalar_rr2_lut64_p2.minus_ln2_lo;
+  const float vc2 = params->scalar_rr2_lut64_p2.c2;
+  const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
 
   float vacc0 = 0.0f;
   float vacc1 = 0.0f;
@@ -66,10 +62,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc4(
     // |x| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs outside of [-87.336540, 0.0]
     // result in denormalized or underflown expf(x). We fixup the result for such inputs at the very end of the
     // algorithm.
-    float vn0 = vx0 * vlog2e_x64 + vmagic_bias;
-    float vn1 = vx1 * vlog2e_x64 + vmagic_bias;
-    float vn2 = vx2 * vlog2e_x64 + vmagic_bias;
-    float vn3 = vx3 * vlog2e_x64 + vmagic_bias;
+    float vn0 = vx0 * vlog2e + vmagic_bias;
+    float vn1 = vx1 * vlog2e + vmagic_bias;
+    float vn2 = vx2 * vlog2e + vmagic_bias;
+    float vn3 = vx3 * vlog2e + vmagic_bias;
 
     // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that expf(x) is normalized,
     // i.e. -87.33642 <= x <= 0.0. As n has 6 fractional bits, we split s == 2**(n / 64) = 2**e * 2**(n / 64 - e), where
@@ -105,15 +101,15 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc4(
 
     // Compute reduced argument t := x - n * log(2) / 64.
     // Use Cody-Waite range reduction method (note the two constants representing log(2) / 64) to improve accuracy.
-    float vt0 = vn0 * vminus_ln2_o64_hi + vx0;
-    float vt1 = vn1 * vminus_ln2_o64_hi + vx1;
-    float vt2 = vn2 * vminus_ln2_o64_hi + vx2;
-    float vt3 = vn3 * vminus_ln2_o64_hi + vx3;
+    float vt0 = vn0 * vminus_ln2_hi + vx0;
+    float vt1 = vn1 * vminus_ln2_hi + vx1;
+    float vt2 = vn2 * vminus_ln2_hi + vx2;
+    float vt3 = vn3 * vminus_ln2_hi + vx3;
 
-    vt0 = vn0 * vminus_ln2_o64_lo + vt0;
-    vt1 = vn1 * vminus_ln2_o64_lo + vt1;
-    vt2 = vn2 * vminus_ln2_o64_lo + vt2;
-    vt3 = vn3 * vminus_ln2_o64_lo + vt3;
+    vt0 = vn0 * vminus_ln2_lo + vt0;
+    vt1 = vn1 * vminus_ln2_lo + vt1;
+    vt2 = vn2 * vminus_ln2_lo + vt2;
+    vt3 = vn3 * vminus_ln2_lo + vt3;
 
     // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float vp0 = vt0 * vc2;
@@ -184,7 +180,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc4(
     // |x| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs outside of [-87.336540, 0.0]
     // result in denormalized or underflown expf(x). We fixup the result for such inputs at the very end of the
     // algorithm.
-    float vn = vx * vlog2e_x64 + vmagic_bias;
+    float vn = vx * vlog2e + vmagic_bias;
 
     // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that expf(x) is normalized,
     // i.e. -87.33642 <= x <= 0.0. As n has 6 fractional bits, we split s == 2**(n / 64) = 2**e * 2**(n / 64 - e), where
@@ -208,8 +204,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc4(
 
     // Compute reduced argument t := x - n * log(2) / 64.
     // Use Cody-Waite range reduction method (note the two constants representing log(2) / 64) to improve accuracy.
-    float vt = vn * vminus_ln2_o64_hi + vx;
-    vt = vn * vminus_ln2_o64_lo + vt;
+    float vt = vn * vminus_ln2_hi + vx;
+    vt = vn * vminus_ln2_lo + vt;
 
     // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
     float vp = vt * vc2;

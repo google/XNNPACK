@@ -20,25 +20,22 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x20_acc2(
     const float* input,
     const float* max,
     float* output,
-    float* sum) XNN_OOB_READS
+    float* sum,
+    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
-  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp23f);
-  // The smallest x for which expf(x) is normalized.
-  const v128_t vdenorm_cutoff = wasm_f32x4_const_splat(-0x1.5D589Ep6f);
-  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
-  // Last 7 bits are zeroes
-  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
-  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
-
-  const v128_t vc1 = wasm_f32x4_const_splat(0x1.FFFFF6p-1f);
-  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFDC6p-2f);
-  const v128_t vc3 = wasm_f32x4_const_splat(0x1.555A80p-3f);
-  const v128_t vc4 = wasm_f32x4_const_splat(0x1.573A1Ap-5f);
-  const v128_t vc5 = wasm_f32x4_const_splat(0x1.0F9F9Cp-7f);
-
   const v128_t vi_max = wasm_v128_load32_splat(max);
+  const v128_t vlog2e = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.log2e);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.magic_bias);
+  const v128_t vminus_ln2_hi = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.minus_ln2_hi);
+  const v128_t vminus_ln2_lo = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.minus_ln2_lo);
+  const v128_t vc5 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c5);
+  const v128_t vc4 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c4);
+  const v128_t vc3 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c3);
+  const v128_t vc2 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c2);
+  const v128_t vc1 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c1);
+  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.denorm_cutoff);
 
   v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   v128_t vacc1 = vacc0;

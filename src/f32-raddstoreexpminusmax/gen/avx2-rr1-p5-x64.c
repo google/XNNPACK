@@ -14,30 +14,26 @@
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x64(
     size_t elements,
     const float* input,
     const float* max,
     float* output,
-    float* sum)
+    float* sum,
+    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(elements % sizeof(float) == 0);
 
-  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
-  // The smallest x for which expf(x) is normalized.
-  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep6f);
-  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
-
-  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
-  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
-  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
-
   const __m256 vi_max = _mm256_broadcast_ss(max);
+  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p5.log2e);
+  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p5.magic_bias);
+  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p5.minus_ln2);
+  const __m256 vc5 = _mm256_load_ps(params->avx2_rr1_p5.c5);
+  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_p5.c4);
+  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p5.c3);
+  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p5.c2);
+  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p5.c1);
+  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p5.denorm_cutoff);
 
   __m256 vacc0 = _mm256_setzero_ps();
   for (; elements >= 64 * sizeof(float); elements -= 64 * sizeof(float)) {
@@ -212,7 +208,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x64(
   if (elements != 0) {
     assert(elements >= 1 * sizeof(float));
     assert(elements <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - elements));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p5.mask_table[7] - elements));
 
     const __m256 vi = _mm256_maskload_ps(input, vmask);
 

@@ -20,25 +20,22 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x12_acc3(
     const float* input,
     const float* max,
     float* output,
-    float* sum) XNN_OOB_READS
+    float* sum,
+    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(elements % sizeof(float) == 0);
 
-  const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
-  // The smallest x for which expf(x) is normalized.
-  const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep6f);
-  const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
-  // Last 7 bits are zeroes
-  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
-  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
-
-  const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
-  const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);
-  const __m128 vc3 = _mm_set1_ps(0x1.555A80p-3f);
-  const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
-  const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
-
   const __m128 vi_max = _mm_load1_ps(max);
+  const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_p5.log2e);
+  const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_p5.magic_bias);
+  const __m128 vminus_ln2_hi = _mm_load_ps(params->sse2_rr2_p5.minus_ln2_hi);
+  const __m128 vminus_ln2_lo = _mm_load_ps(params->sse2_rr2_p5.minus_ln2_lo);
+  const __m128 vc5 = _mm_load_ps(params->sse2_rr2_p5.c5);
+  const __m128 vc4 = _mm_load_ps(params->sse2_rr2_p5.c4);
+  const __m128 vc3 = _mm_load_ps(params->sse2_rr2_p5.c3);
+  const __m128 vc2 = _mm_load_ps(params->sse2_rr2_p5.c2);
+  const __m128 vc1 = _mm_load_ps(params->sse2_rr2_p5.c1);
+  const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_p5.denorm_cutoff);
 
   __m128 vacc0 = _mm_setzero_ps();
   __m128 vacc1 = _mm_setzero_ps();

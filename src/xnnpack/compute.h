@@ -997,7 +997,8 @@ struct f32_three_pass_softmax_context {
   xnn_f32_rmax_ukernel_function rmax_ukernel;
   xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax_ukernel;
   xnn_vbinary_ukernel_function vmulc_ukernel;
-  union xnn_f32_minmax_params params;
+  union xnn_f32_minmax_params minmax_params;
+  union xnn_f32_expminus_params expminus_params;
 };
 
 #ifndef __cplusplus

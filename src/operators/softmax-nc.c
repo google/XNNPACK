@@ -288,15 +288,14 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     .y = output,
     .y_stride = softmax_op->output_pixel_stride * sizeof(float),
     .rmax_ukernel = xnn_params.f32.rmax,
-    .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax,
+    .raddstoreexpminusmax_ukernel = xnn_params.f32.raddstoreexpminusmax.ukernel,
     .vmulc_ukernel = xnn_params.f32.vmul.minmax.opc_ukernel,
   };
   if (xnn_params.f32.vmul.linear.opc_ukernel != NULL) {
     softmax_op->context.f32_three_pass_softmax.vmulc_ukernel = xnn_params.f32.vmul.linear.opc_ukernel;
   };
-  if (xnn_params.f32.vmul.init.f32_minmax != NULL) {
-    xnn_params.f32.vmul.init.f32_minmax(&softmax_op->context.f32_three_pass_softmax.params, -INFINITY, INFINITY);
-  }
+  xnn_params.f32.vmul.init.f32_minmax(&softmax_op->context.f32_three_pass_softmax.minmax_params, -INFINITY, INFINITY);
+  xnn_params.f32.raddstoreexpminusmax.init(&softmax_op->context.f32_three_pass_softmax.expminus_params);
   softmax_op->compute.type = xnn_parallelization_type_1d;
   softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_three_pass_softmax;
   softmax_op->compute.range[0] = batch_size;

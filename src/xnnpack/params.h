@@ -421,6 +421,119 @@ union xnn_f32_elu_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f32_expminus_params {
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2_hi;
+    float minus_ln2_lo;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float denorm_cutoff;
+  } scalar_rr2_p5;
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2_hi;
+    float minus_ln2_lo;
+    float c2;
+    float denorm_cutoff;
+  } scalar_rr2_lut64_p2;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2_hi;
+    float minus_ln2_lo;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float denorm_cutoff;
+  } neon_rr2_p5;
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2_hi;
+    float minus_ln2_lo;
+    float c2;
+    float denorm_cutoff;
+  } neon_rr2_lut64_p2;
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float denorm_cutoff;
+  } neonfma_rr1_p5;
+  struct {
+    float log2e;
+    float magic_bias;
+    float minus_ln2;
+    float c2;
+    float denorm_cutoff;
+  } neonfma_rr1_lut64_p2;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) float log2e[4];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) float minus_ln2_hi[4];
+    XNN_ALIGN(16) float minus_ln2_lo[4];
+    XNN_ALIGN(16) float c5[4];
+    XNN_ALIGN(16) float c4[4];
+    XNN_ALIGN(16) float c3[4];
+    XNN_ALIGN(16) float c2[4];
+    XNN_ALIGN(16) float c1[4];
+    XNN_ALIGN(16) float denorm_cutoff[4];
+  } sse2_rr2_p5;
+  struct {
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c5[8];
+    XNN_ALIGN(32) float c4[8];
+    XNN_ALIGN(32) float c3[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float c1[8];
+    XNN_ALIGN(32) float denorm_cutoff[8];
+    int32_t mask_table[14];
+  } avx2_rr1_p5;
+  struct {
+    float log2e;
+    float minus_ln2;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float c1;
+    float c0;
+  } avx512_rr1_p5;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float log2e[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) float minus_ln2_hi[2];
+    XNN_ALIGN(8) float minus_ln2_lo[2];
+    XNN_ALIGN(8) float c5[2];
+    XNN_ALIGN(8) float c4[2];
+    XNN_ALIGN(8) float c3[2];
+    XNN_ALIGN(8) float c2[2];
+    XNN_ALIGN(8) float c1[2];
+    XNN_ALIGN(8) float denorm_cutoff[2];
+  } wasmsimd_rr2_p5;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
 union xnn_f32_lrelu_params {
   struct {
     float slope;
@@ -3071,7 +3184,8 @@ typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_function)(
     const float* input,
     const float* max,
     float* output,
-    float* sum);
+    float* sum,
+    const union xnn_f32_expminus_params* params);
 
 typedef void (*xnn_f32_vscaleexpminusmax_ukernel_function)(
     size_t n,
@@ -3208,6 +3322,9 @@ typedef void (*xnn_init_f32_abs_params_fn)(
 
 typedef void (*xnn_init_f32_default_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f32_expminus_params_fn)(
+  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_elu_params_fn)(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
@@ -3522,6 +3639,14 @@ struct prelu_parameters {
   uint16_t channel_tile;
 };
 
+struct raddstoreexpminusmax_parameters {
+  xnn_f32_raddstoreexpminusmax_ukernel_function ukernel;
+  xnn_init_f32_expminus_params_fn init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  uint8_t element_tile;
+};
+
 struct fill_parameters {
   xnn_fill_ukernel_function ukernel;
   // Number of rows of inputs processed in one tile.
@@ -3668,7 +3793,7 @@ struct xnn_parameters {
     struct vbinary_parameters vsub;
     struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
-    xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax;
+    struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_f32_rmax_ukernel_function rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
