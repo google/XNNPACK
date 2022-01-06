@@ -158,18 +158,25 @@ def main(input_file):
   # Name of the microkernel function.
   fn_name = ''
   sc = ';'
+  # Whether we are in the auto-generated comment.
+  in_autogen = False
 
   with open(input_file, 'r', encoding='utf-8') as f:
     for line in f:
 
       # Handle all lines before the microkernel instructions begin.
       if not in_function:
-        if 'BEGIN_FUNCTION' in line:
+        if 'Auto-generated file' in line:
+          in_autogen = True
+          continue
+        elif 'BEGIN_FUNCTION' in line:
           in_function = True
           fn_name = line.split()[1]
+          prologue.append(f'// Converted from: {input_file}')
           prologue.append('void Generator::generate() {')
           continue
         elif 'Copyright ' in line:
+          in_autogen = False
           # replace year
           prologue.append(
               re.sub('\d{4}', str(datetime.date.today().year), line,
@@ -178,7 +185,9 @@ def main(input_file):
         elif '#include <xnnpack/assembly.h>' in line:
           prologue.append('#include <xnnpack/aarch32-assembler.h>')
           prologue.append('#include <xnnpack/allocator.h>')
-          if 'gemm' in input_file:
+          if 'igemm' in input_file:
+            prologue.append('#include <xnnpack/igemm.h>')
+          elif 'gemm' in input_file:
             prologue.append('#include <xnnpack/gemm.h>')
           prologue.append('')
           prologue.append('namespace xnnpack {')
@@ -191,6 +200,8 @@ def main(input_file):
           prologue.append('};')
           continue
         elif any(re.match(p, line) for p in IGNORE_LINES):
+          continue
+        elif in_autogen:
           continue
         else:
           prologue.append(line.rstrip())

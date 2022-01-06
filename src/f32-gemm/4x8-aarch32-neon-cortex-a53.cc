@@ -17,19 +17,21 @@ class Generator : public Assembler {
 };
 
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55(
+// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5
+//     size_t kc,                            r2 -> r5 -> sp + 0
 //     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 96 -> (r7)
-//     const void*restrict w,    sp + 100 -> r9
-//     uint8_t*restrict c,       sp + 104 -> r11
-//     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> (r0)
-//     minmax_params*params,     sp + 116 -> (r5)
+//     size_t a_stride,          sp + 100 -> (r7)
+//     const void*restrict w,    sp + 104 -> r9
+//     uint8_t*restrict c,       sp + 108 -> r11
+//     size_t cm_stride,         sp + 112 -> (r6)
+//     size_t cn_stride,         sp + 116 -> (r0)
+//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 120 -> (r5)
+
 
 // inner loop registers
+// r0, r2   scratch temporaries for loads
 // r14 (lr) unused
 
 // A0   r3  d0
@@ -47,18 +49,19 @@ class Generator : public Assembler {
 
 // Clamp (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S
+// Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
 void Generator::generate() {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
 
-  // Push 96 bytes
+  // Push 100 bytes
+  // r2 will be reloaded in outer loop
   vpush({d8-d15}); // 64
-  push({r4, r5, r6, r7, r8, r9, r10, r11}); // +32 = 96
+  push({r2, r4, r5, r6, r7, r8, r9, r10, r11}); // +36 = 100
 
-  ldr(r7, mem[sp, 96]); // a_stride
-  ldr(r11, mem[sp, 104]); // c
-  ldr(r6, mem[sp, 108]); // cm_stride
-  ldr(r9, mem[sp, 100]); // w
+  ldr(r7, mem[sp, 100]); // a_stride
+  ldr(r11, mem[sp, 108]); // c
+  ldr(r6, mem[sp, 112]); // cm_stride
+  ldr(r9, mem[sp, 104]); // w
 
   // Clamp A and C pointers
   cmp(r0, 2); // if mr >= 2
@@ -113,8 +116,10 @@ void Generator::generate() {
   vld1_32({d3}, mem[r7]++); // A3
   subs(r5, r5, 16);
   vldm(r9, {d8-d11}, false); // B0
-  vldr(d15, mem[r9, 56]); // B1CK 0
+  ldr(r0, mem[r9, 56]); // B1 low   VMOV is in BLOCK 0
+  ldr(r2, mem[r9, 60]); // B1 high
   vldr(d13, mem[r9, 40]); // B1
+
   blo(l2); // less than 4 channels?  skip main loop
 
   // Main loop - 4 floats of A (16 bytes)
@@ -123,151 +128,210 @@ void Generator::generate() {
   bind(l1);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
-  vmla_f32(q8, q4, d0[0]);
   vld1_32({d4}, mem[r3]++); // A0
+  vmov(d15, r0, r2); // b1 VMOV b from second group
+  vmla_f32(q8, q4, d0[0]);
+  ldr(r0, mem[r12]); // A1 low
   vmla_f32(q10, q4, d1[0]);
-  vld1_32({d5}, mem[r12]++); // A1
+  ldr(r2, mem[r12, 4]); // A1 high
   vmla_f32(q12, q4, d2[0]);
+  pld(mem[r3, 128]); // Prefetch A0
 
   // BLOCK 1
-  vmla_f32(q14, q4, d3[0]);
   vldr(d12, mem[r9, 32]); // B1
+  vmov(d5, r0, r2); // a1 VMOV
+  vmla_f32(q14, q4, d3[0]);
+  ldr(r0, mem[r9, 72]); // B0 low
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
+  ldr(r2, mem[r9, 76]); // B0 high
   vmla_f32(q11, q5, d1[0]);
+  pld(mem[r12, 128]); // Prefetch A1
 
   // BLOCK 2
-  vmla_f32(q13, q5, d2[0]);
   vld1_32({d6}, mem[r10]++); // A2
+  vmov(d9, r0, r2); // b0 VMOV
+  vmla_f32(q13, q5, d2[0]);
+  ldr(r0, mem[r7]); // A3 low
   vmla_f32(q15, q5, d3[0]);
-  vld1_32({d7}, mem[r7]++); // A3
+  ldr(r2, mem[r7, 4]); // A3 high
   vmla_f32(q8, q6, d0[1]);
+  pld(mem[r10, 128]); // Prefetch A2
 
   // BLOCK 3
-  vmla_f32(q10, q6, d1[1]);
   vldr(d14, mem[r9, 48]); // B1
+  vmov(d7, r0, r2); // a3 VMOV
+  vmla_f32(q10, q6, d1[1]);
+  ldr(r0, mem[r9, 88]); // B0 low
   vmla_f32(q12, q6, d2[1]);
-  vldr(d11, mem[r9, 88]); // B0
+  ldr(r2, mem[r9, 92]); // B0 high
   vmla_f32(q14, q6, d3[1]);
+  pld(mem[r7, 128]); // Prefetch A3
 
   // BLOCK 4
-  vmla_f32(q9, q7, d0[1]);
   vldr(d8, mem[r9, 64]); // B0
+  vmov(d11, r0, r2); // B0 VMOV
+  vmla_f32(q9, q7, d0[1]);
+  ldr(r0, mem[r9, 104]); // B1 low   VMOV is in BLOCK 0
   vmla_f32(q11, q7, d1[1]);
-  vldr(d13, mem[r9, 104]); // B1
+  ldr(r2, mem[r9, 108]); // B1 high
   vmla_f32(q13, q7, d2[1]);
-  vldr(d10, mem[r9, 80]); // B0
+  pld(mem[r9, 384]); // Prefetch B
 
   // BLOCK 5
+  vldr(d10, mem[r9, 80]); // B0
+  vmov(d13, r0, r2); // b1 VMOV b from second group
   vmla_f32(q15, q7, d3[1]);
-  vldr(d15, mem[r9, 120]); // B1
+  ldr(r0, mem[r9, 120]); // B1 low   VMOV is in BLOCK 0
+  nop();
+  ldr(r2, mem[r9, 124]); // B1 high
+  nop();
+  pld(mem[r9, 448]); // Prefetch B
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
-  vmla_f32(q8, q4, d4[0]);
   vld1_32({d0}, mem[r3]++); // A0
+  vmov(d15, r0, r2); // b1 VMOV b from second group
+  vmla_f32(q8, q4, d4[0]);
+  ldr(r0, mem[r12, 8]); // A1 low
   vmla_f32(q10, q4, d5[0]);
-  vld1_32({d1}, mem[r12]++); // A1
+  ldr(r2, mem[r12, 12]); // A1 high
   vmla_f32(q12, q4, d6[0]);
+  // NOP
 
   // BLOCK 1
-  vmla_f32(q14, q4, d7[0]);
   vldr(d12, mem[r9, 96]); // B1
+  vmov(d1, r0, r2); // a1 VMOV
+  vmla_f32(q14, q4, d7[0]);
+  ldr(r0, mem[r9, 136]); // B0 low
   vmla_f32(q9, q5, d4[0]);
-  vldr(d9, mem[r9, 136]); // B0
+  ldr(r2, mem[r9, 140]); // B0 high
   vmla_f32(q11, q5, d5[0]);
+  // NOP
 
   // BLOCK 2
-  vmla_f32(q13, q5, d6[0]);
   vld1_32({d2}, mem[r10]++); // A2
+  vmov(d9, r0, r2); // b0 VMOV
+  vmla_f32(q13, q5, d6[0]);
+  ldr(r0, mem[r7, 8]); // A3 low
   vmla_f32(q15, q5, d7[0]);
-  vld1_32({d3}, mem[r7]++); // A3
+  ldr(r2, mem[r7, 12]); // A3 high
   vmla_f32(q8, q6, d4[1]);
+  // NOP
 
   // BLOCK 3
-  vmla_f32(q10, q6, d5[1]);
   vldr(d14, mem[r9, 112]); // B1
+  vmov(d3, r0, r2); // a3 VMOV
+  vmla_f32(q10, q6, d5[1]);
+  ldr(r0, mem[r9, 152]); // B0 low
   vmla_f32(q12, q6, d6[1]);
-  vldr(d11, mem[r9, 152]); // B0
+  ldr(r2, mem[r9, 156]); // B0 high
   vmla_f32(q14, q6, d7[1]);
-  subs(r5, r5, 16);
+  add(r12, r12, 16); // A1++
 
   // BLOCK 4
-  vmla_f32(q9, q7, d4[1]);
   vldr(d8, mem[r9, 128]); // B0
+  vmov(d11, r0, r2); // B0 VMOV
+  vmla_f32(q9, q7, d4[1]);
+  ldr(r0, mem[r9, 168]); // B1 low
   vmla_f32(q11, q7, d5[1]);
-  vldr(d13, mem[r9, 168]); // B1
+  ldr(r2, mem[r9, 172]); // B1 high
   vmla_f32(q13, q7, d6[1]);
-  vldr(d10, mem[r9, 144]); // B0
+  add(r7, r7, 16); // A3++
 
   // BLOCK 5
+  vldr(d10, mem[r9, 144]); // B0
+  vmov(d13, r0, r2); // b1 VMOV b
   vmla_f32(q15, q7, d7[1]);
-  vldr(d15, mem[r9, 184]); // B1
+  ldr(r0, mem[r9, 184]); // B1 low   VMOV is in BLOCK 0
+  subs(r5, r5, 16);
+  ldr(r2, mem[r9, 188]); // B1 high
   add(r9, r9, 128); // B++
   bhs(l1);
-
 
   // Epilogue - 4 floats of A (16 bytes)
   bind(l2);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
-  vmla_f32(q8, q4, d0[0]);
   vld1_32({d4}, mem[r3]++); // A0
+  vmov(d15, r0, r2); // b1 VMOV b from second group
+  vmla_f32(q8, q4, d0[0]);
+  ldr(r0, mem[r12]); // A1 low
   vmla_f32(q10, q4, d1[0]);
-  vld1_32({d5}, mem[r12]++); // A1
+  ldr(r2, mem[r12, 4]); // A1 high
   vmla_f32(q12, q4, d2[0]);
+  // NOP
 
   // BLOCK 1
-  vmla_f32(q14, q4, d3[0]);
   vldr(d12, mem[r9, 32]); // B1
+  vmov(d5, r0, r2); // a1 VMOV
+  vmla_f32(q14, q4, d3[0]);
+  ldr(r0, mem[r9, 72]); // B0 low
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
+  ldr(r2, mem[r9, 76]); // B0 high
   vmla_f32(q11, q5, d1[0]);
+  // NOP
 
   // BLOCK 2
-  vmla_f32(q13, q5, d2[0]);
   vld1_32({d6}, mem[r10]++); // A2
+  vmov(d9, r0, r2); // b0 VMOV
+  vmla_f32(q13, q5, d2[0]);
+  ldr(r0, mem[r7]); // A3 low
   vmla_f32(q15, q5, d3[0]);
-  vld1_32({d7}, mem[r7]++); // A3
+  ldr(r2, mem[r7, 4]); // A3 high
   vmla_f32(q8, q6, d0[1]);
+  // NOP
 
   // BLOCK 3
-  vmla_f32(q10, q6, d1[1]);
   vldr(d14, mem[r9, 48]); // B1
+  vmov(d7, r0, r2); // a3 VMOV
+  vmla_f32(q10, q6, d1[1]);
+  ldr(r0, mem[r9, 88]); // B0 low
   vmla_f32(q12, q6, d2[1]);
-  vldr(d11, mem[r9, 88]); // B0
+  ldr(r2, mem[r9, 92]); // B0 high
   vmla_f32(q14, q6, d3[1]);
+  // NOP
 
   // BLOCK 4
-  vmla_f32(q9, q7, d0[1]);
   vldr(d8, mem[r9, 64]); // B0
+  vmov(d11, r0, r2); // B0 VMOV
+  vmla_f32(q9, q7, d0[1]);
+  ldr(r0, mem[r9, 104]); // B1 low
   vmla_f32(q11, q7, d1[1]);
-  vldr(d13, mem[r9, 104]); // B1
+  ldr(r2, mem[r9, 108]); // B1 high
   vmla_f32(q13, q7, d2[1]);
-  vldr(d10, mem[r9, 80]); // B0
+  // NOP
 
   // BLOCK 5
+  vldr(d10, mem[r9, 80]); // B0
+  vmov(d13, r0, r2); // b1 VMOV b
   vmla_f32(q15, q7, d3[1]);
-  vldr(d15, mem[r9, 120]); // B1
+  ldr(r0, mem[r9, 120]); // B1 low   VMOV is in BLOCK 0
+  nop();
+  ldr(r2, mem[r9, 124]); // B1 high
+  nop();
+  nop();
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
-  vmla_f32(q8, q4, d4[0]);
   vldr(d12, mem[r9, 96]); // B1
+  vmov(d15, r0, r2); // b1 VMOV b from second group
+  vmla_f32(q8, q4, d4[0]);
   vmla_f32(q10, q4, d5[0]);
   vmla_f32(q12, q4, d6[0]);
 
   // BLOCK 1
-  vmla_f32(q14, q4, d7[0]);
   vldr(d14, mem[r9, 112]); // B1
+  vmla_f32(q14, q4, d7[0]);
   vmla_f32(q9, q5, d4[0]);
   vmla_f32(q11, q5, d5[0]);
+  add(r12, r12, 8); // A1++
 
   // BLOCK 2
+  add(r7, r7, 8); // A3++ VLDR B1 land_s here
+  add(r9, r9, 128); // B++
   vmla_f32(q13, q5, d6[0]);
   vmla_f32(q15, q5, d7[0]);
   vmla_f32(q8, q6, d4[1]);
-  add(r9, r9, 128); // B++
 
   // BLOCK 3
   vmla_f32(q10, q6, d5[1]);
@@ -289,8 +353,9 @@ void Generator::generate() {
   align(8);
   bind(l3);
   // Load params pointer
-  ldr(r0, mem[sp, 112]); // cn_stride
-  ldr(r5, mem[sp, 116]); // params
+  ldr(r0, mem[sp, 116]); // cn_stride
+  ldr(r5, mem[sp, 120]); // params
+  ldr(r2, mem[sp]); // kc
   subs(r1, r1, 8);
 
   // Load min/max values
@@ -327,6 +392,7 @@ void Generator::generate() {
   sub(r3, r3, r2);
   bhi(l0);
 
+  add(sp, sp, 4);
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
   bx(lr);
@@ -417,6 +483,7 @@ void Generator::generate() {
   vst1_32({d28[0]}, mem[r6]);
 
   bind(l9);
+  add(sp, sp, 4);
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
   bx(lr);
@@ -427,7 +494,7 @@ void Generator::generate() {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   g.generate();

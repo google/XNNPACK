@@ -5,7 +5,7 @@
 
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/gemm.h>
+#include <xnnpack/igemm.h>
 
 namespace xnnpack {
 namespace aarch32 {
@@ -17,20 +17,21 @@ class Generator : public Assembler {
 };
 
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55(
+// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
-//     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 96 -> (r7)
-//     const void*restrict w,    sp + 100 -> r9
-//     uint8_t*restrict c,       sp + 104 -> r11
-//     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> (r0)
-//     minmax_params*params,     sp + 116 -> (r5)
+//     size_t ks,                            r3 -> sp + 64 -> r14
+//     const float**restrict a,  sp + 104 -> (r5)
+//     const void*restrict w,    sp + 108 -> r9
+//     uint8_t*restrict c,       sp + 112 -> r11
+//     size_t cm_stride,         sp + 116 -> (r6)
+//     size_t cn_stride,         sp + 120 -> (r0)
+//     size_t a_offset,          sp + 124 -> (r5)
+//     const float* zero,        sp + 128 -> (r0)
+//     minmax_params*params,     sp + 132 -> (r5)
 
 // inner loop registers
-// r14 (lr) unused
 
 // A0   r3  d0
 // A1  r12  d1
@@ -47,54 +48,40 @@ class Generator : public Assembler {
 
 // Clamp (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S
+// Converted from: src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a55.S
 void Generator::generate() {
-  Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
+  Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
 
-  // Push 96 bytes
-  vpush({d8-d15}); // 64
-  push({r4, r5, r6, r7, r8, r9, r10, r11}); // +32 = 96
+  // Push 104 bytes
+  push({r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}); // +40
+  vpush({d8-d15}); // +64 = 104
 
-  ldr(r7, mem[sp, 96]); // a_stride
-  ldr(r11, mem[sp, 104]); // c
-  ldr(r6, mem[sp, 108]); // cm_stride
-  ldr(r9, mem[sp, 100]); // w
+  ldr(r11, mem[sp, 112]); // c
+  ldr(r6, mem[sp, 116]); // cm_stride
+  ldr(r5, mem[sp, 104]); // a
+  ldr(r9, mem[sp, 108]); // w
+  mov(r14, r3); // p = ks
 
-  // Clamp A and C pointers
+  // Clamp C pointers
   cmp(r0, 2); // if mr >= 2
-  add(r12, r3, r7); //   a1 = a0 + a_stride
   add(r4, r11, r6); //   c1 = c0 + cm_stride
-  movlo(r12, r3); // a1
   movlo(r4, r11); // c1
   // if mr > 2
-  add(r10, r12, r7); //   a2 = a1 + a_stride
   add(r8, r4, r6); //   c2 = c1 + cm_stride
-  movls(r10, r12); // a2
   movls(r8, r4); // c2
-
   cmp(r0, 4); // if mr >=4
-  add(r7, r10, r7); //   a3 = a2 + a_stride
   add(r6, r8, r6); //   c3 = c2 + cm_stride
-  movlo(r7, r10); // a3
   movlo(r6, r8); // c3
+
 
   align(8);
   bind(l0);
   // Load initial bias from w into accumulators
   vldm(r9, {d16-d19}, true); // Bias
 
-  subs(r5, r2, 16); // kc - 16
-  pld(mem[r3, 0]); // Prefetch A
-  pld(mem[r3, 64]);
   vmov(q10, q8);
-  pld(mem[r12, 0]);
-  pld(mem[r12, 64]);
   vmov(q11, q9);
-  pld(mem[r10, 0]);
-  pld(mem[r10, 64]);
   vmov(q12, q8);
-  pld(mem[r7, 0]);
-  pld(mem[r7, 64]);
   vmov(q13, q9);
   pld(mem[r9, 0]); // Prefetch B
   pld(mem[r9, 64]);
@@ -104,7 +91,42 @@ void Generator::generate() {
   vmov(q15, q9);
   pld(mem[r9, 256]);
   pld(mem[r9, 320]);
-  blo(l4); // less than 4 channels?
+
+  bind(l1);
+  // Load next 4 A pointers
+  ldr(r3, mem[r5, 0]);
+  ldr(r12, mem[r5, 4]);
+  ldr(r10, mem[r5, 8]);
+  ldr(r7, mem[r5, 12]);
+  add(r5, r5, 16);
+  pld(mem[r3, 0]); // Prefetch A
+  str(r5, mem[sp, 104]); // a
+  pld(mem[r3, 64]);
+  ldr(r0, mem[sp, 128]); // zero
+  pld(mem[r12, 0]);
+  ldr(r5, mem[sp, 124]); // a_offset
+  pld(mem[r12, 64]);
+  pld(mem[r10, 0]);
+  pld(mem[r10, 64]);
+  pld(mem[r7, 0]);
+  pld(mem[r7, 64]);
+
+  // Add a_offset
+  cmp(r3, r0); // if a0 == zero
+  add(r3, r3, r5); // a0 += a_offset
+  moveq(r3, r0); //   a0 = zero, else += a0 + a_offset
+  cmp(r12, r0); // if a1 == zero
+  add(r12, r12, r5); // a1 += a_offset
+  moveq(r12, r0); //   a1 = zero, else += a1 + a_offset
+  cmp(r10, r0); // if a2 == zero
+  add(r10, r10, r5); // a2 += a_offset
+  moveq(r10, r0); //   a2 = zero, else += a2 + a_offset
+  cmp(r7, r0); // if a3 == zero
+  add(r7, r7, r5); // a3 += a_offset
+  moveq(r7, r0); //   a3 = zero, else += a3 + a_offset
+
+  subs(r5, r2, 16); // kc - 16
+  blo(l5); // less than 4 channels?
 
   // Prologue
   vld1_32({d0}, mem[r3]++); // A0
@@ -115,12 +137,13 @@ void Generator::generate() {
   vldm(r9, {d8-d11}, false); // B0
   vldr(d15, mem[r9, 56]); // B1CK 0
   vldr(d13, mem[r9, 40]); // B1
-  blo(l2); // less than 4 channels?  skip main loop
+
+  blo(l3); // less than 4 channels?  skip main loop
 
   // Main loop - 4 floats of A (16 bytes)
   // 32 FMA + 8 LD64 A + 8 LDR B
   align(8);
-  bind(l1);
+  bind(l2);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
   vmla_f32(q8, q4, d0[0]);
@@ -183,6 +206,7 @@ void Generator::generate() {
   vmla_f32(q15, q5, d7[0]);
   vld1_32({d3}, mem[r7]++); // A3
   vmla_f32(q8, q6, d4[1]);
+  subs(r5, r5, 16);
 
   // BLOCK 3
   vmla_f32(q10, q6, d5[1]);
@@ -190,7 +214,6 @@ void Generator::generate() {
   vmla_f32(q12, q6, d6[1]);
   vldr(d11, mem[r9, 152]); // B0
   vmla_f32(q14, q6, d7[1]);
-  subs(r5, r5, 16);
 
   // BLOCK 4
   vmla_f32(q9, q7, d4[1]);
@@ -204,11 +227,10 @@ void Generator::generate() {
   vmla_f32(q15, q7, d7[1]);
   vldr(d15, mem[r9, 184]); // B1
   add(r9, r9, 128); // B++
-  bhs(l1);
-
+  bhs(l2);
 
   // Epilogue - 4 floats of A (16 bytes)
-  bind(l2);
+  bind(l3);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
   vmla_f32(q8, q4, d0[0]);
@@ -284,18 +306,24 @@ void Generator::generate() {
   vmla_f32(q15, q7, d7[1]);
 
   // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
-  bne(l4);
+  bne(l5);
 
   align(8);
-  bind(l3);
-  // Load params pointer
-  ldr(r0, mem[sp, 112]); // cn_stride
-  ldr(r5, mem[sp, 116]); // params
-  subs(r1, r1, 8);
+  bind(l4);
+  ldr(r5, mem[sp, 104]); // a
+  subs(r14, r14, 16); // ks -= MR * sizeof(void*)
 
+  // ks loop
+  bhi(l1);
+
+  // Load params pointer
+  ldr(r0, mem[sp, 132]); // params
+  ldr(r14, mem[sp, 64]); // p = ks
   // Load min/max values
-  vld1r_32({d4,d5}, mem[r5]++);
-  vld1r_32({d6,d7}, mem[r5]);
+  vld1r_32({d4,d5}, mem[r0]++);
+  vld1r_32({d6,d7}, mem[r0]);
+  subs(r1, r1, 8);
+  ldr(r0, mem[sp, 120]); // cn_stride
 
   // Clamp
   vmax_f32(q8, q8, q2);
@@ -316,26 +344,25 @@ void Generator::generate() {
   vmin_f32(q15, q15, q3);
 
   // Store full 4 x 8
-  blo(l6);
-  vst1_32({d16-d19}, mem[r11], r0);
-  sub(r7, r7, r2);
-  vst1_32({d20-d23}, mem[r4], r0);
-  sub(r10, r10, r2);
-  vst1_32({d24-d27}, mem[r8], r0);
-  sub(r12, r12, r2);
+  blo(l7);
   vst1_32({d28-d31}, mem[r6], r0);
-  sub(r3, r3, r2);
+  vst1_32({d24-d27}, mem[r8], r0);
+  vst1_32({d20-d23}, mem[r4], r0);
+  vst1_32({d16-d19}, mem[r11], r0);
+
+  sub(r5, r5, r14); // a -= ks
+
   bhi(l0);
 
-  pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
-  bx(lr);
+  add(sp, sp, 4); // skip r3
+  pop({r4, r5, r6, r7, r8, r9, r10, r11, pc});
 
   align(8);
-  bind(l4);
+  bind(l5);
   // Is there a remainder?- 2 floats of A (8 bytes)
   tst(r5, 8);
-  beq(l5);
+  beq(l6);
 
   // Remainder - 2 floats of A (8 bytes)
   vld1_32({d0}, mem[r3]++); // A0
@@ -364,9 +391,9 @@ void Generator::generate() {
 
   // Is there a remainder?- 1 floats of A (4 bytes)
   tst(r5, 4);
-  beq(l3);
+  beq(l4);
 
-  bind(l5);
+  bind(l6);
   // Remainder- 1 floats of A (4 bytes)
   vldm(r3, {s0}, true); // A0
   vldm(r9, {d8-d11}, true); // B0
@@ -381,45 +408,45 @@ void Generator::generate() {
   vmla_f32(q13, q5, d2[0]);
   vmla_f32(q14, q4, d3[0]);
   vmla_f32(q15, q5, d3[0]);
-  b(l3);
+  b(l4);
 
   // Store odd width
-  bind(l6);
-  tst(r1, 4);
-  beq(l7);
-  vst1_32({d16-d17}, mem[r11]++);
-  vst1_32({d20-d21}, mem[r4]++);
-  vmov(q8, q9);
-  vmov(q10, q11);
-  vst1_32({d24-d25}, mem[r8]++);
-  vst1_32({d28-d29}, mem[r6]++);
-  vmov(q12, q13);
-  vmov(q14, q15);
-
   bind(l7);
-  tst(r1, 2);
+  tst(r1, 4);
   beq(l8);
-  vst1_32({d16}, mem[r11]++);
-  vst1_32({d20}, mem[r4]++);
-  vmov(d16, d17);
-  vmov(d20, d21);
-  vst1_32({d24}, mem[r8]++);
-  vst1_32({d28}, mem[r6]++);
-  vmov(d24, d25);
-  vmov(d28, d29);
+  vst1_32({d28-d29}, mem[r6]++);
+  vst1_32({d24-d25}, mem[r8]++);
+  vmov(q14, q15);
+  vmov(q12, q13);
+  vst1_32({d20-d21}, mem[r4]++);
+  vst1_32({d16-d17}, mem[r11]++);
+  vmov(q10, q11);
+  vmov(q8, q9);
 
   bind(l8);
-  tst(r1, 1);
+  tst(r1, 2);
   beq(l9);
-  vst1_32({d16[0]}, mem[r11]);
-  vst1_32({d20[0]}, mem[r4]);
-  vst1_32({d24[0]}, mem[r8]);
-  vst1_32({d28[0]}, mem[r6]);
+  vst1_32({d28}, mem[r6]++);
+  vst1_32({d24}, mem[r8]++);
+  vmov(d28, d29);
+  vmov(d24, d25);
+  vst1_32({d20}, mem[r4]++);
+  vst1_32({d16}, mem[r11]++);
+  vmov(d20, d21);
+  vmov(d16, d17);
 
   bind(l9);
-  pop({r4, r5, r6, r7, r8, r9, r10, r11});
+  tst(r1, 1);
+  beq(l10);
+  vst1_32({d28[0]}, mem[r6]++);
+  vst1_32({d24[0]}, mem[r8]++);
+  vst1_32({d20[0]}, mem[r4]++);
+  vst1_32({d16[0]}, mem[r11]++);
+
+  bind(l10);
   vpop({d8-d15});
-  bx(lr);
+  add(sp, sp, 4); // skip r3
+  pop({r4, r5, r6, r7, r8, r9, r10, r11, pc});
 
 
 }
@@ -427,7 +454,7 @@ void Generator::generate() {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code) {
+xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   g.generate();

@@ -254,6 +254,22 @@ SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
   src/jit/memory.c)
 
+SET(JIT_AARCH32_SRCS
+  src/f32-gemm/4x8-aarch32-neon-cortex-a53.cc
+  src/f32-gemm/4x8-aarch32-neon-cortex-a55.cc
+  src/f32-gemm/4x8-aarch32-neon-cortex-a7.cc
+  src/f32-gemm/4x8-aarch32-neon-cortex-a75.cc
+  src/f32-gemm/4x8-aarch32-neon-ld64.cc
+  src/f32-igemm/4x8-aarch32-neon-cortex-a53.cc
+  src/f32-igemm/4x8-aarch32-neon-cortex-a55.cc
+  src/f32-igemm/4x8-aarch32-neon-cortex-a7.cc
+  src/f32-igemm/4x8-aarch32-neon-cortex-a75.cc
+  src/f32-igemm/4x8-aarch32-neon-ld64.cc
+  src/qs8-gemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
+  src/qs8-gemm/4x8c4-rndnu-aarch32-neondot-ld64.cc
+  src/qs8-igemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
+  src/qs8-igemm/4x8c4-rndnu-aarch32-neondot-ld64.cc)
+
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/params-init.c
   src/u8-lut32norm/scalar.c
@@ -5756,7 +5772,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${AARCH32_ASM_MICROKERNEL_SRCS})
     LIST(APPEND ALL_MICROKERNEL_SRCS ${AARCH32_ASM_MICROKERNEL_SRCS})
   ENDIF()
-  LIST(APPEND JIT_SRCS "src/f32-gemm/4x8-aarch32-neon-cortex-a55.cc")
+  LIST(APPEND JIT_SRCS ${JIT_AARCH32_SRCS})
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(aarch64|arm64)$" OR IOS_ARCH MATCHES "^arm64.*")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEON_MICROKERNEL_SRCS})
@@ -6896,7 +6912,7 @@ IF(XNNPACK_BUILD_TESTS)
     # Work-around for "too many sections" error
     TARGET_COMPILE_OPTIONS(f32-igemm-minmax-test PRIVATE "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:-Wa,-mbig-obj>")
   ENDIF()
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit)
   ADD_TEST(f32-igemm-minmax-test f32-igemm-minmax-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -7535,7 +7551,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit)
   ADD_TEST(qs8-gemm-minmax-rndnu-test qs8-gemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -7553,7 +7569,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit)
   ADD_TEST(qs8-igemm-minmax-rndnu-test qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)

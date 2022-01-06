@@ -11,8 +11,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/params.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/params.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -1338,6 +1339,16 @@ DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_2x4_
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf)
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
 
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(struct xnn_code_buffer* code);
+
+enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64(struct xnn_code_buffer* code);
+enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code);
 
 #ifdef __cplusplus
 }  // extern "C"
