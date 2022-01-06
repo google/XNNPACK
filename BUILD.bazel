@@ -7024,14 +7024,16 @@ JIT_AARCH32_SRCS = [
     "src/f32-gemm/4x8-aarch32-neon-cortex-a53.cc",
     "src/f32-gemm/4x8-aarch32-neon-cortex-a55.cc",
     "src/f32-gemm/4x8-aarch32-neon-cortex-a7.cc",
-    "src/f32-gemm/4x8-aarch32-neon-ld64.cc",
     "src/f32-gemm/4x8-aarch32-neon-cortex-a75.cc",
+    "src/f32-gemm/4x8-aarch32-neon-ld64.cc",
     "src/f32-igemm/4x8-aarch32-neon-cortex-a53.cc",
     "src/f32-igemm/4x8-aarch32-neon-cortex-a55.cc",
     "src/f32-igemm/4x8-aarch32-neon-cortex-a7.cc",
-    "src/f32-igemm/4x8-aarch32-neon-ld64.cc",
     "src/f32-igemm/4x8-aarch32-neon-cortex-a75.cc",
+    "src/f32-igemm/4x8-aarch32-neon-ld64.cc",
+    "src/qc8-gemm/4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
     "src/qc8-gemm/4x8c4-fp32-aarch32-neondot-ld64.cc",
+    "src/qc8-igemm/4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
     "src/qc8-igemm/4x8c4-fp32-aarch32-neondot-ld64.cc",
     "src/qs8-gemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc",
     "src/qs8-gemm/4x8c4-rndnu-aarch32-neondot-ld64.cc",
@@ -11313,7 +11315,10 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":jit",
+    ],
 )
 
 xnnpack_unit_test(
@@ -11325,7 +11330,10 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":jit",
+    ],
 )
 
 xnnpack_unit_test(

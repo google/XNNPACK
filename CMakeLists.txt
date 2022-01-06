@@ -265,7 +265,9 @@ SET(JIT_AARCH32_SRCS
   src/f32-igemm/4x8-aarch32-neon-cortex-a7.cc
   src/f32-igemm/4x8-aarch32-neon-cortex-a75.cc
   src/f32-igemm/4x8-aarch32-neon-ld64.cc
+  src/qc8-gemm/4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
   src/qc8-gemm/4x8c4-fp32-aarch32-neondot-ld64.cc
+  src/qc8-igemm/4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
   src/qc8-igemm/4x8c4-fp32-aarch32-neondot-ld64.cc
   src/qs8-gemm/4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
   src/qs8-gemm/4x8c4-rndnu-aarch32-neondot-ld64.cc
@@ -7488,7 +7490,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qc8-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit)
   ADD_TEST(qc8-gemm-minmax-fp32-test qc8-gemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -7497,7 +7499,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qc8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit)
   ADD_TEST(qc8-igemm-minmax-fp32-test qc8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
