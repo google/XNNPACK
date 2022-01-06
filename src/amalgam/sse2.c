@@ -1516,7 +1516,7 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x32(
   }
 }
 
-void xnn_f32_raddstoreexpminusmax_ukernel__sse2_p5_x20_acc2(
+void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2(
     size_t elements,
     const float* input,
     const float* max,

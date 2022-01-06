@@ -16,7 +16,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t elements,
     const float* input,
     const float* max,

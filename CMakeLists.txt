@@ -311,7 +311,7 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f32-prelu/gen/scalar-2x4.c
   src/f32-qs8-vcvt/gen/vcvt-scalar-imagic-x4.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-imagic-x4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x4-acc2.c
   src/f32-rmax/scalar.c
   src/f32-spmm/gen/8x1-minmax-scalar.c
   src/f32-spmm/gen/8x2-minmax-scalar.c
@@ -453,7 +453,7 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/f32-prelu/gen/scalar-2x4.c
   src/f32-qs8-vcvt/gen/vcvt-scalar-lrintf-x4.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x4-acc2.c
   src/f32-rmax/scalar.c
   src/f32-spmm/gen/8x1-minmax-scalar.c
   src/f32-spmm/gen/8x2-minmax-scalar.c
@@ -705,18 +705,18 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x2.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x3.c
   src/f32-qu8-vcvt/gen/vcvt-scalar-lrintf-x4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x1.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2-acc2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x4-acc2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x4-acc4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-lut64-p2-x4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x1.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x2-acc2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc2.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x4-acc4.c
-  src/f32-raddstoreexpminusmax/gen/scalar-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x1.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x2-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x4-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x4-acc4.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-lut64-p2-x4.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x1.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x2-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x4-acc2.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x4-acc4.c
+  src/f32-raddstoreexpminusmax/gen/scalar-rr2-p5-x4.c
   src/f32-rmax/scalar.c
   src/f32-spmm/gen/1x1-minmax-scalar-pipelined.c
   src/f32-spmm/gen/1x1-minmax-scalar.c
@@ -1282,7 +1282,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-prelu/gen/neon-2x8.c
   src/f32-qs8-vcvt/gen/vcvt-neon-x32.c
   src/f32-qu8-vcvt/gen/vcvt-neon-x32.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x8.c
   src/f32-rmax/neon.c
   src/f32-spmm/gen/32x1-minmax-neon.c
   src/f32-vbinary/gen/vadd-minmax-neon-x8.c
@@ -1541,30 +1541,30 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-neon-x16.c
   src/f32-qu8-vcvt/gen/vcvt-neon-x24.c
   src/f32-qu8-vcvt/gen/vcvt-neon-x32.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x4.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x8.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x12.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x16.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/neon-lut64-p2-x20.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x4.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x8.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x12.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x16.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/neon-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x4.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x12.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x16.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-lut64-p2-x20.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neon-rr2-p5-x20.c
   src/f32-rmax/neon.c
   src/f32-spmm/gen/4x1-minmax-neon-pipelined.c
   src/f32-spmm/gen/4x1-minmax-neon-x2.c
@@ -2389,7 +2389,7 @@ SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-ibilinear/gen/neonfma-c8.c
   src/f32-igemm/gen/1x8s4-minmax-neonfma.c
   src/f32-igemm/gen/6x8s4-minmax-neonfma.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x16.c
   src/f32-spmm/gen/32x1-minmax-neonfma-pipelined.c
   src/f32-velu/gen/velu-neonfma-rr1-lut16-p3-x16.c
   src/f32-velu/gen/velu-neonfma-rr1-p6-x8.c
@@ -2462,30 +2462,30 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/gen/8x8s4-minmax-neonfma.c
   src/f32-ppmm/gen/4x8-minmax-neonfma.c
   src/f32-ppmm/gen/8x8-minmax-neonfma.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x4.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x8.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x12.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x16.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-lut64-p2-x20.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x4.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x8.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x12.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x16.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/neonfma-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x8.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x12.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x16.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-lut64-p2-x20.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/neonfma-rr1-p5-x20.c
   src/f32-spmm/gen/4x1-minmax-neonfma-pipelined.c
   src/f32-spmm/gen/4x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/4x1-minmax-neonfma.c
@@ -3440,7 +3440,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-prelu/gen/sse2-2x8.c
   src/f32-qs8-vcvt/gen/vcvt-sse2-x32.c
   src/f32-qu8-vcvt/gen/vcvt-sse2-x32.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x20-acc2.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x12.c
   src/f32-vlrelu/gen/vlrelu-sse2-x8.c
   src/f32-vrnd/gen/vrndd-sse2-x8.c
@@ -3539,18 +3539,18 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/vcvt-sse2-x16.c
   src/f32-qu8-vcvt/gen/vcvt-sse2-x24.c
   src/f32-qu8-vcvt/gen/vcvt-sse2-x32.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x4.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x8.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x12.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x16.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/sse2-p5-x20.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x4.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x8-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x8.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x12-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x12-acc3.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x12.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x16-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x16-acc4.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x16.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x20-acc5.c
+  src/f32-raddstoreexpminusmax/gen/sse2-rr2-p5-x20.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x4.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x8.c
   src/f32-velu/gen/velu-sse2-rr2-lut16-p3-x12.c
@@ -4859,18 +4859,18 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f32-raddextexp/gen/avx2-p5-x96-acc3.c
   src/f32-raddextexp/gen/avx2-p5-x96-acc6.c
   src/f32-raddextexp/gen/avx2-p5-x96.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x64-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x64-acc4.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x64.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x72-acc3.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x72.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x80-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x80-acc5.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x80.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc3.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x96-acc6.c
-  src/f32-raddstoreexpminusmax/gen/avx2-p5-x96.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x64-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x64-acc4.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x64.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x72-acc3.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x72.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x80-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x80-acc5.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x80.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x96-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x96-acc3.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x96-acc6.c
+  src/f32-raddstoreexpminusmax/gen/avx2-rr1-p5-x96.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x8.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x16.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x24.c
@@ -4974,6 +4974,7 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/expm1minus-avx2-rr1-lut8-p4-perm.c
   src/math/expm1minus-avx2-rr1-lut16-p3-gather.c
   src/math/expm1minus-avx2-rr1-p6.c
+  src/math/expminus-avx2-rr1-p5.c
   src/math/expminus-avx2-rr2-p5.c
   src/math/extexp-avx2-p5.c
   src/math/sigmoid-avx2-rr1-lut64-p2-gather-div.c
@@ -5185,18 +5186,18 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-raddextexp/gen/avx512f-p5-scalef-x192-acc3.c
   src/f32-raddextexp/gen/avx512f-p5-scalef-x192-acc6.c
   src/f32-raddextexp/gen/avx512f-p5-scalef-x192.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x128-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x128-acc4.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x128.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x144-acc3.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x144.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x160-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x160-acc5.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x160.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc2.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc3.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192-acc6.c
-  src/f32-raddstoreexpminusmax/gen/avx512f-p5-scalef-x192.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x128-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x128-acc4.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x128.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x144-acc3.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x144.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x160-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x160-acc5.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x160.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x192-acc2.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x192-acc3.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x192-acc6.c
+  src/f32-raddstoreexpminusmax/gen/avx512f-rr1-p5-scalef-x192.c
   src/f32-rmax/avx512f.c
   src/f32-vbinary/gen/vadd-minmax-avx512f-x16.c
   src/f32-vbinary/gen/vadd-minmax-avx512f-x32.c

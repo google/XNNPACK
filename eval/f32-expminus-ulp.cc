@@ -129,6 +129,11 @@ static void ExpError(benchmark::State& state,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(ExpError, avx2_rr1_p5,
+                    xnn_math_f32_expminus__avx2_rr1_p5,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(ExpError, avx2_rr2_p5,
                     xnn_math_f32_expminus__avx2_rr2_p5,
                     benchmark::utils::CheckAVX2)
