@@ -7563,7 +7563,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qs8-gemm-minmax-fp32-test qs8-gemm-minmax-fp32-test)
 
-  ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc test/qs8-gemm-minmax-rndnu-c2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-rndnu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
