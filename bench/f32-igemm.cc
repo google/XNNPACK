@@ -155,6 +155,55 @@ static void IGEMMBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+  static void IGEMMBenchmark(benchmark::State& state,
+    xnn_jit_code_generator_function generator,
+    size_t mr, size_t nr, size_t kr, size_t sr,
+    xnn_init_f32_minmax_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+  {
+    xnn_code_buffer code_buffer;
+    xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+    generator(&code_buffer);
+    IGEMMBenchmark(
+        state,
+        reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code),
+        mr, nr, kr, sr, init_params);
+    xnn_release_code_memory(&code_buffer);
+  }
+
+  static void jit_f32_igemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_4x8__aarch32_neon_cortex_a7(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_4x8__aarch32_neon_cortex_a53(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_4x8__aarch32_neon_cortex_a55(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_4x8__aarch32_neon_prfm_cortex_a75(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_4x8__aarch32_neon_cortex_a75(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_ld64)
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a7)
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a53)
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a55)
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_prfm_cortex_a75)
+  BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a75)
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void f32_igemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net) {
@@ -809,7 +858,6 @@ static void f32_igemm_4x4__scalar(benchmark::State& state, const char* net) {
 BENCHMARK_CONV(f32_igemm_1x4__scalar)
 BENCHMARK_CONV(f32_igemm_2x4__scalar)
 BENCHMARK_CONV(f32_igemm_4x4__scalar)
-
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
