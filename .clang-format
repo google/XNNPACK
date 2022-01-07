@@ -1,9 +1,12 @@
 AllowShortFunctionsOnASingleLine: Inline
 PackConstructorInitializers: Never
 ColumnLimit: 120
-AlignAfterOpenBracket: AlwaysBreak
-BinPackParameters: false
+AlignAfterOpenBracket: DontAlign
+ContinuationIndentWidth: 2
+BinPackParameters: true
+BinPackArguments: true
 AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: false
 BreakBeforeBraces: Stroustrup
 SpaceAfterCStyleCast: true
 PointerAlignment: Left
@@ -14,3 +17,4 @@ SpaceBeforeParensOptions:
   AfterControlStatements: true
   AfterIfMacros: true
   AfterForeachMacros: false
+SpacesBeforeTrailingComments: 2
