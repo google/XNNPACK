@@ -1053,6 +1053,7 @@ tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DAT
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qc8-igemm-minmax-fp32.yaml --output test/qc8-igemm-minmax-fp32.cc &
+tools/generate-gemm-test.py --spec test/qc8-igemm-minmax-fp32-c.yaml --output test/qc8-igemm-minmax-fp32-c.cc &
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output test/qs8-igemm-minmax-fp32.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-fp32.yaml --output test/qu8-igemm-minmax-fp32.cc &
 
