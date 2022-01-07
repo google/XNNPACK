@@ -4347,8 +4347,6 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c",
     "src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c",
     "src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c",
-    "src/f16-vrelu/gen/vrelu-neonfp16arith-x8.c",
-    "src/f16-vrelu/gen/vrelu-neonfp16arith-x16.c",
 ]
 
 PROD_NEONDOT_MICROKERNEL_SRCS = [
@@ -9283,15 +9281,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-spmm.cc",
         "bench/spmm.h",
-        "src/xnnpack/AlignedAllocator.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
-    name = "f16_vrelu_bench",
-    srcs = [
-        "bench/f16-vrelu.cc",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,

@@ -3113,9 +3113,7 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
-  src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
-  src/f16-vrelu/gen/vrelu-neonfp16arith-x8.c
-  src/f16-vrelu/gen/vrelu-neonfp16arith-x16.c)
+  src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
@@ -8348,14 +8346,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f16-vrelu-bench bench/f16-vrelu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-vrelu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrelu-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-f32-vcvt-bench PROPERTIES

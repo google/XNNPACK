@@ -575,58 +575,6 @@ class VUnaryMicrokernelTester {
     Test(xnn_f32_vunary_ukernel_function(vunary), op_type, variant);
   }
 
-  void Test(xnn_f16_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16rng));
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-          case OpType::ReLU:
-            y_ref[i] = std::max(fp16_ieee_to_fp32_value(x_data[i]), 0.0f);
-            break;
-          default:
-            GTEST_FAIL() << "Unexpected op type";
-        }
-      }
-
-      // Prepare parameters.
-      union {
-        union xnn_f16_minmax_params minmax;
-      } params;
-      switch (op_type) {
-        case OpType::ReLU:
-          break;
-        default:
-          GTEST_FAIL() << "Unexpected op type";
-      }
-
-      // Call optimized micro-kernel.
-      vunary(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
-          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
-      }
-    }
-  }
-
   void Test(xnn_f16_vclamp_ukernel_function vclamp, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
