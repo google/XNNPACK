@@ -34,6 +34,11 @@ union xnn_f16_scaleminmax_params {
     uint16_t max;
     uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
   } neon;
+  struct {
+    XNN_ALIGN(32) float scale[8];
+    XNN_ALIGN(32) float min[8];
+    XNN_ALIGN(32) float max[8];
+  } avx;
 };
 
 union xnn_f16_minmax_params {

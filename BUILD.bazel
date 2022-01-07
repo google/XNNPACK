@@ -6099,6 +6099,24 @@ PROD_AVX2_MICROKERNEL_SRCS = [
 ]
 
 ALL_AVX2_MICROKERNEL_SRCS = [
+    "src/f16-gemm/gen/1x8-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/4x8-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/5x8-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/6x8-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/7x8-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/1x16-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/3x16-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/4x16-minmax-avx2-broadcast.c",
+    "src/f16-gemm/gen/5x16-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/1x8-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/4x8-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/5x8-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/1x16-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/3x16-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/4x16-minmax-avx2-broadcast.c",
+    "src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c",
     "src/f32-qs8-vcvt/gen/vcvt-avx2-x16.c",
     "src/f32-qs8-vcvt/gen/vcvt-avx2-x32.c",
     "src/f32-qs8-vcvt/gen/vcvt-avx2-x48.c",
@@ -8101,6 +8119,7 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
         "-mfma",
         "-mavx2",
     ],
@@ -8120,6 +8139,7 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
         "-mfma",
         "-mavx2",
     ],
@@ -8139,6 +8159,7 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
         "-mfma",
         "-mavx2",
     ],
@@ -8162,6 +8183,7 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
+        "-mf16c",
         "-mfma",
         "-mavx2",
     ],

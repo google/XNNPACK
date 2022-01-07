@@ -2101,7 +2101,7 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
       xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64);
       xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
-      xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_params;
+      xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_neon_params;
 
       xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith;
       xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_params;

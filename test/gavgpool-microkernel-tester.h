@@ -502,8 +502,7 @@ class GAvgPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      xnn_init_f16_scaleminmax_params(
-        &params,
+      xnn_init_f16_scaleminmax_neon_params(&params,
         fp16_ieee_from_fp32_value(1.0f / float(rows())),
         fp16_ieee_from_fp32_value(output_min),
         fp16_ieee_from_fp32_value(output_max));
@@ -560,8 +559,7 @@ class GAvgPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      xnn_init_f16_scaleminmax_params(
-        &params,
+      xnn_init_f16_scaleminmax_neon_params(&params,
         fp16_ieee_from_fp32_value(1.0f / float(rows())),
         fp16_ieee_from_fp32_value(output_min),
         fp16_ieee_from_fp32_value(output_max));

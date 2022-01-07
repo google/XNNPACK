@@ -163,11 +163,24 @@ XNN_INTERNAL void xnn_update_f32_scaleminmax_params(
   union xnn_f32_scaleminmax_params* params,
   float scale);
 
-XNN_INTERNAL void xnn_init_f16_scaleminmax_params(
-  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max);
+#define DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                                      \
+    union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t scale,                                               \
+    uint16_t min,                                                 \
+    uint16_t max);
+
+// TODO(maratek): remove once all operators are updated to function pointers
+DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_neon_params)
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_avx_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 XNN_INTERNAL void xnn_init_f32_scaleminmax_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],

@@ -4844,6 +4844,24 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx2-x128.c)
 
 SET(ALL_AVX2_MICROKERNEL_SRCS
+  src/f16-gemm/gen/1x8-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/4x8-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/5x8-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/6x8-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/7x8-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/1x16-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/3x16-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/4x16-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/5x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/1x8-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/4x8-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/5x8-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/1x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/3x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/4x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x16.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x32.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x48.c
