@@ -11335,6 +11335,7 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qc8-gemm-minmax-fp32.cc",
+        "test/qc8-gemm-minmax-fp32-c.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
