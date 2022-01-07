@@ -24,6 +24,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_microkernels",
     ":bench_utils",
     ":enable_assembly",
+    ":enable_jit",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
@@ -8799,6 +8800,15 @@ cc_library(
     }),
 )
 
+cc_library(
+    name = "enable_jit",
+    defines = select({
+        ":xnn_enable_jit_explicit_true": ["XNN_ENABLE_JIT=1"],
+        ":xnn_enable_jit_explicit_false": ["XNN_ENABLE_JIT=0"],
+        "//conditions:default": ["XNN_ENABLE_JIT=0"],
+    }),
+)
+
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
@@ -9428,7 +9438,10 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [":packing"] + xnnpack_optional_ruy_deps(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":packing",
+        ":jit",
+    ] + xnnpack_optional_ruy_deps(),
 )
 
 xnnpack_benchmark(
@@ -12282,6 +12295,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_qu8_explicit_false",
     define_values = {"xnn_enable_qu8": "false"},
+)
+
+# Enables usage of JIT kernels.
+config_setting(
+    name = "xnn_enable_jit_explicit_true",
+    define_values = {"xnn_enable_jit": "true"},
+)
+
+# Disables usage of JIT kernels.
+config_setting(
+    name = "xnn_enable_jit_explicit_false",
+    define_values = {"xnn_enable_jit": "false"},
 )
 
 # Target Chrome M87 instructions in WAsm SIMD build

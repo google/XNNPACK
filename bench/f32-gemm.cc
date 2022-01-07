@@ -22,6 +22,7 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 #include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/pack.h>
@@ -354,6 +355,23 @@ static void ruy_st(benchmark::State& state, const char* net)
 }
 #endif  // BENCHMARK_RUY
 
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+static void GEMMBenchmark(benchmark::State& state,
+  xnn_jit_code_generator_function generator,
+  size_t mr, size_t nr, size_t kr, size_t sr,
+  xnn_init_f32_minmax_params_fn init_params,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  xnn_code_buffer code_buffer;
+  xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  generator(&code_buffer);
+  GEMMBenchmark(
+      state,
+      reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code),
+      mr, nr, kr, sr, init_params);
+  xnn_release_code_memory(&code_buffer);
+}
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_1x8__aarch64_neonfma_ld64(benchmark::State& state, const char* net) {
@@ -494,7 +512,6 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_6x8__neonfma_lane_ld128)
 #endif  // XNN_ARCH_ARM64
 
-
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_4x4__aarch32_vfp_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64, 4, 4, 1, 1,
@@ -534,6 +551,45 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_4x8__aarch32_neon_prfm_cortex_a75)
 #endif  // XNN_ARCH_ARM
 
+#if XNN_ARCH_ARM && XNN_ENABLE_JIT && XNN_PLATFORM_JIT
+  static void jit_f32_gemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_f32_gemm_4x8__aarch32_neon_cortex_a7(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_f32_gemm_4x8__aarch32_neon_cortex_a53(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_f32_gemm_4x8__aarch32_neon_cortex_a55(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_f32_gemm_4x8__aarch32_neon_cortex_a75(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_f32_gemm_4x8__aarch32_neon_prfm_cortex_a75(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_ld64)
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_cortex_a7)
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_cortex_a53)
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_cortex_a55)
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_cortex_a75)
+  BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch32_neon_prfm_cortex_a75)
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_JIT && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void f32_gemm_1x8__neon_lane_ld64(benchmark::State& state, const char* net) {
