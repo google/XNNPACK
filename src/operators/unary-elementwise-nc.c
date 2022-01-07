@@ -559,7 +559,7 @@ enum xnn_status xnn_create_hardswish_nc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  struct xnn_f16_hswish_params params;
+  union xnn_f16_hswish_params params;
   if (xnn_params.f16.hswish.init.f16_hswish != NULL) {
     xnn_params.f16.hswish.init.f16_hswish(&params);
   }

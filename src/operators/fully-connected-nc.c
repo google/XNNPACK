@@ -505,7 +505,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  struct xnn_f16_scaleminmax_params params;
+  union xnn_f16_scaleminmax_params params;
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
     xnn_params.f16.gemm.init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
   }

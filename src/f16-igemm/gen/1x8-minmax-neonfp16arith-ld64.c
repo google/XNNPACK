@@ -27,7 +27,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
     size_t cn_stride,
     size_t a_offset,
     const void* zero,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -59,7 +59,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
       for (; k >= 4 * sizeof(__fp16); k -= 4 * sizeof(__fp16)) {
         const float16x4_t va0 = vld1_f16(a0); a0 += 4;
 
-        const float16x8_t vb01234567c0 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof( float16x8_t));
+        const float16x8_t vb01234567c0 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
@@ -68,7 +68,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
 
           vacc0x01234567 = vfmaq_f16(vacc0x01234567, va0c0, vb01234567c0);
         #endif
-        const float16x8_t vb01234567c1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof( float16x8_t));
+        const float16x8_t vb01234567c1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
@@ -77,7 +77,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
 
           vacc0x01234567 = vfmaq_f16(vacc0x01234567, va0c1, vb01234567c1);
         #endif
-        const float16x8_t vb01234567c2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof( float16x8_t));
+        const float16x8_t vb01234567c2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
@@ -86,7 +86,7 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
 
           vacc0x01234567 = vfmaq_f16(vacc0x01234567, va0c2, vb01234567c2);
         #endif
-        const float16x8_t vb01234567c3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof( float16x8_t));
+        const float16x8_t vb01234567c3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
@@ -110,13 +110,13 @@ void xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
+    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
     vacc0x01234567 = vmulq_f16(vacc0x01234567, vscale);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
     vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
 
     if XNN_LIKELY(nc >= 8) {

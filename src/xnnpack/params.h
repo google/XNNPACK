@@ -16,27 +16,31 @@
 #include <xnnpack/common.h>
 
 
-struct xnn_f16_default_params {
+union xnn_f16_default_params {
   // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
   char _; // Dummy member variable to comply with the C standard
 };
 
-struct xnn_f16_relu_params {
+union xnn_f16_relu_params {
   // Empty; serves to differentiate pointer types for micro-kernels with different fused activations.
   char _; // Dummy member variable to comply with the C standard
 };
 
 // scaleminmax is used for gemm/igemm ukernels.
-struct xnn_f16_scaleminmax_params {
-  uint16_t scale;
-  uint16_t min;
-  uint16_t max;
-  uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
+union xnn_f16_scaleminmax_params {
+  struct {
+    uint16_t scale;
+    uint16_t min;
+    uint16_t max;
+    uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
+  } neon;
 };
 
-struct xnn_f16_minmax_params {
-  uint16_t min;
-  uint16_t max;
+union xnn_f16_minmax_params {
+  struct {
+    uint16_t min;
+    uint16_t max;
+  } neon;
 };
 
 union xnn_f32_default_params {
@@ -897,10 +901,13 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
-struct xnn_f16_hswish_params {
-  uint16_t sixth;
-  uint16_t three;
-  uint16_t six;
+union xnn_f16_hswish_params {
+  struct {
+    uint16_t sixth;
+    uint16_t three;
+    uint16_t six;
+    uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
+  } neon;
 };
 
 union xnn_f32_hswish_params {
@@ -1911,7 +1918,7 @@ typedef void (*xnn_f16_ppmm_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_gemm_ukernel_function)(
     size_t mr,
@@ -2000,7 +2007,7 @@ typedef void (*xnn_f16_gemm_minmax_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     size_t mr,
@@ -2014,7 +2021,7 @@ typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const void* zero,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_qc8_gemm_minmax_ukernel_function)(
     size_t mr,
@@ -2230,7 +2237,7 @@ typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
     const uint32_t* nidx_nnzmap,
     void* output,
     size_t output_stride,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
     size_t batch_size,
@@ -2414,7 +2421,7 @@ typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_function)(
     size_t output_increment,
     size_t input_offset,
     const void* zero,
-    const struct xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
@@ -2535,7 +2542,7 @@ typedef void (*xnn_f16_gavgpool_minmax_unipass_ukernel_function)(
     size_t input_stride,
     const void* zero,
     void* output,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_gavgpool_minmax_unipass_ukernel_function)(
     size_t rows,
@@ -2582,7 +2589,7 @@ typedef void (*xnn_f16_gavgpool_minmax_multipass_ukernel_function)(
     const void* zero,
     void* buffer,
     void* output,
-    const struct xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_gavgpool_minmax_multipass_ukernel_function)(
     size_t rows,
@@ -2859,7 +2866,7 @@ typedef void (*xnn_f16_vclamp_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
-    const struct xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_vclamp_ukernel_function)(
     size_t n,
@@ -2883,7 +2890,7 @@ typedef void (*xnn_f16_vrelu_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
-    const struct xnn_f16_relu_params* params);
+    const union xnn_f16_relu_params* params);
 
 typedef void (*xnn_f32_vrelu_ukernel_function)(
     size_t n,
@@ -2895,7 +2902,7 @@ typedef void (*xnn_f16_vhswish_ukernel_function)(
     size_t n,
     const void* x,
     void* y,
-    const struct xnn_f16_hswish_params* params);
+    const union xnn_f16_hswish_params* params);
 
 typedef void (*xnn_f32_vabs_ukernel_function)(
     size_t n,
@@ -3020,14 +3027,14 @@ typedef void (*xnn_f16_vbinary_ukernel_function)(
     const void* a,
     const void* b,
     void* y,
-    const struct xnn_f16_default_params* params);
+    const union xnn_f16_default_params* params);
 
 typedef void (*xnn_f16_vbinary_minmax_ukernel_function)(
     size_t n,
     const void* a,
     const void* b,
     void* y,
-    const struct xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_vbinary_ukernel_function)(
     size_t n,
@@ -3134,7 +3141,7 @@ typedef void (*xnn_f16_vmulcaddc_ukernel_function)(
     const void* w,
     void* y,
     size_t y_stride,
-    const struct xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_vmulcaddc_ukernel_function)(
     size_t m,
@@ -3304,15 +3311,15 @@ typedef void (*xnn_init_qu8_mul_minmax_params_fn)(
   uint8_t output_max);
 
 typedef void (*xnn_init_f16_hswish_params_fn)(
-  struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f16_minmax_params_fn)(
-  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max);
 
 typedef void (*xnn_init_f16_scaleminmax_params_fn)(
-  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max);

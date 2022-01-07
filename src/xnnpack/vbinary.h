@@ -24,7 +24,7 @@ extern "C" {
         const void* a,                               \
         const void* b,                               \
         void* y,                                     \
-        const struct xnn_f16_default_params* params);
+        const union xnn_f16_default_params* params);
 
 #define DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                \
@@ -32,7 +32,7 @@ extern "C" {
       const void* a,                                        \
       const void* b,                                        \
       void* y,                                              \
-      const struct xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params* params);
 
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x16)
 DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vmax_ukernel__neonfp16arith_x8)

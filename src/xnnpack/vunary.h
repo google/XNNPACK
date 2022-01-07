@@ -21,7 +21,7 @@ extern "C" {
       size_t n,                                      \
       const void* x,                                 \
       void* y,                                       \
-      const struct xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params* params);
 
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x8)
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x16)
@@ -32,7 +32,7 @@ DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x16)
       size_t n,                                       \
       const void* x,                                  \
       void* y,                                        \
-      const struct xnn_f16_hswish_params* params);
+      const union xnn_f16_hswish_params* params);
 
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x16)
@@ -43,7 +43,7 @@ DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x16)
       size_t n,                                     \
       const void* x,                                \
       void* y,                                      \
-      const struct xnn_f16_relu_params* params);
+      const union xnn_f16_relu_params* params);
 
 DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x8)
 DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x16)

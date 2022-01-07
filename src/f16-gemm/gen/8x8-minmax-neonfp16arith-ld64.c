@@ -27,7 +27,7 @@ void xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64(
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 8);
@@ -253,7 +253,7 @@ void xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64(
       } while (k != 0);
     }
 
-    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
+    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
     vacc0x01234567 = vmulq_f16(vacc0x01234567, vscale);
     vacc1x01234567 = vmulq_f16(vacc1x01234567, vscale);
     vacc2x01234567 = vmulq_f16(vacc2x01234567, vscale);
@@ -263,7 +263,7 @@ void xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64(
     vacc6x01234567 = vmulq_f16(vacc6x01234567, vscale);
     vacc7x01234567 = vmulq_f16(vacc7x01234567, vscale);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
     vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
     vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
     vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
@@ -273,7 +273,7 @@ void xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64(
     vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
     vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
     vacc1x01234567 = vmaxq_f16(vacc1x01234567, vmin);
     vacc2x01234567 = vmaxq_f16(vacc2x01234567, vmin);

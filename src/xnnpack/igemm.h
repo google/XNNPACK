@@ -282,7 +282,7 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_4x4__scal
       size_t cn_stride,                                    \
       size_t a_offset,                                     \
       const void* zero,                                    \
-      const struct xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64)
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64)

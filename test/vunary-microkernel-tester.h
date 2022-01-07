@@ -607,7 +607,7 @@ class VUnaryMicrokernelTester {
 
       // Prepare parameters.
       union {
-        struct xnn_f16_minmax_params minmax;
+        union xnn_f16_minmax_params minmax;
       } params;
       switch (op_type) {
         case OpType::ReLU:
@@ -651,7 +651,7 @@ class VUnaryMicrokernelTester {
       }
 
       // Prepare parameters.
-      struct xnn_f16_minmax_params params;
+      union xnn_f16_minmax_params params;
       init_params(&params, fp16_ieee_from_fp32_value(float(qmin())), fp16_ieee_from_fp32_value(float(qmax())));
 
       // Call optimized micro-kernel.
@@ -690,7 +690,7 @@ class VUnaryMicrokernelTester {
       }
 
       // Prepare parameters.
-      struct xnn_f16_hswish_params params;
+      union xnn_f16_hswish_params params;
       init_params(&params);
 
       // Call optimized micro-kernel.

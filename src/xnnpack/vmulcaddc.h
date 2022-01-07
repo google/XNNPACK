@@ -59,7 +59,7 @@ DECLARE_F32_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_minmax_ukernel_c
       const void* w,                                           \
       void* y,                                                 \
       size_t y_stride,                                         \
-      const struct xnn_f16_minmax_params* params);
+      const union xnn_f16_minmax_params* params);
 
 DECLARE_F16_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x)
 DECLARE_F16_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x)

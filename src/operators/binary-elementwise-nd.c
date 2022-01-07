@@ -96,7 +96,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     return xnn_status_invalid_parameter;
   }
 
-  struct xnn_f16_minmax_params params;
+  union xnn_f16_minmax_params params;
   xnn_init_f16_minmax_params(
     &params, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
   return create_binary_elementwise_nd(

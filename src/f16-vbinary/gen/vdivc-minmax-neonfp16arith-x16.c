@@ -20,7 +20,7 @@ void xnn_f16_vdivc_minmax_ukernel__neonfp16arith_x16(
     const void* restrict a_ptr,
     const void* restrict b_ptr,
     void* restrict y_ptr,
-    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
@@ -32,8 +32,8 @@ void xnn_f16_vdivc_minmax_ukernel__neonfp16arith_x16(
   const __fp16* b = (const __fp16*) b_ptr;
   __fp16* y = (__fp16*) y_ptr;
 
-  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
-  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
 
   const float16x8_t vb = vld1q_dup_f16(b);
   for (; n >= 16 * sizeof(__fp16); n -= 16 * sizeof(__fp16)) {

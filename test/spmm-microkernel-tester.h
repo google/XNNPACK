@@ -448,9 +448,9 @@ class SpMMMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      params.scale = UINT16_C(0x3C00) /* 1.0 */;
-      params.max = fp16_ieee_from_fp32_value(output_max);
-      params.min = fp16_ieee_from_fp32_value(output_min);
+      params.neon.scale = UINT16_C(0x3C00) /* 1.0 */;
+      params.neon.max = fp16_ieee_from_fp32_value(output_max);
+      params.neon.min = fp16_ieee_from_fp32_value(output_min);
 
       spmm(m() * sizeof(uint16_t), n(),
         input.data() + first_kk * m(),

@@ -23,7 +23,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x(
     const void*restrict weights,
     void*restrict output,
     size_t output_stride,
-    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -41,8 +41,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
   do {
     const __fp16* w = (const __fp16*) weights;
     size_t c = channels;

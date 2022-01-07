@@ -156,7 +156,7 @@ XNN_INTERNAL void xnn_update_qs8_avgpool_params(
   float scale);
 
 XNN_INTERNAL void xnn_update_f16_scaleminmax_params(
-  struct xnn_f16_scaleminmax_params* params,
+  union xnn_f16_scaleminmax_params* params,
   uint16_t scale);
 
 XNN_INTERNAL void xnn_update_f32_scaleminmax_params(
@@ -164,7 +164,7 @@ XNN_INTERNAL void xnn_update_f32_scaleminmax_params(
   float scale);
 
 XNN_INTERNAL void xnn_init_f16_scaleminmax_params(
-  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max);
@@ -201,7 +201,7 @@ XNN_INTERNAL void xnn_init_scalar_f32_gavgpool_params(
   uint32_t width);
 
 XNN_INTERNAL void xnn_init_f16_minmax_params(
-  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max);
 
@@ -236,7 +236,7 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
 
 
 XNN_INTERNAL void xnn_init_f16_hswish_params(
-  struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
 
 
 #define DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(fn_name) \

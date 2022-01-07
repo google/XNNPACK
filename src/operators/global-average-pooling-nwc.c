@@ -354,7 +354,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  struct xnn_f16_scaleminmax_params params;
+  union xnn_f16_scaleminmax_params params;
   xnn_init_f16_scaleminmax_params(
     &params, UINT16_C(0x7E00) /* NaN */,
     fp16_ieee_from_fp32_value(output_min),

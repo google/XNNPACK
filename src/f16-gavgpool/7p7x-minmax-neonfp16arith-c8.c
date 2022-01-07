@@ -19,7 +19,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8(
     const void* zero,
     void* buffer,
     void* output_ptr,
-    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -116,9 +116,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8(
   if (rows <= 6) {
     i6 = (const __fp16*) zero;
   }
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scale));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->max));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
 
   b = (__fp16*) buffer;
   while (channels >= 8) {

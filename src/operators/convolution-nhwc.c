@@ -847,20 +847,20 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  struct xnn_f16_scaleminmax_params gemm_params;
+  union xnn_f16_scaleminmax_params gemm_params;
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
     xnn_params.f16.gemm.init.f16(&gemm_params,
       UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
   }
 
-  struct xnn_f16_minmax_params dwconv_params;
+  union xnn_f16_minmax_params dwconv_params;
   const struct dwconv_parameters* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f16.dwconv, XNN_MAX_F16_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.f16(&dwconv_params, fp16_output_min, fp16_output_max);
   }
 
-  struct xnn_f16_minmax_params vmulcaddc_params;
+  union xnn_f16_minmax_params vmulcaddc_params;
   if XNN_LIKELY(xnn_params.f16.vmulcaddc.init.f16 != NULL) {
     xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }

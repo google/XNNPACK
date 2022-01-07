@@ -303,7 +303,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     size_t output_increment,                                 \
     size_t input_offset,                                     \
     const void* zero,                                        \
-    const struct xnn_f16_default_params* params);
+    const union xnn_f16_default_params* params);
 
 #define DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                        \
@@ -316,7 +316,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const void* zero,                                               \
-    const struct xnn_f16_minmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith)
 DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith_acc2)

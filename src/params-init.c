@@ -996,10 +996,10 @@ void xnn_update_qs8_avgpool_params(
 }
 
 void xnn_update_f16_scaleminmax_params(
-  struct xnn_f16_scaleminmax_params* params,
+  union xnn_f16_scaleminmax_params* params,
   uint16_t scale)
 {
-  params->scale = scale;
+  params->neon.scale = scale;
 }
 
 void xnn_update_f32_scaleminmax_params(
@@ -1016,15 +1016,14 @@ void xnn_update_f32_scaleminmax_params(
 }
 
 void xnn_init_f16_scaleminmax_params(
-  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max)
 {
-  params->scale = scale;
-  params->min = min;
-  params->max = max;
-  params->pad = 0;  // unused.
+  params->neon.scale = scale;
+  params->neon.min = min;
+  params->neon.max = max;
 }
 
 void xnn_init_f32_scaleminmax_params(
@@ -1152,12 +1151,12 @@ void xnn_init_scalar_f32_gavgpool_params(
 }
 
 void xnn_init_f16_minmax_params(
-  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max)
 {
-  params->min = min;
-  params->max = max;
+  params->neon.min = min;
+  params->neon.max = max;
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1247,11 +1246,11 @@ void xnn_init_f32_minmax_scalar_params(
 }
 
 void xnn_init_f16_hswish_params(
-  struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
+  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->sixth = UINT16_C(0x3155);
-  params->three = UINT16_C(0x4200);
-  params->six = UINT16_C(0x4600);
+  params->neon.sixth = UINT16_C(0x3155);
+  params->neon.three = UINT16_C(0x4200);
+  params->neon.six = UINT16_C(0x4600);
 }
 
 void xnn_init_f32_hswish_scalar_params(

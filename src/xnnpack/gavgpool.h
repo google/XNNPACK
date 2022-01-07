@@ -64,7 +64,7 @@ DECLARE_F32_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_gavgpool_minmax_uke
       const void* zero,                                                 \
       void* buffer,                                                     \
       void* output,                                                     \
-      const struct xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8)
 
@@ -77,7 +77,7 @@ DECLARE_F16_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_u
       size_t input_stride,                                            \
       const void* zero,                                               \
       void* output,                                                   \
-      const struct xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_scaleminmax_params* params);
 
 DECLARE_F16_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8)
 
