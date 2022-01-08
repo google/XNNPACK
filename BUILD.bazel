@@ -9168,7 +9168,10 @@ xnnpack_benchmark(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [":packing"] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":packing",
+        ":jit",
+    ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
 
 xnnpack_benchmark(

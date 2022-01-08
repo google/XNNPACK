@@ -210,6 +210,40 @@ static void ruy_st(benchmark::State& state, const char* net)
 }
 #endif  // BENCHMARK_RUY
 
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+  static void GEMMBenchmark(benchmark::State& state,
+    xnn_jit_code_generator_function generator,
+    size_t mr, size_t nr, size_t kr, size_t sr,
+    xnn_init_qs8_conv_minmax_params_fn  init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+  {
+    xnn_code_buffer code_buffer;
+    xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+    generator(&code_buffer);
+    GEMMBenchmark(
+        state,
+        reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code),
+        mr, nr, kr, sr, init_params);
+    xnn_release_code_memory(&code_buffer);
+  }
+
+  static void jit_qs8_gemm_4x8c4__aarch32_neondot_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_generate_qs8_gemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64, 4, 8, 4, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEONDOT);
+  }
+  static void jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
+  static void jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
+  BENCHMARK_GEMM(jit_qs8_gemm_4x8c4__aarch32_neondot_ld64)
+  BENCHMARK_GEMM(jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_ld64)
+  BENCHMARK_GEMM(jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_ld64)
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void qs8_gemm_4x8c4__aarch32_neondot_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64, 4, 8, 4, 1,
