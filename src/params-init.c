@@ -1008,7 +1008,7 @@ void xnn_update_f32_scaleminmax_params(
 {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.scale[i] = scale;
+      params->sse.scale[i] = scale;
     }
   #else
     params->scalar.scale = scale;
@@ -1054,9 +1054,9 @@ void xnn_init_f32_scaleminmax_params(
 {
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     for (uint32_t i = 0; i < 4; i++) {
-      params->sse2.scale[i] = scale;
-      params->sse2.min[i] = min;
-      params->sse2.max[i] = max;
+      params->sse.scale[i] = scale;
+      params->sse.min[i] = min;
+      params->sse.max[i] = max;
     }
   #else
     params->scalar.scale = scale;

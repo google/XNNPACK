@@ -44,9 +44,9 @@ void xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4(
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 vmin = _mm_load_ps(params->sse2.min);
-  const __m128 vmax = _mm_load_ps(params->sse2.max);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
 
   do {
     {
@@ -366,9 +366,9 @@ void xnn_f32_avgpool_minmax_ukernel_9x__sse_c4(
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 vmin = _mm_load_ps(params->sse2.min);
-  const __m128 vmax = _mm_load_ps(params->sse2.max);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
 
   do {
     const float* i0 = input[0];
@@ -4390,9 +4390,9 @@ void xnn_f32_gavgpool_minmax_ukernel_7p7x__sse_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 vmin = _mm_load_ps(params->sse2.min);
-  const __m128 vmax = _mm_load_ps(params->sse2.max);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
 
   b = buffer;
   while (channels >= 4) {
@@ -4505,9 +4505,9 @@ void xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 vmin = _mm_load_ps(params->sse2.min);
-  const __m128 vmax = _mm_load_ps(params->sse2.max);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
 
   while (channels >= 4) {
     const __m128 vi0 = _mm_loadu_ps(i0);

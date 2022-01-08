@@ -27,9 +27,9 @@ void xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4(
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 vmin = _mm_load_ps(params->sse2.min);
-  const __m128 vmax = _mm_load_ps(params->sse2.max);
+  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vmin = _mm_load_ps(params->sse.min);
+  const __m128 vmax = _mm_load_ps(params->sse.max);
 
   do {
     {
