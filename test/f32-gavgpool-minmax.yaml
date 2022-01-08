@@ -3,14 +3,26 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__neon_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__sse_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_arm_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_x86_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1
+  init: xnn_init_f32_scaleminmax_scalar_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7p7x__scalar_c1
+  init: xnn_init_f32_scaleminmax_scalar_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__neon_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__wasmsimd_arm_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__wasmsimd_x86_c4
+  init: xnn_init_f32_scaleminmax_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__wasm_c1
+  init: xnn_init_f32_scaleminmax_scalar_params
 - name: xnn_f32_gavgpool_minmax_ukernel_7x__scalar_c1
+  init: xnn_init_f32_scaleminmax_scalar_params

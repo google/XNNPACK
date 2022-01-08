@@ -4,8 +4,14 @@
 # LICENSE file in the root directory of this source tree.
 
 - name: xnn_qu8_gavgpool_minmax_ukernel_7x__neon_c8
+  init: xnn_init_qu8_avgpool_minmax_params
 - name: xnn_qu8_gavgpool_minmax_ukernel_7p7x__neon_c8
+  init: xnn_init_qu8_avgpool_minmax_params
 - name: xnn_qu8_gavgpool_minmax_ukernel_7x__sse2_c8
+  init: xnn_init_qu8_avgpool_minmax_params
 - name: xnn_qu8_gavgpool_minmax_ukernel_7p7x__sse2_c8
+  init: xnn_init_qu8_avgpool_minmax_params
 - name: xnn_qu8_gavgpool_minmax_ukernel_7x__scalar_c1
+  init: xnn_init_qu8_avgpool_minmax_scalar_params
 - name: xnn_qu8_gavgpool_minmax_ukernel_7p7x__scalar_c1
+  init: xnn_init_qu8_avgpool_minmax_scalar_params
