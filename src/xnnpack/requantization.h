@@ -304,7 +304,7 @@ inline static int8_t xnn_qs8_requantize_rndnu(
 
 static inline uint8_t xnn_qu8_quantize_avgpool(
   int32_t n,
-  union xnn_qu8_avgpool_params params)
+  union xnn_qu8_avgpool_minmax_params params)
 {
   const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
   const int64_t adjusted_product = product - (int64_t) (n < 0);
@@ -322,7 +322,7 @@ static inline uint8_t xnn_qu8_quantize_avgpool(
 
 static inline int8_t xnn_qs8_quantize_avgpool(
   int32_t n,
-  union xnn_qs8_avgpool_params params)
+  union xnn_qs8_avgpool_minmax_params params)
 {
   const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
   const int64_t adjusted_product = product - (int64_t) (n < 0);

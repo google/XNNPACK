@@ -113,45 +113,45 @@ DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_lrintf_params
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-XNN_INTERNAL void xnn_init_qu8_avgpool_params(
-  union xnn_qu8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qu8_avgpool_minmax_params(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_init_scalar_qu8_avgpool_params(
-  union xnn_qu8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qu8_avgpool_minmax_scalar_params(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
 
-XNN_INTERNAL void xnn_update_qu8_avgpool_params(
-  union xnn_qu8_avgpool_params* params,
+XNN_INTERNAL void xnn_update_qu8_avgpool_minmax_params(
+  union xnn_qu8_avgpool_minmax_params* params,
   int32_t bias,
   float scale);
 
-XNN_INTERNAL void xnn_init_qs8_avgpool_params(
-  union xnn_qs8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qs8_avgpool_minmax_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
 
-XNN_INTERNAL void xnn_init_scalar_qs8_avgpool_params(
-  union xnn_qs8_avgpool_params params[XNN_MIN_ELEMENTS(1)],
+XNN_INTERNAL void xnn_init_qs8_avgpool_minmax_scalar_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
 
-XNN_INTERNAL void xnn_update_qs8_avgpool_params(
-  union xnn_qs8_avgpool_params* params,
+XNN_INTERNAL void xnn_update_qs8_avgpool_minmax_params(
+  union xnn_qs8_avgpool_minmax_params* params,
   int32_t bias,
   float scale);
 

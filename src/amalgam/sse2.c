@@ -5654,7 +5654,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse2_c8_acc2(
     const int8_t* zero,
     int32_t* buffer,
     int8_t* output,
-    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -5984,7 +5984,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__sse2_c8_acc2(
     size_t input_stride,
     const int8_t* zero,
     int8_t* output,
-    const union xnn_qs8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(rows <= 7);
@@ -7184,7 +7184,7 @@ void xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements > 9);
@@ -7609,7 +7609,7 @@ void xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
@@ -9209,7 +9209,7 @@ void xnn_qu8_gavgpool_minmax_ukernel_7p7x__sse2_c8(
     const uint8_t* zero,
     int32_t* buffer,
     uint8_t* output,
-    const union xnn_qu8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -9498,7 +9498,7 @@ void xnn_qu8_gavgpool_minmax_ukernel_7x__sse2_c8(
     size_t input_stride,
     const uint8_t* zero,
     uint8_t* output,
-    const union xnn_qu8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(rows <= 7);

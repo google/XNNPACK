@@ -312,8 +312,8 @@ struct xnn_operator {
     // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
     struct {
-      union xnn_qs8_avgpool_params qs8_avgpool;
-      union xnn_qs8_avgpool_params qs8_gavgpool;
+      union xnn_qs8_avgpool_minmax_params qs8_avgpool;
+      union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
     // Quantized Add parameters are sensitive to order of inputs, so we initialize an extra copy with the reversed order.
     struct {
@@ -336,8 +336,8 @@ struct xnn_operator {
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
     struct {
-      union xnn_qu8_avgpool_params qu8_avgpool;
-      union xnn_qu8_avgpool_params qu8_gavgpool;
+      union xnn_qu8_avgpool_minmax_params qu8_avgpool;
+      union xnn_qu8_avgpool_minmax_params qu8_gavgpool;
     };
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;

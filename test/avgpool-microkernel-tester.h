@@ -241,25 +241,25 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_qu8_avgpool_params quantization_params;
+      xnn_qu8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(pooling_elements()),
             input_scale() / (output_scale() * float(pooling_elements())),
             output_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(pooling_elements()),
             input_scale() / (output_scale() * float(pooling_elements())),
             output_zero_point(), qmin(), qmax());
           break;
       }
-      xnn_qu8_avgpool_params scalar_quantization_params;
-      xnn_init_scalar_qu8_avgpool_params(
+      xnn_qu8_avgpool_minmax_params scalar_quantization_params;
+      xnn_init_qu8_avgpool_minmax_scalar_params(
         &scalar_quantization_params,
         -int32_t(input_zero_point()) * int32_t(pooling_elements()),
         input_scale() / (output_scale() * float(pooling_elements())),
@@ -347,25 +347,25 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_qu8_avgpool_params quantization_params;
+      xnn_qu8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(pooling_elements()),
             input_scale() / (output_scale() * float(pooling_elements())),
             output_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(pooling_elements()),
             input_scale() / (output_scale() * float(pooling_elements())),
             output_zero_point(), qmin(), qmax());
           break;
       }
-      xnn_qu8_avgpool_params scalar_quantization_params;
-        xnn_init_scalar_qu8_avgpool_params(
+      xnn_qu8_avgpool_minmax_params scalar_quantization_params;
+        xnn_init_qu8_avgpool_minmax_scalar_params(
           &scalar_quantization_params,
           -int32_t(input_zero_point()) * int32_t(pooling_elements()),
           input_scale() / (output_scale() * float(pooling_elements())),

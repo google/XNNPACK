@@ -91,7 +91,7 @@ DECLARE_F16_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_gavgpool_minmax_uke
       const uint8_t* zero,                                              \
       int32_t* buffer,                                                  \
       uint8_t* output,                                                  \
-      const union xnn_qu8_avgpool_params* params);
+      const union xnn_qu8_avgpool_minmax_params* params);
 
 DECLARE_QU8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_ukernel_7p7x__neon_c8)
 DECLARE_QU8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_ukernel_7p7x__sse2_c8)
@@ -106,7 +106,7 @@ DECLARE_QU8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_u
       size_t input_stride,                                            \
       const uint8_t* zero,                                            \
       uint8_t* output,                                                \
-      const union xnn_qu8_avgpool_params* params);
+      const union xnn_qu8_avgpool_minmax_params* params);
 
 DECLARE_QU8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_ukernel_7x__neon_c8)
 DECLARE_QU8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_ukernel_7x__sse2_c8)
@@ -122,7 +122,7 @@ DECLARE_QU8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_gavgpool_minmax_uke
       const int8_t* zero,                                               \
       int32_t* buffer,                                                  \
       int8_t* output,                                                   \
-      const union xnn_qs8_avgpool_params* params);
+      const union xnn_qs8_avgpool_minmax_params* params);
 
 DECLARE_QS8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qs8_gavgpool_minmax_ukernel_7p7x__neon_c8_acc2)
 DECLARE_QS8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qs8_gavgpool_minmax_ukernel_7p7x__neon_c16_acc2)
@@ -158,7 +158,7 @@ DECLARE_QS8_GAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qs8_gavgpool_minmax_u
       size_t input_stride,                                            \
       const int8_t* zero,                                             \
       int8_t* output,                                                 \
-      const union xnn_qs8_avgpool_params* params);
+      const union xnn_qs8_avgpool_minmax_params* params);
 
 DECLARE_QS8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_gavgpool_minmax_ukernel_7x__neon_c8_acc2)
 DECLARE_QS8_GAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_gavgpool_minmax_ukernel_7x__neon_c16_acc2)

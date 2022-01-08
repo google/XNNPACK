@@ -165,25 +165,25 @@ class GAvgPoolMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Prepare parameters.
-      union xnn_qu8_avgpool_params quantization_params;
+      union xnn_qu8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             output_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             output_zero_point(), qmin(), qmax());
           break;
       }
-      union xnn_qu8_avgpool_params scalar_quantization_params;
-      xnn_init_scalar_qu8_avgpool_params(
+      union xnn_qu8_avgpool_minmax_params scalar_quantization_params;
+      xnn_init_qu8_avgpool_minmax_scalar_params(
         &scalar_quantization_params,
         -int32_t(input_zero_point()) * int32_t(rows()),
         input_scale() / (output_scale() * float(rows())),
@@ -243,25 +243,25 @@ class GAvgPoolMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Prepare parameters.
-      union xnn_qu8_avgpool_params quantization_params;
+      union xnn_qu8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             output_zero_point(), qmin(), qmax());
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qu8_avgpool_params(
+          xnn_init_qu8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point()) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             output_zero_point(), qmin(), qmax());
           break;
       }
-      union xnn_qu8_avgpool_params scalar_quantization_params;
-      xnn_init_scalar_qu8_avgpool_params(
+      union xnn_qu8_avgpool_minmax_params scalar_quantization_params;
+      xnn_init_qu8_avgpool_minmax_scalar_params(
         &scalar_quantization_params,
         -int32_t(input_zero_point()) * int32_t(rows()),
         input_scale() / (output_scale() * float(rows())),
@@ -323,25 +323,25 @@ class GAvgPoolMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Prepare parameters.
-      union xnn_qs8_avgpool_params quantization_params;
+      union xnn_qs8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qs8_avgpool_params(
+          xnn_init_qs8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qs8_avgpool_params(
+          xnn_init_qs8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      union xnn_qs8_avgpool_params scalar_quantization_params;
-        xnn_init_scalar_qs8_avgpool_params(
+      union xnn_qs8_avgpool_minmax_params scalar_quantization_params;
+        xnn_init_qs8_avgpool_minmax_scalar_params(
           &scalar_quantization_params,
           -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
           input_scale() / (output_scale() * float(rows())),
@@ -402,25 +402,25 @@ class GAvgPoolMicrokernelTester {
       std::fill(output.begin(), output.end(), 0xA5);
 
       // Prepare parameters.
-      union xnn_qs8_avgpool_params quantization_params;
+      union xnn_qs8_avgpool_minmax_params quantization_params;
       switch (variant) {
         case Variant::Native:
-          xnn_init_qs8_avgpool_params(
+          xnn_init_qs8_avgpool_minmax_params(
             &quantization_params,
             -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
         case Variant::Scalar:
-          xnn_init_scalar_qs8_avgpool_params(
+          xnn_init_qs8_avgpool_minmax_scalar_params(
             &quantization_params,
             -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
             input_scale() / (output_scale() * float(rows())),
             int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
           break;
       }
-      union xnn_qs8_avgpool_params scalar_quantization_params;
-      xnn_init_scalar_qs8_avgpool_params(
+      union xnn_qs8_avgpool_minmax_params scalar_quantization_params;
+      xnn_init_qs8_avgpool_minmax_scalar_params(
         &scalar_quantization_params,
         -int32_t(input_zero_point() - 0x80) * int32_t(rows()),
         input_scale() / (output_scale() * float(rows())),

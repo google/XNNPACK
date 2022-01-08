@@ -240,8 +240,8 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
-  union xnn_qu8_avgpool_params params;
-  xnn_init_qu8_avgpool_params(
+  union xnn_qu8_avgpool_minmax_params params;
+  xnn_init_qu8_avgpool_minmax_params(
     &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -302,8 +302,8 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
-  union xnn_qs8_avgpool_params params;
-  xnn_init_qs8_avgpool_params(
+  union xnn_qs8_avgpool_minmax_params params;
+  xnn_init_qs8_avgpool_minmax_params(
     &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -417,7 +417,7 @@ static void update_params_qu8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_update_qu8_avgpool_params(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
+  xnn_update_qu8_avgpool_minmax_params(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
@@ -448,7 +448,7 @@ static void update_params_qs8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_update_qs8_avgpool_params(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
+  xnn_update_qs8_avgpool_minmax_params(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(

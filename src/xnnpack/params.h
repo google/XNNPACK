@@ -1454,7 +1454,7 @@ union xnn_qs8_mul_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
-union xnn_qu8_avgpool_params {
+union xnn_qu8_avgpool_minmax_params {
   struct {
     int32_t bias;
     int32_t multiplier;
@@ -1487,7 +1487,7 @@ union xnn_qu8_avgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_qs8_avgpool_params {
+union xnn_qs8_avgpool_minmax_params {
   struct {
     int32_t bias;
     int32_t multiplier;
@@ -2565,7 +2565,7 @@ typedef void (*xnn_qu8_gavgpool_minmax_unipass_ukernel_function)(
     size_t input_stride,
     const uint8_t* zero,
     uint8_t* output,
-    const union xnn_qu8_avgpool_params* params);
+    const union xnn_qu8_avgpool_minmax_params* params);
 
 typedef void (*xnn_qs8_gavgpool_minmax_unipass_ukernel_function)(
     size_t rows,
@@ -2574,7 +2574,7 @@ typedef void (*xnn_qs8_gavgpool_minmax_unipass_ukernel_function)(
     size_t input_stride,
     const int8_t* zero,
     int8_t* output,
-    const union xnn_qs8_avgpool_params* params);
+    const union xnn_qs8_avgpool_minmax_params* params);
 
 typedef void (*xnn_gavgpool_multipass_ukernel_function)(
     size_t rows,
@@ -2614,7 +2614,7 @@ typedef void (*xnn_qu8_gavgpool_minmax_multipass_ukernel_function)(
     const uint8_t* zero,
     int32_t* buffer,
     uint8_t* output,
-    const union xnn_qu8_avgpool_params* params);
+    const union xnn_qu8_avgpool_minmax_params* params);
 
 typedef void (*xnn_qs8_gavgpool_minmax_multipass_ukernel_function)(
     size_t rows,
@@ -2624,7 +2624,7 @@ typedef void (*xnn_qs8_gavgpool_minmax_multipass_ukernel_function)(
     const int8_t* zero,
     int32_t* buffer,
     int8_t* output,
-    const union xnn_qs8_avgpool_params* params);
+    const union xnn_qs8_avgpool_minmax_params* params);
 
 typedef void (*xnn_gavgpool_cw_ukernel_function)(
     size_t elements,
@@ -2674,7 +2674,7 @@ typedef void (*xnn_qu8_avgpool_minmax_unipass_ukernel_function)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_params* params);
+    const union xnn_qu8_avgpool_minmax_params* params);
 
 typedef void (*xnn_avgpool_multipass_ukernel_function)(
     size_t output_pixels,
@@ -2713,7 +2713,7 @@ typedef void (*xnn_qu8_avgpool_minmax_multipass_ukernel_function)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_params* params);
+    const union xnn_qu8_avgpool_minmax_params* params);
 
 typedef void (*xnn_pavgpool_unipass_ukernel_function)(
     size_t output_pixels,

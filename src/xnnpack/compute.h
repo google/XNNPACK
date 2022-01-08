@@ -585,7 +585,7 @@ struct average_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_qu8_avgpool_params qu8;
+    union xnn_qu8_avgpool_minmax_params qu8;
     union xnn_f32_scaleminmax_params f32;
   } params;
   union {
@@ -654,8 +654,8 @@ struct global_average_pooling_nwc_context {
   void* output;
   size_t output_batch_stride;
   union {
-    union xnn_qs8_avgpool_params qs8;
-    union xnn_qu8_avgpool_params qu8;
+    union xnn_qs8_avgpool_minmax_params qs8;
+    union xnn_qu8_avgpool_minmax_params qu8;
     union xnn_f16_scaleminmax_params f16;
     union xnn_f32_scaleminmax_params f32;
   } params;

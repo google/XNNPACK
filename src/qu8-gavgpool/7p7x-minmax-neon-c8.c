@@ -23,7 +23,7 @@ void xnn_qu8_gavgpool_minmax_ukernel_7p7x__neon_c8(
     const uint8_t* zero,
     int32_t* buffer,
     uint8_t* output,
-    const union xnn_qu8_avgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
