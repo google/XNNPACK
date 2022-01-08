@@ -28,7 +28,7 @@
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(8)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
@@ -38,7 +38,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .input_offset(11)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_zero) {
@@ -50,7 +50,7 @@
         .channels(8)
         .input_offset(11)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -62,7 +62,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -74,7 +74,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -86,7 +86,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -98,7 +98,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -109,7 +109,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__NEON_C8, channels_eq_8_twopass_fulltile_with_qmax) {
@@ -119,7 +119,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__NEON_C8, channels_eq_8_twopass_subtile) {
@@ -129,7 +129,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -141,7 +141,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -155,7 +155,7 @@
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -167,7 +167,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -179,7 +179,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(41)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -193,7 +193,7 @@
           .channels(channels)
           .input_offset(41)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -207,7 +207,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -221,7 +221,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -235,7 +235,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -249,7 +249,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -262,7 +262,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -274,7 +274,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -286,7 +286,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -300,7 +300,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -316,7 +316,7 @@
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -329,7 +329,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -341,7 +341,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -355,7 +355,7 @@
           .channels(channels)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -369,7 +369,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -383,7 +383,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -397,7 +397,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -411,7 +411,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -424,7 +424,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -436,7 +436,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -448,7 +448,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -462,7 +462,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(11)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -478,7 +478,7 @@
             .channels(channels)
             .input_offset(11)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -491,7 +491,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -503,7 +503,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -517,7 +517,7 @@
           .channels(channels)
           .input_offset(17)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -531,7 +531,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -545,7 +545,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -559,7 +559,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -573,7 +573,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -586,7 +586,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -598,7 +598,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -610,7 +610,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -624,7 +624,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -640,7 +640,7 @@
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -653,7 +653,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -665,7 +665,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -679,7 +679,7 @@
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -693,7 +693,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -707,7 +707,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -721,7 +721,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -735,7 +735,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -748,7 +748,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -760,7 +760,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -772,7 +772,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -786,7 +786,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -802,7 +802,7 @@
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -818,7 +818,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -834,7 +834,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -850,7 +850,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -866,7 +866,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -881,7 +881,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -895,7 +895,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -908,7 +908,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -922,7 +922,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(8)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -938,7 +938,7 @@
             .channels(channels)
             .input_offset(8)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -954,7 +954,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -970,7 +970,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -986,7 +986,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1002,7 +1002,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1017,7 +1017,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1031,7 +1031,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1044,7 +1044,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1058,7 +1058,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1074,7 +1074,7 @@
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1090,7 +1090,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1106,7 +1106,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1122,7 +1122,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1138,7 +1138,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1153,7 +1153,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1167,7 +1167,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1182,7 +1182,7 @@
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1199,7 +1199,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_offset(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1218,7 +1218,7 @@
               .channels(channels)
               .input_offset(43)
               .zero_index(zero_index)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1237,7 +1237,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .input_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1256,7 +1256,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .input_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1275,7 +1275,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .output_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1294,7 +1294,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .output_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1312,7 +1312,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmin(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1329,7 +1329,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmax(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1346,7 +1346,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_stride(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1365,7 +1365,7 @@
               .step(step)
               .channels(channels)
               .output_stride(43)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -1381,7 +1381,7 @@
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(8)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
@@ -1391,7 +1391,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .input_offset(11)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_zero) {
@@ -1403,7 +1403,7 @@
         .channels(8)
         .input_offset(11)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1415,7 +1415,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1427,7 +1427,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1439,7 +1439,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1451,7 +1451,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1462,7 +1462,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__SSE2_C8, channels_eq_8_twopass_fulltile_with_qmax) {
@@ -1472,7 +1472,7 @@
       .pooling_tile(9, 8)
       .channels(8)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9P8X__SSE2_C8, channels_eq_8_twopass_subtile) {
@@ -1482,7 +1482,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1494,7 +1494,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1508,7 +1508,7 @@
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1520,7 +1520,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1532,7 +1532,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(41)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1546,7 +1546,7 @@
           .channels(channels)
           .input_offset(41)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1560,7 +1560,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1574,7 +1574,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1588,7 +1588,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1602,7 +1602,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1615,7 +1615,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1627,7 +1627,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1639,7 +1639,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1653,7 +1653,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1669,7 +1669,7 @@
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1682,7 +1682,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1694,7 +1694,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1708,7 +1708,7 @@
           .channels(channels)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1722,7 +1722,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1736,7 +1736,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1750,7 +1750,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1764,7 +1764,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1777,7 +1777,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1789,7 +1789,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1801,7 +1801,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1815,7 +1815,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(11)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1831,7 +1831,7 @@
             .channels(channels)
             .input_offset(11)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -1844,7 +1844,7 @@
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1856,7 +1856,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1870,7 +1870,7 @@
           .channels(channels)
           .input_offset(17)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1884,7 +1884,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1898,7 +1898,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1912,7 +1912,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1926,7 +1926,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1939,7 +1939,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1951,7 +1951,7 @@
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -1963,7 +1963,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1977,7 +1977,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -1993,7 +1993,7 @@
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2006,7 +2006,7 @@
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -2018,7 +2018,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -2032,7 +2032,7 @@
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2046,7 +2046,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2060,7 +2060,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2074,7 +2074,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2088,7 +2088,7 @@
           .pooling_tile(9, 8)
           .channels(8)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2101,7 +2101,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -2113,7 +2113,7 @@
         .pooling_tile(9, 8)
         .channels(8)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -2125,7 +2125,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2139,7 +2139,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2155,7 +2155,7 @@
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2171,7 +2171,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2187,7 +2187,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2203,7 +2203,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2219,7 +2219,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2234,7 +2234,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2248,7 +2248,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2261,7 +2261,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2275,7 +2275,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(8)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2291,7 +2291,7 @@
             .channels(channels)
             .input_offset(8)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2307,7 +2307,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2323,7 +2323,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2339,7 +2339,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2355,7 +2355,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2370,7 +2370,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2384,7 +2384,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2397,7 +2397,7 @@
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2411,7 +2411,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2427,7 +2427,7 @@
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2443,7 +2443,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2459,7 +2459,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2475,7 +2475,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2491,7 +2491,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2506,7 +2506,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2520,7 +2520,7 @@
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -2535,7 +2535,7 @@
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 8)
             .channels(channels)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2552,7 +2552,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .input_offset(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2571,7 +2571,7 @@
               .channels(channels)
               .input_offset(43)
               .zero_index(zero_index)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2590,7 +2590,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .input_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2609,7 +2609,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .input_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2628,7 +2628,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .output_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2647,7 +2647,7 @@
               .pooling_tile(9, 8)
               .channels(channels)
               .output_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2665,7 +2665,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmin(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2682,7 +2682,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .qmax(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2699,7 +2699,7 @@
             .pooling_tile(9, 8)
             .channels(channels)
             .output_stride(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -2718,7 +2718,7 @@
               .step(step)
               .channels(channels)
               .output_stride(43)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -2732,7 +2732,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile) {
     .pooling_elements(17)
     .pooling_tile(9, 8)
     .channels(1)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_input_offset) {
@@ -2741,7 +2741,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_inp
     .pooling_tile(9, 8)
     .channels(1)
     .input_offset(3)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_zero) {
@@ -2752,7 +2752,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_zer
       .channels(1)
       .input_offset(3)
       .zero_index(zero_index)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2763,7 +2763,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_inp
       .pooling_tile(9, 8)
       .channels(1)
       .input_scale(scale)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2774,7 +2774,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_inp
       .pooling_tile(9, 8)
       .channels(1)
       .input_zero_point(zero_point)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2785,7 +2785,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_out
       .pooling_tile(9, 8)
       .channels(1)
       .output_scale(scale)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2796,7 +2796,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_out
       .pooling_tile(9, 8)
       .channels(1)
       .output_zero_point(zero_point)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2806,7 +2806,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_qmi
     .pooling_tile(9, 8)
     .channels(1)
     .qmin(128)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_qmax) {
@@ -2815,7 +2815,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_qma
     .pooling_tile(9, 8)
     .channels(1)
     .qmax(128)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
@@ -2824,7 +2824,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2835,7 +2835,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile_with_inpu
       .pooling_tile(9, 8)
       .channels(1)
       .input_offset(3)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2848,7 +2848,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile_with_zero
         .channels(1)
         .input_offset(3)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2859,7 +2859,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile) {
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(channels)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2870,7 +2870,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_inp
       .pooling_tile(9, 8)
       .channels(channels)
       .input_offset(3)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2883,7 +2883,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_zer
         .channels(channels)
         .input_offset(3)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2896,7 +2896,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_inp
         .pooling_tile(9, 8)
         .channels(channels)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2909,7 +2909,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_inp
         .pooling_tile(9, 8)
         .channels(channels)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2922,7 +2922,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_out
         .pooling_tile(9, 8)
         .channels(channels)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2935,7 +2935,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_out
         .pooling_tile(9, 8)
         .channels(channels)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2947,7 +2947,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_qmi
       .pooling_tile(9, 8)
       .channels(channels)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2958,7 +2958,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_qma
       .pooling_tile(9, 8)
       .channels(channels)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -2969,7 +2969,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2982,7 +2982,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_inpu
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -2997,7 +2997,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_zero
           .channels(channels)
           .input_offset(3)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3009,7 +3009,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass) {
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(1)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -3020,7 +3020,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offs
       .pooling_tile(9, 8)
       .channels(1)
       .input_offset(3)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -3033,7 +3033,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_zero) {
         .channels(1)
         .input_offset(3)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3046,7 +3046,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_scal
         .pooling_tile(9, 8)
         .channels(1)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3059,7 +3059,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_zero
         .pooling_tile(9, 8)
         .channels(1)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3072,7 +3072,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_output_sca
         .pooling_tile(9, 8)
         .channels(1)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3085,7 +3085,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_output_zer
         .pooling_tile(9, 8)
         .channels(1)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3097,7 +3097,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmin) {
       .pooling_tile(9, 8)
       .channels(1)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -3108,7 +3108,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_eq_1_multipass_with_qmax) {
       .pooling_tile(9, 8)
       .channels(1)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -3119,7 +3119,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3132,7 +3132,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_offs
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3147,7 +3147,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_zero) {
           .channels(channels)
           .input_offset(3)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3162,7 +3162,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_scal
           .pooling_tile(9, 8)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3177,7 +3177,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_zero
           .pooling_tile(9, 8)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3192,7 +3192,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_output_sca
           .pooling_tile(9, 8)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3207,7 +3207,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_output_zer
           .pooling_tile(9, 8)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3221,7 +3221,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmin) {
         .pooling_tile(9, 8)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3234,7 +3234,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, channels_gt_1_multipass_with_qmax) {
         .pooling_tile(9, 8)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -3248,7 +3248,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3264,7 +3264,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_input_offset) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(7)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3282,7 +3282,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_zero) {
             .channels(channels)
             .input_offset(7)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3300,7 +3300,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_input_scale) {
             .pooling_tile(9, 8)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3318,7 +3318,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_input_zero_point
             .pooling_tile(9, 8)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3336,7 +3336,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_output_scale) {
             .pooling_tile(9, 8)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3354,7 +3354,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_output_zero_poin
             .pooling_tile(9, 8)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3371,7 +3371,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_qmin) {
           .pooling_tile(9, 8)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3387,7 +3387,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_qmax) {
           .pooling_tile(9, 8)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3403,7 +3403,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_output_stride) {
           .pooling_tile(9, 8)
           .channels(channels)
           .output_stride(7)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -3421,7 +3421,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(7)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -3435,7 +3435,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_elements(9)
       .pooling_tile(9)
       .channels(8)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
@@ -3445,7 +3445,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .input_offset(11)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_zero) {
@@ -3457,7 +3457,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .channels(8)
         .input_offset(11)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3469,7 +3469,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3481,7 +3481,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3493,7 +3493,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3505,7 +3505,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3516,7 +3516,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__NEON_C8, channels_eq_8_unipass_fulltile_with_qmax) {
@@ -3526,7 +3526,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__NEON_C8, channels_eq_8_unipass_subtile) {
@@ -3536,7 +3536,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3548,7 +3548,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3562,7 +3562,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3574,7 +3574,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3586,7 +3586,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(67)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3600,7 +3600,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(67)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3614,7 +3614,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3628,7 +3628,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3642,7 +3642,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3656,7 +3656,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3669,7 +3669,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3681,7 +3681,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3693,7 +3693,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3707,7 +3707,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3723,7 +3723,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -3736,7 +3736,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3748,7 +3748,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3762,7 +3762,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3776,7 +3776,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3790,7 +3790,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3804,7 +3804,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3818,7 +3818,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3831,7 +3831,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3843,7 +3843,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3855,7 +3855,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3869,7 +3869,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(11)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3885,7 +3885,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(11)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -3898,7 +3898,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3910,7 +3910,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -3924,7 +3924,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(17)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3938,7 +3938,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3952,7 +3952,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3966,7 +3966,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3980,7 +3980,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -3993,7 +3993,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4005,7 +4005,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4017,7 +4017,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4031,7 +4031,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4047,7 +4047,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4063,7 +4063,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 0)
             .channels(channels)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4080,7 +4080,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .input_offset(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4099,7 +4099,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .channels(channels)
               .input_offset(43)
               .zero_index(zero_index)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4118,7 +4118,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .input_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4137,7 +4137,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .input_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4156,7 +4156,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .output_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4175,7 +4175,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .output_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4193,7 +4193,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .qmin(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4210,7 +4210,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .qmax(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4227,7 +4227,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .output_stride(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4246,7 +4246,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .step(step)
               .channels(channels)
               .output_stride(43)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4262,7 +4262,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_elements(9)
       .pooling_tile(9)
       .channels(8)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
@@ -4272,7 +4272,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .input_offset(11)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_zero) {
@@ -4284,7 +4284,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .channels(8)
         .input_offset(11)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4296,7 +4296,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4308,7 +4308,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4320,7 +4320,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4332,7 +4332,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4343,7 +4343,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__SSE2_C8, channels_eq_8_unipass_fulltile_with_qmax) {
@@ -4353,7 +4353,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
       .pooling_tile(9)
       .channels(8)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
   }
 
   TEST(QU8_AVGPOOL_MINMAX_9X__SSE2_C8, channels_eq_8_unipass_subtile) {
@@ -4363,7 +4363,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
         .channels(8)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4375,7 +4375,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(8)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4389,7 +4389,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(8)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4401,7 +4401,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4413,7 +4413,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(67)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4427,7 +4427,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(67)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4441,7 +4441,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4455,7 +4455,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4469,7 +4469,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4483,7 +4483,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4496,7 +4496,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4508,7 +4508,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4520,7 +4520,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4534,7 +4534,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(67)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4550,7 +4550,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(67)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4563,7 +4563,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4575,7 +4575,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(11)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4589,7 +4589,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(11)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4603,7 +4603,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4617,7 +4617,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4631,7 +4631,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4645,7 +4645,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4658,7 +4658,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4670,7 +4670,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4682,7 +4682,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4696,7 +4696,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(11)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4712,7 +4712,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(11)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4725,7 +4725,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_elements(9)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4737,7 +4737,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .input_offset(17)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4751,7 +4751,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .channels(channels)
           .input_offset(17)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4765,7 +4765,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4779,7 +4779,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4793,7 +4793,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_scale(scale)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4807,7 +4807,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .output_zero_point(zero_point)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4820,7 +4820,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4832,7 +4832,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
         .pooling_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
     }
   }
 
@@ -4844,7 +4844,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4858,7 +4858,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(17)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
       }
     }
   }
@@ -4874,7 +4874,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .channels(channels)
             .input_offset(17)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4890,7 +4890,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_elements(pooling_elements)
             .pooling_tile(9, 0)
             .channels(channels)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4907,7 +4907,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .input_offset(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -4926,7 +4926,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .channels(channels)
               .input_offset(43)
               .zero_index(zero_index)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4945,7 +4945,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .input_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4964,7 +4964,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .input_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -4983,7 +4983,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .output_scale(scale)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -5002,7 +5002,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .pooling_tile(9)
               .channels(channels)
               .output_zero_point(zero_point)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -5020,7 +5020,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .qmin(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -5037,7 +5037,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .qmax(128)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -5054,7 +5054,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .pooling_tile(9, 0)
             .channels(channels)
             .output_stride(43)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
         }
       }
     }
@@ -5073,7 +5073,7 @@ TEST(QU8_AVGPOOL_MINMAX_9P8X__SCALAR_C1, few_output_pixels_with_step) {
               .step(step)
               .channels(channels)
               .output_stride(43)
-              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8);
+              .Test(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8, xnn_init_qu8_avgpool_minmax_params);
           }
         }
       }
@@ -5087,7 +5087,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
     .pooling_elements(9)
     .pooling_tile(9)
     .channels(1)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
@@ -5096,7 +5096,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input
     .pooling_tile(9)
     .channels(1)
     .input_offset(3)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_zero) {
@@ -5107,7 +5107,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_zero)
       .channels(1)
       .input_offset(3)
       .zero_index(zero_index)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5118,7 +5118,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input
       .pooling_tile(9)
       .channels(1)
       .input_scale(scale)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5129,7 +5129,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input
       .pooling_tile(9)
       .channels(1)
       .input_zero_point(zero_point)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5140,7 +5140,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_outpu
       .pooling_tile(9)
       .channels(1)
       .output_scale(scale)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5151,7 +5151,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_outpu
       .pooling_tile(9)
       .channels(1)
       .output_zero_point(zero_point)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5161,7 +5161,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_qmin)
     .pooling_tile(9)
     .channels(1)
     .qmin(128)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_qmax) {
@@ -5170,7 +5170,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_qmax)
     .pooling_tile(9)
     .channels(1)
     .qmax(128)
-    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
 }
 
 TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_subtile) {
@@ -5179,7 +5179,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(9)
       .channels(1)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5190,7 +5190,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_subtile_with_input_
       .pooling_tile(9)
       .channels(1)
       .input_offset(3)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5203,7 +5203,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_eq_1_unipass_subtile_with_zero) 
         .channels(1)
         .input_offset(3)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5214,7 +5214,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile) {
       .pooling_elements(9)
       .pooling_tile(9)
       .channels(channels)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5225,7 +5225,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_input
       .pooling_tile(9)
       .channels(channels)
       .input_offset(3)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5238,7 +5238,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_zero)
         .channels(channels)
         .input_offset(3)
         .zero_index(zero_index)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5251,7 +5251,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_input
         .pooling_tile(9)
         .channels(channels)
         .input_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5264,7 +5264,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_input
         .pooling_tile(9)
         .channels(channels)
         .input_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5277,7 +5277,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_outpu
         .pooling_tile(9)
         .channels(channels)
         .output_scale(scale)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5290,7 +5290,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_outpu
         .pooling_tile(9)
         .channels(channels)
         .output_zero_point(zero_point)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5302,7 +5302,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_qmin)
       .pooling_tile(9)
       .channels(channels)
       .qmin(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5313,7 +5313,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_qmax)
       .pooling_tile(9)
       .channels(channels)
       .qmax(128)
-      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
   }
 }
 
@@ -5324,7 +5324,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5337,7 +5337,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_subtile_with_input_
         .pooling_tile(9)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
     }
   }
 }
@@ -5352,7 +5352,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, channels_gt_1_unipass_subtile_with_zero) 
           .channels(channels)
           .input_offset(3)
           .zero_index(zero_index)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5367,7 +5367,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 0)
           .channels(channels)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5383,7 +5383,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_input_offset) {
           .pooling_tile(9, 0)
           .channels(channels)
           .input_offset(7)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5401,7 +5401,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_zero) {
             .channels(channels)
             .input_offset(7)
             .zero_index(zero_index)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -5419,7 +5419,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_input_scale) {
             .pooling_tile(9)
             .channels(channels)
             .input_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -5437,7 +5437,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_input_zero_point) 
             .pooling_tile(9)
             .channels(channels)
             .input_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -5455,7 +5455,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_output_scale) {
             .pooling_tile(9)
             .channels(channels)
             .output_scale(scale)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -5473,7 +5473,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_output_zero_point)
             .pooling_tile(9)
             .channels(channels)
             .output_zero_point(zero_point)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }
@@ -5490,7 +5490,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_qmin) {
           .pooling_tile(9, 0)
           .channels(channels)
           .qmin(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5506,7 +5506,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_qmax) {
           .pooling_tile(9, 0)
           .channels(channels)
           .qmax(128)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5522,7 +5522,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_output_stride) {
           .pooling_tile(9, 0)
           .channels(channels)
           .output_stride(7)
-          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
       }
     }
   }
@@ -5540,7 +5540,7 @@ TEST(QU8_AVGPOOL_MINMAX_9X__SCALAR_C1, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(7)
-            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, AvgPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1, xnn_init_qu8_avgpool_minmax_scalar_params);
         }
       }
     }

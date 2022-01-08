@@ -3277,6 +3277,22 @@ typedef void (*xnn_init_qu8_conv_minmax_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
+typedef void (*xnn_init_qs8_avgpool_minmax_params_fn)(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max);
+
+typedef void (*xnn_init_qu8_avgpool_minmax_params_fn)(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
+
 typedef void (*xnn_init_qs8_addsub_minmax_params_fn)(
   union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
@@ -3361,6 +3377,12 @@ typedef void (*xnn_init_f32_neg_params_fn)(
 
 typedef void (*xnn_init_f32_rnd_params_fn)(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f32_scaleminmax_params_fn)(
+  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  float output_min,
+  float output_max);
 
 typedef void (*xnn_init_f32_sigmoid_params_fn)(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);

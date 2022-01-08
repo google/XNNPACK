@@ -1046,6 +1046,17 @@ void xnn_init_f16_scaleminmax_avx_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+void xnn_init_f32_scaleminmax_scalar_params(
+  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  float min,
+  float max)
+{
+  params->scalar.scale = scale;
+  params->scalar.min = min;
+  params->scalar.max = max;
+}
+
 void xnn_init_f32_scaleminmax_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -1139,17 +1150,6 @@ void xnn_update_f32_gavgpool_params(
     params->scalar.mask[2] = -(int32_t) (w >= 2);
     params->scalar.mask[3] = -(int32_t) (w >= 3);
   #endif
-}
-
-void xnn_init_scalar_f32_scaleminmax_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  float min,
-  float max)
-{
-  params->scalar.scale = scale;
-  params->scalar.min = min;
-  params->scalar.max = max;
 }
 
 void xnn_init_scalar_f32_gavgpool_params(

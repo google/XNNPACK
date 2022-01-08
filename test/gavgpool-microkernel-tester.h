@@ -633,7 +633,7 @@ class GAvgPoolMicrokernelTester {
             &params, 1.0f / float(rows()), output_min, output_max);
           break;
         case Variant::Scalar:
-          xnn_init_scalar_f32_scaleminmax_params(
+          xnn_init_f32_scaleminmax_scalar_params(
             &params, 1.0f / float(rows()), output_min, output_max);
           break;
       }
@@ -695,7 +695,7 @@ class GAvgPoolMicrokernelTester {
             &params, 1.0f / float(rows()), output_min, output_max);
           break;
         case Variant::Scalar:
-          xnn_init_scalar_f32_scaleminmax_params(
+          xnn_init_f32_scaleminmax_scalar_params(
             &params, 1.0f / float(rows()), output_min, output_max);
           break;
       }
