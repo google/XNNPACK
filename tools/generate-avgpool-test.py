@@ -2392,12 +2392,13 @@ $else:
 """
 
 
-def generate_test_cases(ukernel, primary_tile, incremental_tile, channel_tile,
-                        isa):
+def generate_test_cases(ukernel, init_fn, primary_tile, incremental_tile,
+                        channel_tile, isa):
   """Generates all tests cases for a AVGPOOL micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    init_fn: C name of the function to initialize microkernel parameters.
     primary_tile: Number of rows (pixels) processed per one iteration of the
                   primary outer loop of the micro-kernel.
     incremental_tile: Number of rows (pixels) processed per one iteration of
@@ -2412,9 +2413,7 @@ def generate_test_cases(ukernel, primary_tile, incremental_tile, channel_tile,
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  test_args = [ukernel]
-  if isa == "wasm" or not isa:
-    test_args.append("AvgPoolMicrokernelTester::Variant::Scalar")
+  test_args = [ukernel, init_fn]
   return xngen.preprocess(AVGPOOL_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -2461,14 +2460,15 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       primary_tile, incremental_tile, channel_tile, arch, isa = \
         split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, primary_tile, incremental_tile,
-                                      channel_tile, isa)
+      test_case = generate_test_cases(name, init_fn, primary_tile,
+                                      incremental_tile, channel_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True
