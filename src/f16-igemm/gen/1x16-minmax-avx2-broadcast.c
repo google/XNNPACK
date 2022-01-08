@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast(
@@ -62,7 +63,7 @@ void xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast(
         const __m256 vb89ABCDEF = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + 8)));
         w = (const uint16_t*) w + 16;
 
-        const __m256 va0 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a0)));
+        const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
         a0 += 1;
 
         vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_NO_EXC));
@@ -116,7 +117,7 @@ void xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast(
         c0 += 2;
       }
       if (nc & 1) {
-        _mm_storeu_si16(c0, vh0x01234567);
+        *c0 = _mm_extract_epi16(vh0x01234567, 0);
       }
 
       nc = 0;

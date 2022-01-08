@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_igemm_minmax_ukernel_6x8__avx2_broadcast(
@@ -110,17 +111,17 @@ void xnn_f16_igemm_minmax_ukernel_6x8__avx2_broadcast(
         const __m256 vb01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
         w = (const uint16_t*) w + 8;
 
-        const __m256 va0 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a0)));
+        const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
         a0 += 1;
-        const __m256 va1 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a1)));
+        const __m256 va1 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a1));
         a1 += 1;
-        const __m256 va2 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a2)));
+        const __m256 va2 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a2));
         a2 += 1;
-        const __m256 va3 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a3)));
+        const __m256 va3 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a3));
         a3 += 1;
-        const __m256 va4 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a4)));
+        const __m256 va4 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a4));
         a4 += 1;
-        const __m256 va5 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a5)));
+        const __m256 va5 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a5));
         a5 += 1;
 
         vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_NO_EXC));
@@ -227,12 +228,12 @@ void xnn_f16_igemm_minmax_ukernel_6x8__avx2_broadcast(
         c0 += 2;
       }
       if (nc & 1) {
-        _mm_storeu_si16(c5, vh5x01234567);
-        _mm_storeu_si16(c4, vh4x01234567);
-        _mm_storeu_si16(c3, vh3x01234567);
-        _mm_storeu_si16(c2, vh2x01234567);
-        _mm_storeu_si16(c1, vh1x01234567);
-        _mm_storeu_si16(c0, vh0x01234567);
+        *c5 = _mm_extract_epi16(vh5x01234567, 0);
+        *c4 = _mm_extract_epi16(vh4x01234567, 0);
+        *c3 = _mm_extract_epi16(vh3x01234567, 0);
+        *c2 = _mm_extract_epi16(vh2x01234567, 0);
+        *c1 = _mm_extract_epi16(vh1x01234567, 0);
+        *c0 = _mm_extract_epi16(vh0x01234567, 0);
       }
 
       nc = 0;

@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast(
@@ -44,7 +45,7 @@ void xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast(
 
     size_t k = kc;
     do {
-      const __m256 va0 = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a0)));
+      const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
       a0 += 1;
 
       const __m256 vb01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
@@ -88,7 +89,7 @@ void xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast(
         c0 += 2;
       }
       if (nc & 1) {
-        _mm_storeu_si16(c0, vh0x01234567);
+        *c0 = (uint16_t) _mm_extract_epi16(vh0x01234567, 0);
       }
 
       nc = 0;

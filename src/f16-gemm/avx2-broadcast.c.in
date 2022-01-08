@@ -10,6 +10,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
@@ -66,7 +67,7 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
     size_t k = kc;
     do {
       $for M in range(MR):
-        const __m256 va${M} = _mm256_cvtph_ps(_mm_broadcastw_epi16(_mm_loadu_si16(a${M})));
+        const __m256 va${M} = _mm256_cvtph_ps(_mm_set1_epi16((short) *a${M}));
         a${M} += 1;
 
       const __m256 vb${ABC[0:8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
@@ -155,7 +156,7 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
                 c${M} += 2;
             $elif LOG2N == 0:
               $for M in reversed(range(MR)):
-                _mm_storeu_si16(c${M}, vh${M}x${ABC[0:8]});
+                *c${M} = (uint16_t) _mm_extract_epi16(vh${M}x${ABC[0:8]}, 0);
           }
 
       nc = 0;
