@@ -168,7 +168,7 @@ static enum xnn_status setup_global_average_pooling_nwc(
 
   update_params(global_average_pooling_op, width);
 
-  assert(gavgpool->mr != 0);
+  assert(gavgpool->row_tile != 0);
 
   const size_t input_stride_in_bytes = global_average_pooling_op->input_pixel_stride << log2_element_size;
   const size_t channels = global_average_pooling_op->channels;
@@ -186,12 +186,12 @@ static enum xnn_status setup_global_average_pooling_nwc(
   global_average_pooling_op->compute.type = xnn_parallelization_type_1d;
   global_average_pooling_op->compute.range[0] = batch_size;
 
-  if (width <= gavgpool->mr) {
+  if (width <= gavgpool->row_tile) {
     global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
-    global_average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = gavgpool->up;
+    global_average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = gavgpool->unipass;
   } else {
     global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
-    global_average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->mp;
+    global_average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->multipass;
   }
   global_average_pooling_op->state = xnn_run_state_ready;
 
@@ -241,8 +241,10 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
   }
 
   union xnn_qu8_avgpool_minmax_params params;
-  xnn_init_qu8_avgpool_minmax_params(
-    &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  if (xnn_params.qu8.gavgpool.init.qu8 != NULL) {
+    xnn_params.qu8.gavgpool.init.qu8(&params,
+      0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  }
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     0 /* log2(sizeof(uint8_t)) */,
@@ -303,8 +305,10 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
   }
 
   union xnn_qs8_avgpool_minmax_params params;
-  xnn_init_qs8_avgpool_minmax_params(
-    &params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  if (xnn_params.qs8.gavgpool.init.qs8 != NULL) {
+    xnn_params.qs8.gavgpool.init.qs8(&params,
+      0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  }
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     0 /* log2(sizeof(int8_t)) */,
@@ -355,10 +359,10 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
   }
 
   union xnn_f16_scaleminmax_params params;
-  xnn_init_f16_scaleminmax_neon_params(
-    &params, UINT16_C(0x7E00) /* NaN */,
-    fp16_ieee_from_fp32_value(output_min),
-    fp16_ieee_from_fp32_value(output_max));
+  if (xnn_params.f16.gavgpool.init.f16 != NULL) {
+    xnn_params.f16.gavgpool.init.f16(&params,
+      0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+  }
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     1 /* log2(sizeof(uint16_t)) */,
@@ -400,7 +404,10 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   }
 
   union xnn_f32_scaleminmax_params params;
-  xnn_init_f32_scaleminmax_params(&params, 0.0f /* scale */, output_min, output_max);
+  if (xnn_params.f32.gavgpool.init.f32 != NULL) {
+    xnn_params.f32.gavgpool.init.f32(&params,
+      0.0f /* scale */, output_min, output_max);
+  }
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
     2 /* log2(sizeof(float)) */,
@@ -417,7 +424,7 @@ static void update_params_qu8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_update_qu8_avgpool_minmax_params(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
+  xnn_params.qu8.gavgpool.update.qu8(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
@@ -448,7 +455,7 @@ static void update_params_qs8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_update_qs8_avgpool_minmax_params(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
+  xnn_params.qs8.gavgpool.update.qs8(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
@@ -477,7 +484,7 @@ static void update_params_f16(
   xnn_operator_t global_average_pooling_op,
   size_t width)
 {
-  xnn_update_f16_scaleminmax_params(
+  xnn_params.f16.gavgpool.update.f16(
     &global_average_pooling_op->params.f16_scaleminmax,
     fp16_ieee_from_fp32_value(1.0f / (float) width));
 }
@@ -508,7 +515,7 @@ static void update_params_f32(
   xnn_operator_t global_average_pooling_op,
   size_t width)
 {
-  xnn_update_f32_scaleminmax_params(&global_average_pooling_op->params.f32_scaleminmax, 1.0f / (float) width);
+  xnn_params.f32.gavgpool.update.f32(&global_average_pooling_op->params.f32_scaleminmax, 1.0f / (float) width);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_f32(

@@ -825,6 +825,33 @@ void xnn_update_qu8_avgpool_minmax_params(
   #endif
 }
 
+void xnn_update_qu8_avgpool_minmax_scalar_params(
+  union xnn_qu8_avgpool_minmax_params* params,
+  int32_t bias,
+  float scale)
+{
+  // Compute requantization parameters.
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x00800000, 0x00FFFFFF] range.
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
+  assert(multiplier >= INT32_C(0x00800000));
+  assert(multiplier <= INT32_C(0x00FFFFFF));
+
+  // Shift is in [16, 55] range.
+  const int32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 16);
+  assert(shift < 64);
+
+  const int64_t rounding = INT64_C(1) << ((uint32_t) shift - 1);
+  params->scalar.bias = bias;
+  params->scalar.multiplier = multiplier;
+  params->scalar.rounding = rounding;
+  params->scalar.right_shift = (uint32_t) shift;
+}
+
 void xnn_init_qs8_avgpool_minmax_params(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
@@ -937,6 +964,33 @@ void xnn_init_qs8_avgpool_minmax_scalar_params(
   params->scalar.output_zero_point = (int32_t) output_zero_point;
 }
 
+void xnn_update_qs8_avgpool_minmax_scalar_params(
+  union xnn_qs8_avgpool_minmax_params* params,
+  int32_t bias,
+  float scale)
+{
+  // Compute requantization parameters.
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x00800000, 0x00FFFFFF] range.
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
+  assert(multiplier >= INT32_C(0x00800000));
+  assert(multiplier <= INT32_C(0x00FFFFFF));
+
+  // Shift is in [16, 55] range.
+  const int32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 16);
+  assert(shift < 64);
+
+  const int64_t rounding = INT64_C(1) << ((uint32_t) shift - 1);
+  params->scalar.bias = bias;
+  params->scalar.multiplier = multiplier;
+  params->scalar.rounding = rounding;
+  params->scalar.shift = (uint32_t) shift;
+}
+
 void xnn_update_qs8_avgpool_minmax_params(
   union xnn_qs8_avgpool_minmax_params* params,
   int32_t bias,
@@ -995,11 +1049,11 @@ void xnn_update_qs8_avgpool_minmax_params(
   #endif
 }
 
-void xnn_update_f16_scaleminmax_params(
-  union xnn_f16_scaleminmax_params* params,
-  uint16_t scale)
+void xnn_update_f32_scaleminmax_scalar_params(
+  union xnn_f32_scaleminmax_params* params,
+  float scale)
 {
-  params->neon.scale = scale;
+  params->scalar.scale = scale;
 }
 
 void xnn_update_f32_scaleminmax_params(
@@ -1015,7 +1069,7 @@ void xnn_update_f32_scaleminmax_params(
   #endif
 }
 
-// #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_f16_scaleminmax_neon_params(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
@@ -1026,7 +1080,7 @@ void xnn_init_f16_scaleminmax_neon_params(
   params->neon.min = min;
   params->neon.max = max;
 }
-// #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f16_scaleminmax_avx_params(
@@ -1042,6 +1096,27 @@ void xnn_init_f16_scaleminmax_avx_params(
     params->avx.scale[i] = scale_f32;
     params->avx.min[i] = min_f32;
     params->avx.max[i] = max_f32;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_update_f16_scaleminmax_neon_params(
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale)
+{
+  params->neon.scale = scale;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_update_f16_scaleminmax_avx_params(
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale)
+{
+  const float scale_f32 = fp16_ieee_to_fp32_value(scale);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.scale[i] = scale_f32;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

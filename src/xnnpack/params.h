@@ -3293,6 +3293,16 @@ typedef void (*xnn_init_qu8_avgpool_minmax_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
+typedef void (*xnn_update_qs8_avgpool_minmax_params_fn)(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale);
+
+typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale);
+
 typedef void (*xnn_init_qs8_addsub_minmax_params_fn)(
   union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
@@ -3345,6 +3355,10 @@ typedef void (*xnn_init_f16_scaleminmax_params_fn)(
   uint16_t min,
   uint16_t max);
 
+typedef void (*xnn_update_f16_scaleminmax_params_fn)(
+  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale);
+
 typedef void (*xnn_init_f32_abs_params_fn)(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)]);
 
@@ -3383,6 +3397,10 @@ typedef void (*xnn_init_f32_scaleminmax_params_fn)(
   float scale,
   float output_min,
   float output_max);
+
+typedef void (*xnn_update_f32_scaleminmax_params_fn)(
+  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale);
 
 typedef void (*xnn_init_f32_sigmoid_params_fn)(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
@@ -3601,23 +3619,62 @@ struct depthtospace2d_chw2hwc_parameters {
 };
 
 struct gavgpool_parameters {
-  xnn_gavgpool_unipass_ukernel_function up;
-  xnn_gavgpool_multipass_ukernel_function mp;
-  uint8_t mr;
+  xnn_gavgpool_unipass_ukernel_function unipass;
+  xnn_gavgpool_multipass_ukernel_function multipass;
+  union {
+    xnn_init_f16_scaleminmax_params_fn f16;
+    xnn_init_f32_scaleminmax_params_fn f32;
+    xnn_init_qs8_avgpool_minmax_params_fn qs8;
+    xnn_init_qu8_avgpool_minmax_params_fn qu8;
+  } init;
+  union {
+    xnn_update_f16_scaleminmax_params_fn f16;
+    xnn_update_f32_scaleminmax_params_fn f32;
+    xnn_update_qs8_avgpool_minmax_params_fn qs8;
+    xnn_update_qu8_avgpool_minmax_params_fn qu8;
+  } update;
+  // Number of rows in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint16_t row_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
 };
 
 struct avgpool_parameters {
-  xnn_avgpool_unipass_ukernel_function up;
-  xnn_avgpool_multipass_ukernel_function mp;
-  uint8_t mr;
-  uint8_t qr;
+  xnn_avgpool_unipass_ukernel_function unipass;
+  xnn_avgpool_multipass_ukernel_function multipass;
+  union {
+    xnn_init_f32_scaleminmax_params_fn f32;
+    xnn_init_qu8_avgpool_minmax_params_fn qu8;
+  } init;
+  // Number of rows in a primary tile.
+  // Unipass micro-kernel must be called with this number of rows, or fewer.
+  // Multipass micro-kernel must be called with more than this number of rows.
+  uint8_t primary_tile;
+  // Number of rows in an incremental tile.
+  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
+  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
+  uint8_t incremental_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
 };
 
 struct pavgpool_parameters {
-  xnn_pavgpool_unipass_ukernel_function up;
-  xnn_pavgpool_multipass_ukernel_function mp;
-  uint8_t mr;
-  uint8_t qr;
+  xnn_pavgpool_unipass_ukernel_function unipass;
+  xnn_pavgpool_multipass_ukernel_function multipass;
+  // Number of rows in a primary tile.
+  // Unipass micro-kernel must be called with this number of rows, or fewer.
+  // Multipass micro-kernel must be called with more than this number of rows.
+  uint8_t primary_tile;
+  // Number of rows in an incremental tile.
+  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
+  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
+  uint8_t incremental_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
 };
 
 struct argmaxpool_parameters {
