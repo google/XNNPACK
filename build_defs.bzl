@@ -96,7 +96,8 @@ def xnnpack_cc_library(
         defines = [],
         includes = [],
         deps = [],
-        visibility = []):
+        visibility = [],
+        testonly = False):
     """C/C++/assembly library with architecture-specific configuration.
 
     Define a static library with architecture- and instruction-specific
@@ -242,6 +243,7 @@ def xnnpack_cc_library(
         }),
         textual_hdrs = hdrs,
         visibility = visibility,
+        testonly = testonly,
     )
 
 def xnnpack_aggregate_library(

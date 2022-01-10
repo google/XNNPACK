@@ -10385,6 +10385,22 @@ xnnpack_unit_test(
 
 ######################### Unit tests for micro-kernels #########################
 
+xnnpack_cc_library(
+    name = "gemm_microkernel_tester",
+    testonly = True,
+    srcs = [
+        "test/gemm-microkernel-tester.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    hdrs = [
+        "test/gemm-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 xnnpack_unit_test(
     name = "f16_f32_vcvt_test",
     srcs = [
@@ -10418,20 +10434,20 @@ xnnpack_unit_test(
     name = "f16_gemm_minmax_test",
     srcs = [
         "test/f16-gemm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f16_igemm_minmax_test",
     srcs = [
         "test/f16-igemm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -10642,32 +10658,30 @@ xnnpack_unit_test(
     name = "f32_igemm_test",
     srcs = [
         "test/f32-igemm.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f32_igemm_relu_test",
     srcs = [
         "test/f32-igemm-relu.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f32_igemm_minmax_test",
     srcs = [
         "test/f32-igemm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -10754,12 +10768,10 @@ xnnpack_unit_test(
     name = "f32_gemm_test",
     srcs = [
         "test/f32-gemm.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -10767,22 +10779,20 @@ xnnpack_unit_test(
     name = "f32_gemm_relu_test",
     srcs = [
         "test/f32-gemm-relu.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f32_gemm_minmax_test",
     srcs = [
         "test/f32-gemm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -10790,10 +10800,10 @@ xnnpack_unit_test(
     name = "f32_gemminc_minmax_test",
     srcs = [
         "test/f32-gemminc-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -10828,10 +10838,10 @@ xnnpack_unit_test(
     name = "f32_ppmm_minmax_test",
     srcs = [
         "test/f32-ppmm-minmax.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -11405,13 +11415,11 @@ xnnpack_unit_test(
     srcs = [
         "test/qc8-gemm-minmax-fp32.cc",
         "test/qc8-gemm-minmax-fp32-c.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -11421,13 +11429,11 @@ xnnpack_unit_test(
     srcs = [
         "test/qc8-igemm-minmax-fp32.cc",
         "test/qc8-igemm-minmax-fp32-c.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -11476,11 +11482,11 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-gemm-minmax-fp32.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -11490,12 +11496,10 @@ xnnpack_unit_test(
         "test/qs8-gemm-minmax-rndnu.cc",
         "test/qs8-gemm-minmax-rndnu-c2.cc",
         "test/qs8-gemm-minmax-rndnu-c4.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -11504,11 +11508,11 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-igemm-minmax-fp32.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -11516,12 +11520,10 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-igemm-minmax-rndnu.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":jit",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -11624,42 +11626,42 @@ xnnpack_unit_test(
     name = "qu8_gemm_minmax_fp32_test",
     srcs = [
         "test/qu8-gemm-minmax-fp32.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "qu8_gemm_minmax_rndnu_test",
     srcs = [
         "test/qu8-gemm-minmax-rndnu.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "qu8_igemm_minmax_fp32_test",
     srcs = [
         "test/qu8-igemm-minmax-fp32.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "qu8_igemm_minmax_rndnu_test",
     srcs = [
         "test/qu8-igemm-minmax-rndnu.cc",
-        "test/gemm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
