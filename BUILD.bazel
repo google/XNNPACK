@@ -11905,6 +11905,7 @@ xnnpack_unit_test(
         "test/add-nd.cc",
         "test/binary-elementwise-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12044,6 +12045,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/divide-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12126,6 +12128,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/maximum-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12135,6 +12138,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/minimum-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12145,6 +12149,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12226,6 +12231,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/squared-difference-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -12235,6 +12241,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
