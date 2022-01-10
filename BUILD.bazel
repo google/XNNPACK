@@ -11473,6 +11473,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-gemm-minmax-rndnu.cc",
         "test/qs8-gemm-minmax-rndnu-c2.cc",
+        "test/qs8-gemm-minmax-rndnu-c4.cc",
         "test/gemm-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,

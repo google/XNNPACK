@@ -1135,6 +1135,7 @@ tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml     --output t
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml    --output test/qs8-gemm-minmax-rndnu.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu-c2.yaml --output test/qs8-gemm-minmax-rndnu-c2.cc &
+tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu-c4.yaml --output test/qs8-gemm-minmax-rndnu-c4.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml    --output test/qu8-gemm-minmax-rndnu.cc &
 
 wait
