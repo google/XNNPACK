@@ -79,12 +79,13 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__neonfp16arith_2x(
       vst1q_f16(o1, vacc1x89ABCDEF); o1 += 8;
     }
     for (; c >= 8 * sizeof(__fp16); c -= 8 * sizeof(__fp16)) {
-      const float16x8_t vscale01234567 = vld1q_f16(w); w += 8;
+      const float16x8_t vscale01234567 = vld1q_f16(w);
 
       float16x8_t vacc0x01234567 = vld1q_f16(i0); i0 += 8;
       float16x8_t vacc1x01234567 = vld1q_f16(i1); i1 += 8;
 
-      const float16x8_t vbias01234567 = vld1q_f16(w + 8);
+      const float16x8_t vbias01234567 = vld1q_f16(w + 16);
+      w += 8;
 
       vacc0x01234567 = vfmaq_f16(vbias01234567, vscale01234567, vacc0x01234567);
       vacc1x01234567 = vfmaq_f16(vbias01234567, vscale01234567, vacc1x01234567);

@@ -5814,6 +5814,8 @@ PROD_F16C_MICROKERNEL_SRCS = [
 ]
 
 ALL_F16C_MICROKERNEL_SRCS = [
+    "src/f16-vclamp/gen/vclamp-f16c-x8.c",
+    "src/f16-vclamp/gen/vclamp-f16c-x16.c",
     "src/f16-f32-vcvt/gen/vcvt-f16c-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-f16c-x16.c",
     "src/f32-f16-vcvt/gen/vcvt-f16c-x8.c",
@@ -5994,6 +5996,26 @@ PROD_FMA3_MICROKERNEL_SRCS = [
 ]
 
 ALL_FMA3_MICROKERNEL_SRCS = [
+    "src/f16-dwconv/gen/up8x4-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up8x4-minmax-fma3.c",
+    "src/f16-dwconv/gen/up8x9-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up8x9-minmax-fma3.c",
+    "src/f16-dwconv/gen/up8x25-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up8x25-minmax-fma3.c",
+    "src/f16-dwconv/gen/up16x4-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up16x4-minmax-fma3.c",
+    "src/f16-dwconv/gen/up16x9-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up16x9-minmax-fma3.c",
+    "src/f16-dwconv/gen/up16x25-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up16x25-minmax-fma3.c",
+    "src/f16-dwconv/gen/up32x4-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up32x4-minmax-fma3.c",
+    "src/f16-dwconv/gen/up32x9-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up32x9-minmax-fma3.c",
+    "src/f16-dwconv/gen/up32x25-minmax-fma3-acc2.c",
+    "src/f16-dwconv/gen/up32x25-minmax-fma3.c",
+    "src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c",
+    "src/f16-vmulcaddc/gen/c16-minmax-fma3-2x.c",
     "src/f32-dwconv/gen/up8x3-minmax-fma3-acc2.c",
     "src/f32-dwconv/gen/up8x3-minmax-fma3.c",
     "src/f32-dwconv/gen/up8x4-minmax-fma3-acc2.c",
@@ -8051,7 +8073,10 @@ xnnpack_cc_library(
     name = "fma3_amalgam_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mfma"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -8067,7 +8092,10 @@ xnnpack_cc_library(
     name = "fma3_bench_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mfma"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -8083,7 +8111,10 @@ xnnpack_cc_library(
     name = "fma3_prod_microkernels",
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mfma"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -8103,7 +8134,10 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mfma"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mfma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],

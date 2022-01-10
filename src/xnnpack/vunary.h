@@ -26,6 +26,9 @@ extern "C" {
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x8)
 DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__neonfp16arith_x16)
 
+DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__f16c_x8)
+DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(xnn_f16_vclamp_ukernel__f16c_x16)
+
 
 #define DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                          \

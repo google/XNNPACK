@@ -3,34 +3,42 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 - name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 1
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 1
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 1
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 1
   arch:
   - aarch64
 - name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2
+  init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
   arch:
   - aarch64

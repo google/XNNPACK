@@ -31,26 +31,26 @@ void xnn_f16_vclamp_ukernel__neonfp16arith_x${BATCH_TILE}(
   const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
   const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
 
-  for (; n >= ${BATCH_TILE} * sizeof(__fp16); n -= ${BATCH_TILE} * sizeof(__fp16)) {
-    $for N in range(0, BATCH_TILE, 8):
-      float16x8_t vacc${ABC[N:N+8]} = vld1q_f16(x); x += 8;
-
-    $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+8]} = vmaxq_f16(vacc${ABC[N:N+8]}, vy_min);
-
-    $for N in range(0, BATCH_TILE, 8):
-      vacc${ABC[N:N+8]} = vminq_f16(vacc${ABC[N:N+8]}, vy_max);
-
-    $for N in range(0, BATCH_TILE, 8):
-      vst1q_f16(y, vacc${ABC[N:N+8]}); y += 8;
-  }
   $if BATCH_TILE > 8:
-    for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
-      float16x8_t vacc = vld1q_f16(x); x += 8;
-      vacc = vmaxq_f16(vacc, vy_min);
-      vacc = vminq_f16(vacc, vy_max);
-      vst1q_f16(y, vacc); y += 8;
+    for (; n >= ${BATCH_TILE} * sizeof(__fp16); n -= ${BATCH_TILE} * sizeof(__fp16)) {
+      $for N in range(0, BATCH_TILE, 8):
+        float16x8_t vacc${ABC[N:N+8]} = vld1q_f16(x); x += 8;
+
+      $for N in range(0, BATCH_TILE, 8):
+        vacc${ABC[N:N+8]} = vmaxq_f16(vacc${ABC[N:N+8]}, vy_min);
+
+      $for N in range(0, BATCH_TILE, 8):
+        vacc${ABC[N:N+8]} = vminq_f16(vacc${ABC[N:N+8]}, vy_max);
+
+      $for N in range(0, BATCH_TILE, 8):
+        vst1q_f16(y, vacc${ABC[N:N+8]}); y += 8;
     }
+  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
+    float16x8_t vacc = vld1q_f16(x); x += 8;
+    vacc = vmaxq_f16(vacc, vy_min);
+    vacc = vminq_f16(vacc, vy_max);
+    vst1q_f16(y, vacc); y += 8;
+  }
   if XNN_UNLIKELY(n != 0) {
     float16x8_t vacc = vld1q_f16(x);
     vacc = vmaxq_f16(vacc, vy_min);

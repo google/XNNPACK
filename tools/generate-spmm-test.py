@@ -376,11 +376,12 @@ TEST(${TEST_NAME}, zero_weights) {
 """
 
 
-def generate_test_cases(ukernel, mr, nr, k_block, is_pipelined, isa):
+def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    init_fn: C name of the function to initialize microkernel parameters.
     mr: MR parameter of the GEMM micro-kernel.
     nr: NR parameter of the GEMM micro-kernel.
     k_block: Number of K values processed per one iteration of the main loop of
@@ -397,9 +398,7 @@ def generate_test_cases(ukernel, mr, nr, k_block, is_pipelined, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  test_args = [ukernel]
-  if not isa:
-    test_args.append("SpMMMicrokernelTester::Variant::Scalar")
+  test_args = [ukernel, init_fn]
   return xngen.preprocess(TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -445,6 +444,7 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec["init"]
       k_block = int(ukernel_spec["k-block"])
       pipelined = bool(ukernel_spec.get("pipelined", False))
       mr, nr, arch, isa = split_ukernel_name(name)
@@ -452,7 +452,8 @@ def main(args):
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, mr, nr, k_block, pipelined, isa)
+      test_case = generate_test_cases(name, init_fn, mr, nr, k_block,
+                                      pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

@@ -1353,7 +1353,8 @@ void xnn_init_scalar_f32_gavgpool_params(
   params->scalar.mask[3] = -(int32_t) (w >= 3);
 }
 
-void xnn_init_f16_minmax_params(
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f16_minmax_neon_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max)
@@ -1361,6 +1362,22 @@ void xnn_init_f16_minmax_params(
   params->neon.min = min;
   params->neon.max = max;
 }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_minmax_avx_params(
+  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max)
+{
+  const float min_f32 = fp16_ieee_to_fp32_value(min);
+  const float max_f32 = fp16_ieee_to_fp32_value(max);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = min_f32;
+    params->avx.max[i] = max_f32;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f32_default_avx_params(

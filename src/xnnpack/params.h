@@ -28,24 +28,40 @@ union xnn_f16_relu_params {
 
 // scaleminmax is used for gemm/igemm ukernels.
 union xnn_f16_scaleminmax_params {
+  // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t scale;
     uint16_t min;
     uint16_t max;
     uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
   } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) float scale[8];
     XNN_ALIGN(32) float min[8];
     XNN_ALIGN(32) float max[8];
   } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f16_minmax_params {
+  // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t min;
     uint16_t max;
   } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float min[8];
+    XNN_ALIGN(32) float max[8];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_default_params {
@@ -3538,6 +3554,7 @@ struct vbinary_parameters {
   struct vbinary_fused_ukernels minmax;
   struct vbinary_fused_ukernels linear;
   union {
+    xnn_init_f16_minmax_params_fn f16_minmax;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_minmax_params_fn f32_minmax;
     xnn_init_qs8_addsub_minmax_params_fn qs8_addsub;

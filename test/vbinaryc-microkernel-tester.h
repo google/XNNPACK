@@ -85,7 +85,7 @@ class VBinaryCMicrokernelTester {
   void Test(xnn_f16_vbinary_ukernel_function vbinaryc, OpType op_type) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(1.0e-3f, 1.0f), rng);
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -147,7 +147,7 @@ class VBinaryCMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vbinary_minmax_ukernel_function vbinaryc_minmax, OpType op_type) const {
+  void Test(xnn_f16_vbinary_minmax_ukernel_function vbinaryc_minmax, OpType op_type, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(1.0e-3f, 1.0f), rng);
@@ -216,10 +216,8 @@ class VBinaryCMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      xnn_init_f16_minmax_params(
-        &params,
-        fp16_ieee_from_fp32_value(y_min),
-        fp16_ieee_from_fp32_value(y_max));
+      init_params(&params,
+        fp16_ieee_from_fp32_value(y_min), fp16_ieee_from_fp32_value(y_max));
 
       // Call optimized micro-kernel.
       vbinaryc_minmax(batch_size() * sizeof(uint16_t), a_data, &b, y.data(), &params);

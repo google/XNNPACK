@@ -4571,6 +4571,8 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
+  src/f16-vclamp/gen/vclamp-f16c-x8.c
+  src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
@@ -4747,6 +4749,26 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-vhswish/gen/vhswish-fma3-x16.c)
 
 SET(ALL_FMA3_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/up8x4-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up8x4-minmax-fma3.c
+  src/f16-dwconv/gen/up8x9-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up8x9-minmax-fma3.c
+  src/f16-dwconv/gen/up8x25-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up8x25-minmax-fma3.c
+  src/f16-dwconv/gen/up16x4-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up16x4-minmax-fma3.c
+  src/f16-dwconv/gen/up16x9-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up16x9-minmax-fma3.c
+  src/f16-dwconv/gen/up16x25-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up16x25-minmax-fma3.c
+  src/f16-dwconv/gen/up32x4-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up32x4-minmax-fma3.c
+  src/f16-dwconv/gen/up32x9-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up32x9-minmax-fma3.c
+  src/f16-dwconv/gen/up32x25-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up32x25-minmax-fma3.c
+  src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c
+  src/f16-vmulcaddc/gen/c16-minmax-fma3-2x.c
   src/f32-dwconv/gen/up8x3-minmax-fma3-acc2.c
   src/f32-dwconv/gen/up8x3-minmax-fma3.c
   src/f32-dwconv/gen/up8x4-minmax-fma3-acc2.c
@@ -5929,7 +5951,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86|x86_64|AMD64)$" OR IOS_ARCH 
       SET_PROPERTY(SOURCE ${ALL_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mavx ")
       SET_PROPERTY(SOURCE ${ALL_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c ")
       SET_PROPERTY(SOURCE ${ALL_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mxop ")
-      SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mfma ")
+      SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma ")
       SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 ")
       SET_PROPERTY(SOURCE ${ALL_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mavx512f ")
       SET_PROPERTY(SOURCE ${ALL_AVX512SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl ")
@@ -5942,7 +5964,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86|x86_64|AMD64)$" OR IOS_ARCH 
     SET_PROPERTY(SOURCE ${ALL_AVX_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx ")
     SET_PROPERTY(SOURCE ${ALL_F16C_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c ")
     SET_PROPERTY(SOURCE ${ALL_XOP_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mxop ")
-    SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfma ")
+    SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mfma ")
     SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mf16c -mfma -mavx2 ")
     SET_PROPERTY(SOURCE ${ALL_AVX512F_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mavx512f ")
     SET_PROPERTY(SOURCE ${ALL_AVX512SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl ")
