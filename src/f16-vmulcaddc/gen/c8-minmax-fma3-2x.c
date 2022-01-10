@@ -33,10 +33,6 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
   uint16_t* o0 = (uint16_t*) output;
   const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
   uint16_t* o1 = (uint16_t*) ((uintptr_t) o0 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 2) {
-    i1 = i0;
-    o1 = o0;
-  }
 
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
@@ -44,6 +40,11 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
+    if XNN_UNPREDICTABLE(rows < 2) {
+      i1 = i0;
+      o1 = o0;
+    }
+
     const uint16_t* w = (const uint16_t*) weights;
     size_t c = channels;
     for (; c >= 8 * sizeof(uint16_t); c -= 8 * sizeof(uint16_t)) {
@@ -125,10 +126,6 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
     o0 = (uint16_t*) ((uintptr_t) o0 + output_increment);
     i1 = (const uint16_t*) ((uintptr_t) i1 + input_increment);
     o1 = (uint16_t*) ((uintptr_t) o1 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 4) {
-      i1 = i0;
-      o1 = o0;
-    }
     rows = doz(rows, 2);
   } while (rows != 0);
 }

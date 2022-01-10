@@ -34,16 +34,6 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__sse_${ROW_TILE}x(
   $for M in range(1, ROW_TILE):
     const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_stride);
     float* o${M} = (float*) ((uintptr_t) o${M-1} + output_stride);
-    $if M % 2 == 0:
-      if XNN_UNPREDICTABLE(rows <= ${M}) {
-        i${M} = i${M-1};
-        o${M} = o${M-1};
-      }
-    $else:
-      if XNN_UNPREDICTABLE(rows < ${M+1}) {
-        i${M} = i${M-1};
-        o${M} = o${M-1};
-      }
 
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
@@ -51,6 +41,18 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__sse_${ROW_TILE}x(
   const __m128 vmin = _mm_load_ps(params->sse.min);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   do {
+    $for M in range(1, ROW_TILE):
+      $if M % 2 == 0:
+        if XNN_UNPREDICTABLE(rows <= ${M}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+      $else:
+        if XNN_UNPREDICTABLE(rows < ${M+1}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+
     const float* w = weights;
     size_t c = channels;
     for (; c >= ${CHANNEL_TILE} * sizeof(float); c -= ${CHANNEL_TILE} * sizeof(float)) {
@@ -161,16 +163,6 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__sse_${ROW_TILE}x(
     $for M in range(ROW_TILE):
       i${M} = (const float*) ((uintptr_t) i${M} + input_increment);
       o${M} = (float*) ((uintptr_t) o${M} + output_increment);
-      $if M % 2 == 1:
-        if XNN_UNPREDICTABLE(rows < ${ROW_TILE + M + 1}) {
-          i${M} = i${M-1};
-          o${M} = o${M-1};
-        }
-      $elif M != 0:
-        if XNN_UNPREDICTABLE(rows <= ${ROW_TILE + M}) {
-          i${M} = i${M-1};
-          o${M} = o${M-1};
-        }
     rows = doz(rows, ${ROW_TILE});
   } while (rows != 0);
 }
