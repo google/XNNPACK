@@ -923,12 +923,21 @@ union xnn_f32_gavgpool_params {
 };
 
 union xnn_f16_hswish_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t sixth;
     uint16_t three;
     uint16_t six;
     uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
   } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float sixth[8];
+    XNN_ALIGN(32) float three[8];
+    XNN_ALIGN(16) uint16_t six[8];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_hswish_params {

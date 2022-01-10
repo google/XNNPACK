@@ -2184,7 +2184,7 @@ static void init(void) {
       };
       xnn_params.f16.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vhswish_ukernel__neonfp16arith_x16,
-        .init.f16_hswish = xnn_init_f16_hswish_params,
+        .init.f16_hswish = xnn_init_f16_hswish_neon_params,
         .element_tile = 16,
       };
     }

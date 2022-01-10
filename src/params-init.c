@@ -1465,13 +1465,27 @@ void xnn_init_f32_minmax_scalar_params(
   params->scalar.max = output_max;
 }
 
-void xnn_init_f16_hswish_params(
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f16_hswish_neon_params(
   union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
 {
   params->neon.sixth = UINT16_C(0x3155);
   params->neon.three = UINT16_C(0x4200);
   params->neon.six = UINT16_C(0x4600);
 }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_hswish_avx_params(
+  union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.sixth[i] = 0x1.554000p-3f;
+    params->avx.three[i] = 3.0f;
+    params->avx.six[i] = UINT16_C(0x4600);
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 void xnn_init_f32_hswish_scalar_params(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)])
