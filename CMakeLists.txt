@@ -1266,22 +1266,22 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-transpose/gen/1x2-scalar-int.c
-  src/x32-transpose/gen/1x4-scalar-int.c
-  src/x32-transpose/gen/2x1-scalar-int.c
-  src/x32-transpose/gen/2x2-scalar-int.c
-  src/x32-transpose/gen/2x4-scalar-int.c
-  src/x32-transpose/gen/4x1-scalar-int.c
-  src/x32-transpose/gen/4x2-scalar-int.c
-  src/x32-transpose/gen/4x4-scalar-int.c
   src/x32-transpose/gen/1x2-scalar-float.c
+  src/x32-transpose/gen/1x2-scalar-int.c
   src/x32-transpose/gen/1x4-scalar-float.c
+  src/x32-transpose/gen/1x4-scalar-int.c
   src/x32-transpose/gen/2x1-scalar-float.c
+  src/x32-transpose/gen/2x1-scalar-int.c
   src/x32-transpose/gen/2x2-scalar-float.c
+  src/x32-transpose/gen/2x2-scalar-int.c
   src/x32-transpose/gen/2x4-scalar-float.c
+  src/x32-transpose/gen/2x4-scalar-int.c
   src/x32-transpose/gen/4x1-scalar-float.c
+  src/x32-transpose/gen/4x1-scalar-int.c
   src/x32-transpose/gen/4x2-scalar-float.c
+  src/x32-transpose/gen/4x2-scalar-int.c
   src/x32-transpose/gen/4x4-scalar-float.c
+  src/x32-transpose/gen/4x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
@@ -1388,15 +1388,11 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
   src/qu8-gavgpool/7p7x-minmax-neon-c8.c
   src/qu8-gavgpool/7x-minmax-neon-c8.c
-  src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/2x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-gemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/2x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-igemm/gen/4x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-vadd/gen/minmax-neon-ld64-x16.c
   src/qu8-vadd/gen/minmax-neon-ld64-x32.c
@@ -4601,12 +4597,12 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
+  src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
+  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f16-vclamp/gen/vclamp-f16c-x8.c
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x8.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
-  src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
-  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c
   src/math/cvt-f16-f32-f16c.c
