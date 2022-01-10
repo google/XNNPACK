@@ -57,7 +57,7 @@ void xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast(
     } while (k != 0);
 
     const __m256 vscale = _mm256_load_ps(params->avx.scale);
-    vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale);
+    vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc0x01234567, vscale), _MM_FROUND_NO_EXC));
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);

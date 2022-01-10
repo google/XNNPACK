@@ -137,12 +137,12 @@ void xnn_f16_igemm_minmax_ukernel_6x8__avx2_broadcast(
     } while (p != 0);
 
     const __m256 vscale = _mm256_load_ps(params->avx.scale);
-    vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale);
-    vacc1x01234567 = _mm256_mul_ps(vacc1x01234567, vscale);
-    vacc2x01234567 = _mm256_mul_ps(vacc2x01234567, vscale);
-    vacc3x01234567 = _mm256_mul_ps(vacc3x01234567, vscale);
-    vacc4x01234567 = _mm256_mul_ps(vacc4x01234567, vscale);
-    vacc5x01234567 = _mm256_mul_ps(vacc5x01234567, vscale);
+    vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc0x01234567, vscale), _MM_FROUND_NO_EXC));
+    vacc1x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc1x01234567, vscale), _MM_FROUND_NO_EXC));
+    vacc2x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc2x01234567, vscale), _MM_FROUND_NO_EXC));
+    vacc3x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc3x01234567, vscale), _MM_FROUND_NO_EXC));
+    vacc4x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc4x01234567, vscale), _MM_FROUND_NO_EXC));
+    vacc5x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc5x01234567, vscale), _MM_FROUND_NO_EXC));
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
