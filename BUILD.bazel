@@ -9208,8 +9208,13 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
-    hdrs = ["bench/utils.h"],
+    hdrs = [
+        "bench/utils.h",
+        "src/xnnpack/allocator.h",
+    ],
     deps = [
+        ":XNNPACK",
+        ":jit",
         "@com_google_benchmark//:benchmark",
         "@cpuinfo",
     ],
@@ -10116,6 +10121,7 @@ xnnpack_benchmark(
         ":fp32_mobilenet_v2",
         ":fp32_mobilenet_v3_large",
         ":fp32_mobilenet_v3_small",
+        ":jit",
     ],
 )
 

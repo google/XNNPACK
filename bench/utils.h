@@ -8,6 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <xnnpack.h>
+#include <xnnpack/allocator.h>
+
 #include <benchmark/benchmark.h>
 
 namespace benchmark {
@@ -151,6 +154,15 @@ template <class T>
 inline T Doz(T a, T b) {
   return a >= b ? a - b : T(0);
 }
+
+// A struct that uses RAII pattern to allocate and release code memory.
+struct CodeMemoryHelper {
+  CodeMemoryHelper();
+  ~CodeMemoryHelper();
+
+  xnn_code_buffer buffer;
+  xnn_status status;
+};
 
 }  // namespace utils
 }  // namespace benchmark
