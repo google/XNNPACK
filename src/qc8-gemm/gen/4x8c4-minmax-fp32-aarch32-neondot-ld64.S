@@ -79,7 +79,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLD1.32 {d13[]}, [r5]           // QC8 params
+        VLD1.8 {s27}, [r5]              // QC8 params
         LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3

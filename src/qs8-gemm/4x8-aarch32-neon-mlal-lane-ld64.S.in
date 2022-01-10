@@ -93,7 +93,8 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         $if REQUANTIZATION == "RNDNU":
           VLDM    r5, {d10-d11}           // RNDNU params
         $else:
-          VLD1.32 {d11[]}, [r5]           // QC8 params
+          VLD1.8 {s23}, [r5]              // QC8 params
+
         LDR     r7, [sp, 80]            // cn_stride
 
         $if PREFETCH:

@@ -81,6 +81,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 
         # Load params values
         VLDM    r5, {d10-d11}           // RNDNU params
+
         LDR     r7, [sp, 80]            // cn_stride
 
         PLD     [r9,  64]               // Prefetch B

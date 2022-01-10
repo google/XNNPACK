@@ -54,7 +54,7 @@ $if REQUANTIZATION == "RNDNU":
   //    int8_t output_min;          d11[6]
   //    int8_t output_max;          d11[7]
   //  } rndnu_neon;
-$else:
+$else:  // QC8
   // params structure is 4 bytes
   //  struct {
   //    int16_t output_zero_point;  d11[2]
@@ -91,7 +91,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         $if REQUANTIZATION == "RNDNU":
           VLDM    r5, {d10-d11}           // RNDNU params
         $else:
-          VLD1.32 {d11[]}, [r5]           // QC8 params
+          VLD1.8 {s23}, [r5]              // QC8 params
 
         $if PREFETCH:
           PLD     [r9,  64]               // Prefetch B
