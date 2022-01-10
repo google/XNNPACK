@@ -447,6 +447,7 @@ class Assembler {
   Assembler& vldm(CoreRegister rn, DRegisterList regs, bool wb);
   Assembler& vldm(CoreRegister rn, SRegisterList regs) { return vldm(rn, regs, false); }
   Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
+  Assembler& vldr(SRegister sd, MemOperand op);
   Assembler& vldr(DRegister dd, MemOperand op);
   Assembler& vmax_f32(QRegister qd, QRegister qn, QRegister qm);
   Assembler& vmax_s8(QRegister qd, QRegister qn, QRegister qm);

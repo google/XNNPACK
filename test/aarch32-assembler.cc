@@ -143,6 +143,14 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, {s4-s0}));
   EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, SRegisterList(s31, 2)));
 
+  CHECK_ENCODING(0xEDD97A0E, a.vldr(s15, mem[r9, 56]));
+  CHECK_ENCODING(0xEDD97AFF, a.vldr(s15, mem[r9, 1020]));
+  CHECK_ENCODING(0xED597AFF, a.vldr(s15, mem[r9, -1020]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(s15, MemOperand(r9, 56, AddressingMode::kPostIndexed)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(s15, mem[r9, 1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(s15, mem[r9, -1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vldr(s15, mem[r9, 1018]));
+
   CHECK_ENCODING(0xED99FB0E, a.vldr(d15, mem[r9, 56]));
   CHECK_ENCODING(0xED99FBFF, a.vldr(d15, mem[r9, 1020]));
   CHECK_ENCODING(0xED19FBFF, a.vldr(d15, mem[r9, -1020]));

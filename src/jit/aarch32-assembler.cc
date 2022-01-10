@@ -372,6 +372,16 @@ Assembler& Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
   return emit32(kAL | 0x0C900B00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
 }
 
+Assembler& Assembler::vldr(SRegister sd, MemOperand op) {
+  const uint32_t offset = std::abs(op.offset());
+  if (op.mode() != AddressingMode::kOffset || offset > kUint10Max || offset % 4 != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(kAL | 0x0D100A00 | op.u() << 23 | encode(sd, 22, 12) | op.base().code << 16 | offset >> 2);
+}
+
 Assembler& Assembler::vldr(DRegister dd, MemOperand op) {
   const uint32_t offset = std::abs(op.offset());
   if (op.mode() != AddressingMode::kOffset || offset > kUint10Max || offset % 4 != 0) {
