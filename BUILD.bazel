@@ -7191,25 +7191,6 @@ WEIGHTS_PACK_HDRS = [
     "src/xnnpack/pack.h",
 ]
 
-LOGGING_COPTS = select({
-    # No logging in optimized mode
-    ":optimized_build": ["-DXNN_LOG_LEVEL=0"],
-    # Full logging in debug mode
-    ":debug_build": ["-DXNN_LOG_LEVEL=5"],
-    # Error-only logging in default (fastbuild) mode
-    "//conditions:default": ["-DXNN_LOG_LEVEL=2"],
-})
-
-LOGGING_SRCS = select({
-    # No logging in optimized mode
-    ":optimized_build": [],
-    "//conditions:default": [
-        "src/datatype-strings.c",
-        "src/operator-strings.c",
-        "src/subgraph-strings.c",
-    ],
-})
-
 LOGGING_HDRS = [
     "src/xnnpack/log.h",
 ]
@@ -8454,20 +8435,53 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "log_level_default",
+    defines = select({
+        # No logging in optimized mode
+        ":optimized_build": ["XNN_LOG_LEVEL=0"],
+        # Full logging in debug mode
+        ":debug_build": ["XNN_LOG_LEVEL=5"],
+        # Error-only logging in default (fastbuild) mode
+        "//conditions:default": ["XNN_LOG_LEVEL=2"],
+    }),
+)
+
+xnnpack_cc_library(
     name = "logging_utils",
-    srcs = LOGGING_SRCS,
+    srcs = [
+        "src/datatype-strings.c",
+        "src/operator-strings.c",
+        "src/subgraph-strings.c",
+    ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
     ] + select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }),
+    defines = select({
+        ":xnn_log_level_explicit_none": ["XNN_LOG_LEVEL=0"],
+        ":xnn_log_level_explicit_fatal": ["XNN_LOG_LEVEL=1"],
+        ":xnn_log_level_explicit_error": ["XNN_LOG_LEVEL=2"],
+        ":xnn_log_level_explicit_warning": ["XNN_LOG_LEVEL=3"],
+        ":xnn_log_level_explicit_info": ["XNN_LOG_LEVEL=4"],
+        ":xnn_log_level_explicit_debug": ["XNN_LOG_LEVEL=5"],
+        "//conditions:default": [],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
-    deps = [
+    deps = select({
+        ":xnn_log_level_explicit_none": [],
+        ":xnn_log_level_explicit_fatal": [],
+        ":xnn_log_level_explicit_error": [],
+        ":xnn_log_level_explicit_warning": [],
+        ":xnn_log_level_explicit_info": [],
+        ":xnn_log_level_explicit_debug": [],
+        "//conditions:default": [":log_level_default"],
+    }) + [
         "@FP16",
         "@clog",
         "@pthreadpool",
@@ -8769,7 +8783,7 @@ xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = LOGGING_COPTS + select({
+    copts = select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
@@ -8788,7 +8802,7 @@ xnnpack_cc_library(
     name = "operator_run_test_mode",
     srcs = ["src/operator-run.c"],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = LOGGING_COPTS + [
+    copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ] + select({
@@ -8878,7 +8892,7 @@ xnnpack_cc_library(
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -8909,7 +8923,7 @@ xnnpack_cc_library(
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
         "-UNDEBUG",
@@ -8945,7 +8959,6 @@ xnnpack_cc_library(
         "src/xnnpack/aarch32-assembler.h",
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
-    copts = LOGGING_COPTS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":logging_utils",
@@ -8961,7 +8974,7 @@ xnnpack_cc_library(
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
     ],
-    copts = LOGGING_COPTS + [
+    copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ],
@@ -8980,7 +8993,7 @@ xnnpack_cc_library(
         "src/tensor.c",
     ] + SUBGRAPH_SRCS,
     hdrs = ["include/xnnpack.h"],
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -9033,7 +9046,7 @@ xnnpack_cc_library(
         "src/tensor.c",
     ] + SUBGRAPH_SRCS,
     hdrs = ["include/xnnpack.h"],
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
         "-UNDEBUG",
@@ -9090,7 +9103,7 @@ xnnpack_cc_library(
         "src/tensor.c",
     ] + SUBGRAPH_SRCS,
     hdrs = ["include/xnnpack.h"],
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -9155,7 +9168,7 @@ xnnpack_cc_library(
         "src/init.c",
     ],
     hdrs = ["include/xnnpack.h"],
-    copts = LOGGING_COPTS + [
+    copts = [
         "-Isrc",
         "-Iinclude",
     ] + select({
@@ -12406,6 +12419,42 @@ config_setting(
 config_setting(
     name = "xnn_wasmsimd_version_m91",
     define_values = {"xnn_wasmsimd_version": "m91"},
+)
+
+# Fully disable logging
+config_setting(
+    name = "xnn_log_level_explicit_none",
+    define_values = {"xnn_log_level": "none"},
+)
+
+# Log fatal errors only
+config_setting(
+    name = "xnn_log_level_explicit_fatal",
+    define_values = {"xnn_log_level": "fatal"},
+)
+
+# Log fatal and non-fatal errors
+config_setting(
+    name = "xnn_log_level_explicit_error",
+    define_values = {"xnn_log_level": "error"},
+)
+
+# Log warnings and errors
+config_setting(
+    name = "xnn_log_level_explicit_warning",
+    define_values = {"xnn_log_level": "warning"},
+)
+
+# Log information messages, warnings and errors
+config_setting(
+    name = "xnn_log_level_explicit_info",
+    define_values = {"xnn_log_level": "info"},
+)
+
+# Log all messages, including debug messages
+config_setting(
+    name = "xnn_log_level_explicit_debug",
+    define_values = {"xnn_log_level": "debug"},
 )
 
 # Builds with -c dbg
