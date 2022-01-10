@@ -8997,6 +8997,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_jit",
         ":enable_sparse",
         ":logging_utils",
         ":memory_planner",
@@ -9051,6 +9052,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_jit",
         ":enable_sparse",
         ":logging_utils",
         ":memory_planner_test_mode",
@@ -9117,6 +9119,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_jit",
         ":enable_sparse",
         ":logging_utils",
         ":memory_planner",
@@ -9164,6 +9167,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":enable_assembly",
+        ":enable_jit",
         ":logging_utils",
         ":operator_run",
         ":operators",
