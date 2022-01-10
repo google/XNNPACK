@@ -480,11 +480,17 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       1, 8, 1, 1, benchmark::utils::CheckNEON);
   }
-  static void qu8_gemm_1x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+  static void qu8_gemm_2x8__neon_mlal_lane(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
-      1, 16, 1, 1, benchmark::utils::CheckNEON);
+      2, 8, 1, 1, benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_3x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      3, 8, 1, 1, benchmark::utils::CheckNEON);
   }
   static void qu8_gemm_4x8__neon_mlal_lane(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
@@ -492,11 +498,41 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       4, 8, 1, 1, benchmark::utils::CheckNEON);
   }
+  static void qu8_gemm_6x8__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      6, 8, 1, 1, benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_1x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      1, 16, 1, 1, benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_2x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      2, 16, 1, 1, benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_3x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      3, 16, 1, 1, benchmark::utils::CheckNEON);
+  }
   static void qu8_gemm_4x16__neon_mlal_lane(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       4, 16, 1, 1, benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_6x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      6, 16, 1, 1, benchmark::utils::CheckNEON);
   }
   static void qu8_gemm_1x32c4__neondot(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
@@ -534,9 +570,15 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qu8_gemm_2x32c4__neondot)
   BENCHMARK_GEMM(qu8_gemm_3x32c4__neondot)
   BENCHMARK_GEMM(qu8_gemm_1x8__neon_mlal_lane)
-  BENCHMARK_GEMM(qu8_gemm_1x16__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_2x8__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_3x8__neon_mlal_lane)
   BENCHMARK_GEMM(qu8_gemm_4x8__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_6x8__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_1x16__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_2x16__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_3x16__neon_mlal_lane)
   BENCHMARK_GEMM(qu8_gemm_4x16__neon_mlal_lane)
+  BENCHMARK_GEMM(qu8_gemm_6x16__neon_mlal_lane)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

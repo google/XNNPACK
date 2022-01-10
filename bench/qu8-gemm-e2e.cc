@@ -194,6 +194,28 @@ static void GEMMEnd2EndBenchmark(
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void qu8_gemm_2x8__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void qu8_gemm_3x8__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_3x8__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
   static void qu8_gemm_4x8__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__neon_mlal_lane,
@@ -205,10 +227,54 @@ static void GEMMEnd2EndBenchmark(
       benchmark::utils::CheckNEON);
   }
 
+  static void qu8_gemm_6x8__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void qu8_gemm_2x16__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_2x16__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void qu8_gemm_3x16__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_3x16__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
   static void qu8_gemm_4x16__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane,
       xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void qu8_gemm_6x16__neon_mlal_lane(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_6x16__neon_mlal_lane,
       xnn_qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
       xnn_qu8_igemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane,
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
@@ -393,8 +459,14 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QU8_END2END(qu8_gemm_2x32c4__neondot);
   BENCHMARK_QU8_END2END(qu8_gemm_3x32c4__neondot);
 
+  BENCHMARK_QU8_END2END(qu8_gemm_2x8__neon_mlal_lane);
+  BENCHMARK_QU8_END2END(qu8_gemm_3x8__neon_mlal_lane);
   BENCHMARK_QU8_END2END(qu8_gemm_4x8__neon_mlal_lane);
+  BENCHMARK_QU8_END2END(qu8_gemm_6x8__neon_mlal_lane);
+  BENCHMARK_QU8_END2END(qu8_gemm_2x16__neon_mlal_lane);
+  BENCHMARK_QU8_END2END(qu8_gemm_3x16__neon_mlal_lane);
   BENCHMARK_QU8_END2END(qu8_gemm_4x16__neon_mlal_lane);
+  BENCHMARK_QU8_END2END(qu8_gemm_6x16__neon_mlal_lane);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
