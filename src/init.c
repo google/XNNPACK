@@ -3476,7 +3476,7 @@ static void init(void) {
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
       .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9x__sse_c4,
       .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4,
-      .init.f32 = xnn_init_f32_scaleminmax_params,
+      .init.f32 = xnn_init_f32_scaleminmax_sse_params,
       .primary_tile = 9,
       .incremental_tile = 8,
       .channel_tile = 4,
@@ -3491,8 +3491,8 @@ static void init(void) {
     xnn_params.f32.gavgpool = (struct gavgpool_parameters) {
       .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4,
       .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7p7x__sse_c4,
-      .init.f32 = xnn_init_f32_scaleminmax_params,
-      .update.f32 = xnn_update_f32_scaleminmax_params,
+      .init.f32 = xnn_init_f32_scaleminmax_sse_params,
+      .update.f32 = xnn_update_f32_scaleminmax_sse_params,
       .row_tile = 7,
       .channel_tile = 4,
     };
@@ -4577,7 +4577,7 @@ static void init(void) {
       xnn_params.f32.avgpool = (struct avgpool_parameters) {
         .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9x__wasmsimd_x86_c4,
         .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9p8x__wasmsimd_x86_c4,
-        .init.f32 = xnn_init_f32_scaleminmax_params,
+        .init.f32 = xnn_init_f32_scaleminmax_scalar_params,
         .primary_tile = 9,
         .incremental_tile = 8,
         .channel_tile = 4,
@@ -4592,8 +4592,8 @@ static void init(void) {
       xnn_params.f32.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7x__wasmsimd_x86_c4,
         .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_x86_c4,
-        .init.f32 = xnn_init_f32_scaleminmax_params,
-        .update.f32 = xnn_update_f32_scaleminmax_params,
+        .init.f32 = xnn_init_f32_scaleminmax_scalar_params,
+        .update.f32 = xnn_update_f32_scaleminmax_scalar_params,
         .row_tile = 7,
         .channel_tile = 4,
       };
@@ -4601,7 +4601,7 @@ static void init(void) {
       xnn_params.f32.avgpool = (struct avgpool_parameters) {
         .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9x__wasmsimd_arm_c4,
         .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f32_avgpool_minmax_ukernel_9p8x__wasmsimd_arm_c4,
-        .init.f32 = xnn_init_f32_scaleminmax_params,
+        .init.f32 = xnn_init_f32_scaleminmax_scalar_params,
         .primary_tile = 9,
         .incremental_tile = 8,
         .channel_tile = 4,
@@ -4616,8 +4616,8 @@ static void init(void) {
       xnn_params.f32.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7x__wasmsimd_arm_c4,
         .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f32_gavgpool_minmax_ukernel_7p7x__wasmsimd_arm_c4,
-        .init.f32 = xnn_init_f32_scaleminmax_params,
-        .update.f32 = xnn_update_f32_scaleminmax_params,
+        .init.f32 = xnn_init_f32_scaleminmax_scalar_params,
+        .update.f32 = xnn_update_f32_scaleminmax_scalar_params,
         .row_tile = 7,
         .channel_tile = 4,
       };

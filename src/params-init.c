@@ -1170,18 +1170,16 @@ void xnn_update_f32_scaleminmax_scalar_params(
   params->scalar.scale = scale;
 }
 
-void xnn_update_f32_scaleminmax_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_update_f32_scaleminmax_sse_params(
   union xnn_f32_scaleminmax_params* params,
   float scale)
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.scale[i] = scale;
-    }
-  #else
-    params->scalar.scale = scale;
-  #endif
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.scale[i] = scale;
+  }
 }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_f16_scaleminmax_neon_params(
@@ -1246,24 +1244,20 @@ void xnn_init_f32_scaleminmax_scalar_params(
   params->scalar.max = max;
 }
 
-void xnn_init_f32_scaleminmax_params(
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f32_scaleminmax_sse_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   float min,
   float max)
 {
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.scale[i] = scale;
-      params->sse.min[i] = min;
-      params->sse.max[i] = max;
-    }
-  #else
-    params->scalar.scale = scale;
-    params->scalar.min = min;
-    params->scalar.max = max;
-  #endif
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.scale[i] = scale;
+    params->sse.min[i] = min;
+    params->sse.max[i] = max;
+  }
 }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 void xnn_init_f32_gavgpool_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],

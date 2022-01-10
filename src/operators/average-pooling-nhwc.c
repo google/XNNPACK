@@ -703,7 +703,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
   const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling;
   if (is_pixelwise) {
     const size_t input_size = input_height * input_width;
-    xnn_update_f32_scaleminmax_params(&average_pooling_op->params.f32_scaleminmax, 1.0f / (float) input_size);
+    xnn_params.f32.gavgpool.update.f32(&average_pooling_op->params.f32_scaleminmax, 1.0f / (float) (int32_t) input_size);
   }
 
   return setup_average_pooling2d(

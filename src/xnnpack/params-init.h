@@ -225,26 +225,31 @@ DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_scalar_
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#define DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                                      \
+    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float scale,                                                  \
+    float min,                                                    \
+    float max);
 
-XNN_INTERNAL void xnn_init_f32_scaleminmax_scalar_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  float min,
-  float max);
+DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_params)
 
-XNN_INTERNAL void xnn_init_f32_scaleminmax_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  float min,
-  float max);
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_sse_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-XNN_INTERNAL void xnn_update_f32_scaleminmax_scalar_params(
-  union xnn_f32_scaleminmax_params* params,
-  float scale);
 
-XNN_INTERNAL void xnn_update_f32_scaleminmax_params(
-  union xnn_f32_scaleminmax_params* params,
-  float scale);
+#define DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                                      \
+    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float scale);
+
+DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_scalar_params)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_sse_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 XNN_INTERNAL void xnn_init_f32_gavgpool_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
