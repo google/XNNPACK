@@ -49,6 +49,39 @@ static void x32_transpose(
   }
 }
 
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_1x2, xnn_x32_transpose_ukernel__1x2_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_1x4, xnn_x32_transpose_ukernel__1x4_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_2x1, xnn_x32_transpose_ukernel__2x1_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_2x2, xnn_x32_transpose_ukernel__2x2_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_2x4, xnn_x32_transpose_ukernel__2x4_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_4x1, xnn_x32_transpose_ukernel__4x1_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_4x2, xnn_x32_transpose_ukernel__4x2_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_int_32_4x4, xnn_x32_transpose_ukernel__4x4_scalar_int, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_1x2, xnn_x32_transpose_ukernel__1x2_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_1x4, xnn_x32_transpose_ukernel__1x4_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_2x1, xnn_x32_transpose_ukernel__2x1_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_2x2, xnn_x32_transpose_ukernel__2x2_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_2x4, xnn_x32_transpose_ukernel__2x4_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_4x1, xnn_x32_transpose_ukernel__4x1_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_4x2, xnn_x32_transpose_ukernel__4x2_scalar_float, 32)
+    ->UseRealTime();
+BENCHMARK_CAPTURE(x32_transpose, scalar_float_32_4x4, xnn_x32_transpose_ukernel__4x4_scalar_float, 32)
+    ->UseRealTime();
+
 #if XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(x32_transpose, aarch64_32_tbl, xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl, 32)
       ->UseRealTime();
