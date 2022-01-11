@@ -63,26 +63,27 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   // Release all unused pages.
   const size_t page_aligned_code_size = round_up_po2(buf->size, page_size);
   const uint8_t* start = (uint8_t*) buf->code;
-  const uint8_t* addr = start + page_aligned_code_size;
-  if (addr >= start) {
-    // We used up every page. No need to unmap anything.
-    return xnn_status_success;
-  }
+  const uint8_t* unused_start = start + page_aligned_code_size;
   const size_t unused_capacity = buf->capacity - page_aligned_code_size;
 
-  // Free unused pages.
-#if XNN_PLATFORM_WINDOWS
-  // We cannot selectively release pages inside the region of pages, so just decommit them.
-  if (!VirtualFree((void*) addr, unused_capacity, MEM_DECOMMIT)) {
-    xnn_log_error("failed to unmap code buffer, error code: %" PRIu32, (uint32_t) GetLastError());
-    return xnn_status_invalid_state;
+  xnn_log_debug("JIT code memory start %p, used: %zu, capacity: %zu, unused %zu", start, buf->size, buf->capacity,
+                unused_capacity);
+
+  if (unused_capacity > 0) {
+    // Free unused pages.
+    #if XNN_PLATFORM_WINDOWS
+      // We cannot selectively release pages inside the region of pages, so just decommit them.
+      if (!VirtualFree((void*) unused_start, unused_capacity, MEM_DECOMMIT)) {
+        xnn_log_error("failed to unmap code buffer, error code: %" PRIu32, (uint32_t) GetLastError());
+        return xnn_status_invalid_state;
+      }
+    #else
+      if (munmap((void*) unused_start, unused_capacity) == -1) {
+        xnn_log_error("failed to unmap code buffer, error code: %d", errno);
+        return xnn_status_invalid_state;
+      }
+    #endif
   }
-#else
-  if (munmap((void*) addr, unused_capacity) == -1) {
-    xnn_log_error("failed to unmap code buffer, error code: %d", errno);
-    return xnn_status_invalid_state;
-  }
-#endif
 
   buf->capacity = page_aligned_code_size;
 
