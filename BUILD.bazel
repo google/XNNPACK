@@ -11540,6 +11540,7 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-gemm-minmax-fp32.cc",
+        "test/qs8-gemm-minmax-fp32-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11568,6 +11569,7 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-igemm-minmax-fp32.cc",
+        "test/qs8-igemm-minmax-fp32-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11580,6 +11582,8 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-igemm-minmax-rndnu.cc",
+        "test/qs8-igemm-minmax-rndnu-2.cc",
+        "test/qs8-igemm-minmax-rndnu-3.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",
@@ -11686,6 +11690,7 @@ xnnpack_unit_test(
     name = "qu8_gemm_minmax_fp32_test",
     srcs = [
         "test/qu8-gemm-minmax-fp32.cc",
+        "test/qu8-gemm-minmax-fp32-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11697,6 +11702,7 @@ xnnpack_unit_test(
     name = "qu8_gemm_minmax_rndnu_test",
     srcs = [
         "test/qu8-gemm-minmax-rndnu.cc",
+        "test/qu8-gemm-minmax-rndnu-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -11707,6 +11713,7 @@ xnnpack_unit_test(
     name = "qu8_igemm_minmax_fp32_test",
     srcs = [
         "test/qu8-igemm-minmax-fp32.cc",
+        "test/qu8-igemm-minmax-fp32-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11718,6 +11725,7 @@ xnnpack_unit_test(
     name = "qu8_igemm_minmax_rndnu_test",
     srcs = [
         "test/qu8-igemm-minmax-rndnu.cc",
+        "test/qu8-igemm-minmax-rndnu-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
