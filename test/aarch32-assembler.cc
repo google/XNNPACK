@@ -443,7 +443,7 @@ TEST(AArch32Assembler, AllocateAndRelease) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
 TEST(AArch32Assembler, JitAllocCodeBuffer) {
   typedef uint32_t (*Func)(uint32_t);
 
@@ -459,6 +459,6 @@ TEST(AArch32Assembler, JitAllocCodeBuffer) {
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
-#endif
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 }  // namespace aarch32
 }  // namespace xnnpack
