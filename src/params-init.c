@@ -249,16 +249,16 @@ void xnn_init_qu8_conv_minmax_fp32_wasmsimd_params(
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  for (uint32_t i = 0; i < 8; i++) {
+  for (uint32_t i = 0; i < 4; i++) {
     params->fp32_wasmsimd.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
   }
-  for (uint32_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 2; i++) {
     params->fp32_wasmsimd.scale[i] = scale;
     params->fp32_wasmsimd.magic_bias[i] = 12582912.0f;
     params->fp32_wasmsimd.magic_min[i] = magic_min;
     params->fp32_wasmsimd.magic_bias_less_output_zero_point[i] = magic_bias_less_zero_point;
   }
-  for (uint32_t i = 0; i < 16; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     params->fp32_wasmsimd.output_max[i] = output_max;
   }
 }
@@ -492,13 +492,13 @@ void xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  for (uint32_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 2; i++) {
     params->fp32_wasmsimd.scale[i] = scale;
     params->fp32_wasmsimd.magic_bias[i] = 12582912.0f;
     params->fp32_wasmsimd.magic_min[i] = magic_min;
     params->fp32_wasmsimd.magic_bias_less_output_zero_point[i] = magic_bias_less_zero_point;
   }
-  for (uint32_t i = 0; i < 16; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     params->fp32_wasmsimd.output_max[i] = output_max;
   }
 }
@@ -664,12 +664,12 @@ void xnn_init_qs8_minmax_wasmsimd_params(
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  for (uint32_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd.magic_bias[i] = 12582912.0f;
     params->wasmsimd.magic_min[i] = magic_min;
     params->wasmsimd.magic_bias_less_output_zero_point[i] = magic_bias_less_zero_point;
   }
-  for (uint32_t i = 0; i < 16; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     params->wasmsimd.output_max[i] = output_max;
   }
 }

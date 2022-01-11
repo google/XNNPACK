@@ -67,7 +67,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
       }
 
   $if DATATYPE == "QU8":
-    const v128_t vb_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.kernel_zero_point);
+    const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.kernel_zero_point);
   do {
     v128_t vacc0x0 = wasm_v128_load32_zero(w);
     $for N in range(1, 4):
@@ -144,19 +144,19 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
     $else:
-      const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
+      const v128_t vscale = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.scale);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
 
-    const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
+    const v128_t vmagic_bias = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias);
     $for M in range(MR):
       vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vmagic_bias);
 
-    const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
+    const v128_t vmagic_min = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_min);
     $for M in range(MR):
       vacc${M}x0123 = wasm_i32x4_max(vacc${M}x0123, vmagic_min);
 
-    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
     $for M in range(MR):
       vacc${M}x0123 = wasm_i32x4_sub(vacc${M}x0123, vmagic_bias_less_output_zero_point);
 
@@ -168,7 +168,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
     $else:
       v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
-    const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+    const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
     vout = ${WASM_X8X16_MIN}(vout, voutput_max);
 
     if (nc >= 4) {
