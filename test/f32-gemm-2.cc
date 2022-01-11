@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f32-gemm-relu.yaml
+//   Specification: test/f32-gemm.yaml
 //   Generator: tools/generate-gemm-test.py
 
 
@@ -24,7 +24,7 @@
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(8)
@@ -33,10 +33,10 @@
       .m(1)
       .n(8)
       .k(4)
-      .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, strided_cn) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, strided_cn) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(8)
@@ -46,10 +46,10 @@
       .n(8)
       .k(4)
       .cn_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(8)
@@ -59,10 +59,10 @@
       .n(8)
       .k(4)
       .a_stride(7)
-      .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
     for (uint32_t m = 1; m <= 1; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -74,12 +74,12 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
     for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -90,11 +90,11 @@
         .n(8)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
     for (uint32_t n = 1; n <= 8; n++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -105,11 +105,11 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_lt_4) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_lt_4) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -119,11 +119,11 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -134,11 +134,11 @@
         .n(8)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -151,13 +151,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_gt_4) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_gt_4) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -167,11 +167,11 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -182,11 +182,11 @@
         .n(8)
         .k(k)
         .a_stride(11)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -199,13 +199,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_div_4) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_div_4) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(1)
@@ -215,11 +215,11 @@
         .m(1)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(1)
@@ -230,11 +230,11 @@
         .n(8)
         .k(k)
         .a_stride(43)
-        .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, k_div_4_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, k_div_4_subtile) {
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -247,13 +247,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_gt_8) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_gt_8) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -264,12 +264,12 @@
           .m(1)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -281,12 +281,12 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -298,12 +298,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
@@ -316,13 +316,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_div_8) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_div_8) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -333,12 +333,12 @@
           .m(1)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -350,12 +350,12 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -367,12 +367,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, n_div_8_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, n_div_8_subtile) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 1; m++) {
@@ -385,13 +385,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, strided_cm_subtile) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, strided_cm_subtile) {
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -405,13 +405,13 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X8__WASMSIMD_SPLAT, strided_cm) {
+  TEST(F32_GEMM_1X8__WASMSIMD_SPLAT, strided_cm) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(8)
@@ -421,13 +421,13 @@
       .n(8)
       .k(4)
       .cm_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -436,10 +436,10 @@
       .m(4)
       .n(8)
       .k(4)
-      .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, strided_cn) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, strided_cn) {
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -449,10 +449,10 @@
       .n(8)
       .k(4)
       .cn_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -462,10 +462,10 @@
       .n(8)
       .k(4)
       .a_stride(7)
-      .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -477,12 +477,12 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
     for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -493,11 +493,11 @@
         .n(8)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
     for (uint32_t n = 1; n <= 8; n++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -508,11 +508,11 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_lt_4) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_lt_4) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -522,11 +522,11 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -537,11 +537,11 @@
         .n(8)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t m = 1; m <= 4; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -554,13 +554,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_gt_4) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_gt_4) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -570,11 +570,11 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -585,11 +585,11 @@
         .n(8)
         .k(k)
         .a_stride(11)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t m = 1; m <= 4; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -602,13 +602,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_div_4) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_div_4) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(4)
@@ -618,11 +618,11 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(4)
@@ -633,11 +633,11 @@
         .n(8)
         .k(k)
         .a_stride(43)
-        .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, k_div_4_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, k_div_4_subtile) {
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t m = 1; m <= 4; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -650,13 +650,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_gt_8) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_gt_8) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -667,12 +667,12 @@
           .m(4)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -684,12 +684,12 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -701,12 +701,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 4; m++) {
@@ -719,13 +719,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_div_8) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_div_8) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -736,12 +736,12 @@
           .m(4)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -753,12 +753,12 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -770,12 +770,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, n_div_8_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, n_div_8_subtile) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 4; m++) {
@@ -788,13 +788,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, strided_cm_subtile) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, strided_cm_subtile) {
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t m = 1; m <= 4; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -808,13 +808,13 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_4X8__WASMSIMD_SPLAT, strided_cm) {
+  TEST(F32_GEMM_4X8__WASMSIMD_SPLAT, strided_cm) {
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -824,13 +824,13 @@
       .n(8)
       .k(4)
       .cm_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_eq_4) {
     GemmMicrokernelTester()
       .mr(5)
       .nr(8)
@@ -839,10 +839,10 @@
       .m(5)
       .n(8)
       .k(4)
-      .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, strided_cn) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, strided_cn) {
     GemmMicrokernelTester()
       .mr(5)
       .nr(8)
@@ -852,10 +852,10 @@
       .n(8)
       .k(4)
       .cn_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_eq_4_strided_a) {
     GemmMicrokernelTester()
       .mr(5)
       .nr(8)
@@ -865,10 +865,10 @@
       .n(8)
       .k(4)
       .a_stride(7)
-      .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_eq_4_subtile) {
     for (uint32_t m = 1; m <= 5; m++) {
       for (uint32_t n = 1; n <= 8; n++) {
         GemmMicrokernelTester()
@@ -880,12 +880,12 @@
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_eq_4_subtile_m) {
     for (uint32_t m = 1; m <= 5; m++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -896,11 +896,11 @@
         .n(8)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_eq_4_subtile_n) {
     for (uint32_t n = 1; n <= 8; n++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -911,11 +911,11 @@
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_lt_4) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_lt_4) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -925,11 +925,11 @@
         .m(5)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_lt_4_strided_a) {
     for (size_t k = 1; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -940,11 +940,11 @@
         .n(8)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_lt_4_subtile) {
     for (size_t k = 1; k < 4; k++) {
       for (uint32_t m = 1; m <= 5; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -957,13 +957,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_gt_4) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_gt_4) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -973,11 +973,11 @@
         .m(5)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_gt_4_strided_a) {
     for (size_t k = 5; k < 8; k++) {
       GemmMicrokernelTester()
         .mr(5)
@@ -988,11 +988,11 @@
         .n(8)
         .k(k)
         .a_stride(11)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_gt_4_subtile) {
     for (size_t k = 5; k < 8; k++) {
       for (uint32_t m = 1; m <= 5; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -1005,13 +1005,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_div_4) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_div_4) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(5)
@@ -1021,11 +1021,11 @@
         .m(5)
         .n(8)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_div_4_strided_a) {
     for (size_t k = 8; k <= 40; k += 4) {
       GemmMicrokernelTester()
         .mr(5)
@@ -1036,11 +1036,11 @@
         .n(8)
         .k(k)
         .a_stride(43)
-        .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+        .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, k_div_4_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, k_div_4_subtile) {
     for (size_t k = 8; k <= 40; k += 4) {
       for (uint32_t m = 1; m <= 5; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -1053,13 +1053,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_gt_8) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_gt_8) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1070,12 +1070,12 @@
           .m(5)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1087,12 +1087,12 @@
           .n(8)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_gt_8_strided_a) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1104,12 +1104,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_gt_8_subtile) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 5; m++) {
@@ -1122,13 +1122,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_div_8) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_div_8) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1139,12 +1139,12 @@
           .m(5)
           .n(8)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_div_8_strided_cn) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1156,12 +1156,12 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_div_8_strided_a) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         GemmMicrokernelTester()
@@ -1173,12 +1173,12 @@
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+          .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, n_div_8_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, n_div_8_subtile) {
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
         for (uint32_t m = 1; m <= 5; m++) {
@@ -1191,13 +1191,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, strided_cm_subtile) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, strided_cm_subtile) {
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t m = 1; m <= 5; m++) {
         for (uint32_t n = 1; n <= 8; n++) {
@@ -1211,13 +1211,13 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+            .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_5X8__WASMSIMD_SPLAT, strided_cm) {
+  TEST(F32_GEMM_5X8__WASMSIMD_SPLAT, strided_cm) {
     GemmMicrokernelTester()
       .mr(5)
       .nr(8)
@@ -1227,13 +1227,13 @@
       .n(8)
       .k(4)
       .cm_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat);
+      .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1) {
+  TEST(F32_GEMM_1X4__WASM, k_eq_1) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(4)
@@ -1242,10 +1242,10 @@
       .m(1)
       .n(4)
       .k(1)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+      .Test(xnn_f32_gemm_ukernel_1x4__wasm);
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, strided_cn) {
+  TEST(F32_GEMM_1X4__WASM, strided_cn) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(4)
@@ -1255,10 +1255,10 @@
       .n(4)
       .k(1)
       .cn_stride(7)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+      .Test(xnn_f32_gemm_ukernel_1x4__wasm);
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1_strided_a) {
+  TEST(F32_GEMM_1X4__WASM, k_eq_1_strided_a) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(4)
@@ -1268,10 +1268,10 @@
       .n(4)
       .k(1)
       .a_stride(3)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+      .Test(xnn_f32_gemm_ukernel_1x4__wasm);
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1_subtile) {
+  TEST(F32_GEMM_1X4__WASM, k_eq_1_subtile) {
     for (uint32_t m = 1; m <= 1; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
         GemmMicrokernelTester()
@@ -1283,12 +1283,12 @@
           .n(n)
           .k(1)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1_subtile_m) {
+  TEST(F32_GEMM_1X4__WASM, k_eq_1_subtile_m) {
     for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -1299,11 +1299,11 @@
         .n(4)
         .k(1)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+        .Test(xnn_f32_gemm_ukernel_1x4__wasm);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_eq_1_subtile_n) {
+  TEST(F32_GEMM_1X4__WASM, k_eq_1_subtile_n) {
     for (uint32_t n = 1; n <= 4; n++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -1314,11 +1314,11 @@
         .n(n)
         .k(1)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+        .Test(xnn_f32_gemm_ukernel_1x4__wasm);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_gt_1) {
+  TEST(F32_GEMM_1X4__WASM, k_gt_1) {
     for (size_t k = 2; k < 10; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -1328,11 +1328,11 @@
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+        .Test(xnn_f32_gemm_ukernel_1x4__wasm);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_gt_1_strided_a) {
+  TEST(F32_GEMM_1X4__WASM, k_gt_1_strided_a) {
     for (size_t k = 2; k < 10; k++) {
       GemmMicrokernelTester()
         .mr(1)
@@ -1343,11 +1343,11 @@
         .n(4)
         .k(k)
         .a_stride(11)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+        .Test(xnn_f32_gemm_ukernel_1x4__wasm);
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, k_gt_1_subtile) {
+  TEST(F32_GEMM_1X4__WASM, k_gt_1_subtile) {
     for (size_t k = 2; k < 10; k++) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 4; n++) {
@@ -1360,13 +1360,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+            .Test(xnn_f32_gemm_ukernel_1x4__wasm);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_gt_4) {
+  TEST(F32_GEMM_1X4__WASM, n_gt_4) {
     for (uint32_t n = 5; n < 8; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1377,12 +1377,12 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_gt_4_strided_cn) {
+  TEST(F32_GEMM_1X4__WASM, n_gt_4_strided_cn) {
     for (uint32_t n = 5; n < 8; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1394,12 +1394,12 @@
           .n(4)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_gt_4_strided_a) {
+  TEST(F32_GEMM_1X4__WASM, n_gt_4_strided_a) {
     for (uint32_t n = 5; n < 8; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1411,12 +1411,12 @@
           .n(n)
           .k(k)
           .a_stride(7)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_gt_4_subtile) {
+  TEST(F32_GEMM_1X4__WASM, n_gt_4_subtile) {
     for (uint32_t n = 5; n < 8; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
         for (uint32_t m = 1; m <= 1; m++) {
@@ -1429,13 +1429,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+            .Test(xnn_f32_gemm_ukernel_1x4__wasm);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_div_4) {
+  TEST(F32_GEMM_1X4__WASM, n_div_4) {
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1446,12 +1446,12 @@
           .m(1)
           .n(4)
           .k(k)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_div_4_strided_cn) {
+  TEST(F32_GEMM_1X4__WASM, n_div_4_strided_cn) {
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1463,12 +1463,12 @@
           .n(n)
           .k(k)
           .cn_stride(7)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_div_4_strided_a) {
+  TEST(F32_GEMM_1X4__WASM, n_div_4_strided_a) {
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         GemmMicrokernelTester()
@@ -1480,12 +1480,12 @@
           .n(n)
           .k(k)
           .a_stride(7)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+          .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, n_div_4_subtile) {
+  TEST(F32_GEMM_1X4__WASM, n_div_4_subtile) {
     for (uint32_t n = 8; n <= 12; n += 4) {
       for (size_t k = 1; k <= 5; k += 2) {
         for (uint32_t m = 1; m <= 1; m++) {
@@ -1498,13 +1498,13 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+            .Test(xnn_f32_gemm_ukernel_1x4__wasm);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, strided_cm_subtile) {
+  TEST(F32_GEMM_1X4__WASM, strided_cm_subtile) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 1; m++) {
         for (uint32_t n = 1; n <= 4; n++) {
@@ -1518,13 +1518,13 @@
             .k(k)
             .cm_stride(7)
             .iterations(1)
-            .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+            .Test(xnn_f32_gemm_ukernel_1x4__wasm);
         }
       }
     }
   }
 
-  TEST(F32_GEMM_RELU_1X4__WASM, strided_cm) {
+  TEST(F32_GEMM_1X4__WASM, strided_cm) {
     GemmMicrokernelTester()
       .mr(1)
       .nr(4)
@@ -1534,12 +1534,12 @@
       .n(4)
       .k(1)
       .cm_stride(7)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__wasm);
+      .Test(xnn_f32_gemm_ukernel_1x4__wasm);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1) {
+TEST(F32_GEMM_1X4__SCALAR, k_eq_1) {
   GemmMicrokernelTester()
     .mr(1)
     .nr(4)
@@ -1548,10 +1548,10 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1) {
     .m(1)
     .n(4)
     .k(1)
-    .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_1x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cn) {
+TEST(F32_GEMM_1X4__SCALAR, strided_cn) {
   GemmMicrokernelTester()
     .mr(1)
     .nr(4)
@@ -1561,10 +1561,10 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cn) {
     .n(4)
     .k(1)
     .cn_stride(7)
-    .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_1x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_strided_a) {
+TEST(F32_GEMM_1X4__SCALAR, k_eq_1_strided_a) {
   GemmMicrokernelTester()
     .mr(1)
     .nr(4)
@@ -1574,10 +1574,10 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_strided_a) {
     .n(4)
     .k(1)
     .a_stride(3)
-    .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_1x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile) {
+TEST(F32_GEMM_1X4__SCALAR, k_eq_1_subtile) {
   for (uint32_t m = 1; m <= 1; m++) {
     for (uint32_t n = 1; n <= 4; n++) {
       GemmMicrokernelTester()
@@ -1589,12 +1589,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile) {
         .n(n)
         .k(1)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile_m) {
+TEST(F32_GEMM_1X4__SCALAR, k_eq_1_subtile_m) {
   for (uint32_t m = 1; m <= 1; m++) {
     GemmMicrokernelTester()
       .mr(1)
@@ -1605,11 +1605,11 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile_m) {
       .n(4)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_1x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile_n) {
+TEST(F32_GEMM_1X4__SCALAR, k_eq_1_subtile_n) {
   for (uint32_t n = 1; n <= 4; n++) {
     GemmMicrokernelTester()
       .mr(1)
@@ -1620,11 +1620,11 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_eq_1_subtile_n) {
       .n(n)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_1x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1) {
+TEST(F32_GEMM_1X4__SCALAR, k_gt_1) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(1)
@@ -1634,11 +1634,11 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1) {
       .m(1)
       .n(4)
       .k(k)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_1x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1_strided_a) {
+TEST(F32_GEMM_1X4__SCALAR, k_gt_1_strided_a) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(1)
@@ -1649,11 +1649,11 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1_strided_a) {
       .n(4)
       .k(k)
       .a_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_1x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1_subtile) {
+TEST(F32_GEMM_1X4__SCALAR, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
     for (uint32_t m = 1; m <= 1; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
@@ -1666,13 +1666,13 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, k_gt_1_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_1x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4) {
+TEST(F32_GEMM_1X4__SCALAR, n_gt_4) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1683,12 +1683,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4) {
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_strided_cn) {
+TEST(F32_GEMM_1X4__SCALAR, n_gt_4_strided_cn) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1700,12 +1700,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_strided_cn) {
         .n(4)
         .k(k)
         .cn_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_strided_a) {
+TEST(F32_GEMM_1X4__SCALAR, n_gt_4_strided_a) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1717,12 +1717,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_subtile) {
+TEST(F32_GEMM_1X4__SCALAR, n_gt_4_subtile) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 1; m++) {
@@ -1735,13 +1735,13 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_gt_4_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_1x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4) {
+TEST(F32_GEMM_1X4__SCALAR, n_div_4) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1752,12 +1752,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4) {
         .m(1)
         .n(4)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_strided_cn) {
+TEST(F32_GEMM_1X4__SCALAR, n_div_4_strided_cn) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1769,12 +1769,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_strided_cn) {
         .n(n)
         .k(k)
         .cn_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_strided_a) {
+TEST(F32_GEMM_1X4__SCALAR, n_div_4_strided_a) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1786,12 +1786,12 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_subtile) {
+TEST(F32_GEMM_1X4__SCALAR, n_div_4_subtile) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 1; m++) {
@@ -1804,13 +1804,13 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, n_div_4_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_1x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cm_subtile) {
+TEST(F32_GEMM_1X4__SCALAR, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
     for (uint32_t m = 1; m <= 1; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
@@ -1824,13 +1824,13 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cm_subtile) {
           .k(k)
           .cm_stride(7)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_1x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cm) {
+TEST(F32_GEMM_1X4__SCALAR, strided_cm) {
   GemmMicrokernelTester()
     .mr(1)
     .nr(4)
@@ -1840,11 +1840,11 @@ TEST(F32_GEMM_RELU_1X4__SCALAR, strided_cm) {
     .n(4)
     .k(1)
     .cm_stride(7)
-    .Test(xnn_f32_gemm_relu_ukernel_1x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_1x4__scalar);
 }
 
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1) {
+TEST(F32_GEMM_4X4__SCALAR, k_eq_1) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(4)
@@ -1853,10 +1853,10 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1) {
     .m(4)
     .n(4)
     .k(1)
-    .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cn) {
+TEST(F32_GEMM_4X4__SCALAR, strided_cn) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(4)
@@ -1866,10 +1866,10 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cn) {
     .n(4)
     .k(1)
     .cn_stride(7)
-    .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_strided_a) {
+TEST(F32_GEMM_4X4__SCALAR, k_eq_1_strided_a) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(4)
@@ -1879,10 +1879,10 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_strided_a) {
     .n(4)
     .k(1)
     .a_stride(3)
-    .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x4__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile) {
+TEST(F32_GEMM_4X4__SCALAR, k_eq_1_subtile) {
   for (uint32_t m = 1; m <= 4; m++) {
     for (uint32_t n = 1; n <= 4; n++) {
       GemmMicrokernelTester()
@@ -1894,12 +1894,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile) {
         .n(n)
         .k(1)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile_m) {
+TEST(F32_GEMM_4X4__SCALAR, k_eq_1_subtile_m) {
   for (uint32_t m = 1; m <= 4; m++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -1910,11 +1910,11 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile_m) {
       .n(4)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile_n) {
+TEST(F32_GEMM_4X4__SCALAR, k_eq_1_subtile_n) {
   for (uint32_t n = 1; n <= 4; n++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -1925,11 +1925,11 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_eq_1_subtile_n) {
       .n(n)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1) {
+TEST(F32_GEMM_4X4__SCALAR, k_gt_1) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -1939,11 +1939,11 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1) {
       .m(4)
       .n(4)
       .k(k)
-      .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1_strided_a) {
+TEST(F32_GEMM_4X4__SCALAR, k_gt_1_strided_a) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -1954,11 +1954,11 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1_strided_a) {
       .n(4)
       .k(k)
       .a_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x4__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1_subtile) {
+TEST(F32_GEMM_4X4__SCALAR, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
@@ -1971,13 +1971,13 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, k_gt_1_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4) {
+TEST(F32_GEMM_4X4__SCALAR, n_gt_4) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -1988,12 +1988,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4) {
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_strided_cn) {
+TEST(F32_GEMM_4X4__SCALAR, n_gt_4_strided_cn) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2005,12 +2005,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_strided_cn) {
         .n(4)
         .k(k)
         .cn_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_strided_a) {
+TEST(F32_GEMM_4X4__SCALAR, n_gt_4_strided_a) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2022,12 +2022,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_subtile) {
+TEST(F32_GEMM_4X4__SCALAR, n_gt_4_subtile) {
   for (uint32_t n = 5; n < 8; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 4; m++) {
@@ -2040,13 +2040,13 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_gt_4_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4) {
+TEST(F32_GEMM_4X4__SCALAR, n_div_4) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2057,12 +2057,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4) {
         .m(4)
         .n(4)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_strided_cn) {
+TEST(F32_GEMM_4X4__SCALAR, n_div_4_strided_cn) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2074,12 +2074,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_strided_cn) {
         .n(n)
         .k(k)
         .cn_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_strided_a) {
+TEST(F32_GEMM_4X4__SCALAR, n_div_4_strided_a) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2091,12 +2091,12 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_subtile) {
+TEST(F32_GEMM_4X4__SCALAR, n_div_4_subtile) {
   for (uint32_t n = 8; n <= 12; n += 4) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 4; m++) {
@@ -2109,13 +2109,13 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, n_div_4_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cm_subtile) {
+TEST(F32_GEMM_4X4__SCALAR, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 4; n++) {
@@ -2129,13 +2129,13 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cm_subtile) {
           .k(k)
           .cm_stride(7)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x4__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cm) {
+TEST(F32_GEMM_4X4__SCALAR, strided_cm) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(4)
@@ -2145,11 +2145,11 @@ TEST(F32_GEMM_RELU_4X4__SCALAR, strided_cm) {
     .n(4)
     .k(1)
     .cm_stride(7)
-    .Test(xnn_f32_gemm_relu_ukernel_4x4__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x4__scalar);
 }
 
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1) {
+TEST(F32_GEMM_4X2__SCALAR, k_eq_1) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(2)
@@ -2158,10 +2158,10 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1) {
     .m(4)
     .n(2)
     .k(1)
-    .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x2__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cn) {
+TEST(F32_GEMM_4X2__SCALAR, strided_cn) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(2)
@@ -2171,10 +2171,10 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cn) {
     .n(2)
     .k(1)
     .cn_stride(5)
-    .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x2__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_strided_a) {
+TEST(F32_GEMM_4X2__SCALAR, k_eq_1_strided_a) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(2)
@@ -2184,10 +2184,10 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_strided_a) {
     .n(2)
     .k(1)
     .a_stride(3)
-    .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x2__scalar);
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile) {
+TEST(F32_GEMM_4X2__SCALAR, k_eq_1_subtile) {
   for (uint32_t m = 1; m <= 4; m++) {
     for (uint32_t n = 1; n <= 2; n++) {
       GemmMicrokernelTester()
@@ -2199,12 +2199,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile) {
         .n(n)
         .k(1)
         .iterations(1)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile_m) {
+TEST(F32_GEMM_4X2__SCALAR, k_eq_1_subtile_m) {
   for (uint32_t m = 1; m <= 4; m++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2215,11 +2215,11 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile_m) {
       .n(2)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x2__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile_n) {
+TEST(F32_GEMM_4X2__SCALAR, k_eq_1_subtile_n) {
   for (uint32_t n = 1; n <= 2; n++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2230,11 +2230,11 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_eq_1_subtile_n) {
       .n(n)
       .k(1)
       .iterations(1)
-      .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x2__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1) {
+TEST(F32_GEMM_4X2__SCALAR, k_gt_1) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2244,11 +2244,11 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1) {
       .m(4)
       .n(2)
       .k(k)
-      .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x2__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1_strided_a) {
+TEST(F32_GEMM_4X2__SCALAR, k_gt_1_strided_a) {
   for (size_t k = 2; k < 10; k++) {
     GemmMicrokernelTester()
       .mr(4)
@@ -2259,11 +2259,11 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1_strided_a) {
       .n(2)
       .k(k)
       .a_stride(11)
-      .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+      .Test(xnn_f32_gemm_ukernel_4x2__scalar);
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1_subtile) {
+TEST(F32_GEMM_4X2__SCALAR, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 2; n++) {
@@ -2276,13 +2276,13 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, k_gt_1_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x2__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2) {
+TEST(F32_GEMM_4X2__SCALAR, n_gt_2) {
   for (uint32_t n = 3; n < 4; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2293,12 +2293,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2) {
         .m(4)
         .n(2)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_strided_cn) {
+TEST(F32_GEMM_4X2__SCALAR, n_gt_2_strided_cn) {
   for (uint32_t n = 3; n < 4; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2310,12 +2310,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_strided_cn) {
         .n(2)
         .k(k)
         .cn_stride(5)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_strided_a) {
+TEST(F32_GEMM_4X2__SCALAR, n_gt_2_strided_a) {
   for (uint32_t n = 3; n < 4; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2327,12 +2327,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_subtile) {
+TEST(F32_GEMM_4X2__SCALAR, n_gt_2_subtile) {
   for (uint32_t n = 3; n < 4; n++) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 4; m++) {
@@ -2345,13 +2345,13 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_gt_2_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x2__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2) {
+TEST(F32_GEMM_4X2__SCALAR, n_div_2) {
   for (uint32_t n = 4; n <= 6; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2362,12 +2362,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2) {
         .m(4)
         .n(2)
         .k(k)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_strided_cn) {
+TEST(F32_GEMM_4X2__SCALAR, n_div_2_strided_cn) {
   for (uint32_t n = 4; n <= 6; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2379,12 +2379,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_strided_cn) {
         .n(n)
         .k(k)
         .cn_stride(5)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_strided_a) {
+TEST(F32_GEMM_4X2__SCALAR, n_div_2_strided_a) {
   for (uint32_t n = 4; n <= 6; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       GemmMicrokernelTester()
@@ -2396,12 +2396,12 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_strided_a) {
         .n(n)
         .k(k)
         .a_stride(7)
-        .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+        .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_subtile) {
+TEST(F32_GEMM_4X2__SCALAR, n_div_2_subtile) {
   for (uint32_t n = 4; n <= 6; n += 2) {
     for (size_t k = 1; k <= 5; k += 2) {
       for (uint32_t m = 1; m <= 4; m++) {
@@ -2414,13 +2414,13 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, n_div_2_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x2__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cm_subtile) {
+TEST(F32_GEMM_4X2__SCALAR, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
     for (uint32_t m = 1; m <= 4; m++) {
       for (uint32_t n = 1; n <= 2; n++) {
@@ -2434,13 +2434,13 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cm_subtile) {
           .k(k)
           .cm_stride(5)
           .iterations(1)
-          .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+          .Test(xnn_f32_gemm_ukernel_4x2__scalar);
       }
     }
   }
 }
 
-TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cm) {
+TEST(F32_GEMM_4X2__SCALAR, strided_cm) {
   GemmMicrokernelTester()
     .mr(4)
     .nr(2)
@@ -2450,5 +2450,5 @@ TEST(F32_GEMM_RELU_4X2__SCALAR, strided_cm) {
     .n(2)
     .k(1)
     .cm_stride(5)
-    .Test(xnn_f32_gemm_relu_ukernel_4x2__scalar);
+    .Test(xnn_f32_gemm_ukernel_4x2__scalar);
 }

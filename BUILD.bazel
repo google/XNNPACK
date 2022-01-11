@@ -10705,6 +10705,7 @@ xnnpack_unit_test(
     name = "f32_igemm_test",
     srcs = [
         "test/f32-igemm.cc",
+        "test/f32-igemm-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -10715,6 +10716,7 @@ xnnpack_unit_test(
     name = "f32_igemm_relu_test",
     srcs = [
         "test/f32-igemm-relu.cc",
+        "test/f32-igemm-relu-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -10725,6 +10727,7 @@ xnnpack_unit_test(
     name = "f32_igemm_minmax_test",
     srcs = [
         "test/f32-igemm-minmax.cc",
+        "test/f32-igemm-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",
@@ -10815,6 +10818,7 @@ xnnpack_unit_test(
     name = "f32_gemm_test",
     srcs = [
         "test/f32-gemm.cc",
+        "test/f32-gemm-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",
@@ -10826,6 +10830,7 @@ xnnpack_unit_test(
     name = "f32_gemm_relu_test",
     srcs = [
         "test/f32-gemm-relu.cc",
+        "test/f32-gemm-relu-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -10836,6 +10841,7 @@ xnnpack_unit_test(
     name = "f32_gemm_minmax_test",
     srcs = [
         "test/f32-gemm-minmax.cc",
+        "test/f32-gemm-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",
@@ -10847,6 +10853,7 @@ xnnpack_unit_test(
     name = "f32_gemminc_minmax_test",
     srcs = [
         "test/f32-gemminc-minmax.cc",
+        "test/f32-gemminc-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -11461,7 +11468,8 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qc8-gemm-minmax-fp32.cc",
-        "test/qc8-gemm-minmax-fp32-c.cc",
+        "test/qc8-gemm-minmax-fp32-2.cc",
+        "test/qc8-gemm-minmax-fp32-3.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11475,7 +11483,8 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qc8-igemm-minmax-fp32.cc",
-        "test/qc8-igemm-minmax-fp32-c.cc",
+        "test/qc8-igemm-minmax-fp32-2.cc",
+        "test/qc8-igemm-minmax-fp32-3.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -11541,8 +11550,10 @@ xnnpack_unit_test(
     timeout = "moderate",
     srcs = [
         "test/qs8-gemm-minmax-rndnu.cc",
-        "test/qs8-gemm-minmax-rndnu-c2.cc",
-        "test/qs8-gemm-minmax-rndnu-c4.cc",
+        "test/qs8-gemm-minmax-rndnu-2.cc",
+        "test/qs8-gemm-minmax-rndnu-3.cc",
+        "test/qs8-gemm-minmax-rndnu-4.cc",
+        "test/qs8-gemm-minmax-rndnu-5.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",

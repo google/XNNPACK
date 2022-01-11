@@ -6937,7 +6937,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gavgpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f32-gavgpool-minmax-test f32-gavgpool-minmax-test)
 
-  ADD_EXECUTABLE(f32-gemm-test test/f32-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-gemm-test test/f32-gemm.cc test/f32-gemm-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-gemm-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -6946,7 +6946,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f32-gemm-test f32-gemm-test)
 
-  ADD_EXECUTABLE(f32-gemm-relu-test test/f32-gemm-relu.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-gemm-relu-test test/f32-gemm-relu.cc test/f32-gemm-relu-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-gemm-relu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -6955,7 +6955,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f32-gemm-relu-test f32-gemm-relu-test)
 
-  ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc test/f32-gemm-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -6964,7 +6964,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester)
   ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
 
-  ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc test/f32-gemminc-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-gemminc-minmax-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -7000,7 +7000,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-igemm-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f32-igemm-test f32-igemm-test)
 
-  ADD_EXECUTABLE(f32-igemm-relu-test test/f32-igemm-relu.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-igemm-relu-test test/f32-igemm-relu.cc test/f32-igemm-relu-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-igemm-relu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -7009,7 +7009,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-igemm-relu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f32-igemm-relu-test f32-igemm-relu-test)
 
-  ADD_EXECUTABLE(f32-igemm-minmax-test test/f32-igemm-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-igemm-minmax-test test/f32-igemm-minmax.cc test/f32-igemm-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f32-igemm-minmax-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -7589,7 +7589,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qc8-dwconv-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qc8-dwconv-minmax-fp32-test qc8-dwconv-minmax-fp32-test)
 
-  ADD_EXECUTABLE(qc8-gemm-minmax-fp32-test test/qc8-gemm-minmax-fp32.cc test/qc8-gemm-minmax-fp32-c.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(qc8-gemm-minmax-fp32-test test/qc8-gemm-minmax-fp32.cc test/qc8-gemm-minmax-fp32-2.cc test/qc8-gemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qc8-gemm-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -7598,7 +7598,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester)
   ADD_TEST(qc8-gemm-minmax-fp32-test qc8-gemm-minmax-fp32-test)
 
-  ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc test/qc8-igemm-minmax-fp32-c.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc test/qc8-igemm-minmax-fp32-2.cc test/qc8-igemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qc8-igemm-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
@@ -7652,7 +7652,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(qs8-gemm-minmax-fp32-test qs8-gemm-minmax-fp32-test)
 
-  ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc test/qs8-gemm-minmax-rndnu-c2.cc test/qs8-gemm-minmax-rndnu-c4.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc test/qs8-gemm-minmax-rndnu-2.cc test/qs8-gemm-minmax-rndnu-3.cc test/qs8-gemm-minmax-rndnu-4.cc test/qs8-gemm-minmax-rndnu-5.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-rndnu-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES

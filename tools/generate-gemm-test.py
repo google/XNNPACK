@@ -7,9 +7,11 @@
 import argparse
 import bisect
 import codecs
+import collections
 import os
 import sys
 import yaml
+import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from primes import next_prime
@@ -22,9 +24,10 @@ parser.add_argument(
 parser.add_argument(
     "-o",
     "--output",
+    action="append",
     metavar="FILE",
     required=True,
-    help="Output (C++ source) file")
+    help="Output (C++ source) file(s)")
 parser.set_defaults(defines=list())
 
 
@@ -1167,6 +1170,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
 
 def main(args):
   options = parser.parse_args(args)
+  num_output_files = len(options.output)
 
   with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
@@ -1200,6 +1204,8 @@ def main(args):
 """.format(
     specification=options.spec, generator=sys.argv[0])
 
+    outputs = collections.defaultdict(lambda: tests)
+
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       k_block = int(ukernel_spec["k-block"])
@@ -1215,17 +1221,22 @@ def main(args):
       test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
                                       init_fn, requantization, pipelined, isa,
                                       jit)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa,
-                                                        assembly, jit)
 
-    txt_changed = True
-    if os.path.exists(options.output):
-      with codecs.open(options.output, "r", encoding="utf-8") as output_file:
-        txt_changed = output_file.read() != tests
+      # Hash the name of each microkernel and figure out which output file to
+      # write it to.
+      output_index = zlib.crc32(bytes(name, 'utf-8')) % num_output_files
+      outputs[options.output[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
+          test_case, arch, isa, assembly, jit)
 
-    if txt_changed:
-      with codecs.open(options.output, "w", encoding="utf-8") as output_file:
-        output_file.write(tests)
+    for output_name in options.output:
+      txt_changed = True
+      if os.path.exists(output_name):
+        with codecs.open(output_name, "r", encoding="utf-8") as output_file:
+          txt_changed = output_file.read() != outputs[output_name]
+
+      if txt_changed:
+        with codecs.open(output_name, "w", encoding="utf-8") as output_file:
+          output_file.write(outputs[output_name])
 
 
 if __name__ == "__main__":

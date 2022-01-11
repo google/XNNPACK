@@ -442,9 +442,9 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=0 -o src/
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=1 -o src/f32-gemm/gen-inc/8x16inc-minmax-avx512f-broadcast.c &
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/f32-gemm.yaml --output test/f32-gemm.cc &
-tools/generate-gemm-test.py --spec test/f32-gemm-relu.yaml --output test/f32-gemm-relu.cc &
-tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-gemm-minmax.cc &
-tools/generate-gemm-test.py --spec test/f32-gemminc-minmax.yaml --output test/f32-gemminc-minmax.cc &
+tools/generate-gemm-test.py --spec test/f32-gemm.yaml --output test/f32-gemm.cc --output test/f32-gemm-2.cc &
+tools/generate-gemm-test.py --spec test/f32-gemm-relu.yaml --output test/f32-gemm-relu.cc --output test/f32-gemm-relu-2.cc &
+tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-gemm-minmax.cc --output test/f32-gemm-minmax-2.cc &
+tools/generate-gemm-test.py --spec test/f32-gemminc-minmax.yaml --output test/f32-gemminc-minmax.cc --output test/f32-gemminc-minmax-2.cc &
 
 wait
