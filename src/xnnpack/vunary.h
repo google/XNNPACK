@@ -44,17 +44,6 @@ DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x16)
 
 
-#define DECLARE_F16_VRELU_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                        \
-      size_t n,                                     \
-      const void* x,                                \
-      void* y,                                      \
-      const union xnn_f16_relu_params* params);
-
-DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x8)
-DECLARE_F16_VRELU_UKERNEL_FUNCTION(xnn_f16_vrelu_ukernel__neonfp16arith_x16)
-
-
 #define DECLARE_F32_VABS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t n,                                    \
