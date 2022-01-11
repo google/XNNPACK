@@ -36,6 +36,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x4(
 
   const v128_t vzero = wasm_i32x4_const_splat(0);
   do {
+
     const float* w = weights;
     size_t c = channels;
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {

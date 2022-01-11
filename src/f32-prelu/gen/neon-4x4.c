@@ -32,27 +32,28 @@ void xnn_f32_prelu_ukernel__neon_4x4(
   float* o0 = output;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
   float* o1 = (float*) ((uintptr_t) o0 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 2) {
-    i1 = i0;
-    o1 = o0;
-  }
   const float* i2 = (const float*) ((uintptr_t) i1 + input_stride);
   float* o2 = (float*) ((uintptr_t) o1 + output_stride);
-  if XNN_UNPREDICTABLE(rows <= 2) {
-    i2 = i1;
-    o2 = o1;
-  }
   const float* i3 = (const float*) ((uintptr_t) i2 + input_stride);
   float* o3 = (float*) ((uintptr_t) o2 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 4) {
-    i3 = i2;
-    o3 = o2;
-  }
 
   const size_t input_increment = input_stride * 4 - channels;
   const size_t output_increment = output_stride * 4 - channels;
 
   do {
+    if XNN_UNPREDICTABLE(rows < 2) {
+      i1 = i0;
+      o1 = o0;
+    }
+    if XNN_UNPREDICTABLE(rows <= 2) {
+      i2 = i1;
+      o2 = o1;
+    }
+    if XNN_UNPREDICTABLE(rows < 4) {
+      i3 = i2;
+      o3 = o2;
+    }
+
     const float* w = weights;
     size_t c = channels;
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
@@ -134,22 +135,10 @@ void xnn_f32_prelu_ukernel__neon_4x4(
     o0 = (float*) ((uintptr_t) o0 + output_increment);
     i1 = (const float*) ((uintptr_t) i1 + input_increment);
     o1 = (float*) ((uintptr_t) o1 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 6) {
-      i1 = i0;
-      o1 = o0;
-    }
     i2 = (const float*) ((uintptr_t) i2 + input_increment);
     o2 = (float*) ((uintptr_t) o2 + output_increment);
-    if XNN_UNPREDICTABLE(rows <= 6) {
-      i2 = i1;
-      o2 = o1;
-    }
     i3 = (const float*) ((uintptr_t) i3 + input_increment);
     o3 = (float*) ((uintptr_t) o3 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 8) {
-      i3 = i2;
-      o3 = o2;
-    }
     rows = doz(rows, 4);
   } while (rows != 0);
 }

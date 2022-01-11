@@ -30,18 +30,18 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x16(
 
   const __fp16* i0 = (const __fp16*) input;
   __fp16* o0 = (__fp16*) output;
-
   const __fp16* i1 = (const __fp16*) ((uintptr_t) i0 + input_stride);
   __fp16* o1 = (__fp16*) ((uintptr_t) o0 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 2) {
-    i1 = i0;
-    o1 = o0;
-  }
 
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
   do {
+    if XNN_UNPREDICTABLE(rows < 2) {
+      i1 = i0;
+      o1 = o0;
+    }
+
     const __fp16* w = (const __fp16*) weights;
     size_t c = channels;
     for (; c >= 16 * sizeof(__fp16); c -= 16 * sizeof(__fp16)) {
@@ -131,10 +131,6 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x16(
     o0 = (__fp16*) ((uintptr_t) o0 + output_increment);
     i1 = (const __fp16*) ((uintptr_t) i1 + input_increment);
     o1 = (__fp16*) ((uintptr_t) o1 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 4) {
-      i1 = i0;
-      o1 = o0;
-    }
     rows = doz(rows, 2);
   } while (rows != 0);
 }

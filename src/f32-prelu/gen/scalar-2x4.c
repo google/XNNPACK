@@ -30,15 +30,16 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
   float* o0 = output;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
   float* o1 = (float*) ((uintptr_t) o0 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 2) {
-    i1 = i0;
-    o1 = o0;
-  }
 
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
   do {
+    if XNN_UNPREDICTABLE(rows < 2) {
+      i1 = i0;
+      o1 = o0;
+    }
+
     const float* w = weights;
     size_t c = channels;
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
@@ -96,10 +97,6 @@ void xnn_f32_prelu_ukernel__scalar_2x4(
     o0 = (float*) ((uintptr_t) o0 + output_increment);
     i1 = (const float*) ((uintptr_t) i1 + input_increment);
     o1 = (float*) ((uintptr_t) o1 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 4) {
-      i1 = i0;
-      o1 = o0;
-    }
     rows = doz(rows, 2);
   } while (rows != 0);
 }
