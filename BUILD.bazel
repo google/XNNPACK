@@ -11586,6 +11586,7 @@ xnnpack_unit_test(
         "test/qs8-igemm-minmax-rndnu-2.cc",
         "test/qs8-igemm-minmax-rndnu-3.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit",
         ":gemm_microkernel_tester",
