@@ -133,7 +133,6 @@ class VMulCMicrokernelTester {
   void Test(
       xnn_qu8_vmul_minmax_ukernel_function vmul_minmax,
       xnn_init_qu8_mul_minmax_params_fn init_params,
-      xnn_init_qu8_requantization_params_fn init_requantization_params,
       xnn_qu8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -162,9 +161,6 @@ class VMulCMicrokernelTester {
         &quantization_params,
         a_zero_point(), b_zero_point(), y_zero_point(),
         product_output_scale, qmin(), qmax());
-      union xnn_qu8_requantization_params requantization_params;
-      init_requantization_params(&requantization_params,
-        product_output_scale, y_zero_point(), qmin(), qmax());
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -173,7 +169,8 @@ class VMulCMicrokernelTester {
         y_fp[i] = float(y_zero_point()) + product_output_scale * float(acc);
         y_fp[i] = std::min<float>(y_fp[i], float(int32_t(qmax())));
         y_fp[i] = std::max<float>(y_fp[i], float(int32_t(qmin())));
-        y_ref[i] = requantize(acc, &requantization_params);
+        y_ref[i] = requantize(
+          acc, product_output_scale, y_zero_point(), qmin(), qmax());
       }
 
       // Call optimized micro-kernel.
@@ -196,7 +193,6 @@ class VMulCMicrokernelTester {
   void Test(
       xnn_qs8_vmul_minmax_ukernel_function vmul_minmax,
       xnn_init_qs8_mul_minmax_params_fn init_params,
-      xnn_init_qs8_requantization_params_fn init_requantization_params,
       xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -228,9 +224,6 @@ class VMulCMicrokernelTester {
         &quantization_params,
         int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
         product_output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      union xnn_qs8_requantization_params requantization_params;
-      init_requantization_params(&requantization_params,
-        product_output_scale, int8_t(y_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -239,7 +232,8 @@ class VMulCMicrokernelTester {
         y_fp[i] = float(y_zero_point() - 0x80) + product_output_scale * float(acc);
         y_fp[i] = std::min<float>(y_fp[i], float(int32_t(qmax() - 0x80)));
         y_fp[i] = std::max<float>(y_fp[i], float(int32_t(qmin() - 0x80)));
-        y_ref[i] = requantize(acc, &requantization_params);
+        y_ref[i] = requantize(
+          acc, product_output_scale, int8_t(y_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
       }
 
       // Call optimized micro-kernel.

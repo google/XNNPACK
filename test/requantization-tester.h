@@ -555,10 +555,9 @@ class RequantizationTester {
         *std::max_element(outputs.cbegin(), outputs.cend()),
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      union xnn_qu8_requantization_params requantization_params;
-      xnn_init_qu8_requantization_rndna_params(&requantization_params, scale, zero_point(), qmin(), qmax());
       for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t reference_output = xnn_qu8_requantize_rndna(inputs[i], &requantization_params);
+        const uint8_t reference_output = xnn_qu8_requantize_rndna(
+          inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(uint32_t(reference_output), uint32_t(outputs[i]));
       }
     }
@@ -599,10 +598,9 @@ class RequantizationTester {
         *std::max_element(outputs.cbegin(), outputs.cend()),
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      union xnn_qs8_requantization_params requantization_params;
-      xnn_init_qs8_requantization_rndna_params(&requantization_params, scale, zero_point(), qmin(), qmax());
       for (size_t i = 0; i < inputs.size(); i++) {
-        const int8_t reference_output = xnn_qs8_requantize_rndna(inputs[i], &requantization_params);
+        const int8_t reference_output = xnn_qs8_requantize_rndna(
+          inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
       }
     }
@@ -643,10 +641,9 @@ class RequantizationTester {
         *std::max_element(outputs.cbegin(), outputs.cend()),
         *std::min_element(outputs.cbegin(), outputs.cend()));
 
-      union xnn_qs8_requantization_params requantization_params;
-      xnn_init_qs8_requantization_rndnu_params(&requantization_params, scale, zero_point(), qmin(), qmax());
       for (size_t i = 0; i < inputs.size(); i++) {
-        const int8_t reference_output = xnn_qs8_requantize_rndnu(inputs[i], &requantization_params);
+        const int8_t reference_output = xnn_qs8_requantize_rndnu(
+          inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
       }
     }

@@ -1123,11 +1123,8 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     test_args.append(init_fn)
     if requantization:
       requantization_datatype = {"qc8": "qs8"}.get(datatype, datatype)
-      test_args += [
-        "xnn_init_%s_requantization_%s_params" % \
-          (requantization_datatype, requantization),
-        "xnn_%s_requantize_%s" % (requantization_datatype, requantization)
-      ]
+      test_args.append("xnn_%s_requantize_%s" % \
+        (requantization_datatype, requantization))
 
   jit_declare_buffer = "struct xnn_code_buffer code_buffer"
   jit_allocate_code_memory = ("ASSERT_EQ(xnn_status_success, "

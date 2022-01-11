@@ -288,12 +288,8 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
   if init_fn:
     test_args.append(init_fn)
     if requantization_type:
-      test_args += [
-        "xnn_init_%s_requantization_%s_params" % \
-          (datatype.lower(), requantization_type.lower()),
-        "xnn_%s_requantize_%s" % \
-          (datatype.lower(), requantization_type.lower())
-      ]
+      test_args.append("xnn_%s_requantize_%s" % \
+        (datatype.lower(), requantization_type.lower()))
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,

@@ -167,7 +167,6 @@ class DWConvMicrokernelTester {
   void Test(
     xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
     xnn_init_qu8_conv_minmax_params_fn init_params,
-    xnn_init_qu8_requantization_params_fn init_requantization_params,
     xnn_qu8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -242,14 +241,12 @@ class DWConvMicrokernelTester {
       union xnn_qu8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
-      union xnn_qu8_requantization_params requantization_params;
-      init_requantization_params(&requantization_params,
-        requantization_scale, output_zero_point, qmin(), qmax());
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[x * channels() + c] = requantize(accumulators[x * channels() + c], &requantization_params);
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], requantization_scale, output_zero_point, qmin(), qmax());
         }
       }
 
@@ -279,7 +276,6 @@ class DWConvMicrokernelTester {
   void Test(
     xnn_qc8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
     xnn_init_qs8_minmax_params_fn init_params,
-    xnn_init_qs8_requantization_params_fn init_requantization_params,
     xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -367,16 +363,12 @@ class DWConvMicrokernelTester {
       union xnn_qs8_minmax_params minmax_params;
       init_params(&minmax_params,
         output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      std::vector<xnn_qs8_requantization_params> requantization_params(channels());
-      for (size_t c = 0; c < channels(); c++) {
-        init_requantization_params(&requantization_params[c],
-          scale[c], output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      }
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[x * channels() + c] = requantize(accumulators[x * channels() + c], &requantization_params[c]);
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], scale[c], output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
         }
       }
 
@@ -406,7 +398,6 @@ class DWConvMicrokernelTester {
   void Test(
     xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
     xnn_init_qs8_conv_minmax_params_fn init_params,
-    xnn_init_qs8_requantization_params_fn init_requantization_params,
     xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -485,14 +476,12 @@ class DWConvMicrokernelTester {
       union xnn_qs8_conv_minmax_params quantization_params;
       init_params(&quantization_params,
         requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      union xnn_qs8_requantization_params requantization_params;
-      init_requantization_params(&requantization_params,
-        requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
       // Renormalize reference results.
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[x * channels() + c] = requantize(accumulators[x * channels() + c], &requantization_params);
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
         }
       }
 
