@@ -243,25 +243,20 @@ class AvgPoolMicrokernelTester {
         input_scale() / (output_scale() * float(pooling_elements())),
         output_zero_point(), qmin(), qmax());
 
-      xnn_qu8_avgpool_minmax_params scalar_params;
-      xnn_init_qu8_avgpool_minmax_scalar_params(
-        &scalar_params,
-        -int32_t(input_zero_point()) * int32_t(pooling_elements()),
-        input_scale() / (output_scale() * float(pooling_elements())),
-        output_zero_point(), qmin(), qmax());
-
       // Compute reference results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          int32_t acc = scalar_params.scalar.bias;
+          int32_t acc = 0;
           for (size_t p = 0; p < pooling_elements(); p++) {
             const uint8_t* row = indirect_input[x * step() + p];
             if (row != zero.data()) {
               acc += int32_t(row[c + input_offset()]);
             }
+            acc -= int32_t(input_zero_point());
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_qu8_quantize_avgpool(acc, scalar_params);
+          output_ref[x * channels() + c] = xnn_qu8_requantize_rndna(
+            acc, input_scale() / (output_scale() * float(pooling_elements())), output_zero_point(), qmin(), qmax());
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());
           output_real[x * channels() + c] = std::min(std::max(scaled_acc, float(qmin())), float(qmax()));
@@ -339,25 +334,20 @@ class AvgPoolMicrokernelTester {
         input_scale() / (output_scale() * float(pooling_elements())),
         output_zero_point(), qmin(), qmax());
 
-      xnn_qu8_avgpool_minmax_params scalar_params;
-      xnn_init_qu8_avgpool_minmax_scalar_params(
-        &scalar_params,
-        -int32_t(input_zero_point()) * int32_t(pooling_elements()),
-        input_scale() / (output_scale() * float(pooling_elements())),
-        output_zero_point(), qmin(), qmax());
-
       // Compute reference results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          int32_t acc = scalar_params.scalar.bias;
+          int32_t acc = 0;
           for (size_t p = 0; p < pooling_elements(); p++) {
             const uint8_t* row = indirect_input[x * step() + p];
             if (row != zero.data()) {
               acc += int32_t(row[c + input_offset()]);
             }
+            acc -= int32_t(input_zero_point());
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_qu8_quantize_avgpool(acc, scalar_params);
+          output_ref[x * channels() + c] = xnn_qu8_requantize_rndna(
+            acc, input_scale() / (output_scale() * float(pooling_elements())), output_zero_point(), qmin(), qmax());
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());
           output_real[x * channels() + c] = std::min(std::max(scaled_acc, float(qmin())), float(qmax()));

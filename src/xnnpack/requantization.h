@@ -206,42 +206,6 @@ static inline uint8_t xnn_qu8_requantize_rndnu(
   return (uint8_t) (output + (int32_t) zero_point);
 }
 
-static inline uint8_t xnn_qu8_quantize_avgpool(
-  int32_t n,
-  union xnn_qu8_avgpool_minmax_params params)
-{
-  const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
-  const int64_t adjusted_product = product - (int64_t) (n < 0);
-
-  n = (int32_t) asr_s64(adjusted_product + params.scalar.rounding, params.scalar.right_shift);
-  if (n < params.scalar.output_min_less_zero_point) {
-    n = params.scalar.output_min_less_zero_point;
-  }
-  if (n > params.scalar.output_max_less_zero_point) {
-    n = params.scalar.output_max_less_zero_point;
-  }
-
-  return (uint8_t) (n + params.scalar.output_zero_point);
-}
-
-static inline int8_t xnn_qs8_quantize_avgpool(
-  int32_t n,
-  union xnn_qs8_avgpool_minmax_params params)
-{
-  const int64_t product = (int64_t) n * (int64_t) params.scalar.multiplier;
-  const int64_t adjusted_product = product - (int64_t) (n < 0);
-
-  n = (int32_t) asr_s64(adjusted_product + params.scalar.rounding, params.scalar.shift);
-  if (n < params.scalar.output_min_less_zero_point) {
-    n = params.scalar.output_min_less_zero_point;
-  }
-  if (n > params.scalar.output_max_less_zero_point) {
-    n = params.scalar.output_max_less_zero_point;
-  }
-
-  return (int8_t) (n + params.scalar.output_zero_point);
-}
-
 static inline uint8_t xnn_qu8_quantize_add(
   uint8_t a, uint8_t b,
   union xnn_qu8_addsub_minmax_params params)
