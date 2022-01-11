@@ -21,14 +21,14 @@ void xnn_qs8_vaddc_minmax_ukernel__wasmsimd_x16(
     int8_t* output,
     const union xnn_qs8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  const v128_t va_multiplier = wasm_v128_load(params->wasmsimd.a_multiplier);
-  const int32_t vshift = params->wasmsimd.shift;
-  const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
-  const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
+  const v128_t va_multiplier = wasm_v128_load64_splat(params->wasmsimd.a_multiplier);
+  const uint32_t vshift = params->wasmsimd.shift;
+  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd.output_zero_point);
+  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.output_min);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.output_max);
 
   v128_t vbias = wasm_i32x4_splat((int32_t) *input_b * params->wasmsimd.b_multiplier[0]);
-  vbias = wasm_i32x4_add(vbias, wasm_v128_load(params->wasmsimd.bias));
+  vbias = wasm_i32x4_add(vbias, wasm_v128_load64_splat(params->wasmsimd.bias));
 
   for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
     const v128_t va01234567 = wasm_i16x8_load8x8(input_a);

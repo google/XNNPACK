@@ -3316,16 +3316,16 @@ void xnn_init_qu8_add_minmax_wasmsimd_params(
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
   const int32_t bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
-  for (uint32_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd.bias[i] = bias;
     params->wasmsimd.a_multiplier[i] = a_multiplier;
     params->wasmsimd.b_multiplier[i] = b_multiplier;
   }
   params->wasmsimd.shift = shift;
-  for (uint32_t i = 0; i < 8; i++) {
+  for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
   }
-  for (uint32_t i = 0; i < 16; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     params->wasmsimd.output_min[i] = output_min;
     params->wasmsimd.output_max[i] = output_max;
   }
@@ -3768,16 +3768,16 @@ void xnn_init_qs8_add_minmax_wasmsimd_params(
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
   const int32_t bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
-  for (uint32_t i = 0; i < 4; i++) {
+  for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd.bias[i] = bias;
     params->wasmsimd.a_multiplier[i] = a_multiplier;
     params->wasmsimd.b_multiplier[i] = b_multiplier;
   }
   params->wasmsimd.shift = shift;
-  for (uint32_t i = 0; i < 8; i++) {
+  for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
   }
-  for (uint32_t i = 0; i < 16; i++) {
+  for (uint32_t i = 0; i < 8; i++) {
     params->wasmsimd.output_min[i] = output_min;
     params->wasmsimd.output_max[i] = output_max;
   }
