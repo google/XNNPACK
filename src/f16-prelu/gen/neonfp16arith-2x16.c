@@ -92,7 +92,7 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x16(
       vst1q_f16(o1, vacc1x01234567); o1 += 8;
     }
     if XNN_UNLIKELY(c != 0) {
-      const float16x8_t vw01234567 = vld1q_f16(w); w += 8;
+      const float16x8_t vw01234567 = vld1q_f16(w);
 
       const float16x8_t vi0x01234567 = vld1q_f16(i0);
       i0 = (const __fp16*) ((uintptr_t) i0 + c);

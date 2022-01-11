@@ -47,22 +47,24 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x8(
     for (; c >= 8 * sizeof(__fp16); c -= 8 * sizeof(__fp16)) {
       const float16x8_t vw01234567 = vld1q_f16(w); w += 8;
 
-      const float16x8_t vi0x001234567 = vld1q_f16(i0); i0 += 8;
-      const float16x8_t vi1x001234567 = vld1q_f16(i1); i1 += 8;
+      const float16x8_t vi0x01234567 = vld1q_f16(i0);
+      i0 += 8;
+      const float16x8_t vi1x01234567 = vld1q_f16(i1);
+      i1 += 8;
 
-      float16x8_t vacc0x001234567 = vmulq_f16(vi0x001234567, vw01234567);
-      const uint16x8_t vm0x001234567 = vcltq_s16(vreinterpretq_s16_f16(vi0x001234567), vmovq_n_s16(0));
-      float16x8_t vacc1x001234567 = vmulq_f16(vi1x001234567, vw01234567);
-      const uint16x8_t vm1x001234567 = vcltq_s16(vreinterpretq_s16_f16(vi1x001234567), vmovq_n_s16(0));
+      float16x8_t vacc0x01234567 = vmulq_f16(vi0x01234567, vw01234567);
+      const uint16x8_t vm0x01234567 = vcltq_s16(vreinterpretq_s16_f16(vi0x01234567), vmovq_n_s16(0));
+      float16x8_t vacc1x01234567 = vmulq_f16(vi1x01234567, vw01234567);
+      const uint16x8_t vm1x01234567 = vcltq_s16(vreinterpretq_s16_f16(vi1x01234567), vmovq_n_s16(0));
 
-      vacc0x001234567 = vbslq_f16(vm0x001234567, vacc0x001234567, vi0x001234567);
-      vacc1x001234567 = vbslq_f16(vm1x001234567, vacc1x001234567, vi1x001234567);
+      vacc0x01234567 = vbslq_f16(vm0x01234567, vacc0x01234567, vi0x01234567);
+      vacc1x01234567 = vbslq_f16(vm1x01234567, vacc1x01234567, vi1x01234567);
 
-      vst1q_f16(o0, vacc0x001234567); o0 += 8;
-      vst1q_f16(o1, vacc1x001234567); o1 += 8;
+      vst1q_f16(o0, vacc0x01234567); o0 += 8;
+      vst1q_f16(o1, vacc1x01234567); o1 += 8;
     }
     if XNN_UNLIKELY(c != 0) {
-      const float16x8_t vw01234567 = vld1q_f16(w); w += 8;
+      const float16x8_t vw01234567 = vld1q_f16(w);
 
       const float16x8_t vi0x01234567 = vld1q_f16(i0);
       i0 = (const __fp16*) ((uintptr_t) i0 + c);
