@@ -9,6 +9,7 @@ SpaceAfterCStyleCast: true
 PointerAlignment: Left
 ForEachMacros: ['XNN_UNPREDICTABLE', 'XNN_LIKELY', 'XNN_UNLIKELY']
 IfMacros: ['IF']
+IndentCaseLabels: true
 SpaceBeforeParens: Custom
 SpaceBeforeParensOptions:
   AfterControlStatements: true
