@@ -97,7 +97,7 @@ class VBinaryCMicrokernelTester {
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(f16rng));
       } else {
-        std::fill(y.begin(), y.end(), nanf(""));
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
       const uint16_t* a_data = inplace() ? y.data() : a.data();
 
@@ -162,7 +162,7 @@ class VBinaryCMicrokernelTester {
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(f16rng));
       } else {
-        std::fill(y.begin(), y.end(), nanf(""));
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
       const uint16_t* a_data = inplace() ? y.data() : a.data();
 

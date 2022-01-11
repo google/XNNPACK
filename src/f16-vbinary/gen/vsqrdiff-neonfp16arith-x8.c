@@ -38,10 +38,7 @@ void xnn_f16_vsqrdiff_ukernel__neonfp16arith_x8(
     const float16x8_t vb01234567 = vld1q_f16(b); b += 8;
 
     float16x8_t vy01234567 = vsubq_f16(va01234567, vb01234567);
-
     vy01234567 = vmulq_f16(vy01234567, vy01234567);
-
-
     vst1q_f16(y, vy01234567); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {

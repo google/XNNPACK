@@ -4599,6 +4599,34 @@ SET(PROD_F16C_MICROKERNEL_SRCS
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/f16-vbinary/gen/vadd-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vadd-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vaddc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vaddc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vdiv-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vdiv-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vdivc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vdivc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vmax-f16c-x8.c
+  src/f16-vbinary/gen/vmax-f16c-x16.c
+  src/f16-vbinary/gen/vmaxc-f16c-x8.c
+  src/f16-vbinary/gen/vmaxc-f16c-x16.c
+  src/f16-vbinary/gen/vmin-f16c-x8.c
+  src/f16-vbinary/gen/vmin-f16c-x16.c
+  src/f16-vbinary/gen/vminc-f16c-x8.c
+  src/f16-vbinary/gen/vminc-f16c-x16.c
+  src/f16-vbinary/gen/vmul-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vmulc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vmulc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vrdivc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vrdivc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vrsubc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vrsubc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsub-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vsub-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsubc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vsubc-minmax-f16c-x16.c
   src/f16-vclamp/gen/vclamp-f16c-x8.c
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x8.c

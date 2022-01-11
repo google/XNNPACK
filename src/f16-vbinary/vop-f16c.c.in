@@ -1,0 +1,124 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vbinary.h>
+
+
+$_MM256_OP_PS = {
+$  "ADD": lambda x, y: "_mm256_add_ps(%s, %s)" % (x, y),
+$  "DIV": lambda x, y: "_mm256_div_ps(%s, %s)" % (x, y),
+$  "MAX": lambda x, y: "_mm256_max_ps(%s, %s)" % (x, y),
+$  "MIN": lambda x, y: "_mm256_min_ps(%s, %s)" % (x, y),
+$  "MUL": lambda x, y: "_mm256_mul_ps(%s, %s)" % (x, y),
+$  "SUB": lambda x, y: "_mm256_sub_ps(%s, %s)" % (x, y),
+$  "SQRDIFF": lambda x, y: "_mm256_sub_ps(%s, %s)" % (x, y),
+$}[OP]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "xnn_f16_default_params", "MINMAX": "xnn_f16_minmax_params"}[ACTIVATION]
+void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_x${BATCH_TILE}(
+    size_t n,
+    const void* restrict a_ptr,
+    const void* restrict b_ptr,
+    void* restrict y_ptr,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(n != 0);
+  assert(n % sizeof(uint16_t) == 0);
+  assert(a_ptr != NULL);
+  assert(b_ptr != NULL);
+  assert(y_ptr != NULL);
+
+  const uint16_t* a = (const uint16_t*) a_ptr;
+  const uint16_t* b = (const uint16_t*) b_ptr;
+  uint16_t* y = (uint16_t*) y_ptr;
+
+  $if ACTIVATION == "MINMAX":
+    const __m256 vy_min = _mm256_load_ps(params->avx.min);
+    const __m256 vy_max = _mm256_load_ps(params->avx.max);
+
+  $if BATCH_TILE > 8:
+    for (; n >= ${BATCH_TILE} * sizeof(uint16_t); n -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      const __m256 va${ABC[0:8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
+      const __m256 vb${ABC[0:8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
+      $for N in range(8, BATCH_TILE, 8):
+        const __m256 va${ABC[N:N+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (a + ${N})));
+        const __m256 vb${ABC[N:N+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (b + ${N})));
+      a += ${BATCH_TILE};
+      b += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 8):
+        __m256 vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va" + ABC[N:N+8], "vb" + ABC[N:N+8])}, _MM_FROUND_NO_EXC));
+
+      $if OP == "SQRDIFF":
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy${ABC[N:N+8]}, vy${ABC[N:N+8]}), _MM_FROUND_NO_EXC));
+
+      $if ACTIVATION == "MINMAX":
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm256_max_ps(vy${ABC[N:N+8]}, vy_min);
+
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
+
+      _mm_storeu_si128((__m128i*) y, _mm256_cvtps_ph(vy${ABC[0:8]}, _MM_FROUND_NO_EXC));
+      $for N in range(8, BATCH_TILE, 8):
+        _mm_storeu_si128((__m128i*) (y + ${N}), _mm256_cvtps_ph(vy${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
+      y += ${BATCH_TILE};
+    }
+  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+    const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
+    const __m256 vb = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
+    a += 8;
+    b += 8;
+
+    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_NO_EXC));
+    $if OP == "SQRDIFF":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_NO_EXC));
+
+    $if ACTIVATION == "MINMAX":
+      vy = _mm256_max_ps(vy, vy_min);
+      vy = _mm256_min_ps(vy, vy_max);
+
+    _mm_storeu_si128((__m128i*) y, _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC));
+    y += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
+    const __m256 vb = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
+
+    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_NO_EXC));
+    $if OP == "SQRDIFF":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_NO_EXC));
+
+    $if ACTIVATION == "MINMAX":
+      vy = _mm256_max_ps(vy, vy_min);
+      vy = _mm256_min_ps(vy, vy_max);
+
+    __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC);
+    if (n & (4 * sizeof(uint16_t))) {
+      _mm_storel_epi64((__m128i*) y, vh);
+      vh = _mm_unpackhi_epi64(vh, vh);
+      y += 4;
+    }
+    if (n & (2 * sizeof(uint16_t))) {
+      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vh);
+      vh = _mm_srli_epi64(vh, 32);
+      y += 2;
+    }
+    if (n & (1 * sizeof(uint16_t))) {
+      *y = (uint16_t) _mm_extract_epi16(vh, 0);
+    }
+  }
+}

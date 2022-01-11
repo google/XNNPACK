@@ -38,9 +38,6 @@ void xnn_f16_vmaxc_ukernel__neonfp16arith_x8(
     const float16x8_t va01234567 = vld1q_f16(a); a += 8;
 
     float16x8_t vy01234567 = vmaxq_f16(va01234567, vb);
-
-
-
     vst1q_f16(y, vy01234567); y += 8;
   }
   if XNN_UNLIKELY(n != 0) {

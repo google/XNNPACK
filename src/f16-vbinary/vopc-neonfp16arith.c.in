@@ -51,39 +51,39 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__neonfp16arith_x${BATCH_TILE}(
     const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
 
   const float16x8_t vb = vld1q_dup_f16(b);
-  for (; n >= ${BATCH_TILE} * sizeof(__fp16); n -= ${BATCH_TILE} * sizeof(__fp16)) {
-    $for N in range(0, BATCH_TILE, 8):
-      const float16x8_t va${ABC[N:N+8]} = vld1q_f16(a); a += 8;
-
-    $for N in range(0, BATCH_TILE, 8):
-      float16x8_t vy${ABC[N:N+8]} = ${VOPQ_f16("va" + ABC[N:N+8])};
-
-    $if OP == "SQRDIFF":
-      $for N in range(0, BATCH_TILE, 8):
-        vy${ABC[N:N+8]} = vmulq_f16(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
-
-    $if ACTIVATION == "MINMAX":
-      $for N in range(0, BATCH_TILE, 8):
-        vy${ABC[N:N+8]} = vmaxq_f16(vy${ABC[N:N+8]}, vy_min);
-
-      $for N in range(0, BATCH_TILE, 8):
-        vy${ABC[N:N+8]} = vminq_f16(vy${ABC[N:N+8]}, vy_max);
-
-    $for N in range(0, BATCH_TILE, 8):
-      vst1q_f16(y, vy${ABC[N:N+8]}); y += 8;
-  }
   $if BATCH_TILE > 8:
-    for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
-      const float16x8_t va01234567 = vld1q_f16(a); a += 8;
+    for (; n >= ${BATCH_TILE} * sizeof(__fp16); n -= ${BATCH_TILE} * sizeof(__fp16)) {
+      $for N in range(0, BATCH_TILE, 8):
+        const float16x8_t va${ABC[N:N+8]} = vld1q_f16(a); a += 8;
 
-      float16x8_t vy01234567 = ${VOPQ_f16("va01234567")};
+      $for N in range(0, BATCH_TILE, 8):
+        float16x8_t vy${ABC[N:N+8]} = ${VOPQ_f16("va" + ABC[N:N+8])};
+
       $if OP == "SQRDIFF":
-        vy01234567 = vmulq_f16(vy01234567, vy01234567);
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = vmulq_f16(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
+
       $if ACTIVATION == "MINMAX":
-        vy01234567 = vmaxq_f16(vy01234567, vy_min);
-        vy01234567 = vminq_f16(vy01234567, vy_max);
-      vst1q_f16(y, vy01234567); y += 8;
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = vmaxq_f16(vy${ABC[N:N+8]}, vy_min);
+
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = vminq_f16(vy${ABC[N:N+8]}, vy_max);
+
+      $for N in range(0, BATCH_TILE, 8):
+        vst1q_f16(y, vy${ABC[N:N+8]}); y += 8;
     }
+  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
+    const float16x8_t va01234567 = vld1q_f16(a); a += 8;
+
+    float16x8_t vy01234567 = ${VOPQ_f16("va01234567")};
+    $if OP == "SQRDIFF":
+      vy01234567 = vmulq_f16(vy01234567, vy01234567);
+    $if ACTIVATION == "MINMAX":
+      vy01234567 = vmaxq_f16(vy01234567, vy_min);
+      vy01234567 = vminq_f16(vy01234567, vy_max);
+    vst1q_f16(y, vy01234567); y += 8;
+  }
   if XNN_UNLIKELY(n != 0) {
     const float16x8_t va01234567 = vld1q_f16(a);
 
