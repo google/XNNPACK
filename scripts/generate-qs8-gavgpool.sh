@@ -5,13 +5,29 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### Scalar ####################################
-tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c &
-tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c2.c &
-tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c4.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c2.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c4.c &
 
-tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c &
-tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c2.c &
-tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c4.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c1.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c2.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c4.c &
+
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c1.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c2.c &
+tools/xngen src/qs8-gavgpool/unipass-scalar.c.in -D ROW_TILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c4.c &
+
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c2.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c4.c &
+
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c1.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c2.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c4.c &
+
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=1 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c1.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=2 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c2.c &
+tools/xngen src/qs8-gavgpool/multipass-scalar.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=4 -D ACCUMULATORS=1 -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D WASM=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c4.c &
 
 ################################## ARM NEON ###################################
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c8-acc2.c &
@@ -19,10 +35,20 @@ tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c24-acc2.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c32-acc2.c &
 
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c8-acc2.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c16-acc2.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c24-acc2.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c32-acc2.c &
+
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c8-acc2.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c16-acc2.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c24-acc2.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c32-acc2.c &
+
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c8-acc2.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c16-acc2.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c24-acc2.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c32-acc2.c &
 
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-gavgpool/unipass-wasmsimd.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D ACCUMULATORS=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-wasmsimd-c8-acc2.c &
