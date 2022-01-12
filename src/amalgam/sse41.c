@@ -3876,7 +3876,7 @@ void xnn_qs8_f32_vcvt_ukernel__sse41_x16(
   }
 }
 
-void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse41_c8_acc2(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse41_c8_acc2(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -4132,7 +4132,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_7p7x__sse41_c8_acc2(
   }
 }
 
-void xnn_qs8_gavgpool_minmax_ukernel_7x__sse41_c8_acc2(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8_acc2(
     size_t rows,
     size_t channels,
     const int8_t* input,

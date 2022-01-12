@@ -24,7 +24,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $PARAMS_STRUCT = "fp32_sse4" if SSE >= 4 else "fp32_sse2"
 $ISA = {2: "sse2", 4: "sse41"}[SSE]
-void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t rows,
     size_t channels,
     const int8_t* input,
