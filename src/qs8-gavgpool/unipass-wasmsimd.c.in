@@ -5,9 +5,7 @@
 
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
-$assert ROW_TILE >= 2
-$assert ACCUMULATORS >= 1
-$assert ROW_TILE >= ACCUMULATORS * 2
+$assert ROW_TILE >= 3
 $assert REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
@@ -17,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/gavgpool.h>
 
 
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -55,27 +53,16 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE
         const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load8x8(i${M} + ${C});
       i${M} += ${CHANNEL_TILE};
 
-    $for A in range(ACCUMULATORS):
-      $for C in range(0, CHANNEL_TILE, 8):
-        v128_t vacc${A}x${ABC[C:C+8]} = wasm_i16x8_add(vxi${A*2}x${ABC[C:C+8]}, vxi${A*2+1}x${ABC[C:C+8]});
+    $for C in range(0, CHANNEL_TILE, 8):
+      v128_t vacc${ABC[C:C+8]} = wasm_i16x8_add(vxi0x${ABC[C:C+8]}, vxi1x${ABC[C:C+8]});
 
-    $for M in range(ACCUMULATORS * 2, ROW_TILE):
+    $for M in range(2, ROW_TILE):
       $for C in range(0, CHANNEL_TILE, 8):
-        vacc${M % ACCUMULATORS}x${ABC[C:C+8]} = wasm_i16x8_add(vacc${M % ACCUMULATORS}x${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
-
-    $if ACCUMULATORS > 1:
-      // Add up all accumulators to vacc0x${ABC[0:CHANNEL_TILE]}
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            $for C in range(0, CHANNEL_TILE, 8):
-              vacc${A}x${ABC[C:C+8]} = wasm_i16x8_add(vacc${A}x${ABC[C:C+8]}, vacc${A + ACC_SLICE}x${ABC[C:C+8]});
-        $ACC_SLICE *= 2
+        vacc${ABC[C:C+8]} = wasm_i16x8_add(vacc${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
 
     $for C in range(0, CHANNEL_TILE, 8):
-      v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc0x${ABC[C:C+8]}));
-      v128_t vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc0x${ABC[C:C+8]}));
+      v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc${ABC[C:C+8]}));
+      v128_t vacc${ABC[C+4:C+8]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc${ABC[C:C+8]}));
 
     $for C in range(0, CHANNEL_TILE, 4):
       vacc${ABC[C:C+4]} = wasm_f32x4_convert_i32x4(vacc${ABC[C:C+4]});
@@ -124,23 +111,13 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE
         const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
         i${M} += 8;
 
-      $for A in range(ACCUMULATORS):
-        v128_t vacc${A}x${ABC[0:8]} = wasm_i16x8_add(vxi${A*2}x${ABC[0:8]}, vxi${A*2+1}x${ABC[0:8]});
+      v128_t vacc${ABC[0:8]} = wasm_i16x8_add(vxi0x${ABC[0:8]}, vxi1x${ABC[0:8]});
 
-      $for M in range(ACCUMULATORS * 2, ROW_TILE):
-        vacc${M % ACCUMULATORS}x${ABC[0:8]} = wasm_i16x8_add(vacc${M % ACCUMULATORS}x${ABC[0:8]}, vxi${M}x${ABC[0:8]});
+      $for M in range(2, ROW_TILE):
+        vacc${ABC[0:8]} = wasm_i16x8_add(vacc${ABC[0:8]}, vxi${M}x${ABC[0:8]});
 
-      $if ACCUMULATORS > 1:
-        // Add up all accumulators to vacc0x${ABC[0:8]}
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              vacc${A}x${ABC[0:8]} = wasm_i16x8_add(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
-          $ACC_SLICE *= 2
-
-      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc0x${ABC[0:8]}));
-      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc0x${ABC[0:8]}));
+      v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc${ABC[0:8]}));
+      v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc${ABC[0:8]}));
 
       vacc${ABC[0:4]} = wasm_f32x4_convert_i32x4(vacc${ABC[0:4]});
       vacc${ABC[4:8]} = wasm_f32x4_convert_i32x4(vacc${ABC[4:8]});
@@ -190,16 +167,14 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE
           vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
-        {
-          uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
-          if (channels & 2) {
-            *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
-            vout${ABC[0:4]} >>= 16;
-            output += 2;
-          }
-          if (channels & 1) {
-            *output = (int8_t) vout${ABC[0:4]};
-          }
+        uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+        if (channels & 2) {
+          *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+          vout${ABC[0:4]} >>= 16;
+          output += 2;
+        }
+        if (channels & 1) {
+          *output = (int8_t) vout${ABC[0:4]};
         }
     }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
   }

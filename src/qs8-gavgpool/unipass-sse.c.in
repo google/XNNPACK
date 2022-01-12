@@ -6,9 +6,7 @@
 $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
-$assert ROW_TILE >= 2
-$assert ACCUMULATORS >= 1
-$assert ROW_TILE >= ACCUMULATORS * 2
+$assert ROW_TILE >= 3
 $assert REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
@@ -20,7 +18,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $PARAMS_STRUCT = "fp32_sse4" if SSE >= 4 else "fp32_sse2"
 $ISA = {2: "sse2", 4: "sse41"}[SSE]
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -67,32 +65,21 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
         $for C in range(0, CHANNEL_TILE, 8):
           const __m128i vxi${M}x${ABC[C:C+8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]}), 8);
 
-    $for A in range(ACCUMULATORS):
-      $for C in range(0, CHANNEL_TILE, 8):
-        __m128i vacc${A}x${ABC[C:C+8]} = _mm_add_epi16(vxi${A*2}x${ABC[C:C+8]}, vxi${A*2+1}x${ABC[C:C+8]});
+    $for C in range(0, CHANNEL_TILE, 8):
+      __m128i vacc${ABC[C:C+8]} = _mm_add_epi16(vxi0x${ABC[C:C+8]}, vxi1x${ABC[C:C+8]});
 
-    $for M in range(ACCUMULATORS * 2, ROW_TILE):
+    $for M in range(2, ROW_TILE):
       $for C in range(0, CHANNEL_TILE, 8):
-        vacc${M % ACCUMULATORS}x${ABC[C:C+8]} = _mm_add_epi16(vacc${M % ACCUMULATORS}x${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
-
-    $if ACCUMULATORS > 1:
-      // Add up all accumulators to vacc0x${ABC[0:CHANNEL_TILE]}
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            $for C in range(0, CHANNEL_TILE, 8):
-              vacc${A}x${ABC[C:C+8]} = _mm_add_epi16(vacc${A}x${ABC[C:C+8]}, vacc${A + ACC_SLICE}x${ABC[C:C+8]});
-        $ACC_SLICE *= 2
+        vacc${ABC[C:C+8]} = _mm_add_epi16(vacc${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
 
     $for C in range(0, CHANNEL_TILE, 8):
       $if SSE == 4:
-        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}));
-        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vinit_bias, _mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vacc0x${ABC[C:C+8]}), 16));
+        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vacc${ABC[C:C+8]}));
+        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vinit_bias, _mm_srai_epi32(_mm_unpackhi_epi16(vacc${ABC[C:C+8]}, vacc${ABC[C:C+8]}), 16));
       $else:
-        const __m128i vsgnacc0x${ABC[C:C+8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]});
-        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vinit_bias, _mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}));
-        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vinit_bias, _mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}));
+        const __m128i vsgnacc${ABC[C:C+8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc${ABC[C:C+8]});
+        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vinit_bias, _mm_unpacklo_epi16(vacc${ABC[C:C+8]}, vsgnacc${ABC[C:C+8]}));
+        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vinit_bias, _mm_unpackhi_epi16(vacc${ABC[C:C+8]}, vsgnacc${ABC[C:C+8]}));
 
     $for C in range(0, CHANNEL_TILE, 4):
       __m128 vfpacc${ABC[C:C+4]} = _mm_cvtepi32_ps(vacc${ABC[C:C+4]});
@@ -150,28 +137,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
         $for M in range(ROW_TILE):
           const __m128i vxi${M}x${ABC[0:8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[0:8]}, vi${M}x${ABC[0:8]}), 8);
 
-      $for A in range(ACCUMULATORS):
-        __m128i vacc${A}x${ABC[0:8]} = _mm_add_epi16(vxi${A*2}x${ABC[0:8]}, vxi${A*2+1}x${ABC[0:8]});
+      __m128i vacc${ABC[0:8]} = _mm_add_epi16(vxi0x${ABC[0:8]}, vxi1x${ABC[0:8]});
 
-      $for M in range(ACCUMULATORS * 2, ROW_TILE):
-        vacc${M % ACCUMULATORS}x${ABC[0:8]} = _mm_add_epi16(vacc${M % ACCUMULATORS}x${ABC[0:8]}, vxi${M}x${ABC[0:8]});
-
-      $if ACCUMULATORS > 1:
-        // Add up all accumulators to vacc0x${ABC[0:8]}
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              vacc${A}x${ABC[0:8]} = _mm_add_epi16(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
-          $ACC_SLICE *= 2
+      $for M in range(2, ROW_TILE):
+        vacc${ABC[0:8]} = _mm_add_epi16(vacc${ABC[0:8]}, vxi${M}x${ABC[0:8]});
 
       $if SSE == 4:
-        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), vinit_bias);
-        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vacc0x${ABC[0:8]}), 16), vinit_bias);
+        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc${ABC[0:8]}), vinit_bias);
+        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc${ABC[0:8]}, vacc${ABC[0:8]}), 16), vinit_bias);
       $else:
-        const __m128i vsgnacc0x${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]});
-        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), vinit_bias);
-        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), vinit_bias);
+        const __m128i vsgnacc${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc${ABC[0:8]});
+        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc${ABC[0:8]}, vsgnacc${ABC[0:8]}), vinit_bias);
+        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc${ABC[0:8]}, vsgnacc${ABC[0:8]}), vinit_bias);
 
       __m128 vfpacc${ABC[0:4]} = _mm_cvtepi32_ps(vacc${ABC[0:4]});
       __m128 vfpacc${ABC[4:8]} = _mm_cvtepi32_ps(vacc${ABC[4:8]});

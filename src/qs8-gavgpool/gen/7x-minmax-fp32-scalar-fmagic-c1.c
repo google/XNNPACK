@@ -61,26 +61,25 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__scalar_fmagic_c1(
   const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
   const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
   do {
+    int32_t vacc = vinit_bias;
     const int32_t vi0 = *i0++;
     const int32_t vi1 = *i1++;
+
+    vacc += vi0;
     const int32_t vi2 = *i2++;
+    vacc += vi1;
     const int32_t vi3 = *i3++;
+    vacc += vi2;
     const int32_t vi4 = *i4++;
+    vacc += vi3;
     const int32_t vi5 = *i5++;
+    vacc += vi4;
     const int32_t vi6 = *i6++;
 
-    int32_t vacc0 = vi0 + vi1;
+    vacc += vi5;
+    vacc += vi6;
 
-    vacc0 += vi2;
-    vacc0 += vi3;
-    vacc0 += vi4;
-    vacc0 += vi5;
-    vacc0 += vi6;
-
-
-    const int32_t vacc = vinit_bias + vacc0;
     float vfpacc = (float) vacc * vscale;
-
     vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
     vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
     vfpacc += vmagic_bias;

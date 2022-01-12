@@ -41,24 +41,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_imagic_c1(
   int32_t* b = buffer;
   size_t c = channels;
   do {
+    int32_t vacc = vinit_bias;
     const int32_t vi0 = *i0++;
     const int32_t vi1 = *i1++;
+
+    vacc += vi0;
     const int32_t vi2 = *i2++;
+    vacc += vi1;
     const int32_t vi3 = *i3++;
+    vacc += vi2;
     const int32_t vi4 = *i4++;
+    vacc += vi3;
     const int32_t vi5 = *i5++;
+    vacc += vi4;
     const int32_t vi6 = *i6++;
 
-    int32_t vacc0 = vi0 + vi1;
+    vacc += vi5;
+    vacc += vi6;
 
-    vacc0 += vi2;
-    vacc0 += vi3;
-    vacc0 += vi4;
-    vacc0 += vi5;
-    vacc0 += vi6;
-
-
-    const int32_t vacc = vinit_bias + vacc0;
     *b++ = vacc;
   } while (--c != 0);
 
@@ -74,24 +74,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_imagic_c1(
     int32_t* b = buffer;
     size_t c = channels;
     do {
+      int32_t vacc = *b;
       const int32_t vi0 = *i0++;
       const int32_t vi1 = *i1++;
+
+      vacc += vi0;
       const int32_t vi2 = *i2++;
+      vacc += vi1;
       const int32_t vi3 = *i3++;
+      vacc += vi2;
       const int32_t vi4 = *i4++;
+      vacc += vi3;
       const int32_t vi5 = *i5++;
+      vacc += vi4;
       const int32_t vi6 = *i6++;
 
-      int32_t vacc0 = vi0 + vi1;
+      vacc += vi5;
+      vacc += vi6;
 
-      vacc0 += vi2;
-      vacc0 += vi3;
-      vacc0 += vi4;
-      vacc0 += vi5;
-      vacc0 += vi6;
-
-
-      int32_t vacc = *b + vacc0;
       *b++ = vacc;
     } while (--c != 0);
   }
@@ -128,26 +128,25 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_imagic_c1(
   const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
   const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
   do {
+    int32_t vacc = *buffer++;
     const int32_t vi0 = *i0++;
     const int32_t vi1 = *i1++;
+
+    vacc += vi0;
     const int32_t vi2 = *i2++;
+    vacc += vi1;
     const int32_t vi3 = *i3++;
+    vacc += vi2;
     const int32_t vi4 = *i4++;
+    vacc += vi3;
     const int32_t vi5 = *i5++;
+    vacc += vi4;
     const int32_t vi6 = *i6++;
 
-    int32_t vacc0 = vi0 + vi1;
+    vacc += vi5;
+    vacc += vi6;
 
-    vacc0 += vi2;
-    vacc0 += vi3;
-    vacc0 += vi4;
-    vacc0 += vi5;
-    vacc0 += vi6;
-
-
-    const int32_t vacc = (*buffer++) + vacc0;
     float vfpacc = (float) vacc * vscale;
-
     vfpacc += vmagic_bias;
     int32_t vout = (int32_t) fp32_to_bits(vfpacc);
     vout = math_max_s32(vout, vmagic_min);

@@ -5,9 +5,7 @@
 
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
-$assert ROW_TILE >= 2
-$assert ACCUMULATORS >= 1
-$assert ROW_TILE >= ACCUMULATORS * 2
+$assert ROW_TILE >= 3
 $assert REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
@@ -19,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -58,31 +56,23 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
     const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
     const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
   for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
-    $for M in range(ROW_TILE):
+    $for M in range(2):
       $for C in range(0, CHANNEL_TILE, 8):
         const int8x8_t vi${M}x${ABC[C:C+8]} = vld1_s8(i${M}); i${M} += 8;
 
-    $for A in range(ACCUMULATORS):
-      $for C in range(0, CHANNEL_TILE, 8):
-        int16x8_t vacc${A}x${ABC[C:C+8]} = vaddl_s8(vi${A*2}x${ABC[C:C+8]}, vi${A*2+1}x${ABC[C:C+8]});
+    $for C in range(0, CHANNEL_TILE, 8):
+      const int8x8_t vi2x${ABC[C:C+8]} = vld1_s8(i2); i2 += 8;
+      int16x8_t vacc${ABC[C:C+8]} = vaddl_s8(vi0x${ABC[C:C+8]}, vi1x${ABC[C:C+8]});
 
-    $for M in range(ACCUMULATORS * 2, ROW_TILE):
+    $for M in range(2, ROW_TILE):
       $for C in range(0, CHANNEL_TILE, 8):
-        vacc${M % ACCUMULATORS}x${ABC[C:C+8]} = vaddw_s8(vacc${M % ACCUMULATORS}x${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
-
-    $if ACCUMULATORS > 1:
-      // Add up all accumulators to vacc0x${ABC[0:CHANNEL_TILE]}
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            $for C in range(0, CHANNEL_TILE, 8):
-              vacc${A}x${ABC[C:C+8]} = vaddq_s16(vacc${A}x${ABC[C:C+8]}, vacc${A + ACC_SLICE}x${ABC[C:C+8]});
-        $ACC_SLICE *= 2
+        $if M + 1 != ROW_TILE:
+          const int8x8_t vi${M+1}x${ABC[C:C+8]} = vld1_s8(i${M+1}); i${M+1} += 8;
+        vacc${ABC[C:C+8]} = vaddw_s8(vacc${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
 
     $for C in range(0, CHANNEL_TILE, 8):
-      int32x4_t vacc${ABC[C:C+4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc0x${ABC[C:C+8]}));
-      int32x4_t vacc${ABC[C+4:C+8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc0x${ABC[C:C+8]}));
+      int32x4_t vacc${ABC[C:C+4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc${ABC[C:C+8]}));
+      int32x4_t vacc${ABC[C+4:C+8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc${ABC[C:C+8]}));
 
     $for C in range(0, CHANNEL_TILE, 4):
       float32x4_t vfpacc${ABC[C:C+4]} = vcvtq_f32_s32(vacc${ABC[C:C+4]});
@@ -102,25 +92,23 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
 
     #if XNN_ARCH_ARM64
       $for C in range(0, CHANNEL_TILE, 8):
-        int16x8_t vacc${ABC[C:C+8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]});
+        vacc${ABC[C:C+8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]});
+    #else  // !XNN_ARCH_ARM64
+      $for C in range(0, CHANNEL_TILE, 8):
+        vacc${ABC[C:C+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]}));
+    #endif  // !XNN_ARCH_ARM64
 
-      $if ARMV8:
-        $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+8]} = vqaddq_s16(vacc${ABC[C:C+8]}, voutput_zero_point);
+    $if ARMV8:
+      $for C in range(0, CHANNEL_TILE, 8):
+        vacc${ABC[C:C+8]} = vqaddq_s16(vacc${ABC[C:C+8]}, voutput_zero_point);
 
+    #if XNN_ARCH_ARM64
       $for C in range(0, CHANNEL_TILE, 16):
         $if C + 8 < CHANNEL_TILE:
           int8x16_t vout${ABC[C:C+16]} = vqmovn_high_s16(vqmovn_s16(vacc${ABC[C:C+8]}), vacc${ABC[C+8:C+16]});
         $else:
           int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
     #else  // !XNN_ARCH_ARM64
-      $for C in range(0, CHANNEL_TILE, 8):
-        int16x8_t vacc${ABC[C:C+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]}));
-
-      $if ARMV8:
-        $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+8]} = vqaddq_s16(vacc${ABC[C:C+8]}, voutput_zero_point);
-
       $for C in range(0, CHANNEL_TILE, 16):
         $if C + 8 < CHANNEL_TILE:
           int8x16_t vout${ABC[C:C+16]} = vcombine_s8(vqmovn_s16(vacc${ABC[C:C+8]}), vqmovn_s16(vacc${ABC[C+8:C+16]}));
@@ -152,26 +140,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
   }
   if XNN_UNLIKELY(channels != 0) {
     ${"do " if CHANNEL_TILE > 8 else ""}{
-      $for M in range(ROW_TILE):
+      $for M in range(3):
         const int8x8_t vi${M}x${ABC[0:8]} = vld1_s8(i${M}); i${M} += 8;
+      int16x8_t vacc${ABC[0:8]} = vaddl_s8(vi0x${ABC[0:8]}, vi1x${ABC[0:8]});
 
-      $for A in range(ACCUMULATORS):
-        int16x8_t vacc${A}x${ABC[0:8]} = vaddl_s8(vi${A*2}x${ABC[0:8]}, vi${A*2+1}x${ABC[0:8]});
+      $for M in range(2, ROW_TILE):
+        $if M + 1 != ROW_TILE:
+          const int8x8_t vi${M+1}x${ABC[0:8]} = vld1_s8(i${M+1}); i${M+1} += 8;
+        vacc${ABC[0:8]} = vaddw_s8(vacc${ABC[0:8]}, vi${M}x${ABC[0:8]});
 
-      $for M in range(ACCUMULATORS * 2, ROW_TILE):
-        vacc${M % ACCUMULATORS}x${ABC[0:8]} = vaddw_s8(vacc${M % ACCUMULATORS}x${ABC[0:8]}, vi${M}x${ABC[0:8]});
-
-      $if ACCUMULATORS > 1:
-        // Add up all accumulators to vacc0x${ABC[0:CHANNEL_TILE]}
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              vacc${A}x${ABC[0:8]} = vaddq_s16(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
-          $ACC_SLICE *= 2
-
-      int32x4_t vacc${ABC[0:4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc0x${ABC[0:8]}));
-      int32x4_t vacc${ABC[4:8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc0x${ABC[0:8]}));
+      int32x4_t vacc${ABC[0:4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc${ABC[0:8]}));
+      int32x4_t vacc${ABC[4:8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc${ABC[0:8]}));
 
       float32x4_t vfpacc${ABC[0:4]} = vcvtq_f32_s32(vacc${ABC[0:4]});
       float32x4_t vfpacc${ABC[4:8]} = vcvtq_f32_s32(vacc${ABC[4:8]});
@@ -190,9 +169,9 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
         vacc${ABC[4:8]} = vqsubq_s32(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
 
       #if XNN_ARCH_ARM64
-        int16x8_t vacc${ABC[0:8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]});
+        vacc${ABC[0:8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]});
       #else
-        int16x8_t vacc${ABC[0:8]} = vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]}));
+        vacc${ABC[0:8]} = vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]}));
       #endif
       $if ARMV8:
         vacc${ABC[0:8]} = vqaddq_s16(vacc${ABC[0:8]}, voutput_zero_point);

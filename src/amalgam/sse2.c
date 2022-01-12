@@ -5643,7 +5643,7 @@ void xnn_qs8_f32_vcvt_ukernel__sse2_x32(
   }
 }
 
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -5692,19 +5692,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
     const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
     const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-    __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-    __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-    vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-    // Add up all accumulators to vacc0x01234567
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-    const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-    const __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567), vinit_bias);
-    const __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567), vinit_bias);
+    const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+    const __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc01234567, vsgnacc01234567), vinit_bias);
+    const __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc01234567, vsgnacc01234567), vinit_bias);
 
     _mm_store_si128((__m128i*) b, vacc0123);
     _mm_store_si128((__m128i*) (b + 4), vacc4567);
@@ -5746,19 +5744,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
       const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
       const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-      __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-      __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-      vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-      // Add up all accumulators to vacc0x01234567
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-      const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-      const __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) (b + 0)));
-      const __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) (b + 4)));
+      const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+      const __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) (b + 0)));
+      const __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) (b + 4)));
 
       _mm_store_si128((__m128i*) b, vacc0123);
       _mm_store_si128((__m128i*) (b + 4), vacc4567);
@@ -5820,19 +5816,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
     const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
     const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-    __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-    __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-    vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-    // Add up all accumulators to vacc0x01234567
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-    const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-    __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) (buffer + 0)));
-    __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) (buffer + 4)));
+    const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+    __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) (buffer + 0)));
+    __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) (buffer + 4)));
     buffer += 8;
 
     __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
@@ -5882,19 +5876,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
       const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
       const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-      __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-      __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-      vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-      // Add up all accumulators to vacc0x01234567
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-      const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-      __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) buffer));
-      __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567), _mm_load_si128((const __m128i*) (buffer + 4)));
+      const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+      __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) buffer));
+      __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc01234567, vsgnacc01234567), _mm_load_si128((const __m128i*) (buffer + 4)));
       buffer += 8;
 
       __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
@@ -5932,7 +5924,7 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8_acc2(
   }
 }
 
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8_acc2(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -6000,19 +5992,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8_acc2(
     const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
     const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-    __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-    __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-    vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-    // Add up all accumulators to vacc0x01234567
-    vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-    const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-    __m128i vacc0123 = _mm_add_epi32(vinit_bias, _mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567));
-    __m128i vacc4567 = _mm_add_epi32(vinit_bias, _mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567));
+    const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+    __m128i vacc0123 = _mm_add_epi32(vinit_bias, _mm_unpacklo_epi16(vacc01234567, vsgnacc01234567));
+    __m128i vacc4567 = _mm_add_epi32(vinit_bias, _mm_unpackhi_epi16(vacc01234567, vsgnacc01234567));
 
     __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
     __m128 vfpacc4567 = _mm_cvtepi32_ps(vacc4567);
@@ -6061,19 +6051,17 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8_acc2(
       const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
       const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-      __m128i vacc0x01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-      __m128i vacc1x01234567 = _mm_add_epi16(vxi2x01234567, vxi3x01234567);
+      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
 
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi4x01234567);
-      vacc1x01234567 = _mm_add_epi16(vacc1x01234567, vxi5x01234567);
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vxi6x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-      // Add up all accumulators to vacc0x01234567
-      vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
-
-      const __m128i vsgnacc0x01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567);
-      __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x01234567, vsgnacc0x01234567), vinit_bias);
-      __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, vsgnacc0x01234567), vinit_bias);
+      const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
+      __m128i vacc0123 = _mm_add_epi32(_mm_unpacklo_epi16(vacc01234567, vsgnacc01234567), vinit_bias);
+      __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc01234567, vsgnacc01234567), vinit_bias);
 
       __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
       __m128 vfpacc4567 = _mm_cvtepi32_ps(vacc4567);

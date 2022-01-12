@@ -60,74 +60,73 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__scalar_imagic_c4(
   const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
   const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
   const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
-  while (channels >= 4) {
+  for (; channels >= 4; channels -= 4) {
     const int32_t vi0x0 = i0[0];
     const int32_t vi0x1 = i0[1];
     const int32_t vi0x2 = i0[2];
     const int32_t vi0x3 = i0[3];
     i0 += 4;
+
+    int32_t vacc0 = vi0x0 + vinit_bias;
     const int32_t vi1x0 = i1[0];
+    int32_t vacc1 = vi0x1 + vinit_bias;
     const int32_t vi1x1 = i1[1];
+    int32_t vacc2 = vi0x2 + vinit_bias;
     const int32_t vi1x2 = i1[2];
+    int32_t vacc3 = vi0x3 + vinit_bias;
     const int32_t vi1x3 = i1[3];
     i1 += 4;
+
+    vacc0 += vi1x0;
     const int32_t vi2x0 = i2[0];
+    vacc1 += vi1x1;
     const int32_t vi2x1 = i2[1];
+    vacc2 += vi1x2;
     const int32_t vi2x2 = i2[2];
+    vacc3 += vi1x3;
     const int32_t vi2x3 = i2[3];
     i2 += 4;
+    vacc0 += vi2x0;
     const int32_t vi3x0 = i3[0];
+    vacc1 += vi2x1;
     const int32_t vi3x1 = i3[1];
+    vacc2 += vi2x2;
     const int32_t vi3x2 = i3[2];
+    vacc3 += vi2x3;
     const int32_t vi3x3 = i3[3];
     i3 += 4;
+    vacc0 += vi3x0;
     const int32_t vi4x0 = i4[0];
+    vacc1 += vi3x1;
     const int32_t vi4x1 = i4[1];
+    vacc2 += vi3x2;
     const int32_t vi4x2 = i4[2];
+    vacc3 += vi3x3;
     const int32_t vi4x3 = i4[3];
     i4 += 4;
+    vacc0 += vi4x0;
     const int32_t vi5x0 = i5[0];
+    vacc1 += vi4x1;
     const int32_t vi5x1 = i5[1];
+    vacc2 += vi4x2;
     const int32_t vi5x2 = i5[2];
+    vacc3 += vi4x3;
     const int32_t vi5x3 = i5[3];
     i5 += 4;
+    vacc0 += vi5x0;
     const int32_t vi6x0 = i6[0];
+    vacc1 += vi5x1;
     const int32_t vi6x1 = i6[1];
+    vacc2 += vi5x2;
     const int32_t vi6x2 = i6[2];
+    vacc3 += vi5x3;
     const int32_t vi6x3 = i6[3];
     i6 += 4;
 
-    int32_t vacc0x0 = vi0x0 + vi1x0;
-    int32_t vacc0x1 = vi0x1 + vi1x1;
-    int32_t vacc0x2 = vi0x2 + vi1x2;
-    int32_t vacc0x3 = vi0x3 + vi1x3;
-
-    vacc0x0 += vi2x0;
-    vacc0x1 += vi2x1;
-    vacc0x2 += vi2x2;
-    vacc0x3 += vi2x3;
-    vacc0x0 += vi3x0;
-    vacc0x1 += vi3x1;
-    vacc0x2 += vi3x2;
-    vacc0x3 += vi3x3;
-    vacc0x0 += vi4x0;
-    vacc0x1 += vi4x1;
-    vacc0x2 += vi4x2;
-    vacc0x3 += vi4x3;
-    vacc0x0 += vi5x0;
-    vacc0x1 += vi5x1;
-    vacc0x2 += vi5x2;
-    vacc0x3 += vi5x3;
-    vacc0x0 += vi6x0;
-    vacc0x1 += vi6x1;
-    vacc0x2 += vi6x2;
-    vacc0x3 += vi6x3;
-
-
-    const int32_t vacc0 = vinit_bias + vacc0x0;
-    const int32_t vacc1 = vinit_bias + vacc0x1;
-    const int32_t vacc2 = vinit_bias + vacc0x2;
-    const int32_t vacc3 = vinit_bias + vacc0x3;
+    vacc0 += vi6x0;
+    vacc1 += vi6x1;
+    vacc2 += vi6x2;
+    vacc3 += vi6x3;
 
     float vfpacc0 = (float) vacc0 * vscale;
     float vfpacc1 = (float) vacc1 * vscale;
@@ -164,31 +163,28 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__scalar_imagic_c4(
     output[2] = vout2;
     output[3] = vout3;
     output += 4;
-
-    channels -= 4;
   }
   if XNN_UNLIKELY(channels != 0) {
     do {
+      int32_t vacc = vinit_bias;
       const int32_t vi0 = *i0++;
       const int32_t vi1 = *i1++;
+
+      vacc += vi0;
       const int32_t vi2 = *i2++;
+      vacc += vi1;
       const int32_t vi3 = *i3++;
+      vacc += vi2;
       const int32_t vi4 = *i4++;
+      vacc += vi3;
       const int32_t vi5 = *i5++;
+      vacc += vi4;
       const int32_t vi6 = *i6++;
 
-      int32_t vacc0 = vi0 + vi1;
+      vacc += vi5;
+      vacc += vi6;
 
-      vacc0 += vi2;
-      vacc0 += vi3;
-      vacc0 += vi4;
-      vacc0 += vi5;
-      vacc0 += vi6;
-
-
-      const int32_t vacc = vinit_bias + vacc0;
       float vfpacc = (float) vacc * vscale;
-
       vfpacc += vmagic_bias;
       int32_t vout = (int32_t) fp32_to_bits(vfpacc);
       vout = math_max_s32(vout, vmagic_min);

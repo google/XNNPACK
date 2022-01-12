@@ -5,12 +5,9 @@
 
 $assert CHANNEL_TILE >= 1
 $assert CHANNEL_TILE <= 16
-$assert ROW_TILE >= 2
-$assert ROW_SUBTILE >= 2
+$assert ROW_TILE >= 3
+$assert ROW_SUBTILE >= 3
 $assert ROW_SUBTILE <= ROW_TILE
-$assert ACCUMULATORS >= 1
-$assert ROW_TILE >= ACCUMULATORS * 2
-$assert ROW_SUBTILE >= ACCUMULATORS * 2
 $assert REQUANTIZATION == "FP32"
 #include <assert.h>
 $if VARIANT == "LRINTF":
@@ -26,7 +23,7 @@ $elif VARIANT in ["FMAGIC", "IMAGIC"]:
 $PARAMS_STRUCT = "fp32_scalar_" + VARIANT.lower()
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${VARIANT.lower()}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${VARIANT.lower()}_c${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -52,52 +49,38 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
   $if CHANNEL_TILE == 1:
     size_t c = channels;
     do {
-      $for M in range(ROW_TILE):
+      int32_t vacc = vinit_bias;
+      $for M in range(2):
         const int32_t vi${M} = *i${M}++;
 
-      $for A in range(ACCUMULATORS):
-        int32_t vacc${A} = vi${A*2} + vi${A*2+1};
+      $for M in range(2, ROW_TILE):
+        vacc += vi${M-2};
+        const int32_t vi${M} = *i${M}++;
 
-      $for M in range(ACCUMULATORS * 2, ROW_TILE):
-        vacc${M % ACCUMULATORS} += vi${M};
+      $for M in range(ROW_TILE - 2, ROW_TILE):
+        vacc += vi${M};
 
-      $if ACCUMULATORS > 1:
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              vacc${A} += vacc${A + ACC_SLICE};
-          $ACC_SLICE *= 2
-
-      const int32_t vacc = vinit_bias + vacc0;
       *b++ = vacc;
     } while (--c != 0);
   $else:
     for (ptrdiff_t c = (ptrdiff_t) channels; c > 0; c -= ${CHANNEL_TILE}) {
-      $for M in range(ROW_TILE):
+      $for C in range(CHANNEL_TILE):
+        const int32_t vi0x${C} = i0[${C}];
+      i0 += ${CHANNEL_TILE};
+
+      $for C in range(CHANNEL_TILE):
+        int32_t vacc${C} = vi0x${C} + vinit_bias;
+        const int32_t vi1x${C} = i1[${C}];
+      i1 += ${CHANNEL_TILE};
+
+      $for M in range(2, ROW_TILE):
         $for C in range(CHANNEL_TILE):
+          vacc${C} += vi${M-1}x${C};
           const int32_t vi${M}x${C} = i${M}[${C}];
         i${M} += ${CHANNEL_TILE};
 
-      $for A in range(ACCUMULATORS):
-        $for C in range(CHANNEL_TILE):
-          int32_t vacc${A}x${C} = vi${A*2}x${C} + vi${A*2+1}x${C};
-
-      $for M in range(ACCUMULATORS * 2, ROW_TILE):
-        $for C in range(CHANNEL_TILE):
-          vacc${M % ACCUMULATORS}x${C} += vi${M}x${C};
-
-      $if ACCUMULATORS > 1:
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              $for C in range(CHANNEL_TILE):
-                vacc${A}x${C} += vacc${A + ACC_SLICE}x${C};
-          $ACC_SLICE *= 2
-
       $for C in range(CHANNEL_TILE):
-        const int32_t vacc${C} = vinit_bias + vacc0x${C};
+        vacc${C} += vi${ROW_TILE-1}x${C};
 
       $for C in range(CHANNEL_TILE):
         b[${C}] = vacc${C};
@@ -112,52 +95,34 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
     $if CHANNEL_TILE == 1:
       size_t c = channels;
       do {
-        $for M in range(ROW_SUBTILE):
+        int32_t vacc = *b;
+        $for M in range(2):
           const int32_t vi${M} = *i${M}++;
 
-        $for A in range(ACCUMULATORS):
-          int32_t vacc${A} = vi${A*2} + vi${A*2+1};
+        $for M in range(2, ROW_SUBTILE):
+          vacc += vi${M-2};
+          const int32_t vi${M} = *i${M}++;
 
-        $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-          vacc${M % ACCUMULATORS} += vi${M};
+        $for M in range(ROW_SUBTILE - 2, ROW_SUBTILE):
+          vacc += vi${M};
 
-        $if ACCUMULATORS > 1:
-          $ACC_SLICE = 1
-          $while ACC_SLICE < ACCUMULATORS:
-            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-              $if A + ACC_SLICE < ACCUMULATORS:
-                vacc${A} += vacc${A + ACC_SLICE};
-            $ACC_SLICE *= 2
-
-        int32_t vacc = *b + vacc0;
         *b++ = vacc;
       } while (--c != 0);
     $else:
       for (ptrdiff_t c = (ptrdiff_t) channels; c > 0; c -= ${CHANNEL_TILE}) {
-        $for M in range(ROW_SUBTILE):
+        $for C in range(CHANNEL_TILE):
+          int32_t vacc${C} = b[${C}];
+          const int32_t vi0x${C} = i0[${C}];
+        i0 += ${CHANNEL_TILE};
+
+        $for M in range(1, ROW_SUBTILE):
           $for C in range(CHANNEL_TILE):
+            vacc${C} += vi${M-1}x${C};
             const int32_t vi${M}x${C} = i${M}[${C}];
           i${M} += ${CHANNEL_TILE};
 
-        $for A in range(ACCUMULATORS):
-          $for C in range(CHANNEL_TILE):
-            int32_t vacc${A}x${C} = vi${A*2}x${C} + vi${A*2+1}x${C};
-
-        $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-          $for C in range(CHANNEL_TILE):
-            vacc${M % ACCUMULATORS}x${C} += vi${M}x${C};
-
-        $if ACCUMULATORS > 1:
-          $ACC_SLICE = 1
-          $while ACC_SLICE < ACCUMULATORS:
-            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-              $if A + ACC_SLICE < ACCUMULATORS:
-                $for C in range(CHANNEL_TILE):
-                  vacc${A}x${C} += vacc${A + ACC_SLICE}x${C};
-            $ACC_SLICE *= 2
-
         $for C in range(CHANNEL_TILE):
-          int32_t vacc${C} = b[${C}] + vacc0x${C};
+          vacc${C} += vi${ROW_SUBTILE-1}x${C};
 
         $for C in range(CHANNEL_TILE):
           b[${C}] = vacc${C};
@@ -194,26 +159,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
     const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
   $if CHANNEL_TILE == 1:
     do {
-      $for M in range(ROW_SUBTILE):
+      int32_t vacc = *buffer++;
+      $for M in range(2):
         const int32_t vi${M} = *i${M}++;
 
-      $for A in range(ACCUMULATORS):
-        int32_t vacc${A} = vi${A*2} + vi${A*2+1};
+      $for M in range(2, ROW_SUBTILE):
+        vacc += vi${M-2};
+        const int32_t vi${M} = *i${M}++;
 
-      $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-        vacc${M % ACCUMULATORS} += vi${M};
+      $for M in range(ROW_SUBTILE - 2, ROW_SUBTILE):
+        vacc += vi${M};
 
-      $if ACCUMULATORS > 1:
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              vacc${A} += vacc${A + ACC_SLICE};
-          $ACC_SLICE *= 2
-
-      const int32_t vacc = (*buffer++) + vacc0;
       float vfpacc = (float) vacc * vscale;
-
       $if VARIANT == "FMAGIC":
         vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
         vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
@@ -235,31 +192,20 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
     } while (--channels != 0);
   $else:
     for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
-      $for M in range(ROW_SUBTILE):
+      $for C in range(CHANNEL_TILE):
+        int32_t vacc${C} = buffer[${C}];
+        const int32_t vi0x${C} = i0[${C}];
+      buffer += ${CHANNEL_TILE};
+      i0 += ${CHANNEL_TILE};
+
+      $for M in range(1, ROW_SUBTILE):
         $for C in range(CHANNEL_TILE):
+          vacc${C} += vi${M-1}x${C};
           const int32_t vi${M}x${C} = i${M}[${C}];
         i${M} += ${CHANNEL_TILE};
 
-      $for A in range(ACCUMULATORS):
-        $for C in range(CHANNEL_TILE):
-          int32_t vacc${A}x${C} = vi${A*2}x${C} + vi${A*2+1}x${C};
-
-      $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-        $for C in range(CHANNEL_TILE):
-          vacc${M % ACCUMULATORS}x${C} += vi${M}x${C};
-
-      $if ACCUMULATORS > 1:
-        $ACC_SLICE = 1
-        $while ACC_SLICE < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-            $if A + ACC_SLICE < ACCUMULATORS:
-              $for C in range(CHANNEL_TILE):
-                vacc${A}x${C} += vacc${A + ACC_SLICE}x${C};
-          $ACC_SLICE *= 2
-
       $for C in range(CHANNEL_TILE):
-        const int32_t vacc${C} = buffer[${C}] + vacc0x${C};
-      buffer += ${CHANNEL_TILE};
+        vacc${C} += vi${ROW_SUBTILE-1}x${C};
 
       $for C in range(CHANNEL_TILE):
         float vfpacc${C} = (float) vacc${C} * vscale;
@@ -310,26 +256,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
     }
     if XNN_UNLIKELY(channels != 0) {
       $if CHANNEL_TILE == 2:
-        $for M in range(ROW_SUBTILE):
+        int32_t vacc = *buffer;
+        $for M in range(2):
           const int32_t vi${M} = *i${M};
 
-        $for A in range(ACCUMULATORS):
-          int32_t vacc${A} = vi${A*2} + vi${A*2+1};
+        $for M in range(2, ROW_SUBTILE):
+          vacc += vi${M-2};
+          const int32_t vi${M} = *i${M};
 
-        $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-          vacc${M % ACCUMULATORS} += vi${M};
+        $for M in range(ROW_SUBTILE - 2, ROW_SUBTILE):
+          vacc += vi${M};
 
-        $if ACCUMULATORS > 1:
-          $ACC_SLICE = 1
-          $while ACC_SLICE < ACCUMULATORS:
-            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-              $if A + ACC_SLICE < ACCUMULATORS:
-                vacc${A} += vacc${A + ACC_SLICE};
-            $ACC_SLICE *= 2
-
-        const int32_t vacc = *buffer + vacc0;
         float vfpacc = (float) vacc * vscale;
-
         $if VARIANT == "FMAGIC":
           vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
           vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
@@ -350,26 +288,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_${
         *output = (int8_t) vout;
       $else:
         do {
-          $for M in range(ROW_SUBTILE):
+          int32_t vacc = *buffer++;
+          $for M in range(2):
             const int32_t vi${M} = *i${M}++;
 
-          $for A in range(ACCUMULATORS):
-            int32_t vacc${A} = vi${A*2} + vi${A*2+1};
+          $for M in range(2, ROW_SUBTILE):
+            vacc += vi${M-2};
+            const int32_t vi${M} = *i${M}++;
 
-          $for M in range(ACCUMULATORS * 2, ROW_SUBTILE):
-            vacc${M % ACCUMULATORS} += vi${M};
+          $for M in range(ROW_SUBTILE - 2, ROW_SUBTILE):
+            vacc += vi${M};
 
-          $if ACCUMULATORS > 1:
-            $ACC_SLICE = 1
-            $while ACC_SLICE < ACCUMULATORS:
-              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-                $if A + ACC_SLICE < ACCUMULATORS:
-                  vacc${A} += vacc${A + ACC_SLICE};
-              $ACC_SLICE *= 2
-
-          const int32_t vacc = (*buffer++) + vacc0;
           float vfpacc = (float) vacc * vscale;
-
           $if VARIANT == "FMAGIC":
             vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
             vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
