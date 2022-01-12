@@ -1076,23 +1076,23 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/vcvt-scalar-x2.c
   src/qs8-f32-vcvt/gen/vcvt-scalar-x3.c
   src/qs8-f32-vcvt/gen/vcvt-scalar-x4.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c1.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c1.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c2.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c2.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c2.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c4.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c4.c
+  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c
+  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c2.c
+  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c4.c
+  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c1.c
+  src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c2.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c4.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c1.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c1.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c2.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c2.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c2.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c4.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c4.c
+  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c
+  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c2.c
+  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c4.c
+  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c1.c
+  src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c2.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c4.c
   src/qs8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
   src/qs8-gemm/gen/1x2-minmax-fp32-scalar-imagic.c
@@ -1400,11 +1400,13 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
   src/qu8-gavgpool/7p7x-minmax-neon-c8.c
   src/qu8-gavgpool/7x-minmax-neon-c8.c
+  src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-gemm/gen/2x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-gemm/gen/3x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-igemm/gen/2x16-minmax-rndnu-neon-mlal-lane.c
+  src/qu8-igemm/gen/3x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/4x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-vadd/gen/minmax-neon-ld64-x16.c
   src/qu8-vadd/gen/minmax-neon-ld64-x32.c
