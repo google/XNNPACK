@@ -9,6 +9,8 @@
 
 #include <assert.h>
 
+#include <fp16.h>
+
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
 
@@ -52,13 +54,12 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__scalar_c2(
     i6 = zero;
   }
 
-  const int32_t vbias = params->scalar.bias;
-  const int32_t vmultiplier = params->scalar.multiplier;
-  const int64_t vrounding = params->scalar.rounding;
-  const uint32_t vshift = params->scalar.shift;
-  const int32_t vout_min = params->scalar.output_min_less_zero_point;
-  const int32_t vout_max = params->scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vinit_bias = params->fp32_scalar_imagic.init_bias;
+  const float vscale = params->fp32_scalar_imagic.scale;
+  const float vmagic_bias = params->fp32_scalar_imagic.magic_bias;
+  const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
+  const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
+  const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
   while (channels >= 2) {
     const int32_t vi0x0 = i0[0];
     const int32_t vi0x1 = i0[1];
@@ -97,26 +98,26 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__scalar_c2(
     vacc0x1 += vi6x1;
 
 
-    int32_t vacc0 = vbias + vacc0x0;
-    int32_t vacc1 = vbias + vacc0x1;
+    const int32_t vacc0 = vinit_bias + vacc0x0;
+    const int32_t vacc1 = vinit_bias + vacc0x1;
 
-    const int64_t vprod0 = (int64_t) vacc0 * (int64_t) vmultiplier;
-    const int64_t vprod1 = (int64_t) vacc1 * (int64_t) vmultiplier;
+    float vfpacc0 = (float) vacc0 * vscale;
+    float vfpacc1 = (float) vacc1 * vscale;
 
-    const int64_t vadjprod0 = vprod0 - (int64_t) (vacc0 < 0);
-    const int64_t vadjprod1 = vprod1 - (int64_t) (vacc1 < 0);
+    vfpacc0 += vmagic_bias;
+    vfpacc1 += vmagic_bias;
 
-    int32_t vout0 = (int32_t) asr_s64(vadjprod0 + vrounding, vshift);
-    int32_t vout1 = (int32_t) asr_s64(vadjprod1 + vrounding, vshift);
+    int32_t vout0 = (int32_t) fp32_to_bits(vfpacc0);
+    int32_t vout1 = (int32_t) fp32_to_bits(vfpacc1);
 
-    vout0 = XNN_UNPREDICTABLE(vout0 < vout_min) ? vout_min : vout0;
-    vout1 = XNN_UNPREDICTABLE(vout1 < vout_min) ? vout_min : vout1;
+    vout0 = math_max_s32(vout0, vmagic_min);
+    vout1 = math_max_s32(vout1, vmagic_min);
 
-    vout0 = XNN_UNPREDICTABLE(vout0 > vout_max) ? vout_max : vout0;
-    vout1 = XNN_UNPREDICTABLE(vout1 > vout_max) ? vout_max : vout1;
+    vout0 = math_min_s32(vout0, vmagic_max);
+    vout1 = math_min_s32(vout1, vmagic_max);
 
-    vout0 += voutput_zero_point;
-    vout1 += voutput_zero_point;
+    vout0 -= vmagic_bias_less_zero_point;
+    vout1 -= vmagic_bias_less_zero_point;
 
     output[0] = vout0;
     output[1] = vout1;
@@ -142,14 +143,14 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__scalar_c2(
     vacc0 += vi6;
 
 
-    int32_t vacc = vbias + vacc0;
-    const int64_t vprod = (int64_t) vacc * (int64_t) vmultiplier;
-    const int64_t vadjprod = vprod - (int64_t) (vacc < 0);
-    int32_t vout = (int32_t) asr_s64(vadjprod + vrounding, vshift);
+    const int32_t vacc = vinit_bias + vacc0;
+    float vfpacc = (float) vacc * vscale;
 
-    vout = math_max_s32(vout, vout_min);
-    vout = math_min_s32(vout, vout_max);
-    vout += voutput_zero_point;
+    vfpacc += vmagic_bias;
+    int32_t vout = (int32_t) fp32_to_bits(vfpacc);
+    vout = math_max_s32(vout, vmagic_min);
+    vout = math_min_s32(vout, vmagic_max);
+    vout -= vmagic_bias_less_zero_point;
 
     *output = (int8_t) vout;
   }

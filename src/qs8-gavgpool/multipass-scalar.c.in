@@ -11,12 +11,19 @@ $assert ROW_SUBTILE <= ROW_TILE
 $assert ACCUMULATORS >= 1
 $assert ROW_TILE >= ACCUMULATORS * 2
 $assert ROW_SUBTILE >= ACCUMULATORS * 2
+$assert REQUANTIZATION == "FP32"
 #include <assert.h>
+$if VARIANT == "LRINTF":
+  #include <math.h>
+$elif VARIANT in ["FMAGIC", "IMAGIC"]:
+
+  #include <fp16.h>
 
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
 
 
+$PARAMS_STRUCT = "fp32_scalar_" + VARIANT.lower()
 void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t rows,
     size_t channels,
@@ -38,7 +45,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
   $else:
     const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8);
 
-  const int32_t vbias = params->scalar.bias;
+  const int32_t vinit_bias = params->${PARAMS_STRUCT}.init_bias;
   int32_t* b = buffer;
   $if CHANNEL_TILE == 1:
     size_t c = channels;
@@ -60,7 +67,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
               vacc${A} += vacc${A + ACC_SLICE};
           $ACC_SLICE *= 2
 
-      const int32_t vacc = vbias + vacc0;
+      const int32_t vacc = vinit_bias + vacc0;
       *b++ = vacc;
     } while (--c != 0);
   $else:
@@ -88,7 +95,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
           $ACC_SLICE *= 2
 
       $for C in range(CHANNEL_TILE):
-        const int32_t vacc${C} = vbias + vacc0x${C};
+        const int32_t vacc${C} = vinit_bias + vacc0x${C};
 
       $for C in range(CHANNEL_TILE):
         b[${C}] = vacc${C};
@@ -168,12 +175,21 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
         i${M} = zero;
       }
 
-  const int32_t vmultiplier = params->scalar.multiplier;
-  const int64_t vrounding = params->scalar.rounding;
-  const uint32_t vshift = params->scalar.shift;
-  const int32_t vout_min = params->scalar.output_min_less_zero_point;
-  const int32_t vout_max = params->scalar.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const float vscale = params->${PARAMS_STRUCT}.scale;
+  $if VARIANT == "FMAGIC":
+    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
+    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
+    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
+    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  $elif VARIANT == "IMAGIC":
+    const float vmagic_bias = params->fp32_scalar_imagic.magic_bias;
+    const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
+    const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
+    const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
+  $elif VARIANT == "LRINTF":
+    const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
+    const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
+    const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
   $if CHANNEL_TILE == 1:
     do {
       $for M in range(ROW_SUBTILE):
@@ -193,15 +209,26 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
               vacc${A} += vacc${A + ACC_SLICE};
           $ACC_SLICE *= 2
 
-      int32_t vacc = (*buffer++) + vacc0;
+      const int32_t vacc = (*buffer++) + vacc0;
+      float vfpacc = (float) vacc * vscale;
 
-      const int64_t vprod = (int64_t) vacc * (int64_t) vmultiplier;
-      const int64_t vadjprod = vprod - (int64_t) (vacc < 0);
+      $if VARIANT == "FMAGIC":
+        vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+        vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+        vfpacc += vmagic_bias;
+        int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+      $elif VARIANT == "IMAGIC":
+        vfpacc += vmagic_bias;
+        int32_t vout = (int32_t) fp32_to_bits(vfpacc);
+        vout = math_max_s32(vout, vmagic_min);
+        vout = math_min_s32(vout, vmagic_max);
+        vout -= vmagic_bias_less_zero_point;
+      $elif VARIANT == "LRINTF":
+        vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+        vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+        const int32_t vrndacc = (int32_t) lrintf(vfpacc);
+        int32_t vout = vrndacc + voutput_zero_point;
 
-      int32_t vout = (int32_t) asr_s64(vadjprod + vrounding, vshift);
-      vout = math_max_s32(vout, vout_min);
-      vout = math_min_s32(vout, vout_max);
-      vout += voutput_zero_point;
       *output++ = (int8_t) vout;
     } while (--channels != 0);
   $else:
@@ -229,26 +256,51 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
           $ACC_SLICE *= 2
 
       $for C in range(CHANNEL_TILE):
-        int32_t vacc${C} = buffer[${C}] + vacc0x${C};
+        const int32_t vacc${C} = buffer[${C}] + vacc0x${C};
       buffer += ${CHANNEL_TILE};
 
       $for C in range(CHANNEL_TILE):
-        const int64_t vprod${C} = (int64_t) vacc${C} * (int64_t) vmultiplier;
+        float vfpacc${C} = (float) vacc${C} * vscale;
 
-      $for C in range(CHANNEL_TILE):
-        const int64_t vadjprod${C} = vprod${C} - (int64_t) (vacc${C} < 0);
+      $if VARIANT == "FMAGIC":
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
 
-      $for C in range(CHANNEL_TILE):
-        int32_t vout${C} = (int32_t) asr_s64(vadjprod${C} + vrounding, vshift);
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
 
-      $for C in range(CHANNEL_TILE):
-        vout${C} = math_max_s32(vout${C}, vout_min);
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} += vmagic_bias;
 
-      $for C in range(CHANNEL_TILE):
-        vout${C} = math_min_s32(vout${C}, vout_max);
+        $for C in range(CHANNEL_TILE):
+          int32_t vout${C} = (int32_t) fp32_to_bits(vfpacc${C}) - vmagic_bias_less_output_zero_point;
+      $elif VARIANT == "IMAGIC":
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} += vmagic_bias;
 
-      $for C in range(CHANNEL_TILE):
-        vout${C} += voutput_zero_point;
+        $for C in range(CHANNEL_TILE):
+          int32_t vout${C} = (int32_t) fp32_to_bits(vfpacc${C});
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_max_s32(vout${C}, vmagic_min);
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_min_s32(vout${C}, vmagic_max);
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} -= vmagic_bias_less_zero_point;
+      $elif VARIANT == "LRINTF":
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} = ${MAX_F32}(vfpacc${C}, voutput_min_less_zero_point);
+
+        $for C in range(CHANNEL_TILE):
+          vfpacc${C} = ${MIN_F32}(vfpacc${C}, voutput_max_less_zero_point);
+
+        $for C in range(CHANNEL_TILE):
+          const int32_t vrndacc${C} = (int32_t) lrintf(vfpacc${C});
+
+        $for C in range(CHANNEL_TILE):
+          int32_t vout${C} = vrndacc${C} + voutput_zero_point;
 
       $for C in range(CHANNEL_TILE):
         output[${C}] = (int8_t) vout${C};
@@ -273,15 +325,26 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
                 vacc${A} += vacc${A + ACC_SLICE};
             $ACC_SLICE *= 2
 
-        int32_t vacc = *buffer + vacc0;
+        const int32_t vacc = *buffer + vacc0;
+        float vfpacc = (float) vacc * vscale;
 
-        const int64_t vprod = (int64_t) vacc * (int64_t) vmultiplier;
-        const int64_t vadjprod = vprod - (int64_t) (vacc < 0);
+        $if VARIANT == "FMAGIC":
+          vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+          vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+          vfpacc += vmagic_bias;
+          int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+        $elif VARIANT == "IMAGIC":
+          vfpacc += vmagic_bias;
+          int32_t vout = (int32_t) fp32_to_bits(vfpacc);
+          vout = math_max_s32(vout, vmagic_min);
+          vout = math_min_s32(vout, vmagic_max);
+          vout -= vmagic_bias_less_zero_point;
+        $elif VARIANT == "LRINTF":
+          vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+          vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+          const int32_t vrndacc = (int32_t) lrintf(vfpacc);
+          int32_t vout = vrndacc + voutput_zero_point;
 
-        int32_t vout = (int32_t) asr_s64(vadjprod + vrounding, vshift);
-        vout = math_max_s32(vout, vout_min);
-        vout = math_min_s32(vout, vout_max);
-        vout += voutput_zero_point;
         *output = (int8_t) vout;
       $else:
         do {
@@ -302,15 +365,26 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__scalar_c${CHAN
                   vacc${A} += vacc${A + ACC_SLICE};
               $ACC_SLICE *= 2
 
-          int32_t vacc = (*buffer++) + vacc0;
+          const int32_t vacc = (*buffer++) + vacc0;
+          float vfpacc = (float) vacc * vscale;
 
-          const int64_t vprod = (int64_t) vacc * (int64_t) vmultiplier;
-          const int64_t vadjprod = vprod - (int64_t) (vacc < 0);
+          $if VARIANT == "FMAGIC":
+            vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+            vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+            vfpacc += vmagic_bias;
+            int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+          $elif VARIANT == "IMAGIC":
+            vfpacc += vmagic_bias;
+            int32_t vout = (int32_t) fp32_to_bits(vfpacc);
+            vout = math_max_s32(vout, vmagic_min);
+            vout = math_min_s32(vout, vmagic_max);
+            vout -= vmagic_bias_less_zero_point;
+          $elif VARIANT == "LRINTF":
+            vfpacc = ${MAX_F32}(vfpacc, voutput_min_less_zero_point);
+            vfpacc = ${MIN_F32}(vfpacc, voutput_max_less_zero_point);
+            const int32_t vrndacc = (int32_t) lrintf(vfpacc);
+            int32_t vout = vrndacc + voutput_zero_point;
 
-          int32_t vout = (int32_t) asr_s64(vadjprod + vrounding, vshift);
-          vout = math_max_s32(vout, vout_min);
-          vout = math_min_s32(vout, vout_max);
-          vout += voutput_zero_point;
           *output++ = (int8_t) vout;
         } while (--channels != 0);
     }

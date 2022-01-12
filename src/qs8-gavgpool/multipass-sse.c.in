@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
+$SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 $assert CHANNEL_TILE % 8 == 0
 $assert CHANNEL_TILE >= 8
 $assert ROW_TILE >= 2
@@ -12,6 +12,7 @@ $assert ROW_SUBTILE <= ROW_TILE
 $assert ACCUMULATORS >= 1
 $assert ROW_TILE >= ACCUMULATORS * 2
 $assert ROW_SUBTILE >= ACCUMULATORS * 2
+$assert REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -21,7 +22,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/math.h>
 
 
-$ISA = {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+$PARAMS_STRUCT = "fp32_sse4" if SSE >= 4 else "fp32_sse2"
+$ISA = {2: "sse2", 4: "sse41"}[SSE]
 void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t rows,
     size_t channels,
@@ -43,7 +45,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
   $else:
     const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8);
 
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
+  const __m128i vinit_bias = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.init_bias);
   int32_t* b = buffer;
   size_t c = channels;
   for (; ${"c >= %d" % CHANNEL_TILE if CHANNEL_TILE > 16 else "c != 0"}; ${("c -= %d" if CHANNEL_TILE > 16 else "c = doz(c, %d)") % CHANNEL_TILE}) {
@@ -61,7 +63,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
     $if SSE < 4:
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 8):
-          const __m128i vxi${M}x${ABC[C:C+8]} = _mm_unpacklo_epi8(vi${M}x${ABC[C:C+8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), vi${M}x${ABC[C:C+8]}));
+          const __m128i vxi${M}x${ABC[C:C+8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]}), 8);
 
     $for A in range(ACCUMULATORS):
       $for C in range(0, CHANNEL_TILE, 8):
@@ -83,12 +85,12 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
 
     $for C in range(0, CHANNEL_TILE, 8):
       $if SSE >= 4:
-        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}));
-        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]})));
+        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}), vinit_bias);
+        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vacc0x${ABC[C:C+8]}), 16), vinit_bias);
       $else:
         const __m128i vsgnacc0x${ABC[C:C+8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]});
-        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}));
-        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}));
+        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), vinit_bias);
+        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), vinit_bias);
 
     _mm_store_si128((__m128i*) b, vacc${ABC[0:4]});
     $for C in range(4, CHANNEL_TILE, 4):
@@ -107,7 +109,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
 
         $if SSE < 4:
           $for M in range(ROW_TILE):
-            const __m128i vxi${M}x${ABC[0:8]} = _mm_unpacklo_epi8(vi${M}x${ABC[0:8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), vi${M}x${ABC[0:8]}));
+            const __m128i vxi${M}x${ABC[0:8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[0:8]}, vi${M}x${ABC[0:8]}), 8);
 
         $for A in range(ACCUMULATORS):
           __m128i vacc${A}x${ABC[0:8]} = _mm_add_epi16(vxi${A*2}x${ABC[0:8]}, vxi${A*2+1}x${ABC[0:8]});
@@ -125,12 +127,12 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
             $ACC_SLICE *= 2
 
         $if SSE >= 4:
-          const __m128i vacc${ABC[0:4]} = _mm_add_epi32(vbias, _mm_cvtepi16_epi32(vacc0x${ABC[0:8]}));
-          const __m128i vacc${ABC[4:8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x${ABC[0:8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]})));
+          const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), vinit_bias);
+          const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vacc0x${ABC[0:8]}), 16), vinit_bias);
         $else:
           const __m128i vsgnacc0x${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]});
-          const __m128i vacc${ABC[0:4]} = _mm_add_epi32(vbias, _mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}));
-          const __m128i vacc${ABC[4:8]} = _mm_add_epi32(vbias, _mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}));
+          const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), vinit_bias);
+          const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), vinit_bias);
 
         _mm_store_si128((__m128i*) b, vacc${ABC[0:4]});
         _mm_store_si128((__m128i*) (b + 4), vacc${ABC[4:8]});
@@ -161,7 +163,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
       $if SSE < 4:
         $for M in range(ROW_SUBTILE):
           $for C in range(0, CHANNEL_TILE, 8):
-            const __m128i vxi${M}x${ABC[C:C+8]} = _mm_unpacklo_epi8(vi${M}x${ABC[C:C+8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), vi${M}x${ABC[C:C+8]}));
+            const __m128i vxi${M}x${ABC[C:C+8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]}), 8);
 
       $for A in range(ACCUMULATORS):
         $for C in range(0, CHANNEL_TILE, 8):
@@ -184,7 +186,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
       $for C in range(0, CHANNEL_TILE, 8):
         $if SSE >= 4:
           const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (b + ${C})));
-          const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]})), _mm_load_si128((const __m128i*) (b + ${C+4})));
+          const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vacc0x${ABC[C:C+8]}), 16), _mm_load_si128((const __m128i*) (b + ${C+4})));
         $else:
           const __m128i vsgnacc0x${ABC[C:C+8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]});
           const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (b + ${C})));
@@ -207,7 +209,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
 
           $if SSE < 4:
             $for M in range(ROW_SUBTILE):
-              const __m128i vxi${M}x${ABC[0:8]} = _mm_unpacklo_epi8(vi${M}x${ABC[0:8]}, _mm_cmpgt_epi8(_mm_setzero_si128(), vi${M}x${ABC[0:8]}));
+              const __m128i vxi${M}x${ABC[0:8]} = _mm_srai_epi16(_mm_unpacklo_epi8(vi${M}x${ABC[0:8]}, vi${M}x${ABC[0:8]}), 8);
 
           $for A in range(ACCUMULATORS):
             __m128i vacc${A}x${ABC[0:8]} = _mm_add_epi16(vxi${A*2}x${ABC[0:8]}, vxi${A*2+1}x${ABC[0:8]});
@@ -226,7 +228,7 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
 
           $if SSE >= 4:
             const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) b));
-            const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]})), _mm_load_si128((const __m128i*) (b + 4)));
+            const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vacc0x${ABC[0:8]}), 16), _mm_load_si128((const __m128i*) (b + 4)));
           $else:
             const __m128i vsgnacc0x${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]});
             const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) b));
@@ -253,10 +255,11 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
         i${M} = zero;
       }
 
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
-  const __m128i vrounding = _mm_load_si128((const __m128i*) params->sse2.rounding);
-  const __m128i vshift = _mm_loadl_epi64((const __m128i*) params->sse2.shift);
-  while (channels >= ${CHANNEL_TILE}) {
+  const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
+  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+  for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
     $for M in range(ROW_SUBTILE):
       $if SSE >= 4:
         const __m128i vxi${M}x${ABC[0:8]} = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i${M}));
@@ -293,67 +296,45 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
 
     $for C in range(0, CHANNEL_TILE, 8):
       $if SSE >= 4:
-        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C})));
-        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]})), _mm_load_si128((const __m128i*) (buffer + ${C+4})));
+        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C})));
+        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]})), _mm_load_si128((const __m128i*) (buffer + ${C+4})));
       $else:
         const __m128i vsgnacc0x${ABC[C:C+8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[C:C+8]});
-        const __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C})));
-        const __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C+4})));
+        __m128i vacc${ABC[C:C+4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C})));
+        __m128i vacc${ABC[C+4:C+8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[C:C+8]}, vsgnacc0x${ABC[C:C+8]}), _mm_load_si128((const __m128i*) (buffer + ${C+4})));
     buffer += ${CHANNEL_TILE};
 
-    $if SSE >= 3:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vabsacc${ABC[C:C+4]} = _mm_abs_epi32(vacc${ABC[C:C+4]});
-    $else:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vsgnacc${ABC[C:C+4]} = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[C:C+4]});
-
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vabsacc${ABC[C:C+4]} = _mm_sub_epi32(_mm_xor_si128(vacc${ABC[C:C+4]}, vsgnacc${ABC[C:C+4]}), vsgnacc${ABC[C:C+4]});
+    $for C in range(0, CHANNEL_TILE, 4):
+      __m128 vfpacc${ABC[C:C+4]} = _mm_cvtepi32_ps(vacc${ABC[C:C+4]});
 
     $for C in range(0, CHANNEL_TILE, 4):
-      const __m128i vabsacc${ABC[C+1:C+4:2]} = _mm_shuffle_epi32(vabsacc${ABC[C:C+4]}, _MM_SHUFFLE(3, 3, 1, 1));
+      vfpacc${ABC[C:C+4]} = _mm_mul_ps(vfpacc${ABC[C:C+4]}, vscale);
 
     $for C in range(0, CHANNEL_TILE, 4):
-      const __m128i vabsprod${ABC[C:C+4:2]} = _mm_mul_epu32(vabsacc${ABC[C:C+4]}, vmultiplier);
-      const __m128i vabsprod${ABC[C+1:C+4:2]} = _mm_mul_epu32(vabsacc${ABC[C+1:C+4:2]}, vmultiplier);
+      vfpacc${ABC[C:C+4]} = _mm_min_ps(vfpacc${ABC[C:C+4]}, voutput_max_less_zero_point);
 
     $for C in range(0, CHANNEL_TILE, 4):
-      const __m128i vabsout${ABC[C:C+4:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[C:C+4:2]}, vrounding), vshift);
-      const __m128i vabsout${ABC[C+1:C+4:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[C+1:C+4:2]}, vrounding), vshift);
+      vacc${ABC[C:C+4]} = _mm_cvtps_epi32(vfpacc${ABC[C:C+4]});
 
-    $if SSE >= 4:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vabsout${ABC[C:C+4]} = _mm_blend_epi16(vabsout${ABC[C:C+4:2]}, _mm_shuffle_epi32(vabsout${ABC[C+1:C+4:2]}, _MM_SHUFFLE(2, 2, 0, 0)), 0xCC);
-    $else:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vabsout${ABC[C:C+4:2]}${ABC[C+1:C+4:2]} = _mm_castps_si128(
-            _mm_shuffle_ps(_mm_castsi128_ps(vabsout${ABC[C:C+4:2]}), _mm_castsi128_ps(vabsout${ABC[C+1:C+4:2]}), _MM_SHUFFLE(2, 0, 2, 0)));
-
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vabsout${ABC[C:C+4]} = _mm_shuffle_epi32(vabsout${ABC[C:C+4:2]}${ABC[C+1:C+4:2]}, _MM_SHUFFLE(3, 1, 2, 0));
-
-    $if SSE >= 3:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vout${ABC[C:C+4]} = _mm_sign_epi32(vabsout${ABC[C:C+4]}, vacc${ABC[C:C+4]});
-    $else:
-      $for C in range(0, CHANNEL_TILE, 4):
-        const __m128i vout${ABC[C:C+4]} = _mm_sub_epi32(_mm_xor_si128(vabsout${ABC[C:C+4]}, vsgnacc${ABC[C:C+4]}), vsgnacc${ABC[C:C+4]});
-
-    const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
     $for C in range(0, CHANNEL_TILE, 8):
-      __m128i vout${ABC[C:C+8]} = _mm_adds_epi16(_mm_packs_epi32(vout${ABC[C:C+4]}, vout${ABC[C+4:C+8]}), voutput_zero_point);
+      __m128i vout${ABC[C:C+8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[C:C+4]}, vacc${ABC[C+4:C+8]}), voutput_zero_point);
 
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-    const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-    $for C in range(0, CHANNEL_TILE, 8):
-      vout${ABC[C:C+8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[C:C+8]}, voutput_min), voutput_max);
+    $if SSE < 4:
+      $for C in range(0, CHANNEL_TILE, 8):
+        vout${ABC[C:C+8]} = _mm_max_epi16(vout${ABC[C:C+8]}, voutput_min);
 
     $for C in range(0, CHANNEL_TILE, 16):
       $if C + 8 < CHANNEL_TILE:
         __m128i vout${ABC[C:C+16]} = _mm_packs_epi16(vout${ABC[C:C+8]}, vout${ABC[C+8:C+16]});
       $else:
         __m128i vout${ABC[C:C+8]}${ABC[C:C+8]} = _mm_packs_epi16(vout${ABC[C:C+8]}, vout${ABC[C:C+8]});
+
+    $if SSE == 4:
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          vout${ABC[C:C+16]} = _mm_max_epi8(vout${ABC[C:C+16]}, voutput_min);
+        $else:
+          vout${ABC[C:C+8]}${ABC[C:C+8]} = _mm_max_epi8(vout${ABC[C:C+8]}${ABC[C:C+8]}, voutput_min);
 
     $if CHANNEL_TILE > 8:
       _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
@@ -365,8 +346,6 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
       $else:
         _mm_storel_epi64((__m128i*) (output + ${C}), vout${ABC[C:C+8]}${ABC[C:C+8]});
     output += ${CHANNEL_TILE};
-
-    channels -= ${CHANNEL_TILE};
   }
   if XNN_UNLIKELY(channels != 0) {
     ${"do " if CHANNEL_TILE > 8 else ""}{
@@ -397,64 +376,33 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__${ISA}_c${CHAN
           $ACC_SLICE *= 2
 
       $if SSE >= 4:
-        const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) buffer));
-        const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]})), _mm_load_si128((const __m128i*) (buffer + 4)));
+        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) buffer));
+        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]})), _mm_load_si128((const __m128i*) (buffer + 4)));
       $else:
         const __m128i vsgnacc0x${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]});
-        const __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) buffer));
-        const __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) (buffer + 4)));
+        __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) buffer));
+        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), _mm_load_si128((const __m128i*) (buffer + 4)));
       buffer += 8;
 
-      $if SSE >= 3:
-        const __m128i vabsacc${ABC[0:4]} = _mm_abs_epi32(vacc${ABC[0:4]});
-        const __m128i vabsacc${ABC[4:8]} = _mm_abs_epi32(vacc${ABC[4:8]});
-      $else:
-        const __m128i vsgnacc${ABC[0:4]} = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[0:4]});
-        const __m128i vsgnacc${ABC[4:8]} = _mm_cmpgt_epi32(_mm_setzero_si128(), vacc${ABC[4:8]});
+      __m128 vfpacc${ABC[0:4]} = _mm_cvtepi32_ps(vacc${ABC[0:4]});
+      __m128 vfpacc${ABC[4:8]} = _mm_cvtepi32_ps(vacc${ABC[4:8]});
 
-        const __m128i vabsacc${ABC[0:4]} = _mm_sub_epi32(_mm_xor_si128(vacc${ABC[0:4]}, vsgnacc${ABC[0:4]}), vsgnacc${ABC[0:4]});
-        const __m128i vabsacc${ABC[4:8]} = _mm_sub_epi32(_mm_xor_si128(vacc${ABC[4:8]}, vsgnacc${ABC[4:8]}), vsgnacc${ABC[4:8]});
+      vfpacc${ABC[0:4]} = _mm_mul_ps(vfpacc${ABC[0:4]}, vscale);
+      vfpacc${ABC[4:8]} = _mm_mul_ps(vfpacc${ABC[4:8]}, vscale);
 
-      const __m128i vabsacc${ABC[1:4:2]} = _mm_shuffle_epi32(vabsacc${ABC[0:4]}, _MM_SHUFFLE(3, 3, 1, 1));
-      const __m128i vabsacc${ABC[5:8:2]} = _mm_shuffle_epi32(vabsacc${ABC[4:8]}, _MM_SHUFFLE(3, 3, 1, 1));
+      vfpacc${ABC[0:4]} = _mm_min_ps(vfpacc${ABC[0:4]}, voutput_max_less_zero_point);
+      vfpacc${ABC[4:8]} = _mm_min_ps(vfpacc${ABC[4:8]}, voutput_max_less_zero_point);
 
-      const __m128i vabsprod${ABC[0:4:2]} = _mm_mul_epu32(vabsacc${ABC[0:4]}, vmultiplier);
-      const __m128i vabsprod${ABC[1:4:2]} = _mm_mul_epu32(vabsacc${ABC[1:4:2]}, vmultiplier);
-      const __m128i vabsprod${ABC[4:8:2]} = _mm_mul_epu32(vabsacc${ABC[4:8]}, vmultiplier);
-      const __m128i vabsprod${ABC[5:8:2]} = _mm_mul_epu32(vabsacc${ABC[5:8:2]}, vmultiplier);
+      vacc${ABC[0:4]} = _mm_cvtps_epi32(vfpacc${ABC[0:4]});
+      vacc${ABC[4:8]} = _mm_cvtps_epi32(vfpacc${ABC[4:8]});
 
-      const __m128i vabsout${ABC[0:4:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[0:4:2]}, vrounding), vshift);
-      const __m128i vabsout${ABC[1:4:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[1:4:2]}, vrounding), vshift);
-      const __m128i vabsout${ABC[4:8:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[4:8:2]}, vrounding), vshift);
-      const __m128i vabsout${ABC[5:8:2]} = _mm_srl_epi64(_mm_add_epi64(vabsprod${ABC[5:8:2]}, vrounding), vshift);
-
-      $if SSE >= 4:
-        const __m128i vabsout${ABC[0:4]} = _mm_blend_epi16(vabsout${ABC[0:4:2]}, _mm_shuffle_epi32(vabsout${ABC[1:4:2]}, _MM_SHUFFLE(2, 2, 0, 0)), 0xCC);
-        const __m128i vabsout${ABC[4:8]} = _mm_blend_epi16(vabsout${ABC[4:8:2]}, _mm_shuffle_epi32(vabsout${ABC[5:8:2]}, _MM_SHUFFLE(2, 2, 0, 0)), 0xCC);
-      $else:
-        const __m128i vabsout${ABC[0:4:2]}${ABC[1:4:2]} = _mm_castps_si128(
-            _mm_shuffle_ps(_mm_castsi128_ps(vabsout${ABC[0:4:2]}), _mm_castsi128_ps(vabsout${ABC[1:4:2]}), _MM_SHUFFLE(2, 0, 2, 0)));
-        const __m128i vabsout${ABC[4:8:2]}${ABC[5:8:2]} = _mm_castps_si128(
-            _mm_shuffle_ps(_mm_castsi128_ps(vabsout${ABC[4:8:2]}), _mm_castsi128_ps(vabsout${ABC[5:8:2]}), _MM_SHUFFLE(2, 0, 2, 0)));
-
-        const __m128i vabsout${ABC[0:4]} = _mm_shuffle_epi32(vabsout${ABC[0:4:2]}${ABC[1:4:2]}, _MM_SHUFFLE(3, 1, 2, 0));
-        const __m128i vabsout${ABC[4:8]} = _mm_shuffle_epi32(vabsout${ABC[4:8:2]}${ABC[5:8:2]}, _MM_SHUFFLE(3, 1, 2, 0));
-
-      $if SSE >= 3:
-        const __m128i vout${ABC[0:4]} = _mm_sign_epi32(vabsout${ABC[0:4]}, vacc${ABC[0:4]});
-        const __m128i vout${ABC[4:8]} = _mm_sign_epi32(vabsout${ABC[4:8]}, vacc${ABC[4:8]});
-      $else:
-        const __m128i vout${ABC[0:4]} = _mm_sub_epi32(_mm_xor_si128(vabsout${ABC[0:4]}, vsgnacc${ABC[0:4]}), vsgnacc${ABC[0:4]});
-        const __m128i vout${ABC[4:8]} = _mm_sub_epi32(_mm_xor_si128(vabsout${ABC[4:8]}, vsgnacc${ABC[4:8]}), vsgnacc${ABC[4:8]});
-
-      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-      __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(vout${ABC[0:4]}, vout${ABC[4:8]}), voutput_zero_point);
-
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
-      const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
-      vout${ABC[0:8]} = _mm_min_epi16(_mm_max_epi16(vout${ABC[0:8]}, voutput_min), voutput_max);
+      __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(vacc${ABC[0:4]}, vacc${ABC[4:8]}), voutput_zero_point);
+      $if SSE < 4:
+        vout${ABC[0:8]} = _mm_max_epi16(vout${ABC[0:8]}, voutput_min);
 
       __m128i vout${ABC[0:8]}${ABC[0:8]} = _mm_packs_epi16(vout${ABC[0:8]}, vout${ABC[0:8]});
+      $if SSE == 4:
+        vout${ABC[0:8]}${ABC[0:8]} = _mm_max_epi8(vout${ABC[0:8]}${ABC[0:8]}, voutput_min);
 
       $if CHANNEL_TILE > 8:
         if XNN_LIKELY(channels >= 8) {

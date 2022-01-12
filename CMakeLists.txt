@@ -3836,9 +3836,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/xx-pad/sse2.c)
 
 SET(PROD_SSSE3_MICROKERNEL_SRCS
-  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4-acc2.c
-  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c8-acc2.c
-  src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c)
+  src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4-acc2.c)
 
 SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc2.c
@@ -3851,12 +3849,6 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-4x4.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-5x4.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-6x4.c
-  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c8-acc2.c
-  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c16-acc2.c
-  src/qs8-gavgpool/gen/7p7x-minmax-ssse3-c24-acc2.c
-  src/qs8-gavgpool/gen/7x-minmax-ssse3-c8-acc2.c
-  src/qs8-gavgpool/gen/7x-minmax-ssse3-c16-acc2.c
-  src/qs8-gavgpool/gen/7x-minmax-ssse3-c24-acc2.c
   src/qs8-gemm/gen/1x4c8-minmax-fp32-ssse3-ld64.c
   src/qs8-gemm/gen/1x4c8-minmax-fp32-ssse3-ld128.c
   src/qs8-gemm/gen/1x4c8-xw-minmax-fp32-ssse3.c

@@ -53,12 +53,13 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c8_acc2(
     i6 = zero;
   }
 
-  const v128_t vbias = wasm_v128_load(params->wasmsimd.bias);
-  const v128_t vmultiplier = wasm_v128_load(params->wasmsimd.multiplier);
-  const v128_t vrounding = wasm_v128_load(params->wasmsimd.rounding);
-  const int32_t vshift = params->wasmsimd.shift;
-  const v128_t vzero = wasm_i32x4_splat(0);
-  while (channels >= 8) {
+  const v128_t vinit_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.init_bias);
+  const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
+  const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
+  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
+  for (; channels >= 8; channels -= 8) {
     const v128_t vxi0x01234567 = wasm_i16x8_load8x8(i0);
     i0 += 8;
     const v128_t vxi1x01234567 = wasm_i16x8_load8x8(i1);
@@ -84,47 +85,32 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c8_acc2(
     // Add up all accumulators to vacc0x01234567
     vacc0x01234567 = wasm_i16x8_add(vacc0x01234567, vacc1x01234567);
 
-    const v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_extend_low_i16x8(vacc0x01234567));
-    const v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_extend_high_i16x8(vacc0x01234567));
+    v128_t vacc0123 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc0x01234567));
+    v128_t vacc4567 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc0x01234567));
 
-    const v128_t vabsacc0123 = wasm_i32x4_abs(vacc0123);
-    const v128_t vabsacc4567 = wasm_i32x4_abs(vacc4567);
+    vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
+    vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);
 
-    const v128_t vsgnacc0123 = wasm_i32x4_gt(vabsacc0123, vacc0123);
-    const v128_t vsgnacc4567 = wasm_i32x4_gt(vabsacc4567, vacc4567);
+    vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
+    vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-    const v128_t vabsacc01 = wasm_v32x4_shuffle(vabsacc0123, vzero, 0, 4, 1, 5);
-    const v128_t vabsacc23 = wasm_v32x4_shuffle(vabsacc0123, vzero, 2, 6, 3, 7);
-    const v128_t vabsacc45 = wasm_v32x4_shuffle(vabsacc4567, vzero, 0, 4, 1, 5);
-    const v128_t vabsacc67 = wasm_v32x4_shuffle(vabsacc4567, vzero, 2, 6, 3, 7);
+    vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
+    vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
 
-    const v128_t vabsprod01 = wasm_i64x2_mul(vabsacc01, vmultiplier);
-    const v128_t vabsprod23 = wasm_i64x2_mul(vabsacc23, vmultiplier);
-    const v128_t vabsprod45 = wasm_i64x2_mul(vabsacc45, vmultiplier);
-    const v128_t vabsprod67 = wasm_i64x2_mul(vabsacc67, vmultiplier);
+    vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
+    vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
 
-    const v128_t vabsout01 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod01, vrounding), vshift);
-    const v128_t vabsout23 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod23, vrounding), vshift);
-    const v128_t vabsout45 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod45, vrounding), vshift);
-    const v128_t vabsout67 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod67, vrounding), vshift);
+    vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
+    vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
-    const v128_t vabsout0123 = wasm_v32x4_shuffle(vabsout01, vabsout23, 0, 2, 4, 6);
-    const v128_t vabsout4567 = wasm_v32x4_shuffle(vabsout45, vabsout67, 0, 2, 4, 6);
+    v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
 
-    const v128_t vout0123 = wasm_i32x4_sub(wasm_v128_xor(vabsout0123, vsgnacc0123), vsgnacc0123);
-    const v128_t vout4567 = wasm_i32x4_sub(wasm_v128_xor(vabsout4567, vsgnacc4567), vsgnacc4567);
+    v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
-    const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
-    const v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vout0123, vout4567), voutput_zero_point);
-
-    const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
-    const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
-    const v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
+    vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
     *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
     output += 8;
-
-    channels -= 8;
   }
   if XNN_UNLIKELY(channels != 0) {
     {
@@ -153,42 +139,27 @@ void xnn_qs8_gavgpool_minmax_ukernel_7x__wasmsimd_c8_acc2(
       // Add up all accumulators to vacc0x01234567
       vacc0x01234567 = wasm_i16x8_add(vacc0x01234567, vacc1x01234567);
 
-      const v128_t vacc0123 = wasm_i32x4_add(vbias, wasm_i32x4_extend_low_i16x8(vacc0x01234567));
-      const v128_t vacc4567 = wasm_i32x4_add(vbias, wasm_i32x4_extend_high_i16x8(vacc0x01234567));
+      v128_t vacc0123 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc0x01234567));
+      v128_t vacc4567 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc0x01234567));
 
-      const v128_t vabsacc0123 = wasm_i32x4_abs(vacc0123);
-      const v128_t vabsacc4567 = wasm_i32x4_abs(vacc4567);
+      vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
+      vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);
 
-      const v128_t vsgnacc0123 = wasm_i32x4_gt(vabsacc0123, vacc0123);
-      const v128_t vsgnacc4567 = wasm_i32x4_gt(vabsacc4567, vacc4567);
+      vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
+      vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-      const v128_t vabsacc01 = wasm_v32x4_shuffle(vabsacc0123, vzero, 0, 4, 1, 5);
-      const v128_t vabsacc23 = wasm_v32x4_shuffle(vabsacc0123, vzero, 2, 6, 3, 7);
-      const v128_t vabsacc45 = wasm_v32x4_shuffle(vabsacc4567, vzero, 0, 4, 1, 5);
-      const v128_t vabsacc67 = wasm_v32x4_shuffle(vabsacc4567, vzero, 2, 6, 3, 7);
+      vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
+      vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
 
-      const v128_t vabsprod01 = wasm_i64x2_mul(vabsacc01, vmultiplier);
-      const v128_t vabsprod23 = wasm_i64x2_mul(vabsacc23, vmultiplier);
-      const v128_t vabsprod45 = wasm_i64x2_mul(vabsacc45, vmultiplier);
-      const v128_t vabsprod67 = wasm_i64x2_mul(vabsacc67, vmultiplier);
+      vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
+      vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
 
-      const v128_t vabsout01 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod01, vrounding), vshift);
-      const v128_t vabsout23 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod23, vrounding), vshift);
-      const v128_t vabsout45 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod45, vrounding), vshift);
-      const v128_t vabsout67 = wasm_u64x2_shr(wasm_i64x2_add(vabsprod67, vrounding), vshift);
+      vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
+      vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
-      const v128_t vabsout0123 = wasm_v32x4_shuffle(vabsout01, vabsout23, 0, 2, 4, 6);
-      const v128_t vabsout4567 = wasm_v32x4_shuffle(vabsout45, vabsout67, 0, 2, 4, 6);
-
-      const v128_t vout0123 = wasm_i32x4_sub(wasm_v128_xor(vabsout0123, vsgnacc0123), vsgnacc0123);
-      const v128_t vout4567 = wasm_i32x4_sub(wasm_v128_xor(vabsout4567, vsgnacc4567), vsgnacc4567);
-
-      const v128_t voutput_zero_point = wasm_v128_load(params->wasmsimd.output_zero_point);
-      const v128_t vout01234567 = wasm_i16x8_add_sat(wasm_i16x8_narrow_i32x4(vout0123, vout4567), voutput_zero_point);
-
-      const v128_t voutput_min = wasm_v128_load(params->wasmsimd.output_min);
-      const v128_t voutput_max = wasm_v128_load(params->wasmsimd.output_max);
-      v128_t vout0123456701234567 = wasm_i8x16_min(wasm_i8x16_max(wasm_i8x16_narrow_i16x8(vout01234567, vout01234567), voutput_min), voutput_max);
+      const v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
+      v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
+      vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
       if (channels & 4) {
         *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);

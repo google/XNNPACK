@@ -8,6 +8,7 @@ $assert CHANNEL_TILE >= 8
 $assert ROW_TILE >= 2
 $assert ACCUMULATORS >= 1
 $assert ROW_TILE >= ACCUMULATORS * 2
+$assert REQUANTIZATION == "FP32"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -16,7 +17,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/gavgpool.h>
 
 
-void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
+$ISA = "neonv8" if ARMV8 else "neon"
+void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -41,21 +44,20 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if 
         i${M} = zero;
       }
 
-  const int32x4_t vbias = vld1q_dup_s32(&params->neon.bias);
-#if XNN_ARCH_ARM64
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
-#else
-  const int32x2_t vmultiplier = vld1_dup_s32(&params->neon.multiplier);
-#endif
-  const int64x2_t vleft_shift = vld1q_dup_s64(&params->neon.left_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  $if CHANNEL_TILE > 8:
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int32x4_t vinit_bias = vld1q_dup_s32(&params->${PARAMS_STRUCT}.init_bias);
+  const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+  $if ARMV8:
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
   $else:
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
-    const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
-  while (channels >= ${CHANNEL_TILE}) {
+    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
+    const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+  $if CHANNEL_TILE > 8:
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+    const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+  $else:
+    const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+  for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
     $for M in range(ROW_TILE):
       $for C in range(0, CHANNEL_TILE, 8):
         const int8x8_t vi${M}x${ABC[C:C+8]} = vld1_s8(i${M}); i${M} += 8;
@@ -79,58 +81,52 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if 
         $ACC_SLICE *= 2
 
     $for C in range(0, CHANNEL_TILE, 8):
-      int32x4_t vacc${ABC[C:C+4]} = vaddw_s16(vbias, vget_low_s16(vacc0x${ABC[C:C+8]}));
-      int32x4_t vacc${ABC[C+4:C+8]} = vaddw_s16(vbias, vget_high_s16(vacc0x${ABC[C:C+8]}));
+      int32x4_t vacc${ABC[C:C+4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc0x${ABC[C:C+8]}));
+      int32x4_t vacc${ABC[C+4:C+8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc0x${ABC[C:C+8]}));
 
     $for C in range(0, CHANNEL_TILE, 4):
-      const int32x4_t vsgnacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vcltq_s32(vacc${ABC[C:C+4]}, vmovq_n_s32(0)));
-
-#if XNN_ARCH_ARM64
-    $for C in range(0, CHANNEL_TILE, 4):
-      const int64x2_t vprod${ABC[C:C+2]} = vmull_s32(vget_low_s32(vacc${ABC[C:C+4]}), vget_low_s32(vmultiplier));
-      const int64x2_t vprod${ABC[C+2:C+4]} = vmull_high_s32(vacc${ABC[C:C+4]}, vmultiplier);
+      float32x4_t vfpacc${ABC[C:C+4]} = vcvtq_f32_s32(vacc${ABC[C:C+4]});
 
     $for C in range(0, CHANNEL_TILE, 4):
-      const int64x2_t vadjprod${ABC[C:C+2]} = vaddw_s32(vprod${ABC[C:C+2]}, vget_low_s32(vsgnacc${ABC[C:C+4]}));
-      const int64x2_t vadjprod${ABC[C+2:C+4]} = vaddw_high_s32(vprod${ABC[C+2:C+4]}, vsgnacc${ABC[C:C+4]});
-#else
-    $for C in range(0, CHANNEL_TILE, 4):
-      const int64x2_t vprod${ABC[C:C+2]} = vmull_s32(vget_low_s32(vacc${ABC[C:C+4]}), vmultiplier);
-      const int64x2_t vprod${ABC[C+2:C+4]} = vmull_s32(vget_high_s32(vacc${ABC[C:C+4]}), vmultiplier);
+      vfpacc${ABC[C:C+4]} = vmulq_f32(vfpacc${ABC[C:C+4]}, vscale);
 
-    $for C in range(0, CHANNEL_TILE, 4):
-      const int64x2_t vadjprod${ABC[C:C+2]} = vaddw_s32(vprod${ABC[C:C+2]}, vget_low_s32(vsgnacc${ABC[C:C+4]}));
-      const int64x2_t vadjprod${ABC[C+2:C+4]} = vaddw_s32(vprod${ABC[C+2:C+4]}, vget_high_s32(vsgnacc${ABC[C:C+4]}));
-#endif
+    $if ARMV8:
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vcvtnq_s32_f32(vfpacc${ABC[C:C+4]});
+    $else:
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[C:C+4]}, vmagic_bias));
 
-    $for C in range(0, CHANNEL_TILE, 2):
-      const int64x2_t vacc${ABC[C:C+2]} = vrshlq_s64(vadjprod${ABC[C:C+2]}, vleft_shift);
+      $for C in range(0, CHANNEL_TILE, 4):
+        vacc${ABC[C:C+4]} = vqsubq_s32(vacc${ABC[C:C+4]}, vmagic_bias_less_output_zero_point);
 
-#if XNN_ARCH_ARM64
-    $for C in range(0, CHANNEL_TILE, 4):
-      vacc${ABC[C:C+4]} = vuzp1q_s32(vreinterpretq_s32_s64(vacc${ABC[C:C+2]}), vreinterpretq_s32_s64(vacc${ABC[C+2:C+4]}));
+    #if XNN_ARCH_ARM64
+      $for C in range(0, CHANNEL_TILE, 8):
+        int16x8_t vacc${ABC[C:C+8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]});
 
-    $for C in range(0, CHANNEL_TILE, 8):
-      const int16x8_t vacc${ABC[C:C+8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${ABC[C:C+4]}), vacc${ABC[C+4:C+8]}), voutput_zero_point);
+      $if ARMV8:
+        $for C in range(0, CHANNEL_TILE, 8):
+          vacc${ABC[C:C+8]} = vqaddq_s16(vacc${ABC[C:C+8]}, voutput_zero_point);
 
-    $for C in range(0, CHANNEL_TILE, 16):
-      $if C + 8 < CHANNEL_TILE:
-        int8x16_t vout${ABC[C:C+16]} = vqmovn_high_s16(vqmovn_s16(vacc${ABC[C:C+8]}), vacc${ABC[C+8:C+16]});
-      $else:
-        int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
-#else
-    $for C in range(0, CHANNEL_TILE, 4):
-      vacc${ABC[C:C+4]} = vcombine_s32(vmovn_s64(vacc${ABC[C:C+2]}), vmovn_s64(vacc${ABC[C+2:C+4]}));
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          int8x16_t vout${ABC[C:C+16]} = vqmovn_high_s16(vqmovn_s16(vacc${ABC[C:C+8]}), vacc${ABC[C+8:C+16]});
+        $else:
+          int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
+    #else  // !XNN_ARCH_ARM64
+      $for C in range(0, CHANNEL_TILE, 8):
+        int16x8_t vacc${ABC[C:C+8]} = vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]}));
 
-    $for C in range(0, CHANNEL_TILE, 8):
-      const int16x8_t vacc${ABC[C:C+8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[C:C+4]}), vqmovn_s32(vacc${ABC[C+4:C+8]})), voutput_zero_point);
+      $if ARMV8:
+        $for C in range(0, CHANNEL_TILE, 8):
+          vacc${ABC[C:C+8]} = vqaddq_s16(vacc${ABC[C:C+8]}, voutput_zero_point);
 
-    $for C in range(0, CHANNEL_TILE, 16):
-      $if C + 8 < CHANNEL_TILE:
-        int8x16_t vout${ABC[C:C+16]} = vcombine_s8(vqmovn_s16(vacc${ABC[C:C+8]}), vqmovn_s16(vacc${ABC[C+8:C+16]}));
-      $else:
-        int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
-#endif
+      $for C in range(0, CHANNEL_TILE, 16):
+        $if C + 8 < CHANNEL_TILE:
+          int8x16_t vout${ABC[C:C+16]} = vcombine_s8(vqmovn_s16(vacc${ABC[C:C+8]}), vqmovn_s16(vacc${ABC[C+8:C+16]}));
+        $else:
+          int8x8_t vout${ABC[C:C+8]} = vqmovn_s16(vacc${ABC[C:C+8]});
+    #endif  // !XNN_ARCH_ARM64
 
     $for C in range(0, CHANNEL_TILE, 16):
       $if C + 8 < CHANNEL_TILE:
@@ -153,8 +149,6 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if 
         vst1q_s8(output, vout${ABC[C:C+16]}); output += 16;
       $else:
         vst1_s8(output, vout${ABC[C:C+8]}); output += 8;
-
-    channels -= ${CHANNEL_TILE};
   }
   if XNN_UNLIKELY(channels != 0) {
     ${"do " if CHANNEL_TILE > 8 else ""}{
@@ -176,63 +170,38 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if 
               vacc${A}x${ABC[0:8]} = vaddq_s16(vacc${A}x${ABC[0:8]}, vacc${A + ACC_SLICE}x${ABC[0:8]});
           $ACC_SLICE *= 2
 
-      int32x4_t vacc${ABC[0:4]} = vaddw_s16(vbias, vget_low_s16(vacc0x${ABC[0:8]}));
-      int32x4_t vacc${ABC[4:8]} = vaddw_s16(vbias, vget_high_s16(vacc0x${ABC[0:8]}));
+      int32x4_t vacc${ABC[0:4]} = vaddw_s16(vinit_bias, vget_low_s16(vacc0x${ABC[0:8]}));
+      int32x4_t vacc${ABC[4:8]} = vaddw_s16(vinit_bias, vget_high_s16(vacc0x${ABC[0:8]}));
 
-      const int32x4_t vsgnacc${ABC[0:4]} = vreinterpretq_s32_u32(vcltq_s32(vacc${ABC[0:4]}, vmovq_n_s32(0)));
-      const int32x4_t vsgnacc${ABC[4:8]} = vreinterpretq_s32_u32(vcltq_s32(vacc${ABC[4:8]}, vmovq_n_s32(0)));
+      float32x4_t vfpacc${ABC[0:4]} = vcvtq_f32_s32(vacc${ABC[0:4]});
+      float32x4_t vfpacc${ABC[4:8]} = vcvtq_f32_s32(vacc${ABC[4:8]});
 
-#if XNN_ARCH_ARM64
-      const int64x2_t vprod${ABC[0:2]} = vmull_s32(vget_low_s32(vacc${ABC[0:4]}), vget_low_s32(vmultiplier));
-      const int64x2_t vprod${ABC[2:4]} = vmull_high_s32(vacc${ABC[0:4]}, vmultiplier);
-      const int64x2_t vprod${ABC[4:6]} = vmull_s32(vget_low_s32(vacc${ABC[4:8]}), vget_low_s32(vmultiplier));
-      const int64x2_t vprod${ABC[6:8]} = vmull_high_s32(vacc${ABC[4:8]}, vmultiplier);
+      vfpacc${ABC[0:4]} = vmulq_f32(vfpacc${ABC[0:4]}, vscale);
+      vfpacc${ABC[4:8]} = vmulq_f32(vfpacc${ABC[4:8]}, vscale);
 
-      const int64x2_t vadjprod${ABC[0:2]} = vaddw_s32(vprod${ABC[0:2]}, vget_low_s32(vsgnacc${ABC[0:4]}));
-      const int64x2_t vadjprod${ABC[2:4]} = vaddw_high_s32(vprod${ABC[2:4]}, vsgnacc${ABC[0:4]});
-      const int64x2_t vadjprod${ABC[4:6]} = vaddw_s32(vprod${ABC[4:6]}, vget_low_s32(vsgnacc${ABC[4:8]}));
-      const int64x2_t vadjprod${ABC[6:8]} = vaddw_high_s32(vprod${ABC[6:8]}, vsgnacc${ABC[4:8]});
-#else
-      const int64x2_t vprod${ABC[0:2]} = vmull_s32(vget_low_s32(vacc${ABC[0:4]}), vmultiplier);
-      const int64x2_t vprod${ABC[2:4]} = vmull_s32(vget_high_s32(vacc${ABC[0:4]}), vmultiplier);
-      const int64x2_t vprod${ABC[4:6]} = vmull_s32(vget_low_s32(vacc${ABC[4:8]}), vmultiplier);
-      const int64x2_t vprod${ABC[6:8]} = vmull_s32(vget_high_s32(vacc${ABC[4:8]}), vmultiplier);
+      $if ARMV8:
+        vacc${ABC[0:4]} = vcvtnq_s32_f32(vfpacc${ABC[0:4]});
+        vacc${ABC[4:8]} = vcvtnq_s32_f32(vfpacc${ABC[4:8]});
+      $else:
+        vacc${ABC[0:4]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[0:4]}, vmagic_bias));
+        vacc${ABC[4:8]} = vreinterpretq_s32_f32(vaddq_f32(vfpacc${ABC[4:8]}, vmagic_bias));
 
-      const int64x2_t vadjprod${ABC[0:2]} = vaddw_s32(vprod${ABC[0:2]}, vget_low_s32(vsgnacc${ABC[0:4]}));
-      const int64x2_t vadjprod${ABC[2:4]} = vaddw_s32(vprod${ABC[2:4]}, vget_high_s32(vsgnacc${ABC[0:4]}));
-      const int64x2_t vadjprod${ABC[4:6]} = vaddw_s32(vprod${ABC[4:6]}, vget_low_s32(vsgnacc${ABC[4:8]}));
-      const int64x2_t vadjprod${ABC[6:8]} = vaddw_s32(vprod${ABC[6:8]}, vget_high_s32(vsgnacc${ABC[4:8]}));
-#endif
+        vacc${ABC[0:4]} = vqsubq_s32(vacc${ABC[0:4]}, vmagic_bias_less_output_zero_point);
+        vacc${ABC[4:8]} = vqsubq_s32(vacc${ABC[4:8]}, vmagic_bias_less_output_zero_point);
 
-      const int64x2_t vacc${ABC[0:2]} = vrshlq_s64(vadjprod${ABC[0:2]}, vleft_shift);
-      const int64x2_t vacc${ABC[2:4]} = vrshlq_s64(vadjprod${ABC[2:4]}, vleft_shift);
-      const int64x2_t vacc${ABC[4:6]} = vrshlq_s64(vadjprod${ABC[4:6]}, vleft_shift);
-      const int64x2_t vacc${ABC[6:8]} = vrshlq_s64(vadjprod${ABC[6:8]}, vleft_shift);
-
-#if XNN_ARCH_ARM64
-      vacc${ABC[0:4]} = vuzp1q_s32(vreinterpretq_s32_s64(vacc${ABC[0:2]}), vreinterpretq_s32_s64(vacc${ABC[2:4]}));
-      vacc${ABC[4:8]} = vuzp1q_s32(vreinterpretq_s32_s64(vacc${ABC[4:6]}), vreinterpretq_s32_s64(vacc${ABC[6:8]}));
-
-      const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]}), voutput_zero_point);
+      #if XNN_ARCH_ARM64
+        int16x8_t vacc${ABC[0:8]} = vqmovn_high_s32(vqmovn_s32(vacc${ABC[0:4]}), vacc${ABC[4:8]});
+      #else
+        int16x8_t vacc${ABC[0:8]} = vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]}));
+      #endif
+      $if ARMV8:
+        vacc${ABC[0:8]} = vqaddq_s16(vacc${ABC[0:8]}, voutput_zero_point);
 
       int8x8_t vout${ABC[0:8]} = vqmovn_s16(vacc${ABC[0:8]});
-#else
-      vacc${ABC[0:4]} = vcombine_s32(vmovn_s64(vacc${ABC[0:2]}), vmovn_s64(vacc${ABC[2:4]}));
-      vacc${ABC[4:8]} = vcombine_s32(vmovn_s64(vacc${ABC[4:6]}), vmovn_s64(vacc${ABC[6:8]}));
-
-      const int16x8_t vacc${ABC[0:8]} = vqaddq_s16(vcombine_s16(vqmovn_s32(vacc${ABC[0:4]}), vqmovn_s32(vacc${ABC[4:8]})), voutput_zero_point);
-
-      int8x8_t vout${ABC[0:8]} = vqmovn_s16(vacc${ABC[0:8]});
-#endif
-
       $if CHANNEL_TILE > 8:
         vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, vget_low_s8(voutput_min));
         vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, vget_low_s8(voutput_max));
-      $else:
-        vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, voutput_min);
-        vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, voutput_max);
 
-      $if CHANNEL_TILE > 8:
         if XNN_LIKELY(channels >= 8) {
           vst1_s8(output, vout${ABC[0:8]}); output += 8;
           channels -= 8;
@@ -251,6 +220,9 @@ void xnn_qs8_gavgpool_minmax_ukernel_${ROW_TILE}x__neon_c${CHANNEL_TILE}${"" if 
           channels = 0;
         }
       $else:
+        vout${ABC[0:8]} = vmax_s8(vout${ABC[0:8]}, voutput_min);
+        vout${ABC[0:8]} = vmin_s8(vout${ABC[0:8]}, voutput_max);
+
         if (channels & 4) {
           vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout${ABC[0:8]}), 0); output += 4;
           vout${ABC[0:8]} = vext_s8(vout${ABC[0:8]}, vout${ABC[0:8]}, 4);
