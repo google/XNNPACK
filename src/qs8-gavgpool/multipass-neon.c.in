@@ -15,6 +15,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <arm_neon.h>
 
 #include <xnnpack/gavgpool.h>
+$if ARMV8:
+  #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 
