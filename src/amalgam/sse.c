@@ -7983,10 +7983,6 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
   float* o0 = output;
   const float* i1 = (const float*) ((uintptr_t) i0 + input_stride);
   float* o1 = (float*) ((uintptr_t) o0 + output_stride);
-  if XNN_UNPREDICTABLE(rows < 2) {
-    i1 = i0;
-    o1 = o0;
-  }
 
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
@@ -7994,6 +7990,11 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
   const __m128 vmin = _mm_load_ps(params->sse.min);
   const __m128 vmax = _mm_load_ps(params->sse.max);
   do {
+    if XNN_UNPREDICTABLE(rows < 2) {
+      i1 = i0;
+      o1 = o0;
+    }
+
     const float* w = weights;
     size_t c = channels;
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
@@ -8069,10 +8070,6 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
     o0 = (float*) ((uintptr_t) o0 + output_increment);
     i1 = (const float*) ((uintptr_t) i1 + input_increment);
     o1 = (float*) ((uintptr_t) o1 + output_increment);
-    if XNN_UNPREDICTABLE(rows < 4) {
-      i1 = i0;
-      o1 = o0;
-    }
     rows = doz(rows, 2);
   } while (rows != 0);
 }
