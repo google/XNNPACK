@@ -30,13 +30,13 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
     const union xnn_${DATATYPE.lower()}_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 
 {
-  const v128_t va_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.a_zero_point);
-  const v128_t vb_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.b_zero_point);
-  const v128_t vscale = wasm_v128_load(params->${PARAMS_STRUCT}.scale);
-  const v128_t vmagic_bias = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias);
-  const v128_t vmagic_min = wasm_v128_load(params->${PARAMS_STRUCT}.magic_min);
-  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
-  const v128_t voutput_max = wasm_v128_load(params->${PARAMS_STRUCT}.output_max);
+  const v128_t va_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.a_zero_point);
+  const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.b_zero_point);
+  const v128_t vscale = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.scale);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias);
+  const v128_t vmagic_min = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_min);
+  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
 
   for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     const v128_t va${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(input_a);

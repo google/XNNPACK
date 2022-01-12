@@ -22,15 +22,15 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16(
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 
 {
-  const v128_t va_zero_point = wasm_v128_load(params->fp32_wasmsimd.a_zero_point);
-  const v128_t vscale = wasm_v128_load(params->fp32_wasmsimd.scale);
-  const v128_t vmagic_bias = wasm_v128_load(params->fp32_wasmsimd.magic_bias);
-  const v128_t vmagic_min = wasm_v128_load(params->fp32_wasmsimd.magic_min);
-  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
-  const v128_t voutput_max = wasm_v128_load(params->fp32_wasmsimd.output_max);
+  const v128_t va_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.a_zero_point);
+  const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
+  const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
+  const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
+  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
 
   const v128_t vxb = wasm_i16x8_sub(
-    wasm_i16x8_splat((int16_t) *input_b), wasm_v128_load(params->fp32_wasmsimd.b_zero_point));
+    wasm_i16x8_splat((int16_t) *input_b), wasm_v128_load64_splat(params->fp32_wasmsimd.b_zero_point));
   const v128_t vxblo = wasm_i32x4_extend_low_i16x8(vxb);
   const v128_t vxbhi = wasm_i32x4_extend_high_i16x8(vxb);
   for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
