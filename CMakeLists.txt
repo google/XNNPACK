@@ -8039,7 +8039,8 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE .)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE XNNPACK benchmark cpuinfo)
+  TARGET_INCLUDE_DIRECTORIES(bench-utils PUBLIC include src)
+  TARGET_LINK_LIBRARIES(bench-utils PRIVATE XNNPACK benchmark cpuinfo jit)
 
   # ---[ Build accuracy microbenchmarks
   ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
