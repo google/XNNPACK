@@ -10733,7 +10733,7 @@ xnnpack_unit_test(
         "test/f32-igemm-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -10824,7 +10824,7 @@ xnnpack_unit_test(
         "test/f32-gemm-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -10847,7 +10847,7 @@ xnnpack_unit_test(
         "test/f32-gemm-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -11476,7 +11476,7 @@ xnnpack_unit_test(
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -11491,7 +11491,7 @@ xnnpack_unit_test(
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -11561,7 +11561,7 @@ xnnpack_unit_test(
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -11589,7 +11589,7 @@ xnnpack_unit_test(
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit",
+        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
