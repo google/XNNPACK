@@ -437,12 +437,6 @@ TEST(AArch32Assembler, CodeBufferOverflow) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
-TEST(AArch32Assembler, AllocateAndRelease) {
-  xnn_code_buffer b;
-  ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
-  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
-}
-
 #if XNN_ARCH_ARM && XNN_PLATFORM_JIT
 TEST(AArch32Assembler, JitAllocCodeBuffer) {
   typedef uint32_t (*Func)(uint32_t);

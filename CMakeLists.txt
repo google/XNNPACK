@@ -8028,6 +8028,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(xx-pad-test xx-pad-test)
 
+  ADD_EXECUTABLE(jit-test test/jit.cc)
+  SET_TARGET_PROPERTIES(jit-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(jit-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(jit-test PRIVATE pthreadpool gtest gtest_main jit)
+
   ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc $<TARGET_OBJECTS:jit>)
   SET_TARGET_PROPERTIES(aarch32-assembler-test PROPERTIES
     CXX_STANDARD 11

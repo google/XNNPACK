@@ -607,7 +607,9 @@ Assembler& Assembler::align(uint8_t n) {
 
 void* Assembler::finalize() {
   xnn_buffer->size = code_size_in_bytes();
-  xnn_finalize_code_memory(xnn_buffer);
+  if (xnn_finalize_code_memory(xnn_buffer) != xnn_status_success) {
+    error_ = Error::kFinalizeCodeMemoryFail;
+  }
   return reinterpret_cast<void*>(buffer_);
 }
 

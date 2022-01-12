@@ -369,6 +369,7 @@ enum class Error {
   kLabelHasTooManyUsers,
   kInvalidLaneIndex,
   kInvalidRegisterListLength,
+  kFinalizeCodeMemoryFail,
 };
 
 enum DataSize {

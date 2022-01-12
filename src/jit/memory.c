@@ -69,7 +69,7 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   xnn_log_debug("JIT code memory start %p, used: %zu, capacity: %zu, unused %zu", start, buf->size, buf->capacity,
                 unused_capacity);
 
-  if (unused_capacity > 0) {
+  if (unused_capacity != 0) {
     // Free unused pages.
     #if XNN_PLATFORM_WINDOWS
       // We cannot selectively release pages inside the region of pages, so just decommit them.
@@ -86,6 +86,10 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   }
 
   buf->capacity = page_aligned_code_size;
+
+  if (buf->capacity == 0) {
+    return xnn_status_success;
+  }
 
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
@@ -117,7 +121,7 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
     return xnn_status_invalid_state;
   }
 #else
-  if (munmap(buf->code, buf->capacity) == -1) {
+  if (buf->capacity != 0 && munmap(buf->code, buf->capacity) == -1) {
     xnn_log_error("failed to release code buffer for JIT, error code: %d", errno);
     return xnn_status_invalid_state;
   }
