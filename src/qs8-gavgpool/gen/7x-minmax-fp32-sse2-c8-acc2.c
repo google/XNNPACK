@@ -179,13 +179,14 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8_acc2(
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
+      uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
       if (channels & 2) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
-        vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
+        *((uint16_t*) output) = (uint16_t) vout0123;
+        vout0123 >>= 16;
         output += 2;
       }
       if (channels & 1) {
-        *output = (int32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        *output = (int8_t) vout0123;
       }
     }
   }

@@ -167,7 +167,7 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
 
       $if SSE == 4:
         __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x${ABC[0:8]}), vinit_bias);
-        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]})), vinit_bias);
+        __m128i vacc${ABC[4:8]} = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x${ABC[0:8]}, vacc0x${ABC[0:8]}), 16), vinit_bias);
       $else:
         const __m128i vsgnacc0x${ABC[0:8]} = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x${ABC[0:8]});
         __m128i vacc${ABC[0:4]} = _mm_add_epi32(_mm_unpacklo_epi16(vacc0x${ABC[0:8]}, vsgnacc0x${ABC[0:8]}), vinit_bias);
@@ -199,48 +199,69 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__${ISA}_c${CHANNEL_TILE}$
           output += 8;
           channels -= 8;
         } else {
+          $if SSE == 4:
+            if (channels & 4) {
+              *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+              vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
+              output += 4;
+            }
+            if (channels & 2) {
+              *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
+              vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
+              output += 2;
+            }
+            if (channels & 1) {
+              *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
+              output += 1;
+            }
+          $else:
+            if (channels & 4) {
+              *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+              vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
+              output += 4;
+            }
+            uint32_t vout${ABC[0:4]} = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            if (channels & 2) {
+              *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+              vout${ABC[0:4]} >>= 16;
+              output += 2;
+            }
+            if (channels & 1) {
+              *output = (int8_t) vout${ABC[0:4]};
+              output += 1;
+            }
+          channels = 0;
+        }
+      $else:
+        $if SSE == 4:
           if (channels & 4) {
             *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
           if (channels & 2) {
-            $if SSE == 4:
-              *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
-            $else:
-              *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
             output += 2;
           }
           if (channels & 1) {
-            $if SSE == 4:
-              *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
-            $else:
-              *output = (int32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
-            output += 1;
-          }
-          channels = 0;
-        }
-      $else:
-        if (channels & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
-          vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
-          output += 4;
-        }
-        if (channels & 2) {
-          $if SSE == 4:
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
-          $else:
-            *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
-          vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
-          output += 2;
-        }
-        if (channels & 1) {
-          $if SSE == 4:
             *output = (int8_t) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
-          $else:
-            *output = (int32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
-        }
+          }
+        $else:
+          if (channels & 4) {
+            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
+            output += 4;
+          }
+          uint32_t vout${ABC[0:4]} = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+          if (channels & 2) {
+            *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
+            vout${ABC[0:4]} >>= 16;
+            output += 2;
+          }
+          if (channels & 1) {
+            *output = (int8_t) vout${ABC[0:4]};
+          }
     }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
   }
 }

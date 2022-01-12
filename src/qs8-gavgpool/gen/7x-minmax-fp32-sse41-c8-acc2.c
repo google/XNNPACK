@@ -139,7 +139,7 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8_acc2(
       vacc0x01234567 = _mm_add_epi16(vacc0x01234567, vacc1x01234567);
 
       __m128i vacc0123 = _mm_add_epi32(_mm_cvtepi16_epi32(vacc0x01234567), vinit_bias);
-      __m128i vacc4567 = _mm_add_epi32(_mm_unpackhi_epi16(vacc0x01234567, _mm_cmpgt_epi16(_mm_setzero_si128(), vacc0x01234567)), vinit_bias);
+      __m128i vacc4567 = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc0x01234567, vacc0x01234567), 16), vinit_bias);
 
       __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
       __m128 vfpacc4567 = _mm_cvtepi32_ps(vacc4567);
