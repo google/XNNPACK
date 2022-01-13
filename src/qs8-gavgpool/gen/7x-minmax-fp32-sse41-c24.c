@@ -109,12 +109,19 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c24(
     vacc89ABCDEF = _mm_add_epi16(vacc89ABCDEF, vxi6x89ABCDEF);
     vaccGHIJKLMN = _mm_add_epi16(vaccGHIJKLMN, vxi6xGHIJKLMN);
 
-    __m128i vacc0123 = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vacc01234567));
-    __m128i vacc4567 = _mm_add_epi32(vinit_bias, _mm_srai_epi32(_mm_unpackhi_epi16(vacc01234567, vacc01234567), 16));
-    __m128i vacc89AB = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vacc89ABCDEF));
-    __m128i vaccCDEF = _mm_add_epi32(vinit_bias, _mm_srai_epi32(_mm_unpackhi_epi16(vacc89ABCDEF, vacc89ABCDEF), 16));
-    __m128i vaccGHIJ = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vaccGHIJKLMN));
-    __m128i vaccKLMN = _mm_add_epi32(vinit_bias, _mm_srai_epi32(_mm_unpackhi_epi16(vaccGHIJKLMN, vaccGHIJKLMN), 16));
+    __m128i vacc0123 = _mm_cvtepi16_epi32(vacc01234567);
+    __m128i vacc4567 = _mm_srai_epi32(_mm_unpackhi_epi16(vacc01234567, vacc01234567), 16);
+    __m128i vacc89AB = _mm_cvtepi16_epi32(vacc89ABCDEF);
+    __m128i vaccCDEF = _mm_srai_epi32(_mm_unpackhi_epi16(vacc89ABCDEF, vacc89ABCDEF), 16);
+    __m128i vaccGHIJ = _mm_cvtepi16_epi32(vaccGHIJKLMN);
+    __m128i vaccKLMN = _mm_srai_epi32(_mm_unpackhi_epi16(vaccGHIJKLMN, vaccGHIJKLMN), 16);
+
+    vacc0123 = _mm_add_epi32(vacc0123, vinit_bias);
+    vacc4567 = _mm_add_epi32(vacc4567, vinit_bias);
+    vacc89AB = _mm_add_epi32(vacc89AB, vinit_bias);
+    vaccCDEF = _mm_add_epi32(vaccCDEF, vinit_bias);
+    vaccGHIJ = _mm_add_epi32(vaccGHIJ, vinit_bias);
+    vaccKLMN = _mm_add_epi32(vaccKLMN, vinit_bias);
 
     __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
     __m128 vfpacc4567 = _mm_cvtepi32_ps(vacc4567);
@@ -184,8 +191,11 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c24(
 
       vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
-      __m128i vacc0123 = _mm_add_epi32(_mm_cvtepi16_epi32(vacc01234567), vinit_bias);
-      __m128i vacc4567 = _mm_add_epi32(_mm_srai_epi32(_mm_unpackhi_epi16(vacc01234567, vacc01234567), 16), vinit_bias);
+      __m128i vacc0123 = _mm_cvtepi16_epi32(vacc01234567);
+      __m128i vacc4567 = _mm_srai_epi32(_mm_unpackhi_epi16(vacc01234567, vacc01234567), 16);
+
+      vacc0123 = _mm_add_epi32(vacc0123, vinit_bias);
+      vacc4567 = _mm_add_epi32(vacc4567, vinit_bias);
 
       __m128 vfpacc0123 = _mm_cvtepi32_ps(vacc0123);
       __m128 vfpacc4567 = _mm_cvtepi32_ps(vacc4567);

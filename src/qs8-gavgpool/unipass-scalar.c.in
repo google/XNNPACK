@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["QS8", "QU8"]
 $assert CHANNEL_TILE >= 1
 $assert ROW_TILE >= 3
 $assert REQUANTIZATION == "FP32"
@@ -18,24 +19,25 @@ $elif VARIANT in ["FMAGIC", "IMAGIC"]:
 
 
 $PARAMS_STRUCT = "fp32_scalar_" + VARIANT.lower()
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()}_c${CHANNEL_TILE}(
+void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()}_c${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
-    const int8_t* input,
+    const ${XINT8_T}* input,
     size_t input_stride,
-    const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${XINT8_T}* zero,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(rows <= ${ROW_TILE});
   assert(channels != 0);
 
-  const int8_t* i0 = input;
+  const ${XINT8_T}* i0 = input;
   $for M in range(1, ROW_TILE):
-    const int8_t* i${M} = (const int8_t*) ((uintptr_t) i${M-1} + input_stride);
+    const ${XINT8_T}* i${M} = (const ${XINT8_T}*) ((uintptr_t) i${M-1} + input_stride);
     $if M % 2 == 1:
       if XNN_UNPREDICTABLE(rows < ${M+1}) {
         i${M} = zero;
@@ -64,18 +66,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()
   $if CHANNEL_TILE > 1:
     for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
       $for C in range(CHANNEL_TILE):
-        const int32_t vi0x${C} = i0[${C}];
+        const int32_t vi0x${C} = (int32_t) i0[${C}];
       i0 += ${CHANNEL_TILE};
 
       $for C in range(CHANNEL_TILE):
         int32_t vacc${C} = vi0x${C} + vinit_bias;
-        const int32_t vi1x${C} = i1[${C}];
+        const int32_t vi1x${C} = (int32_t) i1[${C}];
       i1 += ${CHANNEL_TILE};
 
       $for M in range(2, ROW_TILE):
         $for C in range(CHANNEL_TILE):
           vacc${C} += vi${M-1}x${C};
-          const int32_t vi${M}x${C} = i${M}[${C}];
+          const int32_t vi${M}x${C} = (int32_t) i${M}[${C}];
         i${M} += ${CHANNEL_TILE};
 
       $for C in range(CHANNEL_TILE):
@@ -125,18 +127,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()
           int32_t vout${C} = vrndacc${C} + voutput_zero_point;
 
       $for C in range(CHANNEL_TILE):
-        output[${C}] = vout${C};
+        output[${C}] = (${XINT8_T}) vout${C};
       output += ${CHANNEL_TILE};
     }
   $if CHANNEL_TILE == 1:
     do {
       int32_t vacc = vinit_bias;
       $for M in range(2):
-        const int32_t vi${M} = *i${M}++;
+        const int32_t vi${M} = (int32_t) *i${M}++;
 
       $for M in range(2, ROW_TILE):
         vacc += vi${M-2};
-        const int32_t vi${M} = *i${M}++;
+        const int32_t vi${M} = (int32_t) *i${M}++;
 
       $for M in range(ROW_TILE - 2, ROW_TILE):
         vacc += vi${M};
@@ -159,18 +161,18 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()
         const int32_t vrndacc = (int32_t) lrintf(vfpacc);
         int32_t vout = vrndacc + voutput_zero_point;
 
-      *output++ = (int8_t) vout;
+      *output++ = (${XINT8_T}) vout;
     } while (--channels != 0);
   $else:
     if XNN_UNLIKELY(channels != 0) {
       $if CHANNEL_TILE == 2:
         int32_t vacc = vinit_bias;
         $for M in range(2):
-          const int32_t vi${M} = *i${M};
+          const int32_t vi${M} = (int32_t) *i${M};
 
         $for M in range(2, ROW_TILE):
           vacc += vi${M-2};
-          const int32_t vi${M} = *i${M};
+          const int32_t vi${M} = (int32_t) *i${M};
 
         $for M in range(ROW_TILE - 2, ROW_TILE):
           vacc += vi${M};
@@ -193,16 +195,16 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()
           const int32_t vrndacc = (int32_t) lrintf(vfpacc);
           int32_t vout = vrndacc + voutput_zero_point;
 
-        *output = (int8_t) vout;
+        *output = (${XINT8_T}) vout;
       $else:
         do {
           int32_t vacc = vinit_bias;
           $for M in range(2):
-            const int32_t vi${M} = *i${M}++;
+            const int32_t vi${M} = (int32_t) *i${M}++;
 
           $for M in range(2, ROW_TILE):
             vacc += vi${M-2};
-            const int32_t vi${M} = *i${M}++;
+            const int32_t vi${M} = (int32_t) *i${M}++;
 
           $for M in range(ROW_TILE - 2, ROW_TILE):
             vacc += vi${M};
@@ -225,7 +227,7 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__scalar_${VARIANT.lower()
             const int32_t vrndacc = (int32_t) lrintf(vfpacc);
             int32_t vout = vrndacc + voutput_zero_point;
 
-          *output++ = (int8_t) vout;
+          *output++ = (${XINT8_T}) vout;
         } while (--channels != 0);
     }
 }

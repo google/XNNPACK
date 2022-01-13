@@ -398,8 +398,8 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up1x25-minmax-fp32-scalar-fmagic.c
   src/qu8-f32-vcvt/gen/vcvt-scalar-x4.c
-  src/qu8-gavgpool/7p7x-minmax-scalar-c1.c
-  src/qu8-gavgpool/7x-minmax-scalar-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
   src/qu8-gemm/gen/2x2-minmax-fp32-scalar-fmagic.c
   src/qu8-igemm/gen/1x2-minmax-fp32-scalar-fmagic.c
@@ -540,8 +540,8 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up2x9-minmax-fp32-scalar-lrintf.c
   src/qu8-dwconv/gen/up2x25-minmax-fp32-scalar-lrintf.c
   src/qu8-f32-vcvt/gen/vcvt-scalar-x4.c
-  src/qu8-gavgpool/7p7x-minmax-scalar-c1.c
-  src/qu8-gavgpool/7x-minmax-scalar-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-gemm/gen/1x4-minmax-fp32-scalar-lrintf.c
   src/qu8-gemm/gen/3x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/1x4-minmax-fp32-scalar-lrintf.c
@@ -1185,8 +1185,24 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-scalar-x2.c
   src/qu8-f32-vcvt/gen/vcvt-scalar-x3.c
   src/qu8-f32-vcvt/gen/vcvt-scalar-x4.c
-  src/qu8-gavgpool/7p7x-minmax-scalar-c1.c
-  src/qu8-gavgpool/7x-minmax-scalar-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c2.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-fmagic-c4.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c2.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-imagic-c4.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c1.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c2.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-scalar-lrintf-c4.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c1.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c2.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-fmagic-c4.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c2.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-imagic-c4.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c1.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c2.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-scalar-lrintf-c4.c
   src/qu8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
   src/qu8-gemm/gen/1x2-minmax-fp32-scalar-imagic.c
   src/qu8-gemm/gen/1x2-minmax-fp32-scalar-lrintf.c
@@ -1393,8 +1409,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qs8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
-  src/qu8-avgpool/9p8x-minmax-neon-c8.c
-  src/qu8-avgpool/9x-minmax-neon-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
   src/qu8-dwconv/gen/up8x25-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/up16x9-minmax-rndnu-neon-mul8.c
   src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
@@ -2364,8 +2380,14 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-neon-x16.c
   src/qu8-f32-vcvt/gen/vcvt-neon-x24.c
   src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
-  src/qu8-gavgpool/7p7x-minmax-neon-c8.c
-  src/qu8-gavgpool/7x-minmax-neon-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c32.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c16.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c24.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c32.c
   src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
@@ -3052,6 +3074,14 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up24x25-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/up32x9-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/up32x25-minmax-fp32-neonv8-mul16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c24.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c32.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c16.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c24.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c32.c
   src/qu8-gemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
   src/qu8-gemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
   src/qu8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
@@ -3545,8 +3575,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-sse2-mul16.c
   src/qu8-f32-vcvt/gen/vcvt-sse2-x32.c
-  src/qu8-gavgpool/7p7x-minmax-sse2-c8.c
-  src/qu8-gavgpool/7x-minmax-sse2-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse2-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse2-c8.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse2-ld64.c
   src/qu8-gemm/gen/3x4c8-minmax-fp32-sse2-ld64.c
   src/qu8-igemm/gen/1x4c8-minmax-fp32-sse2-ld64.c
@@ -3794,8 +3824,12 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-sse2-x16.c
   src/qu8-f32-vcvt/gen/vcvt-sse2-x24.c
   src/qu8-f32-vcvt/gen/vcvt-sse2-x32.c
-  src/qu8-gavgpool/7p7x-minmax-sse2-c8.c
-  src/qu8-gavgpool/7x-minmax-sse2-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse2-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse2-c16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse2-c24.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse2-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse2-c16.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse2-c24.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse2-ld64.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse2-ld128.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse2-ld64.c
@@ -3926,6 +3960,8 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up8x9-minmax-fp32-sse41-mul16.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-sse41-mul16.c
   src/qu8-f32-vcvt/gen/vcvt-sse41-x16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse41-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse41-c8.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/3x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
@@ -4141,6 +4177,12 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/vcvt-sse41-x16.c
   src/qu8-f32-vcvt/gen/vcvt-sse41-x24.c
   src/qu8-f32-vcvt/gen/vcvt-sse41-x32.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse41-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse41-c16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-fp32-sse41-c24.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse41-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse41-c16.c
+  src/qu8-gavgpool/gen/7x-minmax-fp32-sse41-c24.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/1x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/1x4c8-minmax-fp32-sse41-ld64.c
@@ -7776,14 +7818,14 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-f32-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-f32-vcvt-test qu8-f32-vcvt-test)
 
-  ADD_EXECUTABLE(qu8-gavgpool-minmax-test test/qu8-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-gavgpool-minmax-test PROPERTIES
+  ADD_EXECUTABLE(qu8-gavgpool-minmax-fp32-test test/qu8-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-gavgpool-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  ADD_TEST(qu8-gavgpool-test qu8-gavgpool-minmax-test)
+  TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-gavgpool-minmax-fp32-test qu8-gavgpool-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-gemm-minmax-fp32-test test/qu8-gemm-minmax-fp32.cc test/qu8-gemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qu8-gemm-minmax-fp32-test PROPERTIES

@@ -41,19 +41,19 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_lrintf_c1(
   size_t c = channels;
   do {
     int32_t vacc = vinit_bias;
-    const int32_t vi0 = *i0++;
-    const int32_t vi1 = *i1++;
+    const int32_t vi0 = (int32_t) *i0++;
+    const int32_t vi1 = (int32_t) *i1++;
 
     vacc += vi0;
-    const int32_t vi2 = *i2++;
+    const int32_t vi2 = (int32_t) *i2++;
     vacc += vi1;
-    const int32_t vi3 = *i3++;
+    const int32_t vi3 = (int32_t) *i3++;
     vacc += vi2;
-    const int32_t vi4 = *i4++;
+    const int32_t vi4 = (int32_t) *i4++;
     vacc += vi3;
-    const int32_t vi5 = *i5++;
+    const int32_t vi5 = (int32_t) *i5++;
     vacc += vi4;
-    const int32_t vi6 = *i6++;
+    const int32_t vi6 = (int32_t) *i6++;
 
     vacc += vi5;
     vacc += vi6;
@@ -74,19 +74,19 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_lrintf_c1(
     size_t c = channels;
     do {
       int32_t vacc = *b;
-      const int32_t vi0 = *i0++;
-      const int32_t vi1 = *i1++;
+      const int32_t vi0 = (int32_t) *i0++;
+      const int32_t vi1 = (int32_t) *i1++;
 
       vacc += vi0;
-      const int32_t vi2 = *i2++;
+      const int32_t vi2 = (int32_t) *i2++;
       vacc += vi1;
-      const int32_t vi3 = *i3++;
+      const int32_t vi3 = (int32_t) *i3++;
       vacc += vi2;
-      const int32_t vi4 = *i4++;
+      const int32_t vi4 = (int32_t) *i4++;
       vacc += vi3;
-      const int32_t vi5 = *i5++;
+      const int32_t vi5 = (int32_t) *i5++;
       vacc += vi4;
-      const int32_t vi6 = *i6++;
+      const int32_t vi6 = (int32_t) *i6++;
 
       vacc += vi5;
       vacc += vi6;
@@ -127,19 +127,19 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_lrintf_c1(
   const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
   do {
     int32_t vacc = *buffer++;
-    const int32_t vi0 = *i0++;
-    const int32_t vi1 = *i1++;
+    const int32_t vi0 = (int32_t) *i0++;
+    const int32_t vi1 = (int32_t) *i1++;
 
     vacc += vi0;
-    const int32_t vi2 = *i2++;
+    const int32_t vi2 = (int32_t) *i2++;
     vacc += vi1;
-    const int32_t vi3 = *i3++;
+    const int32_t vi3 = (int32_t) *i3++;
     vacc += vi2;
-    const int32_t vi4 = *i4++;
+    const int32_t vi4 = (int32_t) *i4++;
     vacc += vi3;
-    const int32_t vi5 = *i5++;
+    const int32_t vi5 = (int32_t) *i5++;
     vacc += vi4;
-    const int32_t vi6 = *i6++;
+    const int32_t vi6 = (int32_t) *i6++;
 
     vacc += vi5;
     vacc += vi6;

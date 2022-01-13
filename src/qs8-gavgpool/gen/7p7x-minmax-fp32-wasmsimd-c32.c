@@ -235,14 +235,23 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c32(
       vaccGHIJKLMN = wasm_i16x8_add(vaccGHIJKLMN, vxi6xGHIJKLMN);
       vaccOPQRSTUV = wasm_i16x8_add(vaccOPQRSTUV, vxi6xOPQRSTUV);
 
-      const v128_t vacc0123 = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc01234567), wasm_v128_load(b + 0));
-      const v128_t vacc4567 = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc01234567), wasm_v128_load(b + 4));
-      const v128_t vacc89AB = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc89ABCDEF), wasm_v128_load(b + 8));
-      const v128_t vaccCDEF = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc89ABCDEF), wasm_v128_load(b + 12));
-      const v128_t vaccGHIJ = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vaccGHIJKLMN), wasm_v128_load(b + 16));
-      const v128_t vaccKLMN = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vaccGHIJKLMN), wasm_v128_load(b + 20));
-      const v128_t vaccOPQR = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vaccOPQRSTUV), wasm_v128_load(b + 24));
-      const v128_t vaccSTUV = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vaccOPQRSTUV), wasm_v128_load(b + 28));
+      v128_t vacc0123 = wasm_v128_load(b);
+      v128_t vacc4567 = wasm_v128_load(b + 4);
+      v128_t vacc89AB = wasm_v128_load(b + 8);
+      v128_t vaccCDEF = wasm_v128_load(b + 12);
+      v128_t vaccGHIJ = wasm_v128_load(b + 16);
+      v128_t vaccKLMN = wasm_v128_load(b + 20);
+      v128_t vaccOPQR = wasm_v128_load(b + 24);
+      v128_t vaccSTUV = wasm_v128_load(b + 28);
+
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vacc01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vacc01234567));
+      vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vacc89ABCDEF));
+      vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vacc89ABCDEF));
+      vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vaccGHIJKLMN));
+      vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vaccGHIJKLMN));
+      vaccOPQR = wasm_i32x4_add(vaccOPQR, wasm_i32x4_extend_low_i16x8(vaccOPQRSTUV));
+      vaccSTUV = wasm_i32x4_add(vaccSTUV, wasm_i32x4_extend_high_i16x8(vaccOPQRSTUV));
 
       wasm_v128_store(b, vacc0123);
       wasm_v128_store(b + 4, vacc4567);
@@ -280,8 +289,11 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c32(
 
         vacc01234567 = wasm_i16x8_add(vacc01234567, vxi6x01234567);
 
-        const v128_t vacc0123 = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc01234567), wasm_v128_load(b));
-        const v128_t vacc4567 = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc01234567), wasm_v128_load(b + 4));
+        v128_t vacc0123 = wasm_v128_load(b);
+        v128_t vacc4567 = wasm_v128_load(b + 4);
+
+        vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vacc01234567));
+        vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vacc01234567));
 
         wasm_v128_store(b, vacc0123);
         wasm_v128_store(b + 4, vacc4567);
@@ -387,15 +399,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c32(
     vaccGHIJKLMN = wasm_i16x8_add(vaccGHIJKLMN, vxi6xGHIJKLMN);
     vaccOPQRSTUV = wasm_i16x8_add(vaccOPQRSTUV, vxi6xOPQRSTUV);
 
-    v128_t vacc0123 = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc01234567), wasm_v128_load(buffer + 0));
-    v128_t vacc4567 = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc01234567), wasm_v128_load(buffer + 4));
-    v128_t vacc89AB = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc89ABCDEF), wasm_v128_load(buffer + 8));
-    v128_t vaccCDEF = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc89ABCDEF), wasm_v128_load(buffer + 12));
-    v128_t vaccGHIJ = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vaccGHIJKLMN), wasm_v128_load(buffer + 16));
-    v128_t vaccKLMN = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vaccGHIJKLMN), wasm_v128_load(buffer + 20));
-    v128_t vaccOPQR = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vaccOPQRSTUV), wasm_v128_load(buffer + 24));
-    v128_t vaccSTUV = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vaccOPQRSTUV), wasm_v128_load(buffer + 28));
+    v128_t vacc0123 = wasm_v128_load(buffer);
+    v128_t vacc4567 = wasm_v128_load(buffer + 4);
+    v128_t vacc89AB = wasm_v128_load(buffer + 8);
+    v128_t vaccCDEF = wasm_v128_load(buffer + 12);
+    v128_t vaccGHIJ = wasm_v128_load(buffer + 16);
+    v128_t vaccKLMN = wasm_v128_load(buffer + 20);
+    v128_t vaccOPQR = wasm_v128_load(buffer + 24);
+    v128_t vaccSTUV = wasm_v128_load(buffer + 28);
     buffer += 32;
+
+    vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vacc01234567));
+    vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vacc01234567));
+    vacc89AB = wasm_i32x4_add(vacc89AB, wasm_i32x4_extend_low_i16x8(vacc89ABCDEF));
+    vaccCDEF = wasm_i32x4_add(vaccCDEF, wasm_i32x4_extend_high_i16x8(vacc89ABCDEF));
+    vaccGHIJ = wasm_i32x4_add(vaccGHIJ, wasm_i32x4_extend_low_i16x8(vaccGHIJKLMN));
+    vaccKLMN = wasm_i32x4_add(vaccKLMN, wasm_i32x4_extend_high_i16x8(vaccGHIJKLMN));
+    vaccOPQR = wasm_i32x4_add(vaccOPQR, wasm_i32x4_extend_low_i16x8(vaccOPQRSTUV));
+    vaccSTUV = wasm_i32x4_add(vaccSTUV, wasm_i32x4_extend_high_i16x8(vaccOPQRSTUV));
 
     vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
     vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);
@@ -483,9 +504,12 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c32(
 
       vacc01234567 = wasm_i16x8_add(vacc01234567, vxi6x01234567);
 
-      v128_t vacc0123 = wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(vacc01234567), wasm_v128_load(buffer));
-      v128_t vacc4567 = wasm_i32x4_add(wasm_i32x4_extend_high_i16x8(vacc01234567), wasm_v128_load(buffer + 4));
+      v128_t vacc0123 = wasm_v128_load(buffer);
+      v128_t vacc4567 = wasm_v128_load(buffer + 4);
       buffer += 8;
+
+      vacc0123 = wasm_i32x4_add(vacc0123, wasm_i32x4_extend_low_i16x8(vacc01234567));
+      vacc4567 = wasm_i32x4_add(vacc4567, wasm_i32x4_extend_high_i16x8(vacc01234567));
 
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
       vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);

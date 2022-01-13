@@ -174,7 +174,7 @@ class GAvgPoolMicrokernelTester {
           acc += int32_t(input[n * input_stride() + c]) - int32_t(input_zero_point());
         }
         accumulators[c] = acc;
-        output_ref[c] = xnn_qu8_requantize_rndna(
+        output_ref[c] = xnn_qu8_requantize_fp32(
           acc, input_scale() / (output_scale() * float(rows())), output_zero_point(), qmin(), qmax());
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
@@ -237,7 +237,7 @@ class GAvgPoolMicrokernelTester {
         }
 
         accumulators[c] = acc;
-        output_ref[c] = xnn_qu8_requantize_rndna(
+        output_ref[c] = xnn_qu8_requantize_fp32(
           acc, input_scale() / (output_scale() * float(rows())), output_zero_point(), qmin(), qmax());
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
