@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gavgpool/unipass-sse.c.in
+//   Template: src/qs8-gavgpool/unipass-sse2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -59,35 +59,41 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8(
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
   for (; channels >= 8; channels -= 8) {
+
     const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
     i0 += 8;
+
+    const __m128i vxi0x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi0x01234567, vi0x01234567), 8);
     const __m128i vi1x01234567 = _mm_loadl_epi64((const __m128i*) i1);
     i1 += 8;
+
+    const __m128i vxi1x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi1x01234567, vi1x01234567), 8);
     const __m128i vi2x01234567 = _mm_loadl_epi64((const __m128i*) i2);
     i2 += 8;
+
+    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
+    const __m128i vxi2x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi2x01234567, vi2x01234567), 8);
     const __m128i vi3x01234567 = _mm_loadl_epi64((const __m128i*) i3);
     i3 += 8;
+
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+    const __m128i vxi3x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi3x01234567, vi3x01234567), 8);
     const __m128i vi4x01234567 = _mm_loadl_epi64((const __m128i*) i4);
     i4 += 8;
+
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+    const __m128i vxi4x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi4x01234567, vi4x01234567), 8);
     const __m128i vi5x01234567 = _mm_loadl_epi64((const __m128i*) i5);
     i5 += 8;
+
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
+    const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
     const __m128i vi6x01234567 = _mm_loadl_epi64((const __m128i*) i6);
     i6 += 8;
 
-    const __m128i vxi0x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi0x01234567, vi0x01234567), 8);
-    const __m128i vxi1x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi1x01234567, vi1x01234567), 8);
-    const __m128i vxi2x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi2x01234567, vi2x01234567), 8);
-    const __m128i vxi3x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi3x01234567, vi3x01234567), 8);
-    const __m128i vxi4x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi4x01234567, vi4x01234567), 8);
-    const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
     const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
     vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
     const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);
@@ -112,41 +118,47 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8(
 
     __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-
     _mm_storel_epi64((__m128i*) output, vout0123456701234567);
     output += 8;
   }
   if XNN_UNLIKELY(channels != 0) {
     {
+
       const __m128i vi0x01234567 = _mm_loadl_epi64((const __m128i*) i0);
       i0 += 8;
+
       const __m128i vi1x01234567 = _mm_loadl_epi64((const __m128i*) i1);
       i1 += 8;
+
+      const __m128i vxi0x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi0x01234567, vi0x01234567), 8);
       const __m128i vi2x01234567 = _mm_loadl_epi64((const __m128i*) i2);
       i2 += 8;
+
+      const __m128i vxi1x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi1x01234567, vi1x01234567), 8);
       const __m128i vi3x01234567 = _mm_loadl_epi64((const __m128i*) i3);
       i3 += 8;
+
+      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
+      const __m128i vxi2x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi2x01234567, vi2x01234567), 8);
       const __m128i vi4x01234567 = _mm_loadl_epi64((const __m128i*) i4);
       i4 += 8;
+
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
+      const __m128i vxi3x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi3x01234567, vi3x01234567), 8);
       const __m128i vi5x01234567 = _mm_loadl_epi64((const __m128i*) i5);
       i5 += 8;
+
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
+      const __m128i vxi4x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi4x01234567, vi4x01234567), 8);
       const __m128i vi6x01234567 = _mm_loadl_epi64((const __m128i*) i6);
       i6 += 8;
 
-      const __m128i vxi0x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi0x01234567, vi0x01234567), 8);
-      const __m128i vxi1x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi1x01234567, vi1x01234567), 8);
-      const __m128i vxi2x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi2x01234567, vi2x01234567), 8);
-      const __m128i vxi3x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi3x01234567, vi3x01234567), 8);
-      const __m128i vxi4x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi4x01234567, vi4x01234567), 8);
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
       const __m128i vxi5x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi5x01234567, vi5x01234567), 8);
+
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
       const __m128i vxi6x01234567 = _mm_srai_epi16(_mm_unpacklo_epi8(vi6x01234567, vi6x01234567), 8);
 
-      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
       vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
       const __m128i vsgnacc01234567 = _mm_cmpgt_epi16(_mm_setzero_si128(), vacc01234567);

@@ -47,18 +47,29 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE
   const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
   const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
   for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
-    $for M in range(ROW_TILE):
+    $for M in range(2):
       const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
       $for C in range(8, CHANNEL_TILE, 8):
         const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load8x8(i${M} + ${C});
       i${M} += ${CHANNEL_TILE};
 
-    $for C in range(0, CHANNEL_TILE, 8):
+    v128_t vacc${ABC[0:8]} = wasm_i16x8_add(vxi0x${ABC[0:8]}, vxi1x${ABC[0:8]});
+    const v128_t vxi2x${ABC[0:8]} = wasm_i16x8_load8x8(i2);
+    $for C in range(8, CHANNEL_TILE, 8):
       v128_t vacc${ABC[C:C+8]} = wasm_i16x8_add(vxi0x${ABC[C:C+8]}, vxi1x${ABC[C:C+8]});
+      const v128_t vxi2x${ABC[C:C+8]} = wasm_i16x8_load8x8(i2 + ${C});
+    i2 += ${CHANNEL_TILE};
 
-    $for M in range(2, ROW_TILE):
-      $for C in range(0, CHANNEL_TILE, 8):
-        vacc${ABC[C:C+8]} = wasm_i16x8_add(vacc${ABC[C:C+8]}, vxi${M}x${ABC[C:C+8]});
+    $for M in range(3, ROW_TILE):
+      vacc${ABC[0:8]} = wasm_i16x8_add(vacc${ABC[0:8]}, vxi${M-1}x${ABC[0:8]});
+      const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
+      $for C in range(8, CHANNEL_TILE, 8):
+        vacc${ABC[C:C+8]} = wasm_i16x8_add(vacc${ABC[C:C+8]}, vxi${M-1}x${ABC[C:C+8]});
+        const v128_t vxi${M}x${ABC[C:C+8]} = wasm_i16x8_load8x8(i${M} + ${C});
+      i${M} += ${CHANNEL_TILE};
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = wasm_i16x8_add(vacc${ABC[C:C+8]}, vxi${ROW_TILE-1}x${ABC[C:C+8]});
 
     $for C in range(0, CHANNEL_TILE, 8):
       v128_t vacc${ABC[C:C+4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc${ABC[C:C+8]}));
@@ -107,14 +118,20 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__wasmsimd_c${CHANNEL_TILE
   }
   if XNN_UNLIKELY(channels != 0) {
     ${"do " if CHANNEL_TILE > 8 else ""}{
-      $for M in range(ROW_TILE):
+      $for M in range(2):
         const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
         i${M} += 8;
 
       v128_t vacc${ABC[0:8]} = wasm_i16x8_add(vxi0x${ABC[0:8]}, vxi1x${ABC[0:8]});
+      const v128_t vxi2x${ABC[0:8]} = wasm_i16x8_load8x8(i2);
+      i2 += 8;
 
-      $for M in range(2, ROW_TILE):
-        vacc${ABC[0:8]} = wasm_i16x8_add(vacc${ABC[0:8]}, vxi${M}x${ABC[0:8]});
+      $for M in range(3, ROW_TILE):
+        vacc${ABC[0:8]} = wasm_i16x8_add(vacc${ABC[0:8]}, vxi${M-1}x${ABC[0:8]});
+        const v128_t vxi${M}x${ABC[0:8]} = wasm_i16x8_load8x8(i${M});
+        i${M} += 8;
+
+      vacc${ABC[0:8]} = wasm_i16x8_add(vacc${ABC[0:8]}, vxi${ROW_TILE-1}x${ABC[0:8]});
 
       v128_t vacc${ABC[0:4]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc${ABC[0:8]}));
       v128_t vacc${ABC[4:8]} = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_high_i16x8(vacc${ABC[0:8]}));

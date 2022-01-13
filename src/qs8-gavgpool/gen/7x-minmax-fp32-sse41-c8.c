@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gavgpool/unipass-sse.c.in
+//   Template: src/qs8-gavgpool/unipass-sse4.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -63,24 +63,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8(
     i0 += 8;
     const __m128i vxi1x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i1));
     i1 += 8;
+
+    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
     const __m128i vxi2x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i2));
     i2 += 8;
+
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
     const __m128i vxi3x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i3));
     i3 += 8;
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
     const __m128i vxi4x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i4));
     i4 += 8;
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
     const __m128i vxi5x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i5));
     i5 += 8;
+    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
     const __m128i vxi6x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i6));
     i6 += 8;
 
-
-    __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
-    vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
     vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
     __m128i vacc0123 = _mm_add_epi32(vinit_bias, _mm_cvtepi16_epi32(vacc01234567));
@@ -100,7 +100,6 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8(
 
     __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
-
     __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
     vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
@@ -114,24 +113,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8(
       i0 += 8;
       const __m128i vxi1x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i1));
       i1 += 8;
+
+      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
       const __m128i vxi2x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i2));
       i2 += 8;
+
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
       const __m128i vxi3x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i3));
       i3 += 8;
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
       const __m128i vxi4x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i4));
       i4 += 8;
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
       const __m128i vxi5x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i5));
       i5 += 8;
+      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
       const __m128i vxi6x01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) i6));
       i6 += 8;
 
-
-      __m128i vacc01234567 = _mm_add_epi16(vxi0x01234567, vxi1x01234567);
-
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi2x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi3x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi4x01234567);
-      vacc01234567 = _mm_add_epi16(vacc01234567, vxi5x01234567);
       vacc01234567 = _mm_add_epi16(vacc01234567, vxi6x01234567);
 
       __m128i vacc0123 = _mm_add_epi32(_mm_cvtepi16_epi32(vacc01234567), vinit_bias);

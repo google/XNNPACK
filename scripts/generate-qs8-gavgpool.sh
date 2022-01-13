@@ -62,21 +62,21 @@ tools/xngen src/qs8-gavgpool/multipass-wasmsimd.c.in -D ROW_TILE=7 -D ROW_SUBTIL
 tools/xngen src/qs8-gavgpool/multipass-wasmsimd.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-wasmsimd-c32.c &
 
 ################################### x86 SSE ###################################
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c8.c &
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c16.c &
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c24.c &
+tools/xngen src/qs8-gavgpool/unipass-sse2.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c8.c &
+tools/xngen src/qs8-gavgpool/unipass-sse2.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c16.c &
+tools/xngen src/qs8-gavgpool/unipass-sse2.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse2-c24.c &
 
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c8.c &
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c16.c &
-tools/xngen src/qs8-gavgpool/unipass-sse.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c24.c &
+tools/xngen src/qs8-gavgpool/unipass-sse4.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c8.c &
+tools/xngen src/qs8-gavgpool/unipass-sse4.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c16.c &
+tools/xngen src/qs8-gavgpool/unipass-sse4.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7x-minmax-fp32-sse41-c24.c &
 
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c8.c &
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c16.c &
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D SSE=2 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c24.c &
+tools/xngen src/qs8-gavgpool/multipass-sse2.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c8.c &
+tools/xngen src/qs8-gavgpool/multipass-sse2.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c16.c &
+tools/xngen src/qs8-gavgpool/multipass-sse2.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse2-c24.c &
 
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c8.c &
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c16.c &
-tools/xngen src/qs8-gavgpool/multipass-sse.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D SSE=4 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c24.c &
+tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c8.c &
+tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c16.c &
+tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-sse41-c24.c &
 
 ################################## Unit tests #################################
 tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-fp32.yaml --output test/qs8-gavgpool-minmax-fp32.cc &

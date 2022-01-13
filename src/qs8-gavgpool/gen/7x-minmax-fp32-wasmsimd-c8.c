@@ -64,23 +64,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__wasmsimd_c8(
     i0 += 8;
     const v128_t vxi1x01234567 = wasm_i16x8_load8x8(i1);
     i1 += 8;
+
+    v128_t vacc01234567 = wasm_i16x8_add(vxi0x01234567, vxi1x01234567);
     const v128_t vxi2x01234567 = wasm_i16x8_load8x8(i2);
     i2 += 8;
+
+    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi2x01234567);
     const v128_t vxi3x01234567 = wasm_i16x8_load8x8(i3);
     i3 += 8;
+    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi3x01234567);
     const v128_t vxi4x01234567 = wasm_i16x8_load8x8(i4);
     i4 += 8;
+    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi4x01234567);
     const v128_t vxi5x01234567 = wasm_i16x8_load8x8(i5);
     i5 += 8;
+    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi5x01234567);
     const v128_t vxi6x01234567 = wasm_i16x8_load8x8(i6);
     i6 += 8;
 
-    v128_t vacc01234567 = wasm_i16x8_add(vxi0x01234567, vxi1x01234567);
-
-    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi2x01234567);
-    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi3x01234567);
-    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi4x01234567);
-    vacc01234567 = wasm_i16x8_add(vacc01234567, vxi5x01234567);
     vacc01234567 = wasm_i16x8_add(vacc01234567, vxi6x01234567);
 
     v128_t vacc0123 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc01234567));
@@ -116,23 +117,24 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__wasmsimd_c8(
       i0 += 8;
       const v128_t vxi1x01234567 = wasm_i16x8_load8x8(i1);
       i1 += 8;
+
+      v128_t vacc01234567 = wasm_i16x8_add(vxi0x01234567, vxi1x01234567);
       const v128_t vxi2x01234567 = wasm_i16x8_load8x8(i2);
       i2 += 8;
+
+      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi2x01234567);
       const v128_t vxi3x01234567 = wasm_i16x8_load8x8(i3);
       i3 += 8;
+      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi3x01234567);
       const v128_t vxi4x01234567 = wasm_i16x8_load8x8(i4);
       i4 += 8;
+      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi4x01234567);
       const v128_t vxi5x01234567 = wasm_i16x8_load8x8(i5);
       i5 += 8;
+      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi5x01234567);
       const v128_t vxi6x01234567 = wasm_i16x8_load8x8(i6);
       i6 += 8;
 
-      v128_t vacc01234567 = wasm_i16x8_add(vxi0x01234567, vxi1x01234567);
-
-      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi2x01234567);
-      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi3x01234567);
-      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi4x01234567);
-      vacc01234567 = wasm_i16x8_add(vacc01234567, vxi5x01234567);
       vacc01234567 = wasm_i16x8_add(vacc01234567, vxi6x01234567);
 
       v128_t vacc0123 = wasm_i32x4_add(vinit_bias, wasm_i32x4_extend_low_i16x8(vacc01234567));
