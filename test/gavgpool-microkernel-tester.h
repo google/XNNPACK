@@ -143,7 +143,11 @@ class GAvgPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qu8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qu8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax,
+      xnn_init_qu8_avgpool_minmax_params_fn init_params,
+      xnn_qu8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -174,7 +178,7 @@ class GAvgPoolMicrokernelTester {
           acc += int32_t(input[n * input_stride() + c]) - int32_t(input_zero_point());
         }
         accumulators[c] = acc;
-        output_ref[c] = xnn_qu8_requantize_fp32(
+        output_ref[c] = requantize(
           acc, input_scale() / (output_scale() * float(rows())), output_zero_point(), qmin(), qmax());
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
@@ -204,7 +208,11 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qu8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax,
+      xnn_init_qu8_avgpool_minmax_params_fn init_params,
+      xnn_qu8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -237,7 +245,7 @@ class GAvgPoolMicrokernelTester {
         }
 
         accumulators[c] = acc;
-        output_ref[c] = xnn_qu8_requantize_fp32(
+        output_ref[c] = requantize(
           acc, input_scale() / (output_scale() * float(rows())), output_zero_point(), qmin(), qmax());
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point());
         output_fp[c] = std::min<float>(output_fp[c], float(qmax()));
@@ -268,7 +276,11 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_qs8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qs8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax,
+      xnn_init_qs8_avgpool_minmax_params_fn init_params,
+      xnn_qs8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -300,7 +312,7 @@ class GAvgPoolMicrokernelTester {
           acc += int32_t(input[n * input_stride() + c]) - int32_t(input_zero_point() - 0x80);
         }
         accumulators[c] = acc;
-        output_ref[c] = xnn_qs8_requantize_fp32(
+        output_ref[c] = requantize(
           acc, input_scale() / (output_scale() * float(rows())), int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point() - 0x80);
         output_fp[c] = std::min<float>(output_fp[c], float(qmax() - 0x80));
@@ -330,7 +342,11 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_qs8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qs8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax,
+      xnn_init_qs8_avgpool_minmax_params_fn init_params,
+      xnn_qs8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -363,7 +379,7 @@ class GAvgPoolMicrokernelTester {
           acc += int32_t(input[n * input_stride() + c]) - int32_t(input_zero_point() - 0x80);
         }
         accumulators[c] = acc;
-        output_ref[c] = xnn_qs8_requantize_fp32(
+        output_ref[c] = requantize(
           acc, input_scale() / (output_scale() * float(rows())), int8_t(output_zero_point() - 0x80), int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
         output_fp[c] = float(acc) * (input_scale() / (output_scale() * float(rows()))) + float(output_zero_point() - 0x80);
         output_fp[c] = std::min<float>(output_fp[c], float(qmax() - 0x80));

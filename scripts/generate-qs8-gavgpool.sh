@@ -64,6 +64,11 @@ tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c24.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gavgpool/gen/7x-minmax-fp32-neonv8-c32.c &
 
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c &
+
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c16.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c24.c &
@@ -73,6 +78,11 @@ tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c16.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c24.c &
 tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7x-minmax-fp32-neonv8-c32.c &
+
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c &
+tools/xngen src/qs8-gavgpool/unipass-neon.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c &
 
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c &
@@ -84,6 +94,11 @@ tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c24.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c32.c &
 
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c &
+
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c &
@@ -93,6 +108,11 @@ tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c16.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c24.c &
 tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gavgpool/gen/7p7x-minmax-fp32-neonv8-c32.c &
+
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c &
+tools/xngen src/qs8-gavgpool/multipass-neon.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c &
 
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-gavgpool/unipass-wasmsimd.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gavgpool/gen/7x-minmax-fp32-wasmsimd-c8.c &
@@ -150,6 +170,8 @@ tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 
 ################################## Unit tests #################################
 tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-fp32.yaml --output test/qs8-gavgpool-minmax-fp32.cc &
+tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-rndnu.yaml --output test/qs8-gavgpool-minmax-rndnu.cc &
 tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-fp32.yaml --output test/qu8-gavgpool-minmax-fp32.cc &
+tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-rndnu.yaml --output test/qu8-gavgpool-minmax-rndnu.cc &
 
 wait

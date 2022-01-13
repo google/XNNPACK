@@ -213,7 +213,7 @@ void xnn_init_qu8_conv_minmax_rndnu_neon_params(
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
   // Shift is in [-8, 31] range.
-  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
   assert(shift >= -8);
   assert(shift < 32);
 
@@ -461,7 +461,7 @@ void xnn_init_qs8_conv_minmax_rndnu_neon_params(
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
   // Shift is in [-8, 31] range.
-  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
   assert(shift >= -8);
   assert(shift < 32);
 
@@ -908,6 +908,74 @@ void xnn_update_qs8_avgpool_minmax_fp32_neonv8_params(
   params->fp32_neonv8.init_bias = init_bias;
   params->fp32_neonv8.scale = scale;
 }
+
+void xnn_init_qs8_avgpool_minmax_rndnu_neon_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [-8, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
+  assert(shift >= -8);
+  assert(shift < 32);
+
+  // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
+  const int32_t post_shift = math_max_s32(shift, 1);
+  const int32_t pre_shift = shift - post_shift;
+
+  params->rndnu_neon.init_bias = init_bias;
+  params->rndnu_neon.left_pre_shift = -pre_shift;
+  params->rndnu_neon.multiplier = multiplier;
+  params->rndnu_neon.left_post_shift = -post_shift;
+  params->rndnu_neon.output_zero_point = (int16_t) output_zero_point;
+  params->rndnu_neon.output_min = output_min;
+  params->rndnu_neon.output_max = output_max;
+}
+
+void xnn_update_qs8_avgpool_minmax_rndnu_neon_params(
+  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [-8, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
+  assert(shift >= -8);
+  assert(shift < 32);
+
+  // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
+  const int32_t post_shift = math_max_s32(shift, 1);
+  const int32_t pre_shift = shift - post_shift;
+
+  params->rndnu_neon.init_bias = init_bias;
+  params->rndnu_neon.left_pre_shift = -pre_shift;
+  params->rndnu_neon.multiplier = multiplier;
+  params->rndnu_neon.left_post_shift = -post_shift;
+}
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -1186,6 +1254,74 @@ void xnn_update_qu8_avgpool_minmax_fp32_neonv8_params(
 
   params->fp32_neonv8.init_bias = init_bias;
   params->fp32_neonv8.scale = scale;
+}
+
+void xnn_init_qu8_avgpool_minmax_rndnu_neon_params(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [-8, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
+  assert(shift >= -8);
+  assert(shift < 32);
+
+  // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
+  const int32_t post_shift = math_max_s32(shift, 1);
+  const int32_t pre_shift = shift - post_shift;
+
+  params->rndnu_neon.init_bias = init_bias;
+  params->rndnu_neon.left_pre_shift = -pre_shift;
+  params->rndnu_neon.multiplier = multiplier;
+  params->rndnu_neon.left_post_shift = -post_shift;
+  params->rndnu_neon.output_zero_point = (int16_t) output_zero_point;
+  params->rndnu_neon.output_min = output_min;
+  params->rndnu_neon.output_max = output_max;
+}
+
+void xnn_update_qu8_avgpool_minmax_rndnu_neon_params(
+  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t init_bias,
+  float scale)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  // Compute requantization parameters.
+  const uint32_t scale_bits = fp32_to_bits(scale);
+
+  // Multiplier is in [0x40000000, 0x7FFFFF80] range.
+  const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
+  assert(multiplier >= INT32_C(0x40000000));
+  assert(multiplier <= INT32_C(0x7FFFFF80));
+
+  // Shift is in [-8, 31] range.
+  const int32_t shift = 127 + 31 - 32 - (scale_bits >> 23);
+  assert(shift >= -8);
+  assert(shift < 32);
+
+  // Split shift into pre_shift + post_shift, post_shift in [1, 31] range.
+  const int32_t post_shift = math_max_s32(shift, 1);
+  const int32_t pre_shift = shift - post_shift;
+
+  params->rndnu_neon.init_bias = init_bias;
+  params->rndnu_neon.left_pre_shift = -pre_shift;
+  params->rndnu_neon.multiplier = multiplier;
+  params->rndnu_neon.left_post_shift = -post_shift;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

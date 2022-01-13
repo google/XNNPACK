@@ -2619,8 +2619,8 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mla8-ld64.c",
     "src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mla8-ld64.c",
     "src/qs8-f32-vcvt/gen/vcvt-neon-x32.c",
-    "src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c",
-    "src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c8.c",
+    "src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c",
+    "src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c",
     "src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qs8-gemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c",
     "src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c",
@@ -2640,8 +2640,8 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/qu8-dwconv/gen/up8x25-minmax-rndnu-neon-mul8.c",
     "src/qu8-dwconv/gen/up16x9-minmax-rndnu-neon-mul8.c",
     "src/qu8-f32-vcvt/gen/vcvt-neon-x32.c",
-    "src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c",
-    "src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c",
+    "src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c",
+    "src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c",
     "src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/3x8-minmax-rndnu-neon-mlal-lane.c",
@@ -3114,10 +3114,18 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c",
     "src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c",
     "src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c32.c",
+    "src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c",
+    "src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c",
+    "src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c",
+    "src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c",
     "src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c8.c",
     "src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c16.c",
     "src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c24.c",
     "src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c32.c",
+    "src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c",
+    "src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c",
+    "src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c",
+    "src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c",
     "src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane-prfm.c",
     "src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mull-addw-dup.c",
@@ -3617,10 +3625,18 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c",
     "src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c",
     "src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c32.c",
+    "src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c",
+    "src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c",
+    "src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c",
+    "src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c",
     "src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c",
     "src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c16.c",
     "src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c24.c",
     "src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c32.c",
+    "src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c",
+    "src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c",
+    "src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c",
+    "src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c",
     "src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c",
     "src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c",
@@ -11611,6 +11627,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_gavgpool_minmax_rndnu_test",
+    srcs = [
+        "test/qs8-gavgpool-minmax-rndnu.cc",
+        "test/gavgpool-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "qs8_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
@@ -11775,6 +11801,16 @@ xnnpack_unit_test(
     name = "qu8_gavgpool_minmax_fp32_test",
     srcs = [
         "test/qu8-gavgpool-minmax-fp32.cc",
+        "test/gavgpool-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "qu8_gavgpool_minmax_rndnu_test",
+    srcs = [
+        "test/qu8-gavgpool-minmax-rndnu.cc",
         "test/gavgpool-microkernel-tester.h",
         "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,

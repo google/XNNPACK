@@ -1393,8 +1393,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up16x9-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/up16x25-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-f32-vcvt/gen/vcvt-neon-x32.c
-  src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c
-  src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
+  src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c
+  src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c
   src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8c2s4-minmax-rndnu-neon-mlal.c
   src/qs8-gemm/gen/1x16-minmax-rndnu-neon-mlal-lane.c
@@ -1409,8 +1409,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qs8-vmul/gen/minmax-rndnu-neon-ld64-x16.c
   src/qs8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
-  src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c
-  src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c
   src/qu8-dwconv/gen/up8x25-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/up16x9-minmax-rndnu-neon-mul8.c
   src/qu8-f32-vcvt/gen/vcvt-neon-x32.c
@@ -1887,10 +1887,18 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c
   src/qs8-gavgpool/gen/7p7x-minmax-fp32-neon-c32.c
+  src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c
+  src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c
+  src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c
+  src/qs8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c16.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c24.c
   src/qs8-gavgpool/gen/7x-minmax-fp32-neon-c32.c
+  src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c
+  src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c
+  src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c
+  src/qs8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c
   src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane-prfm.c
   src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qs8-gemm/gen/1x8-minmax-rndnu-neon-mull-addw-dup.c
@@ -2390,10 +2398,18 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c16.c
   src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c24.c
   src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c32.c
+  src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c8.c
+  src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c16.c
+  src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c24.c
+  src/qu8-gavgpool/gen/7p7x-minmax-rndnu-neon-c32.c
   src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
   src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c16.c
   src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c24.c
   src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c32.c
+  src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c8.c
+  src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c16.c
+  src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c24.c
+  src/qu8-gavgpool/gen/7x-minmax-rndnu-neon-c32.c
   src/qu8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-gemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-gemm/gen/1x16-minmax-fp32-neon-mlal-lane.c
@@ -7709,6 +7725,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qs8-gavgpool-minmax-fp32-test qs8-gavgpool-minmax-fp32-test)
 
+  ADD_EXECUTABLE(qs8-gavgpool-minmax-rndnu-test test/qs8-gavgpool-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qs8-gavgpool-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qs8-gavgpool-minmax-rndnu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qs8-gavgpool-minmax-rndnu-test qs8-gavgpool-minmax-rndnu-test)
+
   ADD_EXECUTABLE(qs8-gemm-minmax-fp32-test test/qs8-gemm-minmax-fp32.cc test/qs8-gemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
@@ -7834,6 +7859,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-gavgpool-minmax-fp32-test qu8-gavgpool-minmax-fp32-test)
+
+  ADD_EXECUTABLE(qu8-gavgpool-minmax-rndnu-test test/qu8-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-gavgpool-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-rndnu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-gavgpool-minmax-rndnu-test qu8-gavgpool-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qu8-gemm-minmax-fp32-test test/qu8-gemm-minmax-fp32.cc test/qu8-gemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qu8-gemm-minmax-fp32-test PROPERTIES
