@@ -87,7 +87,7 @@ inline static void xnn_release_simd_memory(void* memory_pointer) {
     ((void*) ((((uintptr_t) alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
 #endif
 
-#define XNN_DEFAULT_CODE_BUFFER_SIZE 131072  // 128kb.
+#define XNN_DEFAULT_CODE_BUFFER_SIZE 16384  // 16kb.
 
 #ifdef __cplusplus
 extern "C" {
