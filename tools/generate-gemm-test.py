@@ -534,7 +534,7 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
         .kr(${KR})
         .sr(${SR})
         .m(${MR})
-        .n(${NR})
+        .n(n)
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -560,7 +560,7 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
         .kr(${KR})
         .sr(${SR})
         .m(${MR})
-        .n(${NR})
+        .n(n)
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
         .Test(${", ".join(TEST_ARGS)});
@@ -644,7 +644,7 @@ TEST(${TEST_NAME}, n_div_${NR}) {
         .kr(${KR})
         .sr(${SR})
         .m(${MR})
-        .n(${NR})
+        .n(n)
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -810,7 +810,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .kr(${KR})
           .sr(${SR})
           .m(${MR})
-          .n(${NR})
+          .n(n)
           .k(k)
           .ks(3)
           .Test(${", ".join(TEST_ARGS)});
@@ -837,7 +837,7 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .kr(${KR})
           .sr(${SR})
           .m(${MR})
-          .n(${NR})
+          .n(n)
           .k(k)
           .ks(3)
           .Test(${", ".join(TEST_ARGS)});

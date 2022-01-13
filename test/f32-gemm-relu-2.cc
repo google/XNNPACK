@@ -262,7 +262,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd);
       }
@@ -278,7 +278,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .cn_stride(5)
           .Test(xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd);
@@ -331,7 +331,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x2c4__wasmsimd);
       }
@@ -569,7 +569,7 @@
           .kr(1)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_2x4__wasm);
       }
@@ -585,7 +585,7 @@
           .kr(1)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_f32_gemm_relu_ukernel_2x4__wasm);
@@ -638,7 +638,7 @@
           .kr(1)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_2x4__wasm);
       }
@@ -876,7 +876,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x4__wasm);
       }
@@ -892,7 +892,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_f32_gemm_relu_ukernel_4x4__wasm);
@@ -945,7 +945,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x4__wasm);
       }
@@ -1183,7 +1183,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x2__wasm);
       }
@@ -1199,7 +1199,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .cn_stride(5)
           .Test(xnn_f32_gemm_relu_ukernel_4x2__wasm);
@@ -1252,7 +1252,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_relu_ukernel_4x2__wasm);
       }
@@ -1489,7 +1489,7 @@ TEST(F32_GEMM_RELU_2X4__SCALAR, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_relu_ukernel_2x4__scalar);
     }
@@ -1505,7 +1505,7 @@ TEST(F32_GEMM_RELU_2X4__SCALAR, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_f32_gemm_relu_ukernel_2x4__scalar);
@@ -1558,7 +1558,7 @@ TEST(F32_GEMM_RELU_2X4__SCALAR, n_div_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_relu_ukernel_2x4__scalar);
     }

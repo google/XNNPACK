@@ -262,7 +262,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
@@ -278,7 +278,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
@@ -331,7 +331,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_1x8__wasmsimd_splat);
       }
@@ -665,7 +665,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
@@ -681,7 +681,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
@@ -734,7 +734,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_4x8__wasmsimd_splat);
       }
@@ -1068,7 +1068,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
@@ -1084,7 +1084,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
@@ -1137,7 +1137,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_5x8__wasmsimd_splat);
       }
@@ -1375,7 +1375,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
@@ -1391,7 +1391,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_f32_gemm_ukernel_1x4__wasm);
@@ -1444,7 +1444,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_gemm_ukernel_1x4__wasm);
       }
@@ -1681,7 +1681,7 @@ TEST(F32_GEMM_1X4__SCALAR, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
@@ -1697,7 +1697,7 @@ TEST(F32_GEMM_1X4__SCALAR, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_f32_gemm_ukernel_1x4__scalar);
@@ -1750,7 +1750,7 @@ TEST(F32_GEMM_1X4__SCALAR, n_div_4) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_1x4__scalar);
     }
@@ -1986,7 +1986,7 @@ TEST(F32_GEMM_4X4__SCALAR, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
@@ -2002,7 +2002,7 @@ TEST(F32_GEMM_4X4__SCALAR, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_f32_gemm_ukernel_4x4__scalar);
@@ -2055,7 +2055,7 @@ TEST(F32_GEMM_4X4__SCALAR, n_div_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_4x4__scalar);
     }
@@ -2291,7 +2291,7 @@ TEST(F32_GEMM_4X2__SCALAR, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }
@@ -2307,7 +2307,7 @@ TEST(F32_GEMM_4X2__SCALAR, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_f32_gemm_ukernel_4x2__scalar);
@@ -2360,7 +2360,7 @@ TEST(F32_GEMM_4X2__SCALAR, n_div_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_f32_gemm_ukernel_4x2__scalar);
     }

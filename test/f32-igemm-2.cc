@@ -204,7 +204,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_1x8__wasmsimd_splat);
       }
@@ -220,7 +220,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_igemm_ukernel_1x8__wasmsimd_splat);
@@ -256,7 +256,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_1x8__wasmsimd_splat);
       }
@@ -343,7 +343,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_1x8__wasmsimd_splat);
@@ -360,7 +360,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_1x8__wasmsimd_splat);
@@ -619,7 +619,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_4x8__wasmsimd_splat);
       }
@@ -635,7 +635,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_igemm_ukernel_4x8__wasmsimd_splat);
@@ -671,7 +671,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_4x8__wasmsimd_splat);
       }
@@ -758,7 +758,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_4x8__wasmsimd_splat);
@@ -775,7 +775,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_4x8__wasmsimd_splat);
@@ -1034,7 +1034,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_5x8__wasmsimd_splat);
       }
@@ -1050,7 +1050,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_f32_igemm_ukernel_5x8__wasmsimd_splat);
@@ -1086,7 +1086,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_5x8__wasmsimd_splat);
       }
@@ -1173,7 +1173,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_5x8__wasmsimd_splat);
@@ -1190,7 +1190,7 @@
           .kr(1)
           .sr(1)
           .m(5)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_5x8__wasmsimd_splat);
@@ -1383,7 +1383,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_1x4__wasm);
       }
@@ -1399,7 +1399,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_f32_igemm_ukernel_1x4__wasm);
@@ -1435,7 +1435,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_f32_igemm_ukernel_1x4__wasm);
       }
@@ -1522,7 +1522,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_1x4__wasm);
@@ -1539,7 +1539,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_f32_igemm_ukernel_1x4__wasm);
@@ -1731,7 +1731,7 @@ TEST(F32_IGEMM_2X4__SCALAR, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_igemm_ukernel_2x4__scalar);
     }
@@ -1747,7 +1747,7 @@ TEST(F32_IGEMM_2X4__SCALAR, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_f32_igemm_ukernel_2x4__scalar);
@@ -1783,7 +1783,7 @@ TEST(F32_IGEMM_2X4__SCALAR, n_div_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_f32_igemm_ukernel_2x4__scalar);
     }
@@ -1870,7 +1870,7 @@ TEST(F32_IGEMM_2X4__SCALAR, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_f32_igemm_ukernel_2x4__scalar);
@@ -1887,7 +1887,7 @@ TEST(F32_IGEMM_2X4__SCALAR, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_f32_igemm_ukernel_2x4__scalar);

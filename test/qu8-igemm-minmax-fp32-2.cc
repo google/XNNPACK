@@ -216,7 +216,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -233,7 +233,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .cn_stride(19)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -271,7 +271,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -363,7 +363,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -381,7 +381,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -733,7 +733,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -750,7 +750,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -788,7 +788,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -880,7 +880,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -898,7 +898,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1250,7 +1250,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -1267,7 +1267,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1305,7 +1305,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -1397,7 +1397,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1415,7 +1415,7 @@
           .kr(1)
           .sr(1)
           .m(4)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x8__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1767,7 +1767,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -1784,7 +1784,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(16)
+          .n(n)
           .k(k)
           .cn_stride(19)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1822,7 +1822,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
       }
@@ -1914,7 +1914,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -1932,7 +1932,7 @@
           .kr(1)
           .sr(1)
           .m(1)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane, xnn_init_qu8_conv_minmax_fp32_neon_params, xnn_qu8_requantize_fp32);
@@ -2284,7 +2284,7 @@
           .kr(4)
           .sr(1)
           .m(2)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -2301,7 +2301,7 @@
           .kr(4)
           .sr(1)
           .m(2)
-          .n(16)
+          .n(n)
           .k(k)
           .cn_stride(19)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -2339,7 +2339,7 @@
           .kr(4)
           .sr(1)
           .m(2)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -2431,7 +2431,7 @@
           .kr(4)
           .sr(1)
           .m(2)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -2449,7 +2449,7 @@
           .kr(4)
           .sr(1)
           .m(2)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -2801,7 +2801,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -2818,7 +2818,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .cn_stride(19)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -2856,7 +2856,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
       }
@@ -2948,7 +2948,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -2966,7 +2966,7 @@
           .kr(4)
           .sr(1)
           .m(4)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__neondot, xnn_init_qu8_conv_minmax_fp32_neonv8_params, xnn_qu8_requantize_fp32);
@@ -3318,7 +3318,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -3335,7 +3335,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -3373,7 +3373,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -3465,7 +3465,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -3483,7 +3483,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -3835,7 +3835,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -3852,7 +3852,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -3890,7 +3890,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -3982,7 +3982,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4000,7 +4000,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4352,7 +4352,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -4369,7 +4369,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4407,7 +4407,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -4499,7 +4499,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4517,7 +4517,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4869,7 +4869,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -4886,7 +4886,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -4924,7 +4924,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -5016,7 +5016,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5034,7 +5034,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5386,7 +5386,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -5403,7 +5403,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5441,7 +5441,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -5533,7 +5533,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5551,7 +5551,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5903,7 +5903,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -5920,7 +5920,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -5958,7 +5958,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -6050,7 +6050,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6068,7 +6068,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6420,7 +6420,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -6437,7 +6437,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6475,7 +6475,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -6567,7 +6567,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6585,7 +6585,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6937,7 +6937,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -6954,7 +6954,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -6992,7 +6992,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -7084,7 +7084,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -7102,7 +7102,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -7454,7 +7454,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -7471,7 +7471,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -7509,7 +7509,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -7601,7 +7601,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -7619,7 +7619,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -7971,7 +7971,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -7988,7 +7988,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -8026,7 +8026,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -8118,7 +8118,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -8136,7 +8136,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -8488,7 +8488,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -8505,7 +8505,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -8543,7 +8543,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -8635,7 +8635,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -8653,7 +8653,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9005,7 +9005,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -9022,7 +9022,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9060,7 +9060,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -9152,7 +9152,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9170,7 +9170,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9522,7 +9522,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -9539,7 +9539,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9577,7 +9577,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -9669,7 +9669,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -9687,7 +9687,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10039,7 +10039,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -10056,7 +10056,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10094,7 +10094,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -10186,7 +10186,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10204,7 +10204,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10556,7 +10556,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -10573,7 +10573,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10611,7 +10611,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -10703,7 +10703,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -10721,7 +10721,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11073,7 +11073,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -11090,7 +11090,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11128,7 +11128,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -11220,7 +11220,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11238,7 +11238,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11590,7 +11590,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -11607,7 +11607,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11645,7 +11645,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -11737,7 +11737,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -11755,7 +11755,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12107,7 +12107,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -12124,7 +12124,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12162,7 +12162,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -12254,7 +12254,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12272,7 +12272,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__avx_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12624,7 +12624,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -12641,7 +12641,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12679,7 +12679,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -12771,7 +12771,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -12789,7 +12789,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld64, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13141,7 +13141,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -13158,7 +13158,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13196,7 +13196,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -13288,7 +13288,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13306,7 +13306,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13658,7 +13658,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -13675,7 +13675,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13713,7 +13713,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -13805,7 +13805,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -13823,7 +13823,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__sse2_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14175,7 +14175,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -14192,7 +14192,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14230,7 +14230,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -14322,7 +14322,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14340,7 +14340,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14692,7 +14692,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -14709,7 +14709,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14747,7 +14747,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -14839,7 +14839,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -14857,7 +14857,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__avx_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15209,7 +15209,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -15226,7 +15226,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15264,7 +15264,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -15356,7 +15356,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15374,7 +15374,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15726,7 +15726,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -15743,7 +15743,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15781,7 +15781,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
       }
@@ -15873,7 +15873,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -15891,7 +15891,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld128, xnn_init_qu8_conv_minmax_fp32_sse2_params, xnn_qu8_requantize_fp32);
@@ -16243,7 +16243,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
       }
@@ -16260,7 +16260,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -16298,7 +16298,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
       }
@@ -16390,7 +16390,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -16408,7 +16408,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -16760,7 +16760,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
       }
@@ -16777,7 +16777,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(8)
+          .n(n)
           .k(k)
           .cn_stride(11)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -16815,7 +16815,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(8)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
       }
@@ -16907,7 +16907,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -16925,7 +16925,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(8)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2, xnn_init_qu8_conv_minmax_fp32_avx2_params, xnn_qu8_requantize_fp32);
@@ -17277,7 +17277,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx, xnn_init_qu8_conv_minmax_fp32_avx512_params, xnn_qu8_requantize_fp32);
       }
@@ -17294,7 +17294,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(16)
+          .n(n)
           .k(k)
           .cn_stride(19)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx, xnn_init_qu8_conv_minmax_fp32_avx512_params, xnn_qu8_requantize_fp32);
@@ -17332,7 +17332,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(16)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx, xnn_init_qu8_conv_minmax_fp32_avx512_params, xnn_qu8_requantize_fp32);
       }
@@ -17424,7 +17424,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx, xnn_init_qu8_conv_minmax_fp32_avx512_params, xnn_qu8_requantize_fp32);
@@ -17442,7 +17442,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(16)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x16c8__avx512skx, xnn_init_qu8_conv_minmax_fp32_avx512_params, xnn_qu8_requantize_fp32);
@@ -17782,7 +17782,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -17798,7 +17798,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -17834,7 +17834,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -17921,7 +17921,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -17938,7 +17938,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18269,7 +18269,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -18285,7 +18285,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18321,7 +18321,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -18408,7 +18408,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18425,7 +18425,7 @@
           .kr(2)
           .sr(1)
           .m(4)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18756,7 +18756,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -18772,7 +18772,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18808,7 +18808,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -18895,7 +18895,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -18912,7 +18912,7 @@
           .kr(2)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19243,7 +19243,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -19259,7 +19259,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19295,7 +19295,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -19382,7 +19382,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19399,7 +19399,7 @@
           .kr(2)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19730,7 +19730,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -19746,7 +19746,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19782,7 +19782,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -19869,7 +19869,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -19886,7 +19886,7 @@
           .kr(2)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c2__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20217,7 +20217,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -20233,7 +20233,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20269,7 +20269,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -20356,7 +20356,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20373,7 +20373,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20704,7 +20704,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -20720,7 +20720,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20756,7 +20756,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -20843,7 +20843,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -20860,7 +20860,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21191,7 +21191,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -21207,7 +21207,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21243,7 +21243,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -21330,7 +21330,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21347,7 +21347,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21678,7 +21678,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -21694,7 +21694,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21730,7 +21730,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -21817,7 +21817,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -21834,7 +21834,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22165,7 +22165,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -22181,7 +22181,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22217,7 +22217,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -22304,7 +22304,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22321,7 +22321,7 @@
           .kr(8)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22652,7 +22652,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -22668,7 +22668,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22704,7 +22704,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -22791,7 +22791,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -22808,7 +22808,7 @@
           .kr(8)
           .sr(1)
           .m(1)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23139,7 +23139,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -23155,7 +23155,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23191,7 +23191,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -23278,7 +23278,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23295,7 +23295,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld64, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23626,7 +23626,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -23642,7 +23642,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23678,7 +23678,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
       }
@@ -23765,7 +23765,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -23782,7 +23782,7 @@
           .kr(8)
           .sr(1)
           .m(2)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul32_ld128, xnn_init_qu8_conv_minmax_fp32_wasmsimd_params, xnn_qu8_requantize_fp32);
@@ -24047,7 +24047,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
       }
@@ -24063,7 +24063,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(2)
+          .n(n)
           .k(k)
           .cn_stride(5)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24099,7 +24099,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(2)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
       }
@@ -24186,7 +24186,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(2)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24203,7 +24203,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(2)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24468,7 +24468,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
       }
@@ -24484,7 +24484,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .cn_stride(7)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24520,7 +24520,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
       }
@@ -24607,7 +24607,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24624,7 +24624,7 @@
           .kr(1)
           .sr(1)
           .m(3)
-          .n(4)
+          .n(n)
           .k(k)
           .ks(3)
           .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__wasm_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24888,7 +24888,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_FMAGIC, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -24904,7 +24904,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_FMAGIC, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -24940,7 +24940,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_FMAGIC, n_div_2) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -25027,7 +25027,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_FMAGIC, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25044,7 +25044,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_FMAGIC, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25306,7 +25306,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_FMAGIC, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -25322,7 +25322,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_FMAGIC, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25358,7 +25358,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_FMAGIC, n_div_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -25445,7 +25445,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_FMAGIC, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25462,7 +25462,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_FMAGIC, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25724,7 +25724,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -25740,7 +25740,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25776,7 +25776,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, n_div_4) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -25863,7 +25863,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -25880,7 +25880,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_FMAGIC, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -26142,7 +26142,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -26158,7 +26158,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -26194,7 +26194,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, n_div_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
     }
@@ -26281,7 +26281,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -26298,7 +26298,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_FMAGIC, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_fmagic, xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params, xnn_qu8_requantize_fp32);
@@ -26560,7 +26560,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -26576,7 +26576,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -26612,7 +26612,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, n_div_2) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -26699,7 +26699,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -26716,7 +26716,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_IMAGIC, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -26978,7 +26978,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_IMAGIC, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -26994,7 +26994,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_IMAGIC, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27030,7 +27030,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_IMAGIC, n_div_2) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -27117,7 +27117,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_IMAGIC, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27134,7 +27134,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_IMAGIC, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27396,7 +27396,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_IMAGIC, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -27412,7 +27412,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_IMAGIC, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27448,7 +27448,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_IMAGIC, n_div_4) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -27535,7 +27535,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_IMAGIC, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27552,7 +27552,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_IMAGIC, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(1)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27814,7 +27814,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_IMAGIC, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -27830,7 +27830,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_IMAGIC, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27866,7 +27866,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_IMAGIC, n_div_4) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
     }
@@ -27953,7 +27953,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_IMAGIC, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -27970,7 +27970,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_IMAGIC, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(2)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
@@ -28232,7 +28232,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_LRINTF, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -28248,7 +28248,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_LRINTF, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -28284,7 +28284,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_LRINTF, n_div_2) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -28371,7 +28371,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_LRINTF, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -28388,7 +28388,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_LRINTF, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -28650,7 +28650,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, n_gt_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -28666,7 +28666,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, n_gt_2_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .cn_stride(5)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -28702,7 +28702,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, n_div_2) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -28789,7 +28789,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, n_gt_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -28806,7 +28806,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, n_div_2_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(2)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29068,7 +29068,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_LRINTF, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -29084,7 +29084,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_LRINTF, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29120,7 +29120,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_LRINTF, n_div_4) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -29207,7 +29207,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_LRINTF, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29224,7 +29224,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_LRINTF, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(3)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29486,7 +29486,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_LRINTF, n_gt_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -29502,7 +29502,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_LRINTF, n_gt_4_strided_cn) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .cn_stride(7)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29538,7 +29538,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_LRINTF, n_div_4) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
     }
@@ -29625,7 +29625,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_LRINTF, n_gt_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
@@ -29642,7 +29642,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_LRINTF, n_div_4_small_kernel) {
         .kr(1)
         .sr(1)
         .m(4)
-        .n(4)
+        .n(n)
         .k(k)
         .ks(3)
         .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
