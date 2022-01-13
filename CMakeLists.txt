@@ -1407,8 +1407,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-vadd/gen/minmax-neon-ld64-x32.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x16.c
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
-  src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c
-  src/qs8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
+  src/qs8-vmul/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
   src/qu8-gavgpool/gen/7p7x-minmax-fp32-neon-c8.c
   src/qu8-gavgpool/gen/7x-minmax-fp32-neon-c8.c
   src/qu8-dwconv/gen/up8x25-minmax-rndnu-neon-mul8.c
@@ -1428,8 +1428,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-neon-ld64-x32.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x32.c
-  src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
-  src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
+  src/qu8-vmul/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
   src/s8-ibilinear/gen/neon-c8.c
   src/s8-ibilinear/gen/neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
@@ -2347,9 +2347,15 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vmul/gen/minmax-fp32-neon-ld64-x8.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld128-x16.c
+  src/qs8-vmul/gen/minmax-rndnu-neon-ld64-x8.c
+  src/qs8-vmul/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qs8-vmul/gen/minmax-rndnu-neon-ld128-x16.c
   src/qs8-vmulc/gen/minmax-fp32-neon-ld64-x8.c
   src/qs8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/qs8-vmulc/gen/minmax-fp32-neon-ld128-x16.c
+  src/qs8-vmulc/gen/minmax-rndnu-neon-ld64-x8.c
+  src/qs8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qs8-vmulc/gen/minmax-rndnu-neon-ld128-x16.c
   src/qu8-avgpool/9p8x-minmax-neon-c8.c
   src/qu8-avgpool/9x-minmax-neon-c8.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-neon-mul16.c
@@ -2430,9 +2436,15 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld128-x16.c
+  src/qu8-vmul/gen/minmax-rndnu-neon-ld64-x8.c
+  src/qu8-vmul/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qu8-vmul/gen/minmax-rndnu-neon-ld128-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x8.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-neon-ld128-x16.c
+  src/qu8-vmulc/gen/minmax-rndnu-neon-ld64-x8.c
+  src/qu8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
+  src/qu8-vmulc/gen/minmax-rndnu-neon-ld128-x16.c
   src/s8-ibilinear/gen/neon-c8.c
   src/s8-ibilinear/gen/neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
@@ -2871,11 +2883,7 @@ SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/qc8-igemm/gen/1x16-minmax-fp32-neonv8-mlal-lane.c
   src/qc8-igemm/gen/2x8c2s4-minmax-fp32-neonv8-mlal.c
   src/qc8-igemm/gen/2x8c8-minmax-fp32-neonv8-mlal.c
-  src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c
-  src/qs8-vmul/gen/minmax-fp32-neonv8-ld64-x16.c
-  src/qs8-vmulc/gen/minmax-fp32-neonv8-ld64-x16.c
-  src/qu8-vmul/gen/minmax-fp32-neonv8-ld64-x16.c
-  src/qu8-vmulc/gen/minmax-fp32-neonv8-ld64-x16.c)
+  src/qc8-igemm/gen/4x16-minmax-fp32-neonv8-mlal-lane.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x8.c
@@ -7899,6 +7907,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-vmul-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-vmul-minmax-fp32-test qu8-vmul-minmax-fp32-test)
 
+  ADD_EXECUTABLE(qu8-vmul-minmax-rndnu-test test/qu8-vmul-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-vmul-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-rndnu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-vmul-minmax-rndnu-test qu8-vmul-minmax-rndnu-test)
+
   ADD_EXECUTABLE(qu8-vmulc-minmax-fp32-test test/qu8-vmulc-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-vmulc-minmax-fp32-test PROPERTIES
     CXX_STANDARD 11
@@ -7907,6 +7924,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-vmulc-minmax-fp32-test qu8-vmulc-minmax-fp32-test)
+
+  ADD_EXECUTABLE(qu8-vmulc-minmax-rndnu-test test/qu8-vmulc-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-rndnu-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-rndnu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(qu8-vmulc-minmax-rndnu-test qu8-vmulc-minmax-rndnu-test)
 
   ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(s8-ibilinear-test PROPERTIES

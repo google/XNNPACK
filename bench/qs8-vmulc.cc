@@ -66,42 +66,62 @@ static void qs8_vmulc(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qs8_vmulc, neonv8_ld64_x8,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neonv8_ld64_x8,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
                     benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vmulc, neonv8_ld64_x16,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neonv8_ld64_x16,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x16,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
                     benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(qs8_vmulc, neonv8_ld128_x16,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neonv8_ld128_x16,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld128_x16,
                     xnn_init_qs8_mul_minmax_fp32_neonv8_params,
                     benchmark::utils::CheckNEONV8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 
-BENCHMARK_CAPTURE(qs8_vmulc, neon_ld64_x8,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neon_ld64_x8,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neon_ld64_x8,
                     xnn_init_qs8_mul_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vmulc, neon_ld64_x16,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neon_ld64_x16,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neon_ld64_x16,
                     xnn_init_qs8_mul_minmax_fp32_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(qs8_vmulc, neon_ld128_x16,
+  BENCHMARK_CAPTURE(qs8_vmulc, fp32__neon_ld128_x16,
                     xnn_qs8_vmulc_minmax_fp32_ukernel__neon_ld128_x16,
                     xnn_init_qs8_mul_minmax_fp32_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(qs8_vmulc, rndnu__neon_ld64_x8,
+                    xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_x8,
+                    xnn_init_qs8_mul_minmax_rndnu_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs8_vmulc, rndnu__neon_ld64_x16,
+                    xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_x16,
+                    xnn_init_qs8_mul_minmax_rndnu_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(qs8_vmulc, rndnu__neon_ld128_x16,
+                    xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld128_x16,
+                    xnn_init_qs8_mul_minmax_rndnu_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();

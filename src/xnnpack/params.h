@@ -1390,6 +1390,16 @@ union xnn_qu8_mul_minmax_params {
     uint8_t output_min;
     uint8_t output_max;
   } fp32_neonv8;
+  struct {
+    uint8_t a_zero_point[2];
+    uint8_t b_zero_point[2];
+    int32_t left_pre_shift;
+    int32_t multiplier;
+    int32_t left_post_shift;
+    int16_t output_zero_point;
+    uint8_t output_min;
+    uint8_t output_max;
+  } rndnu_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -1442,6 +1452,16 @@ union xnn_qs8_mul_minmax_params {
     int8_t output_min;
     int8_t output_max;
   } fp32_neonv8;
+  struct {
+    int8_t a_zero_point[2];
+    int8_t b_zero_point[2];
+    int32_t left_pre_shift;
+    int32_t multiplier;
+    int32_t left_post_shift;
+    int16_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } rndnu_neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

@@ -70,23 +70,22 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld128_x16(
     vacc89AB = vcvtnq_s32_f32(vfpacc89AB);
     vaccCDEF = vcvtnq_s32_f32(vfpaccCDEF);
 
-#if XNN_ARCH_ARM64
-    int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
-    int16x8_t vacc89ABCDEF = vqmovn_high_s32(vqmovn_s32(vacc89AB), vaccCDEF);
+    #if XNN_ARCH_ARM64
+      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      int16x8_t vacc89ABCDEF = vqmovn_high_s32(vqmovn_s32(vacc89AB), vaccCDEF);
+    #else
+      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+      int16x8_t vacc89ABCDEF = vcombine_s16(vqmovn_s32(vacc89AB), vqmovn_s32(vaccCDEF));
+    #endif
 
     vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
     vacc89ABCDEF = vqaddq_s16(vacc89ABCDEF, voutput_zero_point);
 
-    int8x16_t vout0123456789ABCDEF = vqmovn_high_s16(vqmovn_s16(vacc01234567), vacc89ABCDEF);
-#else
-    int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
-    int16x8_t vacc89ABCDEF = vcombine_s16(vqmovn_s32(vacc89AB), vqmovn_s32(vaccCDEF));
-
-    vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
-    vacc89ABCDEF = vqaddq_s16(vacc89ABCDEF, voutput_zero_point);
-
-    int8x16_t vout0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
-#endif
+    #if XNN_ARCH_ARM64
+      int8x16_t vout0123456789ABCDEF = vqmovn_high_s16(vqmovn_s16(vacc01234567), vacc89ABCDEF);
+    #else
+      int8x16_t vout0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
+    #endif
 
     vout0123456789ABCDEF = vmaxq_s8(vout0123456789ABCDEF, voutput_min);
 
@@ -119,19 +118,18 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld128_x16(
       vacc0123 = vcvtnq_s32_f32(vfpacc0123);
       vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
-#if XNN_ARCH_ARM64
-      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      #if XNN_ARCH_ARM64
+        int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      #else
+        int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+      #endif
+
       vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
+
       int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#else
-      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
-      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
-      int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#endif
 
       vout01234567 = vmax_s8(vout01234567, vget_low_s8(voutput_min));
       vout01234567 = vmin_s8(vout01234567, vget_low_s8(voutput_max));
-
       if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
         vst1_s8(output, vout01234567); output += 8;
         n -= 8 * sizeof(int8_t);

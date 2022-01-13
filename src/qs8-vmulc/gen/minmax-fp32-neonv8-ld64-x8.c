@@ -48,19 +48,19 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
     vacc0123 = vcvtnq_s32_f32(vfpacc0123);
     vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
-#if XNN_ARCH_ARM64
-    int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+    #if XNN_ARCH_ARM64
+      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+    #else
+      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+    #endif
 
     vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
 
-    int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#else
-    int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
-
-    vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
-
-    int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#endif
+    #if XNN_ARCH_ARM64
+      int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
+    #else
+      int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
+    #endif
 
     vout01234567 = vmax_s8(vout01234567, voutput_min);
 
@@ -86,19 +86,18 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__neonv8_ld64_x8(
       vacc0123 = vcvtnq_s32_f32(vfpacc0123);
       vacc4567 = vcvtnq_s32_f32(vfpacc4567);
 
-#if XNN_ARCH_ARM64
-      int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      #if XNN_ARCH_ARM64
+        int16x8_t vacc01234567 = vqmovn_high_s32(vqmovn_s32(vacc0123), vacc4567);
+      #else
+        int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
+      #endif
+
       vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
+
       int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#else
-      int16x8_t vacc01234567 = vcombine_s16(vqmovn_s32(vacc0123), vqmovn_s32(vacc4567));
-      vacc01234567 = vqaddq_s16(vacc01234567, voutput_zero_point);
-      int8x8_t vout01234567 = vqmovn_s16(vacc01234567);
-#endif
 
       vout01234567 = vmax_s8(vout01234567, voutput_min);
       vout01234567 = vmin_s8(vout01234567, voutput_max);
-
       if (n & (4 * sizeof(int8_t))) {
         vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout01234567), 0); output += 4;
         vout01234567 = vext_s8(vout01234567, vout01234567, 4);
