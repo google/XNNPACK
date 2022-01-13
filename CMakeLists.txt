@@ -8136,15 +8136,15 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(jit-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(jit-test PRIVATE pthreadpool gtest gtest_main jit)
+  TARGET_LINK_LIBRARIES(jit-test PRIVATE jit pthreadpool gtest gtest_main)
 
-  ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc $<TARGET_OBJECTS:jit>)
+  ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc)
   SET_TARGET_PROPERTIES(aarch32-assembler-test PROPERTIES
     CXX_STANDARD 11
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
