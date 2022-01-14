@@ -1286,6 +1286,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-scalar-x4.c
   src/x8-lut/gen/lut-scalar-x8.c
   src/x8-lut/gen/lut-scalar-x16.c
+  src/x8-transpose/gen/1x2-scalar-int.c
+  src/x8-transpose/gen/1x4-scalar-int.c
+  src/x8-transpose/gen/2x1-scalar-int.c
+  src/x8-transpose/gen/2x2-scalar-int.c
+  src/x8-transpose/gen/2x4-scalar-int.c
+  src/x8-transpose/gen/4x1-scalar-int.c
+  src/x8-transpose/gen/4x2-scalar-int.c
+  src/x8-transpose/gen/4x4-scalar-int.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c

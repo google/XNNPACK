@@ -63,6 +63,24 @@ DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__4x2_scalar_int
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__4x4_scalar_int);
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__4x8_sse2);
 
+#define DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(fn_name)  \
+  XNN_INTERNAL void fn_name(const uint8_t* input,       \
+                            uint8_t* output,            \
+                            size_t input_stride,        \
+                            size_t output_stride,       \
+                            size_t block_width,         \
+                            size_t block_height);
+
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x1_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x2_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x4_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__2x1_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__2x2_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__2x4_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__4x1_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__4x2_scalar_int);
+DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__4x4_scalar_int);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

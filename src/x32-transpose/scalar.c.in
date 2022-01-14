@@ -5,8 +5,8 @@
 
 $assert ((TILE_HEIGHT & (TILE_HEIGHT-1) == 0) and TILE_HEIGHT != 0)
 $assert ((TILE_WIDTH & (TILE_WIDTH-1) == 0) and TILE_WIDTH != 0)
-$assert SIZE in [16, 32]
-$assert TYPE in ["int", "float", "int16_t"]
+$assert SIZE in [8, 16, 32]
+$assert TYPE in ["int", "float", "int16_t", "int8_t"]
 $SUFFIX = "float" if TYPE in ["float", "double"] else "int"
 
 #include <assert.h>
