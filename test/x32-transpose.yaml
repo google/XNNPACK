@@ -20,5 +20,11 @@
 - name: xnn_x32_transpose_ukernel__4x2_scalar_float
 - name: xnn_x32_transpose_ukernel__4x4_scalar_float
 - name: xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl
+- name: xnn_x32_transpose_ukernel__4x4_multi_dec_sse2
+- name: xnn_x32_transpose_ukernel__4x4_multi_multi_sse2
+- name: xnn_x32_transpose_ukernel__4x4_multi_switch_sse2
+- name: xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2
+- name: xnn_x32_transpose_ukernel__4x4_reuse_multi_sse2
+- name: xnn_x32_transpose_ukernel__4x4_reuse_switch_sse2
 - name: xnn_x32_transpose_ukernel__4x4_sse
 - name: xnn_x32_transpose_ukernel__4x4_wasmsimd

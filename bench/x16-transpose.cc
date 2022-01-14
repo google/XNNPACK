@@ -54,8 +54,6 @@ static void x16_transpose(
       ->UseRealTime();
   BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__4x8_sse2, 117)
       ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_1024, xnn_x16_transpose_ukernel__4x8_sse2, 1024)
-      ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

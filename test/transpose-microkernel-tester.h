@@ -56,7 +56,6 @@ class TransposeMicrokernelTester {
 
   inline size_t iterations() const { return this->iterations_; }
 
-
   void Test(xnn_x64_transpose_ukernel_function transpose) const {
     std::vector<uint64_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint64_t));
     std::vector<uint64_t> output(input_stride() * output_stride());

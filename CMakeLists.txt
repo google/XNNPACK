@@ -3642,15 +3642,35 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
+  src/x8-transpose/gen/16x16-reuse-dec-sse2.c
+  src/x8-transpose/gen/16x16-reuse-switch-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
+  src/x16-transpose/4x8-sse2.c
+  src/x16-transpose/gen/8x8-multi-dec-sse2.c
+  src/x16-transpose/gen/8x8-multi-switch-sse2.c
+  src/x16-transpose/gen/8x8-reuse-dec-sse2.c
+  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
+  src/x16-transpose/gen/8x8-reuse-switch-sse2.c
+  src/x32-transpose/gen/4x4-multi-dec-sse2.c
+  src/x32-transpose/gen/4x4-multi-multi-sse2.c
+  src/x32-transpose/gen/4x4-multi-switch-sse2.c
+  src/x32-transpose/gen/4x4-reuse-dec-sse2.c
+  src/x32-transpose/gen/4x4-reuse-multi-sse2.c
+  src/x32-transpose/gen/4x4-reuse-switch-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
+  src/x64-transpose/gen/2x2-multi-dec-sse2.c
+  src/x64-transpose/gen/2x2-multi-multi-sse2.c
+  src/x64-transpose/gen/2x2-multi-switch-sse2.c
+  src/x64-transpose/gen/2x2-reuse-dec-sse2.c
+  src/x64-transpose/gen/2x2-reuse-multi-sse2.c
+  src/x64-transpose/gen/2x2-reuse-switch-sse2.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c)
 
@@ -3928,16 +3948,20 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
+  src/x8-transpose/gen/16x16-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
   src/x16-transpose/4x8-sse2.c
+  src/x16-transpose/gen/8x8-sse2.c
+  src/x32-transpose/gen/4x4-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
+  src/x64-transpose/gen/2x2-sse2.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c)
 
@@ -8066,6 +8090,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(u8-vclamp-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(u8-vclamp-test u8-vclamp-test)
 
+  ADD_EXECUTABLE(x8-transpose-test test/x8-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x8-transpose-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x8-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x8-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(x8-transpose-test x8-transpose-test)
+
   ADD_EXECUTABLE(x16-transpose-test test/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x16-transpose-test PROPERTIES
     CXX_STANDARD 11
@@ -8119,6 +8152,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(x32-zip-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(x32-zip-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(x32-zip-test x32-zip-test)
+
+  ADD_EXECUTABLE(x64-transpose-test test/x64-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x64-transpose-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x64-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x64-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(x64-transpose-test x64-transpose-test)
 
   ADD_EXECUTABLE(x8-lut-test test/x8-lut.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x8-lut-test PROPERTIES
