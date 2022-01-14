@@ -56,6 +56,33 @@ class TransposeMicrokernelTester {
 
   inline size_t iterations() const { return this->iterations_; }
 
+
+  void Test(xnn_x64_transpose_ukernel_function transpose) const {
+    std::vector<uint64_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    std::vector<uint64_t> output(input_stride() * output_stride());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::iota(input.begin(), input.end(), 0);
+      std::fill(output.begin(), output.end(), 0);
+
+      // Call optimized micro-kernel.
+      transpose(input.data(),
+                output.data(),
+                input_stride() * sizeof(uint64_t),
+                output_stride() * sizeof(uint64_t),
+                block_width(),
+                block_height());
+
+      // Verify results.
+      for (size_t c = 0; c < block_width(); c++) {
+        for (size_t r = 0; r < block_height(); r++) {
+          EXPECT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
+              << "at row " << r << " / " << block_height()
+              << ", at column " << c << " / " << block_width();
+        }
+      }
+    }
+  }
+
   void Test(xnn_x32_transpose_ukernel_function transpose) const {
     std::vector<uint32_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(input_stride() * output_stride());

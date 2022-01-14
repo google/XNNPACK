@@ -1331,6 +1331,16 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
   src/x32-zip/xm-scalar.c
+  src/x64-transpose/gen/1x2-scalar-float.c
+  src/x64-transpose/gen/1x2-scalar-int.c
+  src/x64-transpose/gen/2x1-scalar-float.c
+  src/x64-transpose/gen/2x1-scalar-int.c
+  src/x64-transpose/gen/2x2-scalar-float.c
+  src/x64-transpose/gen/2x2-scalar-int.c
+  src/x64-transpose/gen/4x1-scalar-float.c
+  src/x64-transpose/gen/4x1-scalar-int.c
+  src/x64-transpose/gen/4x2-scalar-float.c
+  src/x64-transpose/gen/4x2-scalar-int.c
   src/xx-copy/memcpy.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c)
