@@ -22,7 +22,6 @@ extern "C" {
                             size_t block_width,         \
                             size_t block_height);
 
-DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x1_scalar_int);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x2_scalar_int);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x4_scalar_int);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__2x1_scalar_int);
@@ -31,7 +30,6 @@ DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__2x4_scalar_int
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__4x1_scalar_int);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__4x2_scalar_int);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__4x4_scalar_int);
-DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x1_scalar_float);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x2_scalar_float);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__1x4_scalar_float);
 DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__2x1_scalar_float);
@@ -55,7 +53,6 @@ DECLARE_X64_TRANSPOSE_UKERNEL_FUNCTION(xnn_x64_transpose_ukernel__2x2_reuse_swit
                             size_t block_width,         \
                             size_t block_height);
 
-DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x1_scalar_int);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x2_scalar_int);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x4_scalar_int);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__2x1_scalar_int);
@@ -64,7 +61,6 @@ DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__2x4_scalar_int
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x1_scalar_int);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x2_scalar_int);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_scalar_int);
-DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x1_scalar_float);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x2_scalar_float);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__1x4_scalar_float);
 DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__2x1_scalar_float);
@@ -91,7 +87,6 @@ DECLARE_X32_TRANSPOSE_UKERNEL_FUNCTION(xnn_x32_transpose_ukernel__4x4_reuse_swit
                             size_t block_width,         \
                             size_t block_height);
 
-DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__1x1_scalar_int);
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__1x2_scalar_int);
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__1x4_scalar_int);
 DECLARE_X16_TRANSPOSE_UKERNEL_FUNCTION(xnn_x16_transpose_ukernel__2x1_scalar_int);
@@ -131,7 +126,6 @@ DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__16x16_reuse_swit
                             size_t block_width,         \
                             size_t block_height);
 
-DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x1_scalar_int);
 DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x2_scalar_int);
 DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__1x4_scalar_int);
 DECLARE_X8_TRANSPOSE_UKERNEL_FUNCTION(xnn_x8_transpose_ukernel__2x1_scalar_int);
