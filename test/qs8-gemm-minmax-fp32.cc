@@ -67,8 +67,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEON_MLAL_LD1R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -149,8 +149,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEON_MLAL_LD1R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -200,8 +200,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEON_MLAL_LD1R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -251,8 +251,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEON_MLAL_LD1R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -417,8 +417,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEON_MLAL_LD1R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -523,8 +523,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_LD1R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -605,8 +605,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_LD1R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -656,8 +656,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_LD1R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -707,8 +707,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_LD1R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -873,8 +873,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_LD1R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -979,8 +979,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD2R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -1061,8 +1061,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD2R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1112,8 +1112,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD2R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1163,8 +1163,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD2R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1329,8 +1329,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD2R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1435,8 +1435,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD2R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -1517,8 +1517,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD2R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1568,8 +1568,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD2R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1619,8 +1619,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD2R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1785,8 +1785,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD2R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -1891,8 +1891,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD4R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -1973,8 +1973,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD4R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2024,8 +2024,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD4R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2075,8 +2075,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD4R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2241,8 +2241,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEON_MLAL_LD4R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2347,8 +2347,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD4R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2429,8 +2429,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD4R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2480,8 +2480,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD4R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2531,8 +2531,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD4R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2697,8 +2697,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_LD4R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -2803,8 +2803,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEON_MLAL_LD1R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -2885,8 +2885,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEON_MLAL_LD1R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -2936,8 +2936,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEON_MLAL_LD1R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -2987,8 +2987,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEON_MLAL_LD1R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -3153,8 +3153,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEON_MLAL_LD1R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -3259,8 +3259,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONV8_MLAL_LD1R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -3341,8 +3341,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONV8_MLAL_LD1R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3392,8 +3392,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONV8_MLAL_LD1R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3443,8 +3443,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONV8_MLAL_LD1R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3609,8 +3609,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONV8_MLAL_LD1R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3715,8 +3715,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEON_MLAL_LD2R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -3797,8 +3797,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEON_MLAL_LD2R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3848,8 +3848,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEON_MLAL_LD2R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -3899,8 +3899,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEON_MLAL_LD2R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -4065,8 +4065,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEON_MLAL_LD2R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -4171,8 +4171,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEONV8_MLAL_LD2R, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -4253,8 +4253,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEONV8_MLAL_LD2R, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -4304,8 +4304,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEONV8_MLAL_LD2R, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -4355,8 +4355,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEONV8_MLAL_LD2R, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -4521,8 +4521,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C4__NEONV8_MLAL_LD2R, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -4627,8 +4627,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_DUP, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -4709,8 +4709,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_DUP, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -4760,8 +4760,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_DUP, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -4811,8 +4811,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_DUP, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -4977,8 +4977,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C2__NEONV8_MLAL_DUP, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -5083,8 +5083,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_DUP, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -5165,8 +5165,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_DUP, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5216,8 +5216,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_DUP, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5267,8 +5267,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_DUP, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5433,8 +5433,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C2__NEONV8_MLAL_DUP, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5539,8 +5539,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_CORTEX_A53, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -5621,8 +5621,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_CORTEX_A53, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5672,8 +5672,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_CORTEX_A53, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5723,8 +5723,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_CORTEX_A53, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5889,8 +5889,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -5995,8 +5995,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -6077,8 +6077,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -6128,8 +6128,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -6179,8 +6179,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -6345,8 +6345,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -6451,8 +6451,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -6533,8 +6533,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -6584,8 +6584,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -6635,8 +6635,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -6801,8 +6801,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__AARCH64_NEON_MLAL_PRFM_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -6907,8 +6907,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_CORTEX_A53, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(16)
@@ -6989,8 +6989,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_CORTEX_A53, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7040,8 +7040,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_CORTEX_A53, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7091,8 +7091,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_CORTEX_A53, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7257,8 +7257,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7363,8 +7363,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_PRFM_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(16)
@@ -7445,8 +7445,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_PRFM_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7496,8 +7496,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_PRFM_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7547,8 +7547,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_PRFM_LD64, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7713,8 +7713,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_PRFM_LD64, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7819,8 +7819,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(16)
@@ -7901,8 +7901,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -7952,8 +7952,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -8003,8 +8003,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_LD64, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -8169,8 +8169,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__AARCH64_NEON_MLAL_LANE_LD64, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -8275,8 +8275,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD32, k_eq_4_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(16)
@@ -8357,8 +8357,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD32, k_lt_4_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k < 4; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8408,8 +8408,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD32, k_gt_4_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 5; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8459,8 +8459,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD32, k_div_4_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 8; k <= 40; k += 4) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8625,8 +8625,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD32, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k <= 20; k += 5) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8731,8 +8731,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(16)
@@ -8813,8 +8813,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8864,8 +8864,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -8915,8 +8915,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD64, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9081,8 +9081,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C4__AARCH64_NEONDOT_LD64, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9187,8 +9187,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEON_MLAL_LANE, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(16)
@@ -9269,8 +9269,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEON_MLAL_LANE, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9320,8 +9320,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEON_MLAL_LANE, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9371,8 +9371,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEON_MLAL_LANE, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9537,8 +9537,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEON_MLAL_LANE, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9643,8 +9643,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEONV8_MLAL_LANE, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(16)
@@ -9725,8 +9725,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEONV8_MLAL_LANE, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9776,8 +9776,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEONV8_MLAL_LANE, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9827,8 +9827,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEONV8_MLAL_LANE, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -9993,8 +9993,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16__NEONV8_MLAL_LANE, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -10099,8 +10099,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(16)
@@ -10181,8 +10181,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -10232,8 +10232,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -10283,8 +10283,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -10449,8 +10449,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16__NEONV8_MLAL_LANE, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -10555,8 +10555,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__NEON_MLAL, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -10637,8 +10637,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__NEON_MLAL, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -10688,8 +10688,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__NEON_MLAL, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -10739,8 +10739,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__NEON_MLAL, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -10905,8 +10905,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C8__NEON_MLAL, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -11011,8 +11011,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__NEON_MLAL, k_eq_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -11093,8 +11093,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__NEON_MLAL, k_lt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -11144,8 +11144,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__NEON_MLAL, k_gt_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -11195,8 +11195,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__NEON_MLAL, k_div_16_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 32; k <= 160; k += 16) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -11361,8 +11361,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__NEON_MLAL, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 80; k += 17) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -11467,8 +11467,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONDOT, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -11549,8 +11549,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONDOT, k_lt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -11600,8 +11600,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONDOT, k_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -11651,8 +11651,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONDOT, k_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -11817,8 +11817,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X8C4__NEONDOT, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON_DOT;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(8)
@@ -11923,8 +11923,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE2_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -12005,8 +12005,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE2_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -12056,8 +12056,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE2_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -12107,8 +12107,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE2_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -12273,8 +12273,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE2_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -12379,8 +12379,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE2_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -12461,8 +12461,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE2_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -12512,8 +12512,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE2_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -12563,8 +12563,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE2_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -12729,8 +12729,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE2_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -12835,8 +12835,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE2_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -12917,8 +12917,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE2_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -12968,8 +12968,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE2_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -13019,8 +13019,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE2_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -13185,8 +13185,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE2_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -13291,8 +13291,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE41_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -13373,8 +13373,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE41_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -13424,8 +13424,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE41_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -13475,8 +13475,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE41_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -13641,8 +13641,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__SSE41_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -13747,8 +13747,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE41_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -13829,8 +13829,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE41_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -13880,8 +13880,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE41_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -13931,8 +13931,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE41_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -14097,8 +14097,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__SSE41_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -14203,8 +14203,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -14285,8 +14285,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -14336,8 +14336,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -14387,8 +14387,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -14553,8 +14553,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -14659,8 +14659,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -14741,8 +14741,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -14792,8 +14792,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -14843,8 +14843,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -15009,8 +15009,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -15115,8 +15115,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__AVX_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -15197,8 +15197,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__AVX_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -15248,8 +15248,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__AVX_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -15299,8 +15299,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__AVX_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -15465,8 +15465,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__AVX_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -15571,8 +15571,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -15653,8 +15653,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -15704,8 +15704,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -15755,8 +15755,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -15921,8 +15921,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -16027,8 +16027,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__XOP_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -16109,8 +16109,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__XOP_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -16160,8 +16160,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__XOP_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -16211,8 +16211,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__XOP_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -16377,8 +16377,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__XOP_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -16483,8 +16483,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -16565,8 +16565,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -16616,8 +16616,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -16667,8 +16667,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -16833,8 +16833,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -16939,8 +16939,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__XOP_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -17021,8 +17021,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__XOP_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -17072,8 +17072,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__XOP_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -17123,8 +17123,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__XOP_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -17289,8 +17289,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__XOP_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -17395,8 +17395,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE2_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -17477,8 +17477,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE2_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -17528,8 +17528,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE2_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -17579,8 +17579,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE2_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -17745,8 +17745,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE2_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -17851,8 +17851,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE41_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -17933,8 +17933,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE41_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -17984,8 +17984,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE41_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -18035,8 +18035,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE41_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -18201,8 +18201,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__SSE41_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -18307,8 +18307,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -18389,8 +18389,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -18440,8 +18440,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -18491,8 +18491,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -18657,8 +18657,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__SSE41_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -18763,8 +18763,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__AVX_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -18845,8 +18845,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__AVX_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -18896,8 +18896,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__AVX_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -18947,8 +18947,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__AVX_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -19113,8 +19113,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__AVX_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -19219,8 +19219,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -19301,8 +19301,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -19352,8 +19352,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -19403,8 +19403,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -19569,8 +19569,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__AVX_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -19675,8 +19675,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -19757,8 +19757,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -19808,8 +19808,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -19859,8 +19859,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -20025,8 +20025,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X4C2__AVX_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -20131,8 +20131,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -20213,8 +20213,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20264,8 +20264,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20315,8 +20315,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20481,8 +20481,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__XOP_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20587,8 +20587,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -20669,8 +20669,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20720,8 +20720,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20771,8 +20771,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -20937,8 +20937,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -21043,8 +21043,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -21125,8 +21125,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -21176,8 +21176,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -21227,8 +21227,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -21393,8 +21393,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -21499,8 +21499,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -21581,8 +21581,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -21632,8 +21632,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -21683,8 +21683,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -21849,8 +21849,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -21955,8 +21955,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -22037,8 +22037,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -22088,8 +22088,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -22139,8 +22139,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -22305,8 +22305,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -22411,8 +22411,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -22493,8 +22493,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -22544,8 +22544,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -22595,8 +22595,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -22761,8 +22761,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -22867,8 +22867,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__AVX_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -22949,8 +22949,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__AVX_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23000,8 +23000,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__AVX_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23051,8 +23051,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__AVX_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23217,8 +23217,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__AVX_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23323,8 +23323,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -23405,8 +23405,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -23456,8 +23456,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -23507,8 +23507,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -23673,8 +23673,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -23779,8 +23779,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -23861,8 +23861,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23912,8 +23912,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -23963,8 +23963,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -24129,8 +24129,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -24235,8 +24235,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__XOP_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -24317,8 +24317,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__XOP_LD64, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24368,8 +24368,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__XOP_LD64, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24419,8 +24419,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__XOP_LD64, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24585,8 +24585,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__XOP_LD64, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24691,8 +24691,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -24773,8 +24773,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24824,8 +24824,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -24875,8 +24875,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -25041,8 +25041,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__SSE2_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -25147,8 +25147,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -25229,8 +25229,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -25280,8 +25280,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -25331,8 +25331,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -25497,8 +25497,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSSE3_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -25603,8 +25603,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -25685,8 +25685,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -25736,8 +25736,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -25787,8 +25787,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -25953,8 +25953,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSSE3_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -26059,8 +26059,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -26141,8 +26141,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -26192,8 +26192,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -26243,8 +26243,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -26409,8 +26409,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__SSE41_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -26515,8 +26515,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -26597,8 +26597,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -26648,8 +26648,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -26699,8 +26699,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -26865,8 +26865,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__SSE41_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -26971,8 +26971,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -27053,8 +27053,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -27104,8 +27104,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -27155,8 +27155,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -27321,8 +27321,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__AVX_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -27427,8 +27427,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__XOP_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -27509,8 +27509,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__XOP_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -27560,8 +27560,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__XOP_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -27611,8 +27611,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__XOP_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -27777,8 +27777,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__XOP_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -27883,8 +27883,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD128, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -27965,8 +27965,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD128, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -28016,8 +28016,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD128, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -28067,8 +28067,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD128, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -28233,8 +28233,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__XOP_LD128, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -28342,8 +28342,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__SSE2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(2)
@@ -28429,8 +28429,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__SSE2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -28483,8 +28483,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__SSE2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -28537,8 +28537,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__SSE2, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -28712,8 +28712,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__SSE2, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -28795,8 +28795,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -28882,8 +28882,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -28936,8 +28936,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -28990,8 +28990,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE2, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29165,8 +29165,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE2, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29248,8 +29248,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE41, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -29335,8 +29335,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE41, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29389,8 +29389,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE41, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29443,8 +29443,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE41, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29618,8 +29618,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__SSE41, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -29701,8 +29701,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__AVX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(2)
@@ -29788,8 +29788,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__AVX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -29842,8 +29842,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__AVX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -29896,8 +29896,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__AVX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -30071,8 +30071,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C2__AVX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -30154,8 +30154,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__AVX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -30241,8 +30241,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__AVX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -30295,8 +30295,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__AVX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -30349,8 +30349,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__AVX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -30524,8 +30524,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C2__AVX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -30607,8 +30607,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__XOP, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -30694,8 +30694,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__XOP, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -30748,8 +30748,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__XOP, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -30802,8 +30802,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__XOP, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -30977,8 +30977,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__XOP, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -31060,8 +31060,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_4X4C2__XOP, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(4)
@@ -31147,8 +31147,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_4X4C2__XOP, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(4)
@@ -31201,8 +31201,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_4X4C2__XOP, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(4)
@@ -31255,8 +31255,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_4X4C2__XOP, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(4)
@@ -31430,8 +31430,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_4X4C2__XOP, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(4)
@@ -31513,8 +31513,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSE2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(2)
@@ -31600,8 +31600,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSE2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -31654,8 +31654,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSE2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -31708,8 +31708,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSE2, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -31883,8 +31883,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSE2, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -31966,8 +31966,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -32053,8 +32053,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -32107,8 +32107,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -32161,8 +32161,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE2, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -32336,8 +32336,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE2, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -32419,8 +32419,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__SSSE3, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -32506,8 +32506,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__SSSE3, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -32560,8 +32560,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__SSSE3, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -32614,8 +32614,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__SSSE3, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -32789,8 +32789,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__SSSE3, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -32872,8 +32872,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSSE3, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(2)
@@ -32959,8 +32959,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSSE3, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33013,8 +33013,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSSE3, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33067,8 +33067,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSSE3, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33242,8 +33242,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__SSSE3, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33325,8 +33325,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE41, k_eq_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -33412,8 +33412,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE41, k_lt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -33466,8 +33466,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE41, k_gt_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -33520,8 +33520,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE41, k_div_8_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -33695,8 +33695,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__SSE41, strided_cm_subtile) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -33778,8 +33778,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__AVX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(2)
@@ -33865,8 +33865,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__AVX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33919,8 +33919,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__AVX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -33973,8 +33973,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__AVX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -34148,8 +34148,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_2X4C8__AVX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(2)
@@ -34231,8 +34231,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__AVX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(3)
@@ -34318,8 +34318,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__AVX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -34372,8 +34372,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__AVX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -34426,8 +34426,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__AVX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -34601,8 +34601,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_3X4C8__AVX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(3)
@@ -34684,8 +34684,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__XOP, k_eq_8_subtile) {
     TEST_REQUIRES_X86_XOP;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -34771,8 +34771,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__XOP, k_lt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -34825,8 +34825,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__XOP, k_gt_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -34879,8 +34879,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__XOP, k_div_8_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -35054,8 +35054,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__XOP, strided_cm_subtile) {
     TEST_REQUIRES_X86_XOP;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -35134,8 +35134,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AVX2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(8)
@@ -35216,8 +35216,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AVX2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -35267,8 +35267,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AVX2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -35318,8 +35318,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AVX2, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -35484,8 +35484,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X8C8__AVX2, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(8)
@@ -35590,8 +35590,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X8C8__AVX2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(8)
@@ -35672,8 +35672,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X8C8__AVX2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(8)
@@ -35723,8 +35723,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X8C8__AVX2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(8)
@@ -35774,8 +35774,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X8C8__AVX2, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(8)
@@ -35940,8 +35940,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_3X8C8__AVX2, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(8)
@@ -36049,8 +36049,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X8C8__AVX2, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 8; n++) {
+    for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -36136,8 +36136,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X8C8__AVX2, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -36190,8 +36190,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X8C8__AVX2, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -36244,8 +36244,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X8C8__AVX2, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -36419,8 +36419,8 @@
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X8C8__AVX2, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 8; n++) {
+      for (uint32_t n = 1; n <= 8; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -36499,8 +36499,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X16C8__AVX512SKX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(16)
@@ -36581,8 +36581,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C8__AVX512SKX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -36632,8 +36632,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C8__AVX512SKX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -36683,8 +36683,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C8__AVX512SKX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -36849,8 +36849,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_1X16C8__AVX512SKX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(16)
@@ -36955,8 +36955,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X16C8__AVX512SKX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(16)
@@ -37037,8 +37037,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X16C8__AVX512SKX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(16)
@@ -37088,8 +37088,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X16C8__AVX512SKX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(16)
@@ -37139,8 +37139,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X16C8__AVX512SKX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(16)
@@ -37305,8 +37305,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_2X16C8__AVX512SKX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(16)
@@ -37411,8 +37411,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X16C8__AVX512SKX, k_eq_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 16; n++) {
+    for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(16)
@@ -37493,8 +37493,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16C8__AVX512SKX, k_lt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -37544,8 +37544,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16C8__AVX512SKX, k_gt_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -37595,8 +37595,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16C8__AVX512SKX, k_div_8_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -37761,8 +37761,8 @@
   TEST(QS8_GEMM_MINMAX_FP32_4X16C8__AVX512SKX, strided_cm_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 16; n++) {
+      for (uint32_t n = 1; n <= 16; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(16)
@@ -37863,8 +37863,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD64, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -37940,8 +37940,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD64, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -37988,8 +37988,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD64, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -38036,8 +38036,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD64, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -38193,8 +38193,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD64, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -38292,8 +38292,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD64, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -38369,8 +38369,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD64, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -38417,8 +38417,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD64, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -38465,8 +38465,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD64, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -38622,8 +38622,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD64, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -38721,8 +38721,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -38798,8 +38798,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -38846,8 +38846,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -38894,8 +38894,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -39051,8 +39051,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -39150,8 +39150,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -39227,8 +39227,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -39275,8 +39275,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -39323,8 +39323,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -39480,8 +39480,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C2__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -39579,8 +39579,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -39656,8 +39656,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -39704,8 +39704,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -39752,8 +39752,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -39909,8 +39909,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -40011,8 +40011,8 @@
   }
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -40093,8 +40093,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -40144,8 +40144,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -40195,8 +40195,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -40361,8 +40361,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C2__WASMSIMD_DOT16X2, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -40436,8 +40436,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2S4__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -40513,8 +40513,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2S4__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -40561,8 +40561,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2S4__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -40609,8 +40609,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2S4__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -40766,8 +40766,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C2S4__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -40865,8 +40865,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2S4__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -40942,8 +40942,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2S4__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -40990,8 +40990,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2S4__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -41038,8 +41038,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2S4__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -41195,8 +41195,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C2S4__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -41294,8 +41294,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD64, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -41371,8 +41371,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD64, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -41419,8 +41419,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD64, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -41467,8 +41467,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD64, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -41624,8 +41624,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD64, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -41723,8 +41723,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C8__WASMSIMD_DOT16X2_LD64, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -41800,8 +41800,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C8__WASMSIMD_DOT16X2_LD64, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -41848,8 +41848,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C8__WASMSIMD_DOT16X2_LD64, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -41896,8 +41896,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C8__WASMSIMD_DOT16X2_LD64, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -42053,8 +42053,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_4X4C8__WASMSIMD_DOT16X2_LD64, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 4; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
             .nr(4)
@@ -42152,8 +42152,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -42229,8 +42229,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -42277,8 +42277,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -42325,8 +42325,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -42482,8 +42482,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
             .nr(4)
@@ -42581,8 +42581,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -42658,8 +42658,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -42706,8 +42706,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -42754,8 +42754,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -42911,8 +42911,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -43010,8 +43010,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_DOT16X2_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -43087,8 +43087,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_DOT16X2_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -43135,8 +43135,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_DOT16X2_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -43183,8 +43183,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_DOT16X2_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -43340,8 +43340,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_DOT16X2_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -43442,8 +43442,8 @@
   }
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -43524,8 +43524,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -43575,8 +43575,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -43626,8 +43626,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -43792,8 +43792,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_DOT16X2, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -43867,8 +43867,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_MUL16_LD64, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -43944,8 +43944,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_MUL16_LD64, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -43992,8 +43992,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_MUL16_LD64, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -44040,8 +44040,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_MUL16_LD64, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -44197,8 +44197,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4C8__WASMSIMD_MUL16_LD64, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -44296,8 +44296,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_MUL16_LD128, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -44373,8 +44373,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_MUL16_LD128, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -44421,8 +44421,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_MUL16_LD128, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -44469,8 +44469,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_MUL16_LD128, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -44626,8 +44626,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_2X4C8__WASMSIMD_MUL16_LD128, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 2; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 2; m++) {
           GemmMicrokernelTester()
             .mr(2)
             .nr(4)
@@ -44728,8 +44728,8 @@
   }
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_MUL16, k_eq_8_subtile) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .extended_weights(true)
           .mr(1)
@@ -44810,8 +44810,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_MUL16, k_lt_8_subtile) {
     for (size_t k = 1; k < 8; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -44861,8 +44861,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_MUL16, k_gt_8_subtile) {
     for (size_t k = 9; k < 16; k++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -44912,8 +44912,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_MUL16, k_div_8_subtile) {
     for (size_t k = 16; k <= 80; k += 8) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -45078,8 +45078,8 @@
 
   TEST(QS8_GEMM_XW_MINMAX_FP32_1X4C8__WASMSIMD_MUL16, strided_cm_subtile) {
     for (size_t k = 1; k <= 40; k += 9) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .extended_weights(true)
             .mr(1)
@@ -45153,8 +45153,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X2__WASM_FMAGIC, k_eq_1_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(2)
@@ -45230,8 +45230,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X2__WASM_FMAGIC, k_gt_1_subtile) {
     for (size_t k = 2; k < 10; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t n = 1; n <= 2; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(2)
@@ -45387,8 +45387,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X2__WASM_FMAGIC, strided_cm_subtile) {
     for (size_t k = 1; k <= 5; k += 2) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t n = 1; n <= 2; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(2)
@@ -45486,8 +45486,8 @@
   }
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4__WASM_FMAGIC, k_eq_1_subtile) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -45563,8 +45563,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4__WASM_FMAGIC, k_gt_1_subtile) {
     for (size_t k = 2; k < 10; k++) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -45720,8 +45720,8 @@
 
   TEST(QS8_GEMM_MINMAX_FP32_3X4__WASM_FMAGIC, strided_cm_subtile) {
     for (size_t k = 1; k <= 5; k += 2) {
-      for (uint32_t m = 1; m <= 3; m++) {
-        for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t n = 1; n <= 4; n++) {
+        for (uint32_t m = 1; m <= 3; m++) {
           GemmMicrokernelTester()
             .mr(3)
             .nr(4)
@@ -45818,8 +45818,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 1; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(2)
@@ -45895,8 +45895,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(2)
@@ -46052,8 +46052,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(2)
@@ -46149,8 +46149,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 2; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 2; m++) {
       GemmMicrokernelTester()
         .mr(2)
         .nr(2)
@@ -46226,8 +46226,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(2)
@@ -46383,8 +46383,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(2)
@@ -46480,8 +46480,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 1; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(4)
@@ -46557,8 +46557,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -46714,8 +46714,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -46811,8 +46811,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 2; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 2; m++) {
       GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -46888,8 +46888,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -47045,8 +47045,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -47142,8 +47142,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 3; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 3; m++) {
       GemmMicrokernelTester()
         .mr(3)
         .nr(2)
@@ -47219,8 +47219,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(2)
@@ -47376,8 +47376,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(2)
@@ -47473,8 +47473,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 4; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
         .nr(2)
@@ -47550,8 +47550,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(2)
@@ -47707,8 +47707,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(2)
@@ -47804,8 +47804,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 3; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 3; m++) {
       GemmMicrokernelTester()
         .mr(3)
         .nr(4)
@@ -47881,8 +47881,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -48038,8 +48038,8 @@ TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 3; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 3; m++) {
         GemmMicrokernelTester()
           .mr(3)
           .nr(4)
@@ -48135,8 +48135,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 4; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
         .nr(4)
@@ -48212,8 +48212,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -48369,8 +48369,8 @@ TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 4; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
           .nr(4)
@@ -48466,8 +48466,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 1; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(2)
@@ -48543,8 +48543,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(2)
@@ -48700,8 +48700,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(2)
@@ -48797,8 +48797,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 2; m++) {
-    for (uint32_t n = 1; n <= 2; n++) {
+  for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t m = 1; m <= 2; m++) {
       GemmMicrokernelTester()
         .mr(2)
         .nr(2)
@@ -48874,8 +48874,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(2)
@@ -49031,8 +49031,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, n_div_2_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 2; n++) {
+    for (uint32_t n = 1; n <= 2; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(2)
@@ -49128,8 +49128,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 1; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(4)
@@ -49205,8 +49205,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -49362,8 +49362,8 @@ TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 1; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 1; m++) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(4)
@@ -49459,8 +49459,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, k_eq_1_strided_a) {
 }
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, k_eq_1_subtile) {
-  for (uint32_t m = 1; m <= 2; m++) {
-    for (uint32_t n = 1; n <= 4; n++) {
+  for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t m = 1; m <= 2; m++) {
       GemmMicrokernelTester()
         .mr(2)
         .nr(4)
@@ -49536,8 +49536,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, k_gt_1_strided_a) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, k_gt_1_subtile) {
   for (size_t k = 2; k < 10; k++) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)
@@ -49693,8 +49693,8 @@ TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, n_div_4_subtile) {
 
 TEST(QS8_GEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, strided_cm_subtile) {
   for (size_t k = 1; k <= 5; k += 2) {
-    for (uint32_t m = 1; m <= 2; m++) {
-      for (uint32_t n = 1; n <= 4; n++) {
+    for (uint32_t n = 1; n <= 4; n++) {
+      for (uint32_t m = 1; m <= 2; m++) {
         GemmMicrokernelTester()
           .mr(2)
           .nr(4)

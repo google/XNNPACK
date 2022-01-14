@@ -157,14 +157,16 @@ static void IGEMMBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   static void IGEMMBenchmark(benchmark::State& state,
-    xnn_jit_code_generator_function generator,
+    xnn_jit_gemm_code_generator_function generator,
     size_t mr, size_t nr, size_t kr, size_t sr,
     xnn_init_f32_minmax_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
   {
     xnn_code_buffer code_buffer;
     xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-    generator(&code_buffer);
+    const size_t nc = state.range(1);
+    const size_t kc = state.range(2);
+    generator(&code_buffer, nc, kc, nullptr);
     IGEMMBenchmark(
         state,
         reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code),

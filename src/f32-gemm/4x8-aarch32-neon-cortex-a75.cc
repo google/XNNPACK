@@ -13,7 +13,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(bool prefetch);
+  void generate(bool prefetch, size_t nc, size_t kc, void* params);
 };
 
 
@@ -48,7 +48,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
-void Generator::generate(bool prefetch) {
+void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
 
   // Push 96 bytes
@@ -380,10 +380,10 @@ void Generator::generate(bool prefetch) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(false);
+  g.generate(false, nc, kc, nullptr);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;
@@ -391,10 +391,10 @@ xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_b
   return xnn_status_success;
 }
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(xnn_code_buffer* code) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(true);
+  g.generate(true, nc, kc, nullptr);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;

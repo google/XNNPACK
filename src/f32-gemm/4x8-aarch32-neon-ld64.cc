@@ -13,7 +13,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate();
+  void generate(size_t nc, size_t kc, void* params);
 };
 
 
@@ -48,7 +48,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
-void Generator::generate() {
+void Generator::generate(size_t nc, size_t kc, void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7;
 
   // Push 96 bytes
@@ -227,10 +227,10 @@ void Generator::generate() {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(xnn_code_buffer* code) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate();
+  g.generate(nc, kc, nullptr);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;

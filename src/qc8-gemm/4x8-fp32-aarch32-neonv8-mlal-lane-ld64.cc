@@ -14,7 +14,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(bool prefetch);
+  void generate(bool prefetch, size_t nc, size_t kc, void* params);
 };
 
 
@@ -54,7 +54,7 @@ class Generator : public Assembler {
 //  } xnn_qs8_minmax_params.neonv8;
 
 // Converted from: src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
-void Generator::generate(bool prefetch) {
+void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7;
 
   // Push 64 bytes
@@ -467,10 +467,10 @@ void Generator::generate(bool prefetch) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64(xnn_code_buffer* code) {
+xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(false);
+  g.generate(false, nc, kc, nullptr);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;
@@ -478,10 +478,10 @@ xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
   return xnn_status_success;
 }
 
-xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64(xnn_code_buffer* code) {
+xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(true);
+  g.generate(true, nc, kc, nullptr);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;

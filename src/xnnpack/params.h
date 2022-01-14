@@ -3927,7 +3927,7 @@ struct vmulcaddc_parameters {
 // Forward declare to avoid circular includes between this and allocator.h.
 struct xnn_code_buffer;
 
-typedef enum xnn_status (*xnn_jit_code_generator_function)(struct xnn_code_buffer* code);
+typedef enum xnn_status (*xnn_jit_gemm_code_generator_function)(struct xnn_code_buffer* code, size_t nc, size_t kc, void* params);
 
 #define XNN_MAX_QC8_DWCONV_UKERNELS 2
 #define XNN_MAX_QS8_DWCONV_UKERNELS 2
