@@ -5,8 +5,9 @@
 
 $assert ((TILE_HEIGHT & (TILE_HEIGHT-1) == 0) and TILE_HEIGHT != 0)
 $assert ((TILE_WIDTH & (TILE_WIDTH-1) == 0) and TILE_WIDTH != 0)
-$assert SIZE == 32
-$assert TYPE == "int" or TYPE == "float"
+$assert SIZE in [16, 32]
+$assert TYPE in ["int", "float", "int16_t"]
+$SUFFIX = "float" if TYPE in ["float", "double"] else "int"
 
 #include <assert.h>
 
@@ -14,7 +15,7 @@ $assert TYPE == "int" or TYPE == "float"
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x${SIZE}_transpose_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_scalar_${TYPE}(
+void xnn_x${SIZE}_transpose_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_scalar_${SUFFIX}(
     const uint${SIZE}_t *input,
     uint${SIZE}_t * output,
     size_t input_stride,

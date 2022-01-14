@@ -1290,6 +1290,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
   src/x8-zip/xm-scalar.c
+  src/x16-transpose/gen/1x2-scalar-int.c
+  src/x16-transpose/gen/1x4-scalar-int.c
+  src/x16-transpose/gen/2x1-scalar-int.c
+  src/x16-transpose/gen/2x2-scalar-int.c
+  src/x16-transpose/gen/2x4-scalar-int.c
+  src/x16-transpose/gen/4x1-scalar-int.c
+  src/x16-transpose/gen/4x2-scalar-int.c
+  src/x16-transpose/gen/4x4-scalar-int.c
   src/x32-depthtospace2d-chw2hwc/scalar.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
