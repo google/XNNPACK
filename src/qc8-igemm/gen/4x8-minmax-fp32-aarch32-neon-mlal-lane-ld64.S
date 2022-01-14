@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in
+//   Template: src/qs8-igemm/4x8-aarch32-neon-mlal-lane-ld64.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -12,17 +12,19 @@
 
 .syntax unified
 
-// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64(
-//     size_t mr,                            r0
-//     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5
-//     const uint8_t*restrict a,             r3
-//     size_t a_stride,           sp + 64 -> (r7)
-//     const void*restrict w,     sp + 68 -> r9
-//     uint8_t*restrict c,        sp + 72 -> r11
-//     size_t cm_stride,          sp + 76 -> (r6)
-//     size_t cn_stride,          sp + 80 -> r7
-//     xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 84 -> (r5)
+// void xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
+//     size_t mr,                                      r0
+//     size_t nc,                                      r1
+//     size_t kc,                                      r2 -> r5 -> sp + 36
+//     size_t ks,                                      r3 -> sp + 40 -> r14
+//     const int8_t**restrict a,           sp + 80  -> r2
+//     const void*restrict w,              sp + 84  -> r9
+//     int8_t*restrict c,                  sp + 88  -> r11
+//     size_t cm_stride,                   sp + 92  -> (r6)
+//     size_t cn_stride,                   sp + 96  -> (r7)
+//     size_t a_offset,                    sp + 100 -> (r5)
+//     const int8_t* zero,                 sp + 104 -> (r7)
+//     xnn_qs8_minmax_params*params); sp + 108 -> (r5)
 
 // inner loop registers
 
@@ -38,67 +40,91 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// unused q6 q7
+// Unused q6 q7
 
-// params structure is 4 bytes
-//  struct {
-//    int16_t output_zero_point;  d11[2]
-//    int8_t output_min;          d11[6]
-//    int8_t output_max;          d11[7]
-//  } xnn_qs8_minmax_params.neonv8;
+// params structure is 10 bytes
+// struct {
+//   float magic_bias;                           d10[0]
+//   int32_t magic_bias_less_output_zero_point;  d10[1]
+//   int8_t output_min;                          d11[6]
+//   int8_t output_max;                          d11[7]
+// } xnn_qs8_minmax_params.neon;
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
-        # Push 64 bytes
-        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        VPUSH   {d8-d11}                            // +32 = 64
+BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
+        # Push 80 bytes
+        # r2 will be reloaded in outer loop.  r3 is ks
+        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
+        SUB     sp, sp, 4                                        // 4
+        VPUSH   {d8-d11}                                         // +32 = 80
 
-        LDR     r7, [sp, 64]            // a_stride
-        LDR     r11, [sp, 72]           // c
-        LDR     r6, [sp, 76]            // cm_stride
-        LDR     r9, [sp, 68]            // w
-        LDR     r5, [sp, 84]            // params
+        LDR     r11, [sp, 88]           // c
+        LDR     r6, [sp, 92]            // cm_stride
+        LDR     r2, [sp, 80]            // a
+        LDR     r9, [sp, 84]            // w
+        LDR     r5, [sp, 108]           // params
+        MOV     r14, r3                 // p = ks
 
-        # Clamp A and C pointers
+        # Clamp C pointers
         CMP     r0, 2                   // if mr >= 2
-        ADD     r12, r3, r7             //   a1 = a0 + a_stride
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
-        MOVLO   r12, r3                 // a1
         MOVLO   r4, r11                 // c1
                                         // if mr > 2
-        ADD     r10, r12, r7            //   a2 = a1 + a_stride
         ADD     r8, r4, r6              //   c2 = c1 + cm_stride
-        MOVLS   r10, r12                // a2
         MOVLS   r8, r4                  // c2
-
         CMP     r0, 4                   // if mr >=4
-        ADD     r0, r10, r7             //   a3 = a2 + a_stride
         ADD     r6, r8, r6              //   c3 = c2 + cm_stride
-        MOVLO   r0, r10                 // a3
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLD1.32 {d11[]}, [r5]           // QC8 neonv8 params
-        LDR     r7, [sp, 80]            // cn_stride
+        VLDM    r5!, {d10}              // QC8 neon params
+        VLD1.16 {d11[]}, [r5]
 
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
-        SUBS    r5, r2, 8               // k = kc - 8
-
         VMOV    q10, q8
         VMOV    q11, q9
         VMOV    q12, q8
         VMOV    q13, q9
         VMOV    q14, q8
         VMOV    q15, q9
-        BLO     3f                      // less than 8 channels?
+
+        .p2align 3
+1:
+        # Load next 4 A pointers
+        LDR     r3, [r2,  0]
+        LDR     r12, [r2,  4]
+        LDR     r10, [r2,  8]
+        LDR     r0, [r2, 12]
+        ADD     r2, r2, 16
+
+
+        # Add a_offset
+        LDR     r5, [sp, 100]           // a_offset
+        LDR     r7, [sp, 104]           // zero
+        CMP     r3,  r7                 // if a0 == zero
+        ADD     r3,  r3, r5             // a0 += a_offset
+        MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset
+        CMP     r12,  r7                // if a1 == zero
+        ADD     r12, r12, r5            // a1 += a_offset
+        MOVEQ   r12,  r7                //   a1 = zero, else += a1 + a_offset
+        CMP     r10,  r7                // if a2 == zero
+        ADD     r10, r10, r5            // a2 += a_offset
+        MOVEQ   r10,  r7                //   a2 = zero, else += a2 + a_offset
+        CMP     r0,  r7                 // if a3 == zero
+        ADD     r0,  r0, r5             // a3 += a_offset
+        LDR     r5, [sp, 36]            // kc
+        MOVEQ   r0,  r7                 //   a3 = zero, else += a3 + a_offset
+
+        SUBS    r5, r5, 8               // kc - 8
+        BLO     4f                      // less than 8 channels?
 
         # Main loop - 8 bytes
         # 64 bytes for weights.
         .p2align 3
-1:
+2:
         VLD1.8  {d0},  [r3]!            // A0
         VLD1.8  {d8},  [r9]!            // B
         VLD1.8  {d2}, [r12]!            // A1
@@ -195,16 +221,25 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q13, d9, d5[3]
         VMLAL.S16 q14, d8, d7[3]
         VMLAL.S16 q15, d9, d7[3]
-        BHS     1b
+        BHS     2b
 
         # Is there a remainder?- 1-7 bytes of A
         ADDS    r5, r5, 8
-        BNE     3f
+        BNE     4f
 
-2:
+3:
+        # ks loop
+        SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
+        BHI     1b
+
+        LDR     r7, [sp, 96]            // cn_stride
+        LDR     r14, [sp, 40]           // p = ks
 
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
+
+        VDUP.32 q2, d10[0]              // magic_bias
+        VDUP.32 q3, d10[1]              // magic_bias_less_output_zero_point
 
         VCVT.F32.S32 q8,  q8
         VCVT.F32.S32 q9,  q9
@@ -224,16 +259,24 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMUL.F32 q14, q14, q0
         VMUL.F32 q15, q15, q1
 
-        VCVTN.S32.F32 q8,  q8
-        VCVTN.S32.F32 q9,  q9
-        VCVTN.S32.F32 q10, q10
-        VCVTN.S32.F32 q11, q11
-        VCVTN.S32.F32 q12, q12
-        VCVTN.S32.F32 q13, q13
-        VCVTN.S32.F32 q14, q14
-        VCVTN.S32.F32 q15, q15
+        VADD.F32 q8,  q8, q2            // magic_bias
+        VADD.F32 q9,  q9, q2
+        VADD.F32 q10, q10, q2
+        VADD.F32 q11, q11, q2
+        VADD.F32 q12, q12, q2
+        VADD.F32 q13, q13, q2
+        VADD.F32 q14, q14, q2
+        VADD.F32 q15, q15, q2
 
-        VDUP.16 q0, d11[2]              // output_zero_point
+        VQSUB.S32 q8,  q8, q3           // magic_bias_less_output_zero_point
+        VQSUB.S32 q9,  q9, q3
+        VQSUB.S32 q10, q10, q3
+        VQSUB.S32 q11, q11, q3
+        VQSUB.S32 q12, q12, q3
+        VQSUB.S32 q13, q13, q3
+        VQSUB.S32 q14, q14, q3
+        VQSUB.S32 q15, q15, q3
+
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -244,10 +287,6 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VQMOVN.S32 d22, q14
         VQMOVN.S32 d23, q15
 
-        VQADD.S16 q8,  q8, q0
-        VQADD.S16 q9,  q9, q0
-        VQADD.S16 q10, q10, q0
-        VQADD.S16 q11, q11, q0
 
         VDUP.8  q12, d11[6]             // output_min
 
@@ -261,37 +300,34 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
 
-        SUBS    r1, r1, 8
+        SUBS    r1, r1, 8               // nc -= 8
 
         VMIN.S8 q0, q0, q13
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     4f
-        VST1.8  {d0}, [r11], r7
-        SUB     r3, r3, r2
-        VST1.8  {d1}, [r4], r7
-        SUB     r12, r12, r2
-        VST1.8  {d2}, [r8], r7
-        SUB     r10, r10, r2
+        BLO     5f
         VST1.8  {d3}, [r6], r7
-        SUB     r0, r0, r2
+        VST1.8  {d2}, [r8], r7
+        VST1.8  {d1}, [r4], r7
+        VST1.8  {d0}, [r11], r7
+        SUB     r2, r2, r14             // a -= ks
         BHI     0b
 
         VPOP    {d8-d11}
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
-        BX      lr
+        ADD     sp, sp, 12              // skip pad, r2, r3
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
-3:
+4:
         AND     r5, r5, 7               // kc remainder 1 to 7
 
-        VLD1.8  {d0},  [r3], r5
+        VLD1.8  {d0},  [r3]
         VLD1.8  {d8},  [r9]!
-        VLD1.8  {d2}, [r12], r5
-        VLD1.8  {d4}, [r10], r5
-        VLD1.8  {d6},  [r0], r5
+        VLD1.8  {d2}, [r12]
+        VLD1.8  {d4}, [r10]
+        VLD1.8  {d6},  [r0]
 
         VMOVL.S8 q0, d0
         VMOVL.S8 q4, d8
@@ -307,7 +343,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q14, d8, d6[0]
         VMLAL.S16 q15, d9, d6[0]
         CMP     r5, 2
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -319,7 +355,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q13, d9, d4[1]
         VMLAL.S16 q14, d8, d6[1]
         VMLAL.S16 q15, d9, d6[1]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -332,7 +368,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q14, d8, d6[2]
         VMLAL.S16 q15, d9, d6[2]
         CMP     r5, 4
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -344,7 +380,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q13, d9, d4[3]
         VMLAL.S16 q14, d8, d6[3]
         VMLAL.S16 q15, d9, d6[3]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -357,7 +393,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q14, d8, d7[0]
         VMLAL.S16 q15, d9, d7[0]
         CMP     r5, 6
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -369,7 +405,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q13, d9, d5[1]
         VMLAL.S16 q14, d8, d7[1]
         VMLAL.S16 q15, d9, d7[1]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -381,45 +417,44 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
         VMLAL.S16 q15, d9, d7[2]
-        B       2b
+        B       3b
 
         # Store odd width
         .p2align 3
-4:
+5:
         TST     r1, 4
-        BEQ     5f
-        VST1.32 {d0[0]}, [r11]!
-        VST1.32 {d1[0]}, [r4]!
-        VST1.32 {d2[0]}, [r8]!
+        BEQ     6f
         VST1.32 {d3[0]}, [r6]!
+        VST1.32 {d2[0]}, [r8]!
+        VST1.32 {d1[0]}, [r4]!
+        VST1.32 {d0[0]}, [r11]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-5:
+6:
         TST     r1, 2
-        BEQ     6f
-        VST1.16 {d0[0]}, [r11]!
-        VST1.16 {d1[0]}, [r4]!
-        VST1.16 {d2[0]}, [r8]!
+        BEQ     7f
         VST1.16 {d3[0]}, [r6]!
+        VST1.16 {d2[0]}, [r8]!
+        VST1.16 {d1[0]}, [r4]!
+        VST1.16 {d0[0]}, [r11]!
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-6:
-        TST     r1, 1
-        BEQ     7f
-        VST1.8  {d0[0]}, [r11]
-        VST1.8  {d1[0]}, [r4]
-        VST1.8  {d2[0]}, [r8]
-        VST1.8  {d3[0]}, [r6]
-
 7:
-        VPOP    {d8-d11}
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
-        BX      lr
+        TST     r1, 1
+        BEQ     8f
+        VST1.8  {d3[0]}, [r6]
+        VST1.8  {d2[0]}, [r8]
+        VST1.8  {d1[0]}, [r4]
+        VST1.8  {d0[0]}, [r11]
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+8:
+        VPOP    {d8-d11}
+        ADD     sp, sp, 12              // skip pad, r2, r3
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+
+END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif
-

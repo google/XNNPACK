@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64(
+// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -40,14 +40,15 @@
 
 // unused q6 q7
 
-// params structure is 4 bytes
-//  struct {
-//    int16_t output_zero_point;  d11[2]
-//    int8_t output_min;          d11[6]
-//    int8_t output_max;          d11[7]
-//  } xnn_qs8_minmax_params.neonv8;
+// params structure is 10 bytes
+// struct {
+//   float magic_bias;                           d10[0]
+//   int32_t magic_bias_less_output_zero_point;  d10[1]
+//   int8_t output_min;                          d11[6]
+//   int8_t output_max;                          d11[7]
+// } xnn_qs8_minmax_params.neon;
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64
         # Push 64 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         VPUSH   {d8-d11}                            // +32 = 64
@@ -77,9 +78,16 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLD1.32 {d11[]}, [r5]           // QC8 neonv8 params
+        VLDM    r5!, {d10}              // QC8 neon params
+        VLD1.16 {d11[]}, [r5]
         LDR     r7, [sp, 80]            // cn_stride
 
+        PLD     [r9,  64]               // Prefetch B
+        PLD     [r9, 128]
+        PLD     [r9, 192]
+        PLD     [r9, 256]
+        PLD     [r9, 320]
+        PLD     [r9, 384]
 
         .p2align 3
 0:
@@ -88,9 +96,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         SUBS    r5, r2, 8               // k = kc - 8
 
         VMOV    q10, q8
+        PLD     [r3,  64]               // Prefetch A
         VMOV    q11, q9
+        PLD     [r12, 64]
         VMOV    q12, q8
+        PLD     [r10, 64]
         VMOV    q13, q9
+        PLD     [r0,  64]
         VMOV    q14, q8
         VMOV    q15, q9
         BLO     3f                      // less than 8 channels?
@@ -105,10 +117,15 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VLD1.8  {d4}, [r10]!            // A2
         VLD1.8  {d6},  [r0]!            // A3
         SUBS    r5, r5, 8
+        PLD     [r3, 128]
         VMOVL.S8 q0, d0
+        PLD     [r12, 128]
         VMOVL.S8 q4, d8
+        PLD     [r10, 128]
         VMOVL.S8 q1, d2
+        PLD     [r0, 128]
         VMOVL.S8 q2, d4
+        PLD     [r9, 448]
         VMOVL.S8 q3, d6
         VMLAL.S16 q8, d8, d0[0]
         VMLAL.S16 q9, d9, d0[0]
@@ -206,6 +223,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
 
+        VDUP.32 q2, d10[0]              // magic_bias
+        VDUP.32 q3, d10[1]              // magic_bias_less_output_zero_point
+
         VCVT.F32.S32 q8,  q8
         VCVT.F32.S32 q9,  q9
         VCVT.F32.S32 q10, q10
@@ -224,16 +244,24 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMUL.F32 q14, q14, q0
         VMUL.F32 q15, q15, q1
 
-        VCVTN.S32.F32 q8,  q8
-        VCVTN.S32.F32 q9,  q9
-        VCVTN.S32.F32 q10, q10
-        VCVTN.S32.F32 q11, q11
-        VCVTN.S32.F32 q12, q12
-        VCVTN.S32.F32 q13, q13
-        VCVTN.S32.F32 q14, q14
-        VCVTN.S32.F32 q15, q15
+        VADD.F32 q8,  q8, q2            // magic_bias
+        VADD.F32 q9,  q9, q2
+        VADD.F32 q10, q10, q2
+        VADD.F32 q11, q11, q2
+        VADD.F32 q12, q12, q2
+        VADD.F32 q13, q13, q2
+        VADD.F32 q14, q14, q2
+        VADD.F32 q15, q15, q2
 
-        VDUP.16 q0, d11[2]              // output_zero_point
+        VQSUB.S32 q8,  q8, q3           // magic_bias_less_output_zero_point
+        VQSUB.S32 q9,  q9, q3
+        VQSUB.S32 q10, q10, q3
+        VQSUB.S32 q11, q11, q3
+        VQSUB.S32 q12, q12, q3
+        VQSUB.S32 q13, q13, q3
+        VQSUB.S32 q14, q14, q3
+        VQSUB.S32 q15, q15, q3
+
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -244,10 +272,6 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VQMOVN.S32 d22, q14
         VQMOVN.S32 d23, q15
 
-        VQADD.S16 q8,  q8, q0
-        VQADD.S16 q9,  q9, q0
-        VQADD.S16 q10, q10, q0
-        VQADD.S16 q11, q11, q0
 
         VDUP.8  q12, d11[6]             // output_min
 
@@ -417,7 +441,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

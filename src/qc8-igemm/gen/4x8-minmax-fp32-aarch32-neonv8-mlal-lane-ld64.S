@@ -75,7 +75,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_l
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLD1.32 {d11[]}, [r5]           // QC8 params
+        VLD1.32 {d11[]}, [r5]           // QC8 neonv8 params
 
 
         .p2align 3

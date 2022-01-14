@@ -77,7 +77,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_pr
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLD1.32 {d11[]}, [r5]           // QC8 params
+        VLD1.32 {d11[]}, [r5]           // QC8 neonv8 params
         LDR     r7, [sp, 80]            // cn_stride
 
         PLD     [r9,  64]               // Prefetch B
@@ -217,6 +217,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_pr
         BNE     3f
 
 2:
+
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
 

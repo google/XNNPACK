@@ -220,6 +220,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BNE     3f
 
 2:
+
         # RNDNU quantization
         VDUP.32 q0, d10[0]              // right_pre_shift
 
