@@ -27,6 +27,11 @@
 
 class ConvolutionOperatorTester {
  public:
+  enum class WeightsType {
+    Default,
+    FP32,
+  };
+
   inline ConvolutionOperatorTester& padding_tf_same(bool padding_same) {
     if (padding_same) {
       assert(padding_top() == 0);
@@ -497,6 +502,15 @@ class ConvolutionOperatorTester {
     return this->has_bias_;
   }
 
+  inline ConvolutionOperatorTester& weights_type(WeightsType weights_type) {
+    this->weights_type_ = weights_type;
+    return *this;
+  }
+
+  inline WeightsType weights_type() const {
+    return this->weights_type_;
+  }
+
   inline ConvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -507,6 +521,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestNHWCxQC8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -701,6 +717,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestNHWCxQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -873,6 +891,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestNHWCxQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -1043,6 +1063,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestNHWCxF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -1202,6 +1224,15 @@ class ConvolutionOperatorTester {
   }
 
   void TestNHWCxF16() const {
+    switch (weights_type()) {
+      case WeightsType::Default:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
@@ -1210,15 +1241,20 @@ class ConvolutionOperatorTester {
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
     std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<float> kernel_as_float(kernel.size());
     std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<float> bias_as_float(bias.size());
     std::vector<uint16_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f16rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
       std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -1309,6 +1345,22 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
+      const void* kernel_data = kernel.data();
+      const void* bias_data = bias.data();
+      if (weights_type() == WeightsType::FP32) {
+        kernel_data = kernel_as_float.data();
+        bias_data = bias_as_float.data();
+      }
+      uint32_t flags = 0;
+      if (depthwise_layout()) {
+        flags |= XNN_FLAG_DEPTHWISE_CONVOLUTION;
+      }
+      if (padding_tf_same()) {
+        flags |= XNN_FLAG_TENSORFLOW_SAME_PADDING;
+      }
+      if (weights_type() == WeightsType::FP32) {
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+      }
       xnn_status status = xnn_create_convolution2d_nhwc_f16(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
@@ -1317,9 +1369,9 @@ class ConvolutionOperatorTester {
           dilation_height(), dilation_width(),
           groups(), group_input_channels(), group_output_channels(),
           input_channel_stride(), output_channel_stride(),
-          kernel.data(), has_bias() ? bias.data() : nullptr,
+          kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
-          (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
+          flags,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1361,6 +1413,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestNCHWxF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -1555,6 +1609,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestSetupNHWCxQC8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -1816,6 +1872,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestSetupNHWCxQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -2048,6 +2106,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestSetupNHWCxQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -2278,6 +2338,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestSetupNHWCxF16() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -2491,6 +2553,8 @@ class ConvolutionOperatorTester {
   }
 
   void TestSetupNHWCxF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     ASSERT_FALSE(depthwise_layout());
 
     std::random_device random_device;
@@ -2736,5 +2800,6 @@ class ConvolutionOperatorTester {
   bool depthwise_layout_{false};
   bool force_nhwc_input_{false};
   bool has_bias_{true};
+  WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
 };

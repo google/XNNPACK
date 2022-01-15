@@ -865,6 +865,21 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
+  xnn_pack_vmulcaddc_w_function pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_function) xnn_pack_f16_vmulcaddc_w;
+  xnn_pack_dwconv_hwg_w_function pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_function) xnn_pack_f16_dwconv_hwg_w;
+  xnn_pack_dwconv_ghw_w_function pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_function) xnn_pack_f16_dwconv_ghw_w;
+  xnn_pack_gemm_goi_w_function pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w;
+  xnn_pack_conv_kgo_w_function pack_conv_kgo_w = (xnn_pack_conv_kgo_w_function) xnn_pack_f16_conv_kgo_w;
+  xnn_pack_conv_goki_w_function pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w;
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_function) xnn_pack_f32_to_f16_vmulcaddc_w;
+    pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_function) xnn_pack_f32_to_f16_dwconv_hwg_w;
+    pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_function) xnn_pack_f32_to_f16_dwconv_ghw_w;
+    pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f32_to_f16_gemm_goi_w;
+    pack_conv_kgo_w = (xnn_pack_conv_kgo_w_function) xnn_pack_f32_to_f16_conv_kgo_w;
+    pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f32_to_f16_conv_goki_w;
+  }
+
   return create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
@@ -876,12 +891,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) xnn_pack_f16_vmulcaddc_w,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_f16_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_f16_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_f16_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w,
+    pack_vmulcaddc_w,
+    pack_dwconv_hwg_w,
+    pack_dwconv_ghw_w,
+    pack_gemm_goi_w,
+    pack_conv_kgo_w,
+    pack_conv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
     0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),

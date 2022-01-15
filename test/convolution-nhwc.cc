@@ -5021,6 +5021,17 @@ TEST(CONVOLUTION_NHWC_F16, 1x1) {
     .TestNHWCxF16();
 }
 
+TEST(CONVOLUTION_NHWC_F16, 1x1_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_qmin) {
   ConvolutionOperatorTester()
     .input_size(27, 29)
@@ -5089,6 +5100,18 @@ TEST(CONVOLUTION_NHWC_F16, 1x1_with_batch) {
 
 TEST(CONVOLUTION_NHWC_F16, grouped_1x1) {
   ConvolutionOperatorTester()
+    .input_size(24, 25)
+    .kernel_size(1, 1)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(19)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, grouped_1x1_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .input_size(24, 25)
     .kernel_size(1, 1)
     .groups(2)
@@ -5340,6 +5363,18 @@ TEST(CONVOLUTION_NHWC_F16, 3x3) {
     .TestNHWCxF16();
 }
 
+TEST(CONVOLUTION_NHWC_F16, 3x3_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(CONVOLUTION_NHWC_F16, 3x3_without_padding) {
   ConvolutionOperatorTester()
     .input_size(13, 12)
@@ -5444,6 +5479,19 @@ TEST(CONVOLUTION_NHWC_F16, 3x3_with_batch) {
 
 TEST(CONVOLUTION_NHWC_F16, grouped_3x3) {
   ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, grouped_3x3_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .input_size(10, 11)
     .padding(1)
     .kernel_size(3, 3)
@@ -5816,6 +5864,16 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_1x1) {
     .TestNHWCxF16();
 }
 
+TEST(CONVOLUTION_NHWC_F16, depthwise_1x1_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(CONVOLUTION_NHWC_F16, depthwise_1x1_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
@@ -5915,6 +5973,17 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_2x2d2x1) {
 
 TEST(CONVOLUTION_NHWC_F16, depthwise_3x3) {
   ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, depthwise_3x3_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .input_size(15, 14)
     .padding(1, 1)
     .kernel_size(3, 3)
@@ -6142,8 +6211,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1) {
     .TestNHWCxF16();
 }
 
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1_with_depth_multiplier) {
   ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .group_output_channels(3)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1_with_depth_multiplier_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .depthwise_layout(true)
     .input_size(15, 14)
     .kernel_size(1, 1)
@@ -6210,8 +6302,33 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 3x3) {
     .TestNHWCxF16();
 }
 
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 3x3_weight_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 3x3_with_depth_multiplier) {
   ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(24)
+    .group_output_channels(3)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 3x3_with_depth_multiplier_with_fp32_weights) {
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .depthwise_layout(true)
     .input_size(15, 14)
     .padding(1, 1)

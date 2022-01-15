@@ -8,7 +8,8 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <stdio.h>  // for printf
+
+#include <fp16.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
@@ -112,6 +113,62 @@ void xnn_pack_f16_gemm_goi_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
             *packed_w++ =
               k[(nr_block_start + nr_block_offset) * kc + (kr_block_start + kr_block_offset)];
+          }
+          packed_w += kr - kr_block_size;
+        }
+        packed_w += (nr - nr_block_size) * kr;
+      }
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+    }
+    k += nc * kc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  } while (--g != 0);
+}
+
+void xnn_pack_f32_to_f16_gemm_goi_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  size_t extra_bytes,
+  const void* params)
+{
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
+  do {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      if XNN_LIKELY(b != NULL) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_w[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+        }
+      }
+      packed_w += nr;
+
+      for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+            *packed_w++ =
+              fp16_ieee_from_fp32_value(k[(nr_block_start + nr_block_offset) * kc + round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset]);
+          }
+        }
+        packed_w += (nr - nr_block_size) * kr;
+      }
+
+      for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
+        const size_t kr_block_size = min(kc - kr_block_start, kr);
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+            *packed_w++ =
+              fp16_ieee_from_fp32_value(k[(nr_block_start + nr_block_offset) * kc + (kr_block_start + kr_block_offset)]);
           }
           packed_w += kr - kr_block_size;
         }
@@ -659,6 +716,65 @@ void xnn_pack_f16_conv_goki_w(
   } while (--g != 0);
 }
 
+void xnn_pack_f32_to_f16_conv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t ks,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  size_t extra_bytes,
+  const void* params)
+{
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
+  do {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      if XNN_LIKELY(b != NULL) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_w[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+        }
+      }
+      packed_w += nr;
+
+      for (size_t ki = 0; ki < ks; ki++) {
+        for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+              *packed_w++ =
+                fp16_ieee_from_fp32_value(k[((nr_block_start + nr_block_offset) * ks + ki) * kc + round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset]);
+            }
+          }
+          packed_w += (nr - nr_block_size) * kr;
+        }
+
+        for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
+          const size_t kr_block_size = min(kc - kr_block_start, kr);
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+            for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+              *packed_w++ =
+                fp16_ieee_from_fp32_value(k[((nr_block_start + nr_block_offset) * ks + ki) * kc + (kr_block_start + kr_block_offset)]);
+            }
+            packed_w += kr - kr_block_size;
+          }
+          packed_w += (nr - nr_block_size) * kr;
+        }
+      }
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+    }
+    k += ks * kc * nc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  } while (--g != 0);
+}
+
 void xnn_pack_qu8_conv_goki_w(
   size_t g,
   size_t nc,
@@ -864,6 +980,44 @@ void xnn_pack_f16_conv_kgo_w(
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           *packed_w =
             k[ki * g * nc + (nr_block_start + nr_block_offset)];
+          packed_w += kr;
+        }
+        packed_w += (nr - nr_block_size) * kr;
+      }
+      packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+    }
+    k += nc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  }
+}
+
+void xnn_pack_f32_to_f16_conv_kgo_w(
+  size_t g,
+  size_t nc,
+  size_t ks,
+  size_t nr,
+  size_t kr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  size_t extra_bytes,
+  const void* params)
+{
+  for (size_t i = 0; i < g; i++) {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      if XNN_LIKELY(b != NULL) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_w[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+        }
+      }
+      packed_w += nr;
+      for (size_t ki = 0; ki < ks; ki++) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          *packed_w =
+            fp16_ieee_from_fp32_value(k[ki * g * nc + (nr_block_start + nr_block_offset)]);
           packed_w += kr;
         }
         packed_w += (nr - nr_block_size) * kr;
@@ -1354,6 +1508,43 @@ void xnn_pack_f16_dwconv_ghw_w(
   }
 }
 
+void xnn_pack_f32_to_f16_dwconv_ghw_w(
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t cr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  size_t extra_bytes,
+  const void* params)
+{
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
+    const size_t cr_block_size = min(c - cr_block_start, cr);
+    if XNN_LIKELY(b != NULL) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+        *packed_w++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+      }
+    } else {
+      size_t n = cr_block_size;
+      do {
+        *packed_w++ = 0;
+      } while (--n != 0);
+    }
+    packed_w += cr - cr_block_size;
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
+        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          *packed_w++ = kv;
+        }
+        packed_w += cr - cr_block_size;
+      }
+    }
+    packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+  }
+}
+
 void xnn_pack_qu8_dwconv_ghw_w(
   size_t h,
   size_t w,
@@ -1506,6 +1697,43 @@ void xnn_pack_f16_dwconv_hwg_w(
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           const uint16_t kv = k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
+          *packed_w++ = kv;
+        }
+        packed_w += cr - cr_block_size;
+      }
+    }
+    packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
+  }
+}
+
+void xnn_pack_f32_to_f16_dwconv_hwg_w(
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t cr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  size_t extra_bytes,
+  const void* params)
+{
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
+    const size_t cr_block_size = min(c - cr_block_start, cr);
+    if XNN_LIKELY(b != NULL) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+        *packed_w++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+      }
+    } else {
+      size_t n = cr_block_size;
+      do {
+        *packed_w++ = 0;
+      } while (--n != 0);
+    }
+    packed_w += cr - cr_block_size;
+    for (size_t x = 0; x < w; x++) {
+      for (size_t y = 0; y < h; y++) {
+        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_w++ = kv;
         }
         packed_w += cr - cr_block_size;
@@ -1876,6 +2104,34 @@ void xnn_pack_f16_vmulcaddc_w(
     if XNN_LIKELY(b != NULL) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
         *packed_w++ = b[cr_block_start + cr_block_offset];
+      }
+    } else {
+      size_t n = cr_block_size;
+      do {
+        *packed_w++ = 0;
+      } while (--n != 0);
+    }
+    packed_w += cr - cr_block_size;
+  }
+}
+
+void xnn_pack_f32_to_f16_vmulcaddc_w(
+  size_t c,
+  size_t cr,
+  const float* s,
+  const float* b,
+  uint16_t* packed_w,
+  const void* params)
+{
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
+    const size_t cr_block_size = min(c - cr_block_start, cr);
+    for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+      *packed_w++ = fp16_ieee_from_fp32_value(s[cr_block_start + cr_block_offset]);
+    }
+    packed_w += cr - cr_block_size;
+    if XNN_LIKELY(b != NULL) {
+      for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
+        *packed_w++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
       }
     } else {
       size_t n = cr_block_size;

@@ -50,6 +50,9 @@ extern "C" {
 /// Match behaviour of TensorFlow 1.x.
 #define XNN_FLAG_TENSORFLOW_LEGACY_MODE 0x00000004
 
+/// Static weights of the FP16 operator are in FP32 format.
+#define XNN_FLAG_FP32_STATIC_WEIGHTS 0x00000008
+
 /// Align corners of input and output images in resize operations.
 #define XNN_FLAG_ALIGN_CORNERS 0x00000008
 
