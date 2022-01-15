@@ -377,8 +377,10 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/up2x9-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up2x25-minmax-fp32-scalar-fmagic.c
   src/qc8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
+  src/qc8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qc8-gemm/gen/2x2-minmax-fp32-scalar-fmagic.c
   src/qc8-igemm/gen/1x2-minmax-fp32-scalar-fmagic.c
+  src/qc8-igemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qc8-igemm/gen/2x2-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-fmagic.c
@@ -5756,11 +5758,11 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-ld64.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-prfm-ld64.S
-  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-ld64.S
-  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
   src/qc8-gemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-ld64.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64.S
   src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
   src/qc8-igemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S
