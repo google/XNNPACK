@@ -509,14 +509,20 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
     xnn_params.f16.gemm.init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
   }
+  xnn_pack_gemm_io_w_function pack_gemm_io_w = (xnn_pack_gemm_io_w_function) xnn_pack_f16_gemm_io_w;
+  xnn_pack_gemm_goi_w_function pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w;
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    pack_gemm_io_w = (xnn_pack_gemm_io_w_function) xnn_pack_f32_to_f16_gemm_io_w;
+    pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f32_to_f16_gemm_goi_w;
+  }
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,
     kernel, bias, flags,
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,
-    (xnn_pack_gemm_io_w_function) xnn_pack_f16_gemm_io_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w,
+    pack_gemm_io_w,
+    pack_gemm_goi_w,
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     &xnn_params.f16.gemm, &xnn_params.f16.gemm.minmax,

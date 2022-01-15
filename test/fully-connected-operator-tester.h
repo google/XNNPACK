@@ -26,6 +26,11 @@
 
 class FullyConnectedOperatorTester {
  public:
+  enum class WeightsType {
+    Default,
+    FP32,
+  };
+
   inline FullyConnectedOperatorTester& input_channels(size_t input_channels) {
     assert(input_channels >= 1);
     this->input_channels_ = input_channels;
@@ -122,6 +127,15 @@ class FullyConnectedOperatorTester {
     return this->has_bias_;
   }
 
+  inline FullyConnectedOperatorTester& weights_type(WeightsType weights_type) {
+    this->weights_type_ = weights_type;
+    return *this;
+  }
+
+  inline WeightsType weights_type() const {
+    return this->weights_type_;
+  }
+
   inline FullyConnectedOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -132,6 +146,8 @@ class FullyConnectedOperatorTester {
   }
 
   void TestQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -253,6 +269,8 @@ class FullyConnectedOperatorTester {
   }
 
   void TestQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -373,6 +391,8 @@ class FullyConnectedOperatorTester {
   }
 
   void TestF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -482,6 +502,15 @@ class FullyConnectedOperatorTester {
   }
 
   void TestF16() const {
+    switch (weights_type()) {
+      case WeightsType::Default:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -490,14 +519,18 @@ class FullyConnectedOperatorTester {
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
       (batch_size() - 1) * input_stride() + input_channels());
     std::vector<uint16_t> kernel(output_channels() * input_channels());
+    std::vector<float> kernel_as_float(kernel.size());
     std::vector<uint16_t> bias(output_channels());
+    std::vector<float> bias_as_float(bias.size());
     std::vector<uint16_t> output((batch_size() - 1) * output_stride() + output_channels());
     std::vector<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f16rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
       std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(output.begin(), output.end(), UINT16_C(0x7C00));
 
       // Compute reference results, without renormalization.
@@ -548,12 +581,25 @@ class FullyConnectedOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
+      const void* kernel_data = kernel.data();
+      const void* bias_data = bias.data();
+      if (weights_type() == WeightsType::FP32) {
+        kernel_data = kernel_as_float.data();
+        bias_data = bias_as_float.data();
+      }
+      uint32_t flags = 0;
+      if (transpose_weights()) {
+        flags |= XNN_FLAG_TRANSPOSE_WEIGHTS;
+      }
+      if (weights_type() == WeightsType::FP32) {
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+      }
       const xnn_status status = xnn_create_fully_connected_nc_f16(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          kernel.data(), has_bias() ? bias.data() : nullptr,
+          kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
-          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+          flags,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -601,5 +647,6 @@ class FullyConnectedOperatorTester {
   uint8_t qmax_{255};
   bool transpose_weights_{false};
   bool has_bias_{true};
+  WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
 };

@@ -484,6 +484,53 @@ void xnn_pack_f16_gemm_io_w(
   }
 }
 
+void xnn_pack_f32_to_f16_gemm_io_w(
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  const void* params)
+{
+  const size_t skr = sr * kr;
+  const size_t skc = round_down_po2(kc, skr);
+  const size_t sr_mask = (sr - 1) * kr;
+  for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+    const size_t nr_block_size = min(nc - nr_block_start, nr);
+    if XNN_LIKELY(b != NULL) {
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+        packed_w[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+      }
+    }
+    packed_w += nr;
+
+    for (size_t kr_block_start = 0; kr_block_start < skc; kr_block_start += kr) {
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+        for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+          *packed_w++ =
+            fp16_ieee_from_fp32_value(k[(round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & sr_mask) + kr_block_offset) * nc + (nr_block_start + nr_block_offset)]);
+        }
+      }
+      packed_w += (nr - nr_block_size) * kr;
+    }
+
+    for (size_t kr_block_start = skc; kr_block_start < kc; kr_block_start += kr) {
+      const size_t kr_block_size = min(kc - kr_block_start, kr);
+      for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+        for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
+          *packed_w++ =
+            fp16_ieee_from_fp32_value(k[(kr_block_start + kr_block_offset) * nc + (nr_block_start + nr_block_offset)]);
+        }
+        packed_w += kr - kr_block_size;
+      }
+      packed_w += (nr - nr_block_size) * kr;
+    }
+  }
+}
+
 void xnn_pack_qu8_gemm_io_w(
   size_t nc,
   size_t kc,

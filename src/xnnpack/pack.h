@@ -155,6 +155,17 @@ XNN_INTERNAL void xnn_pack_f16_gemm_io_w(
   uint16_t* packed_w,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f32_to_f16_gemm_io_w(
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_qu8_gemm_io_w(
   size_t nc,
   size_t kc,

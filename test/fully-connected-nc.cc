@@ -504,6 +504,16 @@ TEST(FULLY_CONNECTED_NC_F16, small_batch) {
     .TestF16();
 }
 
+TEST(FULLY_CONNECTED_NC_F16, small_batch_fp32_weights) {
+  FullyConnectedOperatorTester()
+    .weights_type(FullyConnectedOperatorTester::WeightsType::FP32)
+    .batch_size(12)
+    .input_channels(23)
+    .output_channels(19)
+    .iterations(3)
+    .TestF16();
+}
+
 TEST(FULLY_CONNECTED_NC_F16, small_batch_with_qmin) {
   FullyConnectedOperatorTester()
     .batch_size(12)
@@ -544,8 +554,9 @@ TEST(FULLY_CONNECTED_NC_F16, small_batch_with_output_stride) {
     .TestF16();
 }
 
-TEST(FULLY_CONNECTED_NC_F16, small_batch_transpose_weights) {
+TEST(FULLY_CONNECTED_NC_F16, small_batch_transpose_fp32_weights) {
   FullyConnectedOperatorTester()
+    .weights_type(FullyConnectedOperatorTester::WeightsType::FP32)
     .transpose_weights(true)
     .batch_size(12)
     .input_channels(23)
