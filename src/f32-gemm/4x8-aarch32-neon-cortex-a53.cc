@@ -453,6 +453,9 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   bind(l6);
 
   switch (nc % 8) {
+    case 0:
+      // Do nothing.
+      break;
     case 1:
       vst1_32({d16[0]}, mem[r11]);
       vst1_32({d20[0]}, mem[r4]);
@@ -507,9 +510,8 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
       vst1_32({d27[0]}, mem[r8]);
       vst1_32({d31[0]}, mem[r6]);
       break;
-    case 0:
-      // Do nothing.
-      break;
+    default:
+      XNN_UNREACHABLE;
   }
 
   add(sp, sp, 4);
