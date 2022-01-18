@@ -51,7 +51,7 @@ class Generator : public Assembler {
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
 void Generator::generate(size_t nc, size_t kc, void* params) {
-  Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
+  Label l0, l1, l2, l3, l4, l5, l6;
 
   // Push 100 bytes
   // r2 will be reloaded in outer loop
@@ -451,38 +451,67 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 
   // Store odd width
   bind(l6);
-  tst(r1, 4);
-  beq(l7);
-  vst1_32({d16-d17}, mem[r11]++);
-  vst1_32({d20-d21}, mem[r4]++);
-  vmov(q8, q9);
-  vmov(q10, q11);
-  vst1_32({d24-d25}, mem[r8]++);
-  vst1_32({d28-d29}, mem[r6]++);
-  vmov(q12, q13);
-  vmov(q14, q15);
 
-  bind(l7);
-  tst(r1, 2);
-  beq(l8);
-  vst1_32({d16}, mem[r11]++);
-  vst1_32({d20}, mem[r4]++);
-  vmov(d16, d17);
-  vmov(d20, d21);
-  vst1_32({d24}, mem[r8]++);
-  vst1_32({d28}, mem[r6]++);
-  vmov(d24, d25);
-  vmov(d28, d29);
+  switch (nc % 8) {
+    case 1:
+      vst1_32({d16[0]}, mem[r11]);
+      vst1_32({d20[0]}, mem[r4]);
+      vst1_32({d24[0]}, mem[r8]);
+      vst1_32({d28[0]}, mem[r6]);
+      break;
+    case 2:
+      vst1_32({d16}, mem[r11]);
+      vst1_32({d20}, mem[r4]);
+      vst1_32({d24}, mem[r8]);
+      vst1_32({d28}, mem[r6]);
+      break;
+    case 3:
+      vst1_32({d16}, mem[r11]++);
+      vst1_32({d20}, mem[r4]++);
+      vst1_32({d24}, mem[r8]++);
+      vst1_32({d28}, mem[r6]++);
+      vst1_32({d17[0]}, mem[r11]);
+      vst1_32({d21[0]}, mem[r4]);
+      vst1_32({d25[0]}, mem[r8]);
+      vst1_32({d29[0]}, mem[r6]);
+      break;
+    case 4:
+      vst1_32({d16, d17}, mem[r11]);
+      vst1_32({d20, d21}, mem[r4]);
+      vst1_32({d24, d25}, mem[r8]);
+      vst1_32({d28, d29}, mem[r6]);
+      break;
+    case 5:
+      vst1_32({d16, d17}, mem[r11]++);
+      vst1_32({d20, d21}, mem[r4]++);
+      vst1_32({d24, d25}, mem[r8]++);
+      vst1_32({d28, d29}, mem[r6]++);
+      vst1_32({d18[0]}, mem[r11]);
+      vst1_32({d22[0]}, mem[r4]);
+      vst1_32({d26[0]}, mem[r8]);
+      vst1_32({d30[0]}, mem[r6]);
+      break;
+    case 6:
+      vst1_32({d16-d18}, mem[r11]);
+      vst1_32({d20-d22}, mem[r4]);
+      vst1_32({d24-d26}, mem[r8]);
+      vst1_32({d28-d30}, mem[r6]);
+      break;
+    case 7:
+      vst1_32({d16-d18}, mem[r11]++);
+      vst1_32({d20-d22}, mem[r4]++);
+      vst1_32({d24-d26}, mem[r8]++);
+      vst1_32({d28-d30}, mem[r6]++);
+      vst1_32({d19[0]}, mem[r11]);
+      vst1_32({d23[0]}, mem[r4]);
+      vst1_32({d27[0]}, mem[r8]);
+      vst1_32({d31[0]}, mem[r6]);
+      break;
+    case 0:
+      // Do nothing.
+      break;
+  }
 
-  bind(l8);
-  tst(r1, 1);
-  beq(l9);
-  vst1_32({d16[0]}, mem[r11]);
-  vst1_32({d20[0]}, mem[r4]);
-  vst1_32({d24[0]}, mem[r8]);
-  vst1_32({d28[0]}, mem[r6]);
-
-  bind(l9);
   add(sp, sp, 4);
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});

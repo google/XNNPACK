@@ -10987,6 +10987,7 @@ xnnpack_unit_test(
         "test/f32-gemm-minmax.cc",
         "test/f32-gemm-minmax-2.cc",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
         ":gemm_microkernel_tester",
