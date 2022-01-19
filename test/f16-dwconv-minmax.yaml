@@ -2,6 +2,7 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith
   init: xnn_init_f16_minmax_neon_params
   arch:
@@ -74,3 +75,39 @@
   init: xnn_init_f16_minmax_neon_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x25__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x25__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x25__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x25__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up8x9__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up8x9__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x9__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x9__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x9__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x9__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up8x4__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up8x4__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x4__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up16x4__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x4__fma3
+  init: xnn_init_f16_minmax_avx_params
+- name: xnn_f16_dwconv_minmax_ukernel_up32x4__fma3_acc2
+  init: xnn_init_f16_minmax_avx_params
