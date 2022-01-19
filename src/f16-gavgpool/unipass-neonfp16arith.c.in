@@ -1,0 +1,123 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert ROW_TILE >= 3
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/gavgpool.h>
+
+
+void xnn_f16_gavgpool_minmax_ukernel_${ROW_TILE}x__neonfp16arith_c${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* output,
+    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(rows != 0);
+  assert(rows <= ${ROW_TILE});
+  assert(channels != 0);
+
+  const __fp16* i0 = input;
+  $for M in range(1, ROW_TILE):
+    const __fp16* i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_stride);
+    $if M % 2 == 1:
+      if XNN_UNPREDICTABLE(rows < ${M+1}) {
+        i${M} = (const __fp16*) zero;
+      }
+    $else:
+      if XNN_UNPREDICTABLE(rows <= ${M}) {
+        i${M} = (const __fp16*) zero;
+      }
+
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+  for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
+    $for M in range(2):
+      $for C in range(0, CHANNEL_TILE, 8):
+        const float16x8_t vi${M}x${ABC[C:C+8]} = vld1q_f16(i${M}); i${M} += 8;
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      const float16x8_t vi2x${ABC[C:C+8]} = vld1q_f16(i2); i2 += 8;
+      float16x8_t vacc${ABC[C:C+8]} = vaddq_f16(vi0x${ABC[C:C+8]}, vi1x${ABC[C:C+8]});
+
+    $for M in range(2, ROW_TILE):
+      $for C in range(0, CHANNEL_TILE, 8):
+        $if M + 1 != ROW_TILE:
+          const float16x8_t vi${M+1}x${ABC[C:C+8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+        vacc${ABC[C:C+8]} = vaddq_f16(vacc${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vmulq_f16(vacc${ABC[C:C+8]}, vscale);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vmaxq_f16(vacc${ABC[C:C+8]}, vmin);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vminq_f16(vacc${ABC[C:C+8]}, vmax);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vst1q_f16(output, vacc${ABC[C:C+8]}); output = (__fp16*) output + 8;
+  }
+  if XNN_UNLIKELY(channels != 0) {
+    ${"do " if CHANNEL_TILE > 8 else ""}{
+      $for M in range(2):
+        const float16x8_t vi${M}x${ABC[0:8]} = vld1q_f16(i${M}); i${M} += 8;
+
+      const float16x8_t vi2x${ABC[0:8]} = vld1q_f16(i2); i2 += 8;
+      float16x8_t vacc${ABC[0:8]} = vaddq_f16(vi0x${ABC[0:8]}, vi1x${ABC[0:8]});
+
+      $for M in range(2, ROW_TILE):
+        $if M + 1 != ROW_TILE:
+          const float16x8_t vi${M+1}x${ABC[0:8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+        vacc${ABC[0:8]} = vaddq_f16(vacc${ABC[0:8]}, vi${M}x${ABC[0:8]});
+
+      vacc${ABC[0:8]} = vmulq_f16(vacc${ABC[0:8]}, vscale);
+      vacc${ABC[0:8]} = vmaxq_f16(vacc${ABC[0:8]}, vmin);
+      vacc${ABC[0:8]} = vminq_f16(vacc${ABC[0:8]}, vmax);
+
+      $if CHANNEL_TILE > 8:
+        if XNN_LIKELY(channels >= 8) {
+          vst1q_f16(output, vacc${ABC[0:8]}); output = (__fp16*) output + 8;
+          channels -= 8;
+        } else {
+          float16x4_t vacc${ABC[0:4]} = vget_low_f16(vacc${ABC[0:8]});
+          if (channels & 4) {
+            vst1_f16(output, vacc${ABC[0:4]}); output = (__fp16*) output + 4;
+            vacc${ABC[0:4]} = vget_high_f16(vacc${ABC[0:8]});
+          }
+          if (channels & 2) {
+            vst1_lane_u32(output, vreinterpret_u32_f16(vacc${ABC[0:4]}), 0); output = (__fp16*) output + 2;
+            vacc${ABC[0:4]} = vext_f16(vacc${ABC[0:4]}, vacc${ABC[0:4]}, 2);
+          }
+          if (channels & 1) {
+            vst1_lane_f16(output, vacc${ABC[0:4]}, 0); output = (__fp16*) output + 1;
+          }
+          channels = 0;
+        }
+      $else:
+        float16x4_t vacc${ABC[0:4]} = vget_low_f16(vacc${ABC[0:8]});
+        if (channels & 4) {
+          vst1_f16(output, vacc${ABC[0:4]}); output = (__fp16*) output + 4;
+          vacc${ABC[0:4]} = vget_high_f16(vacc${ABC[0:8]});
+        }
+        if (channels & 2) {
+          vst1_lane_u32(output, vreinterpret_u32_f16(vacc${ABC[0:4]}), 0); output = (__fp16*) output + 2;
+          vacc${ABC[0:4]} = vext_f16(vacc${ABC[0:4]}, vacc${ABC[0:4]}, 2);
+        }
+        if (channels & 1) {
+          vst1_lane_f16(output, vacc${ABC[0:4]}, 0); output = (__fp16*) output + 1;
+        }
+    }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
+  }
+}

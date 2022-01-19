@@ -1,0 +1,21 @@
+#!/bin/sh
+# Copyright 2022 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+################################## ARM NEON ###################################
+tools/xngen src/f16-gavgpool/unipass-neonfp16arith.c.in -D ROW_TILE=7 -D CHANNEL_TILE=8  -o src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c &
+tools/xngen src/f16-gavgpool/unipass-neonfp16arith.c.in -D ROW_TILE=7 -D CHANNEL_TILE=16 -o src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c16.c &
+tools/xngen src/f16-gavgpool/unipass-neonfp16arith.c.in -D ROW_TILE=7 -D CHANNEL_TILE=24 -o src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c24.c &
+tools/xngen src/f16-gavgpool/unipass-neonfp16arith.c.in -D ROW_TILE=7 -D CHANNEL_TILE=32 -o src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c32.c &
+
+tools/xngen src/f16-gavgpool/multipass-neonfp16arith.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=8  -o src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c &
+tools/xngen src/f16-gavgpool/multipass-neonfp16arith.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -o src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c16.c &
+tools/xngen src/f16-gavgpool/multipass-neonfp16arith.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -o src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c24.c &
+tools/xngen src/f16-gavgpool/multipass-neonfp16arith.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=32 -o src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c32.c &
+
+################################## Unit tests #################################
+tools/generate-gavgpool-test.py --spec test/f16-gavgpool-minmax.yaml --output test/f16-gavgpool-minmax.cc &
+
+wait

@@ -35,7 +35,7 @@ void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__sse41_c8(
   const uint8_t* i4 = (const uint8_t*) ((uintptr_t) i3 + input_stride);
   const uint8_t* i5 = (const uint8_t*) ((uintptr_t) i4 + input_stride);
   const uint8_t* i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
-  const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8);
+  const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8) * sizeof(uint8_t);
 
   const __m128i vinit_bias = _mm_load_si128((const __m128i*) params->fp32_sse4.init_bias);
   int32_t* b = buffer;

@@ -41,9 +41,9 @@ void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBT
   $for M in range(1, ROW_TILE):
     const ${XINT8_T}* i${M} = (const ${XINT8_T}*) ((uintptr_t) i${M-1} + input_stride);
   $if CHANNEL_TILE <= 16:
-    const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, ${CHANNEL_TILE});
+    const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, ${CHANNEL_TILE}) * sizeof(${XINT8_T});
   $else:
-    const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8);
+    const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8) * sizeof(${XINT8_T});
 
   const __m128i vinit_bias = _mm_load_si128((const __m128i*) params->fp32_sse4.init_bias);
   int32_t* b = buffer;

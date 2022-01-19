@@ -3149,8 +3149,8 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c
-  src/f16-gavgpool/7p7x-minmax-neonfp16arith-c8.c
-  src/f16-gavgpool/7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c
   src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
@@ -3181,8 +3181,14 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up32x9-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up32x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up32x25-minmax-neonfp16arith.c
-  src/f16-gavgpool/7p7x-minmax-neonfp16arith-c8.c
-  src/f16-gavgpool/7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c16.c
+  src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c24.c
+  src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c32.c
+  src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c
+  src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c16.c
+  src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c24.c
+  src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c32.c
   src/f16-gemm/gen-inc/1x8inc-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen-inc/1x16inc-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen-inc/4x8inc-minmax-neonfp16arith-ld64.c

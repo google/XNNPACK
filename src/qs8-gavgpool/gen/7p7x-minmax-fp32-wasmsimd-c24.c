@@ -35,7 +35,7 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c24(
   const int8_t* i4 = (const int8_t*) ((uintptr_t) i3 + input_stride);
   const int8_t* i5 = (const int8_t*) ((uintptr_t) i4 + input_stride);
   const int8_t* i6 = (const int8_t*) ((uintptr_t) i5 + input_stride);
-  const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8);
+  const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8) * sizeof(int8_t);
 
   const v128_t vinit_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.init_bias);
   int32_t* b = buffer;

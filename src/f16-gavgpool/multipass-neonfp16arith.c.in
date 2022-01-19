@@ -1,0 +1,205 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert ROW_TILE >= 3
+$assert ROW_SUBTILE >= 3
+$assert ROW_SUBTILE <= ROW_TILE
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/gavgpool.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f16_gavgpool_minmax_ukernel_${ROW_TILE}p${ROW_SUBTILE}x__neonfp16arith_c${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    const void* zero,
+    void* buffer,
+    void* output,
+    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(rows > ${ROW_TILE});
+  assert(channels != 0);
+
+  const __fp16* i0 = input;
+  $for M in range(1, ROW_TILE):
+    const __fp16* i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_stride);
+  const size_t input_increment = ${ROW_TILE} * input_stride - round_up_po2(channels, 8) * sizeof(__fp16);
+
+  __fp16* b = buffer;
+  size_t c = channels;
+  for (; ${"c >= %d" % CHANNEL_TILE if CHANNEL_TILE > 8 else "c != 0"}; ${("c -= %d" if CHANNEL_TILE > 8 else "c = doz(c, %d)") % CHANNEL_TILE}) {
+    $for M in range(2):
+      $for C in range(0, CHANNEL_TILE, 8):
+        const float16x8_t vi${M}x${ABC[C:C+8]} = vld1q_f16(i${M}); i${M} += 8;
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      const float16x8_t vi2x${ABC[C:C+8]} = vld1q_f16(i2); i2 += 8;
+      float16x8_t vacc${ABC[C:C+8]} = vaddq_f16(vi0x${ABC[C:C+8]}, vi1x${ABC[C:C+8]});
+
+    $for M in range(2, ROW_TILE):
+      $for C in range(0, CHANNEL_TILE, 8):
+        $if M + 1 != ROW_TILE:
+          const float16x8_t vi${M+1}x${ABC[C:C+8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+        vacc${ABC[C:C+8]} = vaddq_f16(vacc${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vst1q_f16(b, vacc${ABC[C:C+8]}); b += 8;
+  }
+  $if CHANNEL_TILE > 8:
+    if XNN_UNLIKELY(c != 0) {
+      do {
+        $for M in range(3):
+          const float16x8_t vi${M}x${ABC[0:8]} = vld1q_f16(i${M}); i${M} += 8;
+        float16x8_t vacc${ABC[0:8]} = vaddq_f16(vi0x${ABC[0:8]}, vi1x${ABC[0:8]});
+
+        $for M in range(2, ROW_TILE):
+          $if M + 1 != ROW_TILE:
+            const float16x8_t vi${M+1}x${ABC[0:8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+          vacc${ABC[0:8]} = vaddq_f16(vacc${ABC[0:8]}, vi${M}x${ABC[0:8]});
+
+        vst1q_f16(b, vacc${ABC[0:8]}); b += 8;
+
+        c = doz(c, 8);
+      } while (c != 0);
+    }
+
+  for (rows -= ${ROW_TILE}; rows > ${ROW_SUBTILE}; rows -= ${ROW_SUBTILE}) {
+    $for M in range(ROW_SUBTILE):
+      i${M} = (const __fp16*) ((uintptr_t) i${M + ROW_TILE - ROW_SUBTILE} + input_increment);
+
+    __fp16* b = buffer;
+    size_t c = channels;
+    for (; ${"c >= %d" % CHANNEL_TILE if CHANNEL_TILE > 8 else "c != 0"}; ${("c -= %d" if CHANNEL_TILE > 8 else "c = doz(c, %d)") % CHANNEL_TILE}) {
+      float16x8_t vacc${ABC[0:8]} = vld1q_f16(b);
+      $for C in range(8, CHANNEL_TILE, 8):
+        float16x8_t vacc${ABC[C:C+8]} = vld1q_f16(b + ${C});
+
+      $for C in range(0, CHANNEL_TILE, 8):
+        const float16x8_t vi0x${ABC[C:C+8]} = vld1q_f16(i0); i0 += 8;
+
+      $for M in range(ROW_TILE):
+        $for C in range(0, CHANNEL_TILE, 8):
+          $if M + 1 != ROW_TILE:
+            const float16x8_t vi${M+1}x${ABC[C:C+8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+          vacc${ABC[C:C+8]} = vaddq_f16(vacc${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
+
+      $for C in range(0, CHANNEL_TILE, 8):
+        vst1q_f16(b, vacc${ABC[C:C+8]}); b += 8;
+    }
+    $if CHANNEL_TILE > 8:
+      if XNN_UNLIKELY(c != 0) {
+        do {
+          float16x8_t vacc${ABC[0:8]} = vld1q_f16(b);
+          const float16x8_t vi0x${ABC[0:8]} = vld1q_f16(i0); i0 += 8;
+
+          $for M in range(ROW_TILE):
+            $if M + 1 != ROW_TILE:
+              const float16x8_t vi${M+1}x${ABC[0:8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+            vacc${ABC[0:8]} = vaddq_f16(vacc${ABC[0:8]}, vi${M}x${ABC[0:8]});
+
+          vst1q_f16(b, vacc${ABC[0:8]}); b += 8;
+
+          c = doz(c, 8);
+        } while (c != 0);
+      }
+  }
+
+  i0 = (const __fp16*) ((uintptr_t) i${ROW_TILE - ROW_SUBTILE} + input_increment);
+  $for M in range(1, ROW_SUBTILE):
+    i${M} = (const __fp16*) ((uintptr_t) i${M + ROW_TILE - ROW_SUBTILE} + input_increment);
+    $if M % 2 == 1:
+      if XNN_UNPREDICTABLE(rows < ${M+1}) {
+        i${M} = (const __fp16*) zero;
+      }
+    $else:
+      if XNN_UNPREDICTABLE(rows <= ${M}) {
+        i${M} = (const __fp16*) zero;
+      }
+
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+  for (; channels >= ${CHANNEL_TILE}; channels -= ${CHANNEL_TILE}) {
+    $for C in range(0, CHANNEL_TILE, 8):
+      float16x8_t vacc${ABC[C:C+8]} = vld1q_f16(buffer); buffer = (__fp16*) buffer + 8;
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      const float16x8_t vi0x${ABC[C:C+8]} = vld1q_f16(i0); i0 += 8;
+
+    $for M in range(ROW_TILE):
+      $for C in range(0, CHANNEL_TILE, 8):
+        $if M + 1 != ROW_TILE:
+          const float16x8_t vi${M+1}x${ABC[C:C+8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+        vacc${ABC[C:C+8]} = vaddq_f16(vacc${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vmulq_f16(vacc${ABC[C:C+8]}, vscale);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vmaxq_f16(vacc${ABC[C:C+8]}, vmin);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vacc${ABC[C:C+8]} = vminq_f16(vacc${ABC[C:C+8]}, vmax);
+
+    $for C in range(0, CHANNEL_TILE, 8):
+      vst1q_f16(output, vacc${ABC[C:C+8]}); output = (__fp16*) output + 8;
+  }
+  if XNN_UNLIKELY(channels != 0) {
+    ${"do " if CHANNEL_TILE > 8 else ""}{
+      float16x8_t vacc${ABC[0:8]} = vld1q_f16(buffer); buffer = (__fp16*) buffer + 8;
+
+      const float16x8_t vi0x${ABC[0:8]} = vld1q_f16(i0); i0 += 8;
+      $for M in range(ROW_TILE):
+        $if M + 1 != ROW_TILE:
+          const float16x8_t vi${M+1}x${ABC[0:8]} = vld1q_f16(i${M+1}); i${M+1} += 8;
+        vacc${ABC[0:8]} = vaddq_f16(vacc${ABC[0:8]}, vi${M}x${ABC[0:8]});
+
+      vacc${ABC[0:8]} = vmulq_f16(vacc${ABC[0:8]}, vscale);
+      vacc${ABC[0:8]} = vmaxq_f16(vacc${ABC[0:8]}, vmin);
+      vacc${ABC[0:8]} = vminq_f16(vacc${ABC[0:8]}, vmax);
+
+      $if CHANNEL_TILE > 8:
+        if XNN_LIKELY(channels >= 8) {
+          vst1q_f16(output, vacc${ABC[0:8]}); output = (__fp16*) output + 8;
+          channels -= 8;
+        } else {
+          float16x4_t vacc${ABC[0:4]} = vget_low_f16(vacc${ABC[0:8]});
+          if (channels & 4) {
+            vst1_f16(output, vacc${ABC[0:4]}); output = (__fp16*) output + 4;
+            vacc${ABC[0:4]} = vget_high_f16(vacc${ABC[0:8]});
+          }
+          if (channels & 2) {
+            vst1_lane_u32(output, vreinterpret_u32_f16(vacc${ABC[0:4]}), 0); output = (__fp16*) output + 2;
+            vacc${ABC[0:4]} = vext_f16(vacc${ABC[0:4]}, vacc${ABC[0:4]}, 2);
+          }
+          if (channels & 1) {
+            vst1_lane_f16(output, vacc${ABC[0:4]}, 0); output = (__fp16*) output + 1;
+          }
+          channels = 0;
+        }
+      $else:
+        float16x4_t vacc${ABC[0:4]} = vget_low_f16(vacc${ABC[0:8]});
+        if (channels & 4) {
+          vst1_f16(output, vacc${ABC[0:4]}); output = (__fp16*) output + 4;
+          vacc${ABC[0:4]} = vget_high_f16(vacc${ABC[0:8]});
+        }
+        if (channels & 2) {
+          vst1_lane_u32(output, vreinterpret_u32_f16(vacc${ABC[0:4]}), 0); output = (__fp16*) output + 2;
+          vacc${ABC[0:4]} = vext_f16(vacc${ABC[0:4]}, vacc${ABC[0:4]}, 2);
+        }
+        if (channels & 1) {
+          vst1_lane_f16(output, vacc${ABC[0:4]}, 0); output = (__fp16*) output + 1;
+        }
+    }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
+  }
+}
