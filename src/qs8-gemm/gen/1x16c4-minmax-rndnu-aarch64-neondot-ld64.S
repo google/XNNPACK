@@ -35,7 +35,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
         BIC     x2, x2, 3
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q28, q29, [x5], 32
         SUBS    x0, x2, 8               // k = kc - 8
@@ -43,11 +43,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
         LDR     x11, [sp, 8]            // params
 
         # Is there at least 8 bytes?
-        B.LO    3f
+        B.LO    0f
 
         # Main loop - 8 bytes of A
         .p2align 3
-1:
+1:      // kc_loop
         LDR     d0,  [x3], 8
         LDR     q16, [x5, 0]
         LDR     q17, [x5, 16]
@@ -67,12 +67,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
         ADD     x5, x5, 128
         SDOT    v31.4s, v7.16b,  v0.4b[1]
         SUBS    x0, x0, 8
-        B.HS    1b
+        B.HS    1f
 
         # Is there a remainder?- 1 to 4 bytes of A
-        TBNZ    x0, 2, 3f
+        TBNZ    x0, 2, 0f
 
-2:
+2:      // clamp
         # Apply params - preshift, scale, postshift, bias and clamp
         LD1R    {v4.4s}, [x11], 4
         SQSHL   v28.4s, v28.4s, v4.4s   // shift to upper bits
@@ -105,18 +105,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
         SUBS    x1, x1, 16
         SMAX    v0.16b, v0.16b, v4.16b
         SMIN    v0.16b, v0.16b, v5.16b
-        B.LO    4f
+        B.LO    1f
 
         # Store full 1 x 16
         ST1     {v0.16b}, [x6], x12
         SUB     x3,  x3, x2             // a0 -= kc
-        B.NE    0b
+        B.NE    0f
 
         RET
 
         # Remainder - 4 bytes of A
         .p2align 3
-3:
+0:
         LDR     s0,  [x3], 4
         LDR     q16, [x5, 0]
         LDR     q17, [x5, 16]
@@ -127,26 +127,26 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64
         SDOT    v30.4s, v18.16b, v0.4b[0]
         ADD     x5, x5, 64
         SDOT    v31.4s, v19.16b, v0.4b[0]
-        B       2b
+        B       2f
 
         # Store odd width
         .p2align 3
-4:
-        TBZ     x1, 3, 5f
+1:
+        TBZ     x1, 3, 2f
         STR     d0, [x6], 8
         DUP     d0, v0.d[1]
-5:
-        TBZ     x1, 2, 6f
+2:
+        TBZ     x1, 2, 3f
         STR     s0, [x6], 4
         DUP     s0, v0.s[1]
-6:
-        TBZ     x1, 1, 7f
+3:
+        TBZ     x1, 1, 4f
         STR     h0, [x6], 2
         DUP     h0, v0.h[1]
-7:
-        TBZ     x1, 0, 8f
+4:
+        TBZ     x1, 0, 5f
         STR     b0, [x6]
-8:
+5:
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__aarch64_neondot_ld64

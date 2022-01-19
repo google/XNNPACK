@@ -62,7 +62,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
         MOV     v17.16b, v16.16b
@@ -82,7 +82,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
 
         # Main loop - 4 bytes of A
         .p2align 3
-1:
+1:      // kc_loop
         LD1R    {v0.4s},  [x3], 4
         LDR     q4, [x5], 16
         LD1R    {v1.4s}, [x15], 4
@@ -108,7 +108,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         SDOT    v29.4s, v7.16b, v1.16b
         SDOT    v30.4s, v7.16b, v2.16b
         SDOT    v31.4s, v7.16b, v3.16b
-        B.HI    1b
+        B.HI    1f
 
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
@@ -226,13 +226,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         SUB     x13, x13, x2            // a2 -= kc
         ST1     {v3.16b}, [x7], x12
         SUB     x4,  x4, x2             // a3 -= kc
-        B.NE    0b
+        B.NE    0f
         RET
 
         # Store odd width
         .p2align 3
-2:
-        TBZ     x1, 3, 3f
+2:      // clamp
+        TBZ     x1, 3, 0f
         STR     d0, [x6], 8
         STR     d1, [x8], 8
         DUP     d0, v0.d[1]
@@ -241,8 +241,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         STR     d3, [x7], 8
         DUP     d2, v2.d[1]
         DUP     d3, v3.d[1]
-3:
-        TBZ     x1, 2, 4f
+0:
+        TBZ     x1, 2, 1f
         STR     s0, [x6], 4
         STR     s1, [x8], 4
         DUP     s0, v0.s[1]
@@ -251,8 +251,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         STR     s3, [x7], 4
         DUP     s2, v2.s[1]
         DUP     s3, v3.s[1]
-4:
-        TBZ     x1, 1, 5f
+1:
+        TBZ     x1, 1, 2f
         STR     h0, [x6], 2
         STR     h1, [x8], 2
         DUP     h0, v0.h[1]
@@ -261,13 +261,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         STR     h3, [x7], 2
         DUP     h2, v2.h[1]
         DUP     h3, v3.h[1]
-5:
-        TBZ     x1, 0, 6f
+2:
+        TBZ     x1, 0, 3f
         STR     b0, [x6]
         STR     b1, [x8]
         STR     b2, [x9]
         STR     b3, [x7]
-6:
+3:
         RET
 
 END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32

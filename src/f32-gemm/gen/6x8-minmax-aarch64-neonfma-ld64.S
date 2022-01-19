@@ -97,7 +97,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
 
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q20, q21, [x5], 32
         MOV     v22.16b, v20.16b
@@ -123,11 +123,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
 
         # Is there at least 2 floats (8 bytes) for main loop?
         SUBS    x0, x2, 8               // k = kc - 8
-        B.LO    3f
+        B.LO    0f
 
         # Main loop - 2 floats of A (8 bytes)
         # 24 FMA + 6 LD64 A + 2 LDP B
-1:
+1:      // kc_loop
         LDR     d0,  [x3], 8
         LDP     q16,  q17, [x5], 32
         LDR     d1,  [x9], 8
@@ -162,11 +162,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         SUBS    x0, x0, 8
         FMLA    v29.4s, v19.4s,  v4.s[1]
         FMLA    v31.4s, v19.4s,  v5.s[1]
-        B.HS    1b
+        B.HS    1f
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ    x0, 2, 3f
-2:
+        TBNZ    x0, 2, 0f
+2:      // clamp
         # Clamp
         FMAX    v20.4s, v20.4s, v6.4s
         # Load cn_stride
@@ -197,7 +197,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         FMIN    v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        B.LO    4f
+        B.LO    1f
 
         ST1     {v20.16b, v21.16b},  [x6], x0
         SUB     x3,  x3, x2             // a0 -= kc
@@ -212,10 +212,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         ST1     {v30.16b, v31.16b},  [x7], x0
         SUB     x4,  x4, x2             // a5 -= kc
 
-        B.HI    0b
+        B.HI    0f
         RET
 
-3:
+0:
         # Remainder- 1 floats of A (4 bytes)
         LDR     s0,  [x3], 4
         LDP     q16,  q17, [x5], 32
@@ -236,11 +236,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         FMLA    v27.4s, v17.4s,  v3.s[0]
         FMLA    v29.4s, v17.4s,  v4.s[0]
         FMLA    v31.4s, v17.4s,  v5.s[0]
-        B       2b
+        B       2f
 
         # Store odd width
-4:
-        TBZ     x1, 2, 5f
+1:
+        TBZ     x1, 2, 2f
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
         STR     q22, [x16], 16
@@ -254,8 +254,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         STR     q30,  [x7], 16
         MOV     v30.16b, v31.16b
 
-5:
-        TBZ     x1, 1, 6f
+2:
+        TBZ     x1, 1, 3f
         STR     d20,  [x6], 8
         STR     d22, [x16], 8
         DUP     d20, v20.d[1]
@@ -269,15 +269,15 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-6:
-        TBZ     x1, 0, 7f
+3:
+        TBZ     x1, 0, 4f
         STR     s20,  [x6]
         STR     s22, [x16]
         STR     s24, [x17]
         STR     s26, [x14]
         STR     s28, [x13]
         STR     s30,  [x7]
-7:
+4:
         RET
 
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64

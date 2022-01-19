@@ -102,7 +102,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STP     d12, d13, [sp, -32]!
         STP     d14, d15, [sp, 16]
 
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q20, q21, [x5], 32
         MOV     v22.16b, v20.16b
@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS    x0, x2, 16              // k = kc - 16
-        B.LO    4f
+        B.LO    1f
 
         # Prologue - First group loads, no FMA
         LDR     d0, [x3], 8               // a0
@@ -154,7 +154,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 
         # Main loop - 4 floats of A (16 bytes)
         # 48 FMA + 12 LD64 A + 8 LDR B
-1:
+1:      // kc_loop
         # First group of 24 FMA, Second group loads
         # BLOCK 0
         LDR     d3, [x3], 8              // a0
@@ -288,11 +288,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA    v29.4s, v15.4s,  v5.s[1]
         ADD     x5, x5, 128
         FMLA    v31.4s, v15.4s,  v5.s[3]
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue - 4 floats of A (16 bytes)
         # 48 FMA + 12 LD64 A + 8 LDR B
-2:
+2:      // clamp
         # First group of 24 FMA, Second group loads
         # BLOCK 0
         LDR     d3, [x3], 8              // a0
@@ -406,8 +406,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         ADD     x5, x5, 64
 
         # Is there a remainder?- 2 floats of A (8 bytes) or less
-        B.NE    4f
-3:
+        B.NE    1f
+0:
         # Clamp
         FMAX    v20.4s, v20.4s, v6.4s
         # Load cn_stride
@@ -438,7 +438,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMIN    v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        B.LO    6f
+        B.LO    3f
 
         ST1     {v20.16b, v21.16b},  [x6], x0
         SUB     x3,  x3, x2             // a0 -= kc
@@ -460,9 +460,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDP     d12, d13, [sp], 32
         RET
 
-4:
+1:
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBZ     x0, 3, 5f
+        TBZ     x0, 3, 2f
 
         # Remainder- 2 floats of A (8 bytes)
         LDR     d0,  [x3], 8
@@ -503,8 +503,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA    v31.4s, v19.4s,  v2.s[3]
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBZ     x0, 2, 3b
-5:
+        TBZ     x0, 2, 0b
+2:
         # Remainder- 1 floats of A (4 bytes)
         LDR     s0,  [x3], 4
         LDR     q16, [x5], 16
@@ -527,11 +527,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA    v27.4s, v17.4s,  v1.s[2]
         FMLA    v29.4s, v17.4s,  v2.s[0]
         FMLA    v31.4s, v17.4s,  v2.s[2]
-        B       3b
+        B       0b
 
         # Store odd width
-6:
-        TBZ     x1, 2, 7f
+3:
+        TBZ     x1, 2, 4f
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
         STR     q22, [x16], 16
@@ -545,8 +545,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR     q30,  [x7], 16
         MOV     v30.16b, v31.16b
 
-7:
-        TBZ     x1, 1, 8f
+4:
+        TBZ     x1, 1, 5f
         STR     d20,  [x6], 8
         STR     d22, [x16], 8
         DUP     d20, v20.d[1]
@@ -560,15 +560,15 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-8:
-        TBZ     x1, 0, 9f
+5:
+        TBZ     x1, 0, 6f
         STR     s20,  [x6]
         STR     s22, [x16]
         STR     s24, [x17]
         STR     s26, [x14]
         STR     s28, [x13]
         STR     s30,  [x7]
-9:
+6:
         # Restore d12-d15 from stack
         LDP     d14, d15, [sp, 16]
         LDP     d12, d13, [sp], 32

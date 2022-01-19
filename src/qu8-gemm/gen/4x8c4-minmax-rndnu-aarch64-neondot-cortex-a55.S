@@ -68,7 +68,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
         MOV     v17.16b, v16.16b
@@ -84,7 +84,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         MOVI    v27.16b, 0
 
         # Is there at least 16 bytes for prologue/epilogue?
-        B.LO    4f
+        B.LO    1f
 
         # prologue - read A and B values for block 0 and 1
         LDR     d0,  [x3], 8
@@ -105,7 +105,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         # for each 4 UDOT, 1 LD64 for A, 2 LD64 for W + INS.
 
         .p2align 3
-1:
+1:      // kc_loop
         # BLOCK 0
         UDOT    v16.4s,  v28.16b, v0.4b[0]
         LDR     d30,  [x5], 8
@@ -197,10 +197,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         UDOT    v26.2s, v8.8b, v6.8b
         UDOT    v27.2s, v8.8b, v7.8b
 
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue.  Same as main loop but no preloads in final group
-2:
+2:      // epilogue
         # BLOCK 0
         UDOT    v16.4s,  v28.16b, v0.4b[0]
         LDR     d30,  [x5], 8
@@ -285,10 +285,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         UDOT    v27.2s, v8.8b, v7.8b
 
         # Is there a remainder?- 4 to 12 bytes of A
-        CBNZ    x0, 4f
+        CBNZ    x0, 1f
 
         .p2align 3
-3:
+0:
         ADDP    v0.2s, v24.2s, v25.2s
         ADDP    v1.2s, v26.2s, v27.2s
         DUP     v24.4s, v0.s[0]
@@ -384,8 +384,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         # Remainder- 4 to 12 bytes of A
         # Although C4, its safe to read 16 bytes.
         .p2align 3
-4:
-        TBZ     x0, 3, 5f
+1:
+        TBZ     x0, 3, 2f
 
         LDR     d0,  [x3], 8
         LDR     q4, [x5], 16
@@ -415,8 +415,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         UDOT    v21.4s, v4.16b, v1.4b[1]
         UDOT    v22.4s, v4.16b, v2.4b[1]
         UDOT    v23.4s, v4.16b, v3.4b[1]
-        TBZ     x0, 2, 3b
-5:
+        TBZ     x0, 2, 0b
+2:
         LDR     s0,  [x3], 4
         LDR     q4, [x5], 16
         LDR     s1, [x15], 4
@@ -435,33 +435,33 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__aarch64_neondot_cortex_a
         UDOT    v21.4s, v5.16b, v1.4b[0]
         UDOT    v22.4s, v5.16b, v2.4b[0]
         UDOT    v23.4s, v5.16b, v3.4b[0]
-        B       3b
+        B       0b
 
         # Store odd width
         .p2align 3
-6:
-        TBZ     x1, 2, 7f
+6:      // store_odd_width
+        TBZ     x1, 2, 3f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x8], 4
         STR     s1, [x9], 4
         ST1     {v1.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
         EXT     v1.16b, v1.16b, v1.16b, 4
-7:
-        TBZ     x1, 1, 8f
+3:
+        TBZ     x1, 1, 4f
         STR     h0, [x6], 2
         ST1     {v0.h}[4], [x8], 2
         STR     h1, [x9], 2
         ST1     {v1.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
         EXT     v1.16b, v1.16b, v1.16b, 2
-8:
-        TBZ     x1, 0, 9f
+4:
+        TBZ     x1, 0, 5f
         STR     b0, [x6]
         ST1     {v0.b}[8], [x8]
         STR     b1, [x9]
         ST1     {v1.b}[8], [x7]
-9:
+5:
         # Restore d8 from stack
         LDR     d8, [sp], 16
         RET

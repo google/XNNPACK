@@ -76,7 +76,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         MOVLO   r7, r8                  // c3
 
 
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         VLDM    r9!, {d8-d9}            // Bias
         SUBS    r5, r2, 8
@@ -89,7 +89,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         BLO     3f                      // less than 2 channels?
 
         # Main loop - 2 floats of A (8 bytes)
-1:
+1:      // kc_loop
         VLDM    r3!, {d0}               // A0
         VLDM    r9!, {d6-d7}            // B0
         VLDM    r12!, {d1}              // A1
@@ -141,7 +141,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         TST     r5, 4
         BNE     3f
 
-2:
+2:      // clamp
         # Clamp
         VCMPE.F32 s8, s16
         VMRS    APSR_nzcv, FPSCR

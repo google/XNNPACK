@@ -83,7 +83,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
         SUBS    r5, r2, 8               // k = kc - 8
@@ -93,12 +93,12 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VMOV    q13, q9
         VMOV    q14, q8
         VMOV    q15, q9
-        BLO     3f                      // less than 8 channels?
+        BLO     0f                      // less than 8 channels?
 
         # Main loop - 8 bytes of A.
         # 16 SDOT, 4 LD64 A, 4 LD128 B
         .p2align 3
-1:
+1:      // kc_loop
         VLD1.8  {d0},  [r3]!            // A0
         VLD1.8  {q2},  [r9]!            // B0
         VLD1.8  {d1}, [r12]!            // A1
@@ -126,13 +126,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VSDOT.S8 q13, q5, d2[1]
         VSDOT.S8 q14, q4, d3[1]
         VSDOT.S8 q15, q5, d3[1]
-        BHS     1b
+        BHS     1f
 
         # Is there a remainder?- 4 bytes of A
         ADDS    r5, r5, 8
-        BNE     3f
+        BNE     0f
 
-2:
+2:      // clamp
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
 
@@ -197,7 +197,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     4f
+        BLO     1f
         VST1.8  {d0}, [r11], r7
         SUB     r3, r3, r2
         VST1.8  {d1}, [r4], r7
@@ -206,7 +206,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         SUB     r10, r10, r2
         VST1.8  {d3}, [r6], r7
         SUB     r0, r0, r2
-        BHI     0b
+        BHI     0f
 
         VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
@@ -214,7 +214,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
 
         # Remainder- 4 bytes of A
         .p2align 3
-3:
+0:
         VLD1.32 {d0[0]},  [r3]!         // A0
         VLD1.32 {q2},  [r9]!            // B0
         VLD1.32 {d1[0]}, [r12]!         // A1
@@ -230,22 +230,22 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
-        B       2b
+        B       2f
 
         # Store odd width
         .p2align 3
-4:
+1:
         TST     r1, 4
-        BEQ     5f
+        BEQ     2f
         VST1.32 {d0[0]}, [r11]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-5:
+2:
         TST     r1, 2
-        BEQ     6f
+        BEQ     3f
         VST1.16 {d0[0]}, [r11]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d2[0]}, [r8]!
@@ -253,15 +253,15 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-6:
+3:
         TST     r1, 1
-        BEQ     7f
+        BEQ     4f
         VST1.8  {d0[0]}, [r11]
         VST1.8  {d1[0]}, [r4]
         VST1.8  {d2[0]}, [r8]
         VST1.8  {d3[0]}, [r6]
 
-7:
+4:
         VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr

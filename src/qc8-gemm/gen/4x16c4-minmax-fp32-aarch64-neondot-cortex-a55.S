@@ -70,7 +70,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
         MOV     v17.16b, v16.16b
@@ -88,7 +88,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         MOV     v30.16b, v28.16b
         MOV     v31.16b, v28.16b
         # Is there at least 16 bytes for prologue/epilogue?
-        B.LO    4f
+        B.LO    1f
 
         # prologue - read A and B values for block 0 and 1
         LDR     d0,  [x3], 8
@@ -109,7 +109,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         # for each 4 sdot, 1 LD64 for A, 2 LD64 for W + INS.
 
         .p2align 3
-1:
+1:      // kc_loop
         # BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
@@ -262,10 +262,10 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SDOT    v30.4s, v11.16b, v6.4b[1]
         LDR     x14,  [x5], 8
         SDOT    v31.4s, v11.16b, v7.4b[1]
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue.  Same as main loop but no preloads in final group
-2:
+2:      // epilogue
         # BLOCK 0
         SDOT    v16.4s,  v8.16b, v0.4b[0]
         LDR     d10,  [x5], 8
@@ -411,10 +411,10 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SDOT    v31.4s, v11.16b, v7.4b[1]
 
         # Is there a remainder?- 4 to 12 bytes of A
-        CBNZ    x0, 5f
+        CBNZ    x0, 2f
 
         .p2align 3
-3:
+0:
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
         # Load per channel scale values from weights
@@ -541,9 +541,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         # Remainder- 4 to 12 bytes of A
         # Although C4, its safe to read 16 bytes.
         .p2align 3
-4:
+1:
         AND     x0, x2, 15              // kc remainder 4 to 12
-5:
+2:
         LDP     q8,  q9,  [x5], 32
         LDP     q10, q11,  [x5], 32
         LD1     {v0.16b},  [x3], x0
@@ -567,7 +567,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SDOT    v30.4s, v11.16b, v2.4b[0]
         SDOT    v31.4s, v11.16b, v3.4b[0]
         CMP     x0, 4
-        B.LS    3b
+        B.LS    0b
         LDP     q8,  q9,  [x5], 32
         LDP     q10, q11,  [x5], 32
         SDOT    v16.4s,  v8.16b, v0.4b[1]
@@ -587,7 +587,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SDOT    v30.4s, v11.16b, v2.4b[1]
         SDOT    v31.4s, v11.16b, v3.4b[1]
         CMP     x0, 8
-        B.LS    3b
+        B.LS    0b
         LDP     q8,  q9,  [x5], 32
         LDP     q10, q11,  [x5], 32
         SDOT    v16.4s,  v8.16b, v0.4b[2]
@@ -606,12 +606,12 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         SDOT    v29.4s, v11.16b, v1.4b[2]
         SDOT    v30.4s, v11.16b, v2.4b[2]
         SDOT    v31.4s, v11.16b, v3.4b[2]
-        B       3b
+        B       0b
 
         # Store odd width
         .p2align 3
-6:
-        TBZ     x1, 3, 7f
+6:      // store_odd_width
+        TBZ     x1, 3, 3f
         STR     d0, [x6], 8
         STR     d1, [x8], 8
         DUP     d0, v0.d[1]
@@ -620,8 +620,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         STR     d3, [x7], 8
         DUP     d2, v2.d[1]
         DUP     d3, v3.d[1]
-7:
-        TBZ     x1, 2, 8f
+3:
+        TBZ     x1, 2, 4f
         STR     s0, [x6], 4
         STR     s1, [x8], 4
         DUP     s0, v0.s[1]
@@ -630,8 +630,8 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         STR     s3, [x7], 4
         DUP     s2, v2.s[1]
         DUP     s3, v3.s[1]
-8:
-        TBZ     x1, 1, 9f
+4:
+        TBZ     x1, 1, 5f
         STR     h0, [x6], 2
         STR     h1, [x8], 2
         DUP     h0, v0.h[1]
@@ -640,13 +640,13 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a
         STR     h3, [x7], 2
         DUP     h2, v2.h[1]
         DUP     h3, v3.h[1]
-9:
-        TBZ     x1, 0, 10f
+5:
+        TBZ     x1, 0, 6f
         STR     b0, [x6]
         STR     b1, [x8]
         STR     b2, [x9]
         STR     b3, [x7]
-10:
+6:
         # Restore d8-d11 from stack
         LDP     d10, d11, [sp, 16]
         LDP     d8,  d9, [sp], 32

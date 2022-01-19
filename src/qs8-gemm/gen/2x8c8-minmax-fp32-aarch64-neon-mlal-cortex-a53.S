@@ -52,7 +52,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
         STP     x20, x21, [sp, 64]      // Save x20,x21 on stack
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         SUBS    x0, x2, 16              // k = kc - 16
         LDP     s16, s18, [x5], 8
@@ -69,7 +69,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
         LDP     x10, x11, [sp, 80]       // cn_stride, params
         MOV     v31.16b, v30.16b
         # Is there at least 16 bytes for epilogue?
-        B.LO    4f
+        B.LO    1f
 
         # Prologue: load A0, A1 and 2 B's
         LDP     d4, d5, [x5]            // Read B
@@ -87,7 +87,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
          # 2 loads for A0 = +2 cycles.  Total 18 * 4 + 2 = 74 cycles.
 
         .p2align 3
-1:
+1:      // kc_loop
         # BLOCK 0 - 18 cycles - includes prfm
         LDR     d9, [x5, 72]            // Read B
         INS     v8.d[0], x17
@@ -175,13 +175,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
         ADD     x5, x5, 128
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue
         # Same as main loop except no loads at end of loop
 
         .p2align 3
-2:
+2:      // clamp
         # BLOCK 0 - 18 cycles
         LDR     d9, [x5, 72]            // Read B
         INS     v8.d[0], x17
@@ -259,10 +259,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
         SADALP  v31.4s, v15.8h
 
         # Is there a remainder?- 8 bytes of A
-        TBNZ    x0, 3, 4f
+        TBNZ    x0, 3, 1f
 
         .p2align 3
-3:
+0:
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
@@ -328,7 +328,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
 
         # Remainder - 8 bytes of A
         .p2align 3
-4:
+1:
         LDR     d0, [x3], 8
         LDP     d4, d5, [x5]
         LDR     d1, [x4], 8
@@ -368,26 +368,26 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-        B       3b
+        B       0b
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 2, 6f
+5:      // store_odd_width
+        TBZ     x1, 2, 2f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-6:
-        TBZ     x1, 1, 7f
+2:
+        TBZ     x1, 1, 3f
         STR     h0, [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-7:
-        TBZ     x1, 0, 8f
+3:
+        TBZ     x1, 0, 4f
         STR     b0, [x6]
         ST1     {v0.b}[8], [x7]
-8:
+4:
         # Restore x20,x21 from stack
         LDP     x20, x21, [sp, 64]
 

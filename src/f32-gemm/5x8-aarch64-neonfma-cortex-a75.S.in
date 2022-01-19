@@ -100,7 +100,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         # Load clamp values
         LD2R    {v30.4s, v31.4s}, [x8]
 
-0:
+0:      // nc_loop
         $if INC:
           # Load initial accumulators
           LDP     q20, q21, [x15], 32
@@ -149,7 +149,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
-        B.LO    4f
+        B.LO    1f
 
         # Prologue - loads for main loop of 80 FMA
         LDR     q0,  [x3], 16
@@ -167,7 +167,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
 
         # Main loop - 8 floats of A (32 bytes)
         # 80 FMA + 5 LDP A + 8 LDP B
-1:
+1:      // kc_loop
         # First group of 4 A.  40 FMA.
         FMLA    v20.4s, v12.4s,  v0.s[0]
         LDP     q18,  q19, [x5], 32      // Load last B
@@ -280,12 +280,12 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMLA    v25.4s, v19.4s,  v5.s[3]
         FMLA    v27.4s, v19.4s,  v7.s[3]
         FMLA    v29.4s, v19.4s,  v9.s[3]
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue - 8 floats of A (32 bytes)
         # 80 FMA + 5 LDP A + 8 LDP B
         # First block same as main loop.  Second block has no preloads.
-2:
+2:      // clamp
         # First group of 4 A.  40 FMA.
         FMLA    v20.4s, v12.4s,  v0.s[0]
         LDP     q18,  q19, [x5], 32      // Load last B
@@ -390,10 +390,10 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMLA    v25.4s, v19.4s,  v5.s[3]
         FMLA    v27.4s, v19.4s,  v7.s[3]
         FMLA    v29.4s, v19.4s,  v9.s[3]
-        B.NE    4f
+        B.NE    1f
 
         # Clamp
-3:
+0:
         FMAX    v20.4s, v20.4s, v30.4s
         SUBS    x1, x1, 8
         FMAX    v21.4s, v21.4s, v30.4s
@@ -417,7 +417,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMIN    v29.4s, v29.4s, v31.4s
 
         # Store full 5 x 8
-        B.LO    7f
+        B.LO    4f
 
         $if INC:
           SUB     x3,  x3, x2             // a0 -= kc
@@ -461,9 +461,9 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         RET
 
         # Load clamp values
-4:
+1:
         # Is there a remainder?- 4 floats of A (16 bytes)
-        TBZ     x0, 4, 5f
+        TBZ     x0, 4, 2f
 
         # Remainder- 4 floats of A (16 bytes)
         # Load A
@@ -523,8 +523,8 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMLA    v29.4s, v19.4s,  v8.s[3]
 
         # Is there a remainder?- 2 floats of A (8 bytes)
-5:
-        TBZ     x0, 3, 6f
+2:
+        TBZ     x0, 3, 3f
 
         # Remainder- 2 floats of A (8 bytes)
         # Load A
@@ -560,8 +560,8 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMLA    v29.4s, v15.4s,  v8.s[1]
 
         # Is there a remainder?- 1 float of A (4 bytes)
-6:
-        TBZ     x0, 2, 3b
+3:
+        TBZ     x0, 2, 0b
 
         # Remainder- 1 float of A (4 bytes)
         # Load A
@@ -583,11 +583,11 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
         FMLA    v25.4s, v13.4s,  v4.s[0]
         FMLA    v27.4s, v13.4s,  v6.s[0]
         FMLA    v29.4s, v13.4s,  v8.s[0]
-        B       3b
+        B       0b
 
         # Store odd width
-7:
-        TBZ     x1, 2, 8f
+4:
+        TBZ     x1, 2, 5f
         $if INC:
           STR     q28, [x7], 16
           MOV     v28.16b, v29.16b
@@ -610,8 +610,8 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
           MOV     v26.16b, v27.16b
           STR     q28, [x7], 16
           MOV     v28.16b, v29.16b
-8:
-        TBZ     x1, 1, 9f
+5:
+        TBZ     x1, 1, 6f
         $if INC:
           STR     d28, [x7], 8
           STR     d26, [x13], 8
@@ -635,8 +635,8 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
           STR     d28, [x7], 8
           DUP     d28, v28.d[1]
 
-9:
-        TBZ     x1, 0, 10f
+6:
+        TBZ     x1, 0, 7f
         $if INC:
           STR     s28, [x7]
           STR     s26, [x13]
@@ -649,7 +649,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_5x8__aarch64_n
           STR     s24, [x17]
           STR     s26, [x13]
           STR     s28, [x7]
-10:
+7:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]

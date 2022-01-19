@@ -49,7 +49,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         BIC     x2, x2, 15
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         MOV     x0, x2                  // k = kc
         LDP     s16, s18, [x5], 8
@@ -68,7 +68,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
 
         # Main loop - 16 bytes of A
         .p2align 3
-1:
+1:      // kc_loop
         LDR     q0, [x3], 16
         LDP     q4, q5, [x5]
         LDR     q1, [x4], 16
@@ -126,7 +126,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         SADALP  v29.4s, v13.8h
         SADALP  v30.4s, v14.8h
         SADALP  v31.4s, v15.8h
-        B.HI    1b
+        B.HI    1f
 
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
@@ -212,7 +212,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         SUB     x3, x3, x2              // a0 -= kc
         ST1     {v0.d}[1], [x7], x10
         SUB     x4, x4, x2              // a1 -= kc
-        B.HI    0b
+        B.HI    0f
 
         # Restore d10-d15 from stack
         LDP     d14, d15, [sp, 32]
@@ -222,22 +222,22 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
 
         # Store odd width
         .p2align 3
-2:
-        TBZ     x1, 2, 3f
+2:      // clamp
+        TBZ     x1, 2, 0f
         STR     s0, [x6], 4
         ST1     {v0.s}[2], [x7], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-3:
-        TBZ     x1, 1, 4f
+0:
+        TBZ     x1, 1, 1f
         STR     h0, [x6], 2
         ST1     {v0.h}[4], [x7], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-4:
-        TBZ     x1, 0, 5f
+1:
+        TBZ     x1, 0, 2f
         STR     b0, [x6]
         ST1     {v0.b}[8], [x7]
-5:
+2:
         # Restore d10-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]

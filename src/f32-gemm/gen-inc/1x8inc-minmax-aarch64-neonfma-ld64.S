@@ -41,7 +41,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
 
         # Load min/max values
         LD2R    {v4.4s, v5.4s}, [x8]
-0:
+0:      // nc_loop
         # Load initial accumulators
         LDP     q16, q17, [x15], 32
 
@@ -51,10 +51,10 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
         # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
 
-        B.LO    3f
+        B.LO    0f
 
         # Main loop - 2 floats of A (8 bytes)
-1:
+1:      // kc_loop
         LDR     d0, [x3], 8
         LDP     q20, q21, [x5], 32
         LDP     q22, q23, [x5], 32
@@ -63,12 +63,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
         SUBS    x0, x0, 8
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
-        B.HS    1b
+        B.HS    1f
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ    x0, 2, 3f
+        TBNZ    x0, 2, 0f
 
-2:
+2:      // clamp
         FADD    v16.4s, v16.4s, v18.4s
         FADD    v17.4s, v17.4s, v19.4s
         SUBS    x1, x1, 8
@@ -80,40 +80,40 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64
         FMIN    v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        B.LO    4f
+        B.LO    1f
 
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
 
         SUB     x3,  x3, x2             // a0 -= kc
 
-        B.HI    0b
+        B.HI    0f
 
         RET
 
-3:
+0:
         # Remainder- 1 float of A (4 bytes)
         LDP     q20, q21, [x5], 32
         LDR     s0, [x3], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
-        B       2b
+        B       2f
 
         # Store odd channels
-4:
-        TBZ     x1, 2, 5f
+1:
+        TBZ     x1, 2, 2f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
 
-5:
-        TBZ     x1, 1, 6f
+2:
+        TBZ     x1, 1, 3f
         STR     d16, [x6], 8
         DUP     d16, v16.d[1]
 
-6:
-        TBZ     x1, 0, 7f
+3:
+        TBZ     x1, 0, 4f
         STR     s16, [x6]
-7:
+4:
         RET
 
 END_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_ld64

@@ -38,7 +38,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
 
         # Load min/max values
         LD2R    {v4.4s, v5.4s}, [x8]
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
 
@@ -52,7 +52,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
 
-        B.LO    3f
+        B.LO    0f
 
         # 16 prologue
         # Read first block of 1 A and B.
@@ -67,7 +67,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         B.LO    2f
 
         # Main loop - 8 floats of A (32 bytes)
-1:
+1:      // kc_loop
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v16.4s, v20.4s, v0.s[0]
         LDR     q1, [x3], 16
@@ -99,9 +99,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v19.4s, v27.4s, v1.s[3]
         SUBS    x0, x0, 32
         LDP     q26, q27, [x5], 32
-        B.HS    1b
+        B.HS    1f
 
-2:
+2:      // clamp
         # Epilogue
 
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
@@ -129,15 +129,15 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v18.4s, v26.4s, v1.s[3]
         FMLA    v19.4s, v27.4s, v1.s[3]
 
-3:
+0:
         # Is there a remainder?- 4 floats of A (16 bytes)
-        TBNZ    x0, 4, 5f
+        TBNZ    x0, 4, 2f
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ    x0, 3, 6f
+        TBNZ    x0, 3, 3f
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBNZ    x0, 2, 8f
+        TBNZ    x0, 2, 5f
 
-4:
+1:
         FADD    v16.4s, v16.4s, v18.4s
         SUBS    x1, x1, 8
         FADD    v17.4s, v17.4s, v19.4s
@@ -149,7 +149,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         FMIN    v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        B.LO    9f
+        B.LO    6f
 
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
@@ -160,7 +160,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
 
         RET
 
-5:
+2:
         # Remainder- 4 floats of A (16 bytes)
         LDP     q20, q21, [x5], 32
         LDR     q0, [x3], 16
@@ -176,8 +176,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v18.4s, v26.4s, v0.s[3]
         FMLA    v19.4s, v27.4s, v0.s[3]
 
-        TBZ     x0, 3, 7f
-6:
+        TBZ     x0, 3, 4f
+3:
         # Remainder- 2 floats of A (8 bytes)
         LDP     q20, q21, [x5], 32
         LDR     d0, [x3], 8
@@ -186,31 +186,31 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         LDP     q22, q23, [x5], 32
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
-7:
-        TBZ     x0, 2, 4b
-8:
+4:
+        TBZ     x0, 2, 1b
+5:
         # Remainder- 1 float of A (4 bytes)
         LDP     q20, q21, [x5], 32
         LDR     s0, [x3], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
-        B       4b
+        B       1b
 
         # Store odd channels
-9:
-        TBZ     x1, 2, 10f
+6:
+        TBZ     x1, 2, 7f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
 
-10:
-        TBZ     x1, 1, 11f
+7:
+        TBZ     x1, 1, 8f
         STR     d16, [x6], 8
         DUP     d16, v16.d[1]
 
-11:
-        TBZ     x1, 0, 12f
+8:
+        TBZ     x1, 0, 9f
         STR     s16, [x6]
-12:
+9:
         RET
 
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75

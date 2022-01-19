@@ -81,7 +81,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         CSEL    x7,  x9, x7, LO         //   c3 = c2
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q20, [x5], 32
 
@@ -106,11 +106,11 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         MOV     v31.16b, v28.16b
 
         # Is there at least 16 bytes?
-        B.LO    3f
+        B.LO    0f
 
         # Main loop - 16 bytes of A
         .p2align 3
-1:
+1:      // kc_loop
         LDR     q0,  [x3], 16
         LDR     q4,  [x5], 16
         LDR     q1, [x15], 16
@@ -198,13 +198,13 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         UDOT    v29.4s, v7.16b,  v1.4b[3]
         UDOT    v30.4s, v7.16b,  v2.4b[3]
         UDOT    v31.4s, v7.16b,  v3.4b[3]
-        B.HS    1b
+        B.HS    1f
 
         # Is there a remainder?- 4 to 12 bytes of A
         TST     x0, 15
-        B.NE    3f
+        B.NE    0f
 
-2:
+2:      // clamp
         ADDP    v0.4s, v12.4s, v12.4s
         ADDP    v1.4s, v13.4s, v13.4s
         ADDP    v2.4s, v14.4s, v14.4s
@@ -346,7 +346,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         SUB     x13, x13, x2            // a2 -= kc
         ST1     {v3.16b}, [x7], x12
         SUB     x4,  x4, x2             // a3 -= kc
-        B.NE    0b
+        B.NE    0f
 
         # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
@@ -356,9 +356,9 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
 
         # Remainder- 8 bytes of A
         .p2align 3
-3:
+0:
         # Is there a remainder?- 8 bytes of A
-        TBZ     x0, 3, 4f
+        TBZ     x0, 3, 1f
 
         LDR     d0,  [x3], 8
         LDR     q4,  [x5], 16
@@ -408,10 +408,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         UDOT    v30.4s, v7.16b,  v2.4b[1]
         UDOT    v31.4s, v7.16b,  v3.4b[1]
         # Is there a remainder?- 4 bytes of A
-        TBZ     x0, 2, 2b
+        TBZ     x0, 2, 2f
 
         # Remainder- 4 bytes of A
-4:
+1:
         LDR     s0,  [x3], 4
         LDR     q4,  [x5], 16
         LDR     s1, [x15], 4
@@ -441,12 +441,12 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         UDOT    v29.4s, v7.16b, v1.4b[0]
         UDOT    v30.4s, v7.16b, v2.4b[0]
         UDOT    v31.4s, v7.16b, v3.4b[0]
-        B       2b
+        B       2f
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 3, 6f
+5:      // store_odd_width
+        TBZ     x1, 3, 2f
         STR     d0, [x6], 8
         STR     d1, [x8], 8
         DUP     d0, v0.d[1]
@@ -455,8 +455,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         STR     d3, [x7], 8
         DUP     d2, v2.d[1]
         DUP     d3, v3.d[1]
-6:
-        TBZ     x1, 2, 7f
+2:
+        TBZ     x1, 2, 3f
         STR     s0, [x6], 4
         STR     s1, [x8], 4
         DUP     s0, v0.s[1]
@@ -465,8 +465,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         STR     s3, [x7], 4
         DUP     s2, v2.s[1]
         DUP     s3, v3.s[1]
-7:
-        TBZ     x1, 1, 8f
+3:
+        TBZ     x1, 1, 4f
         STR     h0, [x6], 2
         STR     h1, [x8], 2
         DUP     h0, v0.h[1]
@@ -475,13 +475,13 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128
         STR     h3, [x7], 2
         DUP     h2, v2.h[1]
         DUP     h3, v3.h[1]
-8:
-        TBZ     x1, 0, 9f
+4:
+        TBZ     x1, 0, 5f
         STR     b0, [x6]
         STR     b1, [x8]
         STR     b2, [x9]
         STR     b3, [x7]
-9:
+5:
         # Restore d8,d12-d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d12, d13, [sp, 16]

@@ -74,7 +74,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         MOVLO   r6, r8                  // c3
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
 
@@ -117,7 +117,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         # Main loop - 4 floats of A (16 bytes)
         # 32 FMA + 8 LD64 A + 8 LDR B
         .p2align 3
-1:
+1:      // kc_loop
         # First group of 16 FMA, Second group loads
         # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0
@@ -241,7 +241,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         BHS     1b
 
         # Epilogue - 4 floats of A (16 bytes)
-2:
+2:      // clamp
         # First group of 16 FMA, Second group loads
         # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0

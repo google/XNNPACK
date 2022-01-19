@@ -90,7 +90,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         CSEL    x4, x12, x4, LO         //   a3 = a2
         CSEL    x7, x10, x7, LO         //   c3 = c2
 
-0:
+0:      // nc_loop
         # Load initial accumulators
         LD1     {v20.16b, v21.16b, v22.16b}, [x15], 48
         LD1     {v23.16b, v24.16b, v25.16b}, [x15], 48
@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
 
         # Is there at least 4 floats (16 bytes)?
         SUBS    x0, x2, 16              // k = kc - 16
-        B.LO    4f
+        B.LO    1f
 
         SUBS    x0, x0, 16
 
@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         B.LO    2f
 
         # Main loop - 4 floats of A (16 bytes)
-1:
+1:      // kc_loop
         # First group of 24 fma.  8 blocks of 4 cycles.  LDR + 3 FMA
         # A is loaded for 2nd group into v2/v3
         # INS is 4 blocks (16 cycles) after load
@@ -278,11 +278,11 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA    v28.4s, v19.4s, v3.s[1]
         ADD     x5, x5, 192
         FMLA    v31.4s, v19.4s, v3.s[3]
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue
         # First block same as main loop.  Second block has no loads.
-2:
+2:      // clamp
         # BLOCK 0
         LDR     d2, [x3], 8                // a0
         INS     v11.d[1], x8
@@ -394,9 +394,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA    v31.4s, v19.4s, v3.s[3]
 
         # Is there a remainder?- 2 floats of A (8 bytes) or less
-        B.NE    4f
+        B.NE    1f
 
-3:
+0:
         # Clamp
         FMAX    v20.4s, v20.4s, v4.4s
         SUBS    x1, x1, 12
@@ -425,7 +425,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMIN    v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 12
-        B.LO    6f
+        B.LO    3f
 
         ST1     {v29.16b, v30.16b, v31.16b},  [x7], x14
         SUB     x3,  x3, x2             // a0 -= kc
@@ -444,9 +444,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         LDP     d8,  d9, [sp], 48
         RET
 
-4:
+1:
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBZ     x0, 3, 5f
+        TBZ     x0, 3, 2f
 
         # Remainder - 2 floats of A (8 bytes)
         # Read first block of 4 A.
@@ -485,8 +485,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA    v28.4s, v11.4s, v2.s[1]
         FMLA    v31.4s, v11.4s, v3.s[1]
 
-        TBZ     x0, 2, 3b
-5:
+        TBZ     x0, 2, 0b
+2:
         # Remainder - 1 float of A (4 bytes)
         LDR     s0,  [x3], 4            // a0
         LD1     {v6.16b, v7.16b, v8.16b}, [x5], 48
@@ -506,12 +506,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         FMLA    v25.4s, v8.4s, v1.s[0]
         FMLA    v28.4s, v8.4s, v2.s[0]
         FMLA    v31.4s, v8.4s, v3.s[0]
-        B       3b
+        B       0b
 
-6:
+3:
         ADD     x1, x1, 12
         # Store odd channels
-        TBZ     x1, 3, 7f
+        TBZ     x1, 3, 4f
         STP     q29, q30,  [x7], 32
         MOV     v29.16b, v31.16b
         STP     q26, q27, [x10], 32
@@ -521,8 +521,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STP     q20, q21,  [x6], 32
         MOV     v20.16b, v22.16b
 
-7:
-        TBZ     x1, 2, 8f
+4:
+        TBZ     x1, 2, 5f
         STR     q29,  [x7], 16
         MOV     v29.16b, v30.16b
         STR     q26, [x10], 16
@@ -532,8 +532,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
 
-8:
-        TBZ     x1, 1, 9f
+5:
+        TBZ     x1, 1, 6f
         STR     d29,  [x7], 8
         DUP     d29, v29.d[1]
         STR     d26, [x10], 8
@@ -543,13 +543,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
         STR     d20,  [x6], 8
         DUP     d20, v20.d[1]
 
-9:
-        TBZ     x1, 0, 10f
+6:
+        TBZ     x1, 0, 7f
         STR     s29,  [x7]
         STR     s26, [x10]
         STR     s23,  [x9]
         STR     s20,  [x6]
-10:
+7:
         # Restore d8-d11,d14,d15 from stack
         LDP     d14, d15, [sp, 32]
         LDP     d10, d11, [sp, 16]

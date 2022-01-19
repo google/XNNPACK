@@ -38,7 +38,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         BIC     x2, x2, 7
 
         .p2align 3
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     s16, s18, [x5], 8
         SUBS    x0, x2, 16              // k = kc - 16
@@ -46,7 +46,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         LDP     s24, s26, [x5], 8
         LDP     s28, s30, [x5], 8
         # Is there at least 16 bytes for epilogue?
-        B.LO    4f
+        B.LO    1f
 
         # Prologue: load A0 and 4 B's
         LDP     d0, d6, [x3], 16        // Read A0
@@ -63,7 +63,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         # 1 load for A0 = +1 cycle.  Total 41 cycles.
 
         .p2align 3
-1:
+1:      // kc_loop
         # BLOCK 0 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
@@ -124,13 +124,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         SADALP  v28.4s, v21.8h
         ADD     x5, x5, 128
         SADALP  v30.4s, v23.8h
-        B.HS    1b
+        B.HS    1f
 
         # Epilogue
         # Same as main loop except no loads at end of loop
 
         .p2align 3
-2:
+2:      // clamp
         # BLOCK 0 - 6 cycles
         SMULL   v17.8h, v4.8b, v0.8b
         LDR     x17, [x5, 80]
@@ -182,10 +182,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         SADALP  v30.4s, v23.8h
 
         # Is there a remainder?- 8 bytes of A
-        TBNZ    x0, 3, 4f
+        TBNZ    x0, 3, 1f
 
         .p2align 3
-3:
+0:
         # Add columns
         ADDP    v16.4s, v16.4s, v18.4s
         ADDP    v20.4s, v20.4s, v22.4s
@@ -226,7 +226,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
 
         # Remainder - 8 bytes of A
         .p2align 3
-4:
+1:
         LDR     d0, [x3], 8
         LDP     d4, d5, [x5]
         LDP     d6, d7, [x5, 16]
@@ -249,23 +249,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex
         SADALP  v26.4s, v19.8h
         SADALP  v28.4s, v21.8h
         SADALP  v30.4s, v23.8h
-        B       3b
+        B       0b
 
         # Store odd width
         .p2align 3
-5:
-        TBZ     x1, 2, 6f
+5:      // store_odd_width
+        TBZ     x1, 2, 2f
         STR     s0, [x6], 4
         EXT     v0.16b, v0.16b, v0.16b, 4
 
-6:
-        TBZ     x1, 1, 7f
+2:
+        TBZ     x1, 1, 3f
         STR     h0, [x6], 2
         EXT     v0.16b, v0.16b, v0.16b, 2
-7:
-        TBZ     x1, 0, 8f
+3:
+        TBZ     x1, 0, 4f
         STR     b0, [x6]
-8:
+4:
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_cortex_a53

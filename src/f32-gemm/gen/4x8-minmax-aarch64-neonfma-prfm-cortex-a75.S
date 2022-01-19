@@ -83,7 +83,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         CSEL    x4, x12, x4, LO         //   a3 = a2
         CSEL    x7, x10, x7, LO         //   c3 = c2
 
-0:
+0:      // nc_loop
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
         MOV     v18.16b, v16.16b
@@ -95,7 +95,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
-        B.LO    3f
+        B.LO    0f
 
         # 16 prologue
         # Read first block of 4 A and B.
@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         B.LO    2f
 
         # Main loop - 8 floats of A (32 bytes)
-1:
+1:      // kc_loop
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v16.4s, v20.4s, v0.s[0]
         LDP     q8, q9, [x5], 32
@@ -202,9 +202,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         SUBS    x0, x0, 32
         FMLA    v30.4s, v14.4s, v7.s[3]
         FMLA    v31.4s, v15.4s, v7.s[3]
-        B.HS    1b
+        B.HS    1f
 
-2:
+2:      // clamp
         # Epilogue
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v16.4s, v20.4s, v0.s[0]
@@ -289,9 +289,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v30.4s, v14.4s, v7.s[3]
         FMLA    v31.4s, v15.4s, v7.s[3]
 
-3:
+0:
         # Remainder- 4 floats of A (16 bytes)
-        TBZ     x0, 4, 4f
+        TBZ     x0, 4, 1f
 
         LDR     q0,  [x3], 16
         LDP     q20, q21, [x5], 32
@@ -334,9 +334,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v30.4s, v26.4s, v3.s[3]
         FMLA    v31.4s, v27.4s, v3.s[3]
 
-4:
+1:
         # Remainder- 2 floats of A (8 bytes)
-        TBZ     x0, 3, 5f
+        TBZ     x0, 3, 2f
 
         LDR     d0,  [x3], 8
         LDP     q20, q21, [x5], 32
@@ -361,9 +361,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v30.4s, v22.4s, v3.s[1]
         FMLA    v31.4s, v23.4s, v3.s[1]
 
-5:
+2:
         # Remainder- 1 float of A (4 bytes)
-        TBZ     x0, 2, 6f
+        TBZ     x0, 2, 3f
 
         LDR     s0,  [x3], 4
         LDP     q20, q21, [x5], 32
@@ -379,7 +379,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         FMLA    v30.4s, v20.4s, v3.s[0]
         FMLA    v31.4s, v21.4s, v3.s[0]
 
-6:
+3:
         # Clamp
         FMAX    v16.4s, v16.4s, v4.4s
         SUBS    x1, x1, 8
@@ -400,7 +400,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         FMIN    v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        B.LO    7f
+        B.LO    4f
 
         STP     q16, q17,  [x6]
         SUB     x3,  x3, x2             // a0 -= kc
@@ -425,8 +425,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         RET
 
         # Store odd width
-7:
-        TBZ     x1, 2, 8f
+4:
+        TBZ     x1, 2, 5f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
         STR     q18, [x9], 16
@@ -436,8 +436,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         STR     q30, [x7], 16
         MOV     v30.16b, v31.16b
 
-8:
-        TBZ     x1, 1, 9f
+5:
+        TBZ     x1, 1, 6f
         STR     d16, [x6], 8
         STR     d18, [x9], 8
         DUP     d16, v16.d[1]
@@ -447,13 +447,13 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-9:
-        TBZ     x1, 0, 10f
+6:
+        TBZ     x1, 0, 7f
         STR     s16,  [x6]
         STR     s18,  [x9]
         STR     s28, [x10]
         STR     s30,  [x7]
-10:
+7:
         # Restore d8-d15 from stack
         LDP     d14, d15, [sp, 48]
         LDP     d12, d13, [sp, 32]

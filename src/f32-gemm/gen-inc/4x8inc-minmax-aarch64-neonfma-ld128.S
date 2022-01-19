@@ -65,7 +65,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         CSEL    x4, x12, x4, LO         //   a3 = a2
         CSEL    x7, x10, x7, LO         //   c3 = c2
 
-0:
+0:      // nc_loop
         # Load initial accumulators
         LDP     q16, q17, [x15], 32
         LDP     q18, q19, [x15], 32
@@ -74,10 +74,10 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
 
         # Is there at least 4 floats (16 bytes)?
         SUBS    x0, x2, 16              // k = kc - 16
-        B.LO    3f
+        B.LO    0f
 
         # Main loop - 4 floats of A (16 bytes)
-1:
+1:      // kc_loop
         LDR     q0, [x3], 16
         LDP     q20, q21, [x5], 32
         LDR     q1, [x11], 16
@@ -119,12 +119,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         SUBS    x0, x0, 16
         FMLA    v30.4s, v26.4s, v3.s[3]
         FMLA    v31.4s, v27.4s, v3.s[3]
-        B.HS    1b
+        B.HS    1f
 
         TST     x0, 15
-        B.NE    3f
+        B.NE    0f
 
-2:
+2:      // clamp
         # Clamp
         FMAX    v16.4s, v16.4s, v4.4s
         SUBS    x1, x1, 8
@@ -145,7 +145,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         FMIN    v31.4s, v31.4s, v5.4s
 
         # Store full 4 x 8
-        B.LO    5f
+        B.LO    2f
 
         ST1     {v30.16b, v31.16b},  [x7], x14
         SUB     x3,  x3, x2             // a0 -= kc
@@ -156,13 +156,13 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         ST1     {v16.16b, v17.16b},  [x6], x14
         SUB     x4,  x4, x2             // a3 -= kc
 
-        B.HI    0b
+        B.HI    0f
         RET
 
         # Remainder- 2 floats of A (8 bytes)
-3:
+0:
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBZ     x0, 3, 4f
+        TBZ     x0, 3, 1f
 
         # Remainder- 2 floats of A (8 bytes)
         LDR     d0,  [x3], 8
@@ -189,10 +189,10 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         FMLA    v31.4s, v23.4s, v3.s[1]
 
         # Is there a remainder?- 1 floats of A (4 bytes)
-        TBZ     x0, 2, 2b
+        TBZ     x0, 2, 2f
 
         # Remainder- 1 float of A (4 bytes)
-4:
+1:
         LDR     s0,  [x3], 4
         LDP     q20, q21, [x5], 32
         LDR     s1, [x11], 4
@@ -206,12 +206,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
         FMLA    v31.4s, v21.4s, v3.s[0]
-        B       2b
+        B       2f
 
 
         # Store odd width
-5:
-        TBZ     x1, 2, 6f
+2:
+        TBZ     x1, 2, 3f
         STR     q30, [x7], 16
         MOV     v30.16b, v31.16b
         STR     q28, [x10], 16
@@ -221,8 +221,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
 
-6:
-        TBZ     x1, 1, 7f
+3:
+        TBZ     x1, 1, 4f
         STR     d30, [x7], 8
         STR     d28, [x10], 8
         DUP     d30, v30.d[1]
@@ -232,14 +232,14 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
         DUP     d18, v18.d[1]
         DUP     d16, v16.d[1]
 
-7:
-        TBZ     x1, 0, 8f
+4:
+        TBZ     x1, 0, 5f
         STR     s30,  [x7]
         STR     s28, [x10]
         STR     s18,  [x9]
         STR     s16,  [x6]
 
-8:
+5:
         RET
 
 END_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_ld128
