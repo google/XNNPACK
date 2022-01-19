@@ -15,16 +15,16 @@
 // void xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
-//     size_t kc,                                      r2 -> r5 -> sp + 36
-//     size_t ks,                                      r3 -> sp + 40 -> r14
-//     const int8_t**restrict a,           sp + 80  -> r2
-//     const void*restrict w,              sp + 84  -> r9
-//     int8_t*restrict c,                  sp + 88  -> r11
-//     size_t cm_stride,                   sp + 92  -> (r6)
-//     size_t cn_stride,                   sp + 96  -> (r7)
-//     size_t a_offset,                    sp + 100 -> (r5)
-//     const int8_t* zero,                 sp + 104 -> (r7)
-//     xnn_qs8_conv_minmax_params*params); sp + 108 -> (r5)
+//     size_t kc,                                      r2 -> r5 -> sp + 44
+//     size_t ks,                                      r3 -> sp + 48 -> r14
+//     const int8_t**restrict a,            sp + 88  -> r2
+//     const void*restrict w,              sp + 92  -> r9
+//     int8_t*restrict c,                   sp + 96  -> r11
+//     size_t cm_stride,                   sp + 100  -> (r6)
+//     size_t cn_stride,                   sp + 104  -> (r7)
+//     size_t a_offset,                    sp + 108 -> (r5)
+//     const int8_t* zero,                  sp + 112 -> (r7)
+//     xnn_qs8_conv_minmax_params*params); sp + 116 -> (r5)
 
 // inner loop registers
 
@@ -40,7 +40,7 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// Unused q6 q7
+// Unused d13-d15
 
 // params structure is 16 bytes
 //  struct {
@@ -53,17 +53,18 @@
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
-        # Push 80 bytes
+        # Push 88 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
-        SUB     sp, sp, 4                                        // 4
-        VPUSH   {d8-d11}                                         // +32 = 80
 
-        LDR     r11, [sp, 88]           // c
-        LDR     r6, [sp, 92]            // cm_stride
-        LDR     r2, [sp, 80]            // a
-        LDR     r9, [sp, 84]            // w
-        LDR     r5, [sp, 108]           // params
+        SUB     sp, sp, 12                          // +12
+        VPUSH   {d8-d11}                            // +32 = 88
+
+        LDR     r11, [sp, 96]           // c
+        LDR     r6, [sp, 100]           // cm_stride
+        LDR     r2, [sp, 88]            // a
+        LDR     r9, [sp, 92]            // w
+        LDR     r5, [sp, 116]           // params
         MOV     r14, r3                 // p = ks
 
         # Clamp C pointers
@@ -103,8 +104,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
 
 
         # Add a_offset
-        LDR     r5, [sp, 100]           // a_offset
-        LDR     r7, [sp, 104]           // zero
+        LDR     r5, [sp, 108]           // a_offset
+        LDR     r7, [sp, 112]           // zero
         CMP     r3,  r7                 // if a0 == zero
         ADD     r3,  r3, r5             // a0 += a_offset
         MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset
@@ -116,7 +117,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         MOVEQ   r10,  r7                //   a2 = zero, else += a2 + a_offset
         CMP     r0,  r7                 // if a3 == zero
         ADD     r0,  r0, r5             // a3 += a_offset
-        LDR     r5, [sp, 36]            // kc
+        LDR     r5, [sp, 44]            // kc
         MOVEQ   r0,  r7                 //   a3 = zero, else += a3 + a_offset
 
         SUBS    r5, r5, 8               // kc - 8
@@ -233,8 +234,8 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
         BHI     1b
 
-        LDR     r7, [sp, 96]            // cn_stride
-        LDR     r14, [sp, 40]           // p = ks
+        LDR     r7, [sp, 104]           // cn_stride
+        LDR     r14, [sp, 48]           // p = ks
 
         # RNDNU quantization
         VDUP.32 q0, d10[0]              // right_pre_shift
@@ -311,7 +312,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         BHI     0b
 
         VPOP    {d8-d11}
-        ADD     sp, sp, 12              // skip pad, r2, r3
+        ADD     sp, sp, 20                          // skip pad of 12, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         # Remainder- 1 to 7 bytes of A
@@ -446,7 +447,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
 
 8:
         VPOP    {d8-d11}
-        ADD     sp, sp, 12              // skip pad, r2, r3
+        ADD     sp, sp, 20                          // skip pad of 12, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64

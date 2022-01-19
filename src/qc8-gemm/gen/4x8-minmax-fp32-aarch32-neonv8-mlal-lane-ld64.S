@@ -16,13 +16,13 @@
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
-//     const uint8_t*restrict a,             r3
-//     size_t a_stride,           sp + 64 -> (r7)
-//     const void*restrict w,     sp + 68 -> r9
-//     uint8_t*restrict c,        sp + 72 -> r11
-//     size_t cm_stride,          sp + 76 -> (r6)
-//     size_t cn_stride,          sp + 80 -> r7
-//     xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 84 -> (r5)
+//     const int8_t*restrict a,              r3
+//     size_t a_stride,           sp + 72 -> (r7)
+//     const void*restrict w,     sp + 76 -> r9
+//     int8_t*restrict c,         sp + 80 -> r11
+//     size_t cm_stride,          sp + 84 -> (r6)
+//     size_t cn_stride,          sp + 88 -> r7
+//     xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 92 -> (r5)
 
 // inner loop registers
 
@@ -38,7 +38,7 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// unused q6 q7
+// Unused d13-d15
 
 // params structure is 4 bytes
 //  struct {
@@ -48,15 +48,16 @@
 //  } xnn_qs8_minmax_params.neonv8;
 
 BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
-        # Push 64 bytes
+        # Push 72 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        VPUSH   {d8-d11}                            // +32 = 64
+        SUB     sp, sp, 8                           // +8
+        VPUSH   {d8-d11}                            // +32 = 72
 
-        LDR     r7, [sp, 64]            // a_stride
-        LDR     r11, [sp, 72]           // c
-        LDR     r6, [sp, 76]            // cm_stride
-        LDR     r9, [sp, 68]            // w
-        LDR     r5, [sp, 84]            // params
+        LDR     r7, [sp, 72]            // a_stride
+        LDR     r11, [sp, 80]           // c
+        LDR     r6, [sp, 84]            // cm_stride
+        LDR     r9, [sp, 76]            // w
+        LDR     r5, [sp, 92]            // params
 
         # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
@@ -78,7 +79,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
 
         # Load params values
         VLD1.32 {d11[]}, [r5]           // QC8 neonv8 params
-        LDR     r7, [sp, 80]            // cn_stride
+        LDR     r7, [sp, 88]            // cn_stride
 
 
         .p2align 3
@@ -120,6 +121,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         VMLAL.S16 q15, d9, d6[0]
 
         VLD1.8  {d8},  [r9]!
+
         VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d0[1]
         VMLAL.S16 q9, d9, d0[1]
@@ -279,6 +281,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
         BHI     0b
 
         VPOP    {d8-d11}
+        ADD     sp, sp, 8
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
@@ -414,6 +417,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld
 
 7:
         VPOP    {d8-d11}
+        ADD     sp, sp, 8
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
