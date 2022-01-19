@@ -273,7 +273,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
+xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   g.generate(nc, kc, nullptr);

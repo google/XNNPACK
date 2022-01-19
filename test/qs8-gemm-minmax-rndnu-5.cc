@@ -21914,9 +21914,6 @@
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -21925,15 +21922,11 @@
       .m(4)
       .n(8)
       .k(8)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, strided_cn) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -21943,15 +21936,11 @@
       .n(8)
       .k(8)
       .cn_stride(11)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -21961,16 +21950,12 @@
       .n(8)
       .k(8)
       .a_stride(11)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, 8, nullptr));
       for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
@@ -21981,17 +21966,13 @@
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8_subtile_m) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -22002,17 +21983,13 @@
         .n(8)
         .k(8)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8_subtile_n) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, 8, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22022,17 +21999,13 @@
         .n(n)
         .k(8)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22041,17 +22014,13 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_lt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22061,8 +22030,7 @@
         .n(8)
         .k(k)
         .a_stride(11)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
@@ -22070,9 +22038,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22083,9 +22048,8 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -22093,9 +22057,6 @@
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22104,17 +22065,13 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_gt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22124,8 +22081,7 @@
         .n(8)
         .k(k)
         .a_stride(19)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
@@ -22133,9 +22089,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22146,9 +22099,8 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -22156,9 +22108,6 @@
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22167,17 +22116,13 @@
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_div_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, k, nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -22187,8 +22132,7 @@
         .n(8)
         .k(k)
         .a_stride(83)
-        .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
     }
   }
 
@@ -22196,9 +22140,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 16; k <= 80; k += 8) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22209,9 +22150,8 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -22220,9 +22160,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22231,8 +22168,7 @@
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22241,9 +22177,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22253,8 +22186,7 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22263,9 +22195,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22275,8 +22204,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22285,9 +22213,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22298,9 +22223,8 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -22309,9 +22233,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22320,8 +22241,7 @@
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22330,9 +22250,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22342,8 +22259,7 @@
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22352,9 +22268,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -22364,8 +22277,7 @@
           .n(n)
           .k(k)
           .a_stride(43)
-          .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
       }
     }
   }
@@ -22374,9 +22286,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 40; k += 9) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22387,9 +22296,8 @@
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -22398,9 +22306,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 40; k += 9) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, n, k, nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -22412,18 +22317,14 @@
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
+            .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, qmin) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -22433,15 +22334,11 @@
       .n(8)
       .k(8)
       .qmin(128)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, qmax) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -22451,15 +22348,11 @@
       .n(8)
       .k(8)
       .qmax(128)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(&code_buffer, 8, 8, nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -22469,7 +22362,6 @@
       .n(8)
       .k(8)
       .cm_stride(11)
-      .Test(reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT

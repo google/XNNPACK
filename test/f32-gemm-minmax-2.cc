@@ -32637,9 +32637,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -32648,15 +32645,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .m(4)
       .n(8)
       .k(4)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, strided_cn) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -32666,15 +32659,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(4)
       .cn_stride(11)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_4_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -32684,16 +32673,12 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(4)
       .a_stride(7)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_4_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, 4 * sizeof(float), nullptr));
       for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
@@ -32704,17 +32689,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(4)
           .iterations(1)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_4_subtile_m) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -32725,17 +32706,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(4)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_4_subtile_n) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, 4 * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32745,16 +32722,12 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(n)
         .k(4)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 8 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -32763,15 +32736,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .m(4)
       .n(8)
       .k(8)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 8 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -32781,16 +32750,12 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(8)
       .a_stride(11)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_eq_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, 8 * sizeof(float), nullptr));
       for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
@@ -32801,18 +32766,14 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(8)
           .iterations(1)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32821,17 +32782,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_lt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32841,8 +32798,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(11)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -32850,9 +32806,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -32863,9 +32816,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -32873,9 +32825,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32884,17 +32833,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_gt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32904,8 +32849,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(19)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -32913,9 +32857,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -32926,9 +32867,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -32936,9 +32876,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_div_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 12; k <= 40; k += 4) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32947,17 +32884,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, k_div_4_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 12; k <= 40; k += 4) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -32967,8 +32900,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(43)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -32976,9 +32908,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 12; k <= 40; k += 4) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -32989,9 +32918,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33000,9 +32928,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33011,8 +32936,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33021,9 +32945,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33033,8 +32954,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33043,9 +32963,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33055,8 +32972,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33065,9 +32981,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33078,9 +32991,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33089,9 +33001,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33100,8 +33009,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33110,9 +33018,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33122,8 +33027,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33132,9 +33036,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33144,8 +33045,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .a_stride(23)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33154,9 +33054,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 20; k += 5) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33167,9 +33064,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33178,9 +33074,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 20; k += 5) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33192,18 +33085,14 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, qmin) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33213,15 +33102,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(4)
       .qmin(128)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, qmax) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33231,15 +33116,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(4)
       .qmax(128)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(&code_buffer, 8, 4 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33249,8 +33130,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(4)
       .cm_stride(11)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
 
@@ -33258,9 +33138,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33269,15 +33146,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .m(4)
       .n(8)
       .k(2)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, strided_cn) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33287,15 +33160,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(2)
       .cn_stride(11)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_eq_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33305,16 +33174,12 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(2)
       .a_stride(5)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_eq_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, 2 * sizeof(float), nullptr));
       for (uint32_t m = 1; m <= 4; m++) {
         GemmMicrokernelTester()
           .mr(4)
@@ -33325,17 +33190,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(2)
           .iterations(1)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_eq_2_subtile_m) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     for (uint32_t m = 1; m <= 4; m++) {
       GemmMicrokernelTester()
         .mr(4)
@@ -33346,17 +33207,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(2)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_eq_2_subtile_n) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, 2 * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33366,17 +33223,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(n)
         .k(2)
         .iterations(1)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_lt_2) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 2; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33385,17 +33238,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_lt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 2; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33405,8 +33254,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(5)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -33414,9 +33262,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 2; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33427,9 +33272,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33437,9 +33281,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_gt_2) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 3; k < 4; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33448,17 +33289,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_gt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 3; k < 4; k++) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33468,8 +33305,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(7)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -33477,9 +33313,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 3; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33490,9 +33323,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33500,9 +33332,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_div_2) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 4; k <= 20; k += 2) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33511,17 +33340,13 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .m(4)
         .n(8)
         .k(k)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, k_div_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 4; k <= 20; k += 2) {
-      struct xnn_code_buffer code_buffer;
-      ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-      ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, k * sizeof(float), nullptr));
       GemmMicrokernelTester()
         .mr(4)
         .nr(8)
@@ -33531,8 +33356,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
         .n(8)
         .k(k)
         .a_stride(23)
-        .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-      ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+        .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
     }
   }
 
@@ -33540,9 +33364,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 4; k <= 20; k += 2) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33553,9 +33374,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33564,9 +33384,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33575,8 +33392,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33585,9 +33401,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33597,8 +33410,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33607,9 +33419,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33619,8 +33428,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .a_stride(13)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33629,9 +33437,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33642,9 +33447,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33653,9 +33457,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33664,8 +33465,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .m(4)
           .n(n)
           .k(k)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33674,9 +33474,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33686,8 +33483,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .cn_stride(11)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33696,9 +33492,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         GemmMicrokernelTester()
           .mr(4)
           .nr(8)
@@ -33708,8 +33501,7 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
           .n(n)
           .k(k)
           .a_stride(13)
-          .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+          .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -33718,9 +33510,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
       for (size_t k = 1; k <= 10; k += 3) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33731,9 +33520,8 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .n(n)
             .k(k)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
@@ -33742,9 +33530,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k <= 10; k += 3) {
       for (uint32_t n = 1; n <= 8; n++) {
-        struct xnn_code_buffer code_buffer;
-        ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-        ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, n, k * sizeof(float), nullptr));
         for (uint32_t m = 1; m <= 4; m++) {
           GemmMicrokernelTester()
             .mr(4)
@@ -33756,18 +33541,14 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
             .k(k)
             .cm_stride(11)
             .iterations(1)
-            .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
+            .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
         }
-        ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
       }
     }
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, qmin) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33777,15 +33558,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(2)
       .qmin(128)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, qmax) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33795,15 +33572,11 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(2)
       .qmax(128)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 
   TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, strided_cm) {
     TEST_REQUIRES_ARM_NEON;
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(&code_buffer, 8, 2 * sizeof(float), nullptr));
     GemmMicrokernelTester()
       .mr(4)
       .nr(8)
@@ -33813,7 +33586,6 @@ TEST(F32_GEMM_MINMAX_2X4__SCALAR, strided_cm) {
       .n(8)
       .k(2)
       .cm_stride(11)
-      .Test(reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code), xnn_init_f32_minmax_scalar_params);
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+      .Test(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
   }
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT

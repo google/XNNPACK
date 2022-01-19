@@ -60,10 +60,6 @@ GEMM_TEST_CODE = """\
 TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  $if JIT_CODEGEN:
-    ${JIT_DECLARE_BUFFER};
-    ${JIT_ALLOCATE_CODE_MEMORY};
-    ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
   GemmMicrokernelTester()
     $if EXTENDED_WEIGHTS:
       .extended_weights(true)
@@ -75,17 +71,11 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
     .n(${NR})
     .k(${KBLOCK})
     .Test(${", ".join(TEST_ARGS)});
-  $if JIT_CODEGEN:
-    ${JIT_RELEASE_CODE_MEMORY};
 }
 
 TEST(${TEST_NAME}, strided_cn) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  $if JIT_CODEGEN:
-    ${JIT_DECLARE_BUFFER};
-    ${JIT_ALLOCATE_CODE_MEMORY};
-    ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
   GemmMicrokernelTester()
     $if EXTENDED_WEIGHTS:
       .extended_weights(true)
@@ -98,18 +88,12 @@ TEST(${TEST_NAME}, strided_cn) {
     .k(${KBLOCK})
     .cn_stride(${next_prime(NR + 1)})
     .Test(${", ".join(TEST_ARGS)});
-  $if JIT_CODEGEN:
-    ${JIT_RELEASE_CODE_MEMORY};
 }
 
 $if UKERNEL_TYPE != "IGEMM":
   TEST(${TEST_NAME}, k_eq_${KBLOCK}_strided_a) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -122,18 +106,12 @@ $if UKERNEL_TYPE != "IGEMM":
       .k(${KBLOCK})
       .a_stride(${next_prime(KBLOCK + 1)})
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 
 TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t n = 1; n <= ${NR}; n++) {
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
     for (uint32_t m = 1; m <= ${MR}; m++) {
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
@@ -148,18 +126,12 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile) {
         .iterations(1)
         .Test(${", ".join(TEST_ARGS)});
     }
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 }
 
 TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  $if JIT_CODEGEN:
-    ${JIT_DECLARE_BUFFER};
-    ${JIT_ALLOCATE_CODE_MEMORY};
-    ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
   for (uint32_t m = 1; m <= ${MR}; m++) {
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
@@ -174,8 +146,6 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m) {
       .iterations(1)
       .Test(${", ".join(TEST_ARGS)});
   }
-  $if JIT_CODEGEN:
-    ${JIT_RELEASE_CODE_MEMORY};
 }
 
 
@@ -183,10 +153,6 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_n) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t n = 1; n <= ${NR}; n++) {
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -199,8 +165,6 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_n) {
       .k(${KBLOCK})
       .iterations(1)
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 }
 
@@ -208,10 +172,6 @@ $if IS_PIPELINED:
   TEST(${TEST_NAME}, k_eq_${KBLOCK * 2}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK * 2}${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -223,18 +183,12 @@ $if IS_PIPELINED:
       .n(${NR})
       .k(${KBLOCK * 2})
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 
   $if UKERNEL_TYPE != "IGEMM":
     TEST(${TEST_NAME}, k_eq_${KBLOCK * 2}_strided_a) {
       $if ISA_CHECK:
         ${ISA_CHECK};
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK * 2}${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -247,18 +201,12 @@ $if IS_PIPELINED:
         .k(${KBLOCK * 2})
         .a_stride(${next_prime(KBLOCK * 2 + 1)})
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
 
   TEST(${TEST_NAME}, k_eq_${KBLOCK * 2}_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (uint32_t n = 1; n <= ${NR}; n++) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, ${KBLOCK * 2}${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -273,8 +221,6 @@ $if IS_PIPELINED:
           .iterations(1)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -283,10 +229,6 @@ $if KBLOCK > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${ADJKBLOCK}; k++) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -298,8 +240,6 @@ $if KBLOCK > 1:
         .n(${NR})
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -308,10 +248,6 @@ $if KBLOCK > 1:
       $if ISA_CHECK:
         ${ISA_CHECK};
       for (size_t k = 1; k < ${ADJKBLOCK}; k++) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -324,8 +260,6 @@ $if KBLOCK > 1:
           .k(k)
           .a_stride(${next_prime(ADJKBLOCK + 1)})
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
 
@@ -334,10 +268,6 @@ $if KBLOCK > 1:
       ${ISA_CHECK};
     for (size_t k = 1; k < ${ADJKBLOCK}; k++) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         for (uint32_t m = 1; m <= ${MR}; m++) {
           GemmMicrokernelTester()
             $if EXTENDED_WEIGHTS:
@@ -352,8 +282,6 @@ $if KBLOCK > 1:
             .iterations(1)
             .Test(${", ".join(TEST_ARGS)});
         }
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -362,10 +290,6 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t k = ${ADJKBLOCK + 1}; k < ${ADJKBLOCK * 10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -377,8 +301,6 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
       .n(${NR})
       .k(k)
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 }
 
@@ -387,10 +309,6 @@ $if UKERNEL_TYPE.startswith("GEMM"):
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -403,8 +321,6 @@ $if UKERNEL_TYPE.startswith("GEMM"):
         .k(k)
         .a_stride(${next_prime(10 if ADJKBLOCK == 1 else ADJKBLOCK * 2 + 1)})
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -413,10 +329,6 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_subtile) {
     ${ISA_CHECK};
   for (size_t k = ${ADJKBLOCK + 1}; k < ${10 if ADJKBLOCK == 1 else ADJKBLOCK * 2}; k++) {
     for (uint32_t n = 1; n <= ${NR}; n++) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -431,8 +343,6 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_subtile) {
           .iterations(1)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -442,10 +352,6 @@ $if KBLOCK > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = ${ADJKBLOCK + KBLOCK}; k <= ${KBLOCK * 10}; k += ${KBLOCK}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -457,8 +363,6 @@ $if KBLOCK > 1:
         .n(${NR})
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -467,10 +371,6 @@ $if KBLOCK > 1:
       $if ISA_CHECK:
         ${ISA_CHECK};
       for (size_t k = ${ADJKBLOCK + KBLOCK}; k <= ${KBLOCK * 10}; k += ${KBLOCK}) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -483,8 +383,6 @@ $if KBLOCK > 1:
           .k(k)
           .a_stride(${next_prime(KBLOCK * 10 + 1)})
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
 
@@ -493,10 +391,6 @@ $if KBLOCK > 1:
       ${ISA_CHECK};
     for (size_t k = ${ADJKBLOCK + KBLOCK}; k <= ${KBLOCK * 10}; k += ${KBLOCK}) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         for (uint32_t m = 1; m <= ${MR}; m++) {
           GemmMicrokernelTester()
             $if EXTENDED_WEIGHTS:
@@ -511,8 +405,6 @@ $if KBLOCK > 1:
             .iterations(1)
             .Test(${", ".join(TEST_ARGS)});
         }
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -522,10 +414,6 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
     ${ISA_CHECK};
   for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -537,8 +425,6 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
         .n(n)
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -548,10 +434,6 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
     ${ISA_CHECK};
   for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -564,8 +446,6 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -576,10 +456,6 @@ $if UKERNEL_TYPE != "IGEMM":
       ${ISA_CHECK};
     for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -592,8 +468,6 @@ $if UKERNEL_TYPE != "IGEMM":
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -603,10 +477,6 @@ TEST(${TEST_NAME}, n_gt_${NR}_subtile) {
     ${ISA_CHECK};
   for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -621,8 +491,6 @@ TEST(${TEST_NAME}, n_gt_${NR}_subtile) {
           .iterations(1)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -632,10 +500,6 @@ TEST(${TEST_NAME}, n_div_${NR}) {
     ${ISA_CHECK};
   for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -647,8 +511,6 @@ TEST(${TEST_NAME}, n_div_${NR}) {
         .n(n)
         .k(k)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -658,10 +520,6 @@ TEST(${TEST_NAME}, n_div_${NR}_strided_cn) {
     ${ISA_CHECK};
   for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -674,8 +532,6 @@ TEST(${TEST_NAME}, n_div_${NR}_strided_cn) {
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -686,10 +542,6 @@ $if UKERNEL_TYPE != "IGEMM":
       ${ISA_CHECK};
     for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -702,8 +554,6 @@ $if UKERNEL_TYPE != "IGEMM":
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -713,10 +563,6 @@ TEST(${TEST_NAME}, n_div_${NR}_subtile) {
     ${ISA_CHECK};
   for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -731,8 +577,6 @@ TEST(${TEST_NAME}, n_div_${NR}_subtile) {
           .iterations(1)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -742,10 +586,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -758,8 +598,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .k(k)
         .ks(3)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -768,10 +606,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
       for (uint32_t n = 1; n <= ${NR}; n++) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         for (uint32_t m = 1; m <= ${MR}; m++) {
           GemmMicrokernelTester()
             $if EXTENDED_WEIGHTS:
@@ -787,8 +621,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
             .iterations(1)
             .Test(${", ".join(TEST_ARGS)});
         }
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -798,10 +630,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       ${ISA_CHECK};
     for (uint32_t n = ${NR + 1}; n < ${NR * 2}; n++) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -814,8 +642,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .k(k)
           .ks(3)
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -825,10 +651,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
       ${ISA_CHECK};
     for (uint32_t n = ${2 * NR}; n <= ${3 * NR}; n += ${NR}) {
       for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-        $if JIT_CODEGEN:
-          ${JIT_DECLARE_BUFFER};
-          ${JIT_ALLOCATE_CODE_MEMORY};
-          ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
             .extended_weights(true)
@@ -841,8 +663,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .k(k)
           .ks(3)
           .Test(${", ".join(TEST_ARGS)});
-        $if JIT_CODEGEN:
-          ${JIT_RELEASE_CODE_MEMORY};
       }
     }
   }
@@ -852,10 +672,6 @@ TEST(${TEST_NAME}, strided_cm_subtile) {
     ${ISA_CHECK};
   for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
     for (uint32_t n = 1; n <= ${NR}; n++) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, n, k${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t m = 1; m <= ${MR}; m++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -871,8 +687,6 @@ TEST(${TEST_NAME}, strided_cm_subtile) {
           .iterations(1)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 }
@@ -882,10 +696,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -899,8 +709,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .ks(3)
         .a_offset(${next_prime(MR * KBLOCK * 5 + 1)})
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -908,10 +716,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       for (uint32_t mz = 0; mz < ${MR}; mz++) {
         GemmMicrokernelTester()
           $if EXTENDED_WEIGHTS:
@@ -928,8 +732,6 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .zero_index(mz)
           .Test(${", ".join(TEST_ARGS)});
       }
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -937,10 +739,6 @@ $if ACTIVATION == "MINMAX":
   TEST(${TEST_NAME}, qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -953,17 +751,11 @@ $if ACTIVATION == "MINMAX":
       .k(${KBLOCK})
       .qmin(128)
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 
   TEST(${TEST_NAME}, qmax) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    $if JIT_CODEGEN:
-      ${JIT_DECLARE_BUFFER};
-      ${JIT_ALLOCATE_CODE_MEMORY};
-      ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
     GemmMicrokernelTester()
       $if EXTENDED_WEIGHTS:
         .extended_weights(true)
@@ -976,17 +768,11 @@ $if ACTIVATION == "MINMAX":
       .k(${KBLOCK})
       .qmax(128)
       .Test(${", ".join(TEST_ARGS)});
-    $if JIT_CODEGEN:
-      ${JIT_RELEASE_CODE_MEMORY};
   }
 
 TEST(${TEST_NAME}, strided_cm) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  $if JIT_CODEGEN:
-    ${JIT_DECLARE_BUFFER};
-    ${JIT_ALLOCATE_CODE_MEMORY};
-    ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, ${KBLOCK}${JIT_K_MULTIPLIER}, nullptr));
   GemmMicrokernelTester()
     $if EXTENDED_WEIGHTS:
       .extended_weights(true)
@@ -999,8 +785,6 @@ TEST(${TEST_NAME}, strided_cm) {
     .k(${KBLOCK})
     .cm_stride(${next_prime(NR + 1)})
     .Test(${", ".join(TEST_ARGS)});
-  $if JIT_CODEGEN:
-    ${JIT_RELEASE_CODE_MEMORY};
 }
 
 $if DATATYPE == "qu8":
@@ -1008,10 +792,6 @@ $if DATATYPE == "qu8":
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -1024,8 +804,6 @@ $if DATATYPE == "qu8":
         .k(k)
         .a_zero_point(0)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -1033,10 +811,6 @@ $if DATATYPE == "qu8":
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -1049,8 +823,6 @@ $if DATATYPE == "qu8":
         .k(k)
         .b_zero_point(0)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 
@@ -1058,10 +830,6 @@ $if DATATYPE == "qu8":
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
-      $if JIT_CODEGEN:
-        ${JIT_DECLARE_BUFFER};
-        ${JIT_ALLOCATE_CODE_MEMORY};
-        ASSERT_EQ(xnn_status_success, ${JIT_GENERATOR}(&code_buffer, ${NR}, k${JIT_K_MULTIPLIER}, nullptr));
       GemmMicrokernelTester()
         $if EXTENDED_WEIGHTS:
           .extended_weights(true)
@@ -1075,8 +843,6 @@ $if DATATYPE == "qu8":
         .a_zero_point(0)
         .b_zero_point(0)
         .Test(${", ".join(TEST_ARGS)});
-      $if JIT_CODEGEN:
-        ${JIT_RELEASE_CODE_MEMORY};
     }
   }
 """
@@ -1126,25 +892,9 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
       test_args.append("xnn_%s_requantize_%s" % \
         (requantization_datatype, requantization))
 
-  jit_declare_buffer = "struct xnn_code_buffer code_buffer"
-  jit_allocate_code_memory = ("ASSERT_EQ(xnn_status_success, "
-                              "xnn_allocate_code_memory(&code_buffer, "
-                              "XNN_DEFAULT_CODE_BUFFER_SIZE))")
-  jit_release_code_memory = ("ASSERT_EQ(xnn_status_success, "
-                             "xnn_release_code_memory(&code_buffer))")
-  jit_k_multiplier = '1'
-
   if jit:
     if "minmax" in init_fn:
       activation = "minmax"
-    sig = "xnn_%s_%s_%s_ukernel_function" % (datatype, ukernel_type, activation)
-    test_args[0] = "reinterpret_cast<%s>(code_buffer.code)" % sig
-    if datatype == 'f32':
-      jit_k_multiplier = ' * sizeof(float)'
-    elif datatype in ['qs8', 'qc8', 'qu8']:
-      jit_k_multiplier = ''
-    elif datatype in ['f16']:
-      jit_k_multiplier = ' * sizeof(uint16_t)'
 
   return xngen.preprocess(
       GEMM_TEST_CODE, {
@@ -1163,12 +913,6 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "IS_PIPELINED": is_pipelined,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "next_prime": next_prime,
-          "JIT_GENERATOR": ukernel,
-          "JIT_CODEGEN": jit,
-          "JIT_DECLARE_BUFFER": jit_declare_buffer,
-          "JIT_ALLOCATE_CODE_MEMORY": jit_allocate_code_memory,
-          "JIT_RELEASE_CODE_MEMORY": jit_release_code_memory,
-          "JIT_K_MULTIPLIER": jit_k_multiplier,
       })
 
 

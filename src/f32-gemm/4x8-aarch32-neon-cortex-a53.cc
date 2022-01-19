@@ -15,7 +15,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc, size_t kc, void* params);
+  void generate(size_t nc, size_t kc, float min, float max);
 };
 
 
@@ -52,7 +52,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
-void Generator::generate(size_t nc, size_t kc, void* params) {
+void Generator::generate(size_t nc, size_t kc, float min, float max) {
   assert(kc % sizeof(float) == 0);
 
   Label nc_loop, kc_loop, epilogue, clamp, remainder_kc, store_odd_width;
@@ -532,7 +532,8 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(nc, kc, nullptr);
+  jit_gemm_params* p = reinterpret_cast<jit_gemm_params*>(params);
+  g.generate(nc, kc, p->f32_minmax.scalar.min, p->f32_minmax.scalar.max);
   g.finalize();
   if (g.error() != Error::kNoError) {
     return xnn_status_invalid_state;
