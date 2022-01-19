@@ -7,6 +7,8 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
 
+#include <cassert>
+
 namespace xnnpack {
 namespace aarch32 {
 namespace {
@@ -51,7 +53,9 @@ class Generator : public Assembler {
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
 void Generator::generate(size_t nc, size_t kc, void* params) {
-  Label l0, l1, l2, l3, l4, l5, l6;
+  assert(kc % sizeof(float) == 0);
+
+  Label nc_loop, kc_loop, epilogue, clamp, remainder_kc, store_odd_width;
 
   // Push 100 bytes
   // r2 will be reloaded in outer loop
@@ -82,7 +86,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   movlo(r6, r8); // c3
 
   align(8);
-  bind(l0);
+  bind(nc_loop);
   // Load initial bias from w into accumulators
   vldm(r9, {d16-d19}, true); // Bias
 
@@ -107,7 +111,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   vmov(q15, q9);
   pld(mem[r9, 256]);
   pld(mem[r9, 320]);
-  blo(l4); // less than 4 channels?
+  blo(remainder_kc); // less than 4 channels?
 
   // Prologue
   vld1_32({d0}, mem[r3]++); // A0
@@ -120,12 +124,12 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   ldr(r2, mem[r9, 60]); // B1 high
   vldr(d13, mem[r9, 40]); // B1
 
-  blo(l2); // less than 4 channels?  skip main loop
+  blo(epilogue); // less than 4 channels?  skip main loop
 
   // Main loop - 4 floats of A (16 bytes)
   // 32 FMA + 8 LD64 A + 8 LDR B
   align(8);
-  bind(l1);
+  bind(kc_loop);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
   vld1_32({d4}, mem[r3]++); // A0
@@ -246,10 +250,10 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   subs(r5, r5, 16);
   ldr(r2, mem[r9, 188]); // B1 high
   add(r9, r9, 128); // B++
-  bhs(l1);
+  bhs(kc_loop);
 
   // Epilogue - 4 floats of A (16 bytes)
-  bind(l2);
+  bind(epilogue);
   // First group of 16 FMA, Second group loads
   // BLOCK 0
   vld1_32({d4}, mem[r3]++); // A0
@@ -348,10 +352,12 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   vmla_f32(q15, q7, d7[1]);
 
   // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
-  bne(l4);
+  if (kc % 16 != 0) {
+    bne(remainder_kc);
+  }
 
   align(8);
-  bind(l3);
+  bind(clamp);
   // Load params pointer
   ldr(r0, mem[sp, 116]); // cn_stride
   ldr(r5, mem[sp, 120]); // params
@@ -380,8 +386,11 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   vmin_f32(q14, q14, q3);
   vmin_f32(q15, q15, q3);
 
+  if (nc % 8 != 0) {
+    blo(store_odd_width);
+  }
+
   // Store full 4 x 8
-  blo(l6);
   vst1_32({d16-d19}, mem[r11], r0);
   sub(r7, r7, r2);
   vst1_32({d20-d23}, mem[r4], r0);
@@ -390,7 +399,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   sub(r12, r12, r2);
   vst1_32({d28-d31}, mem[r6], r0);
   sub(r3, r3, r2);
-  bhi(l0);
+  bhi(nc_loop);
 
   add(sp, sp, 4);
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
@@ -398,59 +407,54 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   bx(lr);
 
   align(8);
-  bind(l4);
-  // Is there a remainder?- 2 floats of A (8 bytes)
-  tst(r5, 8);
-  beq(l5);
+  bind(remainder_kc);
 
-  // Remainder - 2 floats of A (8 bytes)
-  vld1_32({d0}, mem[r3]++); // A0
-  vldm(r9, {d8-d11}, true); // B0
-  vld1_32({d1}, mem[r12]++); // A1
-  vld1_32({d2}, mem[r10]++); // A2
-  vld1_32({d3}, mem[r7]++); // A3
+  if (kc & 8) {
+    // Remainder - 2 floats of A (8 bytes)
+    vld1_32({d0}, mem[r3]++); // A0
+    vldm(r9, {d8-d11}, true); // B0
+    vld1_32({d1}, mem[r12]++); // A1
+    vld1_32({d2}, mem[r10]++); // A2
+    vld1_32({d3}, mem[r7]++); // A3
 
-  vmla_f32(q8, q4, d0[0]);
-  vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q11, q5, d1[0]);
-  vldm(r9, {d12-d15}, true); // B1
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
-  vmla_f32(q8, q6, d0[1]);
-  vmla_f32(q9, q7, d0[1]);
-  vmla_f32(q10, q6, d1[1]);
-  vmla_f32(q11, q7, d1[1]);
-  vmla_f32(q12, q6, d2[1]);
-  vmla_f32(q13, q7, d2[1]);
-  vmla_f32(q14, q6, d3[1]);
-  vmla_f32(q15, q7, d3[1]);
-
-  // Is there a remainder?- 1 floats of A (4 bytes)
-  tst(r5, 4);
-  beq(l3);
-
-  bind(l5);
-  // Remainder- 1 floats of A (4 bytes)
-  vldm(r3, {s0}, true); // A0
-  vldm(r9, {d8-d11}, true); // B0
-  vldm(r12, {s2}, true); // A1
-  vldm(r10, {s4}, true); // A2
-  vldm(r7, {s6}, true); // A3
-  vmla_f32(q8, q4, d0[0]);
-  vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
-  b(l3);
+    vmla_f32(q8, q4, d0[0]);
+    vmla_f32(q9, q5, d0[0]);
+    vmla_f32(q10, q4, d1[0]);
+    vmla_f32(q11, q5, d1[0]);
+    vldm(r9, {d12-d15}, true); // B1
+    vmla_f32(q12, q4, d2[0]);
+    vmla_f32(q13, q5, d2[0]);
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+    vmla_f32(q8, q6, d0[1]);
+    vmla_f32(q9, q7, d0[1]);
+    vmla_f32(q10, q6, d1[1]);
+    vmla_f32(q11, q7, d1[1]);
+    vmla_f32(q12, q6, d2[1]);
+    vmla_f32(q13, q7, d2[1]);
+    vmla_f32(q14, q6, d3[1]);
+    vmla_f32(q15, q7, d3[1]);
+  }
+  if (kc & 4) {
+    // Remainder - 1 float of A (4 bytes)
+    vldm(r3, {s0}, true); // A0
+    vldm(r9, {d8-d11}, true); // B0
+    vldm(r12, {s2}, true); // A1
+    vldm(r10, {s4}, true); // A2
+    vldm(r7, {s6}, true); // A3
+    vmla_f32(q8, q4, d0[0]);
+    vmla_f32(q9, q5, d0[0]);
+    vmla_f32(q10, q4, d1[0]);
+    vmla_f32(q11, q5, d1[0]);
+    vmla_f32(q12, q4, d2[0]);
+    vmla_f32(q13, q5, d2[0]);
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+  }
+  b(clamp);
 
   // Store odd width
-  bind(l6);
+  bind(store_odd_width);
 
   switch (nc % 8) {
     case 0:
