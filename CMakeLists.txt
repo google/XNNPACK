@@ -4727,6 +4727,13 @@ SET(ALL_AVX_MICROKERNEL_SRCS
 
 SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/f16-gavgpool/gen/7p7x-minmax-f16c-c8.c
+  src/f16-gavgpool/gen/7x-minmax-f16c-c8.c
+  src/f16-vbinary/gen/vadd-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vaddc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vmulc-minmax-f16c-x16.c
+  src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
@@ -4933,6 +4940,10 @@ SET(ALL_XOP_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-xop-mul32-ld32-x16.c)
 
 SET(PROD_FMA3_MICROKERNEL_SRCS
+  src/f16-dwconv/gen/up8x25-minmax-fma3-acc2.c
+  src/f16-dwconv/gen/up16x4-minmax-fma3.c
+  src/f16-dwconv/gen/up16x9-minmax-fma3.c
+  src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c
   src/f32-dwconv/gen/up8x25-minmax-fma3.c
   src/f32-dwconv/gen/up16x3-minmax-fma3.c
   src/f32-dwconv/gen/up16x4-minmax-fma3.c
@@ -5041,6 +5052,10 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/math/sqrt-fma3-nr2fma.c)
 
 SET(PROD_AVX2_MICROKERNEL_SRCS
+  src/f16-gemm/gen/1x16-minmax-avx2-broadcast.c
+  src/f16-gemm/gen/4x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/1x16-minmax-avx2-broadcast.c
+  src/f16-igemm/gen/4x16-minmax-avx2-broadcast.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-qu8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x56.c

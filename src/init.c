@@ -3315,6 +3315,70 @@ static void init(void) {
     };
   #endif  // XNN_NO_X8_OPERATORS
 
+  /**************************** F16 x86 micro-kernels ****************************/
+  #ifndef XNN_NO_F16_OPERATORS
+    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
+      init_flags |= XNN_INIT_FLAG_F16;
+
+      xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_4x16__avx2_broadcast);
+      xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_4x16__avx2_broadcast);
+      xnn_params.f16.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast);
+      xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast);
+      xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_avx_params;
+      xnn_params.f16.gemm.mr = 4;
+      xnn_params.f16.gemm.nr = 16;
+
+      xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x4__fma3;
+      xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_avx_params;
+      xnn_params.f16.dwconv[0].channel_tile = 16;
+      xnn_params.f16.dwconv[0].primary_tile = 4;
+
+      xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x9__fma3;
+      xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_avx_params;
+      xnn_params.f16.dwconv[1].channel_tile = 16;
+      xnn_params.f16.dwconv[1].primary_tile = 9;
+
+      xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2;
+      xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_avx_params;
+      xnn_params.f16.dwconv[2].channel_tile = 8;
+      xnn_params.f16.dwconv[2].primary_tile = 25;
+
+      xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
+        .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c8,
+        .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8,
+        .init.f16 = xnn_init_f16_scaleminmax_avx_params,
+        .update.f16 = xnn_update_f16_scaleminmax_avx_params,
+        .row_tile = 7,
+        .channel_tile = 8,
+      };
+      xnn_params.f16.vadd = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vadd_minmax_ukernel__f16c_x16,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__f16c_x16,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__f16c_x16,
+        .init.f16_minmax = xnn_init_f16_minmax_avx_params,
+        .element_tile = 16,
+      };
+      xnn_params.f16.vmul = (struct vbinary_parameters) {
+        .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmul_minmax_ukernel__f16c_x16,
+        .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmulc_minmax_ukernel__f16c_x16,
+        .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmulc_minmax_ukernel__f16c_x16,
+        .init.f16_minmax = xnn_init_f16_minmax_avx_params,
+        .element_tile = 16,
+      };
+      xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
+        .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x,
+        .init.f16 = xnn_init_f16_minmax_avx_params,
+        .channel_tile = 8,
+        .row_tile = 2,
+      };
+      xnn_params.f16.hswish = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vhswish_ukernel__f16c_x16,
+        .init.f16_hswish = xnn_init_f16_hswish_avx_params,
+        .element_tile = 16,
+      };
+    }
+  #endif  // XNN_NO_F16_OPERATORS
+
   /**************************** F32 x86 micro-kernels ****************************/
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
