@@ -3650,35 +3650,15 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
-  src/x8-transpose/gen/16x16-reuse-dec-sse2.c
-  src/x8-transpose/gen/16x16-reuse-switch-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
-  src/x16-transpose/4x8-sse2.c
-  src/x16-transpose/gen/8x8-multi-dec-sse2.c
-  src/x16-transpose/gen/8x8-multi-switch-sse2.c
-  src/x16-transpose/gen/8x8-reuse-dec-sse2.c
-  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
-  src/x16-transpose/gen/8x8-reuse-switch-sse2.c
-  src/x32-transpose/gen/4x4-multi-dec-sse2.c
-  src/x32-transpose/gen/4x4-multi-multi-sse2.c
-  src/x32-transpose/gen/4x4-multi-switch-sse2.c
-  src/x32-transpose/gen/4x4-reuse-dec-sse2.c
-  src/x32-transpose/gen/4x4-reuse-multi-sse2.c
-  src/x32-transpose/gen/4x4-reuse-switch-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
-  src/x64-transpose/gen/2x2-multi-dec-sse2.c
-  src/x64-transpose/gen/2x2-multi-multi-sse2.c
-  src/x64-transpose/gen/2x2-multi-switch-sse2.c
-  src/x64-transpose/gen/2x2-reuse-dec-sse2.c
-  src/x64-transpose/gen/2x2-reuse-multi-sse2.c
-  src/x64-transpose/gen/2x2-reuse-switch-sse2.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c)
 
@@ -3956,20 +3936,35 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
-  src/x8-transpose/gen/16x16-sse2.c
+  src/x8-transpose/gen/16x16-reuse-dec-sse2.c
+  src/x8-transpose/gen/16x16-reuse-switch-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
   src/x16-transpose/4x8-sse2.c
-  src/x16-transpose/gen/8x8-sse2.c
-  src/x32-transpose/gen/4x4-sse2.c
+  src/x16-transpose/gen/8x8-multi-dec-sse2.c
+  src/x16-transpose/gen/8x8-multi-switch-sse2.c
+  src/x16-transpose/gen/8x8-reuse-dec-sse2.c
+  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
+  src/x16-transpose/gen/8x8-reuse-switch-sse2.c
+  src/x32-transpose/gen/4x4-multi-dec-sse2.c
+  src/x32-transpose/gen/4x4-multi-multi-sse2.c
+  src/x32-transpose/gen/4x4-multi-switch-sse2.c
+  src/x32-transpose/gen/4x4-reuse-dec-sse2.c
+  src/x32-transpose/gen/4x4-reuse-multi-sse2.c
+  src/x32-transpose/gen/4x4-reuse-switch-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
-  src/x64-transpose/gen/2x2-sse2.c
+  src/x64-transpose/gen/2x2-multi-dec-sse2.c
+  src/x64-transpose/gen/2x2-multi-multi-sse2.c
+  src/x64-transpose/gen/2x2-multi-switch-sse2.c
+  src/x64-transpose/gen/2x2-reuse-dec-sse2.c
+  src/x64-transpose/gen/2x2-reuse-multi-sse2.c
+  src/x64-transpose/gen/2x2-reuse-switch-sse2.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c)
 
@@ -6346,6 +6341,7 @@ IF(NOT TARGET fp16)
 ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE fp16)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fp16)
+TARGET_LINK_LIBRARIES(packing PRIVATE fp16)
 
 INSTALL(TARGETS XNNPACK
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
