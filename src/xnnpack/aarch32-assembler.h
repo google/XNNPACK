@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <xnnpack/allocator.h>
+#include <xnnpack/assembler.h>
 
 #include <array>
 #include <cstddef>
@@ -13,7 +14,7 @@
 namespace xnnpack {
 namespace aarch32 {
 
-constexpr size_t kInstructionSizeInBytes = 4;
+using namespace xnnpack;
 
 enum class SpecialFPRegister {
   kFPSCR = 1,
@@ -360,18 +361,6 @@ enum Condition : uint32_t {
   kLO = kCC,
 };
 
-enum class Error {
-  kNoError,
-  kOutOfMemory,
-  kInvalidOperand,
-  kLabelAlreadyBound,
-  kLabelOffsetOutOfBounds,
-  kLabelHasTooManyUsers,
-  kInvalidLaneIndex,
-  kInvalidRegisterListLength,
-  kFinalizeCodeMemoryFail,
-};
-
 enum DataSize {
   k8 = 0,
   k16 = 1,
@@ -379,10 +368,9 @@ enum DataSize {
 };
 
 // A simple AAarch32 assembler.
-class Assembler {
+class Assembler : public AssemblerBase {
  public:
-  // Takes an xnn_code_buffer with a pointer to allocated memory.
-  explicit Assembler(xnn_code_buffer* buf);
+  using AssemblerBase::AssemblerBase;
 
   Assembler& add(CoreRegister rn, CoreRegister rm) { return add(rn, rn, rm); }
   Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
@@ -516,19 +504,6 @@ class Assembler {
   // Align the cursor to specified number of bytes, `n` must be a power of 2.
   Assembler& align(uint8_t n);
 
-  // Finish assembly of code, this should be the last function called on an
-  // instance of Assembler. Returns a pointer to the start of code region.
-  void* finalize();
-  // Reset the assembler state (no memory is freed).
-  void reset();
-
-  // Get a pointer to the start of code buffer.
-  const uint32_t* start() const { return buffer_; }
-  const uint32_t* offset() const { return cursor_; }
-  // Returns the number of bytes of code actually in the buffer.
-  size_t code_size_in_bytes() const { return (cursor_ - buffer_) * kInstructionSizeInBytes; }
-  const Error error() const { return error_; }
-
  private:
   // Emits a 32-bit value to the code buffer.
   Assembler& emit32(uint32_t value);
@@ -541,18 +516,6 @@ class Assembler {
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
   Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);
-
-  // Pointer to start of code buffer.
-  uint32_t* buffer_;
-  // Pointer to current place in code buffer.
-  uint32_t* cursor_;
-  // Pointer to out-of-bounds of code buffer.
-  uint32_t* top_;
-  // Errors encountered while assembling code.
-  Error error_ = Error::kNoError;
-  // Holds an xnn_code_buffer, will write code to its code pointer, and unmap
-  // unused pages on finalizing.
-  xnn_code_buffer* xnn_buffer = nullptr;
 };
 
 }  // namespace aarch32

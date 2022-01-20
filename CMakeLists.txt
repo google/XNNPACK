@@ -259,6 +259,8 @@ SET(TABLE_SRCS
 
 SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
+  src/jit/aarch64-assembler.cc
+  src/jit/assembler.cc
   src/jit/memory.c)
 
 SET(JIT_AARCH32_SRCS
@@ -8248,6 +8250,14 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(aarch64-assembler-test test/aarch64-assembler.cc)
+  SET_TARGET_PROPERTIES(aarch64-assembler-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(aarch64-assembler-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
