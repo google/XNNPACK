@@ -46,6 +46,60 @@ constexpr XRegister x30{30};
 constexpr XRegister xzr{31};
 constexpr XRegister sp{31};
 
+struct VRegister {
+  uint8_t code;
+  uint8_t size = 0;
+  uint8_t q = 1;
+
+  VRegister v8b() const { return {code, 0, 0}; }
+  VRegister v16b() const { return {code, 0, 1}; }
+  VRegister v4h() const { return {code, 1, 0}; }
+  VRegister v8h() const { return {code, 1, 1}; }
+  VRegister v2s() const { return {code, 2, 0}; }
+  VRegister v4s() const { return {code, 2, 1}; }
+  VRegister v1d() const { return {code, 3, 0}; }
+  VRegister v2d() const { return {code, 3, 1}; }
+};
+
+constexpr VRegister v0{0};
+constexpr VRegister v1{1};
+constexpr VRegister v2{2};
+constexpr VRegister v3{3};
+constexpr VRegister v4{4};
+constexpr VRegister v5{5};
+constexpr VRegister v6{6};
+constexpr VRegister v7{7};
+constexpr VRegister v8{8};
+constexpr VRegister v9{9};
+constexpr VRegister v10{10};
+constexpr VRegister v11{11};
+constexpr VRegister v12{12};
+constexpr VRegister v13{13};
+constexpr VRegister v14{14};
+constexpr VRegister v15{15};
+constexpr VRegister v16{16};
+constexpr VRegister v17{17};
+constexpr VRegister v18{18};
+constexpr VRegister v19{19};
+constexpr VRegister v20{20};
+constexpr VRegister v21{21};
+constexpr VRegister v22{22};
+constexpr VRegister v23{23};
+constexpr VRegister v24{24};
+constexpr VRegister v25{25};
+constexpr VRegister v26{26};
+constexpr VRegister v27{27};
+constexpr VRegister v28{28};
+constexpr VRegister v29{29};
+constexpr VRegister v30{30};
+constexpr VRegister v31{31};
+
+struct VRegisterList {
+  VRegisterList(VRegister vt, VRegister vt2): start(vt), length(vt2.code - vt.code + 1) {}
+  VRegister start;
+  uint8_t length;
+};
+
 // C1.3.3 Load/Store addressing modes
 enum class AddressingMode {
   kOffset, // Base plus offset: [base{, #imm}] ; [base, Xm{, LSL #imm}].
@@ -82,6 +136,7 @@ class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
+  Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);

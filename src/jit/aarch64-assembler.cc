@@ -15,6 +15,17 @@ constexpr int32_t kImm7Max = 504;
 // Max value for imm12, will be shifted right by 3 when encoding.
 constexpr int32_t kImm12Max = 32760;
 
+inline uint32_t rn(XRegister xn) { return xn.code << 5; }
+
+Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
+  if (xs.length != 2 || xn.offset != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x0D60C000 | xs.start.q << 30 | xs.start.size << 10 | rn(xn.base) | xs.start.code);
+}
+
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
     error_ = Error::kInvalidOperand;
@@ -24,7 +35,7 @@ Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   const uint32_t mode = xn.mode == AddressingMode::kOffset ? 2 : 1;
   const uint32_t offset = (xn.offset >> 3) & 0x7F;
 
-  return emit32(0xA8400000 | mode << 23 | offset << 15 | xt2.code << 10 | xn.base.code << 5 | xt1.code);
+  return emit32(0xA8400000 | mode << 23 | offset << 15 | xt2.code << 10 | rn(xn.base) | xt1.code);
 }
 
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm) {
@@ -41,7 +52,7 @@ Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
     return *this;
   }
 
-  return emit32(0xF9400000 | xn.offset >> 3 << 10 | xn.base.code << 5 | xt.code);
+  return emit32(0xF9400000 | xn.offset >> 3 << 10 | rn(xn.base) | xt.code);
 }
 
 Assembler& Assembler::emit32(uint32_t value) {
