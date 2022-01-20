@@ -12644,6 +12644,7 @@ xnnpack_unit_test(
     name = "aarch32_assembler_test",
     srcs = [
         "test/aarch32-assembler.cc",
+        "test/assembler-helpers.h",
     ],
     deps = [
         ":XNNPACK",
@@ -12655,6 +12656,7 @@ xnnpack_unit_test(
     name = "aarch64_assembler_test",
     srcs = [
         "test/aarch64-assembler.cc",
+        "test/assembler-helpers.h",
     ],
     deps = [
         ":XNNPACK",
