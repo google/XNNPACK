@@ -12,6 +12,8 @@ namespace aarch64 {
 // Min and max values for the imm7 for ldp, will be shifted right by 3 when encoding.
 constexpr int32_t kImm7Min = -512;
 constexpr int32_t kImm7Max = 504;
+// Max value for imm12, will be shifted right by 3 when encoding.
+constexpr int32_t kImm12Max = 32760;
 
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
@@ -31,6 +33,15 @@ Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t i
     return *this;
   }
   return ldp(xt1, xt2, {xn.base, imm, AddressingMode::kPostIndex});
+}
+
+Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
+  if (xn.mode != AddressingMode::kOffset || xn.offset < 0 || xn.offset > kImm12Max || xn.offset % 8 != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0xF9400000 | xn.offset >> 3 << 10 | xn.base.code << 5 | xt.code);
 }
 
 Assembler& Assembler::emit32(uint32_t value) {

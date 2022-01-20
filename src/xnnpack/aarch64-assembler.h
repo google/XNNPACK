@@ -84,6 +84,7 @@ class Assembler : public AssemblerBase {
 
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
+  Assembler& ldr(XRegister xt, MemOperand xn);
 
  private:
   Assembler& emit32(uint32_t value);
