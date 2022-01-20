@@ -95,8 +95,19 @@ constexpr VRegister v30{30};
 constexpr VRegister v31{31};
 
 struct VRegisterList {
-  VRegisterList(VRegister vt, VRegister vt2): start(vt), length(vt2.code - vt.code + 1) {}
-  VRegister start;
+  VRegisterList(VRegister vt1)
+      : vt1(vt1), length(1) {}
+  VRegisterList(VRegister vt1, VRegister vt2)
+      : vt1(vt1), vt2(vt2), length(2) {}
+  VRegisterList(VRegister vt1, VRegister vt2, VRegister vt3)
+      : vt1(vt1), vt2(vt2), vt3(vt3), length(3) {}
+  VRegisterList(VRegister vt1, VRegister vt2, VRegister vt3, VRegister vt4)
+      : vt1(vt1), vt2(vt2), vt3(vt3), vt4(vt4), length(4) {}
+
+  VRegister vt1;
+  VRegister vt2;
+  VRegister vt3;
+  VRegister vt4;
   uint8_t length;
 };
 
@@ -136,6 +147,7 @@ class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
+  Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);

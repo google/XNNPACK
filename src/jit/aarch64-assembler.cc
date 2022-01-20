@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <xnnpack/common.h>
 #include <xnnpack/aarch64-assembler.h>
 
 #include <cmath>
@@ -16,14 +17,99 @@ constexpr int32_t kImm7Max = 504;
 constexpr int32_t kImm12Max = 32760;
 
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
+inline uint32_t q(VRegister vt) { return vt.q << 30; }
+inline uint32_t size(VRegister vt) { return vt.size << 10; }
 
-Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
-  if (xs.length != 2 || xn.offset != 0) {
+inline bool is_same_shape(VRegister vt1, VRegister vt2) {
+  return vt1.size == vt2.size && vt1.q == vt2.q;
+}
+
+template <typename Reg, typename... Regs>
+inline bool is_same_shape(Reg reg1, Reg reg2, Regs... regs) {
+  return is_same_shape(reg1, reg2) && is_same_shape(reg2, regs...);
+}
+
+inline bool is_same_shape(VRegisterList vs) {
+  switch (vs.length) {
+    case 1:
+      return true;
+    case 2:
+      return is_same_shape(vs.vt1, vs.vt2);
+    case 3:
+      return is_same_shape(vs.vt1, vs.vt2, vs.vt3);
+    case 4:
+      return is_same_shape(vs.vt1, vs.vt2, vs.vt3, vs.vt4);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+inline bool is_consecutive(VRegister vt1, VRegister vt2) {
+  return (vt1.code + 1) % 32 == vt2.code;
+}
+
+template <typename Reg, typename... Regs>
+inline bool is_consecutive(Reg reg1, Reg reg2, Regs... regs) {
+  return is_consecutive(reg1, reg2) && is_consecutive(reg2, regs...);
+}
+
+inline bool is_consecutive(VRegisterList vs) {
+  switch (vs.length) {
+    case 1:
+      return true;
+    case 2:
+      return is_consecutive(vs.vt1, vs.vt2);
+    case 3:
+      return is_consecutive(vs.vt1, vs.vt2, vs.vt3);
+    case 4:
+      return is_consecutive(vs.vt1, vs.vt2, vs.vt3, vs.vt4);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
+  VRegister vt = vs.vt1;
+
+  if (!is_same_shape(vs) || !is_consecutive(vs)) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
 
-  return emit32(0x0D60C000 | xs.start.q << 30 | xs.start.size << 10 | rn(xn.base) | xs.start.code);
+  // imm must match number of bytes loaded.
+  if ((vt.q + 1) * 8 * vs.length != imm) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  uint8_t opcode = 0;
+  switch (vs.length) {
+    case 1:
+      opcode = 0x7;
+      break;
+    case 2:
+      opcode = 0xA;
+      break;
+    case 3:
+      opcode = 0x6;
+      break;
+    case 4:
+      opcode = 0x2;
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+
+  return emit32(0x0CDF0000 | q(vt) | opcode << 12 | size(vt) | rn(xn.base) | vt.code);
+}
+
+Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
+  if (xs.length != 2 || !is_same_shape(xs.vt1, xs.vt2) || xn.offset != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x0D60C000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
 }
 
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
