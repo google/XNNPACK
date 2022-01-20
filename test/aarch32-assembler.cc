@@ -130,6 +130,7 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xF4A54CAF, a.vld1r_32({d4, d5}, mem[r5]));
   CHECK_ENCODING(0xF4A54CAD, a.vld1r_32({d4, d5}, mem[r5]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vld1r_32({d4, d5}, mem[r5, 4]));
 
   CHECK_ENCODING(0xECF90B08, a.vldm(r9, {d16-d19}, true));
   CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8-d11}, false));

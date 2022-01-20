@@ -339,7 +339,7 @@ Assembler& Assembler::vld1_32(DRegisterLane dd, MemOperand op) {
 }
 
 Assembler& Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
-  if (regs.length != 2) {
+  if ((op.mode() == AddressingMode::kOffset && op.offset() != 0) || regs.length != 2) {
     // Unimplemented since only length 2 used in microkernels.
     error_ = Error::kInvalidOperand;
     return *this;

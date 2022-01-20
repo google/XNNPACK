@@ -358,33 +358,42 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
 
   align(8);
   bind(clamp);
-  // Load params pointer
+
   ldr(r0, mem[sp, 116]); // cn_stride
-  ldr(r5, mem[sp, 120]); // params
   ldr(r2, mem[sp]); // kc
   subs(r1, r1, 8);
 
-  // Load min/max values
-  vld1r_32({d4,d5}, mem[r5]++);
-  vld1r_32({d6,d7}, mem[r5]);
+  if (min != -std::numeric_limits<float>::infinity() ||
+      max != +std::numeric_limits<float>::infinity()) {
+    // Load params pointer
+    ldr(r5, mem[sp, 120]); // params
 
-  // Clamp
-  vmax_f32(q8, q8, q2);
-  vmax_f32(q9, q9, q2);
-  vmax_f32(q10, q10, q2);
-  vmax_f32(q11, q11, q2);
-  vmax_f32(q12, q12, q2);
-  vmax_f32(q13, q13, q2);
-  vmax_f32(q14, q14, q2);
-  vmax_f32(q15, q15, q2);
-  vmin_f32(q8, q8, q3);
-  vmin_f32(q9, q9, q3);
-  vmin_f32(q10, q10, q3);
-  vmin_f32(q11, q11, q3);
-  vmin_f32(q12, q12, q3);
-  vmin_f32(q13, q13, q3);
-  vmin_f32(q14, q14, q3);
-  vmin_f32(q15, q15, q3);
+    if (min != -std::numeric_limits<float>::infinity()) {
+      vld1r_32({d4, d5}, mem[r5]++);
+      vmax_f32(q8, q8, q2);
+      vmax_f32(q9, q9, q2);
+      vmax_f32(q10, q10, q2);
+      vmax_f32(q11, q11, q2);
+      vmax_f32(q12, q12, q2);
+      vmax_f32(q13, q13, q2);
+      vmax_f32(q14, q14, q2);
+      vmax_f32(q15, q15, q2);
+    } else {
+      add(r5, r5, 4);
+    }
+
+    if (max != +std::numeric_limits<float>::infinity()) {
+      vld1r_32({d6, d7}, mem[r5]);
+      vmin_f32(q8, q8, q3);
+      vmin_f32(q9, q9, q3);
+      vmin_f32(q10, q10, q3);
+      vmin_f32(q11, q11, q3);
+      vmin_f32(q12, q12, q3);
+      vmin_f32(q13, q13, q3);
+      vmin_f32(q14, q14, q3);
+      vmin_f32(q15, q15, q3);
+    }
+  }
 
   if (nc % 8 != 0) {
     blo(store_odd_width);
