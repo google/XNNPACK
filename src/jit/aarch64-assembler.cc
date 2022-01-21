@@ -211,6 +211,10 @@ Assembler& Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
   return emit32(0xF9800000 | xn.offset << 10 | rn(xn.base) | static_cast<uint32_t>(prfop));
 }
 
+Assembler& Assembler::ret() {
+  return emit32(0xD65F0000 | rn(x30));
+}
+
 Assembler& Assembler::sub(XRegister xd, XRegister xn, XRegister xm) {
   return emit32(0xCB000000 | rm(xm) | rn(xn) | rd(xd));
 }

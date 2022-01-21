@@ -242,6 +242,7 @@ class Assembler : public AssemblerBase {
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);
   Assembler& prfm(PrefetchOp prfop, MemOperand xn);
+  Assembler& ret();
   Assembler& sub(XRegister xd, XRegister xn, XRegister xm);
   Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
   Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
