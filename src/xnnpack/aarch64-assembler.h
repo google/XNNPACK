@@ -8,6 +8,8 @@
 namespace xnnpack {
 namespace aarch64 {
 
+constexpr size_t kInstructionSizeInBytesLog2 = 2;
+
 struct XRegister {
   uint8_t code;
 };
@@ -149,11 +151,36 @@ enum class PrefetchOp {
 
 constexpr PrefetchOp PLDL1KEEP = PrefetchOp::kPLDL1KEEP;
 
+enum Condition : uint32_t {
+  kEQ = 0x0,
+  kNE = 0x1,
+  kCS = 0x2,
+  kCC = 0x3,
+  kMI = 0x4,
+  kPL = 0x5,
+  kVS = 0x6,
+  kVC = 0x7,
+  kHI = 0x8,
+  kLS = 0x9,
+  kGE = 0xa,
+  kLT = 0xB,
+  kGT = 0xC,
+  kLE = 0xD,
+  kAL = 0xE,
+  kHS = kCS,
+  kLO = kCC,
+};
+
 class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
   // Base instructions.
+  Assembler& b_eq(Label& l) { return b(kEQ, l); }
+  Assembler& b_hi(Label& l) { return b(kHI, l); }
+  Assembler& b_hs(Label& l) { return b(kHS, l); }
+  Assembler& b_lo(Label& l) { return b(kLO, l); }
+  Assembler& b_ne(Label& l) { return b(kNE, l); }
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);
@@ -165,8 +192,12 @@ class Assembler : public AssemblerBase {
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& movi(VRegister vd, uint8_t imm);
 
+  // Binds Label l to the current location in the code buffer.
+  Assembler& bind(Label& l);
+
  private:
   Assembler& emit32(uint32_t value);
+  Assembler& b(Condition c, Label& l);
 
 };
 

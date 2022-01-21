@@ -87,5 +87,60 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
+TEST(AArch64Assembler, Label) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
+
+  Label l1;
+  a.movi(v0.v4s(), 0);
+
+  // Branch to unbound label.
+  auto b1 = a.offset<uint32_t*>();
+  a.b_eq(l1);
+
+  a.movi(v1.v4s(), 0);
+
+  auto b2 = a.offset<uint32_t*>();
+  a.b_ne(l1);
+
+  a.movi(v2.v4s(), 0);
+
+  a.bind(l1);
+
+  // Check that b1 and b2 are both patched after binding l1.
+  EXPECT_INSTR(0x54000080, *b1);
+  EXPECT_INSTR(0x54000041, *b2);
+
+  a.movi(v3, 0);
+
+  // Branch to bound label.
+  auto b3 = a.offset<uint32_t*>();
+  a.b_hi(l1);
+  auto b4 = a.offset<uint32_t*>();
+  a.b_hs(l1);
+  auto b5 = a.offset<uint32_t*>();
+  a.b_lo(l1);
+
+  EXPECT_INSTR(0x54FFFFE8, *b3);
+  EXPECT_INSTR(0x54FFFFC2, *b4);
+  EXPECT_INSTR(0x54FFFFA3, *b5);
+
+  // Binding a bound label is an error.
+  a.bind(l1);
+  EXPECT_ERROR(Error::kLabelAlreadyBound, a.bind(l1));
+
+  // Check for bind failure due to too many users of label.
+  Label lfail;
+  a.reset();
+  // Arbitrary high number of users that we probably won't support.
+  for (int i = 0; i < 1000; i++) {
+    a.b_eq(lfail);
+  }
+  EXPECT_EQ(Error::kLabelHasTooManyUsers, a.error());
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
 }  // namespace aarch64
 }  // namespace xnnpack

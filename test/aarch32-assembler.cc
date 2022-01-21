@@ -265,12 +265,12 @@ TEST(AArch32Assembler, Label) {
   a.add(r0, r0, r0);
 
   // Branch to unbound label.
-  auto b1 = a.offset();
+  auto b1 = a.offset<uint32_t*>();
   a.beq(l1);
 
   a.add(r1, r1, r1);
 
-  auto b2 = a.offset();
+  auto b2 = a.offset<uint32_t*>();
   a.bne(l1);
 
   a.add(r2, r2, r2);
@@ -284,13 +284,13 @@ TEST(AArch32Assembler, Label) {
   a.add(r0, r1, r2);
 
   // Branch to bound label.
-  auto b3 = a.offset();
+  auto b3 = a.offset<uint32_t*>();
   a.bhi(l1);
-  auto b4 = a.offset();
+  auto b4 = a.offset<uint32_t*>();
   a.bhs(l1);
-  auto b5 = a.offset();
+  auto b5 = a.offset<uint32_t*>();
   a.blo(l1);
-  auto b6 = a.offset();
+  auto b6 = a.offset<uint32_t*>();
   a.b(l1);
 
   EXPECT_INSTR(0x8AFFFFFD, *b3);
@@ -321,23 +321,23 @@ TEST(AArch32Assembler, Align) {
 
   a.add(r0, r1, r2);
   a.align(4);
-  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x3);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x3);
   EXPECT_EQ(4, a.code_size_in_bytes());
 
   a.align(8);
-  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x7);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x7);
   EXPECT_EQ(8, a.code_size_in_bytes());
 
   a.add(r0, r1, r2);
   a.align(8);
-  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0x7);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x7);
   EXPECT_EQ(16, a.code_size_in_bytes());
 
   a.add(r0, r1, r2);
   EXPECT_EQ(20, a.code_size_in_bytes());
 
   a.align(16);
-  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0xF);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0xF);
   EXPECT_EQ(32, a.code_size_in_bytes());
 
   a.add(r0, r1, r2);
@@ -345,7 +345,7 @@ TEST(AArch32Assembler, Align) {
   EXPECT_EQ(40, a.code_size_in_bytes());
 
   a.align(16);
-  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset()) & 0xF);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0xF);
   EXPECT_EQ(48, a.code_size_in_bytes());
 
   // Not power-of-two.

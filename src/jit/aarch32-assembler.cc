@@ -4,9 +4,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "xnnpack/aarch32-assembler.h"
+#include "xnnpack/assembler.h"
 #include "xnnpack/math.h"
 
 #include <cmath>
+#include <cstddef>
 
 namespace xnnpack {
 namespace aarch32 {
@@ -16,7 +18,7 @@ constexpr int32_t kUint10Max = 1023;
 constexpr int32_t kUint12Max = 4095;
 
 // PC register contains current address of instruction + 8 (2 instructions).
-constexpr ptrdiff_t kPCDelta = 2;
+constexpr ptrdiff_t kPCDelta = 8;
 // Constants used for checking branch offsets bounds.
 constexpr ptrdiff_t kInt24Max = 8388607;
 constexpr ptrdiff_t kInt24Min = -8388608;
@@ -84,12 +86,13 @@ Assembler& Assembler::emit32(uint32_t value) {
     return *this;
   }
 
-  if (cursor_ == top_) {
+  if (cursor_ + sizeof(value) > top_) {
     error_ = Error::kOutOfMemory;
     return *this;
   }
 
-  *cursor_++ = value;
+  memcpy(cursor_, &value, sizeof(value));
+  cursor_ += sizeof(value);
   return *this;
 }
 
@@ -122,7 +125,7 @@ Assembler& Assembler::b(Condition c, Label& l) {
     }
 
     // No need to shift by 2 since our offset is already in terms of uint32_t.
-    return emit32(c | 0xA << 24 | (offset & 0x00FFFFFF));
+    return emit32(c | 0xA << 24 | ((offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF));
   } else {
     if (!l.add_use(cursor_)) {
       error_ = Error::kLabelHasTooManyUsers;
@@ -144,7 +147,7 @@ Assembler& Assembler::bind(Label& l) {
 
   // Patch all users.
   for (size_t i = 0; i < l.num_users; i++) {
-    uint32_t* user = l.users[i];
+    byte* user = l.users[i];
     const ptrdiff_t offset = l.offset - user - kPCDelta;
 
     if (!branch_offset_valid(offset)) {
@@ -152,7 +155,7 @@ Assembler& Assembler::bind(Label& l) {
       return *this;
     }
 
-    *user = (*user | (offset & 0x00FFFFFF));
+    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF));
   }
   return *this;
 }

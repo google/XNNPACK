@@ -15,7 +15,7 @@
   a.reset();                             \
   call;                                  \
   EXPECT_EQ(Error::kNoError, a.error()); \
-  EXPECT_INSTR(expected, *a.start())
+  EXPECT_INSTR(expected, *reinterpret_cast<const uint32_t*>(a.start()))
 
 #define EXPECT_ERROR(expected, call) \
   a.reset();                         \

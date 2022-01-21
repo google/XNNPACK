@@ -10,9 +10,9 @@
 namespace xnnpack {
 
 AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
-  buffer_ = reinterpret_cast<uint32_t*>(buf->code);
+  buffer_ = reinterpret_cast<byte*>(buf->code);
   cursor_ = buffer_;
-  top_ = buffer_ + (buf->capacity / kInstructionSizeInBytes);
+  top_ = buffer_ + buf->capacity;
   xnn_buffer = buf;
 }
 

@@ -6,7 +6,6 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/assembler.h>
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
@@ -244,36 +243,6 @@ struct QRegisterList {
 static inline QRegisterList operator-(const QRegister lhs, const QRegister rhs) {
   return QRegisterList(lhs, rhs);
 }
-
-constexpr size_t max_label_users = 10;
-// Label is a target of a branch. You call Assembler::bind to bind a label to an
-// actual location in the instruction stream.
-//
-// ```
-// Label l;
-// b(kAl, l1); // branch to an unbound label is fine, it will be patched later.
-// a.bind(l); // binds label to this location in the instruction stream.
-// b(kAl, l1); // branch to an already bound label.
-// ```
-struct Label {
-  // Location of label within Assembler buffer.
-  uint32_t* offset = nullptr;
-  // A label can only be bound once, binding it again leads to an error.
-  bool bound = (offset != nullptr);
-  // All users of this label, recorded by their offset in the Assembler buffer.
-  std::array<uint32_t*, max_label_users> users = {0};
-  size_t num_users = 0;
-
-  // Records a user (e.g. branch instruction) of this label.
-  // Returns true if success, false if number of users exceeds maximum.
-  bool add_use(uint32_t* offset) {
-    if (num_users >= max_label_users) {
-      return false;
-    }
-    users[num_users++] = offset;
-    return true;
-  }
-};
 
 // A8.5 Addressing modes for memory access.
 enum class AddressingMode {

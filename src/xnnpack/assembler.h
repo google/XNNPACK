@@ -7,11 +7,15 @@
 
 #include <xnnpack/allocator.h>
 
+#include <array>
 #include <cstdint>
+
+typedef uint8_t byte;
 
 namespace xnnpack {
 
 constexpr size_t kInstructionSizeInBytes = 4;
+constexpr size_t kInstructionSizeInBytesLog2 = 2;
 
 enum class Error {
   kNoError,
@@ -26,6 +30,36 @@ enum class Error {
   kUnimplemented,
 };
 
+constexpr size_t max_label_users = 10;
+// Label is a target of a branch. You call Assembler::bind to bind a label to an
+// actual location in the instruction stream.
+//
+// ```
+// Label l;
+// b(kAl, l1); // branch to an unbound label is fine, it will be patched later.
+// a.bind(l); // binds label to this location in the instruction stream.
+// b(kAl, l1); // branch to an already bound label.
+// ```
+struct Label {
+  // Location of label within Assembler buffer.
+  byte* offset = nullptr;
+  // A label can only be bound once, binding it again leads to an error.
+  bool bound = (offset != nullptr);
+  // All users of this label, recorded by their offset in the Assembler buffer.
+  std::array<byte*, max_label_users> users = {0};
+  size_t num_users = 0;
+
+  // Records a user (e.g. branch instruction) of this label.
+  // Returns true if success, false if number of users exceeds maximum.
+  bool add_use(byte* offset) {
+    if (num_users >= max_label_users) {
+      return false;
+    }
+    users[num_users++] = offset;
+    return true;
+  }
+};
+
 class AssemblerBase {
  public:
   /* // Takes an xnn_code_buffer with a pointer to allocated memory. */
@@ -38,19 +72,21 @@ class AssemblerBase {
   void reset();
 
   // Get a pointer to the start of code buffer.
-  const uint32_t* start() const { return buffer_; }
-  const uint32_t* offset() const { return cursor_; }
+  const byte* start() const { return buffer_; }
+  const byte* offset() const { return cursor_; }
+  template<typename T>
+  const T offset() const { return reinterpret_cast<T>(cursor_); }
   // Returns the number of bytes of code actually in the buffer.
-  size_t code_size_in_bytes() const { return (cursor_ - buffer_) * kInstructionSizeInBytes; }
+  size_t code_size_in_bytes() const { return (cursor_ - buffer_); }
   const Error error() const { return error_; }
 
  protected:
   // Pointer to start of code buffer.
-  uint32_t* buffer_;
+  byte* buffer_;
   // Pointer to current place in code buffer.
-  uint32_t* cursor_;
+  byte* cursor_;
   // Pointer to out-of-bounds of code buffer.
-  uint32_t* top_;
+  byte* top_;
   // Errors encountered while assembling code.
   Error error_ = Error::kNoError;
   // Holds an xnn_code_buffer, will write code to its code pointer, and unmap

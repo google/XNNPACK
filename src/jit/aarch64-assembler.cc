@@ -17,6 +17,10 @@ constexpr int32_t kImm7Max = 504;
 constexpr int32_t kImm12Max = 32760;
 constexpr uint32_t kUint12Max = 4095;
 
+// Constants used for checking branch offset bounds.
+constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
+constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
+
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
 inline uint32_t q(VRegister vt) { return vt.q << 30; }
 inline uint32_t size(VRegister vt) { return vt.size << 10; }
@@ -67,6 +71,11 @@ inline bool is_consecutive(VRegisterList vs) {
     default:
       XNN_UNREACHABLE;
   }
+}
+
+// Check if a branch offset is valid, it must fit in 19 bits.
+bool branch_offset_valid(ptrdiff_t offset) {
+  return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
 }
 
 // Base instructions.
@@ -194,12 +203,58 @@ Assembler& Assembler::emit32(uint32_t value) {
     return *this;
   }
 
-  if (cursor_ == top_) {
+  if (cursor_ + sizeof(value) > top_) {
     error_ = Error::kOutOfMemory;
     return *this;
   }
 
-  *cursor_++ = value;
+  memcpy(cursor_, &value, sizeof(value));
+  cursor_ += sizeof(value);
+  return *this;
+}
+
+Assembler& Assembler::bind(Label& l) {
+  if (l.bound) {
+    error_ = Error::kLabelAlreadyBound;
+    return *this;
+  }
+
+  l.bound = true;
+  l.offset = cursor_;
+
+  // Patch all users.
+  for (size_t i = 0; i < l.num_users; i++) {
+    byte* user = l.users[i];
+    const ptrdiff_t offset = l.offset - user;
+
+    if (!branch_offset_valid(offset)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+
+    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & 0x0007FFFF) << 5);
+  }
+  return *this;
+}
+
+
+Assembler& Assembler::b(Condition c, Label& l) {
+  if (l.bound) {
+    const ptrdiff_t offset = l.offset - cursor_;
+    if (!branch_offset_valid(offset)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+    // No need to shift by 2 since our offset is already in terms of uint32_t.
+    return emit32(0x54000000 | ((offset >> kInstructionSizeInBytesLog2) & 0x0007FFFF) << 5 | c);
+  } else {
+    if (!l.add_use(cursor_)) {
+      error_ = Error::kLabelHasTooManyUsers;
+      return *this;
+    }
+    // Emit 0 offset first, will patch it up when label is bound later.
+    return emit32(0x54000000 | c);
+  }
   return *this;
 }
 
