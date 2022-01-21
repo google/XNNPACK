@@ -48,6 +48,22 @@ constexpr XRegister x30{30};
 constexpr XRegister xzr{31};
 constexpr XRegister sp{31};
 
+struct VRegisterLane {
+  uint8_t code;
+  uint8_t size;
+  uint8_t lane;
+  const bool is_s() { return size == 2; };
+};
+
+struct ScalarVRegister{
+  uint8_t code;
+  uint8_t size = 0;
+
+  const VRegisterLane operator[](std::size_t pos) const {
+    return VRegisterLane{code, size, static_cast<uint8_t>(pos)};
+  }
+};
+
 struct VRegister {
   uint8_t code;
   uint8_t size = 0;
@@ -61,6 +77,8 @@ struct VRegister {
   VRegister v4s() const { return {code, 2, 1}; }
   VRegister v1d() const { return {code, 3, 0}; }
   VRegister v2d() const { return {code, 3, 1}; }
+
+  ScalarVRegister s() const { return {code, 2}; }
 };
 
 constexpr VRegister v0{0};
@@ -225,6 +243,7 @@ class Assembler : public AssemblerBase {
   Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
 
   // SIMD instructions
+  Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);

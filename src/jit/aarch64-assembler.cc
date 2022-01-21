@@ -25,6 +25,7 @@ constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
 
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
+inline uint32_t rn(VRegister vn) { return vn.code << 5; }
 inline uint32_t q(VRegister vt) { return vt.q << 30; }
 inline uint32_t size(VRegister vt) { return vt.size << 10; }
 
@@ -50,6 +51,10 @@ inline bool is_same_shape(VRegisterList vs) {
     default:
       XNN_UNREACHABLE;
   }
+}
+
+inline bool is_same_data_type(VRegister vt1, VRegisterLane vt2) {
+  return vt1.size == vt2.size;
 }
 
 inline bool is_consecutive(VRegister vt1, VRegister vt2) {
@@ -79,6 +84,30 @@ inline bool is_consecutive(VRegisterList vs) {
 // Check if a branch offset is valid, it must fit in 19 bits.
 bool branch_offset_valid(ptrdiff_t offset) {
   return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
+}
+
+inline uint32_t encode_hl(VRegisterLane vl) {
+  if (vl.is_s()) {
+    return (vl.lane & 1) << 21 | ((vl.lane & 2) >> 1 << 11);
+  } else {
+    return (vl.lane & 1) << 11;
+  }
+}
+
+inline bool lane_index_valid(uint8_t q, uint8_t size, uint8_t lane) {
+  // The logic here is something like:
+  // if (q && size == 0) {
+  //   return lane < 16;
+  // } else if (q && size == 1) {
+  //   return lane < 8;
+  // } else if (q && size == 2) {
+  //   return lane < 4;
+  // } else if (q && size == 3) {
+  //   return lane < 2;
+  // }
+  // then repeat for !q with maximum lane size halved.
+  // translated into this formula.
+  return lane < ((q + 1) << (3 - size));
 }
 
 // Base instructions.
@@ -131,6 +160,20 @@ Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
 }
 
 // SIMD instructions.
+
+Assembler& Assembler::fmla(VRegister vd, VRegister vn, VRegisterLane vm) {
+  if (!is_same_shape(vd, vn) || !is_same_data_type(vd, vm)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  if (!lane_index_valid(vd.q, vm.size, vm.lane)) {
+    error_ = Error::kInvalidLaneIndex;
+    return *this;
+  }
+
+  uint32_t sz = vm.is_s() ? 0 : 1;
+  return emit32(0x0F801000 | q(vd) | sz << 22 | encode_hl(vm) | vm.code << 16 | rn(vn) | vd.code);
+}
 
 Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
   VRegister vt = vs.vt1;

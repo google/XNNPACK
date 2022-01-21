@@ -59,6 +59,11 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
 
+  CHECK_ENCODING(0x4F801290, a.fmla(v16.v4s(), v20.v4s(), v0.s()[0]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v4s(), v20.v2s(), v0.s()[0]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v2d(), v20.v2d(), v0.s()[0]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.fmla(v16.v4s(), v20.v4s(), v0.s()[4]));
+
   CHECK_ENCODING(0x0CDF7060, a.ld1({v0.v8b()}, mem[x3], 8));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v0.v8b()}, mem[x3], 16));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v0.v16b()}, mem[x3], 8));
