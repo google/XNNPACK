@@ -158,6 +158,7 @@ class Assembler : public AssemblerBase {
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);
   Assembler& prfm(PrefetchOp prfop, MemOperand xn);
+  Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
 
   // SIMD instructions
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);

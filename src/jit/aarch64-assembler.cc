@@ -15,6 +15,7 @@ constexpr int32_t kImm7Min = -512;
 constexpr int32_t kImm7Max = 504;
 // Max value for imm12, will be shifted right by 3 when encoding.
 constexpr int32_t kImm12Max = 32760;
+constexpr uint32_t kUint12Max = 4095;
 
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
 inline uint32_t q(VRegister vt) { return vt.q << 30; }
@@ -106,6 +107,15 @@ Assembler& Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
   }
 
   return emit32(0xF9800000 | xn.offset << 10 | rn(xn.base) | static_cast<uint32_t>(prfop));
+}
+
+Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
+  if (imm12 > kUint12Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0xF1000000 | imm12 << 10 | rn(xn) | xd.code);
 }
 
 // SIMD instructions.
