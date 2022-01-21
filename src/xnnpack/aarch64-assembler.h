@@ -113,6 +113,43 @@ struct VRegisterList {
   uint8_t length;
 };
 
+struct QRegister {
+  uint8_t code;
+};
+
+constexpr QRegister q0{0};
+constexpr QRegister q1{1};
+constexpr QRegister q2{2};
+constexpr QRegister q3{3};
+constexpr QRegister q4{4};
+constexpr QRegister q5{5};
+constexpr QRegister q6{6};
+constexpr QRegister q7{7};
+constexpr QRegister q8{8};
+constexpr QRegister q9{9};
+constexpr QRegister q10{10};
+constexpr QRegister q11{11};
+constexpr QRegister q12{12};
+constexpr QRegister q13{13};
+constexpr QRegister q14{14};
+constexpr QRegister q15{15};
+constexpr QRegister q16{16};
+constexpr QRegister q17{17};
+constexpr QRegister q18{18};
+constexpr QRegister q19{19};
+constexpr QRegister q20{20};
+constexpr QRegister q21{21};
+constexpr QRegister q22{22};
+constexpr QRegister q23{23};
+constexpr QRegister q24{24};
+constexpr QRegister q25{25};
+constexpr QRegister q26{26};
+constexpr QRegister q27{27};
+constexpr QRegister q28{28};
+constexpr QRegister q29{29};
+constexpr QRegister q30{30};
+constexpr QRegister q31{31};
+
 // C1.3.3 Load/Store addressing modes
 enum class AddressingMode {
   kOffset, // Base plus offset: [base{, #imm}] ; [base, Xm{, LSL #imm}].
@@ -190,6 +227,8 @@ class Assembler : public AssemblerBase {
   // SIMD instructions
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
+  Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
   Assembler& movi(VRegister vd, uint8_t imm);
 
   // Binds Label l to the current location in the code buffer.

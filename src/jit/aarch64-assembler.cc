@@ -17,6 +17,9 @@ constexpr int32_t kImm7Max = 504;
 constexpr int32_t kImm12Max = 32760;
 constexpr uint32_t kUint12Max = 4095;
 
+constexpr ptrdiff_t kInt9Max = 255;
+constexpr ptrdiff_t kInt9Min = -256;
+
 // Constants used for checking branch offset bounds.
 constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
@@ -171,6 +174,25 @@ Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
   }
 
   return emit32(0x0D60C000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
+}
+
+Assembler& Assembler::ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
+  if (imm < -1024 || imm > 1008 || (imm & 0xF) != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  const uint32_t offset = (imm >> 4) & 0x7F;
+
+  return emit32(0xACC00000 | offset << 15 | qt2.code << 10 | rn(xn.base) | qt1.code);
+}
+
+Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
+  if (xn.mode != AddressingMode::kOffset || xn.offset != 0 || imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x3CC00400 | (imm & 0x1FF) << 12| rn(xn.base) | qt.code);
 }
 
 Assembler& Assembler::movi(VRegister vd, uint8_t imm) {
