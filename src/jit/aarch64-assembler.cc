@@ -37,6 +37,7 @@ enum class BranchType {
 };
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
+inline uint32_t rd(XRegister xn) { return xn.code; }
 inline uint32_t rt(VRegister vn) { return vn.code; }
 inline uint32_t rm(XRegister xn) { return xn.code << 16; }
 inline uint32_t rm(VRegister vn) { return vn.code << 16; }
@@ -208,6 +209,10 @@ Assembler& Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
   }
 
   return emit32(0xF9800000 | xn.offset << 10 | rn(xn.base) | static_cast<uint32_t>(prfop));
+}
+
+Assembler& Assembler::sub(XRegister xd, XRegister xn, XRegister xm) {
+  return emit32(0xCB000000 | rm(xm) | rn(xn) | rd(xd));
 }
 
 Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
