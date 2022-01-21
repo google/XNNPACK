@@ -112,6 +112,20 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0x4F00E405, a.movi(v5.v16b(), 0));
   EXPECT_ERROR(Error::kUnimplemented, a.movi(v5.v16b(), 0xFF));
 
+  CHECK_ENCODING(0x4C82746F, a.st1({v15.v8h()}, mem[x3], x2));
+
+  CHECK_ENCODING(0x4C95AA8F, a.st1({v15.v4s(), v16.v4s()}, mem[x20], x21));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v17.v4s()}, mem[x20], x21));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v8h()}, mem[x20], x21));
+
+  CHECK_ENCODING(0x4C8E60D0, a.st1({v16.v16b(), v17.v16b(), v18.v16b() }, mem[x6], x14));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v16b(), v17.v16b(), v18.v16b()}, mem[x6], x14));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v16.v16b(), v17.v16b(), v18.v4s()}, mem[x6], x14));
+
+  CHECK_ENCODING(0x4C812FB4, a.st1({v20.v2d(), v21.v2d(), v22.v2d(), v23.v2d()}, mem[x29], x1));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v20.v2d(), v21.v2d(), v22.v2d(), v23.v2s()}, mem[x29], x1));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v20.v2d(), v21.v2d(), v22.v2d(), v27.v2d()}, mem[x29], x1));
+
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 

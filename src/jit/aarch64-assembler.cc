@@ -37,6 +37,8 @@ enum class BranchType {
 };
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
+inline uint32_t rt(VRegister vn) { return vn.code; }
+inline uint32_t rm(XRegister xn) { return xn.code << 16; }
 inline uint32_t rm(VRegister vn) { return vn.code << 16; }
 inline uint32_t rm(VRegisterLane vn) { return vn.code << 16; }
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
@@ -151,6 +153,21 @@ inline bool lane_index_valid(uint8_t q, uint8_t size, uint8_t lane) {
   // then repeat for !q with maximum lane size halved.
   // translated into this formula.
   return lane < ((q + 1) << (3 - size));
+}
+
+inline uint8_t load_store_opcode(uint8_t register_length) {
+  switch (register_length) {
+    case 1:
+      return 0x7;
+    case 2:
+      return 0xA;
+    case 3:
+      return 0x6;
+    case 4:
+      return 0x2;
+    default:
+      XNN_UNREACHABLE;
+  }
 }
 
 // Base instructions.
@@ -284,25 +301,9 @@ Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
     return *this;
   }
 
-  uint8_t opcode = 0;
-  switch (vs.length) {
-    case 1:
-      opcode = 0x7;
-      break;
-    case 2:
-      opcode = 0xA;
-      break;
-    case 3:
-      opcode = 0x6;
-      break;
-    case 4:
-      opcode = 0x2;
-      break;
-    default:
-      XNN_UNREACHABLE;
-  }
+  const uint8_t opcode = load_store_opcode(vs.length);
 
-  return emit32(0x0CDF0000 | q(vt) | opcode << 12 | size(vt) | rn(xn.base) | vt.code);
+  return emit32(0x0CDF0000 | q(vt) | opcode << 12 | size(vt) | rn(xn.base) | rt(vt));
 }
 
 Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
@@ -356,6 +357,18 @@ Assembler& Assembler::movi(VRegister vd, uint8_t imm) {
   }
 
   return emit32(0x0F000400 | q(vd) | cmode << 12 | vd.code);
+}
+
+Assembler& Assembler::st1(VRegisterList vs, MemOperand xn, XRegister xm) {
+  if (!is_same_shape(vs) || !is_consecutive(vs)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  VRegister vt = vs.vt1;
+
+  const uint8_t opcode = load_store_opcode(vs.length);
+  return emit32(0x0C800000 | q(vt) | rm(xm) | opcode << 12 | size(vt) | rn(xn.base) | rt(vt));
 }
 
 Assembler& Assembler::emit32(uint32_t value) {

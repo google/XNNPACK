@@ -255,6 +255,7 @@ class Assembler : public AssemblerBase {
   Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
   Assembler& movi(VRegister vd, uint8_t imm);
+  Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);
