@@ -247,6 +247,8 @@ class Assembler : public AssemblerBase {
 
   // SIMD instructions
   Assembler& fadd(VRegister vd, VRegister vn, VRegister vm);
+  Assembler& fmax(VRegister vd, VRegister vn, VRegister vm);
+  Assembler& fmin(VRegister vd, VRegister vn, VRegister vm);
   Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);

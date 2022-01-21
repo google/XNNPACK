@@ -239,6 +239,24 @@ Assembler& Assembler::fadd(VRegister vd, VRegister vn, VRegister vm) {
   return emit32(0x0E20D400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
 }
 
+Assembler& Assembler::fmax(VRegister vd, VRegister vn, VRegister vm) {
+  if (!is_same_shape(vd, vn, vm)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x0E20F400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
+}
+
+Assembler& Assembler::fmin(VRegister vd, VRegister vn, VRegister vm) {
+  if (!is_same_shape(vd, vn, vm)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x0EA0F400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
+}
+
 Assembler& Assembler::fmla(VRegister vd, VRegister vn, VRegisterLane vm) {
   if (!is_same_shape(vd, vn) || !is_same_data_type(vd, vm)) {
     error_ = Error::kInvalidOperand;
