@@ -241,6 +241,7 @@ class Assembler : public AssemblerBase {
   Assembler& ldr(XRegister xt, MemOperand xn);
   Assembler& prfm(PrefetchOp prfop, MemOperand xn);
   Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
+  Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
 
   // SIMD instructions
   Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);

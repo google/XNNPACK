@@ -21,8 +21,20 @@ constexpr ptrdiff_t kInt9Max = 255;
 constexpr ptrdiff_t kInt9Min = -256;
 
 // Constants used for checking branch offset bounds.
+// Conditional bounds are +/-1MB.
 constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
+// TBNZ bounds are +-32KB
+constexpr ptrdiff_t kTbnzImmMax = 32764;
+constexpr ptrdiff_t kTbnzImmMin = -32768;
+
+constexpr uint32_t kConditionalImmMask = 0x0007FFFF;
+constexpr uint32_t kTbnzImmMask = 0x3FFF;
+
+enum class BranchType {
+  kConditional,
+  kTbnz,
+};
 
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
 inline uint32_t rn(VRegister vn) { return vn.code << 5; }
@@ -82,8 +94,35 @@ inline bool is_consecutive(VRegisterList vs) {
 }
 
 // Check if a branch offset is valid, it must fit in 19 bits.
-bool branch_offset_valid(ptrdiff_t offset) {
-  return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
+inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
+  switch (branch_type) {
+    case BranchType::kConditional:
+      return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
+    case BranchType::kTbnz:
+      return offset < kTbnzImmMax && offset > kTbnzImmMin;
+  }
+}
+
+inline BranchType instruction_branch_type(uint32_t* instr) {
+  const uint32_t masked = *instr & 0xFF000000;
+  switch (masked) {
+    case 0xB7000000:
+    case 0x37000000:
+      return BranchType::kTbnz;
+    case 0x54000000:
+      return BranchType::kConditional;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+inline uint32_t mask_for_branch(BranchType branch_type) {
+  switch (branch_type) {
+    case BranchType::kConditional:
+      return kConditionalImmMask;
+    case BranchType::kTbnz:
+      return kTbnzImmMask;
+  }
 }
 
 inline uint32_t encode_hl(VRegisterLane vl) {
@@ -157,6 +196,32 @@ Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
   }
 
   return emit32(0xF1000000 | imm12 << 10 | rn(xn) | xd.code);
+}
+
+Assembler& Assembler::tbnz(XRegister xd, uint8_t bit, Label& l) {
+  if (bit > 63) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
+  uint32_t imm14 = 0;
+
+  if (l.bound) {
+    const ptrdiff_t offset = l.offset - cursor_;
+    if (!branch_offset_valid(offset, BranchType::kTbnz)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+    imm14 = ((offset >> kInstructionSizeInBytesLog2) & kTbnzImmMask) << 5;
+  } else {
+    if (!l.add_use(cursor_)) {
+      error_ = Error::kLabelHasTooManyUsers;
+      return *this;
+    }
+  }
+
+  return emit32(0x37000000 | bit_pos | imm14 | xd.code);
 }
 
 // SIMD instructions.
@@ -292,12 +357,13 @@ Assembler& Assembler::bind(Label& l) {
     byte* user = l.users[i];
     const ptrdiff_t offset = l.offset - user;
 
-    if (!branch_offset_valid(offset)) {
+    const BranchType bt = instruction_branch_type(reinterpret_cast<uint32_t*>(user));
+    if (!branch_offset_valid(offset, bt)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return *this;
     }
 
-    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & 0x0007FFFF) << 5);
+    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & mask_for_branch(bt)) << 5);
   }
   return *this;
 }
@@ -306,12 +372,11 @@ Assembler& Assembler::bind(Label& l) {
 Assembler& Assembler::b(Condition c, Label& l) {
   if (l.bound) {
     const ptrdiff_t offset = l.offset - cursor_;
-    if (!branch_offset_valid(offset)) {
+    if (!branch_offset_valid(offset, BranchType::kConditional)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return *this;
     }
-    // No need to shift by 2 since our offset is already in terms of uint32_t.
-    return emit32(0x54000000 | ((offset >> kInstructionSizeInBytesLog2) & 0x0007FFFF) << 5 | c);
+    return emit32(0x54000000 | ((offset >> kInstructionSizeInBytesLog2) & kConditionalImmMask) << 5 | c);
   } else {
     if (!l.add_use(cursor_)) {
       error_ = Error::kLabelHasTooManyUsers;
