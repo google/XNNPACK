@@ -99,6 +99,15 @@ Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
   return emit32(0xF9400000 | xn.offset >> 3 << 10 | rn(xn.base) | xt.code);
 }
 
+Assembler& Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
+  if (xn.offset < 0 || xn.offset > kImm12Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0xF9800000 | xn.offset << 10 | rn(xn.base) | static_cast<uint32_t>(prfop));
+}
+
 // SIMD instructions.
 
 Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
