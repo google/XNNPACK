@@ -246,6 +246,7 @@ class Assembler : public AssemblerBase {
   Assembler& sub(XRegister xd, XRegister xn, XRegister xm);
   Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
   Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
+  Assembler& tbz(XRegister xd, uint8_t bit, Label& l);
 
   // SIMD instructions
   Assembler& fadd(VRegister vd, VRegister vn, VRegister vm);
@@ -265,6 +266,7 @@ class Assembler : public AssemblerBase {
  private:
   Assembler& emit32(uint32_t value);
   Assembler& b(Condition c, Label& l);
+  Assembler& tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
 
 };
 

@@ -24,16 +24,16 @@ constexpr ptrdiff_t kInt9Min = -256;
 // Conditional bounds are +/-1MB.
 constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
-// TBNZ bounds are +-32KB
-constexpr ptrdiff_t kTbnzImmMax = 32764;
-constexpr ptrdiff_t kTbnzImmMin = -32768;
+// TBZ and TBNZ bounds are +-32KB
+constexpr ptrdiff_t kTbzImmMax = 32764;
+constexpr ptrdiff_t kTbzImmMin = -32768;
 
 constexpr uint32_t kConditionalImmMask = 0x0007FFFF;
-constexpr uint32_t kTbnzImmMask = 0x3FFF;
+constexpr uint32_t kTbzImmMask = 0x3FFF;
 
 enum class BranchType {
   kConditional,
-  kTbnz,
+  kTbz,
 };
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
@@ -105,17 +105,20 @@ inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
-    case BranchType::kTbnz:
-      return offset < kTbnzImmMax && offset > kTbnzImmMin;
+    case BranchType::kTbz:
+      return offset < kTbzImmMax && offset > kTbzImmMin;
   }
 }
 
 inline BranchType instruction_branch_type(uint32_t* instr) {
   const uint32_t masked = *instr & 0xFF000000;
   switch (masked) {
+    // The first 2 are TBNZ, for encoding and bounds check purposes, treat it same as TBZ.
     case 0xB7000000:
     case 0x37000000:
-      return BranchType::kTbnz;
+    case 0xB6000000:
+    case 0x36000000:
+      return BranchType::kTbz;
     case 0x54000000:
       return BranchType::kConditional;
     default:
@@ -127,8 +130,8 @@ inline uint32_t mask_for_branch(BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return kConditionalImmMask;
-    case BranchType::kTbnz:
-      return kTbnzImmMask;
+    case BranchType::kTbz:
+      return kTbzImmMask;
   }
 }
 
@@ -229,29 +232,11 @@ Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
 }
 
 Assembler& Assembler::tbnz(XRegister xd, uint8_t bit, Label& l) {
-  if (bit > 63) {
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
+  return tb_helper(0x37000000, xd, bit, l);
+}
 
-  const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
-  uint32_t imm14 = 0;
-
-  if (l.bound) {
-    const ptrdiff_t offset = l.offset - cursor_;
-    if (!branch_offset_valid(offset, BranchType::kTbnz)) {
-      error_ = Error::kLabelOffsetOutOfBounds;
-      return *this;
-    }
-    imm14 = ((offset >> kInstructionSizeInBytesLog2) & kTbnzImmMask) << 5;
-  } else {
-    if (!l.add_use(cursor_)) {
-      error_ = Error::kLabelHasTooManyUsers;
-      return *this;
-    }
-  }
-
-  return emit32(0x37000000 | bit_pos | imm14 | xd.code);
+Assembler& Assembler::tbz(XRegister xd, uint8_t bit, Label& l) {
+  return tb_helper(0x36000000, xd, bit, l);
 }
 
 // SIMD instructions.
@@ -438,6 +423,32 @@ Assembler& Assembler::b(Condition c, Label& l) {
     return emit32(0x54000000 | c);
   }
   return *this;
+}
+
+Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {
+  if (bit > 63) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
+  uint32_t imm14 = 0;
+
+  if (l.bound) {
+    const ptrdiff_t offset = l.offset - cursor_;
+    if (!branch_offset_valid(offset, BranchType::kTbz)) {
+      error_ = Error::kLabelOffsetOutOfBounds;
+      return *this;
+    }
+    imm14 = ((offset >> kInstructionSizeInBytesLog2) & kTbzImmMask) << 5;
+  } else {
+    if (!l.add_use(cursor_)) {
+      error_ = Error::kLabelHasTooManyUsers;
+      return *this;
+    }
+  }
+
+  return emit32(op | bit_pos | imm14 | xd.code);
 }
 
 }  // namespace aarch64
