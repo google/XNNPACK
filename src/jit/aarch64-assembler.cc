@@ -36,10 +36,14 @@ enum class BranchType {
   kTbnz,
 };
 
+inline uint32_t rd(VRegister vn) { return vn.code; }
+inline uint32_t rm(VRegister vn) { return vn.code << 16; }
+inline uint32_t rm(VRegisterLane vn) { return vn.code << 16; }
 inline uint32_t rn(XRegister xn) { return xn.code << 5; }
 inline uint32_t rn(VRegister vn) { return vn.code << 5; }
 inline uint32_t q(VRegister vt) { return vt.q << 30; }
 inline uint32_t size(VRegister vt) { return vt.size << 10; }
+inline uint32_t fp_sz(VRegister vn) { return vn.is_s() ? 0 : 1 << 22; }
 
 inline bool is_same_shape(VRegister vt1, VRegister vt2) {
   return vt1.size == vt2.size && vt1.q == vt2.q;
@@ -125,9 +129,9 @@ inline uint32_t mask_for_branch(BranchType branch_type) {
   }
 }
 
-inline uint32_t encode_hl(VRegisterLane vl) {
+inline uint32_t hl(VRegisterLane vl) {
   if (vl.is_s()) {
-    return (vl.lane & 1) << 21 | ((vl.lane & 2) >> 1 << 11);
+    return (vl.lane & 1) << 21 | ((vl.lane & 2) << 10);
   } else {
     return (vl.lane & 1) << 11;
   }
@@ -226,6 +230,15 @@ Assembler& Assembler::tbnz(XRegister xd, uint8_t bit, Label& l) {
 
 // SIMD instructions.
 
+Assembler& Assembler::fadd(VRegister vd, VRegister vn, VRegister vm) {
+  if (!is_same_shape(vd, vn, vm)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x0E20D400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
+}
+
 Assembler& Assembler::fmla(VRegister vd, VRegister vn, VRegisterLane vm) {
   if (!is_same_shape(vd, vn) || !is_same_data_type(vd, vm)) {
     error_ = Error::kInvalidOperand;
@@ -236,8 +249,7 @@ Assembler& Assembler::fmla(VRegister vd, VRegister vn, VRegisterLane vm) {
     return *this;
   }
 
-  uint32_t sz = vm.is_s() ? 0 : 1;
-  return emit32(0x0F801000 | q(vd) | sz << 22 | encode_hl(vm) | vm.code << 16 | rn(vn) | vd.code);
+  return emit32(0x0F801000 | q(vd) | fp_sz(vd) | hl(vm) | rm(vm) | rn(vn) | rd(vd));
 }
 
 Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {

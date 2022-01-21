@@ -79,6 +79,8 @@ struct VRegister {
   VRegister v2d() const { return {code, 3, 1}; }
 
   ScalarVRegister s() const { return {code, 2}; }
+
+  const bool is_s() { return size == 2; };
 };
 
 constexpr VRegister v0{0};
@@ -244,6 +246,7 @@ class Assembler : public AssemblerBase {
   Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
 
   // SIMD instructions
+  Assembler& fadd(VRegister vd, VRegister vn, VRegister vm);
   Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
