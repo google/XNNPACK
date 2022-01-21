@@ -14,7 +14,7 @@
 
 namespace xnnpack {
 namespace aarch32 {
-TEST(AArch32Assembler, InstructionEncoding) {
+TEST(AArch32Assembler, BaseInstructionEncoding) {
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -75,22 +75,14 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xE315000F, a.tst(r5, 15));
 
-  CHECK_ENCODING(0xEEB44AC8, a.vcmpe_f32(s8, s16));
 
-  CHECK_ENCODING(0xF3FBE646, a.vcvt_f32_s32(q15, q3));
-  CHECK_ENCODING(0xF3FB6748, a.vcvt_s32_f32(q11, q4));
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
 
-  CHECK_ENCODING(0xF3FB6148, a.vcvtn_s32_f32(q11, q4));
-
-  CHECK_ENCODING(0xF3FF8C4F, a.vdup_8(q12, d15[7]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_8(q12, d15[8]));
-  CHECK_ENCODING(0xF3FE8C4F, a.vdup_16(q12, d15[3]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_16(q12, d15[4]));
-  CHECK_ENCODING(0xF3FC8C4F, a.vdup_32(q12, d15[1]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_32(q12, d15[2]));
-
-  CHECK_ENCODING(0xF2BE04C6, a.vext_8(q0, q15, q3, 4));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vext_8(q0, q15, q3, 16));
+TEST(AArch32Assembler, SIMDLoadStoreInstructionEncoding) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
 
   CHECK_ENCODING(0xF423070F, a.vld1_8({d0}, mem[r3]));
   CHECK_ENCODING(0xF423070D, a.vld1_8({d0}, mem[r3]++));
@@ -143,6 +135,72 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 1024]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, -1024]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vldr(d15, mem[r9, 1018]));
+
+  CHECK_ENCODING(0xF40B070F, a.vst1_8({d0}, mem[r11]));
+  CHECK_ENCODING(0xF40B070D, a.vst1_8({d0}, mem[r11]++));
+  CHECK_ENCODING(0xF40B0707, a.vst1_8({d0}, mem[r11], r7));
+  CHECK_ENCODING(0xF48B000F, a.vst1_8({d0[0]}, mem[r11]));
+  CHECK_ENCODING(0xF48B00EF, a.vst1_8({d0[7]}, mem[r11]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_8(d0[8], mem[r11]));
+
+  CHECK_ENCODING(0xF40B074F, a.vst1_16({d0}, mem[r11]));
+  CHECK_ENCODING(0xF40B074D, a.vst1_16({d0}, mem[r11]++));
+  CHECK_ENCODING(0xF40B0747, a.vst1_16({d0}, mem[r11], r7));
+  CHECK_ENCODING(0xF48B040F, a.vst1_16({d0[0]}, mem[r11]));
+  CHECK_ENCODING(0xF48B04CF, a.vst1_16({d0[3]}, mem[r11]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_16(d0[4], mem[r11]));
+
+  CHECK_ENCODING(0xF44B0280, a.vst1_32({d16-d19}, mem[r11], r0));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0-d4}, mem[r11], r0));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], sp));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], pc));
+  CHECK_ENCODING(0xF404168F, a.vst1_32({d1-d3}, mem[r4]));
+  CHECK_ENCODING(0xF44B0A8D, a.vst1_32({d16-d17}, mem[r11]++));
+  CHECK_ENCODING(0xF4CB080F, a.vst1_32({d16[0]}, mem[r11]));
+  // The surrounding braces are optional, but makes it look closer to native assembly.
+  CHECK_ENCODING(0xF4CB080F, a.vst1_32(d16[0], mem[r11]));
+  CHECK_ENCODING(0xF4CB088F, a.vst1_32(d16[1], mem[r11]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
+  CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
+
+  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8-d9}, false));
+  CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, {d8-d28}, true));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, DRegisterList(d31, 2), true));
+
+  CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
+  CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));
+  CHECK_ENCODING(0xED868AFF, a.vstr(s16, mem[r6, 1020]));
+  CHECK_ENCODING(0xED068AFF, a.vstr(s16, mem[r6, -1020]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, MemOperand(r6, 8, AddressingMode::kPostIndexed)));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, -1024]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1018]));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+TEST(AArch32Assembler, SIMDInstructionEncoding) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
+
+  CHECK_ENCODING(0xEEB44AC8, a.vcmpe_f32(s8, s16));
+
+  CHECK_ENCODING(0xF3FBE646, a.vcvt_f32_s32(q15, q3));
+  CHECK_ENCODING(0xF3FB6748, a.vcvt_s32_f32(q11, q4));
+
+  CHECK_ENCODING(0xF3FB6148, a.vcvtn_s32_f32(q11, q4));
+
+  CHECK_ENCODING(0xF3FF8C4F, a.vdup_8(q12, d15[7]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_8(q12, d15[8]));
+  CHECK_ENCODING(0xF3FE8C4F, a.vdup_16(q12, d15[3]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_16(q12, d15[4]));
+  CHECK_ENCODING(0xF3FC8C4F, a.vdup_32(q12, d15[1]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vdup_32(q12, d15[2]));
+
+  CHECK_ENCODING(0xF2BE04C6, a.vext_8(q0, q15, q3, 4));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vext_8(q0, q15, q3, 16));
 
   CHECK_ENCODING(0xF20E26C6, a.vmax_s8(q1, q15, q3));
   CHECK_ENCODING(0xF24ECFC4, a.vmax_f32(q14, q15, q2));
@@ -211,47 +269,6 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xFE666D41, a.vsdot_s8(q11, q3, d1[0]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vsdot_s8(q11, q3, d1[2]));
-
-  CHECK_ENCODING(0xF40B070F, a.vst1_8({d0}, mem[r11]));
-  CHECK_ENCODING(0xF40B070D, a.vst1_8({d0}, mem[r11]++));
-  CHECK_ENCODING(0xF40B0707, a.vst1_8({d0}, mem[r11], r7));
-  CHECK_ENCODING(0xF48B000F, a.vst1_8({d0[0]}, mem[r11]));
-  CHECK_ENCODING(0xF48B00EF, a.vst1_8({d0[7]}, mem[r11]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_8(d0[8], mem[r11]));
-
-  CHECK_ENCODING(0xF40B074F, a.vst1_16({d0}, mem[r11]));
-  CHECK_ENCODING(0xF40B074D, a.vst1_16({d0}, mem[r11]++));
-  CHECK_ENCODING(0xF40B0747, a.vst1_16({d0}, mem[r11], r7));
-  CHECK_ENCODING(0xF48B040F, a.vst1_16({d0[0]}, mem[r11]));
-  CHECK_ENCODING(0xF48B04CF, a.vst1_16({d0[3]}, mem[r11]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_16(d0[4], mem[r11]));
-
-  CHECK_ENCODING(0xF44B0280, a.vst1_32({d16-d19}, mem[r11], r0));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vst1_32({d0-d4}, mem[r11], r0));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], sp));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vst1_32({d16-d19}, mem[r11], pc));
-  CHECK_ENCODING(0xF404168F, a.vst1_32({d1-d3}, mem[r4]));
-  CHECK_ENCODING(0xF44B0A8D, a.vst1_32({d16-d17}, mem[r11]++));
-  CHECK_ENCODING(0xF4CB080F, a.vst1_32({d16[0]}, mem[r11]));
-  // The surrounding braces are optional, but makes it look closer to native assembly.
-  CHECK_ENCODING(0xF4CB080F, a.vst1_32(d16[0], mem[r11]));
-  CHECK_ENCODING(0xF4CB088F, a.vst1_32(d16[1], mem[r11]));
-  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
-  CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
-
-  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8-d9}, false));
-  CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, {d8-d28}, true));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, DRegisterList(d31, 2), true));
-
-  CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
-  CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));
-  CHECK_ENCODING(0xED868AFF, a.vstr(s16, mem[r6, 1020]));
-  CHECK_ENCODING(0xED068AFF, a.vstr(s16, mem[r6, -1020]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, MemOperand(r6, 8, AddressingMode::kPostIndexed)));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1024]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, -1024]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.vstr(s16, mem[r6, 1018]));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
