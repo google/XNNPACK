@@ -23,6 +23,7 @@ enum class Error {
   kInvalidLaneIndex,
   kInvalidRegisterListLength,
   kFinalizeCodeMemoryFail,
+  kUnimplemented,
 };
 
 class AssemblerBase {

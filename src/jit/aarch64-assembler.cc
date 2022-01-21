@@ -68,6 +68,39 @@ inline bool is_consecutive(VRegisterList vs) {
   }
 }
 
+// Base instructions.
+
+Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
+  if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t mode = xn.mode == AddressingMode::kOffset ? 2 : 1;
+  const uint32_t offset = (xn.offset >> 3) & 0x7F;
+
+  return emit32(0xA8400000 | mode << 23 | offset << 15 | xt2.code << 10 | rn(xn.base) | xt1.code);
+}
+
+Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm) {
+  if (xn.offset != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return ldp(xt1, xt2, {xn.base, imm, AddressingMode::kPostIndex});
+}
+
+Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
+  if (xn.mode != AddressingMode::kOffset || xn.offset < 0 || xn.offset > kImm12Max || xn.offset % 8 != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0xF9400000 | xn.offset >> 3 << 10 | rn(xn.base) | xt.code);
+}
+
+// SIMD instructions.
+
 Assembler& Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
   VRegister vt = vs.vt1;
 
@@ -112,33 +145,29 @@ Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
   return emit32(0x0D60C000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
 }
 
-Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
-  if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
-    error_ = Error::kInvalidOperand;
+Assembler& Assembler::movi(VRegister vd, uint8_t imm) {
+  if (imm != 0) {
+    error_ = Error::kUnimplemented;
     return *this;
   }
 
-  const uint32_t mode = xn.mode == AddressingMode::kOffset ? 2 : 1;
-  const uint32_t offset = (xn.offset >> 3) & 0x7F;
-
-  return emit32(0xA8400000 | mode << 23 | offset << 15 | xt2.code << 10 | rn(xn.base) | xt1.code);
-}
-
-Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm) {
-  if (xn.offset != 0) {
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
-  return ldp(xt1, xt2, {xn.base, imm, AddressingMode::kPostIndex});
-}
-
-Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
-  if (xn.mode != AddressingMode::kOffset || xn.offset < 0 || xn.offset > kImm12Max || xn.offset % 8 != 0) {
-    error_ = Error::kInvalidOperand;
-    return *this;
+  uint32_t cmode = 0;
+  switch (vd.size) {
+    case 0:
+      cmode = 0xE;
+      break;
+    case 1:
+      cmode = 0x8;
+      break;
+    case 2:
+      cmode = 0x0;
+      break;
+    default:
+      error_ = Error::kUnimplemented;
+      return *this;
   }
 
-  return emit32(0xF9400000 | xn.offset >> 3 << 10 | rn(xn.base) | xt.code);
+  return emit32(0x0F000400 | q(vd) | cmode << 12 | vd.code);
 }
 
 Assembler& Assembler::emit32(uint32_t value) {

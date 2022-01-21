@@ -147,11 +147,15 @@ class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
-  Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
-  Assembler& ld2r(VRegisterList xs, MemOperand xn);
+  // Base instructions.
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);
+
+  // SIMD instructions
+  Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
+  Assembler& ld2r(VRegisterList xs, MemOperand xn);
+  Assembler& movi(VRegister vd, uint8_t imm);
 
  private:
   Assembler& emit32(uint32_t value);
