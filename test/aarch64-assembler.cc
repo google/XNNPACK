@@ -25,6 +25,10 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
 
+  CHECK_ENCODING(0x91008041, a.add(x1, x2, 32));
+  CHECK_ENCODING(0x913FFC41, a.add(x1, x2, 4095));
+  EXPECT_ERROR(Error::kInvalidOperand, a.add(x1, x2, 4096));
+
   CHECK_ENCODING(0xA9403FEE, a.ldp(x14, x15, mem[sp]));
   CHECK_ENCODING(0xA8C13FEE, a.ldp(x14, x15, mem[sp], 16));
   CHECK_ENCODING(0xA9413FEE, a.ldp(x14, x15, mem[sp, 16]));

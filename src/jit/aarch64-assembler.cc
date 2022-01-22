@@ -194,6 +194,16 @@ inline uint8_t load_store_opcode(uint8_t register_length) {
 
 // Base instructions.
 
+Assembler& Assembler::add(XRegister xd, XRegister xn, uint16_t imm12) {
+  // The instruction supports larger numbers using the shift by (left shift by 12), but that's unused in kernels.
+  if (imm12 > kUint12Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x91000000 | imm12 << 10 | rn(xn) | rd(xd));
+}
+
 Assembler& Assembler::b(Label& l) {
   return branch_to_label(0x14000000, BranchType::kUnconditional, l);
 }
@@ -250,7 +260,7 @@ Assembler& Assembler::subs(XRegister xd, XRegister xn, uint16_t imm12) {
     return *this;
   }
 
-  return emit32(0xF1000000 | imm12 << 10 | rn(xn) | xd.code);
+  return emit32(0xF1000000 | imm12 << 10 | rn(xn) | rd(xd));
 }
 
 Assembler& Assembler::tbnz(XRegister xd, uint8_t bit, Label& l) {
