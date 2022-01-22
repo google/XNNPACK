@@ -25,14 +25,14 @@ constexpr ptrdiff_t kInt9Min = -256;
 constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
 // TBZ and TBNZ bounds are +/-32KB.
-constexpr ptrdiff_t kTbzImmMax = 32764;
-constexpr ptrdiff_t kTbzImmMin = -32768;
+constexpr ptrdiff_t kTbxzImmMax = 32764;
+constexpr ptrdiff_t kTbxzImmMin = -32768;
 // Unconditional bounds are +/-128MB.
 constexpr ptrdiff_t kUnconditionalBranchImmMax = 134217727;
 constexpr ptrdiff_t kUnconditionalBranchImmMin = -134217728;
 
 constexpr uint32_t kConditionalImmMask = 0x0007FFFF;
-constexpr uint32_t kTbzImmMask = 0x3FFF;
+constexpr uint32_t kTbxzImmMask = 0x3FFF;
 constexpr uint32_t kUnconditionalImmMask = 0x03FFFFFF;
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
@@ -104,8 +104,8 @@ inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
-    case BranchType::kTbz:
-      return offset < kTbzImmMax && offset > kTbzImmMin;
+    case BranchType::kTbxz:
+      return offset < kTbxzImmMax && offset > kTbxzImmMin;
     case BranchType::kUnconditional:
       return offset < kUnconditionalBranchImmMax && offset > kUnconditionalBranchImmMin;
   }
@@ -116,7 +116,7 @@ inline BranchType instruction_branch_type(uint32_t* instr) {
   switch (masked) {
     case 0xB6000000:
     case 0x36000000:
-      return BranchType::kTbz;
+      return BranchType::kTbxz;
     case 0x54000000:
       return BranchType::kConditional;
     case 0x14000000:
@@ -131,8 +131,8 @@ inline uint32_t mask(BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return kConditionalImmMask;
-    case BranchType::kTbz:
-      return kTbzImmMask;
+    case BranchType::kTbxz:
+      return kTbxzImmMask;
     case BranchType::kUnconditional:
       return kUnconditionalImmMask;
   }
@@ -142,7 +142,7 @@ inline uint8_t shift(BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return 5;
-    case BranchType::kTbz:
+    case BranchType::kTbxz:
       return 5;
     case BranchType::kUnconditional:
       return 0;
@@ -438,7 +438,7 @@ Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l
   }
 
   const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
-  return branch_to_label(op | bit_pos | xd.code, BranchType::kTbz, l);
+  return branch_to_label(op | bit_pos | xd.code, BranchType::kTbxz, l);
 }
 
 Assembler& Assembler::branch_to_label(uint32_t opcode, BranchType bt, Label& l) {

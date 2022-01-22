@@ -230,7 +230,8 @@ enum Condition : uint32_t {
 
 enum class BranchType {
   kConditional,
-  kTbz,
+  // For encoding, TBZ and TBNZ are treated similarly, called TBXZ here.
+  kTbxz,
   kUnconditional,
 };
 
