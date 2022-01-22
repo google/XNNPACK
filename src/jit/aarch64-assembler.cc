@@ -13,6 +13,7 @@ namespace aarch64 {
 // Min and max values for the imm7 for ldp, will be shifted right by 3 when encoding.
 constexpr int32_t kImm7Min = -512;
 constexpr int32_t kImm7Max = 504;
+constexpr uint32_t kImm7Mask = 0x7F;
 // Max value for imm12, will be shifted right by 3 when encoding.
 constexpr int32_t kImm12Max = 32760;
 constexpr uint32_t kUint12Max = 4095;
@@ -37,7 +38,9 @@ constexpr uint32_t kUnconditionalImmMask = 0x03FFFFFF;
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
 inline uint32_t rd(XRegister xn) { return xn.code; }
+inline uint32_t rt(QRegister qn) { return qn.code; }
 inline uint32_t rt(VRegister vn) { return vn.code; }
+inline uint32_t rt2(QRegister qn) { return qn.code << 10; }
 inline uint32_t rm(XRegister xn) { return xn.code << 16; }
 inline uint32_t rm(VRegister vn) { return vn.code << 16; }
 inline uint32_t rm(VRegisterLane vn) { return vn.code << 16; }
@@ -192,6 +195,14 @@ inline uint8_t load_store_opcode(uint8_t register_length) {
   }
 }
 
+inline bool imm7_offset_valid(int32_t imm, XRegister xn) {
+  return imm >= kImm7Min && imm <= kImm7Max && (imm & 0x7) == 0;
+}
+
+inline bool imm7_offset_valid(int32_t imm, QRegister qn) {
+  return imm >= (kImm7Min * 2) && imm <= (kImm7Max * 2) && (imm & 0xF) == 0;
+}
+
 // Base instructions.
 
 Assembler& Assembler::add(XRegister xd, XRegister xn, uint16_t imm12) {
@@ -209,13 +220,13 @@ Assembler& Assembler::b(Label& l) {
 }
 
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
-  if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
+  if (!imm7_offset_valid(xn.offset, xt1)) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
 
   const uint32_t mode = xn.mode == AddressingMode::kOffset ? 2 : 1;
-  const uint32_t offset = (xn.offset >> 3) & 0x7F;
+  const uint32_t offset = (xn.offset >> 3) & kImm7Mask;
 
   return emit32(0xA8400000 | mode << 23 | offset << 15 | xt2.code << 10 | rn(xn.base) | xt1.code);
 }
@@ -342,13 +353,13 @@ Assembler& Assembler::ld2r(VRegisterList xs, MemOperand xn) {
 }
 
 Assembler& Assembler::ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
-  if (imm < -1024 || imm > 1008 || (imm & 0xF) != 0) {
+  if (!imm7_offset_valid(imm, qt1)) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
-  const uint32_t offset = (imm >> 4) & 0x7F;
+  const uint32_t offset = (imm >> 4) & kImm7Mask;
 
-  return emit32(0xACC00000 | offset << 15 | qt2.code << 10 | rn(xn.base) | qt1.code);
+  return emit32(0xACC00000 | offset << 15 | rt2(qt2) | rn(xn.base) | qt1.code);
 }
 
 Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
@@ -395,6 +406,16 @@ Assembler& Assembler::st1(VRegisterList vs, MemOperand xn, XRegister xm) {
 
   const uint8_t opcode = load_store_opcode(vs.length);
   return emit32(0x0C800000 | q(vt) | rm(xm) | opcode << 12 | size(vt) | rn(xn.base) | rt(vt));
+}
+
+Assembler& Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
+  if (!imm7_offset_valid(imm, qt1)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t offset = (imm >> 4) & kImm7Mask;
+  return emit32(0xAC800000 | offset << 15 | rt2(qt2) | rn(xn.base) | rt(qt1));
 }
 
 Assembler& Assembler::emit32(uint32_t value) {
