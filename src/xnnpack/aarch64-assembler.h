@@ -133,6 +133,43 @@ struct VRegisterList {
   uint8_t length;
 };
 
+struct SRegister {
+  uint8_t code;
+};
+
+constexpr SRegister s0{0};
+constexpr SRegister s1{1};
+constexpr SRegister s2{2};
+constexpr SRegister s3{3};
+constexpr SRegister s4{4};
+constexpr SRegister s5{5};
+constexpr SRegister s6{6};
+constexpr SRegister s7{7};
+constexpr SRegister s8{8};
+constexpr SRegister s9{9};
+constexpr SRegister s10{10};
+constexpr SRegister s11{11};
+constexpr SRegister s12{12};
+constexpr SRegister s13{13};
+constexpr SRegister s14{14};
+constexpr SRegister s15{15};
+constexpr SRegister s16{16};
+constexpr SRegister s17{17};
+constexpr SRegister s18{18};
+constexpr SRegister s19{19};
+constexpr SRegister s20{20};
+constexpr SRegister s21{21};
+constexpr SRegister s22{22};
+constexpr SRegister s23{23};
+constexpr SRegister s24{24};
+constexpr SRegister s25{25};
+constexpr SRegister s26{26};
+constexpr SRegister s27{27};
+constexpr SRegister s28{28};
+constexpr SRegister s29{29};
+constexpr SRegister s30{30};
+constexpr SRegister s31{31};
+
 struct QRegister {
   uint8_t code;
 };
@@ -270,6 +307,8 @@ class Assembler : public AssemblerBase {
   Assembler& movi(VRegister vd, uint8_t imm);
   Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
   Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  Assembler& str(QRegister qt, MemOperand xn, int32_t imm);
+  Assembler& str(SRegister st, MemOperand xn);
 
   // Binds Label l to the current location in the code buffer.
   Assembler& bind(Label& l);

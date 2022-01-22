@@ -145,6 +145,18 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(q16, q17, mem[x6], 1024));
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(q16, q17, mem[x6], -1040));
 
+  CHECK_ENCODING(0x3C8104D0, a.str(q16, mem[x6], 16));
+  CHECK_ENCODING(0x3C8FF4D0, a.str(q16, mem[x6], 255));
+  CHECK_ENCODING(0x3C9004D0, a.str(q16, mem[x6], -256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(q16, mem[x6], 256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(q16, mem[x6], -257));
+
+  CHECK_ENCODING(0xBD0000D0, a.str(s16, mem[x6]));
+  CHECK_ENCODING(0xBD3FFCD0, a.str(s16, mem[x6, 16380]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, 3]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, -4]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, 16384]));
+
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 

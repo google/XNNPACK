@@ -18,8 +18,9 @@ constexpr uint32_t kImm7Mask = 0x7F;
 constexpr int32_t kImm12Max = 32760;
 constexpr uint32_t kUint12Max = 4095;
 
-constexpr ptrdiff_t kInt9Max = 255;
-constexpr ptrdiff_t kInt9Min = -256;
+constexpr int32_t kInt9Max = 255;
+constexpr int32_t kInt9Min = -256;
+constexpr uint32_t kImm9Mask = 0x1FF;
 
 // Constants used for checking branch offset bounds.
 // Conditional bounds are +/-1MB.
@@ -39,6 +40,7 @@ constexpr uint32_t kUnconditionalImmMask = 0x03FFFFFF;
 inline uint32_t rd(VRegister vn) { return vn.code; }
 inline uint32_t rd(XRegister xn) { return xn.code; }
 inline uint32_t rt(QRegister qn) { return qn.code; }
+inline uint32_t rt(SRegister sn) { return sn.code; }
 inline uint32_t rt(VRegister vn) { return vn.code; }
 inline uint32_t rt2(QRegister qn) { return qn.code << 10; }
 inline uint32_t rm(XRegister xn) { return xn.code << 16; }
@@ -240,12 +242,13 @@ Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t i
 }
 
 Assembler& Assembler::ldr(XRegister xt, MemOperand xn) {
-  if (xn.mode != AddressingMode::kOffset || xn.offset < 0 || xn.offset > kImm12Max || xn.offset % 8 != 0) {
+  const int32_t imm = xn.offset;
+  if (xn.mode != AddressingMode::kOffset || imm < 0 || imm > (kUint12Max << 3) || (imm & 7) != 0) {
     error_ = Error::kInvalidOperand;
     return *this;
   }
 
-  return emit32(0xF9400000 | xn.offset >> 3 << 10 | rn(xn.base) | xt.code);
+  return emit32(0xF9400000 | imm >> 3 << 10 | rn(xn.base) | xt.code);
 }
 
 Assembler& Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
@@ -368,7 +371,7 @@ Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
     return *this;
   }
 
-  return emit32(0x3CC00400 | (imm & 0x1FF) << 12| rn(xn.base) | qt.code);
+  return emit32(0x3CC00400 | (imm & kImm9Mask) << 12| rn(xn.base) | qt.code);
 }
 
 Assembler& Assembler::mov(VRegister vd, VRegister vn) {
@@ -424,6 +427,25 @@ Assembler& Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t i
 
   const uint32_t offset = (imm >> 4) & kImm7Mask;
   return emit32(0xAC800000 | offset << 15 | rt2(qt2) | rn(xn.base) | rt(qt1));
+}
+
+Assembler& Assembler::str(QRegister qt, MemOperand xn, int32_t imm) {
+  if (imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x3C800400 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt(qt));
+}
+
+Assembler& Assembler::str(SRegister st, MemOperand xn) {
+  const int32_t imm = xn.offset;
+  if (imm < 0 || imm > (kUint12Max << 2) || (imm & 0x3) != 0) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0xBD000000 | imm >> 2 << 10 | rn(xn.base) | rt(st));
 }
 
 Assembler& Assembler::emit32(uint32_t value) {
