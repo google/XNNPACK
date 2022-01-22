@@ -228,11 +228,18 @@ enum Condition : uint32_t {
   kLO = kCC,
 };
 
+enum class BranchType {
+  kConditional,
+  kTbz,
+  kUnconditional,
+};
+
 class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
   // Base instructions.
+  Assembler& b(Label& l);
   Assembler& b_eq(Label& l) { return b(kEQ, l); }
   Assembler& b_hi(Label& l) { return b(kHI, l); }
   Assembler& b_hs(Label& l) { return b(kHS, l); }
@@ -267,6 +274,7 @@ class Assembler : public AssemblerBase {
   Assembler& emit32(uint32_t value);
   Assembler& b(Condition c, Label& l);
   Assembler& tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
+  Assembler& branch_to_label(uint32_t opcode, BranchType bt, Label& l);
 
 };
 

@@ -244,5 +244,33 @@ TEST(AArch64Assembler, Tbz) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
+TEST(AArch64Assembler, UnconditionalBranch) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
+
+  Label l1;
+  a.movi(v0.v4s(), 0);
+
+  // Branch to unbound label.
+  auto b1 = a.offset<uint32_t*>();
+  a.b(l1);
+
+  a.movi(v1.v4s(), 0);
+  a.bind(l1);
+
+  EXPECT_INSTR(0x14000002, *b1);
+
+  a.movi(v2.v4s(), 0);
+
+  // Branch to bound label.
+  auto b2 = a.offset<uint32_t*>();
+  a.b(l1);
+
+  EXPECT_INSTR(0x17FFFFFF, *b2);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
 }  // namespace aarch64
 }  // namespace xnnpack

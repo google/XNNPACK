@@ -24,17 +24,16 @@ constexpr ptrdiff_t kInt9Min = -256;
 // Conditional bounds are +/-1MB.
 constexpr ptrdiff_t kConditionalBranchImmMax = 1048572;
 constexpr ptrdiff_t kConditionalBranchImmMin = -1048576;
-// TBZ and TBNZ bounds are +-32KB
+// TBZ and TBNZ bounds are +/-32KB.
 constexpr ptrdiff_t kTbzImmMax = 32764;
 constexpr ptrdiff_t kTbzImmMin = -32768;
+// Unconditional bounds are +/-128MB.
+constexpr ptrdiff_t kUnconditionalBranchImmMax = 134217727;
+constexpr ptrdiff_t kUnconditionalBranchImmMin = -134217728;
 
 constexpr uint32_t kConditionalImmMask = 0x0007FFFF;
 constexpr uint32_t kTbzImmMask = 0x3FFF;
-
-enum class BranchType {
-  kConditional,
-  kTbz,
-};
+constexpr uint32_t kUnconditionalImmMask = 0x03FFFFFF;
 
 inline uint32_t rd(VRegister vn) { return vn.code; }
 inline uint32_t rd(XRegister xn) { return xn.code; }
@@ -107,32 +106,51 @@ inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
       return offset < kConditionalBranchImmMax && offset > kConditionalBranchImmMin;
     case BranchType::kTbz:
       return offset < kTbzImmMax && offset > kTbzImmMin;
+    case BranchType::kUnconditional:
+      return offset < kUnconditionalBranchImmMax && offset > kUnconditionalBranchImmMin;
   }
 }
 
 inline BranchType instruction_branch_type(uint32_t* instr) {
-  const uint32_t masked = *instr & 0xFF000000;
+  const uint32_t masked = *instr & 0xFE000000;
   switch (masked) {
-    // The first 2 are TBNZ, for encoding and bounds check purposes, treat it same as TBZ.
-    case 0xB7000000:
-    case 0x37000000:
     case 0xB6000000:
     case 0x36000000:
       return BranchType::kTbz;
     case 0x54000000:
       return BranchType::kConditional;
+    case 0x14000000:
+    case 0x16000000:
+      return BranchType::kUnconditional;
     default:
       XNN_UNREACHABLE;
   }
 }
 
-inline uint32_t mask_for_branch(BranchType branch_type) {
+inline uint32_t mask(BranchType branch_type) {
   switch (branch_type) {
     case BranchType::kConditional:
       return kConditionalImmMask;
     case BranchType::kTbz:
       return kTbzImmMask;
+    case BranchType::kUnconditional:
+      return kUnconditionalImmMask;
   }
+}
+
+inline uint8_t shift(BranchType branch_type) {
+  switch (branch_type) {
+    case BranchType::kConditional:
+      return 5;
+    case BranchType::kTbz:
+      return 5;
+    case BranchType::kUnconditional:
+      return 0;
+  }
+}
+
+inline uint32_t branch_imm(ptrdiff_t offset, BranchType bt) {
+  return ((offset >> kInstructionSizeInBytesLog2) & mask(bt)) << shift(bt);
 }
 
 inline uint32_t hl(VRegisterLane vl) {
@@ -175,6 +193,10 @@ inline uint8_t load_store_opcode(uint8_t register_length) {
 }
 
 // Base instructions.
+
+Assembler& Assembler::b(Label& l) {
+  return branch_to_label(0x14000000, BranchType::kUnconditional, l);
+}
 
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (xn.offset < kImm7Min || xn.offset > kImm7Max || std::abs(xn.offset) % 8 != 0) {
@@ -400,29 +422,13 @@ Assembler& Assembler::bind(Label& l) {
       return *this;
     }
 
-    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & mask_for_branch(bt)) << 5);
+    *user = (*user | branch_imm(offset, bt));
   }
   return *this;
 }
 
-
 Assembler& Assembler::b(Condition c, Label& l) {
-  if (l.bound) {
-    const ptrdiff_t offset = l.offset - cursor_;
-    if (!branch_offset_valid(offset, BranchType::kConditional)) {
-      error_ = Error::kLabelOffsetOutOfBounds;
-      return *this;
-    }
-    return emit32(0x54000000 | ((offset >> kInstructionSizeInBytesLog2) & kConditionalImmMask) << 5 | c);
-  } else {
-    if (!l.add_use(cursor_)) {
-      error_ = Error::kLabelHasTooManyUsers;
-      return *this;
-    }
-    // Emit 0 offset first, will patch it up when label is bound later.
-    return emit32(0x54000000 | c);
-  }
-  return *this;
+  return branch_to_label(0x54000000 | c, BranchType::kConditional, l);
 }
 
 Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {
@@ -432,23 +438,24 @@ Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l
   }
 
   const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
-  uint32_t imm14 = 0;
+  return branch_to_label(op | bit_pos | xd.code, BranchType::kTbz, l);
+}
 
+Assembler& Assembler::branch_to_label(uint32_t opcode, BranchType bt, Label& l) {
   if (l.bound) {
     const ptrdiff_t offset = l.offset - cursor_;
-    if (!branch_offset_valid(offset, BranchType::kTbz)) {
+    if (!branch_offset_valid(offset, bt)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return *this;
     }
-    imm14 = ((offset >> kInstructionSizeInBytesLog2) & kTbzImmMask) << 5;
+    return emit32(opcode | branch_imm(offset, bt));
   } else {
     if (!l.add_use(cursor_)) {
       error_ = Error::kLabelHasTooManyUsers;
       return *this;
     }
+    return emit32(opcode);
   }
-
-  return emit32(op | bit_pos | imm14 | xd.code);
 }
 
 }  // namespace aarch64
