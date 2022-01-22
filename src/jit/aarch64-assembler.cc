@@ -37,17 +37,11 @@ constexpr uint32_t kConditionalImmMask = 0x0007FFFF;
 constexpr uint32_t kTbxzImmMask = 0x3FFF;
 constexpr uint32_t kUnconditionalImmMask = 0x03FFFFFF;
 
-inline uint32_t rd(VRegister vn) { return vn.code; }
-inline uint32_t rd(XRegister xn) { return xn.code; }
-inline uint32_t rt(QRegister qn) { return qn.code; }
-inline uint32_t rt(SRegister sn) { return sn.code; }
-inline uint32_t rt(VRegister vn) { return vn.code; }
+template <typename Reg> inline uint32_t rd(Reg vn) { return vn.code; }
+template <typename Reg> inline uint32_t rt(Reg qn) { return qn.code; }
 inline uint32_t rt2(QRegister qn) { return qn.code << 10; }
-inline uint32_t rm(XRegister xn) { return xn.code << 16; }
-inline uint32_t rm(VRegister vn) { return vn.code << 16; }
-inline uint32_t rm(VRegisterLane vn) { return vn.code << 16; }
-inline uint32_t rn(XRegister xn) { return xn.code << 5; }
-inline uint32_t rn(VRegister vn) { return vn.code << 5; }
+template <typename Reg> inline uint32_t rm(Reg xn) { return xn.code << 16; }
+template <typename Reg> inline uint32_t rn(Reg rn) { return rn.code << 5; }
 inline uint32_t q(VRegister vt) { return vt.q << 30; }
 inline uint32_t size(VRegister vt) { return vt.size << 10; }
 inline uint32_t fp_sz(VRegister vn) { return vn.is_s() ? 0 : 1 << 22; }
@@ -286,6 +280,15 @@ Assembler& Assembler::tbz(XRegister xd, uint8_t bit, Label& l) {
 }
 
 // SIMD instructions.
+
+Assembler& Assembler::dup(DRegister dd, VRegisterLane vn) {
+  if (vn.size != 3 || vn.lane > 1) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  const uint8_t imm5 = 0b1000 | (vn.lane & 1) << 4;
+  return emit32(0x5E000400 | imm5 << 16 | rn(vn) | rd(dd));
+}
 
 Assembler& Assembler::fadd(VRegister vd, VRegister vn, VRegister vm) {
   if (!is_same_shape(vd, vn, vm)) {

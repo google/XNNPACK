@@ -67,6 +67,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
 
+  CHECK_ENCODING(0x5E180610, a.dup(d16, v16.d()[1]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.d()[2]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.s()[1]));
+
   CHECK_ENCODING(0x4E25D690, a.fadd(v16.v4s(), v20.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fadd(v16.v4s(), v20.v4s(), v5.v2s()));
 

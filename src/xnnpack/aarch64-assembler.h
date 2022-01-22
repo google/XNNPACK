@@ -79,6 +79,7 @@ struct VRegister {
   VRegister v2d() const { return {code, 3, 1}; }
 
   ScalarVRegister s() const { return {code, 2}; }
+  ScalarVRegister d() const { return {code, 3}; }
 
   const bool is_s() { return size == 2; };
 };
@@ -169,6 +170,43 @@ constexpr SRegister s28{28};
 constexpr SRegister s29{29};
 constexpr SRegister s30{30};
 constexpr SRegister s31{31};
+
+struct DRegister {
+  uint8_t code;
+};
+
+constexpr DRegister d0{0};
+constexpr DRegister d1{1};
+constexpr DRegister d2{2};
+constexpr DRegister d3{3};
+constexpr DRegister d4{4};
+constexpr DRegister d5{5};
+constexpr DRegister d6{6};
+constexpr DRegister d7{7};
+constexpr DRegister d8{8};
+constexpr DRegister d9{9};
+constexpr DRegister d10{10};
+constexpr DRegister d11{11};
+constexpr DRegister d12{12};
+constexpr DRegister d13{13};
+constexpr DRegister d14{14};
+constexpr DRegister d15{15};
+constexpr DRegister d16{16};
+constexpr DRegister d17{17};
+constexpr DRegister d18{18};
+constexpr DRegister d19{19};
+constexpr DRegister d20{20};
+constexpr DRegister d21{21};
+constexpr DRegister d22{22};
+constexpr DRegister d23{23};
+constexpr DRegister d24{24};
+constexpr DRegister d25{25};
+constexpr DRegister d26{26};
+constexpr DRegister d27{27};
+constexpr DRegister d28{28};
+constexpr DRegister d29{29};
+constexpr DRegister d30{30};
+constexpr DRegister d31{31};
 
 struct QRegister {
   uint8_t code;
@@ -295,6 +333,7 @@ class Assembler : public AssemblerBase {
   Assembler& tbz(XRegister xd, uint8_t bit, Label& l);
 
   // SIMD instructions
+  Assembler& dup(DRegister dd, VRegisterLane vn);
   Assembler& fadd(VRegister vd, VRegister vn, VRegister vm);
   Assembler& fmax(VRegister vd, VRegister vn, VRegister vm);
   Assembler& fmin(VRegister vd, VRegister vn, VRegister vm);
