@@ -266,6 +266,7 @@ class Assembler : public AssemblerBase {
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
+  Assembler& mov(VRegister vd, VRegister vn);
   Assembler& movi(VRegister vd, uint8_t imm);
   Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
   Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);

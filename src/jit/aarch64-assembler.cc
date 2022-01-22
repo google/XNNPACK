@@ -371,6 +371,14 @@ Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
   return emit32(0x3CC00400 | (imm & 0x1FF) << 12| rn(xn.base) | qt.code);
 }
 
+Assembler& Assembler::mov(VRegister vd, VRegister vn) {
+  if (!is_same_shape(vd, vn)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(0x0EA01C00 | q(vd) | rm(vn) | rn(vn) | rd(vd));
+}
+
 Assembler& Assembler::movi(VRegister vd, uint8_t imm) {
   if (imm != 0) {
     error_ = Error::kUnimplemented;
