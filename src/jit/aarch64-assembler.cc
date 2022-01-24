@@ -368,13 +368,16 @@ Assembler& Assembler::ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t i
   return emit32(0xACC00000 | offset << 15 | rt2(qt2) | rn(xn.base) | qt1.code);
 }
 
-Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
-  if (xn.mode != AddressingMode::kOffset || xn.offset != 0 || imm < kInt9Min || imm > kInt9Max) {
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
+Assembler& Assembler::ldr(DRegister dt, MemOperand xn, int32_t imm) {
+  return ldr(/*size=*/3, /*opc=*/1, xn, imm, dt.code);
+}
 
-  return emit32(0x3CC00400 | (imm & kImm9Mask) << 12| rn(xn.base) | qt.code);
+Assembler& Assembler::ldr(QRegister qt, MemOperand xn, int32_t imm) {
+  return ldr(/*size=*/0, /*opc=*/3, xn, imm, qt.code);
+}
+
+Assembler& Assembler::ldr(SRegister st, MemOperand xn, int32_t imm) {
+  return ldr(/*size=*/2, /*opc=*/1, xn, imm, st.code);
 }
 
 Assembler& Assembler::mov(VRegister vd, VRegister vn) {
@@ -432,13 +435,12 @@ Assembler& Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t i
   return emit32(0xAC800000 | offset << 15 | rt2(qt2) | rn(xn.base) | rt(qt1));
 }
 
-Assembler& Assembler::str(QRegister qt, MemOperand xn, int32_t imm) {
-  if (imm < kInt9Min || imm > kInt9Max) {
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
+Assembler& Assembler::str(DRegister dt, MemOperand xn, int32_t imm) {
+  return str(/*size=*/3, /*opc=*/0, xn, imm, dt.code);
+}
 
-  return emit32(0x3C800400 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt(qt));
+Assembler& Assembler::str(QRegister qt, MemOperand xn, int32_t imm) {
+  return str(/*size=*/0, /*opc=*/2, xn, imm, qt.code);
 }
 
 Assembler& Assembler::str(SRegister st, MemOperand xn) {
@@ -495,16 +497,6 @@ Assembler& Assembler::b(Condition c, Label& l) {
   return branch_to_label(0x54000000 | c, BranchType::kConditional, l);
 }
 
-Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {
-  if (bit > 63) {
-    error_ = Error::kInvalidOperand;
-    return *this;
-  }
-
-  const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
-  return branch_to_label(op | bit_pos | xd.code, BranchType::kTbxz, l);
-}
-
 Assembler& Assembler::branch_to_label(uint32_t opcode, BranchType bt, Label& l) {
   if (l.bound) {
     const ptrdiff_t offset = l.offset - cursor_;
@@ -520,6 +512,34 @@ Assembler& Assembler::branch_to_label(uint32_t opcode, BranchType bt, Label& l) 
     }
     return emit32(opcode);
   }
+}
+
+Assembler& Assembler::ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code) {
+  if (xn.mode != AddressingMode::kOffset || xn.offset != 0 || imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x3C400400 | size << 30 | opc << 22 | (imm & kImm9Mask) << 12| rn(xn.base) | rt_code);
+}
+
+Assembler& Assembler::str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code) {
+  if (imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  return emit32(0x3C000400 | size << 30 | opc << 22 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt_code);
+}
+
+Assembler& Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {
+  if (bit > 63) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t bit_pos = (bit & 0x20) >> 5 << 31 | (bit & 0x1F) << 19;
+  return branch_to_label(op | bit_pos | xd.code, BranchType::kTbxz, l);
 }
 
 }  // namespace aarch64

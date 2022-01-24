@@ -341,11 +341,14 @@ class Assembler : public AssemblerBase {
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
   Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  Assembler& ldr(DRegister dt, MemOperand xn, int32_t imm);
   Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
+  Assembler& ldr(SRegister st, MemOperand xn, int32_t imm);
   Assembler& mov(VRegister vd, VRegister vn);
   Assembler& movi(VRegister vd, uint8_t imm);
   Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
   Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  Assembler& str(DRegister dt, MemOperand xn, int32_t imm);
   Assembler& str(QRegister qt, MemOperand xn, int32_t imm);
   Assembler& str(SRegister st, MemOperand xn);
 
@@ -355,8 +358,10 @@ class Assembler : public AssemblerBase {
  private:
   Assembler& emit32(uint32_t value);
   Assembler& b(Condition c, Label& l);
-  Assembler& tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
   Assembler& branch_to_label(uint32_t opcode, BranchType bt, Label& l);
+  Assembler& ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
+  Assembler& str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
+  Assembler& tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
 
 };
 

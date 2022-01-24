@@ -107,6 +107,9 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(q20, q21, mem[x5], -1040));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(q20, q21, mem[x5], 1024));
 
+  CHECK_ENCODING(0xFC408460, a.ldr(d0, mem[x3], 8));
+  CHECK_ENCODING(0xBC404460, a.ldr(s0, mem[x3], 4));
+
   CHECK_ENCODING(0x3CC10460, a.ldr(q0, mem[x3], 16));
   CHECK_ENCODING(0x3CCFF460, a.ldr(q0, mem[x3], 255));
   CHECK_ENCODING(0x3CD00460, a.ldr(q0, mem[x3], -256));
@@ -149,6 +152,7 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(q16, q17, mem[x6], 1024));
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(q16, q17, mem[x6], -1040));
 
+  CHECK_ENCODING(0xFC0084D0, a.str(d16, mem[x6], 8));
   CHECK_ENCODING(0x3C8104D0, a.str(q16, mem[x6], 16));
   CHECK_ENCODING(0x3C8FF4D0, a.str(q16, mem[x6], 255));
   CHECK_ENCODING(0x3C9004D0, a.str(q16, mem[x6], -256));
