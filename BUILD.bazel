@@ -12985,6 +12985,14 @@ config_setting(
 )
 
 config_setting(
+    name = "ios_sim_arm64",
+    values = {
+        "apple_platform_type": "ios",
+        "cpu": "ios_sim_arm64",
+    },
+)
+
+config_setting(
     name = "ios_x86",
     values = {
         "apple_platform_type": "ios",
