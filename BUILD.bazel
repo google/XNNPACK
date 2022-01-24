@@ -7060,6 +7060,7 @@ AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/qc8-igemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S",
     "src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S",
     "src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S",
+    "src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-cortex-a55.S",
     "src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S",
     "src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S",
     "src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S",
@@ -9162,9 +9163,9 @@ xnnpack_cc_library(
         "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
-        "src/xnnpack/assembler.h",
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
+        "src/xnnpack/assembler.h",
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
