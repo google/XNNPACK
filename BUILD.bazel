@@ -9733,6 +9733,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "x64_transpose_bench",
+    srcs = [
+        "bench/x64-transpose.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_gemm_bench",
     srcs = [
         "bench/f32-gemm.cc",

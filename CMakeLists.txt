@@ -9002,4 +9002,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(x32-transpose-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x32-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(x64-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x64-transpose-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x64-transpose-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 ENDIF()
