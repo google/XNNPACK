@@ -469,6 +469,17 @@ Assembler& Assembler::stp(DRegister dt1, DRegister dt2, MemOperand xn) {
   return emit32(0x6D000000 | wb | offset << 15 | rt2(dt2) | rn(xn.base) | rt(dt1));
 }
 
+Assembler& Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn) {
+  if (!imm7_offset_valid(xn.offset, qt1)) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+
+  const uint32_t wb = (xn.mode == AddressingMode::kPreIndex ? 1 : 0) << 23;
+  const uint32_t offset = (xn.offset >> 4) & kImm7Mask;
+  return emit32(0xAD000000 | wb | offset << 15 | rt2(qt2) | rn(xn.base) | rt(qt1));
+}
+
 Assembler& Assembler::stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
   if (!imm7_offset_valid(imm, qt1)) {
     error_ = Error::kInvalidOperand;

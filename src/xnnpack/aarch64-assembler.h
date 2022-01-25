@@ -360,6 +360,7 @@ class Assembler : public AssemblerBase {
   Assembler& movi(VRegister vd, uint8_t imm);
   Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
   Assembler& stp(DRegister dt1, DRegister dt2, MemOperand xn);
+  Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn);
   Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   Assembler& str(DRegister dt, MemOperand xn, int32_t imm);
   Assembler& str(QRegister qt, MemOperand xn, int32_t imm);

@@ -165,6 +165,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
 
   CHECK_ENCODING(0x6D812FEA, a.stp(d10, d11, mem[sp, 16]++));
 
+  CHECK_ENCODING(0xAD0075BC, a.stp(q28, q29, mem[x13]));
+  CHECK_ENCODING(0xAD80F5BC, a.stp(q28, q29, mem[x13, 16]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(q28, q28, mem[x13, 7]));
+
   CHECK_ENCODING(0xAC8144D0, a.stp(q16, q17, mem[x6], 32));
   CHECK_ENCODING(0xAC9FC4D0, a.stp(q16, q17, mem[x6], 1008));
   CHECK_ENCODING(0xACA044D0, a.stp(q16, q17, mem[x6], -1024));
