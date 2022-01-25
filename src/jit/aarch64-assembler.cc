@@ -231,6 +231,10 @@ Assembler& Assembler::cmp(XRegister xn, uint16_t imm12) {
   return emit32(0xF100001F | imm12 << 10 | rn(xn));
 }
 
+Assembler& Assembler::csel(XRegister xd, XRegister xn, XRegister xm, Condition c) {
+  return emit32(0x9A800000 | rm(xm) | c << 12 | rn(xn) | rd(xd));
+}
+
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (!imm7_offset_valid(xn.offset, xt1)) {
     error_ = Error::kInvalidOperand;
