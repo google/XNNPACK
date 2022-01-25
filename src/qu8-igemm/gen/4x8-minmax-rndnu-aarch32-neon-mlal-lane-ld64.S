@@ -26,8 +26,9 @@
 //     const uint8_t* zero,                  sp + 112 -> (r7)
 //     xnn_qs8_conv_minmax_params*params); sp + 116 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
+// Register usage
 // A0   r3  d0-d1 q0
 // A1  r12  d2-d3 q1
 // A2  r10  d4-d5 q2
@@ -42,22 +43,21 @@
 
 // Unused d13-d15
 
-# params structure is 20 bytes
-#  struct {
-#    uint8_t kernel_zero_point[4]; d12
-#    int32_t right_pre_shift;         d10[0]
-#    int32_t multiplier;              d10[1]
-#    int32_t right_post_shift;        d11[0]
-#    int16_t output_zero_point;       d11[2]
-#    uint8_t output_min;           d11[6]
-#    uint8_t output_max;           d11[7]
-#  } rndnu_neon;
+// params structure is 20 bytes
+//  struct {
+//    uint8_t kernel_zero_point[4]; d12
+//    int32_t right_pre_shift;         d10[0]
+//    int32_t multiplier;              d10[1]
+//    int32_t right_post_shift;        d11[0]
+//    int16_t output_zero_point;       d11[2]
+//    uint8_t output_min;           d11[6]
+//    uint8_t output_max;           d11[7]
+//  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
         # Push 88 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
-
         SUB     sp, sp, 4                           // +4
         VPUSH   {d8-d12}                            // +40 = 88
 

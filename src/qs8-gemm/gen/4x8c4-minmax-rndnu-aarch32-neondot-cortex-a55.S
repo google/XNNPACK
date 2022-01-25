@@ -21,10 +21,11 @@
 //     uint8_t*restrict c,        sp + 88 -> r11
 //     size_t cm_stride,          sp + 92 -> (r6)
 //     size_t cn_stride,          sp + 96 -> r7
-//     xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
+//     xnn_qs8_conv_minmax_params params)  sp + 100 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
+// Register usage
 // A0   r3  d0
 // A1  r12  d1
 // A2  r10  d2
@@ -50,7 +51,7 @@
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
-        # Push 96 bytes
+        # Push 80 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         VPUSH   {d8-d13}                            // +48 = 80
 
@@ -103,7 +104,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VMOV    q14, q8
         VLD1.8  {d7},  [r9]!            // B3
         VMOV    q15, q9
-        BLO     3f                      // less than 8 channels?
+        BLO     4f                      // less than 8 channels?
 
         SUBS    r5, r5, 8               // k = k - 8
         BLO     12f                     // less than 16 channels - skip mainloop
@@ -173,7 +174,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VSDOT.S8 q15, q5, d3[1]
 
         # Is there a remainder?- 4 bytes of A
-        BNE     30f
+        BNE     3f
 
 2:
         # RNDNU quantization
@@ -242,7 +243,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     4f
+        BLO     5f
         VST1.8  {d0}, [r11], r7
         SUB     r3, r3, r2
         VST1.8  {d1}, [r4], r7
@@ -259,7 +260,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
 
         # Remainder prologue
         .p2align 3
-30:
+3:
         VLD1.8  {d4},  [r9]!            // B0
         VLD1.8  {d0},  [r3]!            // A0
         VLD1.8  {d5},  [r9]!            // B1
@@ -268,7 +269,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VLD1.8  {d7},  [r9]!            // B3
 
         # Remainder- 4 bytes of A
-3:
+4:
         VSDOT.S8 q8, q2, d0[0]
         VLD1.32 {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
@@ -285,18 +286,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
 
         # Store odd width
         .p2align 3
-4:
+5:
         TST     r1, 4
-        BEQ     5f
+        BEQ     6f
         VST1.32 {d0[0]}, [r11]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-5:
+6:
         TST     r1, 2
-        BEQ     6f
+        BEQ     7f
         VST1.16 {d0[0]}, [r11]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d2[0]}, [r8]!
@@ -304,7 +305,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-6:
+7:
         TST     r1, 1
         BEQ     12f
         VST1.8  {d0[0]}, [r11]

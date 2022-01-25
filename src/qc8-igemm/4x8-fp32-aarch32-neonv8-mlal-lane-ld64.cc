@@ -32,7 +32,9 @@ class Generator : public Assembler {
 //     const int8_t* zero,                 sp + 104 -> (r7)
 //     xnn_qs8_minmax_params*params); sp + 108 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
+
+// Register usage
 
 // A0   r3  d0-d1 q0
 // A1  r12  d2-d3 q1

@@ -27,10 +27,11 @@ class Generator : public Assembler {
 //     uint8_t*restrict c,       sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
 //     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 116 -> (r7)
+//     const union xnn_f32_minmax_params params)  sp + 116 -> (r7)
 
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
-// inner loop registers
+// Register usage
 
 // A0   r3  d0
 // A1  r12  d1

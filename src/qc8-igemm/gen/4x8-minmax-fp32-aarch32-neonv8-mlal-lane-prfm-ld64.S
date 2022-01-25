@@ -26,8 +26,9 @@
 //     const int8_t* zero,                  sp + 112 -> (r7)
 //     xnn_qs8_minmax_params*params); sp + 116 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
+// Register usage
 // A0   r3  d0-d1 q0
 // A1  r12  d2-d3 q1
 // A2  r10  d4-d5 q2
@@ -53,7 +54,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_p
         # Push 88 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
-
         SUB     sp, sp, 12                          // +12
         VPUSH   {d8-d11}                            // +32 = 88
 

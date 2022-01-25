@@ -31,7 +31,9 @@ class Generator : public Assembler {
 //     const float* zero,        sp + 136 -> (r7)
 //     minmax_params*params,     sp + 140 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
+
+// Register usage
 
 // A0   r3  d0
 // A1  r12  d1

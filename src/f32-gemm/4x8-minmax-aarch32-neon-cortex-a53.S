@@ -17,10 +17,12 @@
 //     uint8_t*restrict c,       sp + 108 -> r11
 //     size_t cm_stride,         sp + 112 -> (r6)
 //     size_t cn_stride,         sp + 116 -> (r0)
-//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 120 -> (r5)
+//     const union xnn_f32_minmax_params params)  sp + 120 -> (r5)
 
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
-// inner loop registers
+// Register usage
+
 // r0, r2   scratch temporaries for loads
 // r14 (lr) unused
 

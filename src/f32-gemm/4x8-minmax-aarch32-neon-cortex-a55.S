@@ -19,7 +19,10 @@
 //     size_t cn_stride,         sp + 112 -> (r0)
 //     minmax_params*params,     sp + 116 -> (r5)
 
-// inner loop registers
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
+
+// Register usage
+
 // r14 (lr) unused
 
 // A0   r3  d0
