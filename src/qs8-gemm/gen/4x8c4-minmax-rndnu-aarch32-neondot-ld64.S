@@ -106,16 +106,16 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VLD1.8  {q2},  [r9]!            // B0
         VLD1.8  {d1}, [r12]!            // A1
         VLD1.8  {q3},  [r9]!            // B1
-        VLD1.8  {d2}, [r10]!            // A2
-        VLD1.8  {q4},  [r9]!            // B2
-        VLD1.8  {d3},  [r0]!            // A3
-        VLD1.8  {q5},  [r9]!            // B3
         SUBS    r5, r5, 8
 
         VSDOT.S8 q8, q2, d0[0]
+        VLD1.8  {d2}, [r10]!            // A2
         VSDOT.S8 q9, q3, d0[0]
+        VLD1.8  {q4},  [r9]!            // B2
         VSDOT.S8 q10, q2, d1[0]
+        VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q11, q3, d1[0]
+        VLD1.8  {q5},  [r9]!            // B3
         VSDOT.S8 q12, q2, d2[0]
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
@@ -132,7 +132,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         BHS     1b
 
         # Is there a remainder?- 4 bytes of A
-        ADDS    r5, r5, 8
+        TST     r5, 4
         BNE     3f
 
 2:
@@ -224,11 +224,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VLD1.32 {q2},  [r9]!            // B0
         VLD1.32 {d1[0]}, [r12]!         // A1
         VLD1.32 {q3},  [r9]!            // B1
-        VLD1.32 {d2[0]}, [r10]!         // A2
-        VLD1.32 {d3[0]},  [r0]!         // A3
 
         VSDOT.S8 q8, q2, d0[0]
+        VLD1.32 {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
+        VLD1.32 {d3[0]},  [r0]!         // A3
         VSDOT.S8 q10, q2, d1[0]
         VSDOT.S8 q11, q3, d1[0]
         VSDOT.S8 q12, q2, d2[0]
