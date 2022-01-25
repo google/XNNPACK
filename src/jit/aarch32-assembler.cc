@@ -149,13 +149,14 @@ Assembler& Assembler::bind(Label& l) {
   for (size_t i = 0; i < l.num_users; i++) {
     byte* user = l.users[i];
     const ptrdiff_t offset = l.offset - user - kPCDelta;
+    uint32_t* instr = reinterpret_cast<uint32_t*>(user);
 
     if (!branch_offset_valid(offset)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return *this;
     }
 
-    *user = (*user | ((offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF));
+    *instr |= (offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF;
   }
   return *this;
 }

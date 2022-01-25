@@ -110,8 +110,8 @@ inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
   }
 }
 
-inline BranchType instruction_branch_type(uint32_t* instr) {
-  const uint32_t masked = *instr & 0xFE000000;
+inline BranchType instruction_branch_type(uint32_t instr) {
+  const uint32_t masked = instr & 0xFE000000;
   switch (masked) {
     case 0xB6000000:
     case 0x36000000:
@@ -481,14 +481,15 @@ Assembler& Assembler::bind(Label& l) {
   for (size_t i = 0; i < l.num_users; i++) {
     byte* user = l.users[i];
     const ptrdiff_t offset = l.offset - user;
+    uint32_t* instr = reinterpret_cast<uint32_t*>(user);
 
-    const BranchType bt = instruction_branch_type(reinterpret_cast<uint32_t*>(user));
+    const BranchType bt = instruction_branch_type(*instr);
     if (!branch_offset_valid(offset, bt)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return *this;
     }
 
-    *user = (*user | branch_imm(offset, bt));
+    *instr |= branch_imm(offset, bt);
   }
   return *this;
 }
