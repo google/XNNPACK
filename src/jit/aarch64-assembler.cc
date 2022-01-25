@@ -215,6 +215,14 @@ Assembler& Assembler::b(Label& l) {
   return branch_to_label(0x14000000, BranchType::kUnconditional, l);
 }
 
+Assembler& Assembler::cmp(XRegister xn, uint16_t imm12) {
+  if (imm12 > kUint12Max) {
+    error_ = Error::kInvalidOperand;
+    return *this;
+  }
+  return emit32(0xF100001F | imm12 << 10 | rn(xn));
+}
+
 Assembler& Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (!imm7_offset_valid(xn.offset, xt1)) {
     error_ = Error::kInvalidOperand;

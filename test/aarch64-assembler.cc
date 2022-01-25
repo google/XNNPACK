@@ -29,6 +29,9 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   CHECK_ENCODING(0x913FFC41, a.add(x1, x2, 4095));
   EXPECT_ERROR(Error::kInvalidOperand, a.add(x1, x2, 4096));
 
+  CHECK_ENCODING(0xF100081F, a.cmp(x0, 2));
+  EXPECT_ERROR(Error::kInvalidOperand, a.cmp(x0, 4096));
+
   CHECK_ENCODING(0xA9403FEE, a.ldp(x14, x15, mem[sp]));
   CHECK_ENCODING(0xA8C13FEE, a.ldp(x14, x15, mem[sp], 16));
   CHECK_ENCODING(0xA9413FEE, a.ldp(x14, x15, mem[sp, 16]));

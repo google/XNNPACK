@@ -322,6 +322,7 @@ class Assembler : public AssemblerBase {
   Assembler& b_hs(Label& l) { return b(kHS, l); }
   Assembler& b_lo(Label& l) { return b(kLO, l); }
   Assembler& b_ne(Label& l) { return b(kNE, l); }
+  Assembler& cmp(XRegister xn, uint16_t imm12);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   Assembler& ldr(XRegister xt, MemOperand xn);
