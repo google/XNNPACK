@@ -16,12 +16,12 @@
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
 //     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 96  -> (r7)
-//     const void*restrict w,    sp + 100 -> r9
-//     uint8_t*restrict c,       sp + 104 -> r11
-//     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 116 -> (r5)
+//     size_t a_stride,           sp + 80 -> (r7)
+//     const void*restrict w,     sp + 84 -> r9
+//     uint8_t*restrict c,        sp + 88 -> r11
+//     size_t cm_stride,          sp + 92 -> (r6)
+//     size_t cn_stride,          sp + 96 -> r7
+//     const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
 
 
 // inner loop registers
@@ -31,37 +31,37 @@
 // A2  r10  d2
 // A3   r0  d3
 
-// B    r9  q2 q3 q4 q5
+// B    r9  q2 q3 q4 q5 d4-d11
 
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 
-// Unused q6
+// Unused q7
 
 // params structure is 16 bytes
 //  struct {
-//    int32_t right_pre_shift;    d14[0]
-//    int32_t multiplier;         d14[1]
-//    int32_t right_post_shift;   d15[0]
-//    int16_t output_zero_point;  d15[2]
-//    int8_t output_min;          d15[6]
-//    int8_t output_max;          d15[7]
+//    int32_t right_pre_shift;    d12[0]
+//    int32_t multiplier;         d12[1]
+//    int32_t right_post_shift;   d13[0]
+//    int16_t output_zero_point;  d13[2]
+//    int8_t output_min;          d13[6]
+//    int8_t output_max;          d13[7]
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
         # Push 96 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        VPUSH   {d8-d15}                            // +64 = 96
+        VPUSH   {d8-d13}                            // +48 = 80
 
-        LDR     r7, [sp, 96]            // a_stride
+        LDR     r7, [sp, 80]            // a_stride
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
-        LDR     r11, [sp, 104]          // c
-        LDR     r6, [sp, 108]           // cm_stride
-        LDR     r9, [sp, 100]           // w
+        LDR     r11, [sp, 88]           // c
+        LDR     r6, [sp, 92]            // cm_stride
+        LDR     r9, [sp, 84]            // w
         BIC     r2, r2, 3
-        LDR     r5, [sp, 116]           // params
+        LDR     r5, [sp, 100]           // params
 
         # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
@@ -82,31 +82,31 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5!, {d14-d15}          // RNDNU params
-        LDR     r7, [sp, 112]           // cn_stride
+        VLDM    r5, {d12-d13}           // RNDNU params
+        LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
         SUBS    r5, r2, 8               // k = kc - 8
-
-        # Prologue + Bias
         VMOV    q10, q8
-        VLD1.8  {d4},  [r9]!            // B0a
         VMOV    q11, q9
-        VLD1.8  {d0},  [r3]!            // A0
         VMOV    q12, q8
-        VLD1.8  {d5},  [r9]!            // B0b
         VMOV    q13, q9
-        VLD1.8  {d6},  [r9]!            // B1a
         VMOV    q14, q8
-        VLD1.8  {d1}, [r12]!            // A1
         VMOV    q15, q9
-        VLD1.8  {d7},  [r9]!            // B1b
         BLO     3f                      // less than 8 channels?
 
-        SUBS    r2, r2, 8               // k = k - 8
+        # Prologue
+        VLD1.8  {d0},  [r3]!            // A0
+        VLD1.8  {d1}, [r12]!            // A1
+        VLD1.8  {d4},  [r9]!            // B0
+        VLD1.8  {d5},  [r9]!            // B1
+        VLD1.8  {d6},  [r9]!            // B2
+        VLD1.8  {d7},  [r9]!            // B3
+
+        SUBS    r5, r5, 8               // k = k - 8
         BLO     12f                     // less than 16 channels - skip mainloop
 
         # Main loop - 8 bytes of A.
@@ -118,25 +118,25 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VSDOT.S8 q9, q3, d0[0]
         VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q10, q2, d1[0]
-        VLD1.8  {d8},  [r9]!            // B2a
+        VLD1.8  {d8},  [r9]!            // B4
         VSDOT.S8 q11, q3, d1[0]
-        VLD1.8  {d9},  [r9]!            // B2b
+        VLD1.8  {d9},  [r9]!            // B5
         VSDOT.S8 q12, q2, d2[0]
-        VLD1.8  {q10},  [r9]!           // B3a
+        VLD1.8  {d10},  [r9]!           // B6
         VSDOT.S8 q13, q3, d2[0]
-        VLD1.8  {q11},  [r9]!           // B3b
+        VLD1.8  {d11},  [r9]!           // B7
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
         SUBS    r5, r5, 8
 
         VSDOT.S8 q8, q4, d0[1]
-        VLD1.8  {d4},  [r9]!            // B0a
+        VLD1.8  {d4},  [r9]!            // B0
         VSDOT.S8 q9, q5, d0[1]
-        VLD1.8  {d5},  [r9]!            // B0b
+        VLD1.8  {d5},  [r9]!            // B1
         VSDOT.S8 q10, q4, d1[1]
-        VLD1.8  {d6},  [r9]!            // B1a
+        VLD1.8  {d6},  [r9]!            // B2
         VSDOT.S8 q11, q5, d1[1]
-        VLD1.8  {d7},  [r9]!            // B1b
+        VLD1.8  {d7},  [r9]!            // B3
         VSDOT.S8 q12, q4, d2[1]
         VLD1.8  {d0},  [r3]!            // A0
         VSDOT.S8 q13, q5, d2[1]
@@ -153,13 +153,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VSDOT.S8 q9, q3, d0[0]
         VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q10, q2, d1[0]
-        VLD1.8  {d8},  [r9]!            // B2a
+        VLD1.8  {d8},  [r9]!            // B4
         VSDOT.S8 q11, q3, d1[0]
-        VLD1.8  {d9},  [r9]!            // B2b
+        VLD1.8  {d9},  [r9]!            // B5
         VSDOT.S8 q12, q2, d2[0]
-        VLD1.8  {q10},  [r9]!           // B3a
+        VLD1.8  {d10},  [r9]!           // B6
         VSDOT.S8 q13, q3, d2[0]
-        VLD1.8  {q11},  [r9]!           // B3b
+        VLD1.8  {d11},  [r9]!           // B7
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
 
@@ -178,38 +178,38 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
 
 2:
         # RNDNU quantization
-        VDUP.32 q0, d14[0]              // right_pre_shift
+        VDUP.32 q0, d12[0]              // right_pre_shift
 
         VQSHL.S32 q8,  q8, q0
         VQSHL.S32 q9,  q9, q0
         VQSHL.S32 q10, q10, q0
-        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q11, q11, q0
+        VQSHL.S32 q12, q12, q0
         VQSHL.S32 q13, q13, q0
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
 
-        VDUP.32 q2, d15[0]              // right_post_shift
+        VDUP.32 q2, d13[0]              // right_post_shift
 
-        VQDMULH.S32 q8,  q8, d14[1]     // multiplier
-        VQDMULH.S32 q9,  q9, d14[1]
-        VQDMULH.S32 q10, q10, d14[1]
-        VQDMULH.S32 q12, q12, d14[1]
-        VQDMULH.S32 q11, q11, d14[1]
-        VQDMULH.S32 q13, q13, d14[1]
-        VQDMULH.S32 q14, q14, d14[1]
-        VQDMULH.S32 q15, q15, d14[1]
+        VQDMULH.S32 q8,  q8, d12[1]     // multiplier
+        VQDMULH.S32 q9,  q9, d12[1]
+        VQDMULH.S32 q10, q10, d12[1]
+        VQDMULH.S32 q11, q11, d12[1]
+        VQDMULH.S32 q12, q12, d12[1]
+        VQDMULH.S32 q13, q13, d12[1]
+        VQDMULH.S32 q14, q14, d12[1]
+        VQDMULH.S32 q15, q15, d12[1]
 
         VRSHL.S32 q8,  q8, q2
         VRSHL.S32 q9,  q9, q2
         VRSHL.S32 q10, q10, q2
-        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q11, q11, q2
+        VRSHL.S32 q12, q12, q2
         VRSHL.S32 q13, q13, q2
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2
 
-        VDUP.16 q0, d15[2]              // output_zero_point
+        VDUP.16 q0, d13[2]              // output_zero_point
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -225,14 +225,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VQADD.S16 q10, q10, q0
         VQADD.S16 q11, q11, q0
 
-        VDUP.8  q12, d15[6]             // output_min
+        VDUP.8  q12, d13[6]             // output_min
 
         VQMOVN.S16 d0,  q8
         VQMOVN.S16 d1,  q9
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d15[7]             // output_min
+        VDUP.8  q13, d13[7]             // output_min
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
@@ -254,21 +254,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         SUB     r0, r0, r2
         BHI     0b
 
-        VPOP    {d8-d15}
+        VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
         # Remainder- 4 bytes of A
         .p2align 3
 3:
+        VLD1.32 {d0[0]},  [r3]!         // A0
+        VLD1.32 {q2},  [r9]!            // B0
+        VLD1.32 {d1[0]}, [r12]!         // A1
+        VLD1.32 {q3},  [r9]!            // B1
+        VLD1.32 {d2[0]}, [r10]!         // A2
+        VLD1.32 {d3[0]},  [r0]!         // A3
+
         VSDOT.S8 q8, q2, d0[0]
-        VLD1.8  {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
-        VLD1.8  {d3[0]},  [r0]!         // A3
         VSDOT.S8 q10, q2, d1[0]
-        SUB     r3, r3, 4               // A0
         VSDOT.S8 q11, q3, d1[0]
-        SUB     r12, r12, 4             // A1
         VSDOT.S8 q12, q2, d2[0]
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
@@ -305,7 +308,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VST1.8  {d3[0]}, [r6]
 
 12:
-        VPOP    {d8-d15}
+        VPOP    {d8-d13}
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
