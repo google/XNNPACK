@@ -249,12 +249,19 @@ constexpr QRegister q31{31};
 enum class AddressingMode {
   kOffset, // Base plus offset: [base{, #imm}] ; [base, Xm{, LSL #imm}].
   kPostIndex, // Post-index: [base], #imm ; [base], Xm.
+  kPreIndex, // Pre-index: [base, #imm]!
 };
 
 struct MemOperand {
   MemOperand(XRegister xn): base(xn), mode(AddressingMode::kOffset), offset(0) {}
   MemOperand(XRegister xn, int32_t offset): base(xn), mode(AddressingMode::kOffset), offset(offset) {}
   MemOperand(XRegister xn, int32_t offset, AddressingMode mode): base(xn), mode(mode), offset(offset) {}
+
+  // Overload postfix increment to indicate a pre-index addressing mode for load/stores.
+  MemOperand operator++(int) {
+    mode = AddressingMode::kPreIndex;
+    return *this;
+  }
 
   XRegister base;
   AddressingMode mode;
@@ -267,7 +274,7 @@ static inline MemOperand operator,(XRegister r, int32_t offset) {
 
 // Helper struct for some syntax sugar to look like native assembly, see mem.
 struct MemOperandHelper {
-  const MemOperand operator[](MemOperand op) const { return op; }
+  MemOperand operator[](MemOperand op) const { return op; }
   MemOperand operator[](XRegister r) const { return MemOperand(r, 0); }
 };
 
@@ -349,6 +356,7 @@ class Assembler : public AssemblerBase {
   Assembler& mov(VRegister vd, VRegister vn);
   Assembler& movi(VRegister vd, uint8_t imm);
   Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
+  Assembler& stp(DRegister dt1, DRegister dt2, MemOperand xn);
   Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   Assembler& str(DRegister dt, MemOperand xn, int32_t imm);
   Assembler& str(QRegister qt, MemOperand xn, int32_t imm);
