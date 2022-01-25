@@ -211,6 +211,10 @@ Assembler& Assembler::add(XRegister xd, XRegister xn, uint16_t imm12) {
   return emit32(0x91000000 | imm12 << 10 | rn(xn) | rd(xd));
 }
 
+Assembler& Assembler::add(XRegister xd, XRegister xn, XRegister xm) {
+  return emit32(0x8B000000 | rd(xd) | rn(xn) | rm(xm));
+}
+
 Assembler& Assembler::b(Label& l) {
   return branch_to_label(0x14000000, BranchType::kUnconditional, l);
 }

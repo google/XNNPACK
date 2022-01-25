@@ -316,6 +316,7 @@ class Assembler : public AssemblerBase {
 
   // Base instructions.
   Assembler& add(XRegister xd, XRegister xn, uint16_t imm12);
+  Assembler& add(XRegister xd, XRegister xn, XRegister xm);
   Assembler& b(Label& l);
   Assembler& b_eq(Label& l) { return b(kEQ, l); }
   Assembler& b_hi(Label& l) { return b(kHI, l); }
