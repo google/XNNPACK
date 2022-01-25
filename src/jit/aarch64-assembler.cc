@@ -3,8 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/common.h>
 #include <xnnpack/aarch64-assembler.h>
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
 
 #include <cmath>
 
@@ -297,6 +298,18 @@ Assembler& Assembler::tbnz(XRegister xd, uint8_t bit, Label& l) {
 
 Assembler& Assembler::tbz(XRegister xd, uint8_t bit, Label& l) {
   return tb_helper(0x36000000, xd, bit, l);
+}
+
+Assembler& Assembler::tst(XRegister xn, uint8_t imm) {
+  // Encoding of immediate is quite complicated, we only support po2-1, which is what assembly microkernel uses.
+  uint32_t imm_po2 = imm + 1;
+  if (!is_po2(imm_po2)) {
+    error_ = Error::kUnimplemented;
+    return *this;
+  }
+
+  const uint32_t imm_s = (ctz(imm_po2) - 1) << 10;
+  return emit32(0xF240001F | imm_s | rn(xn));
 }
 
 // SIMD instructions.

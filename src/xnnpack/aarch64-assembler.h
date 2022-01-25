@@ -341,6 +341,8 @@ class Assembler : public AssemblerBase {
   Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
   Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
   Assembler& tbz(XRegister xd, uint8_t bit, Label& l);
+  // Only immediates with lowest N bits set are supported.
+  Assembler& tst(XRegister xn, uint8_t imm);
 
   // SIMD instructions
   Assembler& dup(DRegister dd, VRegisterLane vn);

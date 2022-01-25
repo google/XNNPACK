@@ -66,6 +66,11 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.subs(x0, x2, -32));
   EXPECT_ERROR(Error::kInvalidOperand, a.subs(x0, x2, 4096));
 
+  CHECK_ENCODING(0xF240043F, a.tst(x1, 3));
+  CHECK_ENCODING(0xF2400C3F, a.tst(x1, 15));
+  CHECK_ENCODING(0xF240103F, a.tst(x1, 31));
+  EXPECT_ERROR(Error::kUnimplemented, a.tst(x1, 32));
+
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 

@@ -170,3 +170,13 @@ inline static int64_t asr_s64(int64_t x, uint32_t n) {
     return x >> n;
   #endif
 }
+
+inline static uint32_t ctz(uint32_t x) {
+#if XNN_COMPILER_MSVC
+  unsigned long index;
+  _BitScanForward(&index, x);
+  return index;
+#else
+  return __builtin_ctz(x);
+#endif  // XNN_COMPILER_MSVC
+}
