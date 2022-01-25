@@ -31,7 +31,7 @@
 // A2  r10  d2
 // A3   r0  d3
 
-// B    r9  q2 q3 q4 q5
+// B    r9  q2 q3 q4 q5 d4-d11
 
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
@@ -90,23 +90,23 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
         SUBS    r5, r2, 8               // k = kc - 8
-
-        # Prologue + Bias
         VMOV    q10, q8
-        VLD1.8  {d4},  [r9]!            // B0a
         VMOV    q11, q9
-        VLD1.8  {d0},  [r3]!            // A0
         VMOV    q12, q8
-        VLD1.8  {d5},  [r9]!            // B0b
         VMOV    q13, q9
-        VLD1.8  {d6},  [r9]!            // B1a
         VMOV    q14, q8
-        VLD1.8  {d1}, [r12]!            // A1
         VMOV    q15, q9
-        VLD1.8  {d7},  [r9]!            // B1b
         BLO     3f                      // less than 8 channels?
 
-        SUBS    r2, r2, 8               // k = k - 8
+        # Prologue
+        VLD1.8  {d0},  [r3]!            // A0
+        VLD1.8  {d1}, [r12]!            // A1
+        VLD1.8  {d4},  [r9]!            // B0
+        VLD1.8  {d5},  [r9]!            // B1
+        VLD1.8  {d6},  [r9]!            // B2
+        VLD1.8  {d7},  [r9]!            // B3
+
+        SUBS    r5, r5, 8               // k = k - 8
         BLO     12f                     // less than 16 channels - skip mainloop
 
         # Main loop - 8 bytes of A.
@@ -118,25 +118,25 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VSDOT.S8 q9, q3, d0[0]
         VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q10, q2, d1[0]
-        VLD1.8  {d8},  [r9]!            // B2a
+        VLD1.8  {d8},  [r9]!            // B4
         VSDOT.S8 q11, q3, d1[0]
-        VLD1.8  {d9},  [r9]!            // B2b
+        VLD1.8  {d9},  [r9]!            // B5
         VSDOT.S8 q12, q2, d2[0]
-        VLD1.8  {q10},  [r9]!           // B3a
+        VLD1.8  {d10},  [r9]!           // B6
         VSDOT.S8 q13, q3, d2[0]
-        VLD1.8  {q11},  [r9]!           // B3b
+        VLD1.8  {d11},  [r9]!           // B7
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
         SUBS    r5, r5, 8
 
         VSDOT.S8 q8, q4, d0[1]
-        VLD1.8  {d4},  [r9]!            // B0a
+        VLD1.8  {d4},  [r9]!            // B0
         VSDOT.S8 q9, q5, d0[1]
-        VLD1.8  {d5},  [r9]!            // B0b
+        VLD1.8  {d5},  [r9]!            // B1
         VSDOT.S8 q10, q4, d1[1]
-        VLD1.8  {d6},  [r9]!            // B1a
+        VLD1.8  {d6},  [r9]!            // B2
         VSDOT.S8 q11, q5, d1[1]
-        VLD1.8  {d7},  [r9]!            // B1b
+        VLD1.8  {d7},  [r9]!            // B3
         VSDOT.S8 q12, q4, d2[1]
         VLD1.8  {d0},  [r3]!            // A0
         VSDOT.S8 q13, q5, d2[1]
@@ -153,13 +153,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         VSDOT.S8 q9, q3, d0[0]
         VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q10, q2, d1[0]
-        VLD1.8  {d8},  [r9]!            // B2a
+        VLD1.8  {d8},  [r9]!            // B4
         VSDOT.S8 q11, q3, d1[0]
-        VLD1.8  {d9},  [r9]!            // B2b
+        VLD1.8  {d9},  [r9]!            // B5
         VSDOT.S8 q12, q2, d2[0]
-        VLD1.8  {q10},  [r9]!           // B3a
+        VLD1.8  {d10},  [r9]!           // B6
         VSDOT.S8 q13, q3, d2[0]
-        VLD1.8  {q11},  [r9]!           // B3b
+        VLD1.8  {d11},  [r9]!           // B7
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
 
@@ -261,14 +261,17 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         # Remainder- 4 bytes of A
         .p2align 3
 3:
+        VLD1.32 {d0[0]},  [r3]!         // A0
+        VLD1.32 {q2},  [r9]!            // B0
+        VLD1.32 {d1[0]}, [r12]!         // A1
+        VLD1.32 {q3},  [r9]!            // B1
+        VLD1.32 {d2[0]}, [r10]!         // A2
+        VLD1.32 {d3[0]},  [r0]!         // A3
+
         VSDOT.S8 q8, q2, d0[0]
-        VLD1.8  {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
-        VLD1.8  {d3[0]},  [r0]!         // A3
         VSDOT.S8 q10, q2, d1[0]
-        SUB     r3, r3, 4               // A0
         VSDOT.S8 q11, q3, d1[0]
-        SUB     r12, r12, 4             // A1
         VSDOT.S8 q12, q2, d2[0]
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
