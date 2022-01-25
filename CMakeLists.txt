@@ -8987,6 +8987,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
+  ADD_EXECUTABLE(x8-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(x8-transpose-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(x8-transpose-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x8-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(x16-transpose-bench bench/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(x16-transpose-bench PROPERTIES
     CXX_STANDARD 11
