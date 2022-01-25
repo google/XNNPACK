@@ -11,7 +11,7 @@
 
 .syntax unified
 
-// void xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55(
+// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -21,7 +21,7 @@
 //     uint8_t*restrict c,        sp + 88 -> r11
 //     size_t cm_stride,          sp + 92 -> (r6)
 //     size_t cn_stride,          sp + 96 -> r7
-//     xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
+//     xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  sp + 100 -> (r5)
 
 // inner loop registers
 
@@ -39,17 +39,14 @@
 
 // unused q7
 
-// params structure is 16 bytes
+// params structure is 4 bytes
 //  struct {
-//    int32_t right_pre_shift;    d12[0]
-//    int32_t multiplier;         d12[1]
-//    int32_t right_post_shift;   d13[0]
 //    int16_t output_zero_point;  d13[2]
 //    int8_t output_min;          d13[6]
 //    int8_t output_max;          d13[7]
-//  } rndnu_neon;
+//  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55
         # Push 96 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         VPUSH   {d8-d13}                            // +48 = 80
@@ -81,7 +78,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5, {d12-d13}           // RNDNU params
+        VLD1.32 {d13[]}, [r5]           // QC8 params
         LDR     r7, [sp, 96]            // cn_stride
 
         .p2align 3
@@ -176,37 +173,35 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         BNE     30f
 
 2:
-        # RNDNU quantization
-        VDUP.32 q0, d12[0]              // right_pre_shift
+        # QC8 FP32 quantization
+        VLD1.8  {q0-q1},  [r9]!
 
-        VQSHL.S32 q8,  q8, q0
-        VQSHL.S32 q9,  q9, q0
-        VQSHL.S32 q10, q10, q0
-        VQSHL.S32 q11, q11, q0
-        VQSHL.S32 q12, q12, q0
-        VQSHL.S32 q13, q13, q0
-        VQSHL.S32 q14, q14, q0
-        VQSHL.S32 q15, q15, q0
+        VCVT.F32.S32 q8,  q8
+        VCVT.F32.S32 q9,  q9
+        VCVT.F32.S32 q10, q10
+        VCVT.F32.S32 q11, q11
+        VCVT.F32.S32 q12, q12
+        VCVT.F32.S32 q13, q13
+        VCVT.F32.S32 q14, q14
+        VCVT.F32.S32 q15, q15
 
-        VDUP.32 q2, d13[0]              // right_post_shift
+        VMUL.F32 q8,  q8, q0            // multiplier
+        VMUL.F32 q9,  q9, q1
+        VMUL.F32 q10, q10, q0
+        VMUL.F32 q11, q11, q1
+        VMUL.F32 q12, q12, q0
+        VMUL.F32 q13, q13, q1
+        VMUL.F32 q14, q14, q0
+        VMUL.F32 q15, q15, q1
 
-        VQDMULH.S32 q8,  q8, d12[1]     // multiplier
-        VQDMULH.S32 q9,  q9, d12[1]
-        VQDMULH.S32 q10, q10, d12[1]
-        VQDMULH.S32 q11, q11, d12[1]
-        VQDMULH.S32 q12, q12, d12[1]
-        VQDMULH.S32 q13, q13, d12[1]
-        VQDMULH.S32 q14, q14, d12[1]
-        VQDMULH.S32 q15, q15, d12[1]
-
-        VRSHL.S32 q8,  q8, q2
-        VRSHL.S32 q9,  q9, q2
-        VRSHL.S32 q10, q10, q2
-        VRSHL.S32 q11, q11, q2
-        VRSHL.S32 q12, q12, q2
-        VRSHL.S32 q13, q13, q2
-        VRSHL.S32 q14, q14, q2
-        VRSHL.S32 q15, q15, q2
+        VCVTN.S32.F32 q8,  q8
+        VCVTN.S32.F32 q9,  q9
+        VCVTN.S32.F32 q10, q10
+        VCVTN.S32.F32 q11, q11
+        VCVTN.S32.F32 q12, q12
+        VCVTN.S32.F32 q13, q13
+        VCVTN.S32.F32 q14, q14
+        VCVTN.S32.F32 q15, q15
 
         VDUP.16 q0, d13[2]              // output_zero_point
 
@@ -317,7 +312,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
-END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
+END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
