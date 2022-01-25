@@ -11,36 +11,35 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <random>
+#include <numeric>
 #include <vector>
 
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-static void x16_transpose(
+void transpose(
     benchmark::State& state,
     xnn_x16_transpose_ukernel_function transpose,
-    size_t ukernel_size,
-    benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
   if (isa_check && !isa_check(state)) {
     return;
   }
-
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), rng);
-  const size_t ukernel_bytes = ukernel_size * sizeof(uint16_t);
+  const size_t height = state.range(0);
+  const size_t width = state.range(1);
+  const size_t tile_hbytes = height * sizeof(uint16_t);
+  const size_t tile_wbytes = width * sizeof(uint16_t);
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(
-      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
+      height * width + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(
-      ukernel_size * ukernel_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::generate(x.begin(), x.end(), std::ref(u16rng));
+      height * width + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
-    transpose(x.data(), y.data(), ukernel_bytes, ukernel_bytes, ukernel_size,
-              ukernel_size);
+    transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, width,
+              height);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -49,12 +48,47 @@ static void x16_transpose(
   }
 }
 
+static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
+{
+  b->ArgNames({"height", "width"});
+  b->Args({32, 32});
+  b->Args({64, 64});
+  b->Args({117, 117});
+  b->Args({1024, 1024});
+}
+
+BENCHMARK_CAPTURE(transpose, 1x2_scalar_int, xnn_x16_transpose_ukernel__1x2_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 1x4_scalar_int, xnn_x16_transpose_ukernel__1x4_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 2x1_scalar_int, xnn_x16_transpose_ukernel__2x1_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 2x2_scalar_int, xnn_x16_transpose_ukernel__2x2_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 2x4_scalar_int, xnn_x16_transpose_ukernel__2x4_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 4x1_scalar_int, xnn_x16_transpose_ukernel__4x1_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 4x2_scalar_int, xnn_x16_transpose_ukernel__4x2_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(transpose, 4x4_scalar_int, xnn_x16_transpose_ukernel__4x4_scalar_int)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(x16_transpose, sse2_32, xnn_x16_transpose_ukernel__4x8_sse2, 32)
-      ->UseRealTime();
-  BENCHMARK_CAPTURE(x16_transpose, sse2_117, xnn_x16_transpose_ukernel__4x8_sse2, 117)
-      ->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_sse, xnn_x16_transpose_ukernel__4x8_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_dec_sse2, xnn_x16_transpose_ukernel__8x8_multi_dec_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_sse2, xnn_x16_transpose_ukernel__8x8_multi_switch_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_dec_sse2, xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_multi_sse2, xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_sse2, xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
