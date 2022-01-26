@@ -516,8 +516,6 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   vpop({d8-d15});
   add(sp, sp, 12); // skip pad, r2, r3
   pop({r4, r5, r6, r7, r8, r9, r10, r11, pc});
-
-
 }
 }  // namespace
 }  // aarch32

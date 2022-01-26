@@ -461,9 +461,6 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   vpop({d8-d11});
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   bx(lr);
-
-
-
 }
 }  // namespace
 }  // aarch32

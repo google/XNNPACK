@@ -533,8 +533,6 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
   bx(lr);
-
-
 }
 }  // namespace
 }  // aarch32
