@@ -112,6 +112,11 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v16.v16b(), v17.v16b(), v18.v16b()}, mem[x15], 24));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v16.v8b(), v17.v8b(), v18.v8b()}, mem[x15], 48));
 
+  CHECK_ENCODING(0x6D433FEE, a.ldp(d14, d15, mem[sp, 48]));
+  CHECK_ENCODING(0x6DC33FEE, a.ldp(d14, d15, mem[sp, 48]++));
+  CHECK_ENCODING(0x6CC427E8, a.ldp(d8, d9, mem[sp], 64));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldp(d14, d15, mem[sp, 7]));
+
   CHECK_ENCODING(0xACC154B4, a.ldp(q20, q21, mem[x5], 32));
   CHECK_ENCODING(0xACE054B4, a.ldp(q20, q21, mem[x5], -1024));
   CHECK_ENCODING(0xACDFD4B4, a.ldp(q20, q21, mem[x5], 1008));

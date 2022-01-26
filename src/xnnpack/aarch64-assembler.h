@@ -352,6 +352,8 @@ class Assembler : public AssemblerBase {
   Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);
   Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   Assembler& ld2r(VRegisterList xs, MemOperand xn);
+  Assembler& ldp(DRegister dt1, DRegister dt2, MemOperand xn);
+  Assembler& ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
   Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   Assembler& ldr(DRegister dt, MemOperand xn, int32_t imm);
   Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
