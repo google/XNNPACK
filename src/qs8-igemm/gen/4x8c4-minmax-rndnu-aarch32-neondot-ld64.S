@@ -2,7 +2,7 @@
 //   Template: src/qs8-igemm/4x8c4-aarch32-neondot-ld64.S.in
 //   Generator: tools/xngen
 //
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -54,10 +54,8 @@
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
-
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         BIC     r2, r2, 3
-
         # Push 96 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
@@ -90,6 +88,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
         VLDM    r9!, {d16-d19}          // Bias
         VMOV    q10, q8
         VMOV    q11, q9
+        LDR     r7, [sp, 120]           // zero
         VMOV    q12, q8
         VMOV    q13, q9
         VMOV    q14, q8
@@ -105,7 +104,6 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_ld64
 
         # Add a_offset
         LDR     r5, [sp, 116]           // a_offset
-        LDR     r7, [sp, 120]           // zero
         CMP     r3,  r7                 // if a0 == zero
         ADD     r3,  r3, r5             // a0 += a_offset
         MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset

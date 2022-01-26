@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -13,7 +13,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 .syntax unified
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64(
+// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_cortex_a55(
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 52
@@ -62,7 +62,7 @@ $else:
   //    int8_t output_max;          d13[7]
   //  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64
+BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_cortex_a55
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         BIC     r2, r2, 3
         # Push 96 bytes
@@ -107,54 +107,97 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VMOV    q15, q9
 
 1:
-        # Load next 4 A pointers
-        LDR     r3, [r2,  0]
-        LDR     r12, [r2,  4]
-        LDR     r10, [r2,  8]
-        LDR     r0, [r2, 12]
-        ADD     r2, r2, 16
-
-        # Add a_offset
+        # Load next 4 A pointers + Add a_offset + Prologue
+        # - Load next 4 A pointers to GPR
+        # - Adjust A pointers by a_offset if not zero
+        # - Load prologue
+        # - Load k = kc from stack
+        LDR     r3, [r2,  0]            // A0
         LDR     r5, [sp, 116]           // a_offset
         CMP     r3,  r7                 // if a0 == zero
+        LDR     r12, [r2,  4]           // A1
         ADD     r3,  r3, r5             // a0 += a_offset
+        LDR     r10, [r2,  8]           // A2
         MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset
+        LDR     r0, [r2, 12]            // A3
         CMP     r12,  r7                // if a1 == zero
+        VLD1.8  {d4},  [r9]!            // B0
         ADD     r12, r12, r5            // a1 += a_offset
+        VLD1.8  {d5},  [r9]!            // B1
         MOVEQ   r12,  r7                //   a1 = zero, else += a1 + a_offset
+        VLD1.8  {d6},  [r9]!            // B2
         CMP     r10,  r7                // if a2 == zero
+        VLD1.8  {d7},  [r9]!            // B3
         ADD     r10, r10, r5            // a2 += a_offset
+        VLD1.8  {d0},  [r3]!            // A0
         MOVEQ   r10,  r7                //   a2 = zero, else += a2 + a_offset
+        VLD1.8  {d1}, [r12]!            // A1
         CMP     r0,  r7                 // if a3 == zero
         ADD     r0,  r0, r5             // a3 += a_offset
-        LDR     r5, [sp, 52]            // kc
+        LDR     r5, [sp, 52]            // k = kc
         MOVEQ   r0,  r7                 //   a3 = zero, else += a3 + a_offset
+        SUBS    r5, r5, 8               // k = k - 8
+        ADD     r2, r2, 16
 
-        SUBS    r5, r5, 8               // kc - 8
         BLO     4f                      // less than 8 channels?
 
+        SUBS    r5, r5, 8               // k = k - 8
+        BLO     21f                     // less than 8 channels?
+
         # Main loop - 8 bytes of A.
-        # 16 SDOT, 4 LD64 A, 4 LD128 B
+        # 16 SDOT, 12 LD64
         .p2align 3
 2:
-        VLD1.8  {d0},  [r3]!            // A0
-        VLD1.8  {q2},  [r9]!            // B0
-        VLD1.8  {d1}, [r12]!            // A1
-        VLD1.8  {q3},  [r9]!            // B1
-        VLD1.8  {d2}, [r10]!            // A2
-        VLD1.8  {q4},  [r9]!            // B2
-        VLD1.8  {d3},  [r0]!            // A3
-        VLD1.8  {q5},  [r9]!            // B3
-        SUBS    r5, r5, 8
-
         VSDOT.S8 q8, q2, d0[0]
+        VLD1.8  {d2}, [r10]!            // A2
         VSDOT.S8 q9, q3, d0[0]
+        VLD1.8  {d3},  [r0]!            // A3
         VSDOT.S8 q10, q2, d1[0]
+        VLD1.8  {d8},  [r9]!            // B4
         VSDOT.S8 q11, q3, d1[0]
+        VLD1.8  {d9},  [r9]!            // B5
         VSDOT.S8 q12, q2, d2[0]
+        VLD1.8  {d10},  [r9]!           // B6
         VSDOT.S8 q13, q3, d2[0]
+        VLD1.8  {d11},  [r9]!           // B7
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
+        SUBS    r5, r5, 8
+
+        VSDOT.S8 q8, q4, d0[1]
+        VLD1.8  {d4},  [r9]!            // B0
+        VSDOT.S8 q9, q5, d0[1]
+        VLD1.8  {d5},  [r9]!            // B1
+        VSDOT.S8 q10, q4, d1[1]
+        VLD1.8  {d6},  [r9]!            // B2
+        VSDOT.S8 q11, q5, d1[1]
+        VLD1.8  {d7},  [r9]!            // B3
+        VSDOT.S8 q12, q4, d2[1]
+        VLD1.8  {d0},  [r3]!            // A0
+        VSDOT.S8 q13, q5, d2[1]
+        VLD1.8  {d1}, [r12]!            // A1
+        VSDOT.S8 q14, q4, d3[1]
+        VSDOT.S8 q15, q5, d3[1]
+        BHS     2b
+
+        # Epilogue
+        .p2align 3
+21:
+        VSDOT.S8 q8, q2, d0[0]
+        VLD1.8  {d2}, [r10]!            // A2
+        VSDOT.S8 q9, q3, d0[0]
+        VLD1.8  {d3},  [r0]!            // A3
+        VSDOT.S8 q10, q2, d1[0]
+        VLD1.8  {d8},  [r9]!            // B4
+        VSDOT.S8 q11, q3, d1[0]
+        VLD1.8  {d9},  [r9]!            // B5
+        VSDOT.S8 q12, q2, d2[0]
+        VLD1.8  {d10},  [r9]!           // B6
+        VSDOT.S8 q13, q3, d2[0]
+        VLD1.8  {d11},  [r9]!           // B7
+        VSDOT.S8 q14, q2, d3[0]
+        VSDOT.S8 q15, q3, d3[0]
+        TST     r5, 5
 
         VSDOT.S8 q8, q4, d0[1]
         VSDOT.S8 q9, q5, d0[1]
@@ -164,11 +207,8 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         VSDOT.S8 q13, q5, d2[1]
         VSDOT.S8 q14, q4, d3[1]
         VSDOT.S8 q15, q5, d3[1]
-        BHS     2b
-
         # Is there a remainder?- 4 bytes of A
-        TST     r5, 4
-        BNE     4f
+        BNE     40f
 
 3:
         # ks loop
@@ -286,19 +326,26 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-4:
-        # Remainder- 4 bytes of A
-        VLD1.32 {d0[0]},  [r3]!         // A0
-        VLD1.32 {q2},  [r9]!            // B0
-        VLD1.32 {d1[0]}, [r12]!         // A1
-        VLD1.32 {q3},  [r9]!            // B1
-        VLD1.32 {d2[0]}, [r10]!         // A2
-        VLD1.32 {d3[0]},  [r0]!         // A3
+        # Remainder prologue
+        .p2align 3
+40:
+        VLD1.8  {d4},  [r9]!            // B0
+        VLD1.8  {d0},  [r3]!            // A0
+        VLD1.8  {d5},  [r9]!            // B1
+        VLD1.8  {d6},  [r9]!            // B2
+        VLD1.8  {d1}, [r12]!            // A1
+        VLD1.8  {d7},  [r9]!            // B3
 
+        # Remainder- 4 bytes of A
+4:
         VSDOT.S8 q8, q2, d0[0]
+        VLD1.32 {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
+        VLD1.32 {d3[0]},  [r0]!         // A3
         VSDOT.S8 q10, q2, d1[0]
+        SUB     r3, r3, 4               // Rewind A0
         VSDOT.S8 q11, q3, d1[0]
+        SUB     r12, r12, 4             // Rewind A1
         VSDOT.S8 q12, q2, d2[0]
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
@@ -339,7 +386,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64
+END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -1,7 +1,12 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
+$assert REQUANTIZATION in ["FP32", "RNDNU"]
+$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
