@@ -53,9 +53,9 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 32768]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, MemOperand(sp, 16, AddressingMode::kPostIndex)));
 
-  CHECK_ENCODING(0xF98000A0, a.prfm(PLDL1KEEP, mem[x5]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(PLDL1KEEP, mem[x5, -8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(PLDL1KEEP, mem[x5, 32761]));
+  CHECK_ENCODING(0xF98000A0, a.prfm(kPLDL1KEEP, mem[x5]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[x5, -8]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[x5, 32761]));
 
   CHECK_ENCODING(0xD65F03C0, a.ret());
 

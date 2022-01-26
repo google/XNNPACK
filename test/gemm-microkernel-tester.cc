@@ -1650,7 +1650,7 @@ void GemmMicrokernelTester::Test(xnn_jit_gemm_code_generator_function gemm_gener
     jit_gemm_params p = (jit_gemm_params) {
       .f32_minmax = params
     };
-    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer,n(), k() * sizeof(float), &p));
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n(), k() * sizeof(float), &p));
     xnn_f32_gemm_minmax_ukernel_function gemm_minmax = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code);
 
     gemm_minmax(m(), n(), k() * sizeof(float),

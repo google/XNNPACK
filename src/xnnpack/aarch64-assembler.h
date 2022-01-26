@@ -284,11 +284,9 @@ struct MemOperandHelper {
 // - ldp(x0, x1, mem[rn], offset); // post-indexed
 constexpr MemOperandHelper mem;
 
-enum class PrefetchOp {
+enum PrefetchOp {
   kPLDL1KEEP = 0
 };
-
-constexpr PrefetchOp PLDL1KEEP = PrefetchOp::kPLDL1KEEP;
 
 enum Condition : uint32_t {
   kEQ = 0x0,
