@@ -289,7 +289,7 @@ xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(xnn_co
   Generator g(code);
   g.generate(nc, kc, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;

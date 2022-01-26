@@ -13,8 +13,6 @@
 namespace xnnpack {
 namespace aarch32 {
 
-using namespace xnnpack;
-
 enum class SpecialFPRegister {
   kFPSCR = 1,
 };

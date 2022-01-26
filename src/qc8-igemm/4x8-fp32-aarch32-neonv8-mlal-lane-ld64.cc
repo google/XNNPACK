@@ -495,7 +495,7 @@ xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld6
   Generator g(code);
   g.generate(false, nc, kc, ks, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;
@@ -506,7 +506,7 @@ xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prf
   Generator g(code);
   g.generate(true, nc, kc, ks, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;

@@ -546,7 +546,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_b
   jit_gemm_params* p = reinterpret_cast<jit_gemm_params*>(params);
   g.generate(nc, kc, p->f32_minmax.scalar.min, p->f32_minmax.scalar.max);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;

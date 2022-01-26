@@ -479,7 +479,7 @@ xnn_status xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(
   Generator g(code);
   g.generate(false, nc, kc, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;
@@ -490,7 +490,7 @@ xnn_status xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_
   Generator g(code);
   g.generate(true, nc, kc, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;

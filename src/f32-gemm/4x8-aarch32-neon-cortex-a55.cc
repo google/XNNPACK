@@ -435,7 +435,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_b
   Generator g(code);
   g.generate(nc, kc, nullptr);
   g.finalize();
-  if (g.error() != Error::kNoError) {
+  if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
   }
   return xnn_status_success;
