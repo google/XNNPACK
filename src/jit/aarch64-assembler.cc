@@ -110,7 +110,10 @@ inline bool branch_offset_valid(ptrdiff_t offset, BranchType branch_type) {
       return offset < kTbxzImmMax && offset > kTbxzImmMin;
     case BranchType::kUnconditional:
       return offset < kUnconditionalBranchImmMax && offset > kUnconditionalBranchImmMin;
+    default:
+      XNN_UNREACHABLE;
   }
+  return false;
 }
 
 inline BranchType instruction_branch_type(uint32_t instr) {
@@ -137,6 +140,8 @@ inline uint32_t mask(BranchType branch_type) {
       return kTbxzImmMask;
     case BranchType::kUnconditional:
       return kUnconditionalImmMask;
+    default:
+      XNN_UNREACHABLE;
   }
 }
 
@@ -148,6 +153,8 @@ inline uint8_t shift(BranchType branch_type) {
       return 5;
     case BranchType::kUnconditional:
       return 0;
+    default:
+      XNN_UNREACHABLE;
   }
 }
 
