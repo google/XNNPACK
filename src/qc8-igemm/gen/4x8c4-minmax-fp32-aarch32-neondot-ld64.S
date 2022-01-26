@@ -51,6 +51,10 @@
 //  } xnn_qs8_minmax_params.neonv8;
 
 BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
+
+        ADD     r2, r2, 3               // kc = (kc + 3) & ~3
+        BIC     r2, r2, 3
+
         # Push 96 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
@@ -58,11 +62,9 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VPUSH   {d8-d13}                                         // +48 = 96
 
         LDR     r11, [sp, 104]          // c
-        ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         LDR     r6, [sp, 108]           // cm_stride
         LDR     r2, [sp, 96]            // a
         LDR     r9, [sp, 100]           // w
-        BIC     r2, r2, 3
         LDR     r5, [sp, 124]           // params
         MOV     r14, r3                 // p = ks
 
