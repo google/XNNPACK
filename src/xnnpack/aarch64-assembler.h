@@ -3,6 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstddef>
+#include <cstdint>
+
 #include <xnnpack/assembler.h>
 
 namespace xnnpack {
@@ -57,7 +60,7 @@ struct VRegisterLane {
 
 struct ScalarVRegister{
   uint8_t code;
-  uint8_t size = 0;
+  uint8_t size;
 
   const VRegisterLane operator[](std::size_t pos) const {
     return VRegisterLane{code, size, static_cast<uint8_t>(pos)};
@@ -66,8 +69,8 @@ struct ScalarVRegister{
 
 struct VRegister {
   uint8_t code;
-  uint8_t size = 0;
-  uint8_t q = 1;
+  uint8_t size;
+  uint8_t q;
 
   VRegister v8b() const { return {code, 0, 0}; }
   VRegister v16b() const { return {code, 0, 1}; }
