@@ -339,150 +339,148 @@ class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
 
-  Assembler& add(CoreRegister rn, CoreRegister rm) { return add(rn, rn, rm); }
-  Assembler& add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
+  void add(CoreRegister rn, CoreRegister rm) { add(rn, rn, rm); }
+  void add(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
-  Assembler& add(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& adds(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& and_(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& b(Label& l) { return b(kAL, l); }
-  Assembler& beq(Label& l) { return b(kEQ, l); }
-  Assembler& bne(Label& l) { return b(kNE, l); }
-  Assembler& bhi(Label& l) { return b(kHI, l); }
-  Assembler& bhs(Label& l) { return b(kHS, l); }
-  Assembler& blo(Label& l) { return b(kLO, l); }
-  Assembler& bic(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& bx(CoreRegister rm);
+  void add(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void adds(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void and_(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void b(Label& l) { b(kAL, l); }
+  void beq(Label& l) { b(kEQ, l); }
+  void bne(Label& l) { b(kNE, l); }
+  void bhi(Label& l) { b(kHI, l); }
+  void bhs(Label& l) { b(kHS, l); }
+  void blo(Label& l) { b(kLO, l); }
+  void bic(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void bx(CoreRegister rm);
   // Cmp supports a subset of uint32_t offsets, see "A5.2.4 Modified immediate
   // constants in ARM instructions", for simplicity we start with uint8_t, which
   // is fully representation using a "rotation" of 0.
-  Assembler& cmp(CoreRegister rn, uint8_t imm);
-  Assembler& cmp(CoreRegister rn, CoreRegister rm);
-  Assembler& ldr(CoreRegister rt, MemOperand operand, int32_t offset);
-  Assembler& ldr(CoreRegister rt, MemOperand operand);
+  void cmp(CoreRegister rn, uint8_t imm);
+  void cmp(CoreRegister rn, CoreRegister rm);
+  void ldr(CoreRegister rt, MemOperand operand, int32_t offset);
+  void ldr(CoreRegister rt, MemOperand operand);
   // LDRD <Rt>, <Rt2>, [<Rn>{, #+/-<imm>}].
-  Assembler& ldrd(CoreRegister rt, CoreRegister rt2, MemOperand op);
-  Assembler& mov(CoreRegister rd, CoreRegister rm);
-  Assembler& moveq(CoreRegister rd, CoreRegister rm) { return mov(kEQ, rd, rm); }
-  Assembler& movlo(CoreRegister rd, CoreRegister rm) { return mov(kLO, rd, rm); }
-  Assembler& movls(CoreRegister rd, CoreRegister rm) { return mov(kLS, rd, rm); }
-  Assembler& nop();
-  Assembler& pld(MemOperand operand);
-  Assembler& pop(CoreRegisterList regs);
-  Assembler& push(CoreRegisterList regs);
-  Assembler& str(CoreRegister rt, MemOperand op);
-  Assembler& sub(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
+  void ldrd(CoreRegister rt, CoreRegister rt2, MemOperand op);
+  void mov(CoreRegister rd, CoreRegister rm);
+  void moveq(CoreRegister rd, CoreRegister rm) { mov(kEQ, rd, rm); }
+  void movlo(CoreRegister rd, CoreRegister rm) { mov(kLO, rd, rm); }
+  void movls(CoreRegister rd, CoreRegister rm) { mov(kLS, rd, rm); }
+  void nop();
+  void pld(MemOperand operand);
+  void pop(CoreRegisterList regs);
+  void push(CoreRegisterList regs);
+  void str(CoreRegister rt, MemOperand op);
+  void sub(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void sub(CoreRegister rd, CoreRegister rn, CoreRegister rm);
   // Only support uint8_t immediates for now, it simplifies encoding.
-  Assembler& subs(CoreRegister rd, CoreRegister rn, uint8_t imm);
-  Assembler& tst(CoreRegister rn, uint8_t imm);
+  void subs(CoreRegister rd, CoreRegister rn, uint8_t imm);
+  void tst(CoreRegister rn, uint8_t imm);
 
   // SIMD instructions.
-  Assembler& vcmpe_f32(SRegister sd, SRegister sm);
-  Assembler& vcvt_f32_s32(QRegister qd, QRegister qm);
-  Assembler& vcvt_s32_f32(QRegister qd, QRegister qm);
-  Assembler& vcvtn_s32_f32(QRegister qd, QRegister qm);
-  Assembler& vdup_8(QRegister qd, DRegisterLane dm) { return vdup(k8, qd, dm); }
-  Assembler& vdup_16(QRegister qd, DRegisterLane dm) { return vdup(k16, qd, dm); }
-  Assembler& vdup_32(QRegister qd, DRegisterLane dm) { return vdup(k32, qd, dm); }
-  Assembler& vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
+  void vcmpe_f32(SRegister sd, SRegister sm);
+  void vcvt_f32_s32(QRegister qd, QRegister qm);
+  void vcvt_s32_f32(QRegister qd, QRegister qm);
+  void vcvtn_s32_f32(QRegister qd, QRegister qm);
+  void vdup_8(QRegister qd, DRegisterLane dm) { vdup(k8, qd, dm); }
+  void vdup_16(QRegister qd, DRegisterLane dm) { vdup(k16, qd, dm); }
+  void vdup_32(QRegister qd, DRegisterLane dm) { vdup(k32, qd, dm); }
+  void vext_8(QRegister qd, QRegister qn, QRegister qm, uint8_t imm4);
   // VLD1.8 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vld1_8(DRegisterList regs, MemOperand op) { return vld1(k8, regs, op); }
-  Assembler& vld1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { return vld1(k8, regs, op, rm); }
-  Assembler& vld1_8(QRegisterList regs, MemOperand op) { return vld1(k8, static_cast<DRegisterList>(regs), op); }
+  void vld1_8(DRegisterList regs, MemOperand op) { vld1(k8, regs, op); }
+  void vld1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { vld1(k8, regs, op, rm); }
+  void vld1_8(QRegisterList regs, MemOperand op) { vld1(k8, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vld1_32(DRegisterList regs, MemOperand op) { return vld1(k32, regs, op); }
-  Assembler& vld1_32(QRegisterList regs, MemOperand op) { return vld1(k32, static_cast<DRegisterList>(regs), op); }
+  void vld1_32(DRegisterList regs, MemOperand op) { vld1(k32, regs, op); }
+  void vld1_32(QRegisterList regs, MemOperand op) { vld1(k32, static_cast<DRegisterList>(regs), op); }
   // VLD1.32 <list>, [<Rn>]{!} (single element to one lane).
-  Assembler& vld1_32(DRegisterLane dd, MemOperand op);
+  void vld1_32(DRegisterLane dd, MemOperand op);
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
   // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
-  Assembler& vld1r_32(DRegisterList regs, MemOperand op);
+  void vld1r_32(DRegisterList regs, MemOperand op);
   // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
-  Assembler& vldm(CoreRegister rn, SRegisterList regs, bool wb);
-  Assembler& vldm(CoreRegister rn, DRegisterList regs, bool wb);
-  Assembler& vldm(CoreRegister rn, SRegisterList regs) { return vldm(rn, regs, false); }
-  Assembler& vldm(CoreRegister rn, DRegisterList regs) { return vldm(rn, regs, false); }
-  Assembler& vldr(SRegister sd, MemOperand op);
-  Assembler& vldr(DRegister dd, MemOperand op);
-  Assembler& vmax_f32(QRegister qd, QRegister qn, QRegister qm);
-  Assembler& vmax_s8(QRegister qd, QRegister qn, QRegister qm);
-  Assembler& vmin_f32(QRegister qd, QRegister qn, QRegister qm);
-  Assembler& vmin_s8(QRegister qd, QRegister qn, QRegister qm);
+  void vldm(CoreRegister rn, SRegisterList regs, bool wb);
+  void vldm(CoreRegister rn, DRegisterList regs, bool wb);
+  void vldm(CoreRegister rn, SRegisterList regs) { vldm(rn, regs, false); }
+  void vldm(CoreRegister rn, DRegisterList regs) { vldm(rn, regs, false); }
+  void vldr(SRegister sd, MemOperand op);
+  void vldr(DRegister dd, MemOperand op);
+  void vmax_f32(QRegister qd, QRegister qn, QRegister qm);
+  void vmax_s8(QRegister qd, QRegister qn, QRegister qm);
+  void vmin_f32(QRegister qd, QRegister qn, QRegister qm);
+  void vmin_s8(QRegister qd, QRegister qn, QRegister qm);
   // VMLA.F32 <Sd>, <Sn>, <Sm>
-  Assembler& vmla_f32(SRegister sd, SRegister sn, SRegister sm);
+  void vmla_f32(SRegister sd, SRegister sn, SRegister sm);
   // VMLA.F32 <Qd>, <Qn>, <Dm[x]>
-  Assembler& vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
+  void vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMLAL.S16 <Qd>, <Dn>, <Dm[x]>
-  Assembler& vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm);
+  void vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
-  Assembler& vmov(SRegister sd, SRegister sm);
+  void vmov(SRegister sd, SRegister sm);
   // VMOV <Dm>, <Rt>, <Rt2>; encoding A1.
-  Assembler& vmov(DRegister dm, CoreRegister rt, CoreRegister rt2);
+  void vmov(DRegister dm, CoreRegister rt, CoreRegister rt2);
   // VMOV <Dd>, <Dm>; encoding A1.
-  Assembler& vmov(DRegister dd, DRegister dm);
+  void vmov(DRegister dd, DRegister dm);
   // VMOV <Qd>, <Qm>; encoding A1.
-  Assembler& vmov(QRegister qd, QRegister qm);
+  void vmov(QRegister qd, QRegister qm);
   // VMOV_F32 <Sd>, <Sm>
-  Assembler& vmov_f32(SRegister sd, SRegister sm) { return vmov_f32(kAL, sd, sm); }
-  Assembler& vmovpl_f32(SRegister sd, SRegister sm) { return vmov_f32(kPL, sd, sm); }
-  Assembler& vmovmi_f32(SRegister sd, SRegister sm) { return vmov_f32(kMI, sd, sm); }
+  void vmov_f32(SRegister sd, SRegister sm) { vmov_f32(kAL, sd, sm); }
+  void vmovpl_f32(SRegister sd, SRegister sm) { vmov_f32(kPL, sd, sm); }
+  void vmovmi_f32(SRegister sd, SRegister sm) { vmov_f32(kMI, sd, sm); }
   // VMOV_F64 <Dd>, <Dm>
-  Assembler& vmov_f64(DRegister dd, DRegister dm);
+  void vmov_f64(DRegister dd, DRegister dm);
   // VMOVL.S8 <Qd>, <Dm>
-  Assembler& vmovl_s8(QRegister qd, DRegister dm);
-  Assembler& vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
-  Assembler& vmul_f32(QRegister qd, QRegister qn, QRegister qm);
-  Assembler& vpop(DRegisterList regs);
-  Assembler& vpush(DRegisterList regs);
-  Assembler& vpush(SRegisterList regs);
-  Assembler& vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
-  Assembler& vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
-  Assembler& vqmovn_s16(DRegister dd, QRegister qm);
-  Assembler& vqmovn_s32(DRegister dd, QRegister qm);
-  Assembler& vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
-  Assembler& vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
-  Assembler& vsdot_s8(QRegister qd, QRegister qn, DRegisterLane dm);
+  void vmovl_s8(QRegister qd, DRegister dm);
+  void vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
+  void vmul_f32(QRegister qd, QRegister qn, QRegister qm);
+  void vpop(DRegisterList regs);
+  void vpush(DRegisterList regs);
+  void vpush(SRegisterList regs);
+  void vqadd_s16(QRegister qd, QRegister qn, QRegister qm);
+  void vqdmulh_s32(QRegister qd, QRegister qn, DRegisterLane dm);
+  void vqmovn_s16(DRegister dd, QRegister qm);
+  void vqmovn_s32(DRegister dd, QRegister qm);
+  void vqshl_s32(QRegister qd, QRegister qm, QRegister qn);
+  void vrshl_s32(QRegister qd, QRegister qm, QRegister qn);
+  void vsdot_s8(QRegister qd, QRegister qn, DRegisterLane dm);
   // VST1.8 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vst1_8(DRegisterList regs, MemOperand op) { return vst1(k8, regs, op); }
+  void vst1_8(DRegisterList regs, MemOperand op) { vst1(k8, regs, op); }
   // VST1.8 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
-  Assembler& vst1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k8, regs, op, rm); }
+  void vst1_8(DRegisterList regs, MemOperand op, CoreRegister rm) { vst1(k8, regs, op, rm); }
   // VST1.8 <list>, [<Rn>]{!} (single element form one lane).
-  Assembler& vst1_8(DRegisterLane dd, MemOperand op) { return vst1(k8, dd, op); }
+  void vst1_8(DRegisterLane dd, MemOperand op) { vst1(k8, dd, op); }
   // VST1.16 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vst1_16(DRegisterList regs, MemOperand op) { return vst1(k16, regs, op); }
+  void vst1_16(DRegisterList regs, MemOperand op) { vst1(k16, regs, op); }
   // VST1.16 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
-  Assembler& vst1_16(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k16, regs, op, rm); }
+  void vst1_16(DRegisterList regs, MemOperand op, CoreRegister rm) { vst1(k16, regs, op, rm); }
   // VST1.16 <list>, [<Rn>]{!} (single element form one lane).
-  Assembler& vst1_16(DRegisterLane dd, MemOperand op) { return vst1(k16, dd, op); }
+  void vst1_16(DRegisterLane dd, MemOperand op) { vst1(k16, dd, op); }
   // VST1.32 <list>, [<Rn>]{!} (multiple single elements).
-  Assembler& vst1_32(DRegisterList regs, MemOperand op) { return vst1(k32, regs, op); }
+  void vst1_32(DRegisterList regs, MemOperand op) { vst1(k32, regs, op); }
   // VST1.32 <list>, [<Rn>]{!}, <Rm> (multiple single elements).
-  Assembler& vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) { return vst1(k32, regs, op, rm); }
+  void vst1_32(DRegisterList regs, MemOperand op, CoreRegister rm) { vst1(k32, regs, op, rm); }
   // VST1.32 <list>, [<Rn>]{!} (single element form one lane).
-  Assembler& vst1_32(DRegisterLane dd, MemOperand op) { return vst1(k32, dd, op); }
+  void vst1_32(DRegisterLane dd, MemOperand op) { vst1(k32, dd, op); }
   // VSTM <Rn>{!}, <list>, consecutive 64-bit registers.
-  Assembler& vstm(CoreRegister rn, DRegisterList regs, bool wb);
+  void vstm(CoreRegister rn, DRegisterList regs, bool wb);
   // VSTR <Sd>, [Rn{, #+/-<imm>}], store single extension register to memory.
-  Assembler& vstr(SRegister rn, MemOperand op);
+  void vstr(SRegister rn, MemOperand op);
 
   // Binds Label l to the current location in the code buffer.
-  Assembler& bind(Label& l);
+  void bind(Label& l);
   // Align the cursor to specified number of bytes, `n` must be a power of 2.
-  Assembler& align(uint8_t n);
+  void align(uint8_t n);
 
  private:
-  // Emits a 32-bit value to the code buffer.
-  Assembler& emit32(uint32_t value);
-  Assembler& mov(Condition c, CoreRegister rd, CoreRegister rm);
-  Assembler& b(Condition c, Label& l);
-  Assembler& vdup(DataSize size, QRegister qd, DRegisterLane dm);
-  Assembler& vmov_f32(Condition c, SRegister sd, SRegister sm);
-  Assembler& vld1(DataSize size, DRegisterList regs, MemOperand op);
-  Assembler& vld1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
-  Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op);
-  Assembler& vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
-  Assembler& vst1(DataSize size, DRegisterLane dd, MemOperand op);
+  void mov(Condition c, CoreRegister rd, CoreRegister rm);
+  void b(Condition c, Label& l);
+  void vdup(DataSize size, QRegister qd, DRegisterLane dm);
+  void vmov_f32(Condition c, SRegister sd, SRegister sm);
+  void vld1(DataSize size, DRegisterList regs, MemOperand op);
+  void vld1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
+  void vst1(DataSize size, DRegisterList regs, MemOperand op);
+  void vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
+  void vst1(DataSize size, DRegisterLane dd, MemOperand op);
 };
 
 }  // namespace aarch32

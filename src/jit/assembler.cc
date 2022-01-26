@@ -16,6 +16,21 @@ AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
   xnn_buffer = buf;
 }
 
+void AssemblerBase::emit32(uint32_t value) {
+  if (error_ != Error::kNoError) {
+    return;
+  }
+
+  if (cursor_ + sizeof(value) > top_) {
+    error_ = Error::kOutOfMemory;
+    return;
+  }
+
+  memcpy(cursor_, &value, sizeof(value));
+  cursor_ += sizeof(value);
+}
+
+
 void* AssemblerBase::finalize() {
   xnn_buffer->size = code_size_in_bytes();
   if (xnn_finalize_code_memory(xnn_buffer) != xnn_status_success) {

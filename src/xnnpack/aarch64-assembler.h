@@ -320,62 +320,61 @@ class Assembler : public AssemblerBase {
   using AssemblerBase::AssemblerBase;
 
   // Base instructions.
-  Assembler& add(XRegister xd, XRegister xn, uint16_t imm12);
-  Assembler& add(XRegister xd, XRegister xn, XRegister xm);
-  Assembler& b(Label& l);
-  Assembler& b_eq(Label& l) { return b(kEQ, l); }
-  Assembler& b_hi(Label& l) { return b(kHI, l); }
-  Assembler& b_hs(Label& l) { return b(kHS, l); }
-  Assembler& b_lo(Label& l) { return b(kLO, l); }
-  Assembler& b_ne(Label& l) { return b(kNE, l); }
-  Assembler& cmp(XRegister xn, uint16_t imm12);
-  Assembler& csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
-  Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn);
-  Assembler& ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
-  Assembler& ldr(XRegister xt, MemOperand xn);
-  Assembler& prfm(PrefetchOp prfop, MemOperand xn);
-  Assembler& ret();
-  Assembler& sub(XRegister xd, XRegister xn, XRegister xm);
-  Assembler& subs(XRegister xd, XRegister xn, uint16_t imm12);
-  Assembler& tbnz(XRegister xd, uint8_t bit, Label& l);
-  Assembler& tbz(XRegister xd, uint8_t bit, Label& l);
+  void add(XRegister xd, XRegister xn, uint16_t imm12);
+  void add(XRegister xd, XRegister xn, XRegister xm);
+  void b(Label& l);
+  void b_eq(Label& l) { return b(kEQ, l); }
+  void b_hi(Label& l) { return b(kHI, l); }
+  void b_hs(Label& l) { return b(kHS, l); }
+  void b_lo(Label& l) { return b(kLO, l); }
+  void b_ne(Label& l) { return b(kNE, l); }
+  void cmp(XRegister xn, uint16_t imm12);
+  void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
+  void ldp(XRegister xt1, XRegister xt2, MemOperand xn);
+  void ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
+  void ldr(XRegister xt, MemOperand xn);
+  void prfm(PrefetchOp prfop, MemOperand xn);
+  void ret();
+  void sub(XRegister xd, XRegister xn, XRegister xm);
+  void subs(XRegister xd, XRegister xn, uint16_t imm12);
+  void tbnz(XRegister xd, uint8_t bit, Label& l);
+  void tbz(XRegister xd, uint8_t bit, Label& l);
   // Only immediates with lowest N bits set are supported.
-  Assembler& tst(XRegister xn, uint8_t imm);
+  void tst(XRegister xn, uint8_t imm);
 
   // SIMD instructions
-  Assembler& dup(DRegister dd, VRegisterLane vn);
-  Assembler& fadd(VRegister vd, VRegister vn, VRegister vm);
-  Assembler& fmax(VRegister vd, VRegister vn, VRegister vm);
-  Assembler& fmin(VRegister vd, VRegister vn, VRegister vm);
-  Assembler& fmla(VRegister vd, VRegister vn, VRegisterLane vm);
-  Assembler& ld1(VRegisterList vs, MemOperand xn, int32_t imm);
-  Assembler& ld2r(VRegisterList xs, MemOperand xn);
-  Assembler& ldp(DRegister dt1, DRegister dt2, MemOperand xn);
-  Assembler& ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
-  Assembler& ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
-  Assembler& ldr(DRegister dt, MemOperand xn, int32_t imm);
-  Assembler& ldr(QRegister qt, MemOperand xn, int32_t imm);
-  Assembler& ldr(SRegister st, MemOperand xn, int32_t imm);
-  Assembler& mov(VRegister vd, VRegister vn);
-  Assembler& movi(VRegister vd, uint8_t imm);
-  Assembler& st1(VRegisterList vs, MemOperand xn, XRegister xm);
-  Assembler& stp(DRegister dt1, DRegister dt2, MemOperand xn);
-  Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn);
-  Assembler& stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
-  Assembler& str(DRegister dt, MemOperand xn, int32_t imm);
-  Assembler& str(QRegister qt, MemOperand xn, int32_t imm);
-  Assembler& str(SRegister st, MemOperand xn);
+  void dup(DRegister dd, VRegisterLane vn);
+  void fadd(VRegister vd, VRegister vn, VRegister vm);
+  void fmax(VRegister vd, VRegister vn, VRegister vm);
+  void fmin(VRegister vd, VRegister vn, VRegister vm);
+  void fmla(VRegister vd, VRegister vn, VRegisterLane vm);
+  void ld1(VRegisterList vs, MemOperand xn, int32_t imm);
+  void ld2r(VRegisterList xs, MemOperand xn);
+  void ldp(DRegister dt1, DRegister dt2, MemOperand xn);
+  void ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
+  void ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  void ldr(DRegister dt, MemOperand xn, int32_t imm);
+  void ldr(QRegister qt, MemOperand xn, int32_t imm);
+  void ldr(SRegister st, MemOperand xn, int32_t imm);
+  void mov(VRegister vd, VRegister vn);
+  void movi(VRegister vd, uint8_t imm);
+  void st1(VRegisterList vs, MemOperand xn, XRegister xm);
+  void stp(DRegister dt1, DRegister dt2, MemOperand xn);
+  void stp(QRegister qt1, QRegister qt2, MemOperand xn);
+  void stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  void str(DRegister dt, MemOperand xn, int32_t imm);
+  void str(QRegister qt, MemOperand xn, int32_t imm);
+  void str(SRegister st, MemOperand xn);
 
   // Binds Label l to the current location in the code buffer.
-  Assembler& bind(Label& l);
+  void bind(Label& l);
 
  private:
-  Assembler& emit32(uint32_t value);
-  Assembler& b(Condition c, Label& l);
-  Assembler& branch_to_label(uint32_t opcode, BranchType bt, Label& l);
-  Assembler& ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
-  Assembler& str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
-  Assembler& tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
+  void b(Condition c, Label& l);
+  void branch_to_label(uint32_t opcode, BranchType bt, Label& l);
+  void ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
+  void str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
+  void tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
 
 };
 

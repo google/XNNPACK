@@ -62,9 +62,11 @@ struct Label {
 
 class AssemblerBase {
  public:
-  /* // Takes an xnn_code_buffer with a pointer to allocated memory. */
+  // Takes an xnn_code_buffer with a pointer to allocated memory.
   explicit AssemblerBase(xnn_code_buffer* buf);
 
+  // Write value into the code buffer and advances cursor_.
+  void emit32(uint32_t value);
   // Finish assembly of code, this should be the last function called on an
   // instance of Assembler. Returns a pointer to the start of code region.
   void* finalize();

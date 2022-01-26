@@ -430,7 +430,8 @@ TEST(AArch32Assembler, JitAllocCodeBuffer) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
 
   Assembler a(&b);
-  a.add(r0, r0, 2).bx(lr);
+  a.add(r0, r0, 2);
+  a.bx(lr);
 
   Func fn = reinterpret_cast<Func>(a.finalize());
 
