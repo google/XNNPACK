@@ -280,7 +280,7 @@ void Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
     return;
   }
 
-  emit32(0xF9800000 | xn.offset << 10 | rn(xn.base) | static_cast<uint32_t>(prfop));
+  emit32(0xF9800000 | xn.offset >> 3 << 10 | rn(xn.base) | prfop);
 }
 
 void Assembler::ret() {
