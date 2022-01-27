@@ -21,9 +21,9 @@
 //     const void*restrict w,              sp + 100 -> r9
 //     int8_t*restrict c,                  sp + 104 -> r11
 //     size_t cm_stride,                   sp + 108 -> (r6)
-//     size_t cn_stride,                   sp + 112 -> (r7)
+//     size_t cn_stride,                   sp + 112 -> (r5)
 //     size_t a_offset,                    sp + 116 -> (r5)
-//     const int8_t* zero,                 sp + 120 -> (r7)
+//     const int8_t* zero,                 sp + 120 -> r7
 //     xnn_qs8_minmax_params*params); sp + 124 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
@@ -63,6 +63,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         LDR     r6, [sp, 108]           // cm_stride
         LDR     r2, [sp, 96]            // a
         LDR     r9, [sp, 100]           // w
+        LDR     r7, [sp, 120]           // zero
         LDR     r5, [sp, 124]           // params
         MOV     r14, r3                 // p = ks
 
@@ -85,7 +86,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VLDM    r9!, {d16-d19}          // Bias
         VMOV    q10, q8
         VMOV    q11, q9
-        LDR     r7, [sp, 120]           // zero
         VMOV    q12, q8
         VMOV    q13, q9
         VMOV    q14, q8
@@ -160,7 +160,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
         BHI     1b
 
-        LDR     r7, [sp, 112]           // cn_stride
+        LDR     r5, [sp, 112]           // cn_stride
         LDR     r14, [sp, 56]           // p = ks
 
         # QC8 FP32 quantization
@@ -227,10 +227,10 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
 
         # Store full 4 x 8
         BLO     5f
-        VST1.8  {d3}, [r6], r7
-        VST1.8  {d2}, [r8], r7
-        VST1.8  {d1}, [r4], r7
-        VST1.8  {d0}, [r11], r7
+        VST1.8  {d3}, [r6], r5
+        VST1.8  {d2}, [r8], r5
+        VST1.8  {d1}, [r4], r5
+        VST1.8  {d0}, [r11], r5
         SUB     r2, r2, r14             // a -= ks
         BHI     0b
 

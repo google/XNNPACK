@@ -21,9 +21,9 @@
 //     const void*restrict w,              sp + 92  -> r9
 //     uint8_t*restrict c,                   sp + 96  -> r11
 //     size_t cm_stride,                   sp + 100  -> (r6)
-//     size_t cn_stride,                   sp + 104  -> (r7)
+//     size_t cn_stride,                   sp + 104  -> (r5)
 //     size_t a_offset,                    sp + 108 -> (r5)
-//     const uint8_t* zero,                  sp + 112 -> (r7)
+//     const uint8_t* zero,                  sp + 112 -> r7
 //     xnn_qs8_conv_minmax_params*params); sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
@@ -65,6 +65,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_pr
         LDR     r6, [sp, 100]           // cm_stride
         LDR     r2, [sp, 88]            // a
         LDR     r9, [sp, 92]            // w
+        LDR     r7, [sp, 112]           // zero
         LDR     r5, [sp, 116]           // params
         MOV     r14, r3                 // p = ks
 
@@ -117,7 +118,6 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_pr
 
         # Add a_offset
         LDR     r5, [sp, 108]           // a_offset
-        LDR     r7, [sp, 112]           // zero
         CMP     r3,  r7                 // if a0 == zero
         ADD     r3,  r3, r5             // a0 += a_offset
         MOVEQ   r3,  r7                 //   a0 = zero, else += a0 + a_offset
@@ -251,7 +251,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_pr
         SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
         BHI     1b
 
-        LDR     r7, [sp, 104]           // cn_stride
+        LDR     r5, [sp, 104]           // cn_stride
         LDR     r14, [sp, 48]           // p = ks
 
         # RNDNU quantization
@@ -321,10 +321,10 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_pr
 
         # Store full 4 x 8
         BLO     5f
-        VST1.8  {d3}, [r6], r7
-        VST1.8  {d2}, [r8], r7
-        VST1.8  {d1}, [r4], r7
-        VST1.8  {d0}, [r11], r7
+        VST1.8  {d3}, [r6], r5
+        VST1.8  {d2}, [r8], r5
+        VST1.8  {d1}, [r4], r5
+        VST1.8  {d0}, [r11], r5
         SUB     r2, r2, r14             // a -= ks
         BHI     0b
 
