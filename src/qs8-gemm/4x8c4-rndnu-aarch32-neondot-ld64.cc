@@ -93,13 +93,13 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   movlo(r6, r8); // c3
 
   // Load params values
-  vldm(r5, {d12-d13}, false); // RNDNU params
+  vldm(mem[r5], {d12-d13}); // RNDNU params
   ldr(r7, mem[sp, 96]); // cn_stride
 
   align(8);
   bind(l0);
   // Load initial bias from w into accumulators
-  vldm(r9, {d16-d19}, true); // Bias
+  vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 8); // k = kc - 8
   vmov(q10, q8);
   vmov(q11, q9);

@@ -116,17 +116,16 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF4A54CAD, a.vld1r_32({d4, d5}, mem[r5]++));
   EXPECT_ERROR(Error::kInvalidOperand, a.vld1r_32({d4, d5}, mem[r5, 4]));
 
-  CHECK_ENCODING(0xECF90B08, a.vldm(r9, {d16-d19}, true));
-  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8-d11}, false));
-  CHECK_ENCODING(0xEC998B08, a.vldm(r9, {d8-d11}));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, {d8-d0}));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, {d0-d16}));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r9, DRegisterList(d31, 2)));
+  CHECK_ENCODING(0xECD90B08, a.vldm(mem[r9], {d16-d19}));
+  CHECK_ENCODING(0xECF90B08, a.vldm(mem[r9]++, {d16-d19}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(mem[r9], {d8-d0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(mem[r9], {d0-d16}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(mem[r9], DRegisterList(d31, 2)));
 
-  CHECK_ENCODING(0xECB30A01, a.vldm(r3, {s0}, true));
-  CHECK_ENCODING(0xEC930A01, a.vldm(r3, {s0}));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, {s4-s0}));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(r3, SRegisterList(s31, 2)));
+  CHECK_ENCODING(0xEC930A01, a.vldm(mem[r3], {s0}));
+  CHECK_ENCODING(0xECB30A01, a.vldm(mem[r3]++, {s0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(mem[r3], {s4-s0}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vldm(mem[r3], SRegisterList(s31, 2)));
 
   CHECK_ENCODING(0xEDD97A0E, a.vldr(s15, mem[r9, 56]));
   CHECK_ENCODING(0xEDD97AFF, a.vldr(s15, mem[r9, 1020]));
@@ -239,10 +238,10 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.vst1_32(d16[2], mem[r11]));
   CHECK_ENCODING(0xF4C6C80D, a.vst1_32({d28[0]}, mem[r6]++));
 
-  CHECK_ENCODING(0xEC868B04, a.vstm(r6, {d8-d9}, false));
-  CHECK_ENCODING(0xECA7EB02, a.vstm(r7, {d14}, true));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, {d8-d28}, true));
-  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(r6, DRegisterList(d31, 2), true));
+  CHECK_ENCODING(0xEC868B04, a.vstm(mem[r6], {d8-d9}));
+  CHECK_ENCODING(0xECA7EB02, a.vstm(mem[r7]++, {d14}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(mem[r6], {d8-d28}));
+  EXPECT_ERROR(Error::kInvalidRegisterListLength, a.vstm(mem[r6], DRegisterList(d31, 2)));
 
   CHECK_ENCODING(0xED868A00, a.vstr(s16, mem[r6]));
   CHECK_ENCODING(0xED868A02, a.vstr(s16, mem[r6, 8]));

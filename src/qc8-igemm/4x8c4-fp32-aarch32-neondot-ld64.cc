@@ -93,7 +93,7 @@ void Generator::generate(size_t nc, size_t kc, size_t ks, void* params) {
 
   bind(l0);
   // Load initial bias from w into accumulators
-  vldm(r9, {d16-d19}, true); // Bias
+  vldm(mem[r9]++, {d16-d19}); // Bias
   vmov(q10, q8);
   vmov(q11, q9);
   vmov(q12, q8);

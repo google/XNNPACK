@@ -91,7 +91,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   movlo(r6, r8); // c3
 
   // Load params values
-  vldm(r5, {d10-d11}, false); // RNDNU params
+  vldm(mem[r5], {d10-d11}); // RNDNU params
   ldr(r7, mem[sp, 80]); // cn_stride
 
   if (prefetch) {
@@ -106,7 +106,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   align(8);
   bind(l0);
   // Load initial bias from w into accumulators
-  vldm(r9, {d16-d19}, true); // Bias
+  vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 8); // k = kc - 8
 
   vmov(q10, q8);

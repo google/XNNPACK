@@ -366,17 +366,17 @@ def main(input_file):
       m = re.fullmatch(INSTR_REG_REGLIST_CONSECT, line)
       if m:
         instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {{{m[3]}-{m[4]}}}, false){sc} {m[5]}')
+            f'{fix_instr_name(m[1])}(mem[{m[2]}], {{{m[3]}-{m[4]}}}){sc} {m[5]}')
         continue
       m = re.fullmatch(INSTR_REG_REGLIST_CONSECT_WB, line)
       if m:
         instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {{{m[3]}-{m[4]}}}, true){sc} {m[5]}')
+            f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}-{m[4]}}}){sc} {m[5]}')
         continue
       m = re.fullmatch(INSTR_REG_REGLIST_INDIV_WB, line)
       if m:
         instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {{{m[3]}}}, true){sc} {m[4]}')
+            f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}}}){sc} {m[4]}')
         continue
       m = re.fullmatch(INSTR_B_IMM, line)
       if m:

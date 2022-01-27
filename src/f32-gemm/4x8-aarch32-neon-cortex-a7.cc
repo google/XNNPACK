@@ -87,7 +87,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 
   bind(l0);
   // Load initial bias from w into accumulators
-  vldm(r9, {d16-d19}, true); // Bias
+  vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 8);
   vmov(q10, q8);
   vmov(q11, q9);
@@ -117,11 +117,11 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
   // Main loop - 2 floats of A (8 bytes)
   bind(l1);
   vld1_32({d0}, mem[r3]++); // A0
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vld1_32({d1}, mem[r12]++); // A1
   vld1_32({d2}, mem[r10]++); // A2
   vld1_32({d3}, mem[r0]++); // A3
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
   vmla_f32(q10, q4, d1[0]);
@@ -188,11 +188,11 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 
   bind(l3);
   // Remainder- 1 floats of A (4 bytes)
-  vldm(r3, {s0}, true); // A0
-  vldm(r9, {d8-d11}, true); // B0
-  vldm(r12, {s2}, true); // A1
-  vldm(r10, {s4}, true); // A2
-  vldm(r0, {s6}, true); // A3
+  vldm(mem[r3]++, {s0}); // A0
+  vldm(mem[r9]++, {d8-d11}); // B0
+  vldm(mem[r12]++, {s2}); // A1
+  vldm(mem[r10]++, {s4}); // A2
+  vldm(mem[r0]++, {s6}); // A3
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
   vmla_f32(q10, q4, d1[0]);

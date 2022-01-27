@@ -337,20 +337,22 @@ void Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
   emit32(0xF4A00CA0 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
 }
 
-void Assembler::vldm(CoreRegister rn, SRegisterList regs, bool wb) {
+void Assembler::vldm(MemOperand rn, SRegisterList regs) {
   if (invalid_register_list(regs)) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }
-  emit32(kAL | 0x0C900A00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
+  uint32_t w = (rn.mode() == AddressingMode::kOffset ? 0 : 1) << 21;
+  emit32(kAL | 0x0C900A00 | w | rn.base().code << 16 | encode(regs, 22, 12));
 }
 
-void Assembler::vldm(CoreRegister rn, DRegisterList regs, bool wb) {
+void Assembler::vldm(MemOperand rn, DRegisterList regs) {
   if (invalid_register_list(regs)) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }
-  emit32(kAL | 0x0C900B00 | wb << 21 | rn.code << 16 | encode(regs, 22, 12));
+  uint32_t w = (rn.mode() == AddressingMode::kOffset ? 0 : 1) << 21;
+  emit32(kAL | 0x0C900B00 | w | rn.base().code << 16 | encode(regs, 22, 12));
 }
 
 void Assembler::vldr(SRegister sd, MemOperand op) {
@@ -553,12 +555,13 @@ void Assembler::vst1(DataSize size, DRegisterLane dd, MemOperand op) {
   emit32(0xF4800000 | encode(dd, 22, 12) | op.base().code << 16 | size << 10 | dd.lane << shift | rm);
 }
 
-void Assembler::vstm(CoreRegister rn, DRegisterList regs, bool wb) {
+void Assembler::vstm(MemOperand rn, DRegisterList regs) {
   if (invalid_register_list(regs)) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }
-  emit32(kAL | 0x0C800B00 | wb << 21 | rn.code << 16 |  encode(regs.start, 22, 12) | regs.length << 1);
+  uint32_t w = (rn.mode() == AddressingMode::kOffset ? 0 : 1) << 21;
+  emit32(kAL | 0x0C800B00 | w | rn.base().code << 16 |  encode(regs.start, 22, 12) | regs.length << 1);
 }
 
 void Assembler::vstr(SRegister rn, MemOperand op) {

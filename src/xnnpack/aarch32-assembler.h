@@ -398,11 +398,9 @@ class Assembler : public AssemblerBase {
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
   // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
   void vld1r_32(DRegisterList regs, MemOperand op);
-  // VLDM <Rn>{!}, <list>. {!} is indicated by setting `wb` argument.
-  void vldm(CoreRegister rn, SRegisterList regs, bool wb);
-  void vldm(CoreRegister rn, DRegisterList regs, bool wb);
-  void vldm(CoreRegister rn, SRegisterList regs) { vldm(rn, regs, false); }
-  void vldm(CoreRegister rn, DRegisterList regs) { vldm(rn, regs, false); }
+  // VLDM <Rn>{!}, <list> (IA).
+  void vldm(MemOperand rn, SRegisterList regs);
+  void vldm(MemOperand rn, DRegisterList regs);
   void vldr(SRegister sd, MemOperand op);
   void vldr(DRegister dd, MemOperand op);
   void vmax_f32(QRegister qd, QRegister qn, QRegister qm);
@@ -462,7 +460,7 @@ class Assembler : public AssemblerBase {
   // VST1.32 <list>, [<Rn>]{!} (single element form one lane).
   void vst1_32(DRegisterLane dd, MemOperand op) { vst1(k32, dd, op); }
   // VSTM <Rn>{!}, <list>, consecutive 64-bit registers.
-  void vstm(CoreRegister rn, DRegisterList regs, bool wb);
+  void vstm(MemOperand rn, DRegisterList regs);
   // VSTR <Sd>, [Rn{, #+/-<imm>}], store single extension register to memory.
   void vstr(SRegister rn, MemOperand op);
 

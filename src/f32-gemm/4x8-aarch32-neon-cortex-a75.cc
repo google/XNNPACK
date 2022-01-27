@@ -84,7 +84,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   align(8);
   bind(l0);
   // Load initial bias from w into accumulators
-  vldm(r9, {d16-d19}, true); // Bias
+  vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 16);
   vmov(q10, q8);
   vmov(q11, q9);
@@ -115,7 +115,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
 
   // Prologue
   vld1_32({d0}, mem[r3]++); // A0
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vld1_32({d1}, mem[r12]++); // A1
   vld1_32({d2}, mem[r10]++); // A2
   vld1_32({d3}, mem[r0]++); // A3
@@ -128,7 +128,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   // Main loop - 4 floats of A (16 bytes)
   bind(l1);
   vmla_f32(q8, q4, d0[0]);
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q10, q4, d1[0]);
   vmla_f32(q12, q4, d2[0]);
   vld1_32({d4}, mem[r3]++); // A0
@@ -144,14 +144,14 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   vld1_32({d7}, mem[r0]++); // A3
   vmla_f32(q12, q6, d2[1]);
   vmla_f32(q14, q6, d3[1]);
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
   vmla_f32(q11, q7, d1[1]);
   vmla_f32(q13, q7, d2[1]);
   vmla_f32(q15, q7, d3[1]);
 
   vmla_f32(q8, q4, d4[0]);
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q10, q4, d5[0]);
   if (prefetch) {
     pld(mem[r3, 128]); // Prefetch A0
@@ -185,7 +185,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
     pld(mem[r9, 416]); // Prefetch B
   }
   vmla_f32(q14, q6, d7[1]);
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d4[1]);
   vmla_f32(q11, q7, d5[1]);
   subs(r5, r5, 16);
@@ -196,7 +196,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   // Epilogue
   bind(l2);
   vmla_f32(q8, q4, d0[0]);
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q10, q4, d1[0]);
   vmla_f32(q12, q4, d2[0]);
   vld1_32({d4}, mem[r3]++); // A0
@@ -212,14 +212,14 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   vld1_32({d7}, mem[r0]++); // A3
   vmla_f32(q12, q6, d2[1]);
   vmla_f32(q14, q6, d3[1]);
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
   vmla_f32(q11, q7, d1[1]);
   vmla_f32(q13, q7, d2[1]);
   vmla_f32(q15, q7, d3[1]);
 
   vmla_f32(q8, q4, d4[0]);
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q10, q4, d5[0]);
   vmla_f32(q12, q4, d6[0]);
   vmla_f32(q14, q4, d7[0]);
@@ -292,7 +292,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
 
   // Remainder - 2 floats of A (8 bytes)
   vld1_32({d0}, mem[r3]++); // A0
-  vldm(r9, {d8-d11}, true); // B0
+  vldm(mem[r9]++, {d8-d11}); // B0
   vld1_32({d1}, mem[r12]++); // A1
   vld1_32({d2}, mem[r10]++); // A2
   vld1_32({d3}, mem[r0]++); // A3
@@ -301,7 +301,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   vmla_f32(q9, q5, d0[0]);
   vmla_f32(q10, q4, d1[0]);
   vmla_f32(q11, q5, d1[0]);
-  vldm(r9, {d12-d15}, true); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   vmla_f32(q12, q4, d2[0]);
   vmla_f32(q13, q5, d2[0]);
   vmla_f32(q14, q4, d3[0]);
@@ -321,11 +321,11 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
 
   bind(l5);
   // Remainder- 1 floats of A (4 bytes)
-  vldm(r3, {s0}, true); // A0
-  vldm(r9, {d8-d11}, true); // B0
-  vldm(r12, {s2}, true); // A1
-  vldm(r10, {s4}, true); // A2
-  vldm(r0, {s6}, true); // A3
+  vldm(mem[r3]++, {s0}); // A0
+  vldm(mem[r9]++, {d8-d11}); // B0
+  vldm(mem[r12]++, {s2}); // A1
+  vldm(mem[r10]++, {s4}); // A2
+  vldm(mem[r0]++, {s6}); // A3
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
   vmla_f32(q10, q4, d1[0]);
