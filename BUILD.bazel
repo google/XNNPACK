@@ -7527,6 +7527,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon",
     ],
     aarch32_srcs = ALL_NEON_MICROKERNEL_SRCS,
@@ -7546,6 +7547,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon",
     ],
     aarch32_srcs = PROD_NEON_MICROKERNEL_SRCS,
@@ -7565,6 +7567,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon",
     ],
     aarch32_srcs = ALL_NEON_MICROKERNEL_SRCS,
@@ -7588,6 +7591,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp16",
     ],
     aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
@@ -7611,6 +7615,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp16",
     ],
     aarch32_srcs = PROD_NEONFP16_MICROKERNEL_SRCS,
@@ -7634,6 +7639,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp16",
     ],
     aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
@@ -7661,6 +7667,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
@@ -7684,6 +7691,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
@@ -7707,6 +7715,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
+        "-mcpu=generic",
         "-mfpu=neon-vfpv4",
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
@@ -7734,6 +7743,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
@@ -7757,6 +7767,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = PROD_NEONV8_MICROKERNEL_SRCS,
@@ -7780,6 +7791,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
@@ -7804,7 +7816,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neonfp16arith_bench_microkernels",
     hdrs = INTERNAL_HDRS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_copts = [
+        "-march=armv8.2-a+fp16",
+        "-mcpu=generic",
+    ],
     aarch64_srcs = ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -7818,7 +7833,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neonfp16arith_prod_microkernels",
     hdrs = INTERNAL_HDRS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_copts = [
+        "-march=armv8.2-a+fp16",
+        "-mcpu=generic",
+    ],
     aarch64_srcs = PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -7832,7 +7850,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neonfp16arith_test_microkernels",
     hdrs = INTERNAL_HDRS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_copts = [
+        "-march=armv8.2-a+fp16",
+        "-mcpu=generic",
+    ],
     aarch64_srcs = ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
@@ -7853,6 +7874,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = ALL_NEONDOT_MICROKERNEL_SRCS,
@@ -7873,6 +7895,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = PROD_NEONDOT_MICROKERNEL_SRCS,
@@ -7893,6 +7916,7 @@ xnnpack_cc_library(
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
+        "-mcpu=generic",
         "-mfpu=neon-fp-armv8",
     ],
     aarch32_srcs = ALL_NEONDOT_MICROKERNEL_SRCS,
