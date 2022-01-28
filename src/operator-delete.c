@@ -15,6 +15,19 @@
 #include <xnnpack/params.h>
 
 
+static void xnn_release_jit_ukernel(struct xnn_ukernel ukernel)
+{
+  switch (ukernel.type) {
+    case xnn_ukernel_type_gemm:
+      xnn_release_code_memory(&ukernel.gemm.general_code_buffer);
+      xnn_release_code_memory(&ukernel.gemm.mr1_code_buffer);
+      break;
+    default:
+      break;
+      // Do nothing, only GEMMs have JIT kernels now.
+  }
+}
+
 enum xnn_status xnn_delete_operator(xnn_operator_t op)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -32,6 +45,7 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
   xnn_release_memory(op->pixelwise_buffer);
   xnn_release_memory(op->subconvolution_buffer);
   xnn_release_simd_memory(op->lookup_table);
+  xnn_release_jit_ukernel(op->ukernel);
   xnn_release_simd_memory(op);
   return xnn_status_success;
 }
