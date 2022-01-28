@@ -27,3 +27,9 @@ TEST(JitMemory, AllocateAndReleaseJunkCode) {
 #endif  // XNN_PLATFORM_JIT
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
+
+TEST(JitMemory, AllocateAndReleaseCodeBufferWithNoCapacity) {
+  xnn_code_buffer b;
+  b.capacity = 0;
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}

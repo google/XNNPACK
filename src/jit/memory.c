@@ -114,6 +114,9 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
 }
 
 enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
+  if (buf->capacity == 0) {
+    return xnn_status_success;
+  }
 #if XNN_PLATFORM_WINDOWS
   // We only decommited any unused capacity, so we release all of it now.
   if (!VirtualFree(buf->code, 0, MEM_RELEASE)) {
@@ -121,7 +124,7 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
     return xnn_status_invalid_state;
   }
 #else
-  if (buf->capacity != 0 && munmap(buf->code, buf->capacity) == -1) {
+  if (munmap(buf->code, buf->capacity) == -1) {
     xnn_log_error("failed to release code buffer for JIT, error code: %d", errno);
     return xnn_status_invalid_state;
   }
