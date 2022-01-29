@@ -364,6 +364,7 @@ static enum xnn_status create_convolution2d_nhwc(
             .mr1_case = gemm_ukernels->gemm1,
           };
 
+#if XNN_PLATFORM_JIT
           if (gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
             struct xnn_code_buffer* code_buffer = &convolution_op->ukernel.gemm.general_code_buffer;
             if (xnn_status_success != xnn_allocate_code_memory(code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE)) {
@@ -379,6 +380,7 @@ static enum xnn_status create_convolution2d_nhwc(
               };
             }
           }
+#endif  // XNN_PLATFORM_JIT
 
           break;
         case xnn_ukernel_type_igemm:
