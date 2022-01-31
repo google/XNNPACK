@@ -3657,7 +3657,6 @@ struct gemm_fused_ukernels {
   struct xnn_hmp_igemm_ukernel igemm1;
 };
 
-#if XNN_PLATFORM_JIT
 struct xnn_hmp_gemm_codegen {
   xnn_jit_gemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
 };
@@ -3715,15 +3714,12 @@ struct gemm_codegens {
   struct xnn_hmp_gemm_codegen gemm1;
   struct xnn_hmp_igemm_codegen igemm1;
 };
-#endif  // XNN_PLATFORM_JIT
 
 struct gemm_parameters {
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
-#if XNN_PLATFORM_JIT
   struct gemm_codegens generator;
-#endif  // XNN_PLATFORM_JIT
   union {
     xnn_init_qs8_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;

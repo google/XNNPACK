@@ -75,7 +75,6 @@ static void GEMMEnd2EndBenchmark(
   }
 }
 
-#if XNN_PLATFORM_JIT
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
@@ -131,7 +130,6 @@ static void GEMMEnd2EndBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 }
-#endif  // XNN_PLATFORM_JIT
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_4x12__aarch64_neonfma_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
