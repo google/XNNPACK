@@ -3586,19 +3586,6 @@ typedef void (*xnn_init_qc8_scale_params_fn)(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-// Forward declare to avoid circular includes between this and allocator.h.
-struct xnn_code_buffer;
-
-struct jit_gemm_params {
-  struct {
-    float min;
-    float max;
-  } f32_minmax;
-};
-
-typedef enum xnn_status (*xnn_jit_gemm_code_generator_function)(struct xnn_code_buffer* code, size_t nc, size_t kc, void* params);
-typedef enum xnn_status (*xnn_jit_igemm_code_generator_function)(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, void* params);
-
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
 };
@@ -3657,69 +3644,10 @@ struct gemm_fused_ukernels {
   struct xnn_hmp_igemm_ukernel igemm1;
 };
 
-struct xnn_hmp_gemm_codegen {
-  xnn_jit_gemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
-};
-
-static inline struct xnn_hmp_gemm_codegen xnn_init_hmp_gemm_codegen(xnn_jit_gemm_code_generator_function function) {
-  struct xnn_hmp_gemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_gemm_codegen(struct xnn_hmp_gemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-struct xnn_hmp_igemm_codegen {
-  xnn_jit_igemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
-};
-
-static inline struct xnn_hmp_igemm_codegen xnn_init_hmp_igemm_codegen(xnn_jit_igemm_code_generator_function function) {
-  struct xnn_hmp_igemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_igemm_codegen(struct xnn_hmp_igemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-struct gemm_codegens {
-  struct xnn_hmp_gemm_codegen gemm;
-  struct xnn_hmp_igemm_codegen igemm;
-  // Optional JIT GEMM and IGEMM micro-kernels with MR=1 and the same NR and KR parameters.
-  struct xnn_hmp_gemm_codegen gemm1;
-  struct xnn_hmp_igemm_codegen igemm1;
-};
-
 struct gemm_parameters {
   struct gemm_fused_ukernels minmax;
   struct gemm_fused_ukernels relu;
   struct gemm_fused_ukernels linear;
-  struct gemm_codegens generator;
   union {
     xnn_init_qs8_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
@@ -3995,6 +3923,16 @@ struct vmulcaddc_parameters {
   uint8_t channel_tile;
   uint8_t row_tile;
 };
+
+// Forward declare to avoid circular includes between this and allocator.h.
+struct xnn_code_buffer;
+
+struct jit_gemm_params {
+  union xnn_f32_minmax_params f32_minmax;
+};
+
+typedef enum xnn_status (*xnn_jit_gemm_code_generator_function)(struct xnn_code_buffer* code, size_t nc, size_t kc, void* params);
+typedef enum xnn_status (*xnn_jit_igemm_code_generator_function)(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, void* params);
 
 #define XNN_MAX_QC8_DWCONV_UKERNELS 2
 #define XNN_MAX_QS8_DWCONV_UKERNELS 2

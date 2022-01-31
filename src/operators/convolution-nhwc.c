@@ -103,7 +103,6 @@ static enum xnn_status create_convolution2d_nhwc(
     const struct gemm_parameters* gemm_parameters,
     const struct dwconv_parameters* dwconv_ukernel,
     const struct vmulcaddc_parameters* vmulcaddc_parameters,
-    struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
     bool relu_activation,
     uint32_t datatype_init_flags,
@@ -363,23 +362,6 @@ static enum xnn_status create_convolution2d_nhwc(
             .general_case = gemm_ukernels->gemm,
             .mr1_case = gemm_ukernels->gemm1,
           };
-
-          if (gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
-            struct xnn_code_buffer* code_buffer = &convolution_op->ukernel.gemm.general_code_buffer;
-            if (xnn_status_success != xnn_allocate_code_memory(code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE)) {
-              return xnn_status_invalid_state;
-            };
-            const xnn_jit_gemm_code_generator_function gen = gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT];
-            if (xnn_status_success == gen(code_buffer, 0, 0, (void*)jit_gemm_params)) {
-              const xnn_gemm_ukernel_function generated_gemm = (xnn_gemm_ukernel_function)code_buffer->code;
-              convolution_op->ukernel.gemm.general_case.function[XNN_UARCH_DEFAULT] = generated_gemm;
-            } else {
-              if (xnn_status_success != xnn_release_code_memory(code_buffer)) {
-                return xnn_status_invalid_state;
-              };
-            }
-          }
-
           break;
         case xnn_ukernel_type_igemm:
           if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
@@ -584,7 +566,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     &dwconv_params, sizeof(dwconv_params),
     NULL /* vmulcaddc params */, 0,
     &xnn_params.qu8.gemm, dwconv_ukernel, NULL /* vmulcaddc parameters */,
-    NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QU8,
     xnn_operator_type_convolution_nhwc_qu8,
     convolution_op_out);
@@ -695,7 +676,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     &dwconv_params, sizeof(dwconv_params),
     NULL /* vmulcaddc params */, 0,
     &xnn_params.qs8.gemm, dwconv_ukernel, NULL /* vmulcaddc parameters */,
-    NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QS8,
     xnn_operator_type_convolution_nhwc_qs8,
     convolution_op_out);
@@ -814,7 +794,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     &dwconv_params, sizeof(dwconv_params),
     NULL /* vmulcaddc params */, 0,
     &xnn_params.qc8.gemm, dwconv_ukernel, NULL /* vmulcaddc parameters */,
-    NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QC8,
     xnn_operator_type_convolution_nhwc_qc8,
     convolution_op_out);
@@ -924,7 +903,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     &dwconv_params, sizeof(dwconv_params),
     &vmulcaddc_params, sizeof(vmulcaddc_params),
     &xnn_params.f16.gemm, dwconv_ukernel, &xnn_params.f16.vmulcaddc,
-    NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_F16,
     xnn_operator_type_convolution_nhwc_f16,
     convolution_op_out);
@@ -982,13 +960,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     xnn_params.f32.gemm.init.f32(&gemm_params, output_min, output_max);
   }
 
-  struct jit_gemm_params jit_gemm_params = {
-    .f32_minmax = {
-      .min = output_min,
-      .max = output_max
-    }
-  };
-
   union xnn_f32_minmax_params dwconv_params;
   const struct dwconv_parameters* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS);
@@ -1024,7 +995,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     &dwconv_params, sizeof(dwconv_params),
     &vmulcaddc_params, sizeof(vmulcaddc_params),
     &xnn_params.f32.gemm, dwconv_ukernel, &xnn_params.f32.vmulcaddc,
-    &jit_gemm_params,
     linear_activation, relu_activation, XNN_INIT_FLAG_F32,
     xnn_operator_type_convolution_nhwc_f32,
     convolution_op_out);

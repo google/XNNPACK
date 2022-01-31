@@ -75,62 +75,6 @@ static void GEMMEnd2EndBenchmark(
   }
 }
 
-static void GEMMEnd2EndBenchmark(
-  benchmark::State& state,
-  models::ExecutionPlanFactory model_factory,
-  xnn_jit_gemm_code_generator_function gemm_generator,
-  xnn_f32_gemm_minmax_ukernel_function gemm,
-  xnn_f32_igemm_minmax_ukernel_function igemm,
-  xnn_f32_gemm_minmax_ukernel_function gemm1,
-  xnn_f32_igemm_minmax_ukernel_function igemm1,
-  xnn_init_f32_minmax_params_fn init_params,
-  uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
-  if (isa_check && !isa_check(state)) {
-    return;
-  }
-  if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
-    state.SkipWithError("failed to initialize XNNPACK");
-    return;
-  }
-
-  // Override microkernels chosen in xnn_initialize
-  // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
-  xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
-  xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
-  xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
-  xnn_params.f32.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
-  xnn_params.f32.gemm.init.f32 = init_params;
-  xnn_params.f32.gemm.mr = mr;
-  xnn_params.f32.gemm.nr = nr;
-  xnn_params.f32.gemm.log2_kr = log2_kr;
-  xnn_params.f32.gemm.log2_sr = log2_sr;
-
-  xnn_params.f32.gemm.generator.gemm = xnn_init_hmp_gemm_codegen(gemm_generator);
-
-  auto execution_plan = model_factory(nullptr);
-  if (execution_plan.empty()) {
-    state.SkipWithError("failed to create a model");
-    return;
-  }
-
-  for (auto _ : state) {
-    for (const std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>& op : execution_plan) {
-      xnn_status status = xnn_run_operator(op.get(), nullptr);
-      if (status != xnn_status_success) {
-        state.SkipWithError("failed to run a model");
-        return;
-      }
-    }
-  }
-
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
-}
-
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_4x12__aarch64_neonfma_cortex_a53(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
@@ -336,34 +280,6 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_gemm_6x8__neonfma_lane_ld64);
   BENCHMARK_FP32_END2END(f32_gemm_6x8__neonfma_lane_ld128);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-
-#if XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
-  static void jit_f32_gemm_6x8__aarch64_neonfma_cortex_a75(
-      benchmark::State &state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(
-        state, model,
-        xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
-        xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75,
-        xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75,
-        xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
-        xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
-        xnn_init_f32_minmax_scalar_params, 6 /* mr */, 8 /* nr */);
-  }
-  static void jit_f32_gemm_6x8__aarch64_neonfma_prfm_cortex_a75(
-      benchmark::State &state, models::ExecutionPlanFactory model) {
-    GEMMEnd2EndBenchmark(
-        state, model,
-        xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75,
-        xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75,
-        xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75,
-        xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
-        xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
-        xnn_init_f32_minmax_scalar_params, 6 /* mr */, 8 /* nr */);
-  }
-
-  BENCHMARK_FP32_END2END(jit_f32_gemm_6x8__aarch64_neonfma_cortex_a75);
-  BENCHMARK_FP32_END2END(jit_f32_gemm_6x8__aarch64_neonfma_prfm_cortex_a75);
-#endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_4x8__aarch32_neon_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
