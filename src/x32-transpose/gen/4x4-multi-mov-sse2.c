@@ -39,9 +39,11 @@ void xnn_x32_transpose_ukernel__4x4_multi_mov_sse2(
   const uint32_t* i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
   const uint32_t* i3 = (const uint32_t*) ((uintptr_t) i2 + input_stride);
   uint32_t* o = (uint32_t*) output;
+  output_stride = -output_stride;
+
   do {
     const size_t rem = min(block_width - 1, 3);
-    const size_t oN_stride = rem * output_stride;
+    const size_t oN_stride = -rem * output_stride;
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {
       const __m128i v2_0 = _mm_loadu_si128((const __m128i*) i0);
@@ -65,18 +67,22 @@ void xnn_x32_transpose_ukernel__4x4_multi_mov_sse2(
 
 
 
-      uint32_t* o3 = (uint32_t*) ((uintptr_t) o + oN_stride);
-      _mm_storeu_si128((__m128i*) o3, v0_3);
-      uint32_t *o2 = (uint32_t*) ((uintptr_t) o3 - output_stride);
-      if XNN_UNPREDICTABLE(block_width <= 3) {
-        o2 = o3;
+      o = (uint32_t*) ((uintptr_t) o + oN_stride);
+      _mm_storeu_si128((__m128i*) o, v0_3);
+      uint32_t *oN = (uint32_t*) ((uintptr_t) o + output_stride);
+      if XNN_UNPREDICTABLE(block_width > 3) {
+        o = oN;
       }
-      _mm_storeu_si128((__m128i*) o2, v0_2);
-      uint32_t *o1 = (uint32_t*) ((uintptr_t) o2 - output_stride);
-      if XNN_UNPREDICTABLE(block_width < 3) {
-        o1 = o3;
+      _mm_storeu_si128((__m128i*) o, v0_2);
+      oN = (uint32_t*) ((uintptr_t) o + output_stride);
+      if XNN_UNPREDICTABLE(block_width >= 3) {
+        o = oN;
       }
-      _mm_storeu_si128((__m128i*) o1, v0_1);
+      _mm_storeu_si128((__m128i*) o, v0_1);
+      oN = (uint32_t*) ((uintptr_t) o + output_stride);
+      if XNN_UNPREDICTABLE(block_width > 1) {
+        o = oN;
+      }
       _mm_storeu_si128((__m128i*) o, v0_0);
       o = (uint32_t*) ((uintptr_t) o + tile_hbytes);
     }
@@ -106,18 +112,22 @@ void xnn_x32_transpose_ukernel__4x4_multi_mov_sse2(
 
 
       if (bh & 2) {
-        uint32_t* o3 = (uint32_t*) ((uintptr_t) o + oN_stride);
-        _mm_storel_epi64((__m128i*) o3, v0_3);
-        uint32_t *o2 = (uint32_t*) ((uintptr_t) o3 - output_stride);
-        if XNN_UNPREDICTABLE(block_width <= 3) {
-          o2 = o3;
+        o = (uint32_t*) ((uintptr_t) o + oN_stride);
+        _mm_storel_epi64((__m128i*) o, v0_3);
+        uint32_t *oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width > 3) {
+          o = oN;
         }
-        _mm_storel_epi64((__m128i*) o2, v0_2);
-        uint32_t *o1 = (uint32_t*) ((uintptr_t) o2 - output_stride);
-        if XNN_UNPREDICTABLE(block_width < 3) {
-          o1 = o3;
+        _mm_storel_epi64((__m128i*) o, v0_2);
+        oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width >= 3) {
+          o = oN;
         }
-        _mm_storel_epi64((__m128i*) o1, v0_1);
+        _mm_storel_epi64((__m128i*) o, v0_1);
+        oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width > 1) {
+          o = oN;
+        }
         _mm_storel_epi64((__m128i*) o, v0_0);
         o += 2;
         v0_0 = _mm_unpackhi_epi64(v0_0, v0_0);
@@ -127,18 +137,22 @@ void xnn_x32_transpose_ukernel__4x4_multi_mov_sse2(
       }
 
       if (bh & 1) {
-        uint32_t* o3 = (uint32_t*) ((uintptr_t) o + oN_stride);
-        *((int*) o3) = _mm_cvtsi128_si32(v0_3);
-        uint32_t *o2 = (uint32_t*) ((uintptr_t) o3 - output_stride);
-        if XNN_UNPREDICTABLE(block_width <= 3) {
-          o2 = o3;
+        o = (uint32_t*) ((uintptr_t) o + oN_stride);
+        *((int*) o) = _mm_cvtsi128_si32(v0_3);
+        uint32_t *oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width > 3) {
+          o = oN;
         }
-        *((int*) o2) = _mm_cvtsi128_si32(v0_2);
-        uint32_t *o1 = (uint32_t*) ((uintptr_t) o2 - output_stride);
-        if XNN_UNPREDICTABLE(block_width < 3) {
-          o1 = o3;
+        *((int*) o) = _mm_cvtsi128_si32(v0_2);
+        oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width >= 3) {
+          o = oN;
         }
-        *((int*) o1) = _mm_cvtsi128_si32(v0_1);
+        *((int*) o) = _mm_cvtsi128_si32(v0_1);
+        oN = (uint32_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width > 1) {
+          o = oN;
+        }
         *((int*) o) = _mm_cvtsi128_si32(v0_0);
       }
     }

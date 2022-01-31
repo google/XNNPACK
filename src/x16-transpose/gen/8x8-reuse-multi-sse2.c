@@ -42,6 +42,7 @@ void xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2(
   uint16_t* o5 = (uint16_t*) ((uintptr_t) o4 + output_stride);
   uint16_t* o6 = (uint16_t*) ((uintptr_t) o5 + output_stride);
   uint16_t* o7 = (uint16_t*) ((uintptr_t) o6 + output_stride);
+
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;

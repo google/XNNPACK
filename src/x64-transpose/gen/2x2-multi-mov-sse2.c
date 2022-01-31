@@ -37,9 +37,11 @@ void xnn_x64_transpose_ukernel__2x2_multi_mov_sse2(
   const uint64_t* i0 = input;
   const uint64_t* i1 = (const uint64_t*) ((uintptr_t) i0 + input_stride);
   uint64_t* o = (uint64_t*) output;
+  output_stride = -output_stride;
+
   do {
     const size_t rem = min(block_width - 1, 1);
-    const size_t oN_stride = rem * output_stride;
+    const size_t oN_stride = -rem * output_stride;
     size_t bh = block_height;
     for (; bh >= 2; bh -= 2) {
       const __m128i v1_0 = _mm_loadu_si128((const __m128i*) i0);
@@ -53,8 +55,12 @@ void xnn_x64_transpose_ukernel__2x2_multi_mov_sse2(
 
 
 
-      uint64_t* o1 = (uint64_t*) ((uintptr_t) o + oN_stride);
-      _mm_storeu_si128((__m128i*) o1, v0_1);
+      o = (uint64_t*) ((uintptr_t) o + oN_stride);
+      _mm_storeu_si128((__m128i*) o, v0_1);
+      uint64_t *oN = (uint64_t*) ((uintptr_t) o + output_stride);
+      if XNN_UNPREDICTABLE(block_width > 1) {
+        o = oN;
+      }
       _mm_storeu_si128((__m128i*) o, v0_0);
       o = (uint64_t*) ((uintptr_t) o + tile_hbytes);
     }
@@ -70,8 +76,12 @@ void xnn_x64_transpose_ukernel__2x2_multi_mov_sse2(
 
 
       if (bh & 1) {
-        uint64_t* o1 = (uint64_t*) ((uintptr_t) o + oN_stride);
-        _mm_storel_epi64((__m128i*) o1, v0_1);
+        o = (uint64_t*) ((uintptr_t) o + oN_stride);
+        _mm_storel_epi64((__m128i*) o, v0_1);
+        uint64_t *oN = (uint64_t*) ((uintptr_t) o + output_stride);
+        if XNN_UNPREDICTABLE(block_width > 1) {
+          o = oN;
+        }
         _mm_storel_epi64((__m128i*) o, v0_0);
       }
 

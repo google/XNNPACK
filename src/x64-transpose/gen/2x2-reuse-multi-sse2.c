@@ -36,6 +36,7 @@ void xnn_x64_transpose_ukernel__2x2_reuse_multi_sse2(
   const uint64_t* i0 = input;
   uint64_t* o0 = (uint64_t*) output;
   uint64_t* o1 = (uint64_t*) ((uintptr_t) o0 + output_stride);
+
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;

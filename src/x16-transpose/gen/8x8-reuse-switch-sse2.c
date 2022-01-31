@@ -35,9 +35,11 @@ void xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2(
 
   const uint16_t* i0 = input;
   uint16_t* o = (uint16_t*) output;
+  output_stride = -output_stride;
+
   do {
     const size_t rem = min(block_width - 1, 7);
-    const size_t oN_stride = rem * output_stride;
+    const size_t oN_stride = -rem * output_stride;
     size_t bh = block_height;
     for (; bh >= 8; bh -= 8) {
       const __m128i v3_0 = _mm_loadu_si128((const __m128i*) i0);
@@ -89,22 +91,22 @@ void xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2(
       switch (rem) {
         case 7:
           _mm_storeu_si128((__m128i*) oN, v0_7);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 6:
           _mm_storeu_si128((__m128i*) oN, v0_6);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 5:
           _mm_storeu_si128((__m128i*) oN, v0_5);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 4:
           _mm_storeu_si128((__m128i*) oN, v0_4);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 3:
           _mm_storeu_si128((__m128i*) oN, v0_3);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 2:
           _mm_storeu_si128((__m128i*) oN, v0_2);
-          oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+          oN = (uint16_t*) ((uintptr_t) oN + output_stride);
         case 1:
           _mm_storeu_si128((__m128i*) oN, v0_1);
         case 0:
@@ -183,22 +185,22 @@ void xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2(
         switch (rem) {
           case 7:
             _mm_storel_epi64((__m128i*) oN, v0_7);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 6:
             _mm_storel_epi64((__m128i*) oN, v0_6);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 5:
             _mm_storel_epi64((__m128i*) oN, v0_5);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 4:
             _mm_storel_epi64((__m128i*) oN, v0_4);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 3:
             _mm_storel_epi64((__m128i*) oN, v0_3);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 2:
             _mm_storel_epi64((__m128i*) oN, v0_2);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 1:
             _mm_storel_epi64((__m128i*) oN, v0_1);
           case 0:
@@ -223,22 +225,22 @@ void xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2(
         switch (rem) {
           case 7:
             *((int*) oN) = _mm_cvtsi128_si32(v0_7);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 6:
             *((int*) oN) = _mm_cvtsi128_si32(v0_6);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 5:
             *((int*) oN) = _mm_cvtsi128_si32(v0_5);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 4:
             *((int*) oN) = _mm_cvtsi128_si32(v0_4);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 3:
             *((int*) oN) = _mm_cvtsi128_si32(v0_3);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 2:
             *((int*) oN) = _mm_cvtsi128_si32(v0_2);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 1:
             *((int*) oN) = _mm_cvtsi128_si32(v0_1);
           case 0:
@@ -262,22 +264,22 @@ void xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2(
         switch (rem) {
           case 7:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_7);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 6:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_6);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 5:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_5);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 4:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_4);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 3:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_3);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 2:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_2);
-            oN = (uint16_t*) ((uintptr_t) oN - output_stride);
+            oN = (uint16_t*) ((uintptr_t) oN + output_stride);
           case 1:
             *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_1);
           case 0:
