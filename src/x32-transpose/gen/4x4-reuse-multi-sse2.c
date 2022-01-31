@@ -91,7 +91,7 @@ void xnn_x32_transpose_ukernel__4x4_reuse_multi_sse2(
       const __m128i v2_1 = _mm_loadu_si128((const __m128i*) i1);
       const uint32_t *i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 2) {
-        i2 = i0;
+        i2 = i1;
       }
       const __m128i v2_2 = _mm_loadu_si128((const __m128i*) i2);
       const __m128i v2_3 = _mm_undefined_si128();

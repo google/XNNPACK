@@ -147,12 +147,12 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
         $for N in range(1, TILE_SIZE - 1, 2):
           const uint${SIZE}_t *i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
           if XNN_UNPREDICTABLE(bh < ${N+1}) {
-            i${N} = i0;
+            i${N} = i${N-1};
           }
           const __m128i v${NUM_ITERS}_${N} = _mm_loadu_si128((const __m128i*) i${N});
           const uint${SIZE}_t *i${N+1} = (const uint${SIZE}_t*) ((uintptr_t) i${N} + input_stride);
           if XNN_UNPREDICTABLE(bh <= ${N+1}) {
-            i${N+1} = i0;
+            i${N+1} = i${N};
           }
           const __m128i v${NUM_ITERS}_${N+1} = _mm_loadu_si128((const __m128i*) i${N+1});
       $else:

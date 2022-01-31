@@ -207,67 +207,67 @@ void xnn_x8_transpose_ukernel__16x16_reuse_switch_sse2(
       const __m128i v4_1 = _mm_loadu_si128((const __m128i*) i1);
       const uint8_t *i2 = (const uint8_t*) ((uintptr_t) i1 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 2) {
-        i2 = i0;
+        i2 = i1;
       }
       const __m128i v4_2 = _mm_loadu_si128((const __m128i*) i2);
       const uint8_t *i3 = (const uint8_t*) ((uintptr_t) i2 + input_stride);
       if XNN_UNPREDICTABLE(bh < 4) {
-        i3 = i0;
+        i3 = i2;
       }
       const __m128i v4_3 = _mm_loadu_si128((const __m128i*) i3);
       const uint8_t *i4 = (const uint8_t*) ((uintptr_t) i3 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 4) {
-        i4 = i0;
+        i4 = i3;
       }
       const __m128i v4_4 = _mm_loadu_si128((const __m128i*) i4);
       const uint8_t *i5 = (const uint8_t*) ((uintptr_t) i4 + input_stride);
       if XNN_UNPREDICTABLE(bh < 6) {
-        i5 = i0;
+        i5 = i4;
       }
       const __m128i v4_5 = _mm_loadu_si128((const __m128i*) i5);
       const uint8_t *i6 = (const uint8_t*) ((uintptr_t) i5 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 6) {
-        i6 = i0;
+        i6 = i5;
       }
       const __m128i v4_6 = _mm_loadu_si128((const __m128i*) i6);
       const uint8_t *i7 = (const uint8_t*) ((uintptr_t) i6 + input_stride);
       if XNN_UNPREDICTABLE(bh < 8) {
-        i7 = i0;
+        i7 = i6;
       }
       const __m128i v4_7 = _mm_loadu_si128((const __m128i*) i7);
       const uint8_t *i8 = (const uint8_t*) ((uintptr_t) i7 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 8) {
-        i8 = i0;
+        i8 = i7;
       }
       const __m128i v4_8 = _mm_loadu_si128((const __m128i*) i8);
       const uint8_t *i9 = (const uint8_t*) ((uintptr_t) i8 + input_stride);
       if XNN_UNPREDICTABLE(bh < 10) {
-        i9 = i0;
+        i9 = i8;
       }
       const __m128i v4_9 = _mm_loadu_si128((const __m128i*) i9);
       const uint8_t *i10 = (const uint8_t*) ((uintptr_t) i9 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 10) {
-        i10 = i0;
+        i10 = i9;
       }
       const __m128i v4_10 = _mm_loadu_si128((const __m128i*) i10);
       const uint8_t *i11 = (const uint8_t*) ((uintptr_t) i10 + input_stride);
       if XNN_UNPREDICTABLE(bh < 12) {
-        i11 = i0;
+        i11 = i10;
       }
       const __m128i v4_11 = _mm_loadu_si128((const __m128i*) i11);
       const uint8_t *i12 = (const uint8_t*) ((uintptr_t) i11 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 12) {
-        i12 = i0;
+        i12 = i11;
       }
       const __m128i v4_12 = _mm_loadu_si128((const __m128i*) i12);
       const uint8_t *i13 = (const uint8_t*) ((uintptr_t) i12 + input_stride);
       if XNN_UNPREDICTABLE(bh < 14) {
-        i13 = i0;
+        i13 = i12;
       }
       const __m128i v4_13 = _mm_loadu_si128((const __m128i*) i13);
       const uint8_t *i14 = (const uint8_t*) ((uintptr_t) i13 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 14) {
-        i14 = i0;
+        i14 = i13;
       }
       const __m128i v4_14 = _mm_loadu_si128((const __m128i*) i14);
       const __m128i v4_15 = _mm_undefined_si128();
