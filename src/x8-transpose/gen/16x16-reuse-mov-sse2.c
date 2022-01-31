@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x8_transpose_ukernel__16x16_reuse_dec_sse2(
+void xnn_x8_transpose_ukernel__16x16_reuse_mov_sse2(
     const uint8_t* input,
     uint8_t* output,
     size_t input_stride,

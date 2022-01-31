@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2(
+void xnn_x16_transpose_ukernel__8x8_multi_mov_sse2(
     const uint16_t* input,
     uint16_t* output,
     size_t input_stride,
@@ -31,9 +31,17 @@ void xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2(
   const size_t tile_hbytes = tile_height * sizeof(uint16_t);
   const size_t tile_wbytes = tile_width * sizeof(uint16_t);
   const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
   const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint16_t);
 
   const uint16_t* i0 = input;
+  const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
+  const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_stride);
+  const uint16_t* i3 = (const uint16_t*) ((uintptr_t) i2 + input_stride);
+  const uint16_t* i4 = (const uint16_t*) ((uintptr_t) i3 + input_stride);
+  const uint16_t* i5 = (const uint16_t*) ((uintptr_t) i4 + input_stride);
+  const uint16_t* i6 = (const uint16_t*) ((uintptr_t) i5 + input_stride);
+  const uint16_t* i7 = (const uint16_t*) ((uintptr_t) i6 + input_stride);
   uint16_t* o = (uint16_t*) output;
   do {
     const size_t rem = min(block_width - 1, 7);
@@ -41,21 +49,21 @@ void xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2(
     size_t bh = block_height;
     for (; bh >= 8; bh -= 8) {
       const __m128i v3_0 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_1 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_2 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_3 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_4 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_5 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_6 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v3_7 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint16_t*) ((uintptr_t) i0 + input_stride);
+      i0 = (uint16_t*) ((uintptr_t) i0 + input_offset);
+      const __m128i v3_1 = _mm_loadu_si128((const __m128i*) i1);
+      i1 = (uint16_t*) ((uintptr_t) i1 + input_offset);
+      const __m128i v3_2 = _mm_loadu_si128((const __m128i*) i2);
+      i2 = (uint16_t*) ((uintptr_t) i2 + input_offset);
+      const __m128i v3_3 = _mm_loadu_si128((const __m128i*) i3);
+      i3 = (uint16_t*) ((uintptr_t) i3 + input_offset);
+      const __m128i v3_4 = _mm_loadu_si128((const __m128i*) i4);
+      i4 = (uint16_t*) ((uintptr_t) i4 + input_offset);
+      const __m128i v3_5 = _mm_loadu_si128((const __m128i*) i5);
+      i5 = (uint16_t*) ((uintptr_t) i5 + input_offset);
+      const __m128i v3_6 = _mm_loadu_si128((const __m128i*) i6);
+      i6 = (uint16_t*) ((uintptr_t) i6 + input_offset);
+      const __m128i v3_7 = _mm_loadu_si128((const __m128i*) i7);
+      i7 = (uint16_t*) ((uintptr_t) i7 + input_offset);
 
       const __m128i v2_0 = _mm_unpacklo_epi16(v3_0, v3_1);
       const __m128i v2_1 = _mm_unpackhi_epi16(v3_0, v3_1);
@@ -123,32 +131,26 @@ void xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2(
 
     if (bh != 0) {
       const __m128i v3_0 = _mm_loadu_si128((const __m128i*) i0);
-      const uint16_t *i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
       if XNN_UNPREDICTABLE(bh < 2) {
         i1 = i0;
       }
       const __m128i v3_1 = _mm_loadu_si128((const __m128i*) i1);
-      const uint16_t *i2 = (const uint16_t*) ((uintptr_t) i1 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 2) {
         i2 = i0;
       }
       const __m128i v3_2 = _mm_loadu_si128((const __m128i*) i2);
-      const uint16_t *i3 = (const uint16_t*) ((uintptr_t) i2 + input_stride);
       if XNN_UNPREDICTABLE(bh < 4) {
         i3 = i0;
       }
       const __m128i v3_3 = _mm_loadu_si128((const __m128i*) i3);
-      const uint16_t *i4 = (const uint16_t*) ((uintptr_t) i3 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 4) {
         i4 = i0;
       }
       const __m128i v3_4 = _mm_loadu_si128((const __m128i*) i4);
-      const uint16_t *i5 = (const uint16_t*) ((uintptr_t) i4 + input_stride);
       if XNN_UNPREDICTABLE(bh < 6) {
         i5 = i0;
       }
       const __m128i v3_5 = _mm_loadu_si128((const __m128i*) i5);
-      const uint16_t *i6 = (const uint16_t*) ((uintptr_t) i5 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 6) {
         i6 = i0;
       }
@@ -310,6 +312,13 @@ void xnn_x16_transpose_ukernel__8x8_reuse_dec_sse2(
     }
 
     i0 = (const uint16_t*) ((uintptr_t) i0 + input_reset);
+    i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
+    i2 = (const uint16_t*) ((uintptr_t) i1 + input_stride);
+    i3 = (const uint16_t*) ((uintptr_t) i2 + input_stride);
+    i4 = (const uint16_t*) ((uintptr_t) i3 + input_stride);
+    i5 = (const uint16_t*) ((uintptr_t) i4 + input_stride);
+    i6 = (const uint16_t*) ((uintptr_t) i5 + input_stride);
+    i7 = (const uint16_t*) ((uintptr_t) i6 + input_stride);
     o = (uint16_t*) ((uintptr_t) o + output_reset);
     block_width = doz(block_width, tile_width);
   } while (block_width != 0);

@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 $import math
 $assert IN_PTRS in ["MULTI", "REUSE"]
-$assert OUT_PTRS in ["MULTI", "SWITCH", "DEC"]
+$assert OUT_PTRS in ["MULTI", "SWITCH", "MOV"]
 $assert SIZE in [8, 16, 32, 64]
 $TILE_SIZE = int(128/SIZE)
 $NUM_ITERS = int(math.log2(TILE_SIZE))
@@ -61,7 +61,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
         if XNN_UNPREDICTABLE(block_width < ${N+2}) {
           o${N+1} = o0;
         }
-    $if OUT_PTRS in ["SWITCH", "DEC"]:
+    $if OUT_PTRS in ["SWITCH", "MOV"]:
       const size_t rem = min(block_width - 1, ${TILE_SIZE-1});
       const size_t oN_stride = rem * output_stride;
     size_t bh = block_height;
@@ -112,7 +112,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
           default:
             XNN_UNREACHABLE;
         }
-      $elif OUT_PTRS == "DEC":
+      $elif OUT_PTRS == "MOV":
         uint${SIZE}_t* o${TILE_SIZE-1} = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
         _mm_storeu_si128((__m128i*) o${TILE_SIZE-1}, v0_${TILE_SIZE-1});
         $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -208,7 +208,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
           }
           $if NUM_ITERS > 1:
             o += ${TILE_SIZE>>1};
-        $elif OUT_PTRS == "DEC":
+        $elif OUT_PTRS == "MOV":
           uint${SIZE}_t* o${TILE_SIZE-1} = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
           _mm_storel_epi64((__m128i*) o${TILE_SIZE-1}, v0_${TILE_SIZE-1});
           $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -254,7 +254,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
             }
             $if NUM_ITERS > 2:
               o += ${TILE_SIZE>>2};
-          $elif OUT_PTRS == "DEC":
+          $elif OUT_PTRS == "MOV":
             uint${SIZE}_t* o${TILE_SIZE-1} = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
             *((int*) o${TILE_SIZE-1}) = _mm_cvtsi128_si32(v0_${TILE_SIZE-1});
             $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -299,7 +299,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
             }
             $if NUM_ITERS>3:
               o += ${TILE_SIZE>>3};
-          $elif OUT_PTRS == "DEC":
+          $elif OUT_PTRS == "MOV":
             uint${SIZE}_t* o${TILE_SIZE-1} = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
             *((uint16_t*) o${TILE_SIZE-1}) = (uint16_t) _mm_cvtsi128_si32(v0_${TILE_SIZE-1});
             $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -342,7 +342,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
               default:
                 XNN_UNREACHABLE;
             }
-          $elif OUT_PTRS == "DEC":
+          $elif OUT_PTRS == "MOV":
             uint${SIZE}_t* o${TILE_SIZE-1} = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
             *((uint8_t*) o${TILE_SIZE-1}) = (uint8_t) _mm_cvtsi128_si32(v0_${TILE_SIZE-1});
             $for N in reversed(range(2, TILE_SIZE, 2)):

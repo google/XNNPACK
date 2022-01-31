@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2(
+void xnn_x32_transpose_ukernel__4x4_multi_mov_sse2(
     const uint32_t* input,
     uint32_t* output,
     size_t input_stride,
@@ -31,9 +31,13 @@ void xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2(
   const size_t tile_hbytes = tile_height * sizeof(uint32_t);
   const size_t tile_wbytes = tile_width * sizeof(uint32_t);
   const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  const size_t input_offset = tile_height * input_stride;
   const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint32_t);
 
   const uint32_t* i0 = input;
+  const uint32_t* i1 = (const uint32_t*) ((uintptr_t) i0 + input_stride);
+  const uint32_t* i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
+  const uint32_t* i3 = (const uint32_t*) ((uintptr_t) i2 + input_stride);
   uint32_t* o = (uint32_t*) output;
   do {
     const size_t rem = min(block_width - 1, 3);
@@ -41,13 +45,13 @@ void xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2(
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {
       const __m128i v2_0 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint32_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v2_1 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint32_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v2_2 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint32_t*) ((uintptr_t) i0 + input_stride);
-      const __m128i v2_3 = _mm_loadu_si128((const __m128i*) i0);
-      i0 = (uint32_t*) ((uintptr_t) i0 + input_stride);
+      i0 = (uint32_t*) ((uintptr_t) i0 + input_offset);
+      const __m128i v2_1 = _mm_loadu_si128((const __m128i*) i1);
+      i1 = (uint32_t*) ((uintptr_t) i1 + input_offset);
+      const __m128i v2_2 = _mm_loadu_si128((const __m128i*) i2);
+      i2 = (uint32_t*) ((uintptr_t) i2 + input_offset);
+      const __m128i v2_3 = _mm_loadu_si128((const __m128i*) i3);
+      i3 = (uint32_t*) ((uintptr_t) i3 + input_offset);
 
       const __m128i v1_0 = _mm_unpacklo_epi32(v2_0, v2_1);
       const __m128i v1_1 = _mm_unpackhi_epi32(v2_0, v2_1);
@@ -79,12 +83,10 @@ void xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2(
 
     if (bh != 0) {
       const __m128i v2_0 = _mm_loadu_si128((const __m128i*) i0);
-      const uint32_t *i1 = (const uint32_t*) ((uintptr_t) i0 + input_stride);
       if XNN_UNPREDICTABLE(bh < 2) {
         i1 = i0;
       }
       const __m128i v2_1 = _mm_loadu_si128((const __m128i*) i1);
-      const uint32_t *i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
       if XNN_UNPREDICTABLE(bh <= 2) {
         i2 = i0;
       }
@@ -142,6 +144,9 @@ void xnn_x32_transpose_ukernel__4x4_reuse_dec_sse2(
     }
 
     i0 = (const uint32_t*) ((uintptr_t) i0 + input_reset);
+    i1 = (const uint32_t*) ((uintptr_t) i0 + input_stride);
+    i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
+    i3 = (const uint32_t*) ((uintptr_t) i2 + input_stride);
     o = (uint32_t*) ((uintptr_t) o + output_reset);
     block_width = doz(block_width, tile_width);
   } while (block_width != 0);
