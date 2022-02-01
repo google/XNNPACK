@@ -13,6 +13,7 @@
 
 #include <pthreadpool.h>
 
+#include <xnnpack/allocator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 
@@ -145,6 +146,8 @@ struct xnn_ukernel_dwconv2d {
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel general_case;
   struct xnn_hmp_gemm_ukernel mr1_case;
+  struct xnn_code_buffer general_code_buffer;
+  struct xnn_code_buffer mr1_code_buffer;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -155,6 +158,8 @@ struct xnn_ukernel_igemm {
   struct xnn_hmp_igemm_ukernel general_case;
   struct xnn_hmp_igemm_ukernel mr1_case;
   struct xnn_hmp_gemm_ukernel gemm_case;
+  struct xnn_code_buffer general_code_buffer;
+  struct xnn_code_buffer mr1_code_buffer;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;

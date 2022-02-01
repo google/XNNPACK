@@ -9134,6 +9134,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":indirection",
+        ":jit_memory",
         ":logging_utils",
         ":operator_run",
         ":packing",
@@ -9167,6 +9168,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":indirection_test_mode",
+        ":jit_memory_test_mode",
         ":logging_utils",
         ":operator_run_test_mode",
         ":packing_test_mode",
@@ -9178,12 +9180,39 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "jit_memory",
+    srcs = [
+        "src/jit/memory.c",
+    ],
+    hdrs = INTERNAL_HDRS,
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":logging_utils",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "jit_memory_test_mode",
+    srcs = [
+        "src/jit/memory.c",
+    ],
+    hdrs = INTERNAL_HDRS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":logging_utils",
+    ],
+)
+
+xnnpack_cc_library(
     name = "jit",
     srcs = [
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -9194,6 +9223,7 @@ xnnpack_cc_library(
     aarch64_srcs = JIT_AARCH64_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":jit_memory",
         ":logging_utils",
     ],
 )
@@ -9204,7 +9234,6 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -9219,6 +9248,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":jit_memory_test_mode",
         ":logging_utils",
     ],
 )
