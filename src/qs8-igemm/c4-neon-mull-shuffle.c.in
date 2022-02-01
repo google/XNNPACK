@@ -63,6 +63,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
         c${M} = c${M-1};
       }
 
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   do {
     $for N in range(0, NR, 2):
       int32x4_t vacc0x${ABC[N:N+2]} = vreinterpretq_s32_u64(vmovl_u32(vld1_u32(w))); w = (const int32_t*) w + 2;
@@ -80,7 +81,6 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
       a += ${MR};
 
       size_t k = kc;
-
       $if MLA:
         while (k >= 16 * sizeof(int8_t)) {
           $for M in range(MR):
@@ -107,8 +107,7 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
 
           k -= 16 * sizeof(int8_t);
         }
-
-      ${"if" if MLA else "while"} (k >= 8 * sizeof(int8_t)) {
+      ${"if (k != 0)" if MLA else "do"} {
         $for M in range(MR):
           int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} += 8;
 
@@ -126,27 +125,9 @@ void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c
             $for M in range(MR):
               va${M}x0 = vext_s8(va${M}x0, va${M}x0, 4);
 
-        k -= 8 * sizeof(int8_t);
-      }
-
-      if XNN_UNLIKELY(k != 0) {
-        $for M in range(MR):
-          int8x8_t va${M}x0 = vld1_s8(a${M}); a${M} = (const int8_t*) ((uintptr_t) a${M} + k);
-
-        $for K in range(2):
-          $for N in range(0, NR, 2):
-            const int8x8_t vb${ABC[N:N+2]}c${K}x0 = vld1_s8(w); w = (const int8_t*) w + 8;
-
-        $for K in range(2):
-          $for N in range(0, NR, 2):
-            $for M in range(MR):
-              int16x8_t vprod${M}x${ABC[N:N+2]}c${K} = vmull_s8(vb${ABC[N:N+2]}c${K}x0, va${M}x0);
-            $for M in range(MR):
-              vacc${M}x${ABC[N:N+2]} = vpadalq_s16(vacc${M}x${ABC[N:N+2]}, vprod${M}x${ABC[N:N+2]}c${K});
-          $if K + 1 != 2:
-            $for M in range(MR):
-              va${M}x0 = vext_s8(va${M}x0, va${M}x0, 4);
-      }
+        $if not MLA:
+          k -= 8 * sizeof(int8_t);
+      }${"" if MLA else " while (k != 0);"}
 
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
