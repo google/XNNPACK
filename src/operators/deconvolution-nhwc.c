@@ -163,12 +163,12 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const uint32_t k_stride = round_up_po2(group_input_channels, kr);
   const uint32_t kernel_size = kernel_height * kernel_width;
   enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_igemm;
-  size_t packed_group_weights_size = (sizeof(float) * kernel_size * k_stride + sizeof(float)) * n_stride;
+  size_t packed_group_weights_size = (((kernel_size * k_stride) << log2_filter_element_size) + bias_element_size) * n_stride;
   if (max(stride_height, stride_width) > 1 && max(dilation_height, dilation_width) == 1 && stride_width <= kernel_width && stride_height <= kernel_height) {
     ukernel_type = xnn_ukernel_type_subconv2d;
     const size_t subkernels = stride_height * stride_width;
     packed_group_weights_size = n_stride *
-      (sizeof(float) * kernel_size * k_stride + sizeof(float) * subkernels);
+      (((kernel_size * k_stride) << log2_filter_element_size) + bias_element_size * subkernels);
 
     const size_t subconvolution_buffer_size = sizeof(struct subconvolution_params) * subkernels;
     deconvolution_op->subconvolution_buffer = xnn_allocate_zero_memory(subconvolution_buffer_size);
@@ -187,7 +187,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
         const size_t subkernel_size = subkernel_height * subkernel_width;
 
         subconvolution_params->indirection_x_stride = sizeof(void*) * subkernel_size;
-        subconvolution_params->w_stride = sizeof(float) + k_stride * subkernel_size * sizeof(float);
+        subconvolution_params->w_stride = bias_element_size + ((k_stride * subkernel_size) << log2_filter_element_size);
         subconvolution_params++;
       }
     }
