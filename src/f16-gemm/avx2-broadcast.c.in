@@ -98,64 +98,64 @@ void xnn_f16_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
         vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vacc${M}x${ABC[N:N+8]}, vmax);
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in reversed(range(MR)):
+      $for M in range(MR):
         _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC));
         $for N in range(8, NR, 8):
           _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
-      $for M in reversed(range(MR)):
+      $for M in range(MR):
         a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
     } else {
       $for LOG2N in reversed(range(NR.bit_length())):
         $if LOG2N == 3:
-          $for M in reversed(range(MR)):
+          $for M in range(MR):
             __m128i vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC);
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC));
                 $for N in range(8, 1 << LOG2N, 8):
                   _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 $for N in range(0, 1 << (LOG2N - 1), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 3:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 _mm_storeu_si128((__m128i*) c${M}, vh${M}x${ABC[0:8]});
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_NO_EXC);
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 2:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 _mm_storel_epi64((__m128i*) c${M}, vh${M}x${ABC[0:8]});
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 vh${M}x${ABC[0:8]} = _mm_unpackhi_epi64(vh${M}x${ABC[0:8]}, vh${M}x${ABC[0:8]});
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 c${M} += 4;
             $elif LOG2N == 1:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 _mm_storeu_si32(c${M}, vh${M}x${ABC[0:8]});
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 vh${M}x${ABC[0:8]} = _mm_srli_epi64(vh${M}x${ABC[0:8]}, 32);
 
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 c${M} += 2;
             $elif LOG2N == 0:
-              $for M in reversed(range(MR)):
+              $for M in range(MR):
                 *c${M} = (uint16_t) _mm_extract_epi16(vh${M}x${ABC[0:8]}, 0);
           }
 

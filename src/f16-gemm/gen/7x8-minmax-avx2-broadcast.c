@@ -144,96 +144,96 @@ void xnn_f16_gemm_minmax_ukernel_7x8__avx2_broadcast(
     vacc6x01234567 = _mm256_min_ps(vacc6x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm_storeu_si128((__m128i*) c6, _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC));
-      c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
-      _mm_storeu_si128((__m128i*) c5, _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC));
-      c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
-      _mm_storeu_si128((__m128i*) c4, _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC));
-      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
-      _mm_storeu_si128((__m128i*) c3, _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC));
-      c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
-      _mm_storeu_si128((__m128i*) c2, _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC));
-      c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
-      _mm_storeu_si128((__m128i*) c1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC));
-      c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
       _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC));
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
+      _mm_storeu_si128((__m128i*) c1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC));
+      c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
+      _mm_storeu_si128((__m128i*) c2, _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC));
+      c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
+      _mm_storeu_si128((__m128i*) c3, _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC));
+      c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
+      _mm_storeu_si128((__m128i*) c4, _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC));
+      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
+      _mm_storeu_si128((__m128i*) c5, _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC));
+      c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
+      _mm_storeu_si128((__m128i*) c6, _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC));
+      c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
 
-      a6 = (const uint16_t*) ((uintptr_t) a6 - kc);
-      a5 = (const uint16_t*) ((uintptr_t) a5 - kc);
-      a4 = (const uint16_t*) ((uintptr_t) a4 - kc);
-      a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
-      a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
-      a1 = (const uint16_t*) ((uintptr_t) a1 - kc);
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
+      a1 = (const uint16_t*) ((uintptr_t) a1 - kc);
+      a2 = (const uint16_t*) ((uintptr_t) a2 - kc);
+      a3 = (const uint16_t*) ((uintptr_t) a3 - kc);
+      a4 = (const uint16_t*) ((uintptr_t) a4 - kc);
+      a5 = (const uint16_t*) ((uintptr_t) a5 - kc);
+      a6 = (const uint16_t*) ((uintptr_t) a6 - kc);
 
       nc -= 8;
     } else {
-      __m128i vh6x01234567 = _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh5x01234567 = _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh4x01234567 = _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh3x01234567 = _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh2x01234567 = _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh1x01234567 = _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC);
       __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh1x01234567 = _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh2x01234567 = _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh3x01234567 = _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh4x01234567 = _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh5x01234567 = _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh6x01234567 = _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC);
       if (nc & 4) {
-        _mm_storel_epi64((__m128i*) c6, vh6x01234567);
-        _mm_storel_epi64((__m128i*) c5, vh5x01234567);
-        _mm_storel_epi64((__m128i*) c4, vh4x01234567);
-        _mm_storel_epi64((__m128i*) c3, vh3x01234567);
-        _mm_storel_epi64((__m128i*) c2, vh2x01234567);
-        _mm_storel_epi64((__m128i*) c1, vh1x01234567);
         _mm_storel_epi64((__m128i*) c0, vh0x01234567);
+        _mm_storel_epi64((__m128i*) c1, vh1x01234567);
+        _mm_storel_epi64((__m128i*) c2, vh2x01234567);
+        _mm_storel_epi64((__m128i*) c3, vh3x01234567);
+        _mm_storel_epi64((__m128i*) c4, vh4x01234567);
+        _mm_storel_epi64((__m128i*) c5, vh5x01234567);
+        _mm_storel_epi64((__m128i*) c6, vh6x01234567);
 
-        vh6x01234567 = _mm_unpackhi_epi64(vh6x01234567, vh6x01234567);
-        vh5x01234567 = _mm_unpackhi_epi64(vh5x01234567, vh5x01234567);
-        vh4x01234567 = _mm_unpackhi_epi64(vh4x01234567, vh4x01234567);
-        vh3x01234567 = _mm_unpackhi_epi64(vh3x01234567, vh3x01234567);
-        vh2x01234567 = _mm_unpackhi_epi64(vh2x01234567, vh2x01234567);
-        vh1x01234567 = _mm_unpackhi_epi64(vh1x01234567, vh1x01234567);
         vh0x01234567 = _mm_unpackhi_epi64(vh0x01234567, vh0x01234567);
+        vh1x01234567 = _mm_unpackhi_epi64(vh1x01234567, vh1x01234567);
+        vh2x01234567 = _mm_unpackhi_epi64(vh2x01234567, vh2x01234567);
+        vh3x01234567 = _mm_unpackhi_epi64(vh3x01234567, vh3x01234567);
+        vh4x01234567 = _mm_unpackhi_epi64(vh4x01234567, vh4x01234567);
+        vh5x01234567 = _mm_unpackhi_epi64(vh5x01234567, vh5x01234567);
+        vh6x01234567 = _mm_unpackhi_epi64(vh6x01234567, vh6x01234567);
 
-        c6 += 4;
-        c5 += 4;
-        c4 += 4;
-        c3 += 4;
-        c2 += 4;
-        c1 += 4;
         c0 += 4;
+        c1 += 4;
+        c2 += 4;
+        c3 += 4;
+        c4 += 4;
+        c5 += 4;
+        c6 += 4;
       }
       if (nc & 2) {
-        _mm_storeu_si32(c6, vh6x01234567);
-        _mm_storeu_si32(c5, vh5x01234567);
-        _mm_storeu_si32(c4, vh4x01234567);
-        _mm_storeu_si32(c3, vh3x01234567);
-        _mm_storeu_si32(c2, vh2x01234567);
-        _mm_storeu_si32(c1, vh1x01234567);
         _mm_storeu_si32(c0, vh0x01234567);
+        _mm_storeu_si32(c1, vh1x01234567);
+        _mm_storeu_si32(c2, vh2x01234567);
+        _mm_storeu_si32(c3, vh3x01234567);
+        _mm_storeu_si32(c4, vh4x01234567);
+        _mm_storeu_si32(c5, vh5x01234567);
+        _mm_storeu_si32(c6, vh6x01234567);
 
-        vh6x01234567 = _mm_srli_epi64(vh6x01234567, 32);
-        vh5x01234567 = _mm_srli_epi64(vh5x01234567, 32);
-        vh4x01234567 = _mm_srli_epi64(vh4x01234567, 32);
-        vh3x01234567 = _mm_srli_epi64(vh3x01234567, 32);
-        vh2x01234567 = _mm_srli_epi64(vh2x01234567, 32);
-        vh1x01234567 = _mm_srli_epi64(vh1x01234567, 32);
         vh0x01234567 = _mm_srli_epi64(vh0x01234567, 32);
+        vh1x01234567 = _mm_srli_epi64(vh1x01234567, 32);
+        vh2x01234567 = _mm_srli_epi64(vh2x01234567, 32);
+        vh3x01234567 = _mm_srli_epi64(vh3x01234567, 32);
+        vh4x01234567 = _mm_srli_epi64(vh4x01234567, 32);
+        vh5x01234567 = _mm_srli_epi64(vh5x01234567, 32);
+        vh6x01234567 = _mm_srli_epi64(vh6x01234567, 32);
 
-        c6 += 2;
-        c5 += 2;
-        c4 += 2;
-        c3 += 2;
-        c2 += 2;
-        c1 += 2;
         c0 += 2;
+        c1 += 2;
+        c2 += 2;
+        c3 += 2;
+        c4 += 2;
+        c5 += 2;
+        c6 += 2;
       }
       if (nc & 1) {
-        *c6 = (uint16_t) _mm_extract_epi16(vh6x01234567, 0);
-        *c5 = (uint16_t) _mm_extract_epi16(vh5x01234567, 0);
-        *c4 = (uint16_t) _mm_extract_epi16(vh4x01234567, 0);
-        *c3 = (uint16_t) _mm_extract_epi16(vh3x01234567, 0);
-        *c2 = (uint16_t) _mm_extract_epi16(vh2x01234567, 0);
-        *c1 = (uint16_t) _mm_extract_epi16(vh1x01234567, 0);
         *c0 = (uint16_t) _mm_extract_epi16(vh0x01234567, 0);
+        *c1 = (uint16_t) _mm_extract_epi16(vh1x01234567, 0);
+        *c2 = (uint16_t) _mm_extract_epi16(vh2x01234567, 0);
+        *c3 = (uint16_t) _mm_extract_epi16(vh3x01234567, 0);
+        *c4 = (uint16_t) _mm_extract_epi16(vh4x01234567, 0);
+        *c5 = (uint16_t) _mm_extract_epi16(vh5x01234567, 0);
+        *c6 = (uint16_t) _mm_extract_epi16(vh6x01234567, 0);
       }
 
       nc = 0;
