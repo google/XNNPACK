@@ -46,6 +46,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld128(
     c1 = c0;
   }
 
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     v128_t vacc1x0123 = vacc0x0123;
@@ -64,7 +65,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld128(
       a += 2;
 
       size_t k = kc;
-      while (k >= 8 * sizeof(int8_t)) {
+      do {
         v128_t vxa0 = wasm_i16x8_load8x8(a0);
         a0 += 8;
         v128_t vxa1 = wasm_i16x8_load8x8(a1);
@@ -97,40 +98,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld128(
 
         w = (const int8_t*) w + 32;
         k -= 8 * sizeof(int8_t);
-      }
-      if (k != 0) {
-        v128_t vxa0 = wasm_i16x8_load8x8((const v128_t*) a0);
-        a0 = (const int8_t*) ((uintptr_t) a0 + k);
-        v128_t vxa1 = wasm_i16x8_load8x8((const v128_t*) a1);
-        a1 = (const int8_t*) ((uintptr_t) a1 + k);
-
-        const v128_t vb01 = wasm_v128_load(w);
-        const v128_t vxb0 = wasm_i16x8_extend_low_i8x16(vb01);
-        const v128_t vxb1 = wasm_i16x8_extend_high_i8x16(vb01);
-
-        vacc0x0123 = wasm_i32x4_add(vacc0x0123, wasm_i32x4_dot_i16x8(vxa0, vxb0));
-        vxa0 = wasm_v32x4_shuffle(vxa0, vxa0, 1, 2, 3, 4);
-        vacc1x0123 = wasm_i32x4_add(vacc1x0123, wasm_i32x4_dot_i16x8(vxa1, vxb0));
-        vxa1 = wasm_v32x4_shuffle(vxa1, vxa1, 1, 2, 3, 4);
-
-        vacc0x0123 = wasm_i32x4_add(vacc0x0123, wasm_i32x4_dot_i16x8(vxa0, vxb1));
-        vxa0 = wasm_v32x4_shuffle(vxa0, vxa0, 1, 2, 3, 4);
-        vacc1x0123 = wasm_i32x4_add(vacc1x0123, wasm_i32x4_dot_i16x8(vxa1, vxb1));
-        vxa1 = wasm_v32x4_shuffle(vxa1, vxa1, 1, 2, 3, 4);
-        const v128_t vb23 = wasm_v128_load((const int8_t*) w + 16);
-        const v128_t vxb2 = wasm_i16x8_extend_low_i8x16(vb23);
-        const v128_t vxb3 = wasm_i16x8_extend_high_i8x16(vb23);
-
-        vacc0x0123 = wasm_i32x4_add(vacc0x0123, wasm_i32x4_dot_i16x8(vxa0, vxb2));
-        vxa0 = wasm_v32x4_shuffle(vxa0, vxa0, 1, 2, 3, 4);
-        vacc1x0123 = wasm_i32x4_add(vacc1x0123, wasm_i32x4_dot_i16x8(vxa1, vxb2));
-        vxa1 = wasm_v32x4_shuffle(vxa1, vxa1, 1, 2, 3, 4);
-
-        vacc0x0123 = wasm_i32x4_add(vacc0x0123, wasm_i32x4_dot_i16x8(vxa0, vxb3));
-        vacc1x0123 = wasm_i32x4_add(vacc1x0123, wasm_i32x4_dot_i16x8(vxa1, vxb3));
-
-        w = (const int8_t*) w + 32;
-      }
+      } while (k != 0);
       p -= 2 * sizeof(void*);
     } while (p != 0);
 

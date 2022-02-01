@@ -66,16 +66,17 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4_
         c${M} = c${M-1};
       }
 
+  kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     $for M in range(1, MR):
       v128_t vacc${M}x0123 = vacc0x0123;
     w = (const void*) ((const int32_t*) w + 4);
 
-    size_t k = kc;
     $if DATATYPE == "QU8":
       const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.kernel_zero_point);
-    while (k >= 8 * sizeof(${XINT8_T})) {
+    size_t k = kc;
+    do {
       $for M in range(MR):
         v128_t vxa${M} = ${WASM_X16X8_LOAD8X8}((const v128_t*) a${M});
         a${M} += 8;
@@ -130,62 +131,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4_
       $else:
         w = (const ${XINT8_T}*) w + 32;
       k -= 8 * sizeof(${XINT8_T});
-    }
-    if (k != 0) {
-      $for M in range(MR):
-        v128_t vxa${M} = ${WASM_X16X8_LOAD8X8}((const v128_t*) a${M});
-        a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} + k);
-
-      $if VARIANT == "LD128":
-        $for K in range(0, 4, 2):
-          $if K == 0:
-            const v128_t vb${K}${K+1} = wasm_v128_load(w);
-          $else:
-            const v128_t vb${K}${K+1} = wasm_v128_load((const ${XINT8_T}*) w + ${K * 8});
-          $if DATATYPE == "QU8":
-            const v128_t vxb${K} = wasm_i16x8_sub(wasm_u16x8_extend_low_u8x16(vb${K}${K+1}), vb_zero_point);
-            const v128_t vxb${K+1} = wasm_i16x8_sub(wasm_u16x8_extend_high_u8x16(vb${K}${K+1}), vb_zero_point);
-          $else:
-            const v128_t vxb${K} = wasm_i16x8_extend_low_i8x16(vb${K}${K+1});
-            const v128_t vxb${K+1} = wasm_i16x8_extend_high_i8x16(vb${K}${K+1});
-
-          $for M in range(MR):
-            vacc${M}x0123 = wasm_i32x4_add(vacc${M}x0123, wasm_i32x4_dot_i16x8(vxa${M}, vxb${K}));
-            vxa${M} = wasm_v32x4_shuffle(vxa${M}, vxa${M}, 1, 2, 3, 4);
-
-          $for M in range(MR):
-            vacc${M}x0123 = wasm_i32x4_add(vacc${M}x0123, wasm_i32x4_dot_i16x8(vxa${M}, vxb${K+1}));
-            $if K + 2 != 4:
-              vxa${M} = wasm_v32x4_shuffle(vxa${M}, vxa${M}, 1, 2, 3, 4);
-      $else:
-        $for K in range(4):
-          $if VARIANT == "LD64":
-            $if DATATYPE == "QU8":
-              $if K == 0:
-                const v128_t vxb${K} = wasm_i16x8_sub(wasm_u16x8_load8x8(w), vb_zero_point);
-              $else:
-                const v128_t vxb${K} = wasm_i16x8_sub(wasm_u16x8_load8x8((const ${XINT8_T}*) w + ${K * 8}), vb_zero_point);
-            $else:
-              $if K == 0:
-                const v128_t vxb${K} = wasm_i16x8_load8x8(w);
-              $else:
-                const v128_t vxb${K} = wasm_i16x8_load8x8((const ${XINT8_T}*) w + ${K * 8});
-          $elif VARIANT == "EXTENDED":
-            $if K == 0:
-              const v128_t vxb${K} = wasm_v128_load(w);
-            $else:
-              const v128_t vxb${K} = wasm_v128_load((const int16_t*) w + ${K * 8});
-
-          $for M in range(MR):
-            vacc${M}x0123 = wasm_i32x4_add(vacc${M}x0123, wasm_i32x4_dot_i16x8(vxa${M}, vxb${K}));
-            $if K + 1 != 4:
-              vxa${M} = wasm_v32x4_shuffle(vxa${M}, vxa${M}, 1, 2, 3, 4);
-
-      $if VARIANT == "EXTENDED":
-        w = (const int16_t*) w + 32;
-      $else:
-        w = (const ${XINT8_T}*) w + 32;
-    }
+    } while (k != 0);
 
     $for M in range(MR):
       vacc${M}x0123 = wasm_f32x4_convert_i32x4(vacc${M}x0123);
