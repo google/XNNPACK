@@ -169,40 +169,44 @@ void xnn_pack_qu8_gemm_goi_w(
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
-  assert(sr == 1);
+  assert(nr >= sr);
+
+  const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
-  const int32_t boff = (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
+  const int32_t bzp = (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_w;
       if XNN_LIKELY(b != NULL) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          *((int32_t*) packed_w) = b[nr_block_start + nr_block_offset] + boff;
-          packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
+          *((int32_t*) packed_w) = bzp + b[nr_block_start + nr_block_offset];
+          packed_w = (int32_t*) packed_w + 1;
         }
       } else {
         size_t n = nr_block_size;
         do {
-          *((int32_t*) packed_w) = boff;
-          packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
+          *((int32_t*) packed_w) = bzp;
+          packed_w = (int32_t*) packed_w + 1;
         } while (--n != 0);
       }
-      packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * sizeof(int32_t));
-      for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
-        const size_t kr_block_size = min(kc - kr_block_start, kr);
+      packed_w = (int32_t*) packed_w + (nr - nr_block_size);
+
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
-          for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
-            const uint8_t kv = k[(nr_block_start + nr_block_offset) * kc + (kr_block_start + kr_block_offset)];
-            ksum += (int32_t) kv;
-            *((uint8_t*) packed_w) = kv;
-            packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            if (kc_idx < kc) {
+              const uint8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
+              ksum += (int32_t) kv;
+              ((uint8_t*) packed_w)[kr_block_offset] = kv;
+            }
           }
           packed_b[nr_block_offset] -= ksum * izp;
-          packed_w = (void*) ((uintptr_t) packed_w + (kr - kr_block_size) * sizeof(uint8_t));
+          packed_w = (uint8_t*) packed_w + kr;
         }
-        packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(uint8_t));
+        packed_w = (uint8_t*) packed_w + (nr - nr_block_size) * kr;
       }
       packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
     }
@@ -710,42 +714,45 @@ void xnn_pack_qu8_conv_goki_w(
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
-  assert(sr == 1);
+  assert(nr >= sr);
+
+  const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
-  const int32_t boff = (int32_t) ks * (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
+  const int32_t bzp = (int32_t) ks * (int32_t) kc * izp * (int32_t) params->kernel_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_w;
       if XNN_LIKELY(b != NULL) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          *((int32_t*) packed_w) = b[nr_block_start + nr_block_offset] + boff;
+          *((int32_t*) packed_w) = bzp + b[nr_block_start + nr_block_offset];
           packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
         }
       } else {
         size_t n = nr_block_size;
         do {
-          *((int32_t*) packed_w) = boff;
+          *((int32_t*) packed_w) = bzp;
           packed_w = (void*) ((uintptr_t) packed_w + sizeof(int32_t));
         } while (--n != 0);
       }
       packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * sizeof(int32_t));
+
       for (size_t ki = 0; ki < ks; ki++) {
-        for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start += kr) {
-          const size_t kr_block_size = min(kc - kr_block_start, kr);
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
             int32_t ksum = 0;
-            for (size_t kr_block_offset = 0; kr_block_offset < kr_block_size; kr_block_offset++) {
-              const uint8_t kv =
-                k[((nr_block_start + nr_block_offset) * ks + ki) * kc + (kr_block_start + kr_block_offset)];
-              ksum += (int32_t) kv;
-              *((uint8_t*) packed_w) = kv;
-              packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+              if (kc_idx < kc) {
+                const uint8_t kv = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
+                ksum += (int32_t) kv;
+                ((uint8_t*) packed_w)[kr_block_offset] = kv;
+              }
             }
             packed_b[nr_block_offset] -= ksum * izp;
-            packed_w = (void*) ((uintptr_t) packed_w + (kr - kr_block_size) * sizeof(uint8_t));
+            packed_w = (uint8_t*) packed_w + kr;
           }
-          packed_w = (void*) ((uintptr_t) packed_w + (nr - nr_block_size) * kr * sizeof(uint8_t));
+          packed_w = (uint8_t*) packed_w + (nr - nr_block_size) * kr;
         }
       }
       packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
