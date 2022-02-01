@@ -25,7 +25,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${ISA}_br
     size_t cn_stride,
     $if INC:
       const float*restrict acc,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -89,7 +89,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${ISA}_br
             $if FMA == 3:
               vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}c${L}, vacc${M}x${ABC[N:N+8]});
             $else:
-              vacc${M}x${ABC[N:N+8]} = _mm_add_ps(vacc${M}x${ABC[N:N+8]}, _mm_mul_ps(va${M}, vb${ABC[N:N+8]}c${L}));
+              vacc${M}x${ABC[N:N+8]} = _mm256_add_ps(vacc${M}x${ABC[N:N+8]}, _mm256_mul_ps(va${M}, vb${ABC[N:N+8]}c${L}));
 
         $if L + 1 != 4:
           $for M in range(MR):
@@ -99,25 +99,28 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${ISA}_br
       k -= 4 * sizeof(float);
     }
     if XNN_UNLIKELY(k != 0) {
-      do {
-        $for M in range(MR):
-          const __m256 va${M} = _mm256_broadcast_ss(a${M});
-          a${M} += 1;
+      $for M in range(MR):
+        __m256 va${M} = _mm256_broadcast_ps((const __m128*) a${M});
+        a${M} = (const float*) ((uintptr_t) a${M} + k);
 
-        const __m256 vb${ABC[0:8]} = _mm256_load_ps(w);
-        $for N in range(8, NR, 8):
-          const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
-        w += ${NR};
+      const __m256 vzero = _mm256_setzero_ps();
+      $for L in range(4):
+
+        $for N in range(0, NR, 8):
+          const __m256 vb${ABC[N:N+8]}c${L} = _mm256_load_ps(w + ${L * NR + N});
 
         $for N in range(0, NR, 8):
           $for M in range(MR):
             $if FMA == 3:
-              vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]});
+              vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(_mm256_and_ps(va${M}, _mm256_cmp_ps(vb${ABC[N:N+8]}c${L}, vzero, _CMP_NEQ_OQ)), vb${ABC[N:N+8]}c${L}, vacc${M}x${ABC[N:N+8]});
             $else:
-              vacc${M}x${ABC[N:N+8]} = _mm256_add_ps(vacc${M}x${ABC[N:N+8]}, _mm256_mul_ps(va${M}, vb${ABC[N:N+8]}));
+              vacc${M}x${ABC[N:N+8]} = _mm256_add_ps(vacc${M}x${ABC[N:N+8]}, _mm256_mul_ps(_mm256_and_ps(va${M}, _mm256_cmp_ps(vb${ABC[N:N+8]}c${L}, vzero, _CMP_NEQ_OQ)), vb${ABC[N:N+8]}c${L}));
 
-        k -= sizeof(float);
-      } while (k != 0);
+        $if L + 1 != 4:
+          $for M in range(MR):
+            va${M} = _mm256_permute_ps(va${M}, _MM_SHUFFLE(0, 3, 2, 1));
+
+      w += ${4 * NR};
     }
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);

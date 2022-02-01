@@ -47,7 +47,7 @@ static void GEMMBenchmark(benchmark::State& state,
   const size_t kc = state.range(2);
 
   const size_t nc_stride = benchmark::utils::RoundUp(nc, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr);
+  const size_t kc_stride = benchmark::utils::RoundUp(kc, kr * sr);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());

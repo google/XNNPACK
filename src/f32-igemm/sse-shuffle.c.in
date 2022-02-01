@@ -24,7 +24,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}s4__sse(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -96,21 +96,24 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}s4__sse(
         k -= 4 * sizeof(float);
       }
       if XNN_UNLIKELY(k != 0) {
-        do {
-          const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
-          $for N in range(4, NR, 4):
-            const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
-          w += ${NR};
+        $for M in range(MR):
+          __m128 va${M} = _mm_loadu_ps(a${M});
+          a${M} = (const float*) ((uintptr_t) a${M} + k);
 
-          $for M in range(MR):
-            const __m128 va${M} = _mm_load1_ps(a${M});
-            a${M} += 1;
+        $for L in range(4):
 
-          $for M in range(MR):
-            $for N in range(0, NR, 4):
-              vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}, vb${ABC[N:N+4]}));
-          k -= sizeof(float);
-        } while (k != 0);
+          $for N in range(0, NR, 4):
+            const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
+
+          $for N in range(0, NR, 4):
+            $for M in range(MR):
+              vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(_mm_andnot_ps(_mm_cmpeq_ps(_mm_setzero_ps(), vb${ABC[N:N+4]}c${L}), va${M}), vb${ABC[N:N+4]}c${L}));
+
+          $if L + 1 != 4:
+            $for M in range(MR):
+              va${M} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(0, 3, 2, 1));
+
+        w += ${4 * NR};
       }
       p -= ${MR} * sizeof(void*);
     } while (p != 0);

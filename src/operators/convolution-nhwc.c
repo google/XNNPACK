@@ -330,7 +330,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const uint32_t kr = UINT32_C(1) << gemm_parameters->log2_kr;
       const uint32_t sr = UINT32_C(1) << gemm_parameters->log2_sr;
       const size_t n_stride = round_up(group_output_channels, nr);
-      const size_t k_stride = round_up_po2(group_input_channels, kr);
+      const size_t k_stride = round_up_po2(group_input_channels, kr * sr);
 
       const size_t packed_group_weights_size = ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * n_stride;
       convolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
@@ -359,6 +359,7 @@ static enum xnn_status create_convolution2d_nhwc(
             .mr = gemm_parameters->mr,
             .nr = nr,
             .kr = kr,
+            .sr = sr,
             .general_case = gemm_ukernels->gemm,
             .mr1_case = gemm_ukernels->gemm1,
           };
@@ -367,7 +368,7 @@ static enum xnn_status create_convolution2d_nhwc(
           if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
             pack_conv_kgo_w(
               groups, group_output_channels, kernel_size,
-              nr, kr,
+              nr, kr, sr,
               kernel, bias, convolution_op->packed_weights, gemm_parameters->nr * extra_weights_bytes, packing_params);
           } else {
             pack_conv_goki_w(
@@ -379,6 +380,7 @@ static enum xnn_status create_convolution2d_nhwc(
             .mr = gemm_parameters->mr,
             .nr = nr,
             .kr = kr,
+            .sr = sr,
             .general_case = gemm_ukernels->igemm,
             .mr1_case = gemm_ukernels->igemm1,
           };
@@ -1089,7 +1091,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t groups = convolution_op->groups;
       const size_t group_input_channels = convolution_op->group_input_channels;
       const size_t w_stride = extra_weights_elements_size +
-        (round_up_po2(group_input_channels, convolution_op->ukernel.gemm.kr) << log2_filter_element_size);
+        (round_up_po2(group_input_channels, convolution_op->ukernel.gemm.kr * convolution_op->ukernel.gemm.sr) << log2_filter_element_size);
       const size_t group_output_channels = convolution_op->group_output_channels;
 
       uint32_t mr = convolution_op->ukernel.gemm.mr;
@@ -1206,7 +1208,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       const size_t group_input_channels = convolution_op->group_input_channels;
       const size_t w_stride = extra_weights_elements_size +
-        (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr) * kernel_size << log2_filter_element_size);
+        (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr * convolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
       const size_t group_output_channels = convolution_op->group_output_channels;
       convolution_op->context.igemm = (struct igemm_context) {
           .ks = kernel_size,

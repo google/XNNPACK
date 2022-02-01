@@ -80,7 +80,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${"neonfm
       $for L in range(4):
 
         $for N in range(0, NR, 4):
-          const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w + ${L * NR + N});
+          const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
@@ -90,23 +90,25 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}s4__${"neonfm
           $for M in range(MR):
             va${M} = vextq_f32(va${M}, va${M}, 1);
 
-      w += ${4 * NR};
       k -= 4 * sizeof(float);
     }
     if XNN_UNLIKELY(k != 0) {
-      do {
-        $for M in range(MR):
-          const float32x4_t va${M} = vld1q_dup_f32(a${M}); a${M} += 1;
+      $for M in range(MR):
+        float32x4_t va${M} = vld1q_f32(a${M}); a${M} = (const float*) ((uintptr_t) a${M} + k);
+
+      $for L in range(4):
 
         $for N in range(0, NR, 4):
-          const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+          const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
+            const float32x4_t vmska${M}x${ABC[N:N+4]}c${L} = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(va${M}), vceqq_f32(vb${ABC[N:N+4]}c${L}, vmovq_n_f32(0.0f))));
+            vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, vmska${M}x${ABC[N:N+4]}c${L}, vb${ABC[N:N+4]}c${L});
 
-        k -= sizeof(float);
-      } while (k != 0);
+        $if L + 1 != 4:
+          $for M in range(MR):
+            va${M} = vextq_f32(va${M}, va${M}, 1);
     }
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):

@@ -160,7 +160,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const uint32_t sr = UINT32_C(1) << gemm_parameters->log2_sr;
 
   const uint32_t n_stride = round_up(group_output_channels, nr);
-  const uint32_t k_stride = round_up_po2(group_input_channels, kr);
+  const uint32_t k_stride = round_up_po2(group_input_channels, kr * sr);
   const uint32_t kernel_size = kernel_height * kernel_width;
   enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_igemm;
   size_t packed_group_weights_size = (((kernel_size * k_stride) << log2_filter_element_size) + bias_element_size) * n_stride;
@@ -258,6 +258,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
     .mr = mr,
     .nr = nr,
     .kr = kr,
+    .sr = sr,
   };
 
   deconvolution_op->state = xnn_run_state_invalid;
@@ -592,7 +593,7 @@ static enum xnn_status setup_conv_path(
   const size_t group_output_channels = deconvolution_op->group_output_channels;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
   const size_t w_stride = bias_element_size +
-    (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm.kr) * kernel_size << log2_filter_element_size);
+    (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm.kr * deconvolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
   deconvolution_op->context.igemm = (struct igemm_context) {
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
@@ -751,8 +752,9 @@ static enum xnn_status setup_subconv2d_path(
   const size_t group_output_channels = deconvolution_op->group_output_channels;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
   const uint32_t kr = deconvolution_op->ukernel.igemm.kr;
+  const uint32_t sr = deconvolution_op->ukernel.igemm.sr;
   const size_t w_stride = stride_height * stride_width * bias_element_size +
-    (round_up_po2(group_input_channels, kr) * kernel_size << log2_filter_element_size);
+    (round_up_po2(group_input_channels, kr * sr) * kernel_size << log2_filter_element_size);
   if (use_gemm) {
     deconvolution_op->context.subgemm = (struct subgemm_context) {
         .subconvolution_params = deconvolution_op->subconvolution_buffer,

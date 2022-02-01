@@ -61,7 +61,7 @@ static void IGEMMBenchmark(benchmark::State& state,
 
   const size_t mc_stride = benchmark::utils::RoundUp<size_t>(output_size, mr);
   const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
-  const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr);
+  const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
   std::vector<float> a(input_height * input_width * input_pixel_stride);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
@@ -72,7 +72,7 @@ static void IGEMMBenchmark(benchmark::State& state,
 
   std::vector<float> z(group_input_channels);
 
-  const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
+  const size_t w_elements = kernel_size * kc_stride * nc_stride + nc_stride;
   const size_t i_elements = mc_stride * kernel_size;
   const size_t c_elements = output_height * output_width * output_pixel_stride;
   const size_t num_buffers = 1 +

@@ -148,6 +148,7 @@ struct xnn_ukernel_gemm {
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
+  uint8_t sr;
 };
 
 struct xnn_ukernel_igemm {
@@ -157,6 +158,7 @@ struct xnn_ukernel_igemm {
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
+  uint8_t sr;
 };
 
 struct xnn_ukernel_spmm {

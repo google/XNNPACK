@@ -25,7 +25,7 @@ void xnn_f32_gemminc_minmax_ukernel_4x16s4__fma3_broadcast(
     size_t cm_stride,
     size_t cn_stride,
     const float*restrict acc,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -149,31 +149,82 @@ void xnn_f32_gemminc_minmax_ukernel_4x16s4__fma3_broadcast(
       k -= 4 * sizeof(float);
     }
     if XNN_UNLIKELY(k != 0) {
-      do {
-        const __m256 va0 = _mm256_broadcast_ss(a0);
-        a0 += 1;
-        const __m256 va1 = _mm256_broadcast_ss(a1);
-        a1 += 1;
-        const __m256 va2 = _mm256_broadcast_ss(a2);
-        a2 += 1;
-        const __m256 va3 = _mm256_broadcast_ss(a3);
-        a3 += 1;
+      __m256 va0 = _mm256_broadcast_ps((const __m128*) a0);
+      a0 = (const float*) ((uintptr_t) a0 + k);
+      __m256 va1 = _mm256_broadcast_ps((const __m128*) a1);
+      a1 = (const float*) ((uintptr_t) a1 + k);
+      __m256 va2 = _mm256_broadcast_ps((const __m128*) a2);
+      a2 = (const float*) ((uintptr_t) a2 + k);
+      __m256 va3 = _mm256_broadcast_ps((const __m128*) a3);
+      a3 = (const float*) ((uintptr_t) a3 + k);
 
-        const __m256 vb01234567 = _mm256_load_ps(w);
-        const __m256 vb89ABCDEF = _mm256_load_ps(w + 8);
-        w += 16;
+      const __m256 vzero = _mm256_setzero_ps();
 
-        vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);
-        vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567, vacc1x01234567);
-        vacc2x01234567 = _mm256_fmadd_ps(va2, vb01234567, vacc2x01234567);
-        vacc3x01234567 = _mm256_fmadd_ps(va3, vb01234567, vacc3x01234567);
-        vacc0x89ABCDEF = _mm256_fmadd_ps(va0, vb89ABCDEF, vacc0x89ABCDEF);
-        vacc1x89ABCDEF = _mm256_fmadd_ps(va1, vb89ABCDEF, vacc1x89ABCDEF);
-        vacc2x89ABCDEF = _mm256_fmadd_ps(va2, vb89ABCDEF, vacc2x89ABCDEF);
-        vacc3x89ABCDEF = _mm256_fmadd_ps(va3, vb89ABCDEF, vacc3x89ABCDEF);
+      const __m256 vb01234567c0 = _mm256_load_ps(w + 0);
+      const __m256 vb89ABCDEFc0 = _mm256_load_ps(w + 8);
 
-        k -= sizeof(float);
-      } while (k != 0);
+      vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc0x01234567);
+      vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc1x01234567);
+      vacc2x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc2x01234567);
+      vacc3x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc3x01234567);
+      vacc0x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb89ABCDEFc0, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc0, vacc0x89ABCDEF);
+      vacc1x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb89ABCDEFc0, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc0, vacc1x89ABCDEF);
+      vacc2x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb89ABCDEFc0, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc0, vacc2x89ABCDEF);
+      vacc3x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb89ABCDEFc0, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc0, vacc3x89ABCDEF);
+
+      va0 = _mm256_permute_ps(va0, _MM_SHUFFLE(0, 3, 2, 1));
+      va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
+      va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
+      va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
+
+      const __m256 vb01234567c1 = _mm256_load_ps(w + 16);
+      const __m256 vb89ABCDEFc1 = _mm256_load_ps(w + 24);
+
+      vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc0x01234567);
+      vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc1x01234567);
+      vacc2x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc2x01234567);
+      vacc3x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc3x01234567);
+      vacc0x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb89ABCDEFc1, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc1, vacc0x89ABCDEF);
+      vacc1x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb89ABCDEFc1, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc1, vacc1x89ABCDEF);
+      vacc2x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb89ABCDEFc1, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc1, vacc2x89ABCDEF);
+      vacc3x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb89ABCDEFc1, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc1, vacc3x89ABCDEF);
+
+      va0 = _mm256_permute_ps(va0, _MM_SHUFFLE(0, 3, 2, 1));
+      va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
+      va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
+      va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
+
+      const __m256 vb01234567c2 = _mm256_load_ps(w + 32);
+      const __m256 vb89ABCDEFc2 = _mm256_load_ps(w + 40);
+
+      vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc0x01234567);
+      vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc1x01234567);
+      vacc2x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc2x01234567);
+      vacc3x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc3x01234567);
+      vacc0x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb89ABCDEFc2, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc2, vacc0x89ABCDEF);
+      vacc1x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb89ABCDEFc2, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc2, vacc1x89ABCDEF);
+      vacc2x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb89ABCDEFc2, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc2, vacc2x89ABCDEF);
+      vacc3x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb89ABCDEFc2, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc2, vacc3x89ABCDEF);
+
+      va0 = _mm256_permute_ps(va0, _MM_SHUFFLE(0, 3, 2, 1));
+      va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
+      va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
+      va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
+
+      const __m256 vb01234567c3 = _mm256_load_ps(w + 48);
+      const __m256 vb89ABCDEFc3 = _mm256_load_ps(w + 56);
+
+      vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc0x01234567);
+      vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc1x01234567);
+      vacc2x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc2x01234567);
+      vacc3x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc3x01234567);
+      vacc0x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb89ABCDEFc3, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc3, vacc0x89ABCDEF);
+      vacc1x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb89ABCDEFc3, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc3, vacc1x89ABCDEF);
+      vacc2x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va2, _mm256_cmp_ps(vb89ABCDEFc3, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc3, vacc2x89ABCDEF);
+      vacc3x89ABCDEF = _mm256_fmadd_ps(_mm256_and_ps(va3, _mm256_cmp_ps(vb89ABCDEFc3, vzero, _CMP_NEQ_OQ)), vb89ABCDEFc3, vacc3x89ABCDEF);
+
+
+      w += 64;
     }
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);

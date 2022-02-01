@@ -10,6 +10,7 @@
 
 #include <cstddef>
 
+#include <xnnpack/math.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
@@ -91,11 +92,11 @@ class GemmMicrokernelTester {
   }
 
   inline size_t packed_k() const {
-    return k() % kr() == 0 ? k() : (k() / kr() + 1) * kr();
+    return round_up_po2(k(), kr() * sr());
   }
 
   inline size_t packed_n() const {
-    return n() % nr() == 0 ? n() : (n() / nr() + 1) * nr();
+    return round_up(n(), nr());
   }
 
   inline GemmMicrokernelTester& a_stride(size_t a_stride) {
