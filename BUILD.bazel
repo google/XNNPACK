@@ -9509,6 +9509,7 @@ xnnpack_cc_library(
     deps = [
         ":enable_assembly",
         ":enable_jit",
+        ":jit",
         ":logging_utils",
         ":operator_run",
         ":operators",
