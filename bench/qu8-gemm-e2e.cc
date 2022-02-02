@@ -96,6 +96,26 @@ static void GEMMEnd2EndBenchmark(
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
   }
+  static void qu8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a7,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
+  static void qu8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64,
+      xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
+      benchmark::utils::CheckNEON);
+  }
   static void qu8_gemm_4x8__aarch32_neon_mlal_lane_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64,
@@ -118,6 +138,8 @@ static void GEMMEnd2EndBenchmark(
   }
   BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53)
   BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a53)
+  BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7)
+  BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a7)
   BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_prfm_ld64)
   BENCHMARK_QU8_END2END(qu8_gemm_4x8__aarch32_neon_mlal_lane_ld64)
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
