@@ -327,14 +327,13 @@ void Assembler::vld1_32(DRegisterLane dd, MemOperand op) {
 }
 
 void Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
-  if ((op.mode() == AddressingMode::kOffset && op.offset() != 0) || regs.length != 2) {
-    // Unimplemented since only length 2 used in microkernels.
+  if ((op.mode() == AddressingMode::kOffset && op.offset() != 0) || regs.length > 2) {
     error_ = Error::kInvalidOperand;
     return;
   }
 
   const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? 0xD : 0xF;
-  emit32(0xF4A00CA0 | encode(regs.start, 22, 12) | op.base().code << 16 | rm);
+  emit32(0xF4A00C80 | encode(regs.start, 22, 12) | op.base().code << 16 | (regs.length - 1) << 5 | rm);
 }
 
 void Assembler::vldm(MemOperand rn, SRegisterList regs) {
