@@ -538,10 +538,10 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  jit_gemm_params* p = reinterpret_cast<jit_gemm_params*>(params);
+  auto p = static_cast<const jit_gemm_params*>(params);
   g.generate(nc, kc, p->f32_minmax.min, p->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {

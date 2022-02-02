@@ -13,7 +13,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc, size_t kc, void* params);
+  void generate(size_t nc, size_t kc, const void* params);
 };
 
 
@@ -51,7 +51,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S
-void Generator::generate(size_t nc, size_t kc, void* params) {
+void Generator::generate(size_t nc, size_t kc, const void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
 
   // Push 96 bytes
@@ -428,7 +428,7 @@ void Generator::generate(size_t nc, size_t kc, void* params) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   g.generate(nc, kc, nullptr);

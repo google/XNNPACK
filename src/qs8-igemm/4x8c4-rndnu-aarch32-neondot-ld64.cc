@@ -14,7 +14,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc, size_t kc, size_t ks, void* params);
+  void generate(size_t nc, size_t kc, size_t ks, const void* params);
 };
 
 
@@ -61,7 +61,7 @@ class Generator : public Assembler {
 //  } rndnu_neon;
 
 // Converted from: src/qs8-igemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S
-void Generator::generate(size_t nc, size_t kc, size_t ks, void* params) {
+void Generator::generate(size_t nc, size_t kc, size_t ks, const void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
 
   add(r2, r2, 3); // kc = (kc + 3) & ~3
@@ -311,7 +311,7 @@ void Generator::generate(size_t nc, size_t kc, size_t ks, void* params) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, void* params) {
+xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   g.generate(nc, kc, ks, nullptr);
