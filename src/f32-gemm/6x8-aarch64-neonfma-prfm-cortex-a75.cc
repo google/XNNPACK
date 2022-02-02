@@ -3,9 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cassert>
+#include <cstddef>
+
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/params.h>
 
 namespace xnnpack {
 namespace aarch64 {
@@ -13,7 +17,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(bool prefetch, size_t nc, size_t kc, void* params);
+  void generate(bool prefetch, size_t nc, size_t kc, float min, float max);
 };
 
 // void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
@@ -64,7 +68,7 @@ class Generator : public Assembler {
 // Clamp v6 v7
 
 // Converted from: src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
+void Generator::generate(bool prefetch, size_t nc, size_t kc, float min, float max) {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
 
 
@@ -430,7 +434,10 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
   fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
 
   // Load min/max values
-  ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
+  if (min != -std::numeric_limits<float>::infinity() ||
+      max != +std::numeric_limits<float>::infinity()) {
+    ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
+  }
 
   fmla(v25.v4s(), v19.v4s(), v8.s()[3]);
   fmla(v27.v4s(), v19.v4s(), v9.s()[3]);
@@ -442,33 +449,37 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
 
   // Clamp
   bind(l3);
-  fmax(v20.v4s(), v20.v4s(), v6.v4s());
   // Load cn_stride
   ldr(x0, mem[sp, 64]);
-  fmax(v21.v4s(), v21.v4s(), v6.v4s());
-  fmax(v22.v4s(), v22.v4s(), v6.v4s());
-  fmax(v23.v4s(), v23.v4s(), v6.v4s());
-  fmax(v24.v4s(), v24.v4s(), v6.v4s());
-  fmax(v25.v4s(), v25.v4s(), v6.v4s());
-  fmax(v26.v4s(), v26.v4s(), v6.v4s());
-  fmax(v27.v4s(), v27.v4s(), v6.v4s());
-  fmax(v28.v4s(), v28.v4s(), v6.v4s());
-  fmax(v29.v4s(), v29.v4s(), v6.v4s());
-  fmax(v30.v4s(), v30.v4s(), v6.v4s());
-  fmax(v31.v4s(), v31.v4s(), v6.v4s());
   subs(x1, x1, 8);
-  fmin(v20.v4s(), v20.v4s(), v7.v4s());
-  fmin(v21.v4s(), v21.v4s(), v7.v4s());
-  fmin(v22.v4s(), v22.v4s(), v7.v4s());
-  fmin(v23.v4s(), v23.v4s(), v7.v4s());
-  fmin(v24.v4s(), v24.v4s(), v7.v4s());
-  fmin(v25.v4s(), v25.v4s(), v7.v4s());
-  fmin(v26.v4s(), v26.v4s(), v7.v4s());
-  fmin(v27.v4s(), v27.v4s(), v7.v4s());
-  fmin(v28.v4s(), v28.v4s(), v7.v4s());
-  fmin(v29.v4s(), v29.v4s(), v7.v4s());
-  fmin(v30.v4s(), v30.v4s(), v7.v4s());
-  fmin(v31.v4s(), v31.v4s(), v7.v4s());
+  if (min != -std::numeric_limits<float>::infinity()) {
+    fmax(v20.v4s(), v20.v4s(), v6.v4s());
+    fmax(v21.v4s(), v21.v4s(), v6.v4s());
+    fmax(v22.v4s(), v22.v4s(), v6.v4s());
+    fmax(v23.v4s(), v23.v4s(), v6.v4s());
+    fmax(v24.v4s(), v24.v4s(), v6.v4s());
+    fmax(v25.v4s(), v25.v4s(), v6.v4s());
+    fmax(v26.v4s(), v26.v4s(), v6.v4s());
+    fmax(v27.v4s(), v27.v4s(), v6.v4s());
+    fmax(v28.v4s(), v28.v4s(), v6.v4s());
+    fmax(v29.v4s(), v29.v4s(), v6.v4s());
+    fmax(v30.v4s(), v30.v4s(), v6.v4s());
+    fmax(v31.v4s(), v31.v4s(), v6.v4s());
+  }
+  if (max != +std::numeric_limits<float>::infinity()) {
+    fmin(v20.v4s(), v20.v4s(), v7.v4s());
+    fmin(v21.v4s(), v21.v4s(), v7.v4s());
+    fmin(v22.v4s(), v22.v4s(), v7.v4s());
+    fmin(v23.v4s(), v23.v4s(), v7.v4s());
+    fmin(v24.v4s(), v24.v4s(), v7.v4s());
+    fmin(v25.v4s(), v25.v4s(), v7.v4s());
+    fmin(v26.v4s(), v26.v4s(), v7.v4s());
+    fmin(v27.v4s(), v27.v4s(), v7.v4s());
+    fmin(v28.v4s(), v28.v4s(), v7.v4s());
+    fmin(v29.v4s(), v29.v4s(), v7.v4s());
+    fmin(v30.v4s(), v30.v4s(), v7.v4s());
+    fmin(v31.v4s(), v31.v4s(), v7.v4s());
+  }
 
   // Store full 6 x 8
   b_lo(l7);
@@ -700,7 +711,9 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, void* params) {
 xnn_status xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch64;
   Generator g(code);
-  g.generate(false, nc, kc, nullptr);
+  assert(params != nullptr);
+  jit_gemm_params* gemm_params = static_cast<jit_gemm_params*>(params);
+  g.generate(false, nc, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -711,7 +724,9 @@ xnn_status xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75(xnn_cod
 xnn_status xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {
   using namespace xnnpack::aarch64;
   Generator g(code);
-  g.generate(true, nc, kc, nullptr);
+  assert(params != nullptr);
+  jit_gemm_params* gemm_params = static_cast<jit_gemm_params*>(params);
+  g.generate(true, nc, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
