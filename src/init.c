@@ -438,7 +438,7 @@ static void init(void) {
         xnn_params.qu8.gemm.nr = 16;
         xnn_params.qu8.gemm.log2_kr = 2;
       } else {
-        xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64);
+        xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53);
         xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64);
         xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane);
         xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__neon_mlal_lane);
