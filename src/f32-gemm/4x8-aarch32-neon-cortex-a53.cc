@@ -8,6 +8,7 @@
 #include <xnnpack/gemm.h>
 
 #include <cassert>
+#include <limits>
 
 namespace xnnpack {
 namespace aarch32 {
