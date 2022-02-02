@@ -61,7 +61,6 @@ void xnn_x64_transpose_ukernel__2x2_multi_multi_sse2(
       _mm_storeu_si128((__m128i*) o0, v0_0);
       o0 = (uint64_t*) ((uintptr_t) o0 + tile_hbytes);
     }
-
     if (bh != 0) {
       const __m128i v1_0 = _mm_loadu_si128((const __m128i*) i0);
       const __m128i v1_1 = _mm_undefined_si128();

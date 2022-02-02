@@ -39,11 +39,11 @@ void xnn_x32_transpose_ukernel__4x4_multi_switch_sse2(
   const uint32_t* i2 = (const uint32_t*) ((uintptr_t) i1 + input_stride);
   const uint32_t* i3 = (const uint32_t*) ((uintptr_t) i2 + input_stride);
   uint32_t* o = (uint32_t*) output;
-  output_stride = -output_stride;
+  const size_t minus_output_stride = -output_stride;
 
   do {
     const size_t rem = min(block_width - 1, 3);
-    const size_t oN_stride = -rem * output_stride;
+    const size_t oN_stride = rem * output_stride;
     size_t bh = block_height;
     for (; bh >= 4; bh -= 4) {
       const __m128i v2_0 = _mm_loadu_si128((const __m128i*) i0);
@@ -71,10 +71,10 @@ void xnn_x32_transpose_ukernel__4x4_multi_switch_sse2(
       switch (rem) {
         case 3:
           _mm_storeu_si128((__m128i*) oN, v0_3);
-          oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+          oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
         case 2:
           _mm_storeu_si128((__m128i*) oN, v0_2);
-          oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+          oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
         case 1:
           _mm_storeu_si128((__m128i*) oN, v0_1);
         case 0:
@@ -85,7 +85,6 @@ void xnn_x32_transpose_ukernel__4x4_multi_switch_sse2(
           XNN_UNREACHABLE;
       }
     }
-
     if (bh != 0) {
       const __m128i v2_0 = _mm_loadu_si128((const __m128i*) i0);
       if XNN_UNPREDICTABLE(bh < 2) {
@@ -115,10 +114,10 @@ void xnn_x32_transpose_ukernel__4x4_multi_switch_sse2(
         switch (rem) {
           case 3:
             _mm_storel_epi64((__m128i*) oN, v0_3);
-            oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+            oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
             _mm_storel_epi64((__m128i*) oN, v0_2);
-            oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+            oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
             _mm_storel_epi64((__m128i*) oN, v0_1);
           case 0:
@@ -139,10 +138,10 @@ void xnn_x32_transpose_ukernel__4x4_multi_switch_sse2(
         switch (rem) {
           case 3:
             *((int*) oN) = _mm_cvtsi128_si32(v0_3);
-            oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+            oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
             *((int*) oN) = _mm_cvtsi128_si32(v0_2);
-            oN = (uint32_t*) ((uintptr_t) oN + output_stride);
+            oN = (uint32_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
             *((int*) oN) = _mm_cvtsi128_si32(v0_1);
           case 0:

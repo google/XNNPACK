@@ -35,11 +35,10 @@ void xnn_x64_transpose_ukernel__2x2_reuse_switch_sse2(
 
   const uint64_t* i0 = input;
   uint64_t* o = (uint64_t*) output;
-  output_stride = -output_stride;
 
   do {
     const size_t rem = min(block_width - 1, 1);
-    const size_t oN_stride = -rem * output_stride;
+    const size_t oN_stride = rem * output_stride;
     size_t bh = block_height;
     for (; bh >= 2; bh -= 2) {
       const __m128i v1_0 = _mm_loadu_si128((const __m128i*) i0);
@@ -65,7 +64,6 @@ void xnn_x64_transpose_ukernel__2x2_reuse_switch_sse2(
           XNN_UNREACHABLE;
       }
     }
-
     if (bh != 0) {
       const __m128i v1_0 = _mm_loadu_si128((const __m128i*) i0);
       const __m128i v1_1 = _mm_undefined_si128();

@@ -129,7 +129,6 @@ void xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2(
       _mm_storeu_si128((__m128i*) o0, v0_0);
       o0 = (uint16_t*) ((uintptr_t) o0 + tile_hbytes);
     }
-
     if (bh != 0) {
       const __m128i v3_0 = _mm_loadu_si128((const __m128i*) i0);
       const uint16_t *i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
