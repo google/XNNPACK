@@ -2503,19 +2503,13 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
+  src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c
+  src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c
+  src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
-  src/x32-packx/x4-neon-st4.c
-  src/x32-unpool/neon.c
-  src/x32-zip/x2-neon.c
-  src/x32-zip/x3-neon.c
-  src/x32-zip/x4-neon.c
-  src/x32-zip/xm-neon.c
-  src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c
   src/x16-transpose/gen/8x8-multi-dec-zip-neon.c
   src/x16-transpose/gen/8x8-multi-mov-zip-neon.c
   src/x16-transpose/gen/8x8-multi-switch-zip-neon.c
@@ -2523,6 +2517,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c
   src/x16-transpose/gen/8x8-reuse-multi-zip-neon.c
   src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c
+  src/x32-packx/x4-neon-st4.c
   src/x32-transpose/gen/4x4-multi-dec-zip-neon.c
   src/x32-transpose/gen/4x4-multi-mov-zip-neon.c
   src/x32-transpose/gen/4x4-multi-multi-zip-neon.c
@@ -2531,6 +2526,11 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-transpose/gen/4x4-reuse-mov-zip-neon.c
   src/x32-transpose/gen/4x4-reuse-multi-zip-neon.c
   src/x32-transpose/gen/4x4-reuse-switch-zip-neon.c
+  src/x32-unpool/neon.c
+  src/x32-zip/x2-neon.c
+  src/x32-zip/x3-neon.c
+  src/x32-zip/x4-neon.c
+  src/x32-zip/xm-neon.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c)
 
@@ -5805,7 +5805,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-ld64.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-prfm-ld64.S
+  src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-cortex-a53.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64.S
+  src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-cortex-a53.S
   src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
   src/qc8-gemm/gen/4x8c4-minmax-fp32-aarch32-neondot-cortex-a55.S
   src/qc8-gemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S
@@ -5815,7 +5817,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
   src/qc8-igemm/gen/4x8c4-minmax-fp32-aarch32-neondot-cortex-a55.S
   src/qc8-igemm/gen/4x8c4-minmax-fp32-aarch32-neondot-ld64.S
+  src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-cortex-a53.S
   src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
+  src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
   src/qs8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-cortex-a55.S
   src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S
@@ -5823,7 +5827,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qs8-igemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-cortex-a55.S
   src/qs8-igemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S
+  src/qu8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-cortex-a53.S
   src/qu8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
+  src/qu8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
   src/qu8-gemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S)
