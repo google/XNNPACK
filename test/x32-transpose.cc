@@ -3538,3 +3538,1211 @@ TEST(X32_TRANSPOSE__4X4_SCALAR_FLOAT, bh_4_bw_4_is_8_os_8) {
       .Test(xnn_x32_transpose_ukernel__4x4_wasmsimd);
   }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_DEC_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MOV_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_MULTI_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_MULTI_SWITCH_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_DEC_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MOV_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_MULTI_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(4)
+        .block_width(i)
+        .block_height(4)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_8_bw_4) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(8)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_5_8_bw_4){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(4)
+        .output_stride(i)
+        .block_width(4)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_5_8_bw_8){
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .iterations(1)
+        .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_ARM_NEON;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .iterations(1)
+          .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+      }
+    }
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+
+  TEST(X32_TRANSPOSE__4X4_REUSE_SWITCH_ZIP_NEON, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_ARM_NEON;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .iterations(1)
+      .Test(xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

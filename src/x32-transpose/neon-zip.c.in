@@ -1,0 +1,475 @@
+// Copyright 2021 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+$import math
+$assert IN_PTRS in ["MULTI", "REUSE"]
+$assert OUT_PTRS in ["MULTI", "SWITCH", "MOV", "DEC"]
+$assert SIZE in [8, 16, 32]
+$TILE_SIZE = int(128/SIZE)
+$NUM_ITERS = int(math.log2(TILE_SIZE))
+
+#include <arm_neon.h>
+
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/transpose.h>
+
+void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_zip_neon(
+    const uint${SIZE}_t* input,
+    uint${SIZE}_t* output,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_width,
+    size_t block_height)
+{
+  assert(output_stride >= block_height * sizeof(uint${SIZE}_t));
+  assert(input_stride >= block_width * sizeof(uint${SIZE}_t));
+
+  const size_t tile_height = ${TILE_SIZE};
+  const size_t tile_width = ${TILE_SIZE};
+  const size_t tile_hbytes = tile_height * sizeof(uint${SIZE}_t);
+  const size_t tile_wbytes = tile_width * sizeof(uint${SIZE}_t);
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  $if IN_PTRS == "MULTI":
+    const size_t input_offset = tile_height * input_stride;
+  $if OUT_PTRS in ["MOV", "DEC"]:
+    const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint${SIZE}_t) - tile_hbytes;
+  $else:
+    const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(uint${SIZE}_t);
+
+  $if IN_PTRS == "MULTI":
+    const uint${SIZE}_t* i0 = input;
+    $for N in range(1, TILE_SIZE):
+      const uint${SIZE}_t* i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
+  $else:
+    const uint${SIZE}_t* i0 = input;
+  $if OUT_PTRS == "MULTI":
+    uint${SIZE}_t* o0 = (uint${SIZE}_t*) output;
+    $for N in range(1, TILE_SIZE):
+      uint${SIZE}_t* o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N-1} + output_stride);
+  $elif OUT_PTRS == "SWITCH":
+    uint${SIZE}_t* o = (uint${SIZE}_t*) output;
+  $else:
+    uint${SIZE}_t* o = (uint${SIZE}_t*) ((uintptr_t) output - tile_hbytes);
+  $if OUT_PTRS != "MULTI":
+    const size_t minus_output_stride = -output_stride;
+
+  do {
+    $if OUT_PTRS == "MULTI":
+      if XNN_UNPREDICTABLE(block_width < 2) {
+        o1 = o0;
+      }
+      $for N in range(2, TILE_SIZE, 2):
+        if XNN_UNPREDICTABLE(block_width <= ${N}) {
+          o${N} = o0;
+        }
+        if XNN_UNPREDICTABLE(block_width < ${N+2}) {
+          o${N+1} = o0;
+        }
+    $elif OUT_PTRS in ["MOV", "DEC"]:
+      const size_t rem = min(block_width - 1, ${TILE_SIZE-1});
+      const size_t oN_stride = rem * output_stride;
+      const size_t oN_offset = oN_stride + tile_hbytes;
+    $else:
+      const size_t rem = min(block_width - 1, ${TILE_SIZE-1});
+      const size_t oN_stride = rem * output_stride;
+    size_t bh = block_height;
+    for (; bh >= ${TILE_SIZE}; bh -= ${TILE_SIZE}) {
+      $for N in range(TILE_SIZE):
+        $if IN_PTRS == "REUSE":
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N} = vld1q_u${SIZE}(i0); i0 = (uint${SIZE}_t*) ((uintptr_t) i0 + input_stride);
+        $else:
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N} = vld1q_u${SIZE}(i${N}); i${N} = (uint${SIZE}_t*) ((uintptr_t) i${N} + input_offset);
+
+      $for N in range(TILE_SIZE >> 1):
+        const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzipq_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
+
+      $for M in range(1, NUM_ITERS):
+        $for N in range(TILE_SIZE >> 1):
+          const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-M-1}_${N} = vzipq_u${SIZE}(v${NUM_ITERS-M}_${N>>1}.val[${N%2}], v${NUM_ITERS-M}_${(N>>1)+int(TILE_SIZE/4)}.val[${N%2}]);
+
+      $if OUT_PTRS == "SWITCH":
+        uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+        switch (rem) {
+          $for N in reversed(range(2, TILE_SIZE)):
+            case ${N}:
+              vst1q_u${SIZE}(oN, v0_${N>>1}.val[${N%2}]); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+          case 1:
+            vst1q_u${SIZE}(oN, v0_0.val[1]);
+          case 0:
+            vst1q_u${SIZE}(o, v0_0.val[0]); o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
+      $elif OUT_PTRS in ["MOV", "DEC"]:
+        o = (uint${SIZE}_t*) ((uintptr_t) o + oN_offset);
+        vst1q_u${SIZE}(o, v0_${(TILE_SIZE-1)>>1}.val[1]);
+        $if OUT_PTRS == "MOV":
+          uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+        $for N in reversed(range(2, TILE_SIZE, 2)):
+          if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+            $if OUT_PTRS == "MOV":
+              o = oN;
+            $else:
+              o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          }
+          vst1q_u${SIZE}(o, v0_${N>>1}.val[0]);
+          $if OUT_PTRS == "MOV":
+            oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+            $if OUT_PTRS == "MOV":
+              o = oN;
+            $else:
+              o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          }
+          vst1q_u${SIZE}(o, v0_${(N-1)>>1}.val[1]);
+          $if OUT_PTRS == "MOV":
+            oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+        if XNN_UNPREDICTABLE(block_width > 1) {
+          $if OUT_PTRS == "MOV":
+            o = oN;
+          $else:
+            o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+        }
+        vst1q_u${SIZE}(o, v0_0.val[0]);
+      $else:
+        $for N in reversed(range(TILE_SIZE)):
+          vst1q_u${SIZE}(o${N}, v0_${N>>1}.val[${N%2}]); o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N} + tile_hbytes);
+    }
+    $if OUT_PTRS in ["MOV", "DEC"]:
+      o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
+
+    if (bh != 0) {
+      $if IN_PTRS == "REUSE":
+        const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_0 = vld1q_u${SIZE}(i0);
+        $for N in range(1, TILE_SIZE - 1, 2):
+          const uint${SIZE}_t *i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
+          if XNN_UNPREDICTABLE(bh < ${N+1}) {
+            i${N} = i${N-1};
+          }
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N} = vld1q_u${SIZE}(i${N});
+          const uint${SIZE}_t *i${N+1} = (const uint${SIZE}_t*) ((uintptr_t) i${N} + input_stride);
+          if XNN_UNPREDICTABLE(bh <= ${N+1}) {
+            i${N+1} = i${N};
+          }
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N+1} = vld1q_u${SIZE}(i${N+1});
+      $else:
+        const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_0 = vld1q_u${SIZE}(i0);
+        $for N in range(1, TILE_SIZE - 1, 2):
+          if XNN_UNPREDICTABLE(bh < ${N+1}) {
+            i${N} = i0;
+          }
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N} = vld1q_u${SIZE}(i${N});
+          if XNN_UNPREDICTABLE(bh <= ${N+1}) {
+            i${N+1} = i0;
+          }
+          const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N+1} = vld1q_u${SIZE}(i${N+1});
+      const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${TILE_SIZE-1} = vmovq_n_u${SIZE}(0);
+
+      $for N in range(TILE_SIZE >> 1):
+          const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzipq_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
+
+      $for M in range(1, NUM_ITERS):
+        $for N in range(TILE_SIZE >> 1):
+          const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-M-1}_${N} = vzipq_u${SIZE}(v${NUM_ITERS-M}_${N>>1}.val[${N%2}], v${NUM_ITERS-M}_${(N>>1)+int(TILE_SIZE/4)}.val[${N%2}]);
+
+      $for N in range(TILE_SIZE):
+        uint${SIZE}x${TILE_SIZE>>1}_t v${N}_low = vget_low_u${SIZE}(v0_${N>>1}.val[${N%2}]);
+
+      if (bh & ${TILE_SIZE>>1}) {
+        $if OUT_PTRS == "SWITCH":
+          uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+          switch (rem) {
+            $for N in reversed(range(2, TILE_SIZE)):
+              case ${N}:
+                vst1_u${SIZE}(oN, v${N}_low); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+            case 1:
+              vst1_u${SIZE}(oN, v1_low);
+            case 0:
+              $if NUM_ITERS > 1:
+                vst1_u${SIZE}(o, v0_low); o += ${TILE_SIZE>>1};
+              $else:
+                vst1_u${SIZE}(o, v0_low);
+              break;
+            default:
+              XNN_UNREACHABLE;
+          }
+        $elif OUT_PTRS in ["MOV", "DEC"]:
+          o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+          vst1_u${SIZE}(o, v${TILE_SIZE-1}_low);
+          $if OUT_PTRS == "MOV":
+            uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          $for N in reversed(range(2, TILE_SIZE, 2)):
+            if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+              $if OUT_PTRS == "MOV":
+                o = oN;
+              $else:
+                o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            }
+            vst1_u${SIZE}(o, v${N}_low);
+            $if OUT_PTRS == "MOV":
+              oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+              $if OUT_PTRS == "MOV":
+                o = oN;
+              $else:
+                o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            }
+            vst1_u${SIZE}(o, v${N-1}_low);
+            $if OUT_PTRS == "MOV":
+              oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          if XNN_UNPREDICTABLE(block_width > 1) {
+            $if OUT_PTRS == "MOV":
+              o = oN;
+            $else:
+              o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+          }
+          $if NUM_ITERS > 1:
+            vst1_u${SIZE}(o, v0_low); o += ${TILE_SIZE>>1};
+          $else:
+            vst1_u${SIZE}(o, v0_low);
+        $else:
+          $for N in reversed(range(TILE_SIZE)):
+            $if NUM_ITERS>1:
+              vst1_u${SIZE}(o${N}, v${N}_low); o${N} += ${TILE_SIZE>>1};
+            $else:
+              vst1_u${SIZE}(o${N}, v${N}_low);
+        $if NUM_ITERS > 1:
+          $for N in range(TILE_SIZE):
+            v${N}_low = vget_high_u${SIZE}(v0_${N>>1}.val[${N%2}]);
+      }
+
+      $if NUM_ITERS>1:
+        if (bh & ${TILE_SIZE>>2}) {
+          $if OUT_PTRS == "SWITCH":
+            uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            switch (rem) {
+              $for N in reversed(range(2, TILE_SIZE)):
+                case ${N}:
+                  $if SIZE == 32:
+                    vst1_lane_u32(oN, v${N}_low, 0); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  $else:
+                    vst1_lane_u32((void*) oN, vreinterpret_u32_u${SIZE}(v${N}_low), 0); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+              case 1:
+                $if SIZE == 32:
+                  vst1_lane_u32(oN, v1_low, 0);
+                $else:
+                  vst1_lane_u32((void*) oN, vreinterpret_u32_u${SIZE}(v1_low), 0);
+              case 0:
+                $if SIZE == 32:
+                  vst1_lane_u32(o, v0_low, 0);
+                $else:
+                  vst1_lane_u32((void*) o, vreinterpret_u32_u${SIZE}(v0_low), 0); o += ${TILE_SIZE>>2};
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
+          $elif OUT_PTRS in ["MOV", "DEC"]:
+            o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            $if SIZE == 32:
+              vst1_lane_u32(o, v${TILE_SIZE-1}_low, 0);
+            $else:
+              vst1_lane_u32((void*) o, vreinterpret_u32_u${SIZE}(v${TILE_SIZE-1}_low), 0);
+            $if OUT_PTRS == "MOV":
+              uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            $for N in reversed(range(2, TILE_SIZE, 2)):
+              if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              $if SIZE == 32:
+                vst1_lane_u32(o, v${N}_low, 0);
+              $else:
+                vst1_lane_u32((void*) o, vreinterpret_u32_u${SIZE}(v${N}_low), 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              $if SIZE == 32:
+                vst1_lane_u32(o, v${N-1}_low, 0);
+              $else:
+                vst1_lane_u32((void*) o, vreinterpret_u32_u${SIZE}(v${N-1}_low), 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width > 1) {
+              $if OUT_PTRS == "MOV":
+                o = oN;
+              $else:
+                o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            }
+            $if SIZE == 32:
+              vst1_lane_u32(o, v0_low, 0);
+            $else:
+              vst1_lane_u32((void*) o, vreinterpret_u32_u${SIZE}(v0_low), 0); o += ${TILE_SIZE>>2};
+          $else:
+            $for N in reversed(range(TILE_SIZE)):
+              $if SIZE == 32:
+                vst1_lane_u32(o${N}, v${N}_low, 0);
+              $else:
+                vst1_lane_u32((void*) o${N}, vreinterpret_u32_u${SIZE}(v${N}_low), 0); o${N} += ${TILE_SIZE>>2};
+          $if NUM_ITERS > 2:
+            $for N in range(TILE_SIZE):
+              $if SIZE == 16:
+                v${N}_low = vext_u16(v${N}_low, v${N}_low, 2);
+              $else:
+                v${N}_low = vext_u8(v${N}_low, v${N}_low, 4);
+        }
+      $if NUM_ITERS>2:
+        if (bh & ${TILE_SIZE>>3}) {
+          $if OUT_PTRS == "SWITCH":
+            uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            switch (rem) {
+              $for N in reversed(range(2, TILE_SIZE)):
+                case ${N}:
+                  $if SIZE == 16:
+                    vst1_lane_u16(oN, v${N}_low, 0); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  $else:
+                    vst1_lane_u16((void*) oN, vreinterpret_u16_u${SIZE}(v${N}_low), 0); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+              case 1:
+                $if SIZE == 16:
+                  vst1_lane_u16(oN, v1_low, 0);
+                $else:
+                  vst1_lane_u16((void*) oN, vreinterpret_u16_u${SIZE}(v1_low), 0);
+              case 0:
+                $if SIZE == 16:
+                  vst1_lane_u16(o, v0_low, 0);
+                $else:
+                  $if NUM_ITERS>3:
+                    vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v0_low), 0); o += ${TILE_SIZE>>3};
+                  $else:
+                    vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v0_low), 0);
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
+          $elif OUT_PTRS in ["MOV", "DEC"]:
+            o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            $if SIZE == 16:
+              vst1_lane_u16(o, v${TILE_SIZE-1}_low, 0);
+            $else:
+              vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v${TILE_SIZE-1}_low), 0);
+            $if OUT_PTRS == "MOV":
+              uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            $for N in reversed(range(2, TILE_SIZE, 2)):
+              if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              $if SIZE == 16:
+                vst1_lane_u16(o, v${N}_low, 0);
+              $else:
+                vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v${N}_low), 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              $if SIZE == 16:
+                vst1_lane_u16(o, v${N-1}_low, 0);
+              $else:
+                vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v${N-1}_low), 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width > 1) {
+              $if OUT_PTRS == "MOV":
+                o = oN;
+              $else:
+                o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            }
+            $if SIZE == 16:
+              vst1_lane_u16(o, v0_low, 0);
+            $else:
+              vst1_lane_u16((void*) o, vreinterpret_u16_u${SIZE}(v0_low), 0); o += ${TILE_SIZE>>3};
+          $else:
+            $for N in reversed(range(TILE_SIZE)):
+              $if SIZE == 16:
+                vst1_lane_u16(o${N}, v${N}_low, 0);
+              $else:
+                vst1_lane_u16((void*) o${N}, vreinterpret_u16_u${SIZE}(v${N}_low), 0); o${N} += ${TILE_SIZE>>3};
+          $if NUM_ITERS>3:
+            $for N in range(TILE_SIZE):
+              v${N}_low = vext_u8(v${N}_low, v${N}_low, 2);
+        }
+      $if SIZE == 8:
+        if (bh & 1) {
+          $if OUT_PTRS == "SWITCH":
+            uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            switch (rem) {
+              $for N in reversed(range(2, TILE_SIZE)):
+                case ${N}:
+                  vst1_lane_u8(oN, v${N}_low, 0); oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+              case 1:
+                vst1_lane_u8(oN, v1_low, 0);
+              case 0:
+                vst1_lane_u8(o, v0_low, 0);
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
+          $elif OUT_PTRS in ["MOV", "DEC"]:
+            o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
+            vst1_lane_u8(o, v${TILE_SIZE-1}_low, 0);
+            $if OUT_PTRS == "MOV":
+              uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            $for N in reversed(range(2, TILE_SIZE, 2)):
+              if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              vst1_lane_u8(o, v${N}_low, 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+                $if OUT_PTRS == "MOV":
+                  o = oN;
+                $else:
+                  o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+              }
+              vst1_lane_u8(o, v${N-1}_low, 0);
+              $if OUT_PTRS == "MOV":
+                oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width > 1) {
+              $if OUT_PTRS == "MOV":
+                o = oN;
+              $else:
+                o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
+            }
+            vst1_lane_u8(o, v0_low, 0);
+          $else:
+            $for N in reversed(range(TILE_SIZE)):
+              vst1_lane_u8(o${N}, v${N}_low, 0);
+        }
+    }
+
+    $if IN_PTRS == "MULTI":
+      i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
+      $for N in range(1, TILE_SIZE):
+        i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
+    $else:
+      i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
+    $if OUT_PTRS == "MULTI":
+      o0 = (uint${SIZE}_t*) ((uintptr_t) o0 + output_reset);
+      $for N in range(1, TILE_SIZE):
+        o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N} + output_reset);
+    $else:
+      o = (uint${SIZE}_t*) ((uintptr_t) o + output_reset);
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
+}

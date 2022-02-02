@@ -28,3 +28,11 @@
 - name: xnn_x32_transpose_ukernel__4x4_reuse_switch_sse2
 - name: xnn_x32_transpose_ukernel__4x4_sse
 - name: xnn_x32_transpose_ukernel__4x4_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_multi_switch_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_reuse_dec_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_reuse_mov_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_reuse_multi_zip_neon
+- name: xnn_x32_transpose_ukernel__4x4_reuse_switch_zip_neon
