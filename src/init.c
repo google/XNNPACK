@@ -2523,6 +2523,7 @@ static void init(void) {
             xnn_params.f32.gemm.nr = 8;
             #if XNN_ENABLE_JIT
               xnn_params.f32.gemm.generator.gemm = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75);
+              xnn_params.f32.gemm.generator.igemm = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75);
             #endif
             break;
           case cpuinfo_uarch_exynos_m1:
