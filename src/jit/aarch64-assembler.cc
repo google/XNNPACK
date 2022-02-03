@@ -278,6 +278,10 @@ void Assembler::ldr(XRegister xt, MemOperand xn) {
   emit32(0xF9400000 | imm >> 3 << 10 | rn(xn.base) | xt.code);
 }
 
+void Assembler::mov(XRegister xd, XRegister xn) {
+  emit32(0xAA0003E0 | rm(xn) | rd(xd));
+}
+
 void Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
   if (xn.offset < 0 || xn.offset > kImm12Max) {
     error_ = Error::kInvalidOperand;
