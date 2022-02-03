@@ -275,6 +275,22 @@ static void ruy_st(benchmark::State& state, const char* net)
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55, 4, 8, 4, 1,
       xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEONDOT);
   }
+  static void qs8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a53(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a53, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
+  static void qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
+  static void qs8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a7(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a7, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
+  static void qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7, 4, 8, 1, 1,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
+  }
   static void qs8_gemm_4x8__aarch32_neon_mlal_lane_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, 4, 8, 1, 1,
       xnn_init_qs8_conv_minmax_rndnu_neon_params, benchmark::utils::CheckNEON);
@@ -285,6 +301,10 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   BENCHMARK_GEMM(qs8_gemm_4x8c4__aarch32_neondot_ld64)
   BENCHMARK_GEMM(qs8_gemm_4x8c4__aarch32_neondot_cortex_a55)
+  BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a53)
+  BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53)
+  BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_cortex_a7)
+  BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7)
   BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_ld64)
   BENCHMARK_GEMM(qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_ld64)
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
