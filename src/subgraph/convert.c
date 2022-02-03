@@ -35,6 +35,12 @@ static enum xnn_status create_convert_operator(
 
   enum xnn_status status = xnn_status_uninitialized;
   switch (node->compute_type) {
+    case xnn_compute_type_fp32_to_fp16:
+      status = xnn_create_convert_nc_f32_f16(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->flags,
+        &opdata->operator_object);
+      break;
     case xnn_compute_type_fp32_to_qs8:
       status = xnn_create_convert_nc_f32_qs8(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -50,6 +56,12 @@ static enum xnn_status create_convert_operator(
         values[output_id].quantization.scale,
         (uint8_t) values[output_id].quantization.zero_point,
         0, UINT8_MAX,
+        node->flags,
+        &opdata->operator_object);
+      break;
+    case xnn_compute_type_fp16_to_fp32:
+      status = xnn_create_convert_nc_f16_f32(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_object);
       break;
@@ -103,6 +115,13 @@ static enum xnn_status setup_convert_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_object->type) {
+    case xnn_operator_type_convert_nc_f32_f16:
+      return xnn_setup_convert_nc_f32_f16(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
     case xnn_operator_type_convert_nc_f32_qs8:
       return xnn_setup_convert_nc_f32_qs8(
         opdata->operator_object,
@@ -112,6 +131,13 @@ static enum xnn_status setup_convert_operator(
         threadpool);
     case xnn_operator_type_convert_nc_f32_qu8:
       return xnn_setup_convert_nc_f32_qu8(
+        opdata->operator_object,
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+    case xnn_operator_type_convert_nc_f16_f32:
+      return xnn_setup_convert_nc_f16_f32(
         opdata->operator_object,
         opdata->batch_size,
         input_data,
@@ -143,12 +169,19 @@ static inline enum xnn_compute_type validate_datatypes(
   switch (input_datatype) {
     case xnn_datatype_fp32:
       switch (output_datatype) {
+        case xnn_datatype_fp16:
+          return xnn_compute_type_fp32_to_fp16;
         case xnn_datatype_qint8:
           return xnn_compute_type_fp32_to_qs8;
         case xnn_datatype_quint8:
           return xnn_compute_type_fp32_to_qu8;
         default:
           break;
+      }
+      break;
+    case xnn_datatype_fp16:
+      if (output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_fp16_to_fp32;
       }
       break;
     case xnn_datatype_qint8:
@@ -165,6 +198,25 @@ static inline enum xnn_compute_type validate_datatypes(
       XNN_UNREACHABLE;
   }
   return xnn_compute_type_invalid;
+}
+
+void xnn_init_convert_node(
+  struct xnn_node* node,
+  enum xnn_compute_type compute_type,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags)
+{
+  node->type = xnn_node_type_convert;
+  node->compute_type = compute_type;
+  node->num_inputs = 1;
+  node->inputs[0] = input_id;
+  node->num_outputs = 1;
+  node->outputs[0] = output_id;
+  node->flags = flags;
+
+  node->create = create_convert_operator;
+  node->setup = setup_convert_operator;
 }
 
 enum xnn_status xnn_define_convert(
@@ -195,6 +247,7 @@ enum xnn_status xnn_define_convert(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -223,6 +276,7 @@ enum xnn_status xnn_define_convert(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
@@ -251,16 +305,6 @@ enum xnn_status xnn_define_convert(
     return xnn_status_out_of_memory;
   }
 
-  node->type = xnn_node_type_convert;
-  node->compute_type = compute_type;
-  node->num_inputs = 1;
-  node->inputs[0] = input_id;
-  node->num_outputs = 1;
-  node->outputs[0] = output_id;
-  node->flags = flags;
-
-  node->create = create_convert_operator;
-  node->setup = setup_convert_operator;
-
+  xnn_init_convert_node(node, compute_type, input_id, output_id, flags);
   return xnn_status_success;
 }

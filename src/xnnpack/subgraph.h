@@ -82,6 +82,15 @@ struct xnn_value {
   uint32_t num_consumers;
   uint32_t num_nchw_compatible_consumers;
   enum xnn_layout_type layout;
+  /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
+  /// Indicates that this value should be converted to FP16.
+  bool fp16_compatible;
+  /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
+  /// Indicates Value ID of the FP16 variant of this Value.
+  uint32_t fp16_id;
+  /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
+  /// Indicates Value ID of the FP32 variant of this Value.
+  uint32_t fp32_id;
 };
 
 struct xnn_blob {
@@ -110,11 +119,14 @@ typedef enum xnn_status (*xnn_setup_operator_fn)(
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
   xnn_compute_type_fp32,
+  xnn_compute_type_fp16,
   xnn_compute_type_qc8,
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
+  xnn_compute_type_fp32_to_fp16,
   xnn_compute_type_fp32_to_qs8,
   xnn_compute_type_fp32_to_qu8,
+  xnn_compute_type_fp16_to_fp32,
   xnn_compute_type_qs8_to_fp32,
   xnn_compute_type_qu8_to_fp32,
 };
@@ -322,6 +334,8 @@ struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
+void xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
+
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,
   uint32_t value_id);
@@ -341,6 +355,14 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
 void xnn_node_clear(struct xnn_node* node);
 void xnn_value_clear(struct xnn_value* value);
 
+void xnn_value_copy(struct xnn_value* dst_value, const struct xnn_value* src_value);
+
+void xnn_init_convert_node(
+  struct xnn_node* node,
+  enum xnn_compute_type compute_type,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
 
 #ifdef __cplusplus
 }  // extern "C"

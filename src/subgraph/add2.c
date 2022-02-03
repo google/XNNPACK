@@ -42,6 +42,15 @@ static enum xnn_status create_add_operator(
         node->flags,
         &opdata->operator_object);
       break;
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_add_nd_f16(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
     {
@@ -155,6 +164,17 @@ static enum xnn_status setup_add_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_add_nd_f16:
+      return xnn_setup_add_nd_f16(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_F16_OPERATORS)
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_add_nd_qs8:
       return xnn_setup_add_nd_qs8(
