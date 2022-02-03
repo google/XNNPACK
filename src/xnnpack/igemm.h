@@ -1387,6 +1387,9 @@ enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lan
 enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
 enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
 
+enum xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+enum xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

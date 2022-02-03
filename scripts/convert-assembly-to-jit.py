@@ -239,6 +239,8 @@ def main(input_file):
                      1).rstrip())
           continue
         elif '#include <xnnpack/assembly.h>' in line:
+          prologue.append(f'#include <cstddef>')
+          prologue.append('')
           prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
           prologue.append('#include <xnnpack/allocator.h>')
           if kernel_type == GEMM:
@@ -431,11 +433,11 @@ def main(input_file):
         continue
       m = re.fullmatch(INSTR_PLD_MEMOP, line)
       if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}')
+        instructions.append(f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}')
         continue
       m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
       if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
+        instructions.append(f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
         continue
       m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
       if m:
@@ -483,9 +485,9 @@ def main(input_file):
   print('}  // xnnpack')
   print('')
   if kernel_type == GEMM:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, void* params) {{')
+    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {{')
   else:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, void* params) {{')
+    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params) {{')
   print(f'  using namespace xnnpack::{arch};')
   print('  Generator g(code);')
   if kernel_type == GEMM:
