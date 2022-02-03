@@ -284,7 +284,7 @@ SET(JIT_AARCH32_SRCS
   src/qs8-igemm/4x8c4-rndnu-aarch32-neondot-ld64.cc)
 
 SET(JIT_AARCH64_SRCS
-  src/f32-gemm/6x8-aarch64-neonfma-prfm-cortex-a75.cc)
+  src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.cc)
 
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/params-init.c
