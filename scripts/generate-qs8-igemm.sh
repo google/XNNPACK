@@ -1080,7 +1080,7 @@ tools/generate-gemm-test.py --spec test/qc8-igemm-minmax-fp32.yaml --output test
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output test/qs8-igemm-minmax-fp32.cc --output test/qs8-igemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-fp32.yaml --output test/qu8-igemm-minmax-fp32.cc --output test/qu8-igemm-minmax-fp32-2.cc &
 
-tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output test/qs8-igemm-minmax-rndnu.cc --output test/qs8-igemm-minmax-rndnu-2.cc --output test/qs8-igemm-minmax-rndnu-3.cc &
+tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output test/qs8-igemm-minmax-rndnu.cc --output test/qs8-igemm-minmax-rndnu-2.cc --output test/qs8-igemm-minmax-rndnu-3.cc --output test/qs8-igemm-minmax-rndnu-4.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-rndnu.yaml --output test/qu8-igemm-minmax-rndnu.cc --output test/qu8-igemm-minmax-rndnu-2.cc &
 
 wait
