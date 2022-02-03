@@ -3282,30 +3282,30 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
-  src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
-  src/qc8-gemm/gen/1x16c4-minmax-fp32-neondot.c
-  src/qc8-gemm/gen/4x8c4-minmax-fp32-neondot.c
-  src/qc8-gemm/gen/4x16c4-minmax-fp32-neondot.c
-  src/qc8-igemm/gen/1x8c4-minmax-fp32-neondot.c
-  src/qc8-igemm/gen/1x16c4-minmax-fp32-neondot.c
-  src/qc8-igemm/gen/4x8c4-minmax-fp32-neondot.c
-  src/qc8-igemm/gen/4x16c4-minmax-fp32-neondot.c
-  src/qs8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
-  src/qs8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
-  src/qs8-gemm/gen/4x8c4-minmax-rndnu-neondot.c
-  src/qs8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
-  src/qs8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
-  src/qs8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
-  src/qs8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
-  src/qs8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
-  src/qu8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
-  src/qu8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
-  src/qu8-gemm/gen/2x16c4-minmax-rndnu-neondot.c
-  src/qu8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
-  src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
-  src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
-  src/qu8-igemm/gen/2x16c4-minmax-rndnu-neondot.c
-  src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c)
+   src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
+   src/qc8-gemm/gen/1x16c4-minmax-fp32-neondot.c
+   src/qc8-gemm/gen/4x8c4-minmax-fp32-neondot.c
+   src/qc8-gemm/gen/4x16c4-minmax-fp32-neondot.c
+   src/qc8-igemm/gen/1x8c4-minmax-fp32-neondot.c
+   src/qc8-igemm/gen/1x16c4-minmax-fp32-neondot.c
+   src/qc8-igemm/gen/4x8c4-minmax-fp32-neondot.c
+   src/qc8-igemm/gen/4x16c4-minmax-fp32-neondot.c
+   src/qs8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
+   src/qs8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
+   src/qs8-gemm/gen/4x8c4-minmax-rndnu-neondot.c
+   src/qs8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
+   src/qs8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
+   src/qs8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
+   src/qs8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
+   src/qs8-igemm/gen/4x16c4-minmax-rndnu-neondot.c
+   src/qu8-gemm/gen/1x8c4-minmax-rndnu-neondot.c
+   src/qu8-gemm/gen/1x16c4-minmax-rndnu-neondot.c
+   src/qu8-gemm/gen/4x8c4-minmax-rndnu-neondot.c
+   src/qu8-gemm/gen/4x16c4-minmax-rndnu-neondot.c
+   src/qu8-igemm/gen/1x8c4-minmax-rndnu-neondot.c
+   src/qu8-igemm/gen/1x16c4-minmax-rndnu-neondot.c
+   src/qu8-igemm/gen/4x8c4-minmax-rndnu-neondot.c
+   src/qu8-igemm/gen/4x16c4-minmax-rndnu-neondot.c)
 
 SET(ALL_NEONDOT_MICROKERNEL_SRCS
   src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
