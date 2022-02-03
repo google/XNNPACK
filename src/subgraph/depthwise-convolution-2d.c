@@ -100,6 +100,32 @@ static enum xnn_status create_convolution_operator(
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
           &opdata->operator_object);
         break;
+#ifndef XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp16:
+        status = xnn_create_convolution2d_nhwc_f16(
+          node->params.depthwise_convolution_2d.input_padding_top,
+          node->params.depthwise_convolution_2d.input_padding_right,
+          node->params.depthwise_convolution_2d.input_padding_bottom,
+          node->params.depthwise_convolution_2d.input_padding_left,
+          node->params.depthwise_convolution_2d.kernel_height,
+          node->params.depthwise_convolution_2d.kernel_width,
+          node->params.depthwise_convolution_2d.subsampling_height,
+          node->params.depthwise_convolution_2d.subsampling_width,
+          node->params.depthwise_convolution_2d.dilation_height,
+          node->params.depthwise_convolution_2d.dilation_width,
+          node->params.depthwise_convolution_2d.input_channels /* groups */,
+          1 /* group_input_channels */,
+          node->params.depthwise_convolution_2d.depth_multiplier /* group_output_channels */,
+          node->params.depthwise_convolution_2d.input_channels /* input_channel_stride */,
+          node->params.depthwise_convolution_2d.input_channels * node->params.depthwise_convolution_2d.depth_multiplier /* output_channel_stride */,
+          filter_data,
+          bias_data,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION | XNN_FLAG_FP32_STATIC_WEIGHTS,
+          &opdata->operator_object);
+        break;
+#endif  // XNN_NO_F16_OPERATORS
 #ifndef XNN_NO_QS8_OPERATORS
       case xnn_compute_type_qs8:
       {
@@ -267,6 +293,18 @@ static enum xnn_status setup_convolution_operator(
         output_data,
         threadpool);
       break;
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_convolution_nhwc_f16:
+      return xnn_setup_convolution2d_nhwc_f16(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_convolution_nhwc_qc8:
       return xnn_setup_convolution2d_nhwc_qc8(
