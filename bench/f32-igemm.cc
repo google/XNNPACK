@@ -7,6 +7,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -152,28 +153,166 @@ static void IGEMMBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if XNN_PLATFORM_JIT
   static void IGEMMBenchmark(benchmark::State& state,
     xnn_jit_igemm_code_generator_function generator,
     size_t mr, size_t nr, size_t kr, size_t sr,
     xnn_init_f32_minmax_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
-  {
-    xnn_code_buffer code_buffer;
-    xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-    const size_t nc = state.range(1);
-    const size_t kc = state.range(2);
-    const size_t kernel_height = state.range(2);
-    const size_t kernel_width = state.range(3);
-    const size_t kernel_size = kernel_height * kernel_width;
-    generator(&code_buffer, nc, kc, kernel_size * mr * sizeof(void*), nullptr);
-    IGEMMBenchmark(
-        state,
-        reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code),
-        mr, nr, kr, sr, init_params);
-    xnn_release_code_memory(&code_buffer);
+{
+  if (isa_check && !isa_check(state)) {
+    return;
   }
 
+  const size_t input_height = state.range(0);
+  const size_t input_width = state.range(1);
+  const size_t kernel_height = state.range(2);
+  const size_t kernel_width = state.range(3);
+  const size_t kernel_size = kernel_height * kernel_width;
+  const size_t padding_height = state.range(4);
+  const size_t padding_width = state.range(5);
+  const size_t subsampling = state.range(6);
+  const size_t dilation = state.range(7);
+  const size_t group_input_channels = state.range(8);
+  const size_t group_output_channels = state.range(9);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
+
+  const size_t output_pixel_stride = group_output_channels;
+  const size_t input_pixel_stride = group_input_channels;
+  const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
+  const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
+  const size_t padding_left = padding_width / 2;
+  const size_t padding_top = padding_height / 2;
+  const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
+  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_size = output_height * output_width;
+
+  const size_t mc_stride = benchmark::utils::RoundUp<size_t>(output_size, mr);
+  const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
+  const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
+
+  std::vector<float> a(input_height * input_width * input_pixel_stride);
+  std::generate(a.begin(), a.end(), std::ref(f32rng));
+  std::vector<float> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
+  std::generate(k.begin(), k.end(), std::ref(f32rng));
+  std::vector<float> b(group_output_channels);
+  std::generate(b.begin(), b.end(), std::ref(f32rng));
+
+  std::vector<float> z(group_input_channels);
+
+  const size_t w_elements = kernel_size * kc_stride * nc_stride + nc_stride;
+  const size_t i_elements = mc_stride * kernel_size;
+  const size_t c_elements = output_height * output_width * output_pixel_stride;
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+      sizeof(float) * (w_elements + c_elements) + sizeof(void*) * i_elements);
+
+  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
+  std::fill(w.begin(), w.end(), 0.0f);
+  xnn_pack_f32_conv_goki_w(
+    1 /* groups */, group_output_channels, kernel_size, group_input_channels,
+    nr, kr, sr, k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
+  for (size_t n = 1; n < num_buffers; n++) {
+    std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
+  }
+
+  std::vector<const float*> i(i_elements * num_buffers);
+  xnn_operator convolution_op = { };
+  convolution_op.indirection_buffer   = reinterpret_cast<const void**>(i.data());
+  convolution_op.input                = a.data();
+  convolution_op.input_pixel_stride   = input_pixel_stride;
+  convolution_op.zero_buffer          = z.data();
+  convolution_op.groups               = 1;
+  convolution_op.group_input_channels = group_input_channels;
+  convolution_op.batch_size           = 1;
+  convolution_op.input_height         = input_height;
+  convolution_op.input_width          = input_width;
+  convolution_op.output_height        = output_height;
+  convolution_op.output_width         = output_width;
+  convolution_op.kernel_height        = kernel_height;
+  convolution_op.kernel_width         = kernel_width;
+  convolution_op.stride_height        = subsampling;
+  convolution_op.stride_width         = subsampling;
+  convolution_op.dilation_height      = dilation;
+  convolution_op.dilation_width       = dilation;
+  convolution_op.padding_top          = padding_top;
+  convolution_op.padding_left         = padding_left;
+  xnn_indirection_init_conv2d(&convolution_op, mr, 2 /* log2(sizeof(float)) */);
+  for (size_t n = 1; n < num_buffers; n++) {
+    std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
+  }
+
+  std::vector<float> c(c_elements * num_buffers);
+  std::fill(c.begin(), c.end(), std::nanf(""));
+
+  xnn_f32_minmax_params params;
+  init_params(&params,
+    -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+
+  jit_gemm_params jit_params = {
+    .f32_minmax = {
+      .min = -std::numeric_limits<float>::infinity(),
+      .max = +std::numeric_limits<float>::infinity()
+    }
+  };
+
+  xnn_code_buffer code_buffer;
+  xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  generator(&code_buffer, group_output_channels, group_input_channels * sizeof(float), kernel_size * mr * sizeof(void *), &jit_params);
+  auto f32_igemm = reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code);
+
+  size_t buffer_index = 0;
+  for (auto _ : state) {
+    state.PauseTiming();
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(float));
+    buffer_index = (buffer_index + 1) % num_buffers;
+    state.ResumeTiming();
+
+    for (uint32_t m = 0; m < output_size; m += mr) {
+      const uint32_t mb = min(output_size - m, mr);
+      f32_igemm(
+        mb, group_output_channels, group_input_channels * sizeof(float), kernel_size * mr * sizeof(void*),
+        i.data() + buffer_index * i_elements + m,
+        w.data() + buffer_index * w_elements,
+        c.data() + buffer_index * c_elements + m * group_output_channels, group_output_channels * sizeof(float), nr * sizeof(float),
+        0, z.data(), &params);
+    }
+  }
+  xnn_release_code_memory(&code_buffer);
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["FLOPS"] = benchmark::Counter(
+    uint64_t(state.iterations()) * 2 *
+      output_height * output_width *
+      group_input_channels * group_output_channels *
+      kernel_height * kernel_width,
+    benchmark::Counter::kIsRate);
+
+}
+#endif  // XNN_PLATFORM_JIT
+
+#if XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
+  static void jit_f32_igemm_6x8__aarch64_neonfma_cortex_a75(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75, 6, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+  static void jit_f32_igemm_6x8__aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75, 6, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
+
+  BENCHMARK_CONV(jit_f32_igemm_6x8__aarch64_neonfma_cortex_a75)
+  BENCHMARK_CONV(jit_f32_igemm_6x8__aarch64_neonfma_prfm_cortex_a75)
+#endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
+
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
   static void jit_f32_igemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, 4, 8, 1, 1,
       xnn_init_f32_minmax_scalar_params);
@@ -205,7 +344,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a55)
   BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_prfm_cortex_a75)
   BENCHMARK_CONV(jit_f32_igemm_4x8__aarch32_neon_cortex_a75)
-#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void f32_igemm_4x8__aarch32_neon_ld64(benchmark::State& state, const char* net) {
