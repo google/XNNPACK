@@ -332,6 +332,7 @@ class Assembler : public AssemblerBase {
   void b_lo(Label& l) { return b(kLO, l); }
   void b_ne(Label& l) { return b(kNE, l); }
   void cmp(XRegister xn, uint16_t imm12);
+  void cmp(XRegister xn, XRegister xm);
   void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);

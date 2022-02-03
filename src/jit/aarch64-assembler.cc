@@ -241,6 +241,10 @@ void Assembler::cmp(XRegister xn, uint16_t imm12) {
   emit32(0xF100001F | imm12 << 10 | rn(xn));
 }
 
+void Assembler::cmp(XRegister xn, XRegister xm) {
+  emit32(0xEB00001F | rm(xm) | rn(xn));
+}
+
 void Assembler::csel(XRegister xd, XRegister xn, XRegister xm, Condition c) {
   emit32(0x9A800000 | rm(xm) | c << 12 | rn(xn) | rd(xd));
 }
