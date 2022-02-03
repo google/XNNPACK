@@ -130,15 +130,12 @@ static void IGEMMBenchmark(benchmark::State& state,
 
     for (uint32_t m = 0; m < output_size; m += mr) {
       const uint32_t mb = min(output_size - m, mr);
-      for (uint32_t n = 0; n < group_output_channels; n += nr) {
-        const uint32_t nb = min(group_output_channels - n, nr);
-        f32_igemm(
-          mb, nb, group_input_channels * sizeof(float), kernel_size * mr * sizeof(void*),
-          i.data() + buffer_index * i_elements + m,
-          w.data() + buffer_index * w_elements + n * (kc_stride * kernel_size + 1),
-          c.data() + buffer_index * c_elements + m * group_output_channels + n, group_output_channels * sizeof(float), nr * sizeof(float),
-          0, z.data(), &params);
-      }
+      f32_igemm(
+        mb, group_output_channels, group_input_channels * sizeof(float), kernel_size * mr * sizeof(void*),
+        i.data() + buffer_index * i_elements + m,
+        w.data() + buffer_index * w_elements,
+        c.data() + buffer_index * c_elements + m * group_output_channels, group_output_channels * sizeof(float), nr * sizeof(float),
+        0, z.data(), &params);
     }
   }
 
