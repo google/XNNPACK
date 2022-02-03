@@ -877,9 +877,7 @@ struct univector_strided_context {
 
 struct univector_contiguous_context {
   const void* x;
-  size_t x_stride;
   void* y;
-  size_t y_stride;
   uint16_t log2_xsize;
   uint16_t log2_ysize;
   xnn_univector_ukernel_function ukernel;

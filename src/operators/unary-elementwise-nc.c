@@ -116,9 +116,9 @@ static enum xnn_status setup_unary_elementwise_nc(
     const size_t block_size = 4096;
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
       .x = input,
-      .x_stride = input_stride << log2_input_size,
       .y = output,
-      .y_stride = output_stride << log2_output_size,
+      .log2_xsize = log2_input_size,
+      .log2_ysize = log2_output_size,
       .ukernel = ukernel,
     };
     if (params_size != 0) {
