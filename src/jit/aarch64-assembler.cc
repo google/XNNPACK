@@ -291,6 +291,16 @@ void Assembler::ret() {
   emit32(0xD65F0000 | rn(x30));
 }
 
+void Assembler::stp(XRegister xt1, XRegister xt2, MemOperand xn) {
+  if (!imm7_offset_valid(xn.offset, xt1)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  const uint32_t offset = (xn.offset >> 3) & kImm7Mask;
+  emit32(0xA9000000 | wb(xn) | offset << 15 | rt2(xt2) | rn(xn.base) | rt(xt1));
+}
+
 void Assembler::sub(XRegister xd, XRegister xn, XRegister xm) {
   emit32(0xCB000000 | rm(xm) | rn(xn) | rd(xd));
 }
