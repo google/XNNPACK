@@ -278,6 +278,15 @@ void Assembler::ldr(XRegister xt, MemOperand xn) {
   emit32(0xF9400000 | imm >> 3 << 10 | rn(xn.base) | xt.code);
 }
 
+void Assembler::ldr(XRegister xt, MemOperand xn, int32_t imm) {
+  if (imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0xF8400400 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt(xt));
+}
+
 void Assembler::mov(XRegister xd, XRegister xn) {
   emit32(0xAA0003E0 | rm(xn) | rd(xd));
 }

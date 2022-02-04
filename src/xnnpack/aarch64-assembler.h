@@ -337,6 +337,7 @@ class Assembler : public AssemblerBase {
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   void ldr(XRegister xt, MemOperand xn);
+  void ldr(XRegister xt, MemOperand xn, int32_t imm);
   void mov(XRegister xd, XRegister xn);
   void prfm(PrefetchOp prfop, MemOperand xn);
   void ret();
