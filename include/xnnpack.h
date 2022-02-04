@@ -2075,6 +2075,20 @@ enum xnn_status xnn_setup_constant_pad_nd_x16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_copy_nc_x16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* copy_op_out);
+
+enum xnn_status xnn_setup_copy_nc_x16(
+  xnn_operator_t copy_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_X16_OPERATORS
 
 #ifndef XNN_NO_QC8_OPERATORS
@@ -2811,6 +2825,20 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_u8(
 #endif  // XNN_NO_U8_OPERATORS
 
 #ifndef XNN_NO_X8_OPERATORS
+
+enum xnn_status xnn_create_copy_nc_x8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* copy_op_out);
+
+enum xnn_status xnn_setup_copy_nc_x8(
+  xnn_operator_t copy_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_channel_shuffle_nc_x8(
   size_t groups,

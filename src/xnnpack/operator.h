@@ -63,6 +63,8 @@ enum xnn_operator_type {
   xnn_operator_type_convolution_nhwc_qc8,
   xnn_operator_type_convolution_nhwc_qs8,
   xnn_operator_type_convolution_nhwc_qu8,
+  xnn_operator_type_copy_nc_x8,
+  xnn_operator_type_copy_nc_x16,
   xnn_operator_type_copy_nc_x32,
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_qs8,
