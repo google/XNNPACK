@@ -128,7 +128,7 @@ class PReLUOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           const float x_value = fp16_ieee_to_fp32_value(x[i * x_stride() + c]);
           const float w_value = w_as_float[c];
-          y_ref[i * channels() + c] = signbit(x_value) ? x_value * w_value : x_value;
+          y_ref[i * channels() + c] = std::signbit(x_value) ? x_value * w_value : x_value;
         }
       }
 
