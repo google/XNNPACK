@@ -89,11 +89,12 @@ $else:
 
 BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a7
         # Push 96 bytes
-        PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
+        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         $if DATATYPE == "QU8":
+          SUB     sp, sp, 8                           // +8
           VPUSH   {d8-d14}                            // +56 = 96
         $else:
-          SUB     sp, sp, 8                           // +8
+          SUB     sp, sp, 16                          // +16
           VPUSH   {d8-d13}                            // +48 = 96
 
         LDR     r7, [sp, 96]            // a_stride
@@ -178,7 +179,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
-        // 5 vmovl = 4 A and 1 B = 5 cycles
+        // 5 VMOVL = 4 A and 1 B = 5 cycles
         // 7 blocks with VLD B, VMOVL, 8 VMLA = 10 cycles
         // 1 blocks with VLD B, VMLA = 9 cycles
         // total = 84 cycles
@@ -186,8 +187,6 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 1:
         // Extend - 5 cycles
         ${XXTL} q0, d0
-        $if PREFETCH:
-          PLD     [r3, 128]
         $if DATATYPE == "QU8":
           VSUBL.U8 q4, d8, d14
         $else:
@@ -195,14 +194,8 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         $if PREFETCH:
           PLD     [r9, 448]
         ${XXTL} q1, d2
-        $if PREFETCH:
-          PLD     [r12, 128]
         ${XXTL} q2, d4
-        $if PREFETCH:
-          PLD     [r0, 128]
         ${XXTL} q3, d6
-        $if PREFETCH:
-          PLD     [r10, 128]
 
         // BLOCK 0 - 10 cycles
         VLD1.8  {d10},  [r9]!           // B1
@@ -443,16 +436,14 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q11, d11, d3[3]
         VMLAL.S16 q12, d10, d5[3]
         VMLAL.S16 q13, d11, d5[3]
+        ADDS    r5, r5, 8
         VMLAL.S16 q14, d10, d7[3]
         VMLAL.S16 q15, d11, d7[3]
 
-
         # Is there a remainder?- 1-7 bytes of A
-        ADDS    r5, r5, 8
         BNE     3f
 
 2:
-
         $if REQUANTIZATION == "RNDNU":
           # RNDNU quantization
           VDUP.32 q0, d12[0]              // right_pre_shift
@@ -607,11 +598,12 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 
         $if DATATYPE == "QU8":
           VPOP    {d8-d14}
-          ADD     sp, sp, 4    // skip r2
+          ADD     sp, sp, 8    // skip pad of 8
         $else:
           VPOP    {d8-d13}
-          ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+          ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
@@ -767,12 +759,12 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 7:
         $if DATATYPE == "QU8":
           VPOP    {d8-d14}
-          ADD     sp, sp, 4    // skip r2
+          ADD     sp, sp, 8    // skip pad of 8
         $else:
           VPOP    {d8-d13}
-          ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
-
+          ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
 END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a7
 

@@ -55,8 +55,8 @@
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7
         # Push 96 bytes
-        PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
-        SUB     sp, sp, 8                           // +8
+        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
+        SUB     sp, sp, 16                           // +16
         VPUSH   {d8-d13}                            // +48 = 96
 
         LDR     r7, [sp, 96]            // a_stride
@@ -124,7 +124,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
-        // 5 vmovl = 4 A and 1 B = 5 cycles
+        // 5 VMOVL = 4 A and 1 B = 5 cycles
         // 7 blocks with VLD B, VMOVL, 8 VMLA = 10 cycles
         // 1 blocks with VLD B, VMLA = 9 cycles
         // total = 84 cycles
@@ -132,15 +132,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 1:
         // Extend - 5 cycles
         VMOVL.S8 q0, d0
-        PLD     [r3, 128]
         VMOVL.S8 q4, d8
         PLD     [r9, 448]
         VMOVL.S8 q1, d2
-        PLD     [r12, 128]
         VMOVL.S8 q2, d4
-        PLD     [r0, 128]
         VMOVL.S8 q3, d6
-        PLD     [r10, 128]
 
         // BLOCK 0 - 10 cycles
         VLD1.8  {d10},  [r9]!           // B1
@@ -336,16 +332,14 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q11, d11, d3[3]
         VMLAL.S16 q12, d10, d5[3]
         VMLAL.S16 q13, d11, d5[3]
+        ADDS    r5, r5, 8
         VMLAL.S16 q14, d10, d7[3]
         VMLAL.S16 q15, d11, d7[3]
 
-
         # Is there a remainder?- 1-7 bytes of A
-        ADDS    r5, r5, 8
         BNE     3f
 
 2:
-
         # RNDNU quantization
         VDUP.32 q0, d12[0]              // right_pre_shift
 
@@ -424,8 +418,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BHI     0b
 
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+        ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
@@ -559,9 +554,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 
 7:
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
-
+        ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
 END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7
 

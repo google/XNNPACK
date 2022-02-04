@@ -177,7 +177,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
-        // 5 vmovl = 4 A and 1 B = 5 cycles
+        // 5 VMOVL = 4 A and 1 B = 5 cycles
         // 7 blocks with VLD B, VMOVL, 8 VMLA = 10 cycles
         // 1 blocks with VLD B, VMLA = 9 cycles
         // total = 84 cycles
@@ -454,16 +454,14 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q11, d11, d3[3]
         VMLAL.S16 q12, d10, d5[3]
         VMLAL.S16 q13, d11, d5[3]
+        ADDS    r5, r5, 8
         VMLAL.S16 q14, d10, d7[3]
         VMLAL.S16 q15, d11, d7[3]
 
-
         # Is there a remainder?- 1-7 bytes of A
-        ADDS    r5, r5, 8
         BNE     3f
 
 2:
-
         $if REQUANTIZATION == "RNDNU":
           # RNDNU quantization
           VDUP.32 q0, d12[0]              // right_pre_shift

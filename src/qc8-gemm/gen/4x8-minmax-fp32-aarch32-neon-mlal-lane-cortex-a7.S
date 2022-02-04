@@ -53,8 +53,8 @@
 
 BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a7
         # Push 96 bytes
-        PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
-        SUB     sp, sp, 8                           // +8
+        PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
+        SUB     sp, sp, 16                           // +16
         VPUSH   {d8-d13}                            // +48 = 96
 
         LDR     r7, [sp, 96]            // a_stride
@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cort
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
-        // 5 vmovl = 4 A and 1 B = 5 cycles
+        // 5 VMOVL = 4 A and 1 B = 5 cycles
         // 7 blocks with VLD B, VMOVL, 8 VMLA = 10 cycles
         // 1 blocks with VLD B, VMLA = 9 cycles
         // total = 84 cycles
@@ -320,16 +320,14 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cort
         VMLAL.S16 q11, d11, d3[3]
         VMLAL.S16 q12, d10, d5[3]
         VMLAL.S16 q13, d11, d5[3]
+        ADDS    r5, r5, 8
         VMLAL.S16 q14, d10, d7[3]
         VMLAL.S16 q15, d11, d7[3]
 
-
         # Is there a remainder?- 1-7 bytes of A
-        ADDS    r5, r5, 8
         BNE     3f
 
 2:
-
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
 
@@ -413,8 +411,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cort
         BHI     0b
 
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+        ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
@@ -548,9 +547,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cort
 
 7:
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
-
+        ADD     sp, sp, 16   // skip pad of 8 + d14
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
+        BX      lr
 
 END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a7
 
