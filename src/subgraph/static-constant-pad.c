@@ -34,6 +34,14 @@ static enum xnn_status create_constant_pad_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_constant_pad_nd_x16(
+        &node->params.static_pad.padding_value,
+        node->flags,
+        &opdata->operator_object);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_constant_pad_nd_x32(
         &node->params.static_pad.padding_value,
@@ -102,6 +110,19 @@ static enum xnn_status setup_constant_pad_operator(
         threadpool);
       break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_constant_pad_nd_x16:
+      return xnn_setup_constant_pad_nd_x16(
+        opdata->operator_object,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->pre_paddings,
+        opdata->post_paddings,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_constant_pad_nd_x32:
       return xnn_setup_constant_pad_nd_x32(
         opdata->operator_object,

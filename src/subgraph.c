@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
@@ -611,6 +613,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_hardswish:
+      case xnn_node_type_static_constant_pad:
         break;
       default:
         xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
@@ -684,6 +687,10 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     struct xnn_node* node = &subgraph->nodes[n];
     assert(node->compute_type == xnn_compute_type_fp32);
     node->compute_type = xnn_compute_type_fp16;
+    if (node->type == xnn_node_type_static_constant_pad) {
+      node->params.static_pad.padding_value =
+        fp16_ieee_from_fp32_value(fp32_from_bits(node->params.static_pad.padding_value));
+    }
     for (uint32_t i = 0; i < node->num_inputs; i++) {
       const uint32_t fp16_id = subgraph->values[node->inputs[i]].fp16_id;
       if (fp16_id != XNN_INVALID_VALUE_ID) {
