@@ -408,6 +408,15 @@ void Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
   emit32(0x0CDF0000 | q(vt) | opcode << 12 | size(vt) | rn(xn.base) | rt(vt));
 }
 
+void Assembler::ld1r(VRegisterList xs, MemOperand xn) {
+  if (xs.length != 1 || xn.offset != 0) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0x0D40C000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
+}
+
 void Assembler::ld2r(VRegisterList xs, MemOperand xn) {
   if (xs.length != 2 || !is_same_shape(xs.vt1, xs.vt2) || xn.offset != 0) {
     error_ = Error::kInvalidOperand;
