@@ -3974,7 +3974,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x16-transpose/gen/8x8-reuse-mov-sse2.c
   src/x16-transpose/gen/8x8-reuse-multi-sse2.c
   src/x16-transpose/gen/8x8-reuse-switch-sse2.c
-  src/x32-transpose/gen/4x4-multi-momovse2.c
+  src/x32-transpose/gen/4x4-multi-mov-sse2.c
   src/x32-transpose/gen/4x4-multi-multi-sse2.c
   src/x32-transpose/gen/4x4-multi-switch-sse2.c
   src/x32-transpose/gen/4x4-reuse-mov-sse2.c
