@@ -53,6 +53,8 @@
 //    int8_t output_max;          d13[7]
 //  } rndnu_neon;
 
+// iOS does not support 32 bit ARM with Neon DotProduct.
+#ifndef __APPLE__
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         BIC     r2, r2, 3
@@ -344,6 +346,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55
+#endif  // __APPLE__
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -8711,6 +8711,10 @@ xnnpack_cc_library(
     aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
     aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,
+    apple_aarch32_copts = [
+        "-mcpu=cyclone",
+        "-mtune=generic",
+    ],
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
