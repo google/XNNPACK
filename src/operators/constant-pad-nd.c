@@ -68,6 +68,16 @@ enum xnn_status xnn_create_constant_pad_nd_x8(
     padding_pattern * UINT32_C(0x01010101), flags, xnn_operator_type_constant_pad_nd_x8, constant_pad_op_out);
 }
 
+enum xnn_status xnn_create_constant_pad_nd_x16(
+  const void* padding_value,
+  uint32_t flags,
+  xnn_operator_t* constant_pad_op_out)
+{
+  const uint32_t padding_pattern = *((const uint16_t*) padding_value);
+  return create_constant_pad_nd(
+    padding_pattern * UINT32_C(0x00010001), flags, xnn_operator_type_constant_pad_nd_x16, constant_pad_op_out);
+}
+
 enum xnn_status xnn_create_constant_pad_nd_x32(
   const void* padding_value,
   uint32_t flags,
@@ -209,6 +219,23 @@ enum xnn_status xnn_setup_constant_pad_nd_x8(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x8,
     num_dims, input_shape, pre_padding, post_padding,
     input, output, 0 /* log2(element size) */,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_constant_pad_nd_x16(
+    xnn_operator_t constant_pad_op,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* pre_padding,
+    const size_t* post_padding,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_constant_pad_nd(
+    constant_pad_op, xnn_operator_type_constant_pad_nd_x16,
+    num_dims, input_shape, pre_padding, post_padding,
+    input, output, 1 /* log2(element size) */,
     pthreadpool_get_threads_count(threadpool));
 }
 

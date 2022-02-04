@@ -217,6 +217,121 @@ class ConstantPadOperatorTester {
     }
   }
 
+  void TestX16() const {
+    ASSERT_EQ(num_dims(), num_pre_paddings());
+    ASSERT_EQ(num_dims(), num_post_paddings());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), rng);
+
+    // Compute generalized shapes.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_pre_paddings;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_post_paddings;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+    std::fill(input_dims.begin(), input_dims.end(), 1);
+    std::fill(input_pre_paddings.begin(), input_pre_paddings.end(), 0);
+    std::fill(input_post_paddings.begin(), input_post_paddings.end(), 0);
+    std::fill(output_dims.begin(), output_dims.end(), 1);
+    for (size_t i = 0; i < num_dims(); i++) {
+      input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
+      input_pre_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = pre_padding(i);
+      input_post_paddings[XNN_MAX_TENSOR_DIMS - num_dims() + i] = post_padding(i);
+      output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
+    }
+
+    // Compute generalized strides.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_strides;
+    size_t input_stride = 1, output_stride = 1;
+    for (size_t i = XNN_MAX_TENSOR_DIMS; i != 0; i--) {
+      input_strides[i - 1] = input_stride;
+      output_strides[i - 1] = output_stride;
+      input_stride *= input_dims[i - 1];
+      output_stride *= output_dims[i - 1];
+    }
+
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input_elements());
+    std::vector<uint16_t> output(num_output_elements());
+    std::vector<uint16_t> output_ref(num_output_elements());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(u16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
+      const uint16_t padding_value = u16rng();
+
+      // Compute reference results.
+      std::fill(output_ref.begin(), output_ref.end(), padding_value);
+      for (size_t i = 0; i < input_dims[0]; i++) {
+        for (size_t j = 0; j < input_dims[1]; j++) {
+          for (size_t k = 0; k < input_dims[2]; k++) {
+            for (size_t l = 0; l < input_dims[3]; l++) {
+              for (size_t m = 0; m < input_dims[4]; m++) {
+                for (size_t n = 0; n < input_dims[5]; n++) {
+                  const size_t output_index =
+                    (i + input_pre_paddings[0]) * output_strides[0] +
+                    (j + input_pre_paddings[1]) * output_strides[1] +
+                    (k + input_pre_paddings[2]) * output_strides[2] +
+                    (l + input_pre_paddings[3]) * output_strides[3] +
+                    (m + input_pre_paddings[4]) * output_strides[4] +
+                    (n + input_pre_paddings[5]) * output_strides[5];
+                  const size_t input_index =
+                    i * input_strides[0] + j * input_strides[1] + k * input_strides[2] +
+                    l * input_strides[3] + m * input_strides[4] + n * input_strides[5];
+                  output_ref[output_index] = input[input_index];
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy a binary elementwise operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t pad_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_constant_pad_nd_x16(
+          &padding_value, 0, &pad_op));
+      ASSERT_NE(nullptr, pad_op);
+
+      // Smart pointer to automatically delete pad_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_constant_pad_nd_x16(
+          pad_op,
+          num_dims(),
+          input_shape().data(), pre_paddings().data(), post_paddings().data(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(pad_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  const size_t index =
+                    i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
+                    l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
+                  ASSERT_EQ(output[index], output_ref[index])
+                    << "(i, j, k, l, m, n) = ("
+                    << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
+                    << ", padding value = " << padding_value;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestX32() const {
     ASSERT_EQ(num_dims(), num_pre_paddings());
     ASSERT_EQ(num_dims(), num_post_paddings());
