@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <limits>
 
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/allocator.h>
