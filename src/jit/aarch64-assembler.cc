@@ -564,6 +564,10 @@ void Assembler::str(SRegister st, MemOperand xn) {
   emit32(0xBD000000 | imm >> 2 << 10 | rn(xn.base) | rt(st));
 }
 
+void Assembler::str(SRegister st, MemOperand xn, int32_t imm) {
+  return str(/*size=*/2, /*opc=*/0, xn, imm, st.code);
+}
+
 void Assembler::bind(Label& l) {
   if (l.bound) {
     error_ = Error::kLabelAlreadyBound;

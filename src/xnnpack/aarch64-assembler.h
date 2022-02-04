@@ -373,6 +373,7 @@ class Assembler : public AssemblerBase {
   void str(DRegister dt, MemOperand xn, int32_t imm);
   void str(QRegister qt, MemOperand xn, int32_t imm);
   void str(SRegister st, MemOperand xn);
+  void str(SRegister st, MemOperand xn, int32_t imm);
 
   // Binds Label l to the current location in the code buffer.
   void bind(Label& l);
