@@ -621,6 +621,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_max_pooling_2d:
       case xnn_node_type_prelu:
       case xnn_node_type_static_constant_pad:
+      case xnn_node_type_static_reshape:
         break;
       default:
         xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
