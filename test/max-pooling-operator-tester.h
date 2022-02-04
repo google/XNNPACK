@@ -10,6 +10,8 @@
 
 #include <gtest/gtest.h>
 
+#include <fp16.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -615,6 +617,119 @@ class MaxPoolingOperatorTester {
     }
   }
 
+  void TestF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    // Note: we need to avoid FP16 denormals in the generated tensor because they might be processed differently in
+    // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.001f, 1.0f), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              float max_value = -std::numeric_limits<float>::infinity();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < input_width() && iy < input_height()) {
+                    max_value = std::max(max_value,
+                      fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]));
+                  }
+                }
+              }
+              output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
+      float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+      output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
+      output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
+      if (accumulated_range == 0.0f) {
+        output_min = -std::numeric_limits<float>::infinity();
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+      if (qmin() == std::numeric_limits<uint8_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      if (qmax() == std::numeric_limits<uint8_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Max Pooling operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t max_pooling_op = nullptr;
+
+      const xnn_status status = xnn_create_max_pooling2d_nhwc_f16(
+          padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+          padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
+          pooling_height(), pooling_width(),
+          stride_height(), stride_width(),
+          dilation_height(), dilation_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          output_min, output_max,
+          padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0,
+          &max_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, max_pooling_op);
+
+      // Smart pointer to automatically delete max_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_max_pooling_op(max_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_f16(
+          max_pooling_op,
+          batch_size(), input_height(), input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              ASSERT_EQ(
+                  fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
+                  output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
+                << ", min = " << output_min << ", max = " << output_max;
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -988,6 +1103,178 @@ class MaxPoolingOperatorTester {
               ASSERT_EQ(uint32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
                 uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestSetupF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    // Note: we need to avoid FP16 denormals in the generated tensor because they might be processed differently in
+    // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.001f, 1.0f), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+      (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
+    std::vector<uint16_t> output(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+      (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              float max_value = -std::numeric_limits<float>::infinity();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < input_width() && iy < input_height()) {
+                    max_value = std::max(max_value,
+                      fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c]));
+                  }
+                }
+              }
+              output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
+      float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+      output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
+      output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
+      if (accumulated_range == 0.0f) {
+        output_min = -std::numeric_limits<float>::infinity();
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+      if (qmin() == std::numeric_limits<uint8_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      if (qmax() == std::numeric_limits<uint8_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, and run Max Pooling operator once.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t max_pooling_op = nullptr;
+
+      const xnn_status status = xnn_create_max_pooling2d_nhwc_f16(
+          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          pooling_height(), pooling_width(),
+          stride_height(), stride_width(),
+          dilation_height(), dilation_width(),
+          channels(), input_pixel_stride(), output_pixel_stride(),
+          output_min, output_max,
+          0, &max_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, max_pooling_op);
+
+      // Smart pointer to automatically delete max_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_max_pooling_op(max_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_f16(
+          max_pooling_op,
+          batch_size(), input_height(), input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results of the first run.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              ASSERT_EQ(
+                  fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
+                  output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
+                << ", min = " << output_min << ", max = " << output_max;
+            }
+          }
+        }
+      }
+
+      // Re-generate data for the second run.
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results for the second run, including clamping.
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t oy = 0; oy < next_output_height(); oy++) {
+          for (size_t ox = 0; ox < next_output_width(); ox++) {
+            for (size_t c = 0; c < channels(); c++) {
+              float max_value = -std::numeric_limits<float>::infinity();
+              for (size_t py = 0; py < pooling_height(); py++) {
+                const size_t iy = oy * stride_height() + py * dilation_height() - padding_top();
+                for (size_t px = 0; px < pooling_width(); px++) {
+                  const size_t ix = ox * stride_width() + px * dilation_width() - padding_left();
+                  if (ix < next_input_width() && iy < next_input_height()) {
+                    max_value = std::max(max_value,
+                      fp16_ieee_to_fp32_value(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c]));
+                  }
+                }
+              }
+              max_value = std::min(max_value, output_max);
+              max_value = std::max(max_value, output_min);
+              next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] = max_value;
+            }
+          }
+        }
+      }
+
+      // Setup and run Max Pooling operator the second time, and destroy the operator.
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_max_pooling2d_nhwc_f16(
+          max_pooling_op,
+          next_batch_size(), next_input_height(), next_input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(max_pooling_op, nullptr /* thread pool */));
+
+      // Verify results of the second run.
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t y = 0; y < next_output_height(); y++) {
+          for (size_t x = 0; x < next_output_width(); x++) {
+            for (size_t c = 0; c < channels(); c++) {
+              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
+              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
+              ASSERT_EQ(
+                  fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]),
+                  next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) <<
+                "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
+                << ", min = " << output_min << ", max = " << output_max;
             }
           }
         }

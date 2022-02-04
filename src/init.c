@@ -2440,6 +2440,13 @@ static void init(void) {
         .channel_tile = 8,
       };
 
+      xnn_params.f16.maxpool = (struct maxpool_parameters) {
+        .ukernel = (xnn_maxpool_ukernel_function) xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8,
+        .init.f16 = xnn_init_f16_minmax_neon_params,
+        .mr = 9,
+        .qr = 8,
+      };
+
       xnn_params.f16.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
         .row_tile = 2,
@@ -3663,6 +3670,13 @@ static void init(void) {
         .update.f16 = xnn_update_f16_scaleminmax_avx_params,
         .row_tile = 7,
         .channel_tile = 8,
+      };
+
+      xnn_params.f16.maxpool = (struct maxpool_parameters) {
+        .ukernel = (xnn_maxpool_ukernel_function) xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8,
+        .init.f16 = xnn_init_f16_minmax_avx_params,
+        .mr = 9,
+        .qr = 8,
       };
 
       xnn_params.f16.prelu = (struct prelu_parameters) {

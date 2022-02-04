@@ -124,6 +124,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Leaky ReLU (NC, F32)";
     case xnn_operator_type_leaky_relu_nc_qu8:
       return "Leaky ReLU (NC, QU8)";
+    case xnn_operator_type_max_pooling_nhwc_f16:
+      return "Max Pooling (NHWC, F16)";
     case xnn_operator_type_max_pooling_nhwc_f32:
       return "Max Pooling (NHWC, F32)";
     case xnn_operator_type_max_pooling_nhwc_s8:

@@ -1996,6 +1996,34 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t pooling_height,
+  uint32_t pooling_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  size_t channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* max_pooling_op_out);
+
+enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
+  xnn_operator_t max_pooling_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_multiply_nd_f16(
   float output_min,
   float output_max,

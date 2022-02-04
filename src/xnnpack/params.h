@@ -3943,6 +3943,7 @@ struct maxpool_parameters {
     xnn_init_s8_minmax_params_fn s8;
     xnn_init_u8_minmax_params_fn u8;
     xnn_init_f32_minmax_params_fn f32;
+    xnn_init_f16_minmax_params_fn f16;
   } init;
   uint8_t mr;
   uint8_t qr;
@@ -4096,6 +4097,7 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
+    struct maxpool_parameters maxpool;
     struct vunary_parameters hswish;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
