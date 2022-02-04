@@ -1,0 +1,78 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f16_vlrelu_ukernel__f16c_x${BATCH_TILE}(
+    size_t batch,
+    const void* input,
+    void* output,
+    const union xnn_f16_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+
+  const __m256 vslope = _mm256_load_ps(params->avx.slope);
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  $if BATCH_TILE > 8:
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
+      const __m256 vx${ABC[0:8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+      $for N in range(8, BATCH_TILE, 8):
+        const __m256 vx${ABC[N:N+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + ${N})));
+      i += ${BATCH_TILE};
+
+      $for N in range(0, BATCH_TILE, 8):
+        __m256 vacc${ABC[N:N+8]} = _mm256_mul_ps(vx${ABC[N:N+8]}, vslope);
+
+      $for N in range(0, BATCH_TILE, 8):
+        vacc${ABC[N:N+8]} = _mm256_blendv_ps(vx${ABC[N:N+8]}, vacc${ABC[N:N+8]}, vx${ABC[N:N+8]});
+
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc${ABC[0:8]}, _MM_FROUND_NO_EXC));
+      $for N in range(8, BATCH_TILE, 8):
+        _mm_storeu_si128((__m128i*) (o + ${N}), _mm256_cvtps_ph(vacc${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
+      o += ${BATCH_TILE};
+    }
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    i += 8;
+
+    __m256 vacc = _mm256_mul_ps(vx, vslope);
+    vacc = _mm256_blendv_ps(vx, vacc, vx);
+
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_NO_EXC));
+    o += 8;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+
+    __m256 vacc = _mm256_mul_ps(vx, vslope);
+    vacc = _mm256_blendv_ps(vx, vacc, vx);
+
+    __m128i vh = _mm256_cvtps_ph(vacc, _MM_FROUND_NO_EXC);
+    if (batch & (4 * sizeof(uint16_t))) {
+      _mm_storel_epi64((__m128i*) o, vh);
+      vh = _mm_unpackhi_epi64(vh, vh);
+      o += 4;
+    }
+    if (batch & (2 * sizeof(uint16_t))) {
+      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+      vh = _mm_srli_epi64(vh, 32);
+      o += 2;
+    }
+    if (batch & (1 * sizeof(uint16_t))) {
+      *o = _mm_extract_epi16(vh, 0);
+    }
+  }
+}

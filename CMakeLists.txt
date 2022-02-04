@@ -4815,6 +4815,8 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x8.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
+  src/f16-vlrelu/gen/vlrelu-f16c-x8.c
+  src/f16-vlrelu/gen/vlrelu-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c
   src/math/cvt-f16-f32-f16c.c
