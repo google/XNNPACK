@@ -60,6 +60,73 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
   return NULL;
 }
 
+#if XNN_PLATFORM_JIT
+static xnn_gemm_ukernel_function get_generated_gemm(
+    struct xnn_hmp_gemm_codegen generators,
+    struct xnn_code_buffer *code_buffer,
+    struct jit_gemm_params *jit_gemm_params,
+    size_t group_output_channels,
+    size_t nr,
+    size_t group_input_channels,
+    size_t log2_input_element_size)
+{
+  xnn_jit_gemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
+  if (generator == NULL) {
+    goto error;
+  }
+  if (xnn_status_success != xnn_allocate_code_memory(code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE)) {
+    goto error;
+  };
+
+  const enum xnn_status gen_status = generator(
+      code_buffer, group_output_channels % nr,
+      group_input_channels << log2_input_element_size, (void*) jit_gemm_params);
+  if (xnn_status_success != gen_status) {
+    goto error;
+  }
+
+  return (xnn_gemm_ukernel_function) code_buffer->code;
+
+error:
+    xnn_release_code_memory(code_buffer);
+    return NULL;
+}
+
+static xnn_igemm_ukernel_function get_generated_igemm(
+    struct xnn_hmp_igemm_codegen generators,
+    struct xnn_code_buffer *code_buffer,
+    struct jit_gemm_params *jit_gemm_params,
+    size_t group_output_channels,
+    size_t nr,
+    size_t group_input_channels,
+    size_t log2_input_element_size,
+    size_t kernel_size,
+    size_t mr)
+{
+  xnn_jit_igemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
+  if (generator == NULL) {
+    goto error;
+  }
+  if (xnn_status_success != xnn_allocate_code_memory(code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE)) {
+    goto error;
+  };
+
+  const enum xnn_status gen_status = generator(
+      code_buffer, group_output_channels % nr,
+      group_input_channels << log2_input_element_size,
+      kernel_size * mr * sizeof(void*), (void*) jit_gemm_params);
+  if (xnn_status_success != gen_status) {
+    goto error;
+  }
+
+  return (xnn_igemm_ukernel_function) code_buffer->code;
+
+error:
+    xnn_release_code_memory(code_buffer);
+    return NULL;
+}
+#endif  // XNN_PLATFORM_JIT
+
 static enum xnn_status create_convolution2d_nhwc(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -366,19 +433,19 @@ static enum xnn_status create_convolution2d_nhwc(
           };
 
           #if XNN_PLATFORM_JIT
-            if (gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
-              struct xnn_code_buffer* code_buffer = &convolution_op->ukernel.gemm.general_code_buffer;
-              if (xnn_status_success != xnn_allocate_code_memory(code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE)) {
-                break;
-              };
-              const xnn_jit_gemm_code_generator_function gen = gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT];
-              if (xnn_status_success ==
-                  gen(code_buffer, group_output_channels % nr, group_input_channels, (void*) jit_gemm_params)) {
-                const xnn_gemm_ukernel_function generated_gemm = (xnn_gemm_ukernel_function) code_buffer->code;
-                convolution_op->ukernel.gemm.general_case.function[XNN_UARCH_DEFAULT] = generated_gemm;
-              } else {
-                xnn_release_code_memory(code_buffer);
-              }
+            xnn_gemm_ukernel_function generated_gemm_general = get_generated_gemm(
+                gemm_parameters->generator.gemm,
+                &convolution_op->ukernel.gemm.general_code_buffer,
+                jit_gemm_params, group_output_channels, nr, group_input_channels, log2_input_element_size);
+            if (generated_gemm_general != NULL) {
+              convolution_op->ukernel.gemm.general_case.function[XNN_UARCH_DEFAULT] = generated_gemm_general;
+            }
+            xnn_gemm_ukernel_function generated_gemm1 = get_generated_gemm(
+                gemm_parameters->generator.gemm1,
+                &convolution_op->ukernel.gemm.mr1_code_buffer,
+                jit_gemm_params, group_output_channels, nr, group_input_channels, log2_input_element_size);
+            if (generated_gemm1 != NULL) {
+              convolution_op->ukernel.gemm.mr1_case.function[XNN_UARCH_DEFAULT] = generated_gemm1;
             }
           #endif  // XNN_PLATFORM_JIT
 
@@ -403,6 +470,27 @@ static enum xnn_status create_convolution2d_nhwc(
             .general_case = gemm_ukernels->igemm,
             .mr1_case = gemm_ukernels->igemm1,
           };
+
+          #if XNN_PLATFORM_JIT
+            xnn_igemm_ukernel_function generated_igemm_general = get_generated_igemm(
+                    gemm_parameters->generator.igemm,
+                    &convolution_op->ukernel.igemm.general_code_buffer,
+                    jit_gemm_params, group_output_channels, nr,
+                    group_input_channels, log2_input_element_size, kernel_size,
+                    gemm_parameters->mr);
+            if (generated_igemm_general != NULL) {
+              convolution_op->ukernel.igemm.general_case.function[XNN_UARCH_DEFAULT] = generated_igemm_general;
+            }
+            xnn_igemm_ukernel_function generated_igemm1 = get_generated_igemm(
+                gemm_parameters->generator.igemm1,
+                &convolution_op->ukernel.igemm.mr1_code_buffer, jit_gemm_params,
+                group_output_channels, nr, group_input_channels,
+                log2_input_element_size, kernel_size, gemm_parameters->mr);
+            if (generated_igemm1 != NULL) {
+              convolution_op->ukernel.igemm.mr1_case.function[XNN_UARCH_DEFAULT] = generated_igemm1;
+            }
+          #endif  // XNN_PLATFORM_JIT
+
           break;
         default:
           XNN_UNREACHABLE;
