@@ -14,7 +14,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc, size_t kc, const void* params);
+  void generate(size_t nc_mod_nr, size_t kc, const void* params);
 };
 
 
@@ -55,7 +55,7 @@ class Generator : public Assembler {
 //    int8_t output_max;          d13[7]
 //  } xnn_qs8_minmax_params.neonv8;
 
-void Generator::generate(size_t nc, size_t kc, const void* params) {
+void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
   Label l0, l1, l2, l3, l4, l5, l6, l7;
 
   // Auto-generated file. Do not edit!
@@ -281,10 +281,10 @@ void Generator::generate(size_t nc, size_t kc, const void* params) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {
+xnn_status xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
-  g.generate(nc, kc, nullptr);
+  g.generate(nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

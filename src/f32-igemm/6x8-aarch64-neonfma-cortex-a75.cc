@@ -17,7 +17,7 @@ class Generator : public Assembler {
   using Assembler::Assembler;
 
 public:
-  void generate(bool prefetch, size_t nc, size_t kc, size_t ks, float min, float max);
+  void generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max);
 };
 
 // void xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
@@ -70,7 +70,7 @@ public:
 // Clamp v6 v7
 
 // Converted from: src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float min, float max)
+void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max)
 {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
@@ -728,12 +728,12 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float m
 } // namespace xnnpack
   //
 xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75(
-    xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params)
+    xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, size_t ks, const void* params)
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
   auto jit_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(false, nc, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
+  g.generate(false, nc_mod_nr, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -742,12 +742,12 @@ xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75(
 }
 
 xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
-    xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params)
+    xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, size_t ks, const void* params)
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
   auto jit_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(true, nc, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
+  g.generate(true, nc_mod_nr, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

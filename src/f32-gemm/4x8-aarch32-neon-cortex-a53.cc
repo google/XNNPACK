@@ -16,7 +16,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc, size_t kc, float min, float max);
+  void generate(size_t nc_mod_nr, size_t kc, float min, float max);
 };
 
 
@@ -55,7 +55,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
-void Generator::generate(size_t nc, size_t kc, float min, float max) {
+void Generator::generate(size_t nc_mod_nr, size_t kc, float min, float max) {
   assert(kc % sizeof(float) == 0);
 
   Label nc_loop, kc_loop, epilogue, clamp, remainder_kc, store_odd_width;
@@ -399,7 +399,7 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
     }
   }
 
-  if (nc % 8 != 0) {
+  if (nc_mod_nr != 0) {
     blo(store_odd_width);
   }
 
@@ -469,7 +469,7 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
   // Store odd width
   bind(store_odd_width);
 
-  switch (nc % 8) {
+  switch (nc_mod_nr) {
     case 0:
       // Do nothing.
       break;
@@ -540,11 +540,11 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   auto p = static_cast<const jit_gemm_params*>(params);
-  g.generate(nc, kc, p->f32_minmax.min, p->f32_minmax.max);
+  g.generate(nc_mod_nr, kc, p->f32_minmax.min, p->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

@@ -372,8 +372,9 @@ static enum xnn_status create_convolution2d_nhwc(
                 break;
               };
               const xnn_jit_gemm_code_generator_function gen = gemm_parameters->generator.gemm.function[XNN_UARCH_DEFAULT];
-              if (xnn_status_success == gen(code_buffer, 0, 0, (void*) jit_gemm_params)) {
-                const xnn_gemm_ukernel_function generated_gemm = (xnn_gemm_ukernel_function)code_buffer->code;
+              if (xnn_status_success ==
+                  gen(code_buffer, group_output_channels % nr, group_input_channels, (void*) jit_gemm_params)) {
+                const xnn_gemm_ukernel_function generated_gemm = (xnn_gemm_ukernel_function) code_buffer->code;
                 convolution_op->ukernel.gemm.general_case.function[XNN_UARCH_DEFAULT] = generated_gemm;
               } else {
                 xnn_release_code_memory(code_buffer);

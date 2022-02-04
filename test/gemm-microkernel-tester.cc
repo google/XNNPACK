@@ -1587,7 +1587,10 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_minmax_ukernel_function igemm_min
 }
 
 #if XNN_PLATFORM_JIT
-void GemmMicrokernelTester::Test(xnn_jit_gemm_code_generator_function gemm_generator, xnn_init_f32_minmax_params_fn init_params) const {
+void GemmMicrokernelTester::Test(
+    xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params) const
+{
   ASSERT_LE(m(), mr());
   ASSERT_GE(a_stride(), k());
   ASSERT_GE(cm_stride(), n());
@@ -1653,8 +1656,9 @@ void GemmMicrokernelTester::Test(xnn_jit_gemm_code_generator_function gemm_gener
         .max = c_max
       }
     };
-    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n(), k() * sizeof(float), &p));
-    xnn_f32_gemm_minmax_ukernel_function gemm_minmax = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code);
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n() % nr(), k() * sizeof(float), &p));
+    xnn_f32_gemm_minmax_ukernel_function gemm_minmax =
+        reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code);
 
     gemm_minmax(m(), n(), k() * sizeof(float),
       a.data(), a_stride() * sizeof(float),
@@ -1687,7 +1691,10 @@ void GemmMicrokernelTester::Test(xnn_jit_gemm_code_generator_function gemm_gener
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_jit_igemm_code_generator_function igemm_generator, xnn_init_f32_minmax_params_fn init_params) const {
+void GemmMicrokernelTester::Test(
+    xnn_jit_igemm_code_generator_function igemm_generator,
+    xnn_init_f32_minmax_params_fn init_params) const
+{
   ASSERT_LE(m(), mr());
 
   std::random_device random_device;
@@ -1781,8 +1788,10 @@ void GemmMicrokernelTester::Test(xnn_jit_igemm_code_generator_function igemm_gen
         .max = c_max
       }
     };
-    ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer,n(), k() * sizeof(float), ks() * mr() * sizeof(void*), &p));
-    xnn_f32_igemm_minmax_ukernel_function igemm_minmax = reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code);
+    ASSERT_EQ(xnn_status_success,
+              igemm_generator(&code_buffer, n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
+    xnn_f32_igemm_minmax_ukernel_function igemm_minmax =
+        reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code);
 
     igemm_minmax(
       m(), n(), k() * sizeof(float), ks() * mr() * sizeof(void*),
@@ -1906,7 +1915,7 @@ void GemmMicrokernelTester::Test(
 
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n(), k(), nullptr));
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n() % nr(), k(), nullptr));
     xnn_qc8_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_qc8_gemm_minmax_ukernel_function>(code_buffer.code);
 
     gemm(
@@ -2050,7 +2059,7 @@ void GemmMicrokernelTester::Test(
 
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer,n(), k(), ks() * mr() * sizeof(void*), nullptr));
+    ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer, n() % nr(), k(), ks() * mr() * sizeof(void *), nullptr));
     xnn_qc8_igemm_minmax_ukernel_function igemm = reinterpret_cast<xnn_qc8_igemm_minmax_ukernel_function>(code_buffer.code);
 
     igemm(
@@ -2157,7 +2166,7 @@ void GemmMicrokernelTester::Test(
 
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer,n(), k(), nullptr));
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, n() % nr(), k(), nullptr));
     xnn_qs8_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function >(code_buffer.code);
 
     gemm(
@@ -2290,7 +2299,7 @@ void GemmMicrokernelTester::Test(
 
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer,n(), k(), ks() * mr() * sizeof(void*), nullptr));
+    ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer, n() % nr(), k(), ks() * mr() * sizeof(void *), nullptr));
     xnn_qs8_igemm_minmax_ukernel_function igemm = reinterpret_cast<xnn_qs8_igemm_minmax_ukernel_function>(code_buffer.code);
 
     igemm(
