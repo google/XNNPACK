@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include <assert.h>
 
+#ifdef _MSC_VER
+  #include <intrin.h>
+#endif
+
 #include <xnnpack/common.h>
 
 
@@ -172,11 +176,11 @@ inline static int64_t asr_s64(int64_t x, uint32_t n) {
 }
 
 inline static uint32_t ctz(uint32_t x) {
-#if XNN_COMPILER_MSVC
-  unsigned long index;
-  _BitScanForward(&index, x);
-  return index;
-#else
-  return __builtin_ctz(x);
-#endif  // XNN_COMPILER_MSVC
+  #ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward(&index, (unsigned long) x);
+    return (uint32_t) index;
+  #else
+    return __builtin_ctz(x);
+  #endif
 }
