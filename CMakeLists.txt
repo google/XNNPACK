@@ -3181,6 +3181,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c
+  src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c
@@ -4756,6 +4757,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/7x-minmax-f16c-c8.c
+  src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-vbinary/gen/vadd-minmax-f16c-x16.c
   src/f16-vbinary/gen/vaddc-minmax-f16c-x16.c
   src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
@@ -6706,7 +6708,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(prelu-nc-test prelu-nc-test)
 
   ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)

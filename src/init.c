@@ -2439,6 +2439,13 @@ static void init(void) {
         .row_tile = 7,
         .channel_tile = 8,
       };
+
+      xnn_params.f16.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
+        .row_tile = 2,
+        .channel_tile = 16,
+      };
+
       xnn_params.f16.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
@@ -2459,6 +2466,7 @@ static void init(void) {
         .channel_tile = 8,
         .row_tile = 2,
       };
+
       xnn_params.f16.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vhswish_ukernel__neonfp16arith_x16,
         .init.f16_hswish = xnn_init_f16_hswish_neon_params,
@@ -3656,6 +3664,13 @@ static void init(void) {
         .row_tile = 7,
         .channel_tile = 8,
       };
+
+      xnn_params.f16.prelu = (struct prelu_parameters) {
+        .ukernel = (xnn_prelu_ukernel_function) xnn_f16_prelu_ukernel__f16c_2x16,
+        .row_tile = 2,
+        .channel_tile = 16,
+      };
+
       xnn_params.f16.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vadd_minmax_ukernel__f16c_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__f16c_x16,

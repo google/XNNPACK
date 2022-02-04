@@ -144,6 +144,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Multiply (ND, QU8)";
     case xnn_operator_type_negate_nc_f32:
       return "Negate (NC, F32)";
+    case xnn_operator_type_prelu_nc_f16:
+      return "PReLU (NC, F16)";
     case xnn_operator_type_prelu_nc_f32:
       return "PReLU (NC, F32)";
     case xnn_operator_type_resize_bilinear_nhwc_f32:

@@ -2013,6 +2013,21 @@ enum xnn_status xnn_setup_multiply_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_prelu_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* negative_slope,
+  uint32_t flags,
+  xnn_operator_t* prelu_op_out);
+
+enum xnn_status xnn_setup_prelu_nc_f16(
+  xnn_operator_t prelu_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_F16_OPERATORS
 
 #ifndef XNN_NO_X16_OPERATORS
