@@ -108,6 +108,19 @@ TEST(PRELU_NC_F16, large_batch_with_x_stride_and_y_stride) {
   }
 }
 
+TEST(PRELU_NC_F16, fp32_weights) {
+  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .channels(channels)
+      .x_stride(123)
+      .y_stride(117)
+      .weights_type(PReLUOperatorTester::WeightsType::FP32)
+      .iterations(1)
+      .TestF16();
+  }
+}
+
 
 TEST(PRELU_NC_F32, unit_batch) {
   for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {

@@ -677,6 +677,28 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_vmulcaddc_w(
   uint16_t* packed_w,
   const void* params);
 
+
+typedef void (*xnn_pack_prelu_w_function)(
+  size_t c,
+  const void* s,
+  void* packed_w);
+
+XNN_INTERNAL void xnn_pack_f32_prelu_w(
+  size_t c,
+  const float* s,
+  float* packed_w);
+
+XNN_INTERNAL void xnn_pack_f16_prelu_w(
+  size_t c,
+  const uint16_t* s,
+  uint16_t* packed_w);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
+  size_t c,
+  const float* s,
+  uint16_t* packed_w);
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

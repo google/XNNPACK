@@ -22,6 +22,11 @@
 
 class PReLUOperatorTester {
  public:
+  enum class WeightsType {
+    Default,
+    FP32,
+  };
+
   inline PReLUOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
@@ -72,6 +77,15 @@ class PReLUOperatorTester {
     }
   }
 
+  inline PReLUOperatorTester& weights_type(WeightsType weights_type) {
+    this->weights_type_ = weights_type;
+    return *this;
+  }
+
+  inline WeightsType weights_type() const {
+    return this->weights_type_;
+  }
+
   inline PReLUOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -82,6 +96,15 @@ class PReLUOperatorTester {
   }
 
   void TestF16() const {
+    switch (weights_type()) {
+      case WeightsType::Default:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
@@ -91,18 +114,20 @@ class PReLUOperatorTester {
 
     std::vector<uint16_t> x((batch_size() - 1) * x_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> w(channels());
+    std::vector<float> w_as_float(channels());
     std::vector<uint16_t> y((batch_size() - 1) * y_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> y_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f16irng));
       std::generate(w.begin(), w.end(), std::ref(f16wrng));
+      std::transform(w.cbegin(), w.cend(), w_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const float x_value = fp16_ieee_to_fp32_value(x[i * x_stride() + c]);
-          const float w_value = fp16_ieee_to_fp32_value(w[c]);
+          const float w_value = w_as_float[c];
           y_ref[i * channels() + c] = signbit(x_value) ? x_value * w_value : x_value;
         }
       }
@@ -111,11 +136,19 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
+      const void* negative_slope_data = w.data();
+      if (weights_type() == WeightsType::FP32) {
+        negative_slope_data = w_as_float.data();
+      }
+      uint32_t flags = 0;
+      if (weights_type() == WeightsType::FP32) {
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+      }
       ASSERT_EQ(xnn_status_success,
         xnn_create_prelu_nc_f16(
           channels(), x_stride(), y_stride(),
-          w.data(),
-          0, &prelu_op));
+          negative_slope_data,
+          flags, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
 
       // Smart pointer to automatically delete prelu_op.
@@ -145,6 +178,8 @@ class PReLUOperatorTester {
   }
 
   void TestF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
@@ -208,5 +243,6 @@ class PReLUOperatorTester {
   size_t channels_{1};
   size_t x_stride_{0};
   size_t y_stride_{0};
+  WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{15};
 };

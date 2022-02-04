@@ -13,6 +13,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/pack.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
 
@@ -23,9 +24,10 @@ static enum xnn_status create_prelu_nc(
     size_t output_stride,
     const void* negative_slope,
     uint32_t flags,
+    uint32_t log2_weights_element_size,
+    xnn_pack_prelu_w_function pack_prelu_w,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
-    uint32_t log2_weights_element_size,
     xnn_operator_t* prelu_op_out)
 {
   xnn_operator_t prelu_op = NULL;
@@ -89,7 +91,7 @@ static enum xnn_status create_prelu_nc(
       packed_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  memcpy(prelu_op->packed_weights, negative_slope, channels << log2_weights_element_size);
+  pack_prelu_w(channels, negative_slope, prelu_op->packed_weights);
 
   prelu_op->channels = channels;
   prelu_op->input_pixel_stride = input_stride;
@@ -117,11 +119,17 @@ enum xnn_status xnn_create_prelu_nc_f16(
     uint32_t flags,
     xnn_operator_t* prelu_op_out)
 {
+  xnn_pack_prelu_w_function pack_prelu_w = (xnn_pack_prelu_w_function) xnn_pack_f16_prelu_w;
+  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+    pack_prelu_w = (xnn_pack_prelu_w_function) xnn_pack_f32_to_f16_prelu_w;
+  }
+
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
-    XNN_INIT_FLAG_F16, xnn_operator_type_prelu_nc_f16,
     1 /* log2(sizeof(uint16_t)) */,
+    pack_prelu_w,
+    XNN_INIT_FLAG_F16, xnn_operator_type_prelu_nc_f16,
     prelu_op_out);
 }
 
@@ -136,8 +144,9 @@ enum xnn_status xnn_create_prelu_nc_f32(
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
-    XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
     2 /* log2(sizeof(float)) */,
+    (xnn_pack_prelu_w_function) xnn_pack_f32_prelu_w,
+    XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
     prelu_op_out);
 }
 

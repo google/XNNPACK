@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <fp16.h>
 
@@ -2017,4 +2018,30 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
     }
     packed_w += cr - cr_block_size;
   }
+}
+
+void xnn_pack_f32_prelu_w(
+  size_t c,
+  const float* s,
+  float* packed_w)
+{
+  memcpy(packed_w, s, c * sizeof(float));
+}
+
+void xnn_pack_f16_prelu_w(
+  size_t c,
+  const uint16_t* s,
+  uint16_t* packed_w)
+{
+  memcpy(packed_w, s, c * sizeof(uint16_t));
+}
+
+void xnn_pack_f32_to_f16_prelu_w(
+  size_t c,
+  const float* s,
+  uint16_t* packed_w)
+{
+  do {
+    *packed_w++ = fp16_ieee_from_fp32_value(*s++);
+  } while (--c != 0);
 }
