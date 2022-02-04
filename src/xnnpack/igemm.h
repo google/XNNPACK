@@ -1372,23 +1372,35 @@ DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_2x4_
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_3x4__scalar_lrintf)
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
 
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+#define DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL enum xnn_status fn_name(                  \
+      struct xnn_code_buffer* code,                      \
+      size_t nc,                                         \
+      size_t kc,                                         \
+      size_t ks,                                         \
+      const void* params);
 
-enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75)
 
-enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_qc8_igemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qs8_igemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64)
 
-enum xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
-enum xnn_status xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(struct xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params);
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qc8_igemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_qc8_igemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64)
+
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75)
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75)
+
+#undef DECLARE_GENERATE_F32_IGEMM_UKERNEL_FUNCTION
 
 #ifdef __cplusplus
 }  // extern "C"
