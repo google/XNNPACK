@@ -4529,6 +4529,8 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c",
     "src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c",
     "src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c",
+    "src/f16-vlrelu/gen/vlrelu-neonfp16arith-x8.c",
+    "src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c",
     "src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c",
     "src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c",
 ]
@@ -10900,6 +10902,15 @@ xnnpack_unit_test(
     name = "f16_vhswish_test",
     srcs = [
         "test/f16-vhswish.cc",
+        "test/vunary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vlrelu_test",
+    srcs = [
+        "test/f16-vlrelu.cc",
         "test/vunary-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

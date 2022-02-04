@@ -3034,6 +3034,26 @@ void xnn_init_f32_expminus_wasmsimd_rr2_p5_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_init_f16_lrelu_neon_params(
+  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t slope)
+{
+  params->neon.slope = slope;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_lrelu_avx_params(
+  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t slope)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.slope[i] = fp16_ieee_to_fp32_value(slope);
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_init_f32_lrelu_scalar_params(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope)
@@ -3065,7 +3085,7 @@ void xnn_init_f32_lrelu_avx_params(
     params->avx.mask_table[i] = 0;
   }
 }
-#endif
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 void xnn_init_f32_lrelu_wasmsimd_params(

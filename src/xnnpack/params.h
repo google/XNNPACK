@@ -554,6 +554,19 @@ union xnn_f32_expminus_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f16_lrelu_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint16_t slope;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float slope[8];
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_lrelu_params {
   struct {
     float slope;
@@ -3093,6 +3106,12 @@ typedef void (*xnn_f32_vhswish_ukernel_function)(
     float* y,
     const union xnn_f32_hswish_params* params);
 
+typedef void (*xnn_f16_vlrelu_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const union xnn_f16_lrelu_params* params);
+
 typedef void (*xnn_f32_vlrelu_ukernel_function)(
     size_t n,
     const float* x,
@@ -3548,6 +3567,10 @@ typedef void (*xnn_init_f32_elu_params_fn)(
 
 typedef void (*xnn_init_f32_hswish_params_fn)(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f16_lrelu_params_fn)(
+  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t slope);
 
 typedef void (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],

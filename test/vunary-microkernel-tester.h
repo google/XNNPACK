@@ -310,6 +310,50 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_vlrelu_ukernel_function vlrelu, xnn_init_f16_lrelu_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    const uint16_t slope_as_half = fp16_ieee_from_fp32_value(slope());
+    const float slope_as_float = fp16_ieee_to_fp32_value(slope_as_half);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f16rng));
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
+        y_ref[i] = std::signbit(x_value) ? x_value * slope_as_float : x_value;
+      }
+
+      // Prepare parameters.
+      union xnn_f16_lrelu_params params;
+      init_params(&params, slope_as_half);
+
+      // Call optimized micro-kernel.
+      vlrelu(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(
+            fp16_ieee_to_fp32_value(y[i]),
+            y_ref[i],
+            std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-3f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
+  }
+
   void Test(xnn_f32_vlrelu_ukernel_function vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

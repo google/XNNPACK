@@ -532,6 +532,20 @@ DECLARE_INIT_F32_EXPMINUS_PARAMS_FUNCTION(xnn_init_f32_expminus_scalar_rr2_p5_pa
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#define DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                                \
+    union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t slope);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_avx_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                                \
     union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
