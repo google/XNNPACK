@@ -73,6 +73,8 @@ public:
 void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float min, float max)
 {
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11;
+  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
+  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
   // Clamp C pointers / Save d8-d15 on stack
   stp(d8, d9, mem[sp, -96]++);
@@ -442,8 +444,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float m
   fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
 
   // Load min/max values
-  if (min != -std::numeric_limits<float>::infinity() ||
-      max != +std::numeric_limits<float>::infinity()) {
+  if (clamp_min || clamp_max) {
     ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
   }
 
@@ -465,7 +466,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float m
   subs(x1, x1, 8);
 
   // Clamp
-  if (min != -std::numeric_limits<float>::infinity()) {
+  if (clamp_min) {
     fmax(v20.v4s(), v20.v4s(), v6.v4s());
     fmax(v21.v4s(), v21.v4s(), v6.v4s());
     fmax(v22.v4s(), v22.v4s(), v6.v4s());
@@ -479,7 +480,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float m
     fmax(v30.v4s(), v30.v4s(), v6.v4s());
     fmax(v31.v4s(), v31.v4s(), v6.v4s());
   }
-  if (max != +std::numeric_limits<float>::infinity()) {
+  if (clamp_max) {
     fmin(v20.v4s(), v20.v4s(), v7.v4s());
     fmin(v21.v4s(), v21.v4s(), v7.v4s());
     fmin(v22.v4s(), v22.v4s(), v7.v4s());
@@ -528,8 +529,7 @@ void Generator::generate(bool prefetch, size_t nc, size_t kc, size_t ks, float m
 
   bind(l5);
   // Load min/max values
-  if (min != -std::numeric_limits<float>::infinity() ||
-      max != +std::numeric_limits<float>::infinity()) {
+  if (clamp_min || clamp_max) {
     ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
   }
 

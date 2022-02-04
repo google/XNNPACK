@@ -59,6 +59,8 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
   assert(kc % sizeof(float) == 0);
 
   Label nc_loop, kc_loop, epilogue, clamp, remainder_kc, store_odd_width;
+  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
+  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
   // Push 100 bytes
   // r2 will be reloaded in outer loop
@@ -366,12 +368,11 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
   ldr(r2, mem[sp]); // kc
   subs(r1, r1, 8);
 
-  if (min != -std::numeric_limits<float>::infinity() ||
-      max != +std::numeric_limits<float>::infinity()) {
+  if (clamp_min || clamp_max) {
     // Load params pointer
     ldr(r5, mem[sp, 120]); // params
 
-    if (min != -std::numeric_limits<float>::infinity()) {
+    if (clamp_min) {
       vld1r_32({d4, d5}, mem[r5]++);
       vmax_f32(q8, q8, q2);
       vmax_f32(q9, q9, q2);
@@ -385,7 +386,7 @@ void Generator::generate(size_t nc, size_t kc, float min, float max) {
       add(r5, r5, 4);
     }
 
-    if (max != +std::numeric_limits<float>::infinity()) {
+    if (clamp_max) {
       vld1r_32({d6, d7}, mem[r5]);
       vmin_f32(q8, q8, q3);
       vmin_f32(q9, q9, q3);
