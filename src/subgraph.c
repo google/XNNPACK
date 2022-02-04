@@ -594,6 +594,11 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   // Check that all operators in the subgraph are supported in FP16, bail out on any unsupported one.
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
+    if (node->type == xnn_node_type_invalid) {
+      // Node was fused away, skip.
+      continue;
+    }
+
     if (node->compute_type != xnn_compute_type_fp32) {
       xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
       return;
@@ -613,6 +618,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_hardswish:
+      case xnn_node_type_prelu:
       case xnn_node_type_static_constant_pad:
         break;
       default:
@@ -623,13 +629,14 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   }
 
   // Annotate Values to be converted to FP16 as FP16-compatible.
-  // Note that static weights in [Depthwise] Convolution & Fully Connected Nodes remain FP32,
+  // Note that static weights in [Depthwise] Convolution, Fully Connected, and PReLU Nodes remain FP32,
   // they will be converted to FP16 during weight repacking when the operator is created.
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
     switch (node->type) {
       case xnn_node_type_convolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
+      case xnn_node_type_prelu:
         subgraph->values[node->inputs[0]].fp16_compatible = true;
         subgraph->values[node->outputs[0]].fp16_compatible = true;
         break;
