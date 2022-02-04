@@ -75,24 +75,15 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
 
       size_t c = channels;
       for (; c >= 4; c -= 4) {
-        const float32x4_t vi0 = vld1q_f32(i0);
-        i0 += 4;
-        const float32x4_t vi1 = vld1q_f32(i1);
-        i1 += 4;
-        const float32x4_t vi2 = vld1q_f32(i2);
-        i2 += 4;
-        const float32x4_t vi3 = vld1q_f32(i3);
-        i3 += 4;
-        const float32x4_t vi4 = vld1q_f32(i4);
-        i4 += 4;
-        const float32x4_t vi5 = vld1q_f32(i5);
-        i5 += 4;
-        const float32x4_t vi6 = vld1q_f32(i6);
-        i6 += 4;
-        const float32x4_t vi7 = vld1q_f32(i7);
-        i7 += 4;
-        const float32x4_t vi8 = vld1q_f32(i8);
-        i8 += 4;
+        const float32x4_t vi0 = vld1q_f32(i0); i0 += 4;
+        const float32x4_t vi1 = vld1q_f32(i1); i1 += 4;
+        const float32x4_t vi2 = vld1q_f32(i2); i2 += 4;
+        const float32x4_t vi3 = vld1q_f32(i3); i3 += 4;
+        const float32x4_t vi4 = vld1q_f32(i4); i4 += 4;
+        const float32x4_t vi5 = vld1q_f32(i5); i5 += 4;
+        const float32x4_t vi6 = vld1q_f32(i6); i6 += 4;
+        const float32x4_t vi7 = vld1q_f32(i7); i7 += 4;
+        const float32x4_t vi8 = vld1q_f32(i8); i8 += 4;
 
         const float32x4_t vmax018 = vmaxq_f32(vmaxq_f32(vi0, vi1), vi8);
         const float32x4_t vmax23 = vmaxq_f32(vi2, vi3);
@@ -104,28 +95,18 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
         const float32x4_t vmax = vmaxq_f32(vmax2345, vmax01678);
         const float32x4_t vout = vmaxq_f32(vminq_f32(vmax, voutput_max), voutput_min);
 
-        vst1q_f32(o, vout);
-        o += 4;
+        vst1q_f32(o, vout); o += 4;
       }
       if (c != 0) {
-        const float32x4_t vi0 = vld1q_f32(i0);
-        i0 += 4;
-        const float32x4_t vi1 = vld1q_f32(i1);
-        i1 += 4;
-        const float32x4_t vi2 = vld1q_f32(i2);
-        i2 += 4;
-        const float32x4_t vi3 = vld1q_f32(i3);
-        i3 += 4;
-        const float32x4_t vi4 = vld1q_f32(i4);
-        i4 += 4;
-        const float32x4_t vi5 = vld1q_f32(i5);
-        i5 += 4;
-        const float32x4_t vi6 = vld1q_f32(i6);
-        i6 += 4;
-        const float32x4_t vi7 = vld1q_f32(i7);
-        i7 += 4;
-        const float32x4_t vi8 = vld1q_f32(i8);
-        i8 += 4;
+        const float32x4_t vi0 = vld1q_f32(i0); i0 += 4;
+        const float32x4_t vi1 = vld1q_f32(i1); i1 += 4;
+        const float32x4_t vi2 = vld1q_f32(i2); i2 += 4;
+        const float32x4_t vi3 = vld1q_f32(i3); i3 += 4;
+        const float32x4_t vi4 = vld1q_f32(i4); i4 += 4;
+        const float32x4_t vi5 = vld1q_f32(i5); i5 += 4;
+        const float32x4_t vi6 = vld1q_f32(i6); i6 += 4;
+        const float32x4_t vi7 = vld1q_f32(i7); i7 += 4;
+        const float32x4_t vi8 = vld1q_f32(i8); i8 += 4;
 
         const float32x4_t vmax018 = vmaxq_f32(vmaxq_f32(vi0, vi1), vi8);
         const float32x4_t vmax23 = vmaxq_f32(vi2, vi3);
@@ -139,13 +120,11 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
 
         float32x2_t vout_lo = vget_low_f32(vout);
         if (c & 2) {
-          vst1_f32(o, vout_lo);
+          vst1_f32(o, vout_lo); o += 2;
           vout_lo = vget_high_f32(vout);
-          o += 2;
         }
         if (c & 1) {
-          vst1_lane_f32(o, vout_lo, 0);
-          o += 1;
+          vst1_lane_f32(o, vout_lo, 0); o += 1;
         }
       }
     }
@@ -192,22 +171,14 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
       o = output;
       size_t c = channels;
       for (; c >= 4; c -= 4) {
-        const float32x4_t vi0 = vld1q_f32(i0);
-        i0 += 4;
-        const float32x4_t vi1 = vld1q_f32(i1);
-        i1 += 4;
-        const float32x4_t vi2 = vld1q_f32(i2);
-        i2 += 4;
-        const float32x4_t vi3 = vld1q_f32(i3);
-        i3 += 4;
-        const float32x4_t vi4 = vld1q_f32(i4);
-        i4 += 4;
-        const float32x4_t vi5 = vld1q_f32(i5);
-        i5 += 4;
-        const float32x4_t vi6 = vld1q_f32(i6);
-        i6 += 4;
-        const float32x4_t vi7 = vld1q_f32(i7);
-        i7 += 4;
+        const float32x4_t vi0 = vld1q_f32(i0); i0 += 4;
+        const float32x4_t vi1 = vld1q_f32(i1); i1 += 4;
+        const float32x4_t vi2 = vld1q_f32(i2); i2 += 4;
+        const float32x4_t vi3 = vld1q_f32(i3); i3 += 4;
+        const float32x4_t vi4 = vld1q_f32(i4); i4 += 4;
+        const float32x4_t vi5 = vld1q_f32(i5); i5 += 4;
+        const float32x4_t vi6 = vld1q_f32(i6); i6 += 4;
+        const float32x4_t vi7 = vld1q_f32(i7); i7 += 4;
         const float32x4_t vo = vld1q_f32(o);
 
         const float32x4_t vmax01 = vmaxq_f32(vmaxq_f32(vi0, vi1), vo);
@@ -220,8 +191,7 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
         const float32x4_t vmax = vmaxq_f32(vmax2345, vmax0167);
         const float32x4_t vout = vmaxq_f32(vminq_f32(vmax, voutput_max), voutput_min);
 
-        vst1q_f32(o, vout);
-        o += 4;
+        vst1q_f32(o, vout); o += 4;
       }
       if (c != 0) {
         const float32x4_t vi0 = vld1q_f32(i0);
@@ -246,13 +216,11 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4(
 
         float32x2_t vout_lo = vget_low_f32(vout);
         if (c & 2) {
-          vst1_f32(o, vout_lo);
+          vst1_f32(o, vout_lo); o += 2;
           vout_lo = vget_high_f32(vout);
-          o += 2;
         }
         if (c & 1) {
-          vst1_lane_f32(o, vout_lo, 0);
-          o += 1;
+          vst1_lane_f32(o, vout_lo, 0); o += 1;
         }
       }
     }

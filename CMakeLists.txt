@@ -3239,6 +3239,7 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/8x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/8x16-minmax-neonfp16arith-ld64.c
+  src/f16-maxpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-prelu/gen/neonfp16arith-2x8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith-x2.c
@@ -6870,6 +6871,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f16-igemm-minmax-test f16-igemm-minmax-test)
+
+  ADD_EXECUTABLE(f16-maxpool-minmax-test test/f16-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-maxpool-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-maxpool-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-maxpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f16-maxpool-minmax-test f16-maxpool-minmax-test)
 
   ADD_EXECUTABLE(f16-spmm-minmax-test test/f16-spmm-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-spmm-minmax-test PROPERTIES

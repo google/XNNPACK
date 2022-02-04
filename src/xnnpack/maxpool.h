@@ -19,6 +19,21 @@ extern "C" {
 #endif
 
 
+#define DECLARE_F16_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                 \
+      size_t output_pixels,                                  \
+      size_t kernel_size,                                    \
+      size_t channels,                                       \
+      const void** input,                                    \
+      size_t input_offset,                                   \
+      void* output,                                          \
+      size_t input_increment,                                \
+      size_t output_increment,                               \
+      const union xnn_f16_minmax_params* params);
+
+DECLARE_F16_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8)
+
+
 #define DECLARE_F32_MAXPOOL_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
       size_t output_pixels,                                  \

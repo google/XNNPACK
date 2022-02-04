@@ -4484,6 +4484,7 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c",
     "src/f16-igemm/gen/8x8-minmax-neonfp16arith-ld64.c",
     "src/f16-igemm/gen/8x16-minmax-neonfp16arith-ld64.c",
+    "src/f16-maxpool/9p8x-minmax-neonfp16arith-c8.c",
     "src/f16-prelu/gen/neonfp16arith-2x8.c",
     "src/f16-prelu/gen/neonfp16arith-2x16.c",
     "src/f16-spmm/gen/8x1-minmax-neonfp16arith-x2.c",
@@ -10811,6 +10812,15 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
+)
+
+xnnpack_unit_test(
+    name = "f16_maxpool_minmax_test",
+    srcs = [
+        "test/f16-maxpool-minmax.cc",
+        "test/maxpool-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

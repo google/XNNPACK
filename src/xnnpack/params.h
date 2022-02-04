@@ -2947,6 +2947,17 @@ typedef void (*xnn_maxpool_ukernel_function)(
     size_t output_increment,
     const void* params);
 
+typedef void (*xnn_f16_maxpool_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    void* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f16_minmax_params* params);
+
 typedef void (*xnn_f32_maxpool_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
