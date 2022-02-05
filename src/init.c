@@ -2479,6 +2479,11 @@ static void init(void) {
         .init.f16_hswish = xnn_init_f16_hswish_neon_params,
         .element_tile = 16,
       };
+      xnn_params.f16.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vlrelu_ukernel__neonfp16arith_x16,
+        .init.f16_lrelu = xnn_init_f16_lrelu_neon_params,
+        .element_tile = 16,
+      };
     }
   #endif  // XNN_NO_F16_OPERATORS
 
@@ -3708,6 +3713,11 @@ static void init(void) {
       xnn_params.f16.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vhswish_ukernel__f16c_x16,
         .init.f16_hswish = xnn_init_f16_hswish_avx_params,
+        .element_tile = 16,
+      };
+      xnn_params.f16.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vlrelu_ukernel__f16c_x16,
+        .init.f16_lrelu = xnn_init_f16_lrelu_avx_params,
         .element_tile = 16,
       };
     }

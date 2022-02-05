@@ -86,6 +86,7 @@ enum xnn_operator_type {
   xnn_operator_type_global_average_pooling_ncw_f32,
   xnn_operator_type_hardswish_nc_f16,
   xnn_operator_type_hardswish_nc_f32,
+  xnn_operator_type_leaky_relu_nc_f16,
   xnn_operator_type_leaky_relu_nc_f32,
   xnn_operator_type_leaky_relu_nc_qu8,
   xnn_operator_type_max_pooling_nhwc_f16,
@@ -299,6 +300,7 @@ struct xnn_operator {
   union {
     union xnn_f16_f32_cvt_params f16_f32_cvt;
     union xnn_f16_hswish_params f16_hswish;
+    union xnn_f16_lrelu_params f16_lrelu;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;

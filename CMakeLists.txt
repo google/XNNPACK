@@ -3188,6 +3188,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
+  src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
@@ -4767,6 +4768,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
   src/f16-vbinary/gen/vmulc-minmax-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
+  src/f16-vlrelu/gen/vlrelu-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
@@ -6661,7 +6663,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(leaky-relu-nc-test leaky-relu-nc-test)
 
   ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)

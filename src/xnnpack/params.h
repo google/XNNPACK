@@ -3778,6 +3778,7 @@ struct vunary_parameters {
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_hswish_params_fn f16_hswish;
+    xnn_init_f16_lrelu_params_fn f16_lrelu;
     xnn_init_f32_abs_params_fn f32_abs;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_elu_params_fn f32_elu;
@@ -4122,6 +4123,7 @@ struct xnn_parameters {
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
     struct maxpool_parameters maxpool;
     struct vunary_parameters hswish;
+    struct vunary_parameters lrelu;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;

@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
@@ -620,6 +622,42 @@ enum xnn_status xnn_create_hardswish_nc_f32(
     hardswish_op_out);
 }
 
+enum xnn_status xnn_create_leaky_relu_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out)
+{
+  const uint16_t negative_slope_as_half = fp16_ieee_from_fp32_value(negative_slope);
+  negative_slope = fp16_ieee_to_fp32_value(negative_slope_as_half);
+  if (!isfinite(fp16_ieee_to_fp32_value(negative_slope))) {
+    xnn_log_error(
+      "failed to create %s operator with %f negative slope: finite number expected",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
+      negative_slope);
+    return xnn_status_invalid_parameter;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f16_lrelu_params params;
+  if (xnn_params.f16.lrelu.init.f16_lrelu != NULL) {
+    xnn_params.f16.lrelu.init.f16_lrelu(&params, negative_slope_as_half);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_leaky_relu_nc_f16,
+    xnn_params.f16.lrelu.ukernel,
+    leaky_relu_op_out);
+}
+
 enum xnn_status xnn_create_leaky_relu_nc_f32(
   size_t channels,
   size_t input_stride,
@@ -1196,6 +1234,30 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &hardswish_op->params.f32_hswish, sizeof(hardswish_op->params.f32_hswish),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_f16(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool)
+{
+  if (leaky_relu_op->type != xnn_operator_type_leaky_relu_nc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f16),
+      xnn_operator_type_to_string(leaky_relu_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  leaky_relu_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    leaky_relu_op,
+    batch_size, input, output,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    &leaky_relu_op->params.f16_lrelu, sizeof(leaky_relu_op->params.f16_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 
