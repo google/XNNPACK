@@ -85,7 +85,7 @@ static enum xnn_status setup_leaky_relu_operator(
 
   switch (opdata->operator_object->type) {
 #ifndef XNN_NO_F16_OPERATORS
-    case xnn_operator_type_prelu_nc_f16:
+    case xnn_operator_type_leaky_relu_nc_f16:
       return xnn_setup_leaky_relu_nc_f16(
         opdata->operator_object,
         opdata->batch_size,
@@ -93,7 +93,7 @@ static enum xnn_status setup_leaky_relu_operator(
         output_data,
         threadpool);
 #endif  // XNN_NO_F16_OPERATORS
-    case xnn_operator_type_prelu_nc_f32:
+    case xnn_operator_type_leaky_relu_nc_f32:
       return xnn_setup_leaky_relu_nc_f32(
         opdata->operator_object,
         opdata->batch_size,
