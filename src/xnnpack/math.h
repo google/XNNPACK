@@ -175,7 +175,7 @@ inline static int64_t asr_s64(int64_t x, uint32_t n) {
   #endif
 }
 
-inline static uint32_t ctz(uint32_t x) {
+inline static uint32_t math_ctz_u32(uint32_t x) {
   #ifdef _MSC_VER
     unsigned long index;
     _BitScanForward(&index, (unsigned long) x);

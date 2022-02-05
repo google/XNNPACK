@@ -343,7 +343,7 @@ void Assembler::tst(XRegister xn, uint8_t imm) {
     return;
   }
 
-  const uint32_t imm_s = (ctz(imm_po2) - 1) << 10;
+  const uint32_t imm_s = (math_ctz_u32(imm_po2) - 1) << 10;
   emit32(0xF240001F | imm_s | rn(xn));
 }
 
