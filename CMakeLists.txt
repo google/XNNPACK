@@ -6573,7 +6573,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(deconvolution-nhwc-test deconvolution-nhwc-test)
 
   ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)

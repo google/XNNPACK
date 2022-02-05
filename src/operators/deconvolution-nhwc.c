@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/indirection.h>
@@ -458,6 +460,91 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     &params, sizeof(params),
     &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
     xnn_operator_type_deconvolution_nhwc_qu8,
+    deconvolution_op_out);
+}
+
+enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
+    uint32_t output_padding_top,
+    uint32_t output_padding_right,
+    uint32_t output_padding_bottom,
+    uint32_t output_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t stride_height,
+    uint32_t stride_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* deconvolution_op_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  const uint16_t output_min_as_half = fp16_ieee_from_fp32_value(output_min);
+  const uint16_t output_max_as_half = fp16_ieee_from_fp32_value(output_max);
+  output_min = fp16_ieee_to_fp32_value(output_min_as_half);
+  output_max = fp16_ieee_to_fp32_value(output_max_as_half);
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct gemm_parameters* gemm_parameters = &xnn_params.f16.gemm;
+  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_parameters->minmax;
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  if (linear_activation && gemm_parameters->linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+    gemm_ukernels = &gemm_parameters->linear;
+  }
+
+  union xnn_f16_scaleminmax_params params;
+  if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
+    gemm_parameters->init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, output_min_as_half, output_max_as_half);
+  }
+  return create_deconvolution2d_nhwc(
+    output_padding_top, output_padding_right, output_padding_bottom, output_padding_left,
+    kernel_height, kernel_width,
+    stride_height, stride_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_pixel_stride, output_pixel_stride,
+    kernel, bias, flags,
+    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
+    sizeof(uint16_t) /* sizeof(bias element) */,
+    (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w,
+    (xnn_pack_deconv_goki_w_function) xnn_pack_f16_deconv_goki_w,
+    NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    &params, sizeof(params),
+    gemm_parameters, gemm_ukernels,
+    xnn_operator_type_deconvolution_nhwc_f16,
     deconvolution_op_out);
 }
 
@@ -992,6 +1079,37 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
     sizeof(int32_t) /* sizeof(bias element) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
     &deconvolution_op->params.qu8_conv_minmax, sizeof(deconvolution_op->params.qu8_conv_minmax),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
+    xnn_operator_t deconvolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    uint32_t adjustment_height,
+    uint32_t adjustment_width,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16),
+      xnn_operator_type_to_string(deconvolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_deconvolution2d_nhwc(
+    deconvolution_op,
+    batch_size, input_height, input_width,
+    adjustment_height, adjustment_width,
+    input, output,
+    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
+    sizeof(uint16_t) /* sizeof(bias element) */,
+    1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
+    &deconvolution_op->params.f16_scaleminmax, sizeof(deconvolution_op->params.f16_scaleminmax),
     pthreadpool_get_threads_count(threadpool));
 }
 

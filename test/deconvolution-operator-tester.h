@@ -20,6 +20,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 namespace {
@@ -700,6 +702,149 @@ class DeconvolutionOperatorTester {
     }
   }
 
+  void TestF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+      (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
+    std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<uint16_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+      }
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t ky = 0; ky < kernel_height(); ky++) {
+              const size_t y = oy + padding_top() - ky * dilation_height();
+              const size_t iy = y / stride_height();
+              if (iy * stride_height() == y && iy < input_height()) {
+                for (size_t kx = 0; kx < kernel_width(); kx++) {
+                  const size_t x = ox + padding_left() - kx * dilation_width();
+                  const size_t ix = x / stride_width();
+                  if (ix * stride_width() == x && ix < input_width()) {
+                    for (size_t g = 0; g < groups(); g++) {
+                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                          output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
+                            fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) *
+                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
+      float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+      output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
+      output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
+      if (accumulated_range == 0.0f) {
+        output_min = -std::numeric_limits<float>::infinity();
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+      if (qmin() == std::numeric_limits<uint8_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      if (qmax() == std::numeric_limits<uint8_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Deconvolution operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t deconvolution_op = nullptr;
+
+      const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
+        padding_top(), padding_right(), padding_bottom(), padding_left(),
+        kernel_height(), kernel_width(), stride_height(), stride_width(),
+        dilation_height(), dilation_width(), groups(),
+        group_input_channels(), group_output_channels(),
+        input_pixel_stride(), output_pixel_stride(), kernel.data(),
+        has_bias() ? bias.data() : nullptr, output_min, output_max,
+        /*flags=*/0, &deconvolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, deconvolution_op);
+
+      // Smart pointer to automatically delete deconvolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t g = 0; g < groups(); g++) {
+              for (size_t c = 0; c < group_output_channels(); c++) {
+                ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_NEAR(
+                    fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
+                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                    1.0e-2f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -1284,6 +1429,240 @@ class DeconvolutionOperatorTester {
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestSetupF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+      (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels(),
+      (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + groups() * group_input_channels()));
+    std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<uint16_t> output(std::max(
+      (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels(),
+      (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + groups() * group_output_channels()));
+    std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
+    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0);
+      }
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t ky = 0; ky < kernel_height(); ky++) {
+              const size_t y = oy + padding_top() - ky * dilation_height();
+              const size_t iy = y / stride_height();
+              if (iy * stride_height() == y && iy < input_height()) {
+                for (size_t kx = 0; kx < kernel_width(); kx++) {
+                  const size_t x = ox + padding_left() - kx * dilation_width();
+                  const size_t ix = x / stride_width();
+                  if (ix * stride_width() == x && ix < input_width()) {
+                    for (size_t g = 0; g < groups(); g++) {
+                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                          output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
+                            fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) *
+                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      float output_min = accumulated_min + accumulated_range / 255.0f * float(qmin());
+      float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+      output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
+      output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
+      if (accumulated_range == 0.0f) {
+        output_min = -std::numeric_limits<float>::infinity();
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+      if (qmin() == std::numeric_limits<uint8_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      if (qmax() == std::numeric_limits<uint8_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, and run Deconvolution operator once.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t deconvolution_op = nullptr;
+
+      const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
+        padding_top(), padding_right(), padding_bottom(), padding_left(),
+        kernel_height(), kernel_width(),
+        stride_height(), stride_width(),
+        dilation_height(), dilation_width(),
+        groups(), group_input_channels(), group_output_channels(),
+        input_pixel_stride(), output_pixel_stride(),
+        kernel.data(), has_bias() ? bias.data() : nullptr,
+        output_min, output_max,
+        0, &deconvolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, deconvolution_op);
+
+      // Smart pointer to automatically delete deconvolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          batch_size(), input_height(), input_width(),
+          adjustment_height(), adjustment_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
+
+      // Verify results of the first run.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = 0; y < output_height(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t g = 0; g < groups(); g++) {
+              for (size_t c = 0; c < group_output_channels(); c++) {
+                ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_NEAR(
+                    fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
+                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                    1.0e-2f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              }
+            }
+          }
+        }
+      }
+
+      // Re-generate data for the second run.
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results for the second run, including clamping.
+      if (has_bias()) {
+        for (size_t i = 0; i < next_batch_size(); i++) {
+          for (size_t oy = 0; oy < next_output_height(); oy++) {
+            for (size_t ox = 0; ox < next_output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
+                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        std::fill(next_output_ref.begin(), next_output_ref.end(), 0);
+      }
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t oy = 0; oy < next_output_height(); oy++) {
+          for (size_t ox = 0; ox < next_output_width(); ox++) {
+            for (size_t ky = 0; ky < kernel_height(); ky++) {
+              const size_t y = oy + padding_top() - ky * dilation_height();
+              const size_t iy = y / stride_height();
+              if (iy * stride_height() == y && iy < next_input_height()) {
+                for (size_t kx = 0; kx < kernel_width(); kx++) {
+                  const size_t x = ox + padding_left() - kx * dilation_width();
+                  const size_t ix = x / stride_width();
+                  if (ix * stride_width() == x && ix < next_input_width()) {
+                    for (size_t g = 0; g < groups(); g++) {
+                      for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                        for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                          next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
+                            fp16_ieee_to_fp32_value(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) *
+                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      for (float& value : next_output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Setup and run Deconvolution operator the second time, and destroy the operator.
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          next_batch_size(), next_input_height(), next_input_width(),
+          adjustment_height(), adjustment_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
+
+      // Verify results of the second run.
+      for (size_t i = 0; i < next_batch_size(); i++) {
+        for (size_t y = 0; y < next_output_height(); y++) {
+          for (size_t x = 0; x < next_output_width(); x++) {
+            for (size_t g = 0; g < groups(); g++) {
+              for (size_t c = 0; c < group_output_channels(); c++) {
+                ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                ASSERT_NEAR(
+                    fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
+                    next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
+                    1.0e-2f * std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
             }
