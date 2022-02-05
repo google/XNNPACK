@@ -404,6 +404,23 @@ XNN_INTERNAL void xnn_pack_f16_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f32_to_f16_deconv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  struct subconvolution_params* subconv_params,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_qs8_deconv_goki_w(
   size_t g,
   size_t nc,

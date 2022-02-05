@@ -35,6 +35,11 @@ inline T doz(T a, T b) {
 
 class DeconvolutionOperatorTester {
  public:
+  enum class WeightsType {
+    Default,
+    FP32,
+  };
+
   inline DeconvolutionOperatorTester& padding(uint32_t padding) {
     this->padding_top_ = padding;
     this->padding_right_ = padding;
@@ -413,6 +418,15 @@ class DeconvolutionOperatorTester {
     return this->has_bias_;
   }
 
+  inline DeconvolutionOperatorTester& weights_type(WeightsType weights_type) {
+    this->weights_type_ = weights_type;
+    return *this;
+  }
+
+  inline WeightsType weights_type() const {
+    return this->weights_type_;
+  }
+
   inline DeconvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -423,6 +437,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -564,6 +580,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -703,6 +721,15 @@ class DeconvolutionOperatorTester {
   }
 
   void TestF16() const {
+    switch (weights_type()) {
+      case WeightsType::Default:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -711,14 +738,18 @@ class DeconvolutionOperatorTester {
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
     std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<float> kernel_as_float(kernel.size());
     std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<float> bias_as_float(bias.size());
     std::vector<uint16_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f16rng));
       std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
       std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -729,7 +760,7 @@ class DeconvolutionOperatorTester {
               for (size_t g = 0; g < groups(); g++) {
                 for (size_t oc = 0; oc < group_output_channels(); oc++) {
                   output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                    bias_as_float[g * group_output_channels() + oc];
                 }
               }
             }
@@ -754,7 +785,7 @@ class DeconvolutionOperatorTester {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
                             fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + g * group_input_channels() + ic]) *
-                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                            kernel_as_float[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic];
                         }
                       }
                     }
@@ -794,14 +825,25 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
+      const void* kernel_data = kernel.data();
+      const void* bias_data = bias.data();
+      if (weights_type() == WeightsType::FP32) {
+        kernel_data = kernel_as_float.data();
+        bias_data = bias_as_float.data();
+      }
+      uint32_t flags = 0;
+      if (weights_type() == WeightsType::FP32) {
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+      }
       const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
         padding_top(), padding_right(), padding_bottom(), padding_left(),
         kernel_height(), kernel_width(), stride_height(), stride_width(),
         dilation_height(), dilation_width(), groups(),
         group_input_channels(), group_output_channels(),
-        input_pixel_stride(), output_pixel_stride(), kernel.data(),
-        has_bias() ? bias.data() : nullptr, output_min, output_max,
-        /*flags=*/0, &deconvolution_op);
+        input_pixel_stride(), output_pixel_stride(),
+        kernel_data, has_bias() ? bias_data : nullptr,
+        output_min, output_max,
+        flags, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -846,6 +888,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -976,6 +1020,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestSetupQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -1209,6 +1255,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestSetupQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
@@ -1439,6 +1487,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestSetupF16() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -1673,6 +1723,8 @@ class DeconvolutionOperatorTester {
   }
 
   void TestSetupF32() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
@@ -1916,5 +1968,6 @@ class DeconvolutionOperatorTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   bool has_bias_{true};
+  WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
 };

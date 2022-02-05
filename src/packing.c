@@ -1185,6 +1185,66 @@ void xnn_pack_f16_deconv_goki_w(
   }
 }
 
+void xnn_pack_f32_to_f16_deconv_goki_w(
+  size_t g,
+  size_t nc,
+  size_t kh,
+  size_t kw,
+  size_t kc,
+  size_t sh,
+  size_t sw,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
+  struct subconvolution_params* subconv_params,
+  const void* params)
+{
+  assert(nr >= sr);
+
+  const size_t skr = sr * kr;
+  for (size_t i = 0; i < g; i++) {
+    for (size_t oy = 0; oy < sh; oy++) {
+      for (size_t ox = 0; ox < sw; ox++) {
+        if (i == 0) {
+          (*subconv_params++).weights = packed_w;
+        }
+        for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+          const size_t nr_block_size = min(nc - nr_block_start, nr);
+          if XNN_LIKELY(b != NULL) {
+            for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+              packed_w[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+            }
+          }
+          packed_w += nr;
+          for (size_t ky = oy; ky < kh; ky += sh) {
+            for (size_t kx = ox; kx < kw; kx += sw) {
+              for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
+                for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+                    if (kc_idx < kc) {
+                      packed_w[kr_block_offset] = fp16_ieee_from_fp32_value(k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx]);
+                    }
+                  }
+                  packed_w += kr;
+                }
+                packed_w += (nr - nr_block_size) * kr;
+              }
+            }
+          }
+        }
+      }
+    }
+    k += kh * kw * kc * nc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  }
+}
+
 void xnn_pack_qs8_deconv_goki_w(
   size_t g,
   size_t nc,
