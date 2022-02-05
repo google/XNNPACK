@@ -618,6 +618,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_hardswish:
+      case xnn_node_type_leaky_relu:
       case xnn_node_type_max_pooling_2d:
       case xnn_node_type_prelu:
       case xnn_node_type_static_constant_pad:

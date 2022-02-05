@@ -106,7 +106,6 @@ static enum xnn_status setup_prelu_operator(
     default:
       XNN_UNREACHABLE;
   }
-
 }
 
 enum xnn_status xnn_define_prelu(
