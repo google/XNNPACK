@@ -600,7 +600,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     }
 
     if (node->compute_type != xnn_compute_type_fp32) {
-      xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
+      xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
       return;
     }
     switch (node->type) {
@@ -608,7 +608,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         assert(node->num_inputs == 2);
         for (uint32_t i = 0; i < node->num_inputs; i++) {
           if (subgraph->values[node->inputs[i]].data != NULL) {
-            xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",
+            xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",
               n, xnn_node_type_to_string(node->type), i);
             return;
           }
@@ -625,7 +625,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_reshape:
         break;
       default:
-        xnn_log_info("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
+        xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
           n, xnn_node_type_to_string(node->type));
         return;
     }
