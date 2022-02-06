@@ -615,6 +615,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         break;
       case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_hardswish:
@@ -638,6 +639,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     struct xnn_node* node = &subgraph->nodes[n];
     switch (node->type) {
       case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_prelu:
         subgraph->values[node->inputs[0]].fp16_compatible = true;

@@ -52,6 +52,32 @@ static enum xnn_status create_deconvolution_operator(
 
   enum xnn_status status = xnn_status_uninitialized;
   switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_deconvolution2d_nhwc_f16(
+          node->params.deconvolution_2d.padding_top,
+          node->params.deconvolution_2d.padding_right,
+          node->params.deconvolution_2d.padding_bottom,
+          node->params.deconvolution_2d.padding_left,
+          node->params.deconvolution_2d.kernel_height,
+          node->params.deconvolution_2d.kernel_width,
+          node->params.deconvolution_2d.upsampling_height,
+          node->params.deconvolution_2d.upsampling_width,
+          node->params.deconvolution_2d.dilation_height,
+          node->params.deconvolution_2d.dilation_width,
+          node->params.deconvolution_2d.groups,
+          node->params.deconvolution_2d.group_input_channels,
+          node->params.deconvolution_2d.group_output_channels,
+          node->params.deconvolution_2d.group_input_channels * node->params.deconvolution_2d.groups /* input_pixel_stride */,
+          node->params.deconvolution_2d.group_output_channels * node->params.deconvolution_2d.groups /* output_pixel_stride */,
+          filter_data,
+          bias_data,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
+          &opdata->operator_object);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_deconvolution2d_nhwc_f32(
           node->params.deconvolution_2d.padding_top,
@@ -193,6 +219,20 @@ static enum xnn_status setup_deconvolution_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_object->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_deconvolution_nhwc_f16:
+      return xnn_setup_deconvolution2d_nhwc_f16(
+          opdata->operator_object,
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->adjustment_height,
+          opdata->adjustment_width,
+          input_data,
+          output_data,
+          threadpool);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_deconvolution_nhwc_f32:
       return xnn_setup_deconvolution2d_nhwc_f32(
           opdata->operator_object,
