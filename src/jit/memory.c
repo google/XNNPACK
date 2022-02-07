@@ -129,5 +129,8 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
     return xnn_status_invalid_state;
   }
 #endif
+  buf->code = NULL;
+  buf->size = 0;
+  buf->capacity = 0;
   return xnn_status_success;
 }
