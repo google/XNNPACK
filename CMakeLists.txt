@@ -6435,7 +6435,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE . include src test)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE cpuinfo fp16 pthreadpool gtest packing)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE cpuinfo fp16 pthreadpool gtest jit packing)
 
   # ---[ Build size tests
 
