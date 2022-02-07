@@ -29,13 +29,21 @@ extern "C" {
 
 /// Allow sparse inference in a Runtime.
 ///
-/// Note: this flag forces XNNPACK to consider sparse inference, but does not guarantee it.
+/// Note: this flag hints XNNPACK to consider sparse inference, but does not guarantee it.
 #define XNN_FLAG_SPARSE_INFERENCE 0x00000001
+#define XNN_FLAG_HINT_SPARSE_INFERENCE XNN_FLAG_SPARSE_INFERENCE
 
 /// Allow IEEE FP16 inference in a Runtime.
 ///
-/// Note: this flag forces XNNPACK to consider IEEE FP16 inference, but does not guarantee it.
+/// Note: this flag hints XNNPACK to consider IEEE FP16 inference, but does not guarantee it.
 #define XNN_FLAG_FP16_INFERENCE 0x00000002
+#define XNN_FLAG_HINT_FP16_INFERENCE XNN_FLAG_FP16_INFERENCE
+
+/// Force IEEE FP16 inference in a Runtime, and fail if FP16 inference is not possible.
+///
+/// Note: this flag guarantees that XNNPACK will use IEEE FP16 inference, or fail to create the Runtime object.
+/// Warning: on x86 systems FP16 computations will be emulated at a substantial performance cost.
+#define XNN_FLAG_FORCE_FP16_INFERENCE 0x00000004
 
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
@@ -1138,9 +1146,10 @@ typedef struct xnn_runtime* xnn_runtime_t;
 ///                   Nodes can be added to the runtime once it is constructed.
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
-/// @param flags - binary features of the runtime. The only currently supported values are XNN_FLAG_SPARSE_INFERENCE,
-///                XNN_FLAG_FP16_INFERENCE, and XNN_FLAG_YIELD_WORKERS. If XNN_FLAG_YIELD_WORKERS is specified, worker
-///                threads would be yielded to the system scheduler after processing the last operator in the Runtime.
+/// @param flags - binary features of the runtime. The only currently supported values are
+///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE, and
+///                XNN_FLAG_YIELD_WORKERS. If XNN_FLAG_YIELD_WORKERS is specified, worker threads would be yielded to
+///                the system scheduler after processing the last operator in the Runtime.
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.

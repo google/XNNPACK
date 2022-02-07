@@ -40,7 +40,12 @@ enum xnn_status xnn_create_runtime_v2(
     goto error;
   }
 
-  xnn_subgraph_optimize(subgraph, flags & XNN_FLAG_SPARSE_INFERENCE);
+  const uint32_t optimization_flags = XNN_FLAG_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE | XNN_FLAG_FORCE_FP16_INFERENCE; 
+  status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to optimize subgraph");
+    goto error;
+  }
 
   status = xnn_status_out_of_memory;
 

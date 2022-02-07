@@ -2349,7 +2349,7 @@ static void init(void) {
   /**************************** F16 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
     if (cpuinfo_has_arm_neon_fp16_arith()) {
-      init_flags |= XNN_INIT_FLAG_F16;
+      init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
       xnn_params.f16.gemm.mr = 6;
       xnn_params.f16.gemm.nr = 16;
 

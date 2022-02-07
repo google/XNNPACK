@@ -581,7 +581,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
   }
 }
 
-void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
+bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
 {
   xnn_log_info("Analyzing subgraph for FP16 compatibility");
 
@@ -601,7 +601,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
 
     if (node->compute_type != xnn_compute_type_fp32) {
       xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
-      return;
+      return false;
     }
     switch (node->type) {
       case xnn_node_type_add2:
@@ -610,7 +610,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           if (subgraph->values[node->inputs[i]].data != NULL) {
             xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",
               n, xnn_node_type_to_string(node->type), i);
-            return;
+            return false;
           }
         }
         break;
@@ -628,7 +628,7 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
           n, xnn_node_type_to_string(node->type));
-        return;
+        return false;
     }
   }
 
@@ -789,6 +789,8 @@ void xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       }
     }
   }
+
+  return true;
 }
 
 enum xnn_status xnn_subgraph_optimize(
@@ -940,14 +942,25 @@ enum xnn_status xnn_subgraph_optimize(
   }
 
   #if XNN_ENABLE_SPARSE
-    if ((flags & XNN_FLAG_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
+    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
       xnn_subgraph_rewrite_for_nchw(subgraph);
     }
   #endif
 
+  if ((flags & XNN_FLAG_FORCE_FP16_INFERENCE) && !(xnn_params.init_flags & XNN_INIT_FLAG_F16)) {
+    xnn_log_error("failed to force FP16 inference: hardware supports neither native nor emulated FP16 operators");
+    return xnn_status_unsupported_hardware;
+  }
   #ifndef XNN_NO_F16_OPERATORS
-    if ((flags & XNN_FLAG_FP16_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_F16)) {
-      xnn_subgraph_rewrite_for_fp16(subgraph);
+    const bool try_native_fp16 =
+      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_F16_NATIVE);
+    const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
+    if (try_native_fp16 || force_fp16) {
+      const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
+      if (force_fp16 && !fp16_rewrite_succeeded) {
+        xnn_log_error("failed to force FP16 inference: subgraph is incompatible with FP16 operators");
+        return xnn_status_unsupported_parameter;
+      }
     }
   #endif  // XNN_NO_F16_OPERATORS
 
