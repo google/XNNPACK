@@ -129,10 +129,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         SUBS    r5, r5, 8               // k = k - 8
         ADD     r2, r2, 16
 
-        BLO     4f                      // less than 8 channels?
+        BLO     6f                      // less than 8 channels?
 
         SUBS    r5, r5, 8               // k = k - 8
-        BLO     21f                     // less than 8 channels?
+        BLO     3f                      // less than 8 channels?
 
         # Main loop - 8 bytes of A.
         # 16 SDOT, 12 LD64
@@ -172,7 +172,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
 
         # Epilogue
         .p2align 3
-21:
+3:
         VSDOT.S8 q8, q2, d0[0]
         VLD1.8  {d2}, [r10]!            // A2
         VSDOT.S8 q9, q3, d0[0]
@@ -198,9 +198,9 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         VSDOT.S8 q14, q4, d3[1]
         VSDOT.S8 q15, q5, d3[1]
         # Is there a remainder?- 4 bytes of A
-        BNE     40f
+        BNE     5f
 
-3:
+4:
         # ks loop
         SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
         BHI     1b
@@ -273,7 +273,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     5f
+        BLO     7f
         VST1.8  {d3}, [r6], r7
         VST1.8  {d2}, [r8], r7
         VST1.8  {d1}, [r4], r7
@@ -287,7 +287,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
 
         # Remainder prologue
         .p2align 3
-40:
+5:
         VLD1.8  {d4},  [r9]!            // B0
         VLD1.8  {d0},  [r3]!            // A0
         VLD1.8  {d5},  [r9]!            // B1
@@ -296,7 +296,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         VLD1.8  {d7},  [r9]!            // B3
 
         # Remainder- 4 bytes of A
-4:
+6:
         VSDOT.S8 q8, q2, d0[0]
         VLD1.32 {d2[0]}, [r10]!         // A2
         VSDOT.S8 q9, q3, d0[0]
@@ -309,22 +309,22 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         VSDOT.S8 q13, q3, d2[0]
         VSDOT.S8 q14, q2, d3[0]
         VSDOT.S8 q15, q3, d3[0]
-        B       3b
+        B       4b
 
         # Store odd width
         .p2align 3
-5:
+7:
         TST     r1, 4
-        BEQ     6f
+        BEQ     8f
         VST1.32 {d3[0]}, [r6]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d0[0]}, [r11]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-6:
+8:
         TST     r1, 2
-        BEQ     7f
+        BEQ     9f
         VST1.16 {d3[0]}, [r6]!
         VST1.16 {d2[0]}, [r8]!
         VST1.16 {d1[0]}, [r4]!
@@ -332,15 +332,15 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-7:
+9:
         TST     r1, 1
-        BEQ     8f
+        BEQ     10f
         VST1.8  {d3[0]}, [r6]
         VST1.8  {d2[0]}, [r8]
         VST1.8  {d1[0]}, [r4]
         VST1.8  {d0[0]}, [r11]
 
-8:
+10:
         VPOP    {d8-d13}
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}

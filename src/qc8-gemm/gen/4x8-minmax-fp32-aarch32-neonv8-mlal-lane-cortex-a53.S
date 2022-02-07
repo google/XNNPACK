@@ -96,7 +96,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMOV    q13, q9
         VMOV    q14, q8
         VMOV    q15, q9
-        BLO     3f                      // less than 8 channels?
+        BLO     4f                      // less than 8 channels?
 
         // Prologue - load 4A's and B0
         VLD1.8  {d0},  [r3]!            // A0
@@ -106,7 +106,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VLD1.8  {d8},  [r9]!            // B0
 
         SUBS    r5, r5, 8               // k = k - 8
-        BLO     19f                     // less than 8 channels?
+        BLO     2f                      // less than 8 channels?
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
@@ -239,7 +239,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         // Epilogue
 
         .p2align 3
-19:
+2:
         VMOVL.S8 q0, d0
         VMOVL.S8 q4, d8
         VMOVL.S8 q1, d2
@@ -334,9 +334,9 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q15, d11, d7[3]
 
         # Is there a remainder?- 1-7 bytes of A
-        BNE     3f
+        BNE     4f
 
-2:
+3:
         # QC8 FP32 quantization
         VLD1.8  {q0-q1},  [r9]!
 
@@ -402,7 +402,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     4f
+        BLO     5f
         VST1.8  {d0}, [r11], r7
         SUB     r3, r3, r2
         VST1.8  {d1}, [r4], r7
@@ -414,12 +414,12 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         BHI     0b
 
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
+        ADD     sp, sp, 12              // skip pad of 8 + r2
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
-3:
+4:
         AND     r5, r5, 7               // kc remainder 1 to 7
 
         VLD1.8  {d0},  [r3], r5
@@ -442,7 +442,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q14, d8, d6[0]
         VMLAL.S16 q15, d9, d6[0]
         CMP     r5, 2
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -454,7 +454,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q13, d9, d4[1]
         VMLAL.S16 q14, d8, d6[1]
         VMLAL.S16 q15, d9, d6[1]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -467,7 +467,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q14, d8, d6[2]
         VMLAL.S16 q15, d9, d6[2]
         CMP     r5, 4
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -479,7 +479,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q13, d9, d4[3]
         VMLAL.S16 q14, d8, d6[3]
         VMLAL.S16 q15, d9, d6[3]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -492,7 +492,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q14, d8, d7[0]
         VMLAL.S16 q15, d9, d7[0]
         CMP     r5, 6
-        BLO     2b
+        BLO     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -504,7 +504,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q13, d9, d5[1]
         VMLAL.S16 q14, d8, d7[1]
         VMLAL.S16 q15, d9, d7[1]
-        BEQ     2b
+        BEQ     3b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -516,22 +516,22 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
         VMLAL.S16 q15, d9, d7[2]
-        B       2b
+        B       3b
 
         # Store odd width
         .p2align 3
-4:
+5:
         TST     r1, 4
-        BEQ     5f
+        BEQ     6f
         VST1.32 {d0[0]}, [r11]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d3[0]}, [r6]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-5:
+6:
         TST     r1, 2
-        BEQ     6f
+        BEQ     7f
         VST1.16 {d0[0]}, [r11]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d2[0]}, [r8]!
@@ -539,17 +539,17 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_co
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-6:
+7:
         TST     r1, 1
-        BEQ     7f
+        BEQ     8f
         VST1.8  {d0[0]}, [r11]
         VST1.8  {d1[0]}, [r4]
         VST1.8  {d2[0]}, [r8]
         VST1.8  {d3[0]}, [r6]
 
-7:
+8:
         VPOP    {d8-d13}
-        ADD     sp, sp, 12   // skip pad of 8 + r2
+        ADD     sp, sp, 12              // skip pad of 8 + r2
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 
