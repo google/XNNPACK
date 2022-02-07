@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -7,24 +11,25 @@
 
 .syntax unified
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53(
+// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            r2 -> r5 -> sp + 0
-//     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 100 -> (r7)
-//     const void*restrict w,    sp + 104 -> r9
-//     uint8_t*restrict c,       sp + 108 -> r11
-//     size_t cm_stride,         sp + 112 -> (r6)
-//     size_t cn_stride,         sp + 116 -> (r0)
-//     const union xnn_f32_minmax_params params)  sp + 120 -> (r5)
+//     size_t kc,                            r2 -> r5 -> sp + 68
+//     size_t ks,                            r3 -> sp + 72 -> r14
+//     const float**restrict a,  sp + 112 -> (r5)
+//     const void*restrict w,    sp + 116 -> r9
+//     uint8_t*restrict c,       sp + 120 -> r11
+//     size_t cm_stride,         sp + 124 -> (r6)
+//     size_t cn_stride,         sp + 128 -> (r0)
+//     size_t a_offset,          sp + 132 -> (r5)
+//     const float* zero,        sp + 136 -> (r0)
+//     minmax_params*params,     sp + 140 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
 
 // r0, r2   scratch temporaries for loads
-// r14 (lr) unused
 
 // A0   r3  d0
 // A1  r12  d1
@@ -41,67 +46,90 @@
 
 // Clamp (r5) d4 d5 d6 d7
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53
         .arm
 #ifndef __APPLE__
         .arch   armv7-a
         .fpu    neon
 #endif
-        # Push 100 bytes
-        # r2 will be reloaded in outer loop
-        VPUSH   {d8-d15}                                // 64
-        PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11}  // +36 = 100
+        # Push 112 bytes
+        # r2 will be reloaded in outer loop.  r3 is ks
+        PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
+        SUB     sp, sp, 4                                        // 4
+        VPUSH   {d8-d15}                                         // +64 = 112
 
-        LDR     r7, [sp, 100]           // a_stride
-        LDR     r11, [sp, 108]          // c
-        LDR     r6, [sp, 112]           // cm_stride
-        LDR     r9, [sp, 104]           // w
+        LDR     r11, [sp, 120]          // c
+        LDR     r6, [sp, 124]           // cm_stride
+        LDR     r5, [sp, 112]           // a
+        LDR     r9, [sp, 116]           // w
+        MOV     r14, r3                 // p = ks
 
-        # Clamp A and C pointers
+        # Clamp C pointers
         CMP     r0, 2                   // if mr >= 2
-        ADD     r12, r3, r7             //   a1 = a0 + a_stride
         ADD     r4, r11, r6             //   c1 = c0 + cm_stride
-        MOVLO   r12, r3                 // a1
         MOVLO   r4, r11                 // c1
-                                        // if mr > 2
-        ADD     r10, r12, r7            //   a2 = a1 + a_stride
+                                     // if mr > 2
         ADD     r8, r4, r6              //   c2 = c1 + cm_stride
-        MOVLS   r10, r12                // a2
         MOVLS   r8, r4                  // c2
-
         CMP     r0, 4                   // if mr >=4
-        ADD     r7, r10, r7             //   a3 = a2 + a_stride
         ADD     r6, r8, r6              //   c3 = c2 + cm_stride
-        MOVLO   r7, r10                 // a3
         MOVLO   r6, r8                  // c3
+
 
         .p2align 3
 0:
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
 
-        SUBS    r5, r2, 16              // kc - 16
-        PLD     [r3,  0]                // Prefetch A
-        PLD     [r3, 64]
         VMOV    q10, q8
-        PLD     [r12,  0]
-        PLD     [r12, 64]
+        PLD     [r9,   0]               // Prefetch B
         VMOV    q11, q9
+        PLD     [r9,  64]
+        VMOV    q12, q8
+        PLD     [r9, 128]
+        VMOV    q13, q9
+        PLD     [r9, 192]
+        VMOV    q14, q8
+        PLD     [r9, 256]
+        VMOV    q15, q9
+        PLD     [r9, 320]
+
+1:
+        # Load next 4 A pointers
+        LDR     r3, [r5,  0]
+        LDR     r12, [r5,  4]
+        LDR     r10, [r5,  8]
+        LDR     r7, [r5, 12]
+        ADD     r5, r5, 16
+        PLD     [r3,  0]                // Prefetch A
+        STR     r5, [sp, 112]           // a
+        PLD     [r3, 64]
+        LDR     r0, [sp, 136]           // zero
+        PLD     [r12,  0]
+        LDR     r5, [sp, 132]           // a_offset
+        PLD     [r12, 64]
+        LDR     r2, [sp, 68]            // kc
         PLD     [r10,  0]
         PLD     [r10, 64]
-        VMOV    q12, q8
         PLD     [r7,  0]
         PLD     [r7, 64]
-        VMOV    q13, q9
-        PLD     [r9,   0]               // Prefetch B
-        PLD     [r9,  64]
-        VMOV    q14, q8
-        PLD     [r9, 128]
-        PLD     [r9, 192]
-        VMOV    q15, q9
-        PLD     [r9, 256]
-        PLD     [r9, 320]
-        BLO     4f                      // less than 4 channels?
+
+        # Add a_offset
+        CMP     r3,  r0                 // if a0 == zero
+        ADD     r3,  r3, r5             // a0 += a_offset
+        MOVEQ   r3,  r0                 //   a0 = zero, else += a0 + a_offset
+        CMP     r12,  r0                // if a1 == zero
+        ADD     r12, r12, r5            // a1 += a_offset
+        MOVEQ   r12,  r0                //   a1 = zero, else += a1 + a_offset
+        CMP     r10,  r0                // if a2 == zero
+        ADD     r10, r10, r5            // a2 += a_offset
+        MOVEQ   r10,  r0                //   a2 = zero, else += a2 + a_offset
+        CMP     r7,  r0                 // if a3 == zero
+        ADD     r7,  r7, r5             // a3 += a_offset
+        MOVEQ   r7,  r0                 //   a3 = zero, else += a3 + a_offset
+
+        SUBS    r5, r2, 16              // kc - 16
+        BLO     5f                      // less than 4 channels?
 
         # Prologue
         VLD1.32 {d0},  [r3]!            // A0
@@ -114,12 +142,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         LDR     r2, [r9, 60]            // B1 high
         VLDR    d13, [r9, 40]           // B1
 
-        BLO     2f                      // less than 4 channels?  skip main loop
+        BLO     3f                      // less than 4 channels?  skip main loop
 
         # Main loop - 4 floats of A (16 bytes)
         # 32 FMA + 8 LD64 A + 8 LDR B
         .p2align 3
-1:
+2:
         # First group of 16 FMA, Second group loads
         # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0
@@ -240,10 +268,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         SUBS    r5, r5, 16
         LDR     r2, [r9, 188]           // B1 high
         ADD     r9, r9, 128             // B++
-        BHS     1b
+        BHS     2b
 
         # Epilogue - 4 floats of A (16 bytes)
-2:
+3:
         # First group of 16 FMA, Second group loads
         # BLOCK 0
         VLD1.32 {d4}, [r3]!             // A0
@@ -342,19 +370,25 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q15, q7, d7[1]
 
         # Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
-        BNE     4f
+        BNE     5f
 
         .p2align 3
-3:
+4:
+        LDR     r5, [sp, 112]           // a
+        SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
+
+        # ks loop
+        BHI     1b
+
         # Load params pointer
-        LDR     r0, [sp, 116]           // cn_stride
-        LDR     r5, [sp, 120]           // params
-        LDR     r2, [sp]                // kc
+        LDR     r0, [sp, 128]           // cn_stride
+        LDR     r2, [sp, 140]           // params
+        LDR     r14, [sp, 72]           // p = ks
         SUBS    r1, r1, 8
 
         # Load min/max values
-        VLD1.32 {d4[],d5[]}, [r5]!
-        VLD1.32 {d6[],d7[]}, [r5]
+        VLD1.32 {d4[],d5[]}, [r2]!
+        VLD1.32 {d6[],d7[]}, [r2]
 
         # Clamp
         VMAX.F32 q8,  q8, q2
@@ -375,27 +409,25 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMIN.F32 q15, q15, q3
 
         # Store full 4 x 8
-        BLO     6f
+        BLO     7f
+        VST1.32 {d28-d31},  [r6], r0
+        VST1.32 {d24-d27},  [r8], r0
+        VST1.32 {d20-d23},  [r4], r0
         VST1.32 {d16-d19}, [r11], r0
-        SUB     r7, r7, r2
-        VST1.32 {d20-d23}, [r4], r0
-        SUB     r10, r10, r2
-        VST1.32 {d24-d27}, [r8], r0
-        SUB     r12, r12, r2
-        VST1.32 {d28-d31}, [r6], r0
-        SUB     r3, r3, r2
+
+        SUB     r5, r5, r14             // a -= ks
+
         BHI     0b
 
-        ADD     sp, sp, 4
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         VPOP    {d8-d15}
-        BX      lr
+        ADD     sp, sp, 12              // skip pad, r2, r3
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         .p2align 3
-4:
+5:
         # Is there a remainder?- 2 floats of A (8 bytes)
         TST     r5, 8
-        BEQ     5f
+        BEQ     6f
 
         # Remainder - 2 floats of A (8 bytes)
         VLD1.32 {d0}, [r3]!             // A0
@@ -424,11 +456,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
 
         # Is there a remainder?- 1 floats of A (4 bytes)
         TST     r5, 4
-        BEQ     3b
+        BEQ     4b
 
-5:
+6:
         # Remainder- 1 floats of A (4 bytes)
-        VLDM    r3!,  {s0}              // A0
+        VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1
         VLDM    r10!, {s4}              // A2
@@ -441,48 +473,47 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q13, q5, d2[0]
         VMLA.F32 q14, q4, d3[0]
         VMLA.F32 q15, q5, d3[0]
-        B       3b
+        B       4b
 
         # Store odd width
-6:
-        TST     r1, 4
-        BEQ     7f
-        VST1.32 {d16-d17}, [r11]!
-        VST1.32 {d20-d21},  [r4]!
-        VMOV    q8,  q9
-        VMOV    q10, q11
-        VST1.32 {d24-d25},  [r8]!
-        VST1.32 {d28-d29},  [r6]!
-        VMOV    q12, q13
-        VMOV    q14, q15
-
 7:
-        TST     r1, 2
+        TST     r1, 4
         BEQ     8f
-        VST1.32 {d16}, [r11]!
-        VST1.32 {d20},  [r4]!
-        VMOV    d16, d17
-        VMOV    d20, d21
-        VST1.32 {d24},  [r8]!
-        VST1.32 {d28},  [r6]!
-        VMOV    d24, d25
-        VMOV    d28, d29
+        VST1.32 {d28-d29},  [r6]!
+        VST1.32 {d24-d25},  [r8]!
+        VMOV    q14, q15
+        VMOV    q12, q13
+        VST1.32 {d20-d21},  [r4]!
+        VST1.32 {d16-d17}, [r11]!
+        VMOV    q10, q11
+        VMOV    q8,  q9
 
 8:
-        TST     r1, 1
+        TST     r1, 2
         BEQ     9f
-        VST1.32 {d16[0]}, [r11]
-        VST1.32 {d20[0]},  [r4]
-        VST1.32 {d24[0]},  [r8]
-        VST1.32 {d28[0]},  [r6]
+        VST1.32 {d28},  [r6]!
+        VST1.32 {d24},  [r8]!
+        VMOV    d28, d29
+        VMOV    d24, d25
+        VST1.32 {d20},  [r4]!
+        VST1.32 {d16}, [r11]!
+        VMOV    d20, d21
+        VMOV    d16, d17
 
 9:
-        ADD     sp, sp, 4
-        POP     {r4, r5, r6, r7, r8, r9, r10, r11}
-        VPOP    {d8-d15}
-        BX      lr
+        TST     r1, 1
+        BEQ     10f
+        VST1.32 {d28[0]},  [r6]!
+        VST1.32 {d24[0]},  [r8]!
+        VST1.32 {d20[0]},  [r4]!
+        VST1.32 {d16[0]}, [r11]!
 
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
+10:
+        VPOP    {d8-d15}
+        ADD     sp, sp, 12              // skip pad, r2, r3
+        POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
+
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

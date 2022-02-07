@@ -7,7 +7,7 @@
 
 .syntax unified
 
-// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53(
+// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5 -> sp + 68
@@ -42,7 +42,7 @@
 
 // Clamp (r5) d4 d5 d6 d7
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53
         .arm
 #ifndef __APPLE__
         .arch   armv7-a
@@ -78,17 +78,23 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VLDM    r9!, {d16-d19}          // Bias
 
         VMOV    q10, q8
+        $if PREFETCH:
+          PLD     [r9,   0]               // Prefetch B
         VMOV    q11, q9
+        $if PREFETCH:
+          PLD     [r9,  64]
         VMOV    q12, q8
+        $if PREFETCH:
+          PLD     [r9, 128]
         VMOV    q13, q9
-        PLD     [r9,   0]               // Prefetch B
-        PLD     [r9,  64]
+        $if PREFETCH:
+          PLD     [r9, 192]
         VMOV    q14, q8
-        PLD     [r9, 128]
-        PLD     [r9, 192]
+        $if PREFETCH:
+          PLD     [r9, 256]
         VMOV    q15, q9
-        PLD     [r9, 256]
-        PLD     [r9, 320]
+        $if PREFETCH:
+          PLD     [r9, 320]
 
 1:
         # Load next 4 A pointers
@@ -97,18 +103,26 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         LDR     r10, [r5,  8]
         LDR     r7, [r5, 12]
         ADD     r5, r5, 16
-        PLD     [r3,  0]                // Prefetch A
+        $if PREFETCH:
+          PLD     [r3,  0]                // Prefetch A
         STR     r5, [sp, 112]           // a
-        PLD     [r3, 64]
+        $if PREFETCH:
+          PLD     [r3, 64]
         LDR     r0, [sp, 136]           // zero
-        PLD     [r12,  0]
+        $if PREFETCH:
+          PLD     [r12,  0]
         LDR     r5, [sp, 132]           // a_offset
-        PLD     [r12, 64]
+        $if PREFETCH:
+          PLD     [r12, 64]
         LDR     r2, [sp, 68]            // kc
-        PLD     [r10,  0]
-        PLD     [r10, 64]
-        PLD     [r7,  0]
-        PLD     [r7, 64]
+        $if PREFETCH:
+          PLD     [r10,  0]
+        $if PREFETCH:
+          PLD     [r10, 64]
+        $if PREFETCH:
+          PLD     [r7,  0]
+        $if PREFETCH:
+          PLD     [r7, 64]
 
         # Add a_offset
         CMP     r3,  r0                 // if a0 == zero
@@ -153,7 +167,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q10, q4, d1[0]
         LDR     r2, [r12, 4]            // A1 high
         VMLA.F32 q12, q4, d2[0]
-        PLD     [r3, 128]               // Prefetch A0
+        $if PREFETCH:
+          PLD     [r3, 128]               // Prefetch A0
 
         # BLOCK 1
         VLDR    d12, [r9, 32]           // B1
@@ -163,7 +178,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q9, q5, d0[0]
         LDR     r2, [r9, 76]            // B0 high
         VMLA.F32 q11, q5, d1[0]
-        PLD     [r12, 128]              // Prefetch A1
+        $if PREFETCH:
+          PLD     [r12, 128]              // Prefetch A1
 
         # BLOCK 2
         VLD1.32 {d6}, [r10]!            // A2
@@ -173,7 +189,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q15, q5, d3[0]
         LDR     r2, [r7, 4]             // A3 high
         VMLA.F32 q8, q6, d0[1]
-        PLD     [r10, 128]              // Prefetch A2
+        $if PREFETCH:
+          PLD     [r10, 128]              // Prefetch A2
 
         # BLOCK 3
         VLDR    d14, [r9, 48]           // B1
@@ -183,7 +200,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q12, q6, d2[1]
         LDR     r2, [r9, 92]            // B0 high
         VMLA.F32 q14, q6, d3[1]
-        PLD     [r7, 128]               // Prefetch A3
+        $if PREFETCH:
+          PLD     [r7, 128]               // Prefetch A3
 
         # BLOCK 4
         VLDR    d8, [r9, 64]            // B0
@@ -193,7 +211,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         VMLA.F32 q11, q7, d1[1]
         LDR     r2, [r9, 108]           // B1 high
         VMLA.F32 q13, q7, d2[1]
-        PLD     [r9, 384]               // Prefetch B
+        $if PREFETCH:
+          PLD     [r9, 384]               // Prefetch B
 
         # BLOCK 5
         VLDR    d10, [r9, 80]           // B0
@@ -203,7 +222,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         NOP
         LDR     r2, [r9, 124]           // B1 high
         NOP
-        PLD     [r9, 448]               // Prefetch B
+        $if PREFETCH:
+          PLD     [r9, 448]               // Prefetch B
 
         # Second group of 16 FMA, First group of loads
         # BLOCK 0
@@ -509,7 +529,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
