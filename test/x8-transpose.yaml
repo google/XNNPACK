@@ -11,8 +11,8 @@
 - name: xnn_x8_transpose_ukernel__4x1_scalar_int
 - name: xnn_x8_transpose_ukernel__4x2_scalar_int
 - name: xnn_x8_transpose_ukernel__4x4_scalar_int
-- name: xnn_x8_transpose_ukernel__16x16_reuse_mov_sse2
-- name: xnn_x8_transpose_ukernel__16x16_reuse_switch_sse2
-- name: xnn_x8_transpose_ukernel__16x16_reuse_dec_zip_neon
-- name: xnn_x8_transpose_ukernel__16x16_reuse_mov_zip_neon
-- name: xnn_x8_transpose_ukernel__16x16_reuse_switch_zip_neon
+- name: xnn_x8_transpose_ukernel__16x16_sse2_reuse_mov
+- name: xnn_x8_transpose_ukernel__16x16_sse2_reuse_switch
+- name: xnn_x8_transpose_ukernel__16x16_neon_reuse_dec_zip
+- name: xnn_x8_transpose_ukernel__16x16_neon_reuse_mov_zip
+- name: xnn_x8_transpose_ukernel__16x16_neon_reuse_switch_zip

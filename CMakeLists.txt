@@ -2506,29 +2506,29 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
-  src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c
+  src/x8-transpose/gen/16x16-neon-reuse-dec-zip.c
+  src/x8-transpose/gen/16x16-neon-reuse-mov-zip.c
+  src/x8-transpose/gen/16x16-neon-reuse-switch-zip.c
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
   src/x8-zip/xm-neon.c
-  src/x16-transpose/gen/8x8-multi-dec-zip-neon.c
-  src/x16-transpose/gen/8x8-multi-mov-zip-neon.c
-  src/x16-transpose/gen/8x8-multi-switch-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-dec-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-multi-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c
+  src/x16-transpose/gen/8x8-neon-multi-dec-zip.c
+  src/x16-transpose/gen/8x8-neon-multi-mov-zip.c
+  src/x16-transpose/gen/8x8-neon-multi-switch-zip.c
+  src/x16-transpose/gen/8x8-neon-reuse-dec-zip.c
+  src/x16-transpose/gen/8x8-neon-reuse-mov-zip.c
+  src/x16-transpose/gen/8x8-neon-reuse-multi-zip.c
+  src/x16-transpose/gen/8x8-neon-reuse-switch-zip.c
   src/x32-packx/x4-neon-st4.c
-  src/x32-transpose/gen/4x4-multi-dec-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-mov-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-multi-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-switch-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-dec-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-mov-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-multi-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-switch-zip-neon.c
+  src/x32-transpose/gen/4x4-neon-multi-dec-zip.c
+  src/x32-transpose/gen/4x4-neon-multi-mov-zip.c
+  src/x32-transpose/gen/4x4-neon-multi-multi-zip.c
+  src/x32-transpose/gen/4x4-neon-multi-switch-zip.c
+  src/x32-transpose/gen/4x4-neon-reuse-dec-zip.c
+  src/x32-transpose/gen/4x4-neon-reuse-mov-zip.c
+  src/x32-transpose/gen/4x4-neon-reuse-multi-zip.c
+  src/x32-transpose/gen/4x4-neon-reuse-switch-zip.c
   src/x32-unpool/neon.c
   src/x32-zip/x2-neon.c
   src/x32-zip/x3-neon.c
@@ -3968,35 +3968,35 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-sse2-c16.c
   src/u8-rmax/sse2.c
   src/u8-vclamp/sse2-x64.c
-  src/x8-transpose/gen/16x16-reuse-mov-sse2.c
-  src/x8-transpose/gen/16x16-reuse-switch-sse2.c
+  src/x8-transpose/gen/16x16-sse2-reuse-mov.c
+  src/x8-transpose/gen/16x16-sse2-reuse-switch.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
   src/x8-zip/xm-sse2.c
   src/x16-transpose/4x8-sse2.c
-  src/x16-transpose/gen/8x8-multi-mov-sse2.c
-  src/x16-transpose/gen/8x8-multi-switch-sse2.c
-  src/x16-transpose/gen/8x8-reuse-mov-sse2.c
-  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
-  src/x16-transpose/gen/8x8-reuse-switch-sse2.c
-  src/x32-transpose/gen/4x4-multi-mov-sse2.c
-  src/x32-transpose/gen/4x4-multi-multi-sse2.c
-  src/x32-transpose/gen/4x4-multi-switch-sse2.c
-  src/x32-transpose/gen/4x4-reuse-mov-sse2.c
-  src/x32-transpose/gen/4x4-reuse-multi-sse2.c
-  src/x32-transpose/gen/4x4-reuse-switch-sse2.c
+  src/x16-transpose/gen/8x8-sse2-multi-mov.c
+  src/x16-transpose/gen/8x8-sse2-multi-switch.c
+  src/x16-transpose/gen/8x8-sse2-reuse-mov.c
+  src/x16-transpose/gen/8x8-sse2-reuse-multi.c
+  src/x16-transpose/gen/8x8-sse2-reuse-switch.c
+  src/x32-transpose/gen/4x4-sse2-multi-mov.c
+  src/x32-transpose/gen/4x4-sse2-multi-multi.c
+  src/x32-transpose/gen/4x4-sse2-multi-switch.c
+  src/x32-transpose/gen/4x4-sse2-reuse-mov.c
+  src/x32-transpose/gen/4x4-sse2-reuse-multi.c
+  src/x32-transpose/gen/4x4-sse2-reuse-switch.c
   src/x32-unpool/sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
   src/x32-zip/xm-sse2.c
-  src/x64-transpose/gen/2x2-multi-mov-sse2.c
-  src/x64-transpose/gen/2x2-multi-multi-sse2.c
-  src/x64-transpose/gen/2x2-multi-switch-sse2.c
-  src/x64-transpose/gen/2x2-reuse-mov-sse2.c
-  src/x64-transpose/gen/2x2-reuse-multi-sse2.c
-  src/x64-transpose/gen/2x2-reuse-switch-sse2.c
+  src/x64-transpose/gen/2x2-sse2-multi-mov.c
+  src/x64-transpose/gen/2x2-sse2-multi-multi.c
+  src/x64-transpose/gen/2x2-sse2-multi-switch.c
+  src/x64-transpose/gen/2x2-sse2-reuse-mov.c
+  src/x64-transpose/gen/2x2-sse2-reuse-multi.c
+  src/x64-transpose/gen/2x2-sse2-reuse-switch.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c)
 

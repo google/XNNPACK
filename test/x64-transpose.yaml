@@ -13,9 +13,9 @@
 - name: xnn_x64_transpose_ukernel__2x2_scalar_float
 - name: xnn_x64_transpose_ukernel__4x1_scalar_float
 - name: xnn_x64_transpose_ukernel__4x2_scalar_float
-- name: xnn_x64_transpose_ukernel__2x2_multi_mov_sse2
-- name: xnn_x64_transpose_ukernel__2x2_multi_multi_sse2
-- name: xnn_x64_transpose_ukernel__2x2_multi_switch_sse2
-- name: xnn_x64_transpose_ukernel__2x2_reuse_mov_sse2
-- name: xnn_x64_transpose_ukernel__2x2_reuse_multi_sse2
-- name: xnn_x64_transpose_ukernel__2x2_reuse_switch_sse2
+- name: xnn_x64_transpose_ukernel__2x2_sse2_multi_mov
+- name: xnn_x64_transpose_ukernel__2x2_sse2_multi_multi
+- name: xnn_x64_transpose_ukernel__2x2_sse2_multi_switch
+- name: xnn_x64_transpose_ukernel__2x2_sse2_reuse_mov
+- name: xnn_x64_transpose_ukernel__2x2_sse2_reuse_multi
+- name: xnn_x64_transpose_ukernel__2x2_sse2_reuse_switch

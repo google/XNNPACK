@@ -1257,7 +1257,7 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1265,10 +1265,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_1_16_bw_1_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -1278,12 +1278,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1291,10 +1291,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1303,11 +1303,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1316,11 +1316,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_16_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1328,10 +1328,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_9_16_bw_8){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1340,11 +1340,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_9_16_bw_16){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1353,11 +1353,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_9_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -1367,12 +1367,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_8_is_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1380,10 +1380,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_8_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1391,10 +1391,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_SSE2, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_MOV, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1402,13 +1402,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_mov);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1416,10 +1416,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_1_16_bw_1_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -1429,12 +1429,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1442,10 +1442,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1454,11 +1454,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1467,11 +1467,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_16_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1479,10 +1479,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_9_16_bw_8){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1491,11 +1491,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_9_16_bw_16){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1504,11 +1504,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_9_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -1518,12 +1518,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_8_is_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1531,10 +1531,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_8_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1542,10 +1542,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_SSE2, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_MULTI_SWITCH, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1553,13 +1553,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_multi_switch);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1567,10 +1567,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_1_16_bw_1_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -1580,12 +1580,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1593,10 +1593,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1605,11 +1605,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1618,11 +1618,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_16_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1630,10 +1630,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_9_16_bw_8){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1642,11 +1642,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_9_16_bw_16){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1655,11 +1655,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_9_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -1669,12 +1669,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_8_is_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1682,10 +1682,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_8_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1693,10 +1693,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_SSE2, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MOV, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1704,13 +1704,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_mov);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1718,10 +1718,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_1_16_bw_1_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -1731,12 +1731,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1744,10 +1744,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1756,11 +1756,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1769,11 +1769,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_16_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1781,10 +1781,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_9_16_bw_8){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1793,11 +1793,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_9_16_bw_16){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1806,11 +1806,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_9_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -1820,12 +1820,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_8_is_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1833,10 +1833,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_8_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1844,10 +1844,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_SSE2, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_MULTI, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1855,13 +1855,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_multi);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1869,10 +1869,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_1_16_bw_1_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -1882,12 +1882,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1895,10 +1895,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1907,11 +1907,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1920,11 +1920,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_16_bw_8) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1932,10 +1932,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_9_16_bw_8){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1944,11 +1944,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_9_16_bw_16){
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -1957,11 +1957,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+        .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_9_16_bw_9_16) {
     TEST_REQUIRES_X86_SSE2;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -1971,12 +1971,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+          .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_8_is_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -1984,10 +1984,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_8_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1995,10 +1995,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_SSE2, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_SSE2_REUSE_SWITCH, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_X86_SSE2;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2006,13 +2006,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2);
+      .Test(xnn_x16_transpose_ukernel__8x8_sse2_reuse_switch);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2020,10 +2020,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2033,12 +2033,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2046,10 +2046,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2058,11 +2058,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2071,11 +2071,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2083,10 +2083,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2095,11 +2095,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2108,11 +2108,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2122,12 +2122,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2135,10 +2135,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2146,10 +2146,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_DEC_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_DEC_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2157,13 +2157,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_dec_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2171,10 +2171,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2184,12 +2184,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2197,10 +2197,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2209,11 +2209,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2222,11 +2222,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2234,10 +2234,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2246,11 +2246,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2259,11 +2259,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2273,12 +2273,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2286,10 +2286,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2297,10 +2297,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_MOV_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_MOV_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2308,13 +2308,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_mov_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2322,10 +2322,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2335,12 +2335,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2348,10 +2348,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2360,11 +2360,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2373,11 +2373,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2385,10 +2385,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2397,11 +2397,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2410,11 +2410,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2424,12 +2424,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2437,10 +2437,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2448,10 +2448,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_MULTI_SWITCH_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_MULTI_SWITCH_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2459,13 +2459,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_multi_switch_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2473,10 +2473,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2486,12 +2486,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2499,10 +2499,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2511,11 +2511,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2524,11 +2524,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2536,10 +2536,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2548,11 +2548,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2561,11 +2561,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2575,12 +2575,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2588,10 +2588,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2599,10 +2599,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_DEC_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_DEC_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2610,13 +2610,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_dec_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2624,10 +2624,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2637,12 +2637,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2650,10 +2650,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2662,11 +2662,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2675,11 +2675,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2687,10 +2687,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2699,11 +2699,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2712,11 +2712,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2726,12 +2726,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2739,10 +2739,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2750,10 +2750,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MOV_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MOV_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2761,13 +2761,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_mov_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2775,10 +2775,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2788,12 +2788,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2801,10 +2801,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2813,11 +2813,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2826,11 +2826,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2838,10 +2838,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2850,11 +2850,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2863,11 +2863,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -2877,12 +2877,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2890,10 +2890,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2901,10 +2901,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_MULTI_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_MULTI_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2912,13 +2912,13 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_multi_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2926,10 +2926,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_1_16_bw_1_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_1_16_bw_1_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 16; ++i){
       for(size_t j = 1; j <= 16; ++j){
@@ -2939,12 +2939,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -2952,10 +2952,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(16)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2964,11 +2964,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(8)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -2977,11 +2977,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(i)
         .block_height(16)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_16_bw_8) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_16_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -2989,10 +2989,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(16)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_9_16_bw_8){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_9_16_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -3001,11 +3001,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(8)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_9_16_bw_16){
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_9_16_bw_16){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       TransposeMicrokernelTester()
@@ -3014,11 +3014,11 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
         .block_width(16)
         .block_height(i)
         .iterations(1)
-        .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+        .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_9_16_bw_9_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_9_16_bw_9_16) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 9; i < 16; ++i){
       for(size_t j = 9; j < 16; ++j){
@@ -3028,12 +3028,12 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
           .block_width(j)
           .block_height(i)
           .iterations(1)
-          .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+          .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
       }
     }
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_8_is_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_8_is_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -3041,10 +3041,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_8_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_8_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -3052,10 +3052,10 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 
-  TEST(X16_TRANSPOSE__8X8_REUSE_SWITCH_ZIP_NEON, bh_8_bw_8_is_16_os_16) {
+  TEST(X16_TRANSPOSE__8X8_NEON_REUSE_SWITCH_ZIP, bh_8_bw_8_is_16_os_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(16)
@@ -3063,6 +3063,6 @@ TEST(X16_TRANSPOSE__4X4_SCALAR_INT, bh_4_bw_4_is_8_os_8) {
       .block_width(8)
       .block_height(8)
       .iterations(1)
-      .Test(xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon);
+      .Test(xnn_x16_transpose_ukernel__8x8_neon_reuse_switch_zip);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

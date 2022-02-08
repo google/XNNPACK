@@ -17,7 +17,7 @@ $NUM_ITERS = int(math.log2(TILE_SIZE))
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_zip_neon(
+void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_neon_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_zip(
     const uint${SIZE}_t* input,
     uint${SIZE}_t* output,
     size_t input_stride,
