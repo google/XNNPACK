@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# WAsm SIMD
 - name: xnn_f32_dwconv_ukernel_up4x25__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up8x25__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up4x9__wasmsimd
@@ -10,22 +12,39 @@
 - name: xnn_f32_dwconv_ukernel_up4x4__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up8x3__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up8x4__wasmsimd
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x3__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x3__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x3__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x3__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x4__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x4__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x9__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x9__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x9__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x9__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x25__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x25__wasm_acc2
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x25__wasm
+# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x25__wasm_acc2
+# Scalar
 - name: xnn_f32_dwconv_ukernel_up1x3__scalar
 - name: xnn_f32_dwconv_ukernel_up1x3__scalar_acc2
 - name: xnn_f32_dwconv_ukernel_up2x3__scalar

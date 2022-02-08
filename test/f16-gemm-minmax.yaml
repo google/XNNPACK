@@ -3,7 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
@@ -12,7 +12,7 @@
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 2
   assembly: true
-################################### ARM NEON ##################################
+# ARM NEON
 - name: xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 4
@@ -53,7 +53,7 @@
   k-block: 4
   arch:
   - aarch64
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 4
@@ -82,7 +82,7 @@
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 4
   assembly: true
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_f16_gemm_minmax_ukernel_1x8__avx2_broadcast
   init: xnn_init_f16_scaleminmax_avx_params
   k-block: 1

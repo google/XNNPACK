@@ -2,40 +2,49 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_vhswish_ukernel__neon_x4
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__neon_x8
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__neon_x16
   init: xnn_init_f32_hswish_scalar_params
+# x86 SSE
 - name: xnn_f32_vhswish_ukernel__sse_x4
   init: xnn_init_f32_hswish_sse_params
 - name: xnn_f32_vhswish_ukernel__sse_x8
   init: xnn_init_f32_hswish_sse_params
+# x86 AVX
 - name: xnn_f32_vhswish_ukernel__avx_x8
   init: xnn_init_f32_hswish_avx_params
 - name: xnn_f32_vhswish_ukernel__avx_x16
   init: xnn_init_f32_hswish_avx_params
+# x86 FMA3
 - name: xnn_f32_vhswish_ukernel__fma3_x8
   init: xnn_init_f32_hswish_avx_params
 - name: xnn_f32_vhswish_ukernel__fma3_x16
   init: xnn_init_f32_hswish_avx_params
+# x86 AVX512
 - name: xnn_f32_vhswish_ukernel__avx512f_x16
   init: xnn_init_f32_hswish_avx512_params
 - name: xnn_f32_vhswish_ukernel__avx512f_x32
   init: xnn_init_f32_hswish_avx512_params
+# WAsm SIMD
 - name: xnn_f32_vhswish_ukernel__wasmsimd_x4
   init: xnn_init_f32_hswish_wasmsimd_params
 - name: xnn_f32_vhswish_ukernel__wasmsimd_x8
   init: xnn_init_f32_hswish_wasmsimd_params
 - name: xnn_f32_vhswish_ukernel__wasmsimd_x16
   init: xnn_init_f32_hswish_wasmsimd_params
+# WAsm
 - name: xnn_f32_vhswish_ukernel__wasm_x1
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__wasm_x2
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__wasm_x4
   init: xnn_init_f32_hswish_scalar_params
+# Scalar
 - name: xnn_f32_vhswish_ukernel__scalar_x1
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__scalar_x2

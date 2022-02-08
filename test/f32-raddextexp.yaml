@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# x86 AVX
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x64
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x64_acc2
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x64_acc4
@@ -14,6 +16,7 @@
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc2
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc3
 - name: xnn_f32_raddextexp_ukernel__avx2_p5_x96_acc6
+# x86 AVX512
 - name: xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x128
 - name: xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x128_acc2
 - name: xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x128_acc4

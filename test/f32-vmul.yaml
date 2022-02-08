@@ -2,9 +2,12 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# WAsm SIMD
 - name: xnn_f32_vmul_ukernel__wasmsimd_x4
 - name: xnn_f32_vmul_ukernel__wasmsimd_x8
 - name: xnn_f32_vmul_ukernel__wasmsimd_x16
+# Scalar
 - name: xnn_f32_vmul_ukernel__scalar_x1
 - name: xnn_f32_vmul_ukernel__scalar_x2
 - name: xnn_f32_vmul_ukernel__scalar_x4

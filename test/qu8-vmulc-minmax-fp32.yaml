@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEON
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__neon_ld64_x8
   init: xnn_init_qu8_mul_minmax_fp32_neon_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__neon_ld64_x16
@@ -15,6 +16,7 @@
   init: xnn_init_qu8_mul_minmax_fp32_neonv8_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld128_x16
   init: xnn_init_qu8_mul_minmax_fp32_neonv8_params
+# x86 SSE
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x16
@@ -23,14 +25,17 @@
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_x16
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
+# x86 AVX
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x8
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16
   init: xnn_init_qu8_mul_minmax_fp32_sse2_params
+# WAsm SIMD
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8
   init: xnn_init_qu8_mul_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16
   init: xnn_init_qu8_mul_minmax_fp32_wasmsimd_params
+# Scalar
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x1
   init: xnn_init_qu8_mul_minmax_fp32_scalar_params
 - name: xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x2

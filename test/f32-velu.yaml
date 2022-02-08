@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x4
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
 - name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8
@@ -50,6 +52,7 @@
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
 - name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x24
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
+# x86 SSE
 - name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x4
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
 - name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x8
@@ -98,6 +101,7 @@
   init: xnn_init_f32_elu_sse2_rr2_p6_params
 - name: xnn_f32_velu_ukernel__sse41_rr2_p6_x24
   init: xnn_init_f32_elu_sse2_rr2_p6_params
+# x86 AVX
 - name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x8
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
 - name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x16
@@ -214,6 +218,7 @@
   init: xnn_init_f32_elu_avx2_rr1_p6_params
 - name: xnn_f32_velu_ukernel__avx2_rr1_p6_x80
   init: xnn_init_f32_elu_avx2_rr1_p6_params
+# x86 AVX512
 - name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
 - name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x32
@@ -246,6 +251,7 @@
   init: xnn_init_f32_elu_avx512_rr1_p6_params
 - name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x128
   init: xnn_init_f32_elu_avx512_rr1_p6_params
+# WAsm SIMD
 - name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x4
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
 - name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x8
@@ -294,6 +300,7 @@
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
 - name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
+# WAsm
 - name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x1
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
 - name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x2
@@ -318,6 +325,7 @@
   init: xnn_init_f32_elu_scalar_rr2_p6_params
 - name: xnn_f32_velu_ukernel__wasm_rr2_p6_x6
   init: xnn_init_f32_elu_scalar_rr2_p6_params
+# Scalar
 - name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x1
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
 - name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2

@@ -3,7 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
@@ -55,7 +55,7 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   assembly: true
-############################### AArch32 assembly ##############################
+# AArch32 assembly
 - name: xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -89,7 +89,7 @@
   k-block: 4
   assembly: true
   pipelined: true
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
@@ -135,7 +135,7 @@
   k-block: 8
   assembly: true
   pipelined: true
-################################### ARM NEON ##################################
+# ARM NEON
 - name: xnn_f32_igemm_minmax_ukernel_1x8__neon_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -246,7 +246,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_8x8s4__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
@@ -298,7 +298,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_5x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast
   init: xnn_init_f32_minmax_avx_params
   k-block: 1
@@ -326,7 +326,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_7x8__avx_broadcast
   init: xnn_init_f32_minmax_avx_params
   k-block: 1
-################################### x86 FMA3 ##################################
+# x86 FMA3
 - name: xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast
   init: xnn_init_f32_minmax_avx_params
   k-block: 1
@@ -369,7 +369,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_8x8__fma3_broadcast
   init: xnn_init_f32_minmax_avx_params
   k-block: 1
-################################## x86 AVX512 #################################
+# x86 AVX512
 - name: xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -388,7 +388,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_8x16__avx512f_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-################################## WAsm SIMD ##################################
+# WAsm SIMD
 - name: xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
@@ -485,7 +485,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_6x8s4__wasmsimd_x86
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 4
-##################################### WAsm ####################################
+# WAsm
 - name: xnn_f32_igemm_minmax_ukernel_1x4__wasm
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -498,7 +498,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x4__wasm
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-#################################### Scalar ###################################
+# Scalar
 - name: xnn_f32_igemm_minmax_ukernel_1x4__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -511,7 +511,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x4__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-############################### AArch32 assembly ##############################
+# AArch32 assembly
 - name: xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -542,7 +542,7 @@
   k-block: 4
   pipelined: true
   assembly: true
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8

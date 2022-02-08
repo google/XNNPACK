@@ -2,22 +2,28 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_vrndz_ukernel__neon_x4
 - name: xnn_f32_vrndz_ukernel__neon_x8
 - name: xnn_f32_vrndz_ukernel__neonv8_x4
 - name: xnn_f32_vrndz_ukernel__neonv8_x8
+# x86 SSE
 - name: xnn_f32_vrndz_ukernel__sse2_x4
   init: xnn_init_f32_rnd_sse2_params
 - name: xnn_f32_vrndz_ukernel__sse2_x8
   init: xnn_init_f32_rnd_sse2_params
 - name: xnn_f32_vrndz_ukernel__sse41_x4
 - name: xnn_f32_vrndz_ukernel__sse41_x8
+# x86 AVX
 - name: xnn_f32_vrndz_ukernel__avx_x8
   init: xnn_init_f32_rnd_avx_params
 - name: xnn_f32_vrndz_ukernel__avx_x16
   init: xnn_init_f32_rnd_avx_params
+# x86 AVX512
 - name: xnn_f32_vrndz_ukernel__avx512f_x16
 - name: xnn_f32_vrndz_ukernel__avx512f_x32
+# WAsm SIMD
 - name: xnn_f32_vrndz_ukernel__wasmsimd_addsub_x4
   init: xnn_init_f32_rnd_wasmsimd_params
 - name: xnn_f32_vrndz_ukernel__wasmsimd_addsub_x8
@@ -28,6 +34,7 @@
   init: xnn_init_f32_rnd_wasmsimd_params
 - name: xnn_f32_vrndz_ukernel__wasmsimd_native_x4
 - name: xnn_f32_vrndz_ukernel__wasmsimd_native_x8
+# Scalar
 - name: xnn_f32_vrndz_ukernel__scalar_libm_x1
 - name: xnn_f32_vrndz_ukernel__scalar_libm_x2
 - name: xnn_f32_vrndz_ukernel__scalar_libm_x4

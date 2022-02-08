@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEON
 - name: xnn_f32_qu8_vcvt_ukernel__neon_x8
   init: xnn_init_f32_qu8_cvt_neon_params
 - name: xnn_f32_qu8_vcvt_ukernel__neon_x16
@@ -19,6 +20,7 @@
   init: xnn_init_f32_qu8_cvt_neonv8_params
 - name: xnn_f32_qu8_vcvt_ukernel__neonv8_x32
   init: xnn_init_f32_qu8_cvt_neonv8_params
+# x86 SSE
 - name: xnn_f32_qu8_vcvt_ukernel__sse2_x8
   init: xnn_init_f32_qu8_cvt_sse2_params
 - name: xnn_f32_qu8_vcvt_ukernel__sse2_x16
@@ -27,6 +29,7 @@
   init: xnn_init_f32_qu8_cvt_sse2_params
 - name: xnn_f32_qu8_vcvt_ukernel__sse2_x32
   init: xnn_init_f32_qu8_cvt_sse2_params
+# x86 AVX
 - name: xnn_f32_qu8_vcvt_ukernel__avx_x8
   init: xnn_init_f32_qu8_cvt_avx_params
 - name: xnn_f32_qu8_vcvt_ukernel__avx_x16
@@ -43,6 +46,7 @@
   init: xnn_init_f32_qu8_cvt_avx2_params
 - name: xnn_f32_qu8_vcvt_ukernel__avx2_x64
   init: xnn_init_f32_qu8_cvt_avx2_params
+# x86 AVX512
 - name: xnn_f32_qu8_vcvt_ukernel__avx512skx_x32
   init: xnn_init_f32_qu8_cvt_avx512_params
 - name: xnn_f32_qu8_vcvt_ukernel__avx512skx_x64
@@ -51,6 +55,7 @@
   init: xnn_init_f32_qu8_cvt_avx512_params
 - name: xnn_f32_qu8_vcvt_ukernel__avx512skx_x128
   init: xnn_init_f32_qu8_cvt_avx512_params
+# WAsm SIMD
 - name: xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x8
   init: xnn_init_f32_qu8_cvt_wasmsimd_cvt_params
 - name: xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_x16
@@ -67,6 +72,7 @@
   init: xnn_init_f32_qu8_cvt_wasmsimd_magic_params
 - name: xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_x32
   init: xnn_init_f32_qu8_cvt_wasmsimd_magic_params
+# WAsm
 - name: xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x1
   init: xnn_init_f32_qu8_cvt_scalar_fmagic_params
 - name: xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x2
@@ -75,6 +81,7 @@
   init: xnn_init_f32_qu8_cvt_scalar_fmagic_params
 - name: xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x4
   init: xnn_init_f32_qu8_cvt_scalar_fmagic_params
+# Scalar
 - name: xnn_f32_qu8_vcvt_ukernel__scalar_fmagic_x1
   init: xnn_init_f32_qu8_cvt_scalar_fmagic_params
 - name: xnn_f32_qu8_vcvt_ukernel__scalar_fmagic_x2

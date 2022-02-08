@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# AArch64 assembly
 - name: xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   assembly: true
@@ -9,6 +11,7 @@
   init: xnn_init_f32_minmax_scalar_params
   pipelined: true
   assembly: true
+# ARM NEON
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma_acc2
@@ -105,6 +108,7 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2
   init: xnn_init_f32_minmax_scalar_params
+# x86 SSE
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__sse
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__sse_acc2
@@ -137,6 +141,7 @@
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_up8x4__sse_acc2
   init: xnn_init_f32_minmax_sse_params
+# x86 AVX
 - name: xnn_f32_dwconv_minmax_ukernel_up8x25__avx
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_up8x25__avx_acc2
@@ -169,6 +174,7 @@
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_up16x4__avx_acc2
   init: xnn_init_f32_minmax_avx_params
+# x86 FMA3
 - name: xnn_f32_dwconv_minmax_ukernel_up8x25__fma3
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_up8x25__fma3_acc2
@@ -201,6 +207,7 @@
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_up16x4__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
+# x86 AVX512
 - name: xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f_acc2
@@ -233,6 +240,7 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_up32x4__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm SIMD
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_arm_acc2
@@ -297,38 +305,55 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_up8x4__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x3__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x3__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x4__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x4__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x3__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x3__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x4__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x4__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x9__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x9__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x9__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x9__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x25__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x25__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x25__wasm
   init: xnn_init_f32_minmax_scalar_params
+# WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up2x25__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+# Scalar
 - name: xnn_f32_dwconv_minmax_ukernel_up1x3__scalar
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_up1x3__scalar_acc2

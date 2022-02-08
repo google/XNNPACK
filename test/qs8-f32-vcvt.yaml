@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEON
 - name: xnn_qs8_f32_vcvt_ukernel__neon_x8
   init: xnn_init_qs8_f32_cvt_neon_params
 - name: xnn_qs8_f32_vcvt_ukernel__neon_x16
@@ -11,6 +12,7 @@
   init: xnn_init_qs8_f32_cvt_neon_params
 - name: xnn_qs8_f32_vcvt_ukernel__neon_x32
   init: xnn_init_qs8_f32_cvt_neon_params
+# x86 SSE
 - name: xnn_qs8_f32_vcvt_ukernel__sse2_x8
   init: xnn_init_qs8_f32_cvt_sse2_params
 - name: xnn_qs8_f32_vcvt_ukernel__sse2_x16
@@ -27,6 +29,7 @@
   init: xnn_init_qs8_f32_cvt_sse4_params
 - name: xnn_qs8_f32_vcvt_ukernel__sse41_x32
   init: xnn_init_qs8_f32_cvt_sse4_params
+# x86 AVX
 - name: xnn_qs8_f32_vcvt_ukernel__avx_x8
   init: xnn_init_qs8_f32_cvt_avx_params
 - name: xnn_qs8_f32_vcvt_ukernel__avx_x16
@@ -43,6 +46,7 @@
   init: xnn_init_qs8_f32_cvt_avx_params
 - name: xnn_qs8_f32_vcvt_ukernel__avx2_x32
   init: xnn_init_qs8_f32_cvt_avx_params
+# WAsm SIMD
 - name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x8
   init: xnn_init_qs8_f32_cvt_wasmsimd_params
 - name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x16
@@ -51,6 +55,7 @@
   init: xnn_init_qs8_f32_cvt_wasmsimd_params
 - name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_x32
   init: xnn_init_qs8_f32_cvt_wasmsimd_params
+# Scalar
 - name: xnn_qs8_f32_vcvt_ukernel__scalar_x1
   init: xnn_init_qs8_f32_cvt_scalar_params
 - name: xnn_qs8_f32_vcvt_ukernel__scalar_x2

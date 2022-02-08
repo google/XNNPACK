@@ -2,19 +2,26 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_vsqrdiff_ukernel__neon_x4
 - name: xnn_f32_vsqrdiff_ukernel__neon_x8
+# x86 SSE
 - name: xnn_f32_vsqrdiff_ukernel__sse_x4
 - name: xnn_f32_vsqrdiff_ukernel__sse_x8
+# x86 AVX
 - name: xnn_f32_vsqrdiff_ukernel__avx_x8
   init: xnn_init_f32_default_avx_params
 - name: xnn_f32_vsqrdiff_ukernel__avx_x16
   init: xnn_init_f32_default_avx_params
+# x86 AVX512
 - name: xnn_f32_vsqrdiff_ukernel__avx512f_x16
 - name: xnn_f32_vsqrdiff_ukernel__avx512f_x32
+# WAsm SIMD
 - name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x4
 - name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x8
 - name: xnn_f32_vsqrdiff_ukernel__wasmsimd_x16
+# Scalar
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x1
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x2
 - name: xnn_f32_vsqrdiff_ukernel__scalar_x4

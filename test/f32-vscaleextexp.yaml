@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# x86 AVX
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x8
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x16
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x24
@@ -14,6 +16,7 @@
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x80
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x88
 - name: xnn_f32_vscaleextexp_ukernel__avx2_p5_x96
+# x86 AVX512
 - name: xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x16
 - name: xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x32
 - name: xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x48

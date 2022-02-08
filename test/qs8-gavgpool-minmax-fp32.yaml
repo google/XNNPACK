@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEON
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__neon_c8
   init: xnn_init_qs8_avgpool_minmax_fp32_neon_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__neon_c16
@@ -35,6 +36,7 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_neonv8_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__neonv8_c32
   init: xnn_init_qs8_avgpool_minmax_fp32_neonv8_params
+# x86 SSE
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8
   init: xnn_init_qs8_avgpool_minmax_fp32_sse2_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c16
@@ -59,6 +61,7 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c24
   init: xnn_init_qs8_avgpool_minmax_fp32_sse4_params
+# WAsm SIMD
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__wasmsimd_c8
   init: xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__wasmsimd_c16
@@ -75,6 +78,7 @@
   init: xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__wasmsimd_c32
   init: xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params
+# Scalar
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__scalar_imagic_c1
   init: xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params
 - name: xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__scalar_imagic_c2

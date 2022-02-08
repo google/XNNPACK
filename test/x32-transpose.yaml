@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# Scalar
 - name: xnn_x32_transpose_ukernel__1x2_scalar_int
 - name: xnn_x32_transpose_ukernel__1x4_scalar_int
 - name: xnn_x32_transpose_ukernel__2x1_scalar_int
@@ -19,7 +20,9 @@
 - name: xnn_x32_transpose_ukernel__4x1_scalar_float
 - name: xnn_x32_transpose_ukernel__4x2_scalar_float
 - name: xnn_x32_transpose_ukernel__4x4_scalar_float
+# AArch64 assembly
 - name: xnn_x32_transpose_ukernel__4x4_aarch64_neon_tbl
+# x86 SSE
 - name: xnn_x32_transpose_ukernel__4x4_multi_mov_sse2
 - name: xnn_x32_transpose_ukernel__4x4_multi_multi_sse2
 - name: xnn_x32_transpose_ukernel__4x4_multi_switch_sse2
@@ -27,7 +30,9 @@
 - name: xnn_x32_transpose_ukernel__4x4_reuse_multi_sse2
 - name: xnn_x32_transpose_ukernel__4x4_reuse_switch_sse2
 - name: xnn_x32_transpose_ukernel__4x4_sse
+# WAsm SIMD
 - name: xnn_x32_transpose_ukernel__4x4_wasmsimd
+# ARM NEON
 - name: xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon
 - name: xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon
 - name: xnn_x32_transpose_ukernel__4x4_multi_multi_zip_neon

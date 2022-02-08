@@ -3,7 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-################################### ARM NEON ##################################
+# ARM NEON
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x8c2__neon_mlal_dup
   init: xnn_init_qs8_conv_minmax_fp32_neon_params
   k-block: 16
@@ -112,7 +112,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_2x8c4s2__neonv8_mlal
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
-############################### AArch64 assembly ##############################
+# AArch64 assembly
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
@@ -193,7 +193,7 @@
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 16
   assembly: true
-################################### ARM NEON ##################################
+# ARM NEON
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x8c4__neondot
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 8
@@ -221,7 +221,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane
   init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2__sse2_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -246,7 +246,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2__sse41_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2__avx_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -271,7 +271,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2__xop_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2__sse2_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -296,7 +296,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2__sse41_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2__avx_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -321,7 +321,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2__xop_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -340,7 +340,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__ssse3_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -350,7 +350,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -369,7 +369,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__xop_ld64
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -388,7 +388,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__ssse3_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -398,7 +398,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -417,7 +417,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__xop_ld128
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c2__sse2
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -442,7 +442,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_4x4c2__sse41
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c2__avx
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -467,7 +467,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_4x4c2__xop
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__sse2
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
@@ -486,7 +486,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__ssse3
   init: xnn_init_qs8_conv_minmax_fp32_sse2_params
   k-block: 8
-################################### x86 SSE ###################################
+# x86 SSE
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__sse41
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -496,7 +496,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__sse41
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__avx
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
@@ -515,7 +515,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__xop
   init: xnn_init_qs8_conv_minmax_fp32_sse4_params
   k-block: 8
-################################### x86 AVX ###################################
+# x86 AVX
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2
   init: xnn_init_qs8_conv_minmax_fp32_avx2_params
   k-block: 8
@@ -534,7 +534,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x8c8__avx2
   init: xnn_init_qs8_conv_minmax_fp32_avx2_params
   k-block: 8
-################################## x86 AVX512 #################################
+# x86 AVX512
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx
   init: xnn_init_qs8_conv_minmax_fp32_avx512_params
   k-block: 8
@@ -547,7 +547,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx
   init: xnn_init_qs8_conv_minmax_fp32_avx512_params
   k-block: 8
-################################## WAsm SIMD ##################################
+# WAsm SIMD
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
   k-block: 8
@@ -671,7 +671,7 @@
 - name: xnn_qs8_gemm_xw_minmax_fp32_ukernel_4x4c8__wasmsimd_dot16x2
   init: xnn_init_qs8_conv_minmax_fp32_wasmsimd_params
   k-block: 8
-##################################### WAsm ####################################
+# WAsm
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x2__wasm_fmagic
   init: xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params
   k-block: 1
@@ -696,7 +696,7 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic
   init: xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params
   k-block: 1
-#################################### Scalar ###################################
+# Scalar
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic
   init: xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params
   k-block: 1

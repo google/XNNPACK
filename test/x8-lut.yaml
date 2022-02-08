@@ -3,11 +3,13 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# Scalar
 - name: xnn_x8_lut_ukernel__scalar_x1
 - name: xnn_x8_lut_ukernel__scalar_x2
 - name: xnn_x8_lut_ukernel__scalar_x4
 - name: xnn_x8_lut_ukernel__scalar_x8
 - name: xnn_x8_lut_ukernel__scalar_x16
+# ARM NEON
 - name: xnn_x8_lut_ukernel__neon_tbx128x4_x16
   arch:
     - aarch64
@@ -20,8 +22,10 @@
 - name: xnn_x8_lut_ukernel__neon_tbx128x4_x64
   arch:
     - aarch64
+# x86 SSE
 - name: xnn_x8_lut_ukernel__ssse3_x16
 - name: xnn_x8_lut_ukernel__ssse3_x32
+# x86 AVX
 - name: xnn_x8_lut_ukernel__avx_x16
 - name: xnn_x8_lut_ukernel__avx_x32
 - name: xnn_x8_lut_ukernel__avx_x48
@@ -30,10 +34,12 @@
 - name: xnn_x8_lut_ukernel__avx2_x64
 - name: xnn_x8_lut_ukernel__avx2_x96
 - name: xnn_x8_lut_ukernel__avx2_x128
+# x86 AVX512
 - name: xnn_x8_lut_ukernel__avx512skx_vpshufb_x64
 - name: xnn_x8_lut_ukernel__avx512skx_vpshufb_x128
 - name: xnn_x8_lut_ukernel__avx512skx_vpshufb_x192
 - name: xnn_x8_lut_ukernel__avx512skx_vpshufb_x256
+# WAsm SIMD
 - name: xnn_x8_lut_ukernel__wasmsimd_x16
 - name: xnn_x8_lut_ukernel__wasmsimd_x32
 - name: xnn_x8_lut_ukernel__wasmsimd_x48

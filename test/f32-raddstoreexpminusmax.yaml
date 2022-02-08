@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x4
   init: xnn_init_f32_expminus_neon_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8
@@ -98,6 +100,7 @@
   init: xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_x20_acc5
   init: xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params
+# x86 SSE
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x4
   init: xnn_init_f32_expminus_sse2_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x8
@@ -122,6 +125,7 @@
   init: xnn_init_f32_expminus_sse2_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc5
   init: xnn_init_f32_expminus_sse2_rr2_p5_params
+# x86 AVX
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x64
   init: xnn_init_f32_expminus_avx2_rr1_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x64_acc2
@@ -146,6 +150,7 @@
   init: xnn_init_f32_expminus_avx2_rr1_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x96_acc6
   init: xnn_init_f32_expminus_avx2_rr1_p5_params
+# x86 AVX512
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_x128
   init: xnn_init_f32_expminus_avx512_rr1_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_x128_acc2
@@ -170,6 +175,7 @@
   init: xnn_init_f32_expminus_avx512_rr1_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_x192_acc6
   init: xnn_init_f32_expminus_avx512_rr1_p5_params
+# WAsm SIMD
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x4
   init: xnn_init_f32_expminus_wasmsimd_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x8
@@ -194,6 +200,7 @@
   init: xnn_init_f32_expminus_wasmsimd_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x20_acc5
   init: xnn_init_f32_expminus_wasmsimd_rr2_p5_params
+# Scalar
 - name: xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x1
   init: xnn_init_f32_expminus_scalar_rr2_p5_params
 - name: xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x2

@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -14,15 +16,18 @@
 - name: xnn_f32_ppmm_minmax_ukernel_8x8__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+# x86 SSE
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 1
+# WAsm SIMD
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_arm_splat
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_4x8__wasmsimd_x86_splat
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
+# Scalar
 - name: xnn_f32_ppmm_minmax_ukernel_4x2__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1

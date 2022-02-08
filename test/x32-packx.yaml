@@ -2,12 +2,17 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_x32_packx_ukernel_4x__neon_st4
   k-block: 4
+# x86 SSE
 - name: xnn_x32_packx_ukernel_4x__sse
   k-block: 4
+# WAsm SIMD
 - name: xnn_x32_packx_ukernel_4x__wasmsimd
   k-block: 4
+# Scalar
 - name: xnn_x32_packx_ukernel_2x__scalar
   k-block: 1
 - name: xnn_x32_packx_ukernel_3x__scalar

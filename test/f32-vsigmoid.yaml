@@ -2,6 +2,8 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+
+# ARM NEON
 - name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x4
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
@@ -218,6 +220,7 @@
   init: xnn_init_f32_sigmoid_neon_rr2_lut2048_p1_params
 - name: xnn_f32_vsigmoid_ukernel__neon_rr2_lut2048_p1_nr2recps_x24
   init: xnn_init_f32_sigmoid_neon_rr2_lut2048_p1_params
+# x86 SSE
 - name: xnn_f32_vsigmoid_ukernel__sse2_rr2_p5_div_x4
   init: xnn_init_f32_sigmoid_sse2_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__sse2_rr2_p5_div_x8
@@ -266,6 +269,7 @@
   init: xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params
 - name: xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x24
   init: xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params
+# x86 AVX
 - name: xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x8
   init: xnn_init_f32_sigmoid_avx_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x16
@@ -366,6 +370,7 @@
   init: xnn_init_f32_sigmoid_avx2_rr1_p5_params
 - name: xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_x80
   init: xnn_init_f32_sigmoid_avx2_rr1_p5_params
+# x86 AVX512
 - name: xnn_f32_vsigmoid_ukernel__avx512f_rr1_p5_scalef_div_x16
   init: xnn_init_f32_sigmoid_avx512_rr1_p5_params
 - name: xnn_f32_vsigmoid_ukernel__avx512f_rr1_p5_scalef_div_x32
@@ -462,6 +467,7 @@
   init: xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params
 - name: xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_nr1fma_x128
   init: xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params
+# WAsm SIMD
 - name: xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x4
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x8
@@ -486,6 +492,7 @@
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params
 - name: xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params
+# Scalar
 - name: xnn_f32_vsigmoid_ukernel__scalar_rr2_lut2048_p1_div_x1
   init: xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params
 - name: xnn_f32_vsigmoid_ukernel__scalar_rr2_lut2048_p1_div_x2

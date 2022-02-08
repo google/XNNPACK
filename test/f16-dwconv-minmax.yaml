@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARM NEON
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith
   init: xnn_init_f16_minmax_neon_params
   arch:
@@ -75,6 +76,7 @@
   init: xnn_init_f16_minmax_neon_params
   arch:
     - aarch64
+# x86 FMA3
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3
   init: xnn_init_f16_minmax_avx_params
 - name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2
