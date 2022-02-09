@@ -44,6 +44,7 @@ enum xnn_operator_type {
   xnn_operator_type_bankers_rounding_nc_f32,
   xnn_operator_type_channel_shuffle_nc_x8,
   xnn_operator_type_channel_shuffle_nc_x32,
+  xnn_operator_type_clamp_nc_f16,
   xnn_operator_type_clamp_nc_f32,
   xnn_operator_type_clamp_nc_s8,
   xnn_operator_type_clamp_nc_u8,

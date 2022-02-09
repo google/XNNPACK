@@ -42,6 +42,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Channel Shuffle (NC, X8)";
     case xnn_operator_type_channel_shuffle_nc_x32:
       return "Channel Shuffle (NC, X32)";
+    case xnn_operator_type_clamp_nc_f16:
+      return "Clamp (NC, F16)";
     case xnn_operator_type_clamp_nc_f32:
       return "Clamp (NC, F32)";
     case xnn_operator_type_clamp_nc_s8:

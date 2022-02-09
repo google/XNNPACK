@@ -154,6 +154,110 @@ static enum xnn_status setup_unary_elementwise_nc(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_create_clamp_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* clamp_op_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
+    return xnn_status_uninitialized;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  const uint16_t output_min_as_half = fp16_ieee_from_fp32_value(output_min);
+  const uint16_t output_max_as_half = fp16_ieee_from_fp32_value(output_max);
+  output_min = fp16_ieee_to_fp32_value(output_min_as_half);
+  output_max = fp16_ieee_to_fp32_value(output_max_as_half);
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f16_minmax_params params;
+  if (xnn_params.f16.clamp.init.f16_minmax != NULL) {
+    xnn_params.f16.clamp.init.f16_minmax(&params, output_min_as_half, output_max_as_half);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_clamp_nc_f16,
+    xnn_params.f16.clamp.ukernel,
+    clamp_op_out);
+}
+
+enum xnn_status xnn_create_clamp_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* clamp_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+  xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
+    xnn_params.f32.relu : xnn_params.f32.clamp.ukernel;
+
+  union xnn_f32_minmax_params params;
+  if (xnn_params.f32.clamp.init.f32_minmax != NULL) {
+    xnn_params.f32.clamp.init.f32_minmax(&params, output_min, output_max);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_clamp_nc_f32,
+    clamp_ukernel,
+    clamp_op_out);
+}
+
 enum xnn_status xnn_create_clamp_nc_s8(
     size_t channels,
     size_t input_stride,
@@ -207,52 +311,6 @@ enum xnn_status xnn_create_clamp_nc_u8(
     &params, sizeof(params),
     xnn_operator_type_clamp_nc_u8,
     xnn_params.u8.clamp.ukernel,
-    clamp_op_out);
-}
-
-enum xnn_status xnn_create_clamp_nc_f32(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
-    float output_min,
-    float output_max,
-    uint32_t flags,
-    xnn_operator_t* clamp_op_out)
-{
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
-  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
-  xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
-    xnn_params.f32.relu : xnn_params.f32.clamp.ukernel;
-
-  union xnn_f32_minmax_params params;
-  if (xnn_params.f32.clamp.init.f32_minmax != NULL) {
-    xnn_params.f32.clamp.init.f32_minmax(&params, output_min, output_max);
-  }
-  return create_unary_elementwise_nc(
-    channels, input_stride, output_stride, flags,
-    &params, sizeof(params),
-    xnn_operator_type_clamp_nc_f32,
-    clamp_ukernel,
     clamp_op_out);
 }
 
@@ -853,6 +911,54 @@ enum xnn_status xnn_setup_ceiling_nc_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_clamp_nc_f16(
+    xnn_operator_t clamp_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (clamp_op->type != xnn_operator_type_clamp_nc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16),
+      xnn_operator_type_to_string(clamp_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  clamp_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    clamp_op,
+    batch_size, input, output,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    &clamp_op->params.f16_minmax, sizeof(clamp_op->params.f16_minmax),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_clamp_nc_f32(
+    xnn_operator_t clamp_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  if (clamp_op->type != xnn_operator_type_clamp_nc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32),
+      xnn_operator_type_to_string(clamp_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  clamp_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    clamp_op,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    2 /* log2(sizeof(float)) */,
+    &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax),
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_clamp_nc_s8(
     xnn_operator_t clamp_op,
     size_t batch_size,
@@ -898,30 +1004,6 @@ enum xnn_status xnn_setup_clamp_nc_u8(
     0 /* log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(uint8_t)) */,
     &clamp_op->params.u8_minmax, sizeof(clamp_op->params.u8_minmax),
-    pthreadpool_get_threads_count(threadpool));
-}
-
-enum xnn_status xnn_setup_clamp_nc_f32(
-    xnn_operator_t clamp_op,
-    size_t batch_size,
-    const float* input,
-    float* output,
-    pthreadpool_t threadpool)
-{
-  if (clamp_op->type != xnn_operator_type_clamp_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32),
-      xnn_operator_type_to_string(clamp_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  clamp_op->state = xnn_run_state_invalid;
-
-  return setup_unary_elementwise_nc(
-    clamp_op,
-    batch_size, input, output,
-    2 /* log2(sizeof(float)) */,
-    2 /* log2(sizeof(float)) */,
-    &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 

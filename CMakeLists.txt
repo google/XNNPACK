@@ -3190,6 +3190,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c
+  src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c)
@@ -4932,6 +4933,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vaddc-minmax-f16c-x16.c
   src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
   src/f16-vbinary/gen/vmulc-minmax-f16c-x16.c
+  src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f16-vlrelu/gen/vlrelu-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
