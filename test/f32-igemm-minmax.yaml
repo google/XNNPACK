@@ -511,7 +511,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x4__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-# AArch32 assembly
+# AArch32 JIT assembly
 - name: xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -542,7 +542,7 @@
   k-block: 4
   pipelined: true
   assembly: true
-# AArch64 assembly
+# AArch64 JIT assembly
 - name: xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
