@@ -44,13 +44,13 @@
 
 # params structure is 20 bytes
 #  struct {
-#    uint8_t kernel_zero_point[4]; d14
-#    int32_t right_pre_shift;         d12[0]
-#    int32_t multiplier;              d12[1]
-#    int32_t right_post_shift;        d13[0]
-#    int16_t output_zero_point;       d13[2]
-#    uint8_t output_min;           d13[6]
-#    uint8_t output_max;           d13[7]
+#    uint8_t kernel_zero_point[4];  d14
+#    int32_t right_pre_shift;       d12[0]
+#    int32_t multiplier;            d12[1]
+#    int32_t right_post_shift;      d13[0]
+#    int16_t output_zero_point;     d13[2]
+#    uint8_t output_min;            d13[6]
+#    uint8_t output_max;            d13[7]
 #  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53

@@ -20,10 +20,10 @@ $XXTL = "VMOVL.U8" if DATATYPE == "QU8" else "VMOVL.S8"
 $SQXTXN = "VQMOVUN.S16" if DATATYPE == "QU8" else "VQMOVN.S16"
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 // void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
-//     size_t mr,                                      r0
+//     size_t mr,                                     (r0)
 //     size_t nc,                                      r1
-//     size_t kc,                                      r2 -> r5 -> sp + 44
-//     size_t ks,                                      r3 -> sp + 48 -> r14
+//     size_t kc,                                     (r2) -> r5 -> sp + 44
+//     size_t ks,                                     (r3) -> sp + 48 -> r14
 //     const ${XINT8_T}**restrict a,            sp + 88  -> r2
 //     const void*restrict w,              sp + 92  -> r9
 //     ${XINT8_T}*restrict c,                   sp + 96  -> r11

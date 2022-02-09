@@ -13,10 +13,10 @@
 .syntax unified
 
 // void xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
-//     size_t mr,                                      r0
+//     size_t mr,                                     (r0)
 //     size_t nc,                                      r1
-//     size_t kc,                                      r2 -> r5 -> sp + 44
-//     size_t ks,                                      r3 -> sp + 48 -> r14
+//     size_t kc,                                     (r2) -> r5 -> sp + 44
+//     size_t ks,                                     (r3) -> sp + 48 -> r14
 //     const uint8_t**restrict a,            sp + 88  -> r2
 //     const void*restrict w,              sp + 92  -> r9
 //     uint8_t*restrict c,                   sp + 96  -> r11
