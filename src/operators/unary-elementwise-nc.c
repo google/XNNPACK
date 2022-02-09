@@ -243,8 +243,10 @@ enum xnn_status xnn_create_clamp_nc_f32(
   }
 
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
-  xnn_univector_ukernel_function clamp_ukernel = (relu_activation && (xnn_params.f32.relu != NULL)) ?
-    xnn_params.f32.relu : xnn_params.f32.clamp.ukernel;
+  xnn_univector_ukernel_function clamp_ukernel = xnn_params.f32.clamp.ukernel;
+  if (relu_activation && xnn_params.f32.relu.ukernel != NULL) {
+    clamp_ukernel = xnn_params.f32.relu.ukernel;
+  }
 
   union xnn_f32_minmax_params params;
   if (xnn_params.f32.clamp.init.f32_minmax != NULL) {

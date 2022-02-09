@@ -4150,7 +4150,7 @@ struct xnn_parameters {
     struct vunary_parameters hswish;
     struct vunary_parameters lrelu;
     struct vunary_parameters neg;
-    xnn_univector_ukernel_function relu;
+    struct vunary_parameters relu;
     struct vunary_parameters rndne;
     struct vunary_parameters rndz;
     struct vunary_parameters rndu;
