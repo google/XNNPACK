@@ -84,14 +84,14 @@ The table below presents **multi-threaded** performance of XNNPACK library on th
 
 | Model                   | RPi Zero W (BCM2835), ms | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms | RPi 4 (BCM2711, ARM64), ms |
 | ----------------------- | :----------------------: | :-----------------: | :--------------------: | :-----------------: | :------------------------: |
-| FP32 MobileNet v1 1.0X  |          3937            |         299         |          114           |          72         |             76             |
-| FP32 MobileNet v2 1.0X  |          1987            |         187         |           79           |          41         |             44             |
-| FP32 MobileNet v3 Large |          1658            |         158         |           67           |          38         |             41             |
-| FP32 MobileNet v3 Small |           487            |          50         |           23           |          13         |             14             |
-| INT8 MobileNet v1 1.0X  |          2598            |         169         |           61           |          29         |             24             |
-| INT8 MobileNet v2 1.0X  |          1487            |         109         |           40           |          20         |             17             |
+| FP32 MobileNet v1 1.0X  |          3919            |         302         |          114           |          72         |             77             |
+| FP32 MobileNet v2 1.0X  |          1987            |         191         |           79           |          41         |             46             |
+| FP32 MobileNet v3 Large |          1658            |         161         |           67           |          38         |             40             |
+| FP32 MobileNet v3 Small |           474            |          50         |           22           |          13         |             15             |
+| INT8 MobileNet v1 1.0X  |          2589            |         128         |           46           |          29         |             24             |
+| INT8 MobileNet v2 1.0X  |          1495            |          82         |           30           |          20         |             17             |
 
-Benchmarked on Oct 15, 2021 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs. INT8 inference was evaluated on per-channel quantization schema.
+Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs. INT8 inference was evaluated on per-channel quantization schema.
 
 ## Publications
 
