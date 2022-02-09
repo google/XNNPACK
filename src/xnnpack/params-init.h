@@ -397,8 +397,8 @@ DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_scalar_params)
   XNN_INTERNAL void fn_name(                                   \
     union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params)
 DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params)
+DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_lut2048_p1_params)
 DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

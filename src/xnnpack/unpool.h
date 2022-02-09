@@ -26,9 +26,9 @@ extern "C" {
     uint32_t** output);
 
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__neon)
+DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__scalar)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__sse2)
 DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__wasmsimd)
-DECLARE_X32_UNPOOL_UKERNEL_FUNCTION(xnn_x32_unpool_ukernel__scalar)
 
 
 #ifdef __cplusplus
