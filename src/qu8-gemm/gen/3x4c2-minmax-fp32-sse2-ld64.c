@@ -37,7 +37,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__sse2_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);
@@ -190,9 +190,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__sse2_ld64(
 
     if (nc >= 4) {
       *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
-      vout = _mm_srli_si128(vout, 4);
+      vout = _mm_shuffle_epi32(vout, _MM_SHUFFLE(0, 3, 2, 1));
       *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(vout);
-      vout = _mm_srli_si128(vout, 4);
+      vout = _mm_shuffle_epi32(vout, _MM_SHUFFLE(0, 3, 2, 1));
       *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(vout);
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);

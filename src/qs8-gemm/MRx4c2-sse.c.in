@@ -55,7 +55,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__$
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${XINT8_T}* c0 = c;
   $for M in range(1, MR):
@@ -318,7 +318,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__$
         $if SSE == 4:
           *((uint32_t*) c${M}) = (uint32_t) _mm_extract_epi32(vout, ${M});
         $else:
-          vout = _mm_srli_si128(vout, 4);
+          vout = _mm_shuffle_epi32(vout, _MM_SHUFFLE(0, 3, 2, 1));
           *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(vout);
 
       $for M in range(MR):
