@@ -250,19 +250,16 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 # x86 SSE
-- name: xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup
-  init: xnn_init_f32_minmax_sse_params
-  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__sse_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__sse_load1
   init: xnn_init_f32_minmax_sse_params
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_1x8s4__sse
+- name: xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
-- name: xnn_f32_gemm_minmax_ukernel_3x8__sse2_dup
+- name: xnn_f32_gemm_minmax_ukernel_1x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_3x8__sse_dup
@@ -271,13 +268,13 @@
 - name: xnn_f32_gemm_minmax_ukernel_3x8__sse_load1
   init: xnn_init_f32_minmax_sse_params
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_3x8__sse2_dup
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_3x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x2c4__sse
-  init: xnn_init_f32_minmax_sse_params
-  k-block: 4
-- name: xnn_f32_gemm_minmax_ukernel_4x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x8__sse_dup
@@ -286,10 +283,10 @@
 - name: xnn_f32_gemm_minmax_ukernel_4x8__sse_load1
   init: xnn_init_f32_minmax_sse_params
   k-block: 1
-- name: xnn_f32_gemm_minmax_ukernel_4x8s4__sse
+- name: xnn_f32_gemm_minmax_ukernel_4x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
-- name: xnn_f32_gemm_minmax_ukernel_5x8__sse2_dup
+- name: xnn_f32_gemm_minmax_ukernel_4x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_5x8__sse_dup
@@ -298,6 +295,9 @@
 - name: xnn_f32_gemm_minmax_ukernel_5x8__sse_load1
   init: xnn_init_f32_minmax_sse_params
   k-block: 1
+- name: xnn_f32_gemm_minmax_ukernel_5x8__sse2_dup
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_5x8s4__sse
   init: xnn_init_f32_minmax_sse_params
   k-block: 4

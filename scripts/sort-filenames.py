@@ -12,27 +12,30 @@ min_num_lines = args.min_lines
 filename_regex = '(src|source|unit_test|include)/.*$'
 
 # caveat: Does fully not handle numbers with different number of digits.
-def compare_strs(str1, str2):
+def compare_strs(str1, str2, num_sort=True):
     winner = 0 # which one's bigger
     num_sort_mode = False
     for i in range(min(len(str1),len(str2))):
         if winner == 0:
-            if str1[i].isdigit() and str2[i].isdigit():
-                if num_sort_mode:
-                    str1_num += str1[i]
-                    str2_num += str2[i]
-                else:
-                    num_sort_mode = True
-                    str1_num = str1[i]
-                    str2_num = str2[i]
-            elif num_sort_mode:
-                if str1[i].isdigit(): str1_num += str1[i]
-                if str2[i].isdigit(): str2_num += str2[i]
-                winner = int(str1_num) - int(str2_num)
-                num_sort_mode = False
-                if winner != 0: break
+            if num_sort:
+                if str1[i].isdigit() and str2[i].isdigit():
+                    if num_sort_mode:
+                        str1_num += str1[i]
+                        str2_num += str2[i]
+                    else:
+                        num_sort_mode = True
+                        str1_num = str1[i]
+                        str2_num = str2[i]
+                elif num_sort_mode:
+                    if str1[i].isdigit(): str1_num += str1[i]
+                    if str2[i].isdigit(): str2_num += str2[i]
+                    winner = int(str1_num) - int(str2_num)
+                    num_sort_mode = False
+                    if winner != 0: break
             if str1[i] != str2[i] and not num_sort_mode:
-                if str1[i] > str2[i]:
+                if str2[i].isdigit():
+                    winner = -1
+                elif str1[i].isdigit() or str1[i] > str2[i]:
                     winner = 1
                 else:
                     winner = -1
@@ -50,12 +53,14 @@ def compare_strs(str1, str2):
         num_sort_mode = False
 
     if winner == 0:
-        if len(str1) != len(str2):
-            if len(str1) > len(str2):
-                winner = 1
-            else:
-                winner = -1
+        if str2[i].isdigit():
+            winner = -1
+        elif str1[i].isdigit() or str1[i] > str2[i]:
+            winner = 1
+        else:
+            winner = -1
     return winner
+
 
 def cmp_to_key(mycmp):
     'Convert a cmp= function into a key= function'
