@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -92,23 +96,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         # Load initial bias from w into accumulators
         LDP     q20, q21, [x5], 32
         MOV     v22.16b, v20.16b
-        PRFM    PLDL1KEEP,  [x13,  0]   // Prefetch A
-        PRFM    PLDL1KEEP,  [x13, 64]
         MOV     v23.16b, v21.16b
-        PRFM    PLDL1KEEP,  [x14,  0]
-        PRFM    PLDL1KEEP,  [x14, 64]
         MOV     v24.16b, v20.16b
-        PRFM    PLDL1KEEP, [x15,  0]
-        PRFM    PLDL1KEEP, [x15, 64]
         MOV     v25.16b, v21.16b
-        PRFM    PLDL1KEEP, [x8,  0]
-        PRFM    PLDL1KEEP, [x8, 64]
         MOV     v26.16b, v20.16b
-        PRFM    PLDL1KEEP, [x5,   0]    // Prefetch B
-        PRFM    PLDL1KEEP, [x5,  64]
         MOV     v27.16b, v21.16b
-        PRFM    PLDL1KEEP, [x5, 128]
-        PRFM    PLDL1KEEP, [x5, 192]
 
         MOV     x9, x3                  // p = ks
 
@@ -211,7 +203,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR     x19, [x14], 8              // a1
         FMLA    v22.4s, v12.4s,  v3.s[2]
         FMLA    v24.4s, v12.4s,  v4.s[0]
-        PRFM    PLDL1KEEP, [x13, 128]      // Prefetch A0
 
         # BLOCK 1
         LDR     d16, [x5, 64]
@@ -220,7 +211,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR     x19, [x5, 72]           // b
         FMLA    v21.4s, v13.4s,  v3.s[0]
         FMLA    v23.4s, v13.4s,  v3.s[2]
-        PRFM    PLDL1KEEP, [x14, 128]      // Prefetch A1
 
         # BLOCK 2
         LDR     d1, [x15], 8             // a2
@@ -229,7 +219,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR     x19, [x8], 8             // a3
         FMLA    v27.4s, v13.4s,  v4.s[2]
         FMLA    v20.4s, v14.4s,  v3.s[1]
-        PRFM    PLDL1KEEP, [x15, 128]     // Prefetch A2
 
         # BLOCK 3
         LDR     d17, [x5, 80]
@@ -238,7 +227,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR     x19, [x5, 88]
         FMLA    v24.4s, v14.4s,  v4.s[1]
         FMLA    v26.4s, v14.4s,  v4.s[3]
-        PRFM    PLDL1KEEP, [x8, 128]     // Prefetch A3
 
         # BLOCK 4
         LDR     d18, [x5, 96]
@@ -247,7 +235,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         LDR     x19, [x5, 104]
         FMLA    v23.4s, v15.4s,  v3.s[3]
         FMLA    v25.4s, v15.4s,  v4.s[1]
-        PRFM    PLDL1KEEP, [x5, 192]      // Prefetch B
 
         # BLOCK 5
         # NOTE that block needs to be 4 cycles for LDR not to stall
@@ -256,7 +243,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
         FMLA    v27.4s, v15.4s,  v4.s[3]
         LDR     x19, [x5, 120]
         SUBS    x0, x0, 16
-        PRFM    PLDL1KEEP, [x5, 256]      // Prefetch B
         ADD     x5, x5, 128
         B.HS    2b
 

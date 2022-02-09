@@ -3,58 +3,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-# AArch64 assembly
-- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 8
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 8
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 8
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 8
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-  assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld128
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-  assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 8
-  assembly: true
-  pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-  assembly: true
-- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-  assembly: true
 # AArch32 assembly
 - name: xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
@@ -90,9 +38,57 @@
   assembly: true
   pipelined: true
 # AArch64 assembly
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+  assembly: true
+  pipelined: true
 - name: xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+  assembly: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  assembly: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
   assembly: true
   pipelined: true
 - name: xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53
@@ -128,6 +124,19 @@
 - name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
+  assembly: true
+  pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+  assembly: true
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  assembly: true
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
   assembly: true
   pipelined: true
 - name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
