@@ -3244,6 +3244,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/8x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/8x16-minmax-neonfp16arith-ld64.c
+  src/f16-ibilinear/gen/neonfp16arith-c8.c
+  src/f16-ibilinear/gen/neonfp16arith-c16.c
   src/f16-igemm/gen/1x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/4x8-minmax-neonfp16arith-ld64.c
@@ -7106,6 +7108,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-gemm-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester)
   ADD_TEST(f16-gemm-minmax-test f16-gemm-minmax-test)
+
+  ADD_EXECUTABLE(f16-ibilinear-test test/f16-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-ibilinear-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-ibilinear-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-ibilinear-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f16-ibilinear-test f16-ibilinear-test)
 
   ADD_EXECUTABLE(f16-igemm-minmax-test test/f16-igemm-minmax.cc $<TARGET_OBJECTS:all_microkernels>  $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f16-igemm-minmax-test PROPERTIES

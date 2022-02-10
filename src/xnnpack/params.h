@@ -2657,6 +2657,15 @@ typedef void (*xnn_dwconv_multipass_ukernel_function)(
     const void* zero,
     const void* params);
 
+typedef void (*xnn_f16_ibilinear_ukernel_function)(
+    size_t output_pixels,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    const void* weights,
+    void* output,
+    size_t output_increment);
+
 typedef void (*xnn_f32_ibilinear_ukernel_function)(
     size_t output_pixels,
     size_t channels,

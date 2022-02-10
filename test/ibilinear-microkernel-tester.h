@@ -16,6 +16,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/AlignedAllocator.h>
 #include <xnnpack/math.h>
@@ -89,6 +91,61 @@ class IBilinearMicrokernelTester {
     } else {
       assert(this->input_stride_ >= 4 * pixels());
       return this->input_stride_;
+    }
+  }
+
+  void Test(xnn_f16_ibilinear_ukernel_function ibilinear) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<const uint16_t*> indirection(pixels() * 4);
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + indirection.size() * channels());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(pixels() * 2);
+    std::vector<uint16_t> output((pixels() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(pixels() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(packed_weights.begin(), packed_weights.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+
+      // Compute reference results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const float alpha_h = fp16_ieee_to_fp32_value(packed_weights[i * 2 + 0]);
+          const float alpha_v = fp16_ieee_to_fp32_value(packed_weights[i * 2 + 1]);
+          output_ref[i * channels() + c] =
+            fp16_ieee_to_fp32_value(indirection[i * 4 + 0][c + input_offset()]) * (1.0f - alpha_h) * (1.0f - alpha_v) +
+            fp16_ieee_to_fp32_value(indirection[i * 4 + 1][c + input_offset()]) * alpha_h * (1.0f - alpha_v) +
+            fp16_ieee_to_fp32_value(indirection[i * 4 + 2][c + input_offset()]) * (1.0f - alpha_h) * alpha_v +
+            fp16_ieee_to_fp32_value(indirection[i * 4 + 3][c + input_offset()]) * alpha_h * alpha_v;
+        }
+      }
+
+      // Call optimized micro-kernel.
+      ibilinear(
+        pixels(), channels() * sizeof(uint16_t),
+        reinterpret_cast<const void**>(indirection.data()), input_offset() * sizeof(uint16_t),
+        packed_weights.data(), output.data(),
+        (output_stride() - channels()) * sizeof(uint16_t));
+
+      // Verify results.
+      for (size_t i = 0; i < pixels(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
+              output_ref[i * channels() + c],
+              std::abs(output_ref[i * channels() + c]) * 1.0e-2f)
+            << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
+        }
+      }
     }
   }
 

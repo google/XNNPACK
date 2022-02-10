@@ -4491,6 +4491,8 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/8x8-minmax-neonfp16arith-ld64.c",
     "src/f16-gemm/gen/8x16-minmax-neonfp16arith-ld64.c",
+    "src/f16-ibilinear/gen/neonfp16arith-c8.c",
+    "src/f16-ibilinear/gen/neonfp16arith-c16.c",
     "src/f16-igemm/gen/1x8-minmax-neonfp16arith-ld64.c",
     "src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c",
     "src/f16-igemm/gen/4x8-minmax-neonfp16arith-ld64.c",
@@ -11051,6 +11053,16 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
+)
+
+xnnpack_unit_test(
+    name = "f16_ibilinear_test",
+    srcs = [
+        "test/f16-ibilinear.cc",
+        "test/ibilinear-microkernel-tester.h",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
