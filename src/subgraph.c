@@ -698,6 +698,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   }
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
+    if (node->type == xnn_node_type_invalid) {
+      // Node was fused away, skip.
+      continue;
+    }
+
     assert(node->compute_type == xnn_compute_type_fp32);
     node->compute_type = xnn_compute_type_fp16;
     if (node->type == xnn_node_type_static_constant_pad) {
