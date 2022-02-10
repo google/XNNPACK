@@ -76,21 +76,21 @@ class ClampOperatorTester {
     return this->batch_size_;
   }
 
-  inline ClampOperatorTester& qmin(uint8_t qmin) {
+  inline ClampOperatorTester& qmin(int16_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  inline int16_t qmin() const {
     return this->qmin_;
   }
 
-  inline ClampOperatorTester& qmax(uint8_t qmax) {
+  inline ClampOperatorTester& qmax(int16_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  inline int16_t qmax() const {
     return this->qmax_;
   }
 
@@ -113,11 +113,14 @@ class ClampOperatorTester {
   }
 
   void TestF16() const {
+    ASSERT_LT(qmin(), qmax());
     ASSERT_FALSE(relu_activation());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
+    auto f32rng = std::bind(
+      std::uniform_real_distribution<float>(std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()),
+      std::ref(rng));
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -129,11 +132,12 @@ class ClampOperatorTester {
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.
+      const float output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(float(qmin())));
+      const float output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(float(qmax())));
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const float x = fp16_ieee_to_fp32_value(input[i * input_stride() + c]);
-          const float y = relu_activation() ? std::max(x, 0.f) :
-            std::min(std::max(x, float(qmin())), float(qmax()));
+          const float y = relu_activation() ? std::max(x, 0.f) : std::min(std::max(x, output_min), output_max);
           output_ref[i * channels() + c] = y;
         }
       }
@@ -142,8 +146,6 @@ class ClampOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t clamp_op = nullptr;
 
-      const float output_min = float(qmin());
-      const float output_max = float(qmax());
       const xnn_status status = xnn_create_clamp_nc_f16(
         channels(), input_stride(), output_stride(),
         output_min, output_max,
@@ -183,9 +185,13 @@ class ClampOperatorTester {
   }
 
   void TestF32() const {
+    ASSERT_LT(qmin(), qmax());
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), rng);
+    auto f32rng = std::bind(
+      std::uniform_real_distribution<float>(std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()),
+      std::ref(rng));
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
@@ -247,6 +253,10 @@ class ClampOperatorTester {
   }
 
   void TestS8() const {
+    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -265,7 +275,7 @@ class ClampOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const int8_t x = input[i * input_stride() + c];
-          const int8_t y = std::min(std::max(x, int8_t(qmin() - 0x80)), int8_t(qmax() - 0x80));
+          const int8_t y = std::min(std::max(x, int8_t(qmin())), int8_t(qmax()));
           output_ref[i * channels() + c] = y;
         }
       }
@@ -277,7 +287,7 @@ class ClampOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_clamp_nc_s8(
           channels(), input_stride(), output_stride(),
-          int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+          int8_t(qmin()), int8_t(qmax()),
           0, &clamp_op));
       ASSERT_NE(nullptr, clamp_op);
 
@@ -297,22 +307,28 @@ class ClampOperatorTester {
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(int32_t(output[i * output_stride() + c]), int32_t(qmax() - 0x80))
+          ASSERT_LE(int16_t(output[i * output_stride() + c]), qmax())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80))
+          ASSERT_GE(int16_t(output[i * output_stride() + c]), qmin())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+          ASSERT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
-            << ", min " << int32_t(qmin() - 0x80) << ", max " << int32_t(qmax() - 0x80);
+            << ", min " << qmin() << ", max " << qmax();
         }
       }
     }
   }
 
   void TestU8() const {
+    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    auto u8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()),
+      std::ref(rng));
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() - 1) * input_stride() + channels());
@@ -326,7 +342,7 @@ class ClampOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const uint8_t x = input[i * input_stride() + c];
-          const uint8_t y = std::min(std::max(x, qmin()), qmax());
+          const uint8_t y = std::min(std::max(x, uint8_t(qmin())), uint8_t(qmax()));
           output_ref[i * channels() + c] = y;
         }
       }
@@ -338,7 +354,7 @@ class ClampOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_clamp_nc_u8(
           channels(), input_stride(), output_stride(),
-          qmin(), qmax(),
+          uint8_t(qmin()), uint8_t(qmax()),
           0, &clamp_op));
       ASSERT_NE(nullptr, clamp_op);
 
@@ -358,13 +374,13 @@ class ClampOperatorTester {
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(uint32_t(output[i * output_stride() + c]), uint32_t(qmax()))
+          ASSERT_LE(int16_t(output[i * output_stride() + c]), qmax())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(uint32_t(output[i * output_stride() + c]), uint32_t(qmin()))
+          ASSERT_GE(int16_t(output[i * output_stride() + c]), qmin())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+          ASSERT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
-            << ", min = " << uint32_t(qmin()) << ", max = " << uint32_t(qmax());
+            << ", min " << qmin() << ", max " << qmax();
         }
       }
     }
@@ -375,8 +391,8 @@ class ClampOperatorTester {
   size_t channels_{1};
   size_t input_stride_{0};
   size_t output_stride_{0};
-  uint8_t qmin_{5};
-  uint8_t qmax_{250};
+  int16_t qmin_{std::numeric_limits<int16_t>::min()};
+  int16_t qmax_{std::numeric_limits<int16_t>::max()};
   bool relu_activation_{false};
   size_t iterations_{15};
 };
