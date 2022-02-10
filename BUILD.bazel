@@ -2271,6 +2271,8 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/math/cvt-f16-f32-wasmsimd-int16.c",
     "src/math/cvt-f16-f32-wasmsimd-int32.c",
     "src/math/cvt-f32-f16-wasmsimd.c",
+    "src/math/cvt-f32-qs8-wasmsimd.c",
+    "src/math/cvt-f32-qu8-wasmsimd.c",
     "src/math/expm1minus-wasmsimd-rr2-lut16-p3-andnot.c",
     "src/math/expm1minus-wasmsimd-rr2-lut16-p3-max.c",
     "src/math/expm1minus-wasmsimd-rr2-p6-andnot.c",

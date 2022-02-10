@@ -267,3 +267,117 @@ constexpr int kBlockSize = 1024;
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(CVT__WASMSIMD, positive_normal) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> outputs(kBlockSize);
+    for (int32_t zero_point = std::numeric_limits<uint8_t>::min();
+         zero_point <= std::numeric_limits<uint8_t>::max();
+         zero_point++)
+    {
+      const uint32_t max_input = fp32_to_bits((float) (std::numeric_limits<uint8_t>::max() - zero_point));
+      for (uint32_t n = 0; n < max_input; n += kBlockSize) {
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+        }
+        xnn_math_f32_qu8_cvt__wasmsimd(kBlockSize * sizeof(uint8_t), inputs.data(), outputs.data(), uint8_t(zero_point));
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          long reference_output = std::lrintf(inputs[i]) + long(zero_point);
+          if (inputs[i] >= float(std::numeric_limits<long>::max())) {
+            reference_output = std::numeric_limits<uint8_t>::max();
+          } else if (inputs[i] <= float(std::numeric_limits<long>::min())) {
+            reference_output = std::numeric_limits<uint8_t>::min();
+          }
+          ASSERT_EQ(reference_output, long(outputs[i]))
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << ", reference = " << std::dec << reference_output
+            << ", optimized = " << std::dec << uint32_t(outputs[i])
+            << ", zero point = " << std::dec << zero_point;
+        }
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD, negative_normal) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> outputs(kBlockSize);
+    for (int32_t zero_point = std::numeric_limits<uint8_t>::min();
+         zero_point <= std::numeric_limits<uint8_t>::max();
+         zero_point++)
+    {
+      const uint32_t max_input = fp32_to_bits((float) zero_point);
+      for (uint32_t n = 0; n < max_input; n += kBlockSize) {
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+        }
+        xnn_math_f32_qu8_cvt__wasmsimd(kBlockSize * sizeof(uint8_t), inputs.data(), outputs.data(), uint8_t(zero_point));
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          long reference_output = std::lrintf(inputs[i]) + long(zero_point);
+          if (inputs[i] >= float(std::numeric_limits<long>::max())) {
+            reference_output = std::numeric_limits<uint8_t>::max();
+          } else if (inputs[i] <= float(std::numeric_limits<long>::min())) {
+            reference_output = std::numeric_limits<uint8_t>::min();
+          }
+          ASSERT_EQ(reference_output, long(outputs[i]))
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << ", reference = " << std::dec << reference_output
+            << ", optimized = " << std::dec << uint32_t(outputs[i])
+            << ", zero point = " << std::dec << zero_point;
+        }
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD, positive_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> outputs(kBlockSize);
+    for (int32_t zero_point = std::numeric_limits<uint8_t>::min();
+         zero_point <= std::numeric_limits<uint8_t>::max();
+         zero_point++)
+    {
+      const uint32_t min_input = fp32_to_bits((float) (std::numeric_limits<uint8_t>::max() - zero_point));
+      const uint32_t max_input = UINT32_C(0x7F800000);
+      for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+        }
+        xnn_math_f32_qu8_cvt__wasmsimd(kBlockSize * sizeof(uint8_t), inputs.data(), outputs.data(), uint8_t(zero_point));
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          const int32_t reference_output = std::numeric_limits<uint8_t>::max();
+          ASSERT_EQ(reference_output, uint32_t(outputs[i]))
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << ", reference = " << std::dec << reference_output
+            << ", optimized = " << std::dec << uint32_t(outputs[i])
+            << ", zero point = " << std::dec << zero_point;
+        }
+      }
+    }
+  }
+
+  TEST(CVT__WASMSIMD, negative_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> outputs(kBlockSize);
+    for (int32_t zero_point = std::numeric_limits<uint8_t>::min();
+         zero_point <= std::numeric_limits<uint8_t>::max();
+         zero_point++)
+    {
+      const uint32_t min_input = fp32_to_bits((float) zero_point);
+      const uint32_t max_input = UINT32_C(0x7F800000);
+      for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+        }
+        xnn_math_f32_qu8_cvt__wasmsimd(kBlockSize * sizeof(uint8_t), inputs.data(), outputs.data(), uint8_t(zero_point));
+        for (uint32_t i = 0; i < kBlockSize; i++) {
+          const int32_t reference_output = std::numeric_limits<uint8_t>::min();
+          ASSERT_EQ(reference_output, uint32_t(outputs[i]))
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << ", reference = " << std::dec << reference_output
+            << ", optimized = " << std::dec << uint32_t(outputs[i])
+            << ", zero point = " << std::dec << zero_point;
+        }
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
