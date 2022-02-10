@@ -46,7 +46,7 @@ struct Label {
   // A label can only be bound once, binding it again leads to an error.
   bool bound = (offset != nullptr);
   // All users of this label, recorded by their offset in the Assembler buffer.
-  std::array<byte*, max_label_users> users = {0};
+  std::array<byte*, max_label_users> users{{0}};
   size_t num_users = 0;
 
   // Records a user (e.g. branch instruction) of this label.
