@@ -32,6 +32,7 @@ enum xnn_status xnn_create_runtime_v2(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
+  printf("creating runtime v2\n");
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
