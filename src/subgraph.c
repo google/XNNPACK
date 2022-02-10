@@ -605,6 +605,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     }
     switch (node->type) {
       case xnn_node_type_add2:
+      case xnn_node_type_multiply2:
         assert(node->num_inputs == 2);
         for (uint32_t i = 0; i < node->num_inputs; i++) {
           if (subgraph->values[node->inputs[i]].data != NULL) {
