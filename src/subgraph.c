@@ -614,6 +614,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           }
         }
         break;
+      case xnn_node_type_clamp:
       case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
