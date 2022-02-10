@@ -6751,7 +6751,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(clamp-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(clamp-nc-test clamp-nc-test)
 
   ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
