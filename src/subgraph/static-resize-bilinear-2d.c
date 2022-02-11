@@ -44,6 +44,14 @@ static enum xnn_status create_resize_bilinear_operator(
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
     switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp16:
+        status = xnn_create_resize_bilinear2d_nhwc_f16(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          node->flags,
+          &opdata->operator_object);
+        break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
       case xnn_compute_type_fp32:
         status = xnn_create_resize_bilinear2d_nhwc_f32(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -117,6 +125,20 @@ static enum xnn_status setup_resize_bilinear_operator(
         output_data,
         threadpool);
       break;
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_resize_bilinear_nhwc_f16:
+      return xnn_setup_resize_bilinear2d_nhwc_f16(
+        opdata->operator_object,
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        opdata->output_height,
+        opdata->output_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return xnn_setup_resize_bilinear2d_nhwc_f32(
         opdata->operator_object,

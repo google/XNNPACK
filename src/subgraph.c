@@ -626,6 +626,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_prelu:
       case xnn_node_type_static_constant_pad:
       case xnn_node_type_static_reshape:
+      case xnn_node_type_static_resize_bilinear_2d:
         break;
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
