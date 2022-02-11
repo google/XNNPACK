@@ -6972,7 +6972,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(resize-bilinear-nhwc-test resize-bilinear-nhwc-test)
 
   ADD_EXECUTABLE(resize-bilinear-nchw-test test/resize-bilinear-nchw.cc)

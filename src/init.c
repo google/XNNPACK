@@ -2485,6 +2485,11 @@ static void init(void) {
         .mr = 9,
         .qr = 8,
       };
+      xnn_params.f16.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_f16_ibilinear_ukernel__neonfp16arith_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
+      };
 
       xnn_params.f16.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_function) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
@@ -3751,6 +3756,11 @@ static void init(void) {
         .init.f16 = xnn_init_f16_minmax_avx_params,
         .mr = 9,
         .qr = 8,
+      };
+      xnn_params.f16.ibilinear = (struct ibilinear_parameters) {
+        .ukernel = (xnn_ibilinear_ukernel_function) xnn_f16_ibilinear_ukernel__fma3_c8,
+        .pixel_tile = 1,
+        .channel_tile = 8,
       };
 
       xnn_params.f16.prelu = (struct prelu_parameters) {

@@ -4133,6 +4133,8 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
+    // Bilinear interpolation (2D).
+    struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
     struct vunary_parameters clamp;
     struct vunary_parameters hswish;
