@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 4 == 0
-$assert CHANNEL_TILE >= 4
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
 $assert PIXEL_TILE == 1
 $ABC = "456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>

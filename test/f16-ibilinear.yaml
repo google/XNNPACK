@@ -10,3 +10,6 @@
 - name: xnn_f16_ibilinear_ukernel__neonfp16arith_c16
   arch:
     - aarch64
+# x86 FMA3
+- name: xnn_f16_ibilinear_ukernel__fma3_c8
+- name: xnn_f16_ibilinear_ukernel__fma3_c16

@@ -26,6 +26,9 @@ extern "C" {
       void* output,                                     \
       size_t output_increment);
 
+DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(xnn_f16_ibilinear_ukernel__fma3_c8)
+DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(xnn_f16_ibilinear_ukernel__fma3_c16)
+
 DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(xnn_f16_ibilinear_ukernel__neonfp16arith_c8)
 DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(xnn_f16_ibilinear_ukernel__neonfp16arith_c16)
 

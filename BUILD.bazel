@@ -6510,6 +6510,8 @@ ALL_FMA3_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/up32x9-minmax-fma3.c",
     "src/f16-dwconv/gen/up32x25-minmax-fma3-acc2.c",
     "src/f16-dwconv/gen/up32x25-minmax-fma3.c",
+    "src/f16-ibilinear/gen/fma3-c8.c",
+    "src/f16-ibilinear/gen/fma3-c16.c",
     "src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c",
     "src/f16-vmulcaddc/gen/c16-minmax-fma3-2x.c",
     "src/f32-dwconv/gen/up8x3-minmax-fma3-acc2.c",
