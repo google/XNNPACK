@@ -9571,6 +9571,19 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "hashtable",
+    srcs = [
+        "src/hashtable.c",
+    ],
+    hdrs = [
+        "src/xnnpack/hashtable.h",
+    ] + INTERNAL_HDRS,
+    deps = [
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -13084,6 +13097,17 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK",
         ":jit_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "hashtable_test",
+    srcs = [
+        "test/hashtable.cc",
+    ],
+    deps = [
+        ":XNNPACK",
+        ":hashtable",
     ],
 )
 
