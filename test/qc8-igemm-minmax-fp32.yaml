@@ -4,7 +4,15 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch32 assembly
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a53
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 8
+  assembly: true
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a53
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
   assembly: true
@@ -12,7 +20,15 @@
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
   assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a53
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_cortex_a53
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
   assembly: true
@@ -27,6 +43,63 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
+  assembly: true
+# AArch64 assembly
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_cortex_a53
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm_cortex_a53
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_a53
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_prfm
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_prfm_cortex_a53
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c16__aarch64_neon_mlal
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
   assembly: true
 # ARM NEON
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane
@@ -80,6 +153,9 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neon_mlal_ld2r
   init: xnn_init_qs8_minmax_neon_params
   k-block: 16
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neondot
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neonv8_mlal_dup
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 16
@@ -95,6 +171,12 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4s2__neonv8_mlal
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 16
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__neon_mlal
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 16
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__neonv8_mlal
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x16__neon_mlal_lane
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
@@ -105,6 +187,9 @@
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane_prfm
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x16c4__neondot
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8__neon_mlal_lane
@@ -173,6 +258,12 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c4s2__neonv8_mlal
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 16
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__neon_mlal
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 16
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__neonv8_mlal
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 16
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_2x16__neon_mlal_lane
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
@@ -221,6 +312,9 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8__neonv8_mlal_lane_prfm
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__neondot
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__neon_mlal_lane
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
@@ -231,6 +325,9 @@
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__neonv8_mlal_lane_prfm
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__neondot
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_6x8__neon_mlal_lane
@@ -245,6 +342,9 @@
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_6x8__neonv8_mlal_lane_prfm
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_6x8c4__neondot
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_6x16__neon_mlal_lane
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
@@ -255,91 +355,6 @@
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_6x16__neonv8_mlal_lane_prfm
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-# AArch64 assembly
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_cortex_a53
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal_prfm_cortex_a53
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_cortex_a53
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_prfm
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_prfm_cortex_a53
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c16__aarch64_neon_mlal
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_ld64
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-  assembly: true
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-  assembly: true
-# ARM NEON
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neondot
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__neon_mlal
-  init: xnn_init_qs8_minmax_neon_params
-  k-block: 16
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__neonv8_mlal
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x16c4__neondot
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__neon_mlal
-  init: xnn_init_qs8_minmax_neon_params
-  k-block: 16
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__neonv8_mlal
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 16
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__neondot
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__neondot
-  init: xnn_init_qs8_minmax_neonv8_params
-  k-block: 8
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_6x8c4__neondot
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
 - name: xnn_qc8_igemm_minmax_fp32_ukernel_6x16c4__neondot
