@@ -111,7 +111,7 @@ static enum xnn_status create_fully_connected_nc(
   const uint32_t sr = UINT32_C(1) << gemm_parameters->log2_sr;
 
   const size_t n_stride = round_up(output_channels, nr);
-  const size_t k_stride = round_up_po2(input_channels, kr);
+  const size_t k_stride = round_up_po2(input_channels, kr * sr);
 
   const size_t packed_weights_size = n_stride * (bias_element_size + (k_stride << log2_filter_element_size));
   fully_connected_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
