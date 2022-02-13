@@ -5212,6 +5212,8 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x16s4-minmax-fma3-broadcast.c
   src/f32-gemm/gen/4x16s4-minmax-fma3-broadcast.c
   src/f32-gemm/gen/5x16-minmax-fma3-broadcast.c
+  src/f16-ibilinear/gen/fma3-c8.c
+  src/f16-ibilinear/gen/fma3-c16.c
   src/f32-igemm/gen/1x16-minmax-fma3-broadcast.c
   src/f32-igemm/gen/1x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/4x16s4-minmax-fma3-broadcast.c
