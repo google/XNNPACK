@@ -118,7 +118,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         LDR     r5, [sp, 60]            // kc
         MOVEQ   r0,  r7                 //   a3 = zero, else += a3 + a_offset
         SUBS    r5, r5, 8               // kc - 8
-        BLO     4f                      // less than 8 channels?
+        BLO     5f                      // less than 8 channels?
 
         // Prologue - load 4A's and B0
         VLD1.8  {d0},  [r3]!            // A0
@@ -128,7 +128,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VLD1.8  {d8},  [r9]!            // B0
 
         SUBS    r5, r5, 8               // k = k - 8
-        BLO     29f                     // less than 8 channels?
+        BLO     3f                      // less than 8 channels?
 
         // Main loop - 8 bytes
         // 64 bytes for weights.
@@ -261,7 +261,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         // Epilogue
 
         .p2align 3
-29:
+3:
         VMOVL.S8 q0, d0
         VMOVL.S8 q4, d8
         VMOVL.S8 q1, d2
@@ -356,9 +356,9 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q15, d11, d7[3]
 
         # Is there a remainder?- 1-7 bytes of A
-        BNE     41f
+        BNE     6f
 
-3:
+4:
         # ks loop
         SUBS    r14, r14, 16            // ks -= MR * sizeof(void*)
         BHI     1b
@@ -431,7 +431,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
-        BLO     5f
+        BLO     7f
         VST1.8  {d3}, [r6], r7
         VST1.8  {d2}, [r8], r7
         VST1.8  {d1}, [r4], r7
@@ -440,14 +440,14 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         BHI     0b
 
         VPOP    {d8-d13}
-        ADD     sp, sp, 20        // skip pad of 8, r1, r2, r3
+        ADD     sp, sp, 20              // skip pad of 8, r1, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
         # Remainder- 1 to 7 bytes of A
         .p2align 3
-4:
+5:
         AND     r5, r5, 7               // kc remainder 1 to 7
-41:
+6:
         VLD1.8  {d0},  [r3]
         VLD1.8  {d8},  [r9]!
         VLD1.8  {d2}, [r12]
@@ -468,7 +468,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q14, d8, d6[0]
         VMLAL.S16 q15, d9, d6[0]
         CMP     r5, 2
-        BLO     3b
+        BLO     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -480,7 +480,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q13, d9, d4[1]
         VMLAL.S16 q14, d8, d6[1]
         VMLAL.S16 q15, d9, d6[1]
-        BEQ     3b
+        BEQ     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -493,7 +493,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q14, d8, d6[2]
         VMLAL.S16 q15, d9, d6[2]
         CMP     r5, 4
-        BLO     3b
+        BLO     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -505,7 +505,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q13, d9, d4[3]
         VMLAL.S16 q14, d8, d6[3]
         VMLAL.S16 q15, d9, d6[3]
-        BEQ     3b
+        BEQ     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -518,7 +518,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q14, d8, d7[0]
         VMLAL.S16 q15, d9, d7[0]
         CMP     r5, 6
-        BLO     3b
+        BLO     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -530,7 +530,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q13, d9, d5[1]
         VMLAL.S16 q14, d8, d7[1]
         VMLAL.S16 q15, d9, d7[1]
-        BEQ     3b
+        BEQ     4b
 
         VLD1.8  {d8},  [r9]!
         VMOVL.S8 q4, d8
@@ -542,22 +542,22 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
         VMLAL.S16 q15, d9, d7[2]
-        B       3b
+        B       4b
 
         # Store odd width
         .p2align 3
-5:
+7:
         TST     r1, 4
-        BEQ     6f
+        BEQ     8f
         VST1.32 {d3[0]}, [r6]!
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d0[0]}, [r11]!
         VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
-6:
+8:
         TST     r1, 2
-        BEQ     7f
+        BEQ     9f
         VST1.16 {d3[0]}, [r6]!
         VST1.16 {d2[0]}, [r8]!
         VST1.16 {d1[0]}, [r4]!
@@ -565,17 +565,17 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_c
         VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
 
-7:
+9:
         TST     r1, 1
-        BEQ     8f
+        BEQ     10f
         VST1.8  {d3[0]}, [r6]
         VST1.8  {d2[0]}, [r8]
         VST1.8  {d1[0]}, [r4]
         VST1.8  {d0[0]}, [r11]
 
-8:
+10:
         VPOP    {d8-d13}
-        ADD     sp, sp, 20        // skip pad of 8, r1, r2, r3
+        ADD     sp, sp, 20              // skip pad of 8, r1, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a53

@@ -26,7 +26,7 @@
 //     const int8_t* zero,                  sp + 112 -> (r7)
 //     xnn_qs8_conv_minmax_params*params); sp + 116 -> (r5)
 
-// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
+// d10-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
 // A0   r3  d0-d1 q0
@@ -34,7 +34,7 @@
 // A2  r10  d4-d5 q2
 // A3   r0  d6-d7 q3
 
-// B    r9  d8-d9 q4
+// B    r9  d10-d11 q5
 
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
@@ -45,12 +45,12 @@
 
 // params structure is 16 bytes
 //  struct {
-//    int32_t right_pre_shift;    d10[0]
-//    int32_t multiplier;         d10[1]
-//    int32_t right_post_shift;   d11[0]
-//    int16_t output_zero_point;  d11[2]
-//    int8_t output_min;          d11[6]
-//    int8_t output_max;          d11[7]
+//    int32_t right_pre_shift;    d12[0]
+//    int32_t multiplier;         d12[1]
+//    int32_t right_post_shift;   d13[0]
+//    int16_t output_zero_point;  d13[2]
+//    int8_t output_min;          d13[6]
+//    int8_t output_max;          d13[7]
 //  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64
@@ -58,7 +58,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
         SUB     sp, sp, 12                          // +12
-        VPUSH   {d8-d11}                            // +32 = 88
+        VPUSH   {d10-d13}                           // +32 = 88
 
         LDR     r11, [sp, 96]           // c
         LDR     r6, [sp, 100]           // cm_stride
@@ -79,7 +79,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        VLDM    r5, {d10-d11}           // RNDNU params
+        VLDM    r5, {d12-d13}           // RNDNU params
 
 
         .p2align 3
@@ -128,101 +128,101 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         .p2align 3
 2:
         VLD1.8  {d0},  [r3]!            // A0
-        VLD1.8  {d8},  [r9]!            // B
+        VLD1.8  {d10},  [r9]!           // B
         VLD1.8  {d2}, [r12]!            // A1
         VLD1.8  {d4}, [r10]!            // A2
         VLD1.8  {d6},  [r0]!            // A3
         SUBS    r5, r5, 8
         VMOVL.S8 q0, d0
-        VMOVL.S8 q4, d8
+        VMOVL.S8 q5, d10
         VMOVL.S8 q1, d2
         VMOVL.S8 q2, d4
         VMOVL.S8 q3, d6
-        VMLAL.S16 q8, d8, d0[0]
-        VMLAL.S16 q9, d9, d0[0]
-        VMLAL.S16 q10, d8, d2[0]
-        VMLAL.S16 q11, d9, d2[0]
-        VMLAL.S16 q12, d8, d4[0]
-        VMLAL.S16 q13, d9, d4[0]
-        VMLAL.S16 q14, d8, d6[0]
-        VMLAL.S16 q15, d9, d6[0]
+        VMLAL.S16 q8, d10, d0[0]
+        VMLAL.S16 q9, d11, d0[0]
+        VMLAL.S16 q10, d10, d2[0]
+        VMLAL.S16 q11, d11, d2[0]
+        VMLAL.S16 q12, d10, d4[0]
+        VMLAL.S16 q13, d11, d4[0]
+        VMLAL.S16 q14, d10, d6[0]
+        VMLAL.S16 q15, d11, d6[0]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[1]
-        VMLAL.S16 q9, d9, d0[1]
-        VMLAL.S16 q10, d8, d2[1]
-        VMLAL.S16 q11, d9, d2[1]
-        VMLAL.S16 q12, d8, d4[1]
-        VMLAL.S16 q13, d9, d4[1]
-        VMLAL.S16 q14, d8, d6[1]
-        VMLAL.S16 q15, d9, d6[1]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[1]
+        VMLAL.S16 q9, d11, d0[1]
+        VMLAL.S16 q10, d10, d2[1]
+        VMLAL.S16 q11, d11, d2[1]
+        VMLAL.S16 q12, d10, d4[1]
+        VMLAL.S16 q13, d11, d4[1]
+        VMLAL.S16 q14, d10, d6[1]
+        VMLAL.S16 q15, d11, d6[1]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[2]
-        VMLAL.S16 q9, d9, d0[2]
-        VMLAL.S16 q10, d8, d2[2]
-        VMLAL.S16 q11, d9, d2[2]
-        VMLAL.S16 q12, d8, d4[2]
-        VMLAL.S16 q13, d9, d4[2]
-        VMLAL.S16 q14, d8, d6[2]
-        VMLAL.S16 q15, d9, d6[2]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[2]
+        VMLAL.S16 q9, d11, d0[2]
+        VMLAL.S16 q10, d10, d2[2]
+        VMLAL.S16 q11, d11, d2[2]
+        VMLAL.S16 q12, d10, d4[2]
+        VMLAL.S16 q13, d11, d4[2]
+        VMLAL.S16 q14, d10, d6[2]
+        VMLAL.S16 q15, d11, d6[2]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[3]
-        VMLAL.S16 q9, d9, d0[3]
-        VMLAL.S16 q10, d8, d2[3]
-        VMLAL.S16 q11, d9, d2[3]
-        VMLAL.S16 q12, d8, d4[3]
-        VMLAL.S16 q13, d9, d4[3]
-        VMLAL.S16 q14, d8, d6[3]
-        VMLAL.S16 q15, d9, d6[3]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[3]
+        VMLAL.S16 q9, d11, d0[3]
+        VMLAL.S16 q10, d10, d2[3]
+        VMLAL.S16 q11, d11, d2[3]
+        VMLAL.S16 q12, d10, d4[3]
+        VMLAL.S16 q13, d11, d4[3]
+        VMLAL.S16 q14, d10, d6[3]
+        VMLAL.S16 q15, d11, d6[3]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[0]
-        VMLAL.S16 q9, d9, d1[0]
-        VMLAL.S16 q10, d8, d3[0]
-        VMLAL.S16 q11, d9, d3[0]
-        VMLAL.S16 q12, d8, d5[0]
-        VMLAL.S16 q13, d9, d5[0]
-        VMLAL.S16 q14, d8, d7[0]
-        VMLAL.S16 q15, d9, d7[0]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[0]
+        VMLAL.S16 q9, d11, d1[0]
+        VMLAL.S16 q10, d10, d3[0]
+        VMLAL.S16 q11, d11, d3[0]
+        VMLAL.S16 q12, d10, d5[0]
+        VMLAL.S16 q13, d11, d5[0]
+        VMLAL.S16 q14, d10, d7[0]
+        VMLAL.S16 q15, d11, d7[0]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[1]
-        VMLAL.S16 q9, d9, d1[1]
-        VMLAL.S16 q10, d8, d3[1]
-        VMLAL.S16 q11, d9, d3[1]
-        VMLAL.S16 q12, d8, d5[1]
-        VMLAL.S16 q13, d9, d5[1]
-        VMLAL.S16 q14, d8, d7[1]
-        VMLAL.S16 q15, d9, d7[1]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[1]
+        VMLAL.S16 q9, d11, d1[1]
+        VMLAL.S16 q10, d10, d3[1]
+        VMLAL.S16 q11, d11, d3[1]
+        VMLAL.S16 q12, d10, d5[1]
+        VMLAL.S16 q13, d11, d5[1]
+        VMLAL.S16 q14, d10, d7[1]
+        VMLAL.S16 q15, d11, d7[1]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[2]
-        VMLAL.S16 q9, d9, d1[2]
-        VMLAL.S16 q10, d8, d3[2]
-        VMLAL.S16 q11, d9, d3[2]
-        VMLAL.S16 q12, d8, d5[2]
-        VMLAL.S16 q13, d9, d5[2]
-        VMLAL.S16 q14, d8, d7[2]
-        VMLAL.S16 q15, d9, d7[2]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[2]
+        VMLAL.S16 q9, d11, d1[2]
+        VMLAL.S16 q10, d10, d3[2]
+        VMLAL.S16 q11, d11, d3[2]
+        VMLAL.S16 q12, d10, d5[2]
+        VMLAL.S16 q13, d11, d5[2]
+        VMLAL.S16 q14, d10, d7[2]
+        VMLAL.S16 q15, d11, d7[2]
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[3]
-        VMLAL.S16 q9, d9, d1[3]
-        VMLAL.S16 q10, d8, d3[3]
-        VMLAL.S16 q11, d9, d3[3]
-        VMLAL.S16 q12, d8, d5[3]
-        VMLAL.S16 q13, d9, d5[3]
-        VMLAL.S16 q14, d8, d7[3]
-        VMLAL.S16 q15, d9, d7[3]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[3]
+        VMLAL.S16 q9, d11, d1[3]
+        VMLAL.S16 q10, d10, d3[3]
+        VMLAL.S16 q11, d11, d3[3]
+        VMLAL.S16 q12, d10, d5[3]
+        VMLAL.S16 q13, d11, d5[3]
+        VMLAL.S16 q14, d10, d7[3]
+        VMLAL.S16 q15, d11, d7[3]
         BHS     2b
 
         # Is there a remainder?- 1-7 bytes of A
@@ -238,7 +238,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         LDR     r14, [sp, 48]           // p = ks
 
         # RNDNU quantization
-        VDUP.32 q0, d10[0]              // right_pre_shift
+        VDUP.32 q0, d12[0]              // right_pre_shift
 
         VQSHL.S32 q8,  q8, q0
         VQSHL.S32 q9,  q9, q0
@@ -249,16 +249,16 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VQSHL.S32 q14, q14, q0
         VQSHL.S32 q15, q15, q0
 
-        VDUP.32 q2, d11[0]              // right_post_shift
+        VDUP.32 q2, d13[0]              // right_post_shift
 
-        VQDMULH.S32 q8,  q8, d10[1]     // multiplier
-        VQDMULH.S32 q9,  q9, d10[1]
-        VQDMULH.S32 q10, q10, d10[1]
-        VQDMULH.S32 q11, q11, d10[1]
-        VQDMULH.S32 q12, q12, d10[1]
-        VQDMULH.S32 q13, q13, d10[1]
-        VQDMULH.S32 q14, q14, d10[1]
-        VQDMULH.S32 q15, q15, d10[1]
+        VQDMULH.S32 q8,  q8, d12[1]     // multiplier
+        VQDMULH.S32 q9,  q9, d12[1]
+        VQDMULH.S32 q10, q10, d12[1]
+        VQDMULH.S32 q11, q11, d12[1]
+        VQDMULH.S32 q12, q12, d12[1]
+        VQDMULH.S32 q13, q13, d12[1]
+        VQDMULH.S32 q14, q14, d12[1]
+        VQDMULH.S32 q15, q15, d12[1]
 
         VRSHL.S32 q8,  q8, q2
         VRSHL.S32 q9,  q9, q2
@@ -269,7 +269,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VRSHL.S32 q14, q14, q2
         VRSHL.S32 q15, q15, q2
 
-        VDUP.16 q0, d11[2]              // output_zero_point
+        VDUP.16 q0, d13[2]              // output_zero_point
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -285,14 +285,14 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VQADD.S16 q10, q10, q0
         VQADD.S16 q11, q11, q0
 
-        VDUP.8  q12, d11[6]             // output_min
+        VDUP.8  q12, d13[6]             // output_min
 
         VQMOVN.S16 d0,  q8
         VQMOVN.S16 d1,  q9
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d11[7]             // output_min
+        VDUP.8  q13, d13[7]             // output_min
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
@@ -311,7 +311,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         SUB     r2, r2, r14             // a -= ks
         BHI     0b
 
-        VPOP    {d8-d11}
+        VPOP    {d10-d13}
         ADD     sp, sp, 20                          // skip pad of 12, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
@@ -321,99 +321,99 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         AND     r5, r5, 7               // kc remainder 1 to 7
 
         VLD1.8  {d0},  [r3]
-        VLD1.8  {d8},  [r9]!
+        VLD1.8  {d10},  [r9]!
         VLD1.8  {d2}, [r12]
         VLD1.8  {d4}, [r10]
         VLD1.8  {d6},  [r0]
 
         VMOVL.S8 q0, d0
-        VMOVL.S8 q4, d8
+        VMOVL.S8 q5, d10
         VMOVL.S8 q1, d2
         VMOVL.S8 q2, d4
         VMOVL.S8 q3, d6
-        VMLAL.S16 q8, d8, d0[0]
-        VMLAL.S16 q9, d9, d0[0]
-        VMLAL.S16 q10, d8, d2[0]
-        VMLAL.S16 q11, d9, d2[0]
-        VMLAL.S16 q12, d8, d4[0]
-        VMLAL.S16 q13, d9, d4[0]
-        VMLAL.S16 q14, d8, d6[0]
-        VMLAL.S16 q15, d9, d6[0]
+        VMLAL.S16 q8, d10, d0[0]
+        VMLAL.S16 q9, d11, d0[0]
+        VMLAL.S16 q10, d10, d2[0]
+        VMLAL.S16 q11, d11, d2[0]
+        VMLAL.S16 q12, d10, d4[0]
+        VMLAL.S16 q13, d11, d4[0]
+        VMLAL.S16 q14, d10, d6[0]
+        VMLAL.S16 q15, d11, d6[0]
         CMP     r5, 2
         BLO     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[1]
-        VMLAL.S16 q9, d9, d0[1]
-        VMLAL.S16 q10, d8, d2[1]
-        VMLAL.S16 q11, d9, d2[1]
-        VMLAL.S16 q12, d8, d4[1]
-        VMLAL.S16 q13, d9, d4[1]
-        VMLAL.S16 q14, d8, d6[1]
-        VMLAL.S16 q15, d9, d6[1]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[1]
+        VMLAL.S16 q9, d11, d0[1]
+        VMLAL.S16 q10, d10, d2[1]
+        VMLAL.S16 q11, d11, d2[1]
+        VMLAL.S16 q12, d10, d4[1]
+        VMLAL.S16 q13, d11, d4[1]
+        VMLAL.S16 q14, d10, d6[1]
+        VMLAL.S16 q15, d11, d6[1]
         BEQ     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[2]
-        VMLAL.S16 q9, d9, d0[2]
-        VMLAL.S16 q10, d8, d2[2]
-        VMLAL.S16 q11, d9, d2[2]
-        VMLAL.S16 q12, d8, d4[2]
-        VMLAL.S16 q13, d9, d4[2]
-        VMLAL.S16 q14, d8, d6[2]
-        VMLAL.S16 q15, d9, d6[2]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[2]
+        VMLAL.S16 q9, d11, d0[2]
+        VMLAL.S16 q10, d10, d2[2]
+        VMLAL.S16 q11, d11, d2[2]
+        VMLAL.S16 q12, d10, d4[2]
+        VMLAL.S16 q13, d11, d4[2]
+        VMLAL.S16 q14, d10, d6[2]
+        VMLAL.S16 q15, d11, d6[2]
         CMP     r5, 4
         BLO     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d0[3]
-        VMLAL.S16 q9, d9, d0[3]
-        VMLAL.S16 q10, d8, d2[3]
-        VMLAL.S16 q11, d9, d2[3]
-        VMLAL.S16 q12, d8, d4[3]
-        VMLAL.S16 q13, d9, d4[3]
-        VMLAL.S16 q14, d8, d6[3]
-        VMLAL.S16 q15, d9, d6[3]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d0[3]
+        VMLAL.S16 q9, d11, d0[3]
+        VMLAL.S16 q10, d10, d2[3]
+        VMLAL.S16 q11, d11, d2[3]
+        VMLAL.S16 q12, d10, d4[3]
+        VMLAL.S16 q13, d11, d4[3]
+        VMLAL.S16 q14, d10, d6[3]
+        VMLAL.S16 q15, d11, d6[3]
         BEQ     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[0]
-        VMLAL.S16 q9, d9, d1[0]
-        VMLAL.S16 q10, d8, d3[0]
-        VMLAL.S16 q11, d9, d3[0]
-        VMLAL.S16 q12, d8, d5[0]
-        VMLAL.S16 q13, d9, d5[0]
-        VMLAL.S16 q14, d8, d7[0]
-        VMLAL.S16 q15, d9, d7[0]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[0]
+        VMLAL.S16 q9, d11, d1[0]
+        VMLAL.S16 q10, d10, d3[0]
+        VMLAL.S16 q11, d11, d3[0]
+        VMLAL.S16 q12, d10, d5[0]
+        VMLAL.S16 q13, d11, d5[0]
+        VMLAL.S16 q14, d10, d7[0]
+        VMLAL.S16 q15, d11, d7[0]
         CMP     r5, 6
         BLO     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[1]
-        VMLAL.S16 q9, d9, d1[1]
-        VMLAL.S16 q10, d8, d3[1]
-        VMLAL.S16 q11, d9, d3[1]
-        VMLAL.S16 q12, d8, d5[1]
-        VMLAL.S16 q13, d9, d5[1]
-        VMLAL.S16 q14, d8, d7[1]
-        VMLAL.S16 q15, d9, d7[1]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[1]
+        VMLAL.S16 q9, d11, d1[1]
+        VMLAL.S16 q10, d10, d3[1]
+        VMLAL.S16 q11, d11, d3[1]
+        VMLAL.S16 q12, d10, d5[1]
+        VMLAL.S16 q13, d11, d5[1]
+        VMLAL.S16 q14, d10, d7[1]
+        VMLAL.S16 q15, d11, d7[1]
         BEQ     3b
 
-        VLD1.8  {d8},  [r9]!
-        VMOVL.S8 q4, d8
-        VMLAL.S16 q8, d8, d1[2]
-        VMLAL.S16 q9, d9, d1[2]
-        VMLAL.S16 q10, d8, d3[2]
-        VMLAL.S16 q11, d9, d3[2]
-        VMLAL.S16 q12, d8, d5[2]
-        VMLAL.S16 q13, d9, d5[2]
-        VMLAL.S16 q14, d8, d7[2]
-        VMLAL.S16 q15, d9, d7[2]
+        VLD1.8  {d10},  [r9]!
+        VMOVL.S8 q5, d10
+        VMLAL.S16 q8, d10, d1[2]
+        VMLAL.S16 q9, d11, d1[2]
+        VMLAL.S16 q10, d10, d3[2]
+        VMLAL.S16 q11, d11, d3[2]
+        VMLAL.S16 q12, d10, d5[2]
+        VMLAL.S16 q13, d11, d5[2]
+        VMLAL.S16 q14, d10, d7[2]
+        VMLAL.S16 q15, d11, d7[2]
         B       3b
 
         # Store odd width
@@ -446,7 +446,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld
         VST1.8  {d0[0]}, [r11]
 
 8:
-        VPOP    {d8-d11}
+        VPOP    {d10-d13}
         ADD     sp, sp, 20                          // skip pad of 12, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
