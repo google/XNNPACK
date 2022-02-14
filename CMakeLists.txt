@@ -5203,7 +5203,6 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up16x3-minmax-fma3.c
   src/f16-dwconv/gen/up16x4-minmax-fma3.c
   src/f16-dwconv/gen/up16x9-minmax-fma3.c
-  src/f16-ibilinear/gen/fma3-c16.c
   src/f16-ibilinear/gen/fma3-c8.c
   src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c
   src/f32-dwconv/gen/up8x25-minmax-fma3.c
