@@ -13,10 +13,10 @@
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
-#     const uint8_t*restrict a, x3
+#     const void*restrict a,    x3
 #     size_t a_stride,          (x4) - unused
 #     const void*restrict w,    x5
-#     uint8_t*restrict c,       x6
+#     void*restrict c,          x6
 #     size_t cm_stride,         (x7) - unused
 #     size_t cn_stride,         [sp] -> x14
 #     const float*restrict acc,  [sp + 8] -> x15
