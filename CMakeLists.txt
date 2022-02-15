@@ -6646,6 +6646,7 @@ ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE fp16)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fp16)
 TARGET_LINK_LIBRARIES(packing PRIVATE fp16)
+TARGET_LINK_LIBRARIES(indirection PRIVATE fp16)
 
 INSTALL(TARGETS XNNPACK
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -6966,7 +6967,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(resize-bilinear-nchw-test resize-bilinear-nchw-test)
 
   ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
