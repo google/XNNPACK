@@ -318,6 +318,13 @@ enum class BranchType {
   kUnconditional,
 };
 
+// Instruction to use for alignment.
+// kNop should be used for loops, branch targets. kHlt for end of function.
+enum class AlignInstruction {
+  kHlt,
+  kNop,
+};
+
 class Assembler : public AssemblerBase {
  public:
   using AssemblerBase::AssemblerBase;
@@ -334,11 +341,13 @@ class Assembler : public AssemblerBase {
   void cmp(XRegister xn, uint16_t imm12);
   void cmp(XRegister xn, XRegister xm);
   void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
+  void hlt();
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   void ldr(XRegister xt, MemOperand xn);
   void ldr(XRegister xt, MemOperand xn, int32_t imm);
   void mov(XRegister xd, XRegister xn);
+  void nop();
   void prfm(PrefetchOp prfop, MemOperand xn);
   void ret();
   void stp(XRegister xt1, XRegister xt2, MemOperand xn);
@@ -375,6 +384,9 @@ class Assembler : public AssemblerBase {
   void str(SRegister st, MemOperand xn);
   void str(SRegister st, MemOperand xn, int32_t imm);
 
+  // Aligns the buffer to n (must be a power of 2).
+  void align(uint8_t n, AlignInstruction instr);
+  void align(uint8_t n) { align(n, AlignInstruction::kNop); }
   // Binds Label l to the current location in the code buffer.
   void bind(Label& l);
 

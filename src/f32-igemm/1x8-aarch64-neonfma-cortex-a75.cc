@@ -278,6 +278,8 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, 
   str(s16, mem[x6], 4);
   bind(l13);
   ret();
+
+  align(16, AlignInstruction::kHlt);
 }
 } // namespace
 } // namespace aarch64

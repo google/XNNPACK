@@ -249,6 +249,10 @@ void Assembler::csel(XRegister xd, XRegister xn, XRegister xm, Condition c) {
   emit32(0x9A800000 | rm(xm) | c << 12 | rn(xn) | rd(xd));
 }
 
+void Assembler::hlt() {
+  emit32(0xD4400000);
+}
+
 void Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {
   if (!imm7_offset_valid(xn.offset, xt1)) {
     error_ = Error::kInvalidOperand;
@@ -289,6 +293,10 @@ void Assembler::ldr(XRegister xt, MemOperand xn, int32_t imm) {
 
 void Assembler::mov(XRegister xd, XRegister xn) {
   emit32(0xAA0003E0 | rm(xn) | rd(xd));
+}
+
+void Assembler::nop() {
+  emit32(0xD503201F);
 }
 
 void Assembler::prfm(PrefetchOp prfop, MemOperand xn) {
@@ -566,6 +574,29 @@ void Assembler::str(SRegister st, MemOperand xn) {
 
 void Assembler::str(SRegister st, MemOperand xn, int32_t imm) {
   return str(/*size=*/2, /*opc=*/0, xn, imm, st.code);
+}
+
+void Assembler::align(uint8_t n, AlignInstruction instr) {
+  if (!is_po2(n) || (n % kInstructionSizeInBytes != 0)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  uintptr_t cursor = reinterpret_cast<uintptr_t>(cursor_);
+  const uintptr_t target = round_up_po2(cursor, n);
+  while (cursor < target) {
+    switch (instr) {
+      case AlignInstruction::kHlt:
+        hlt();
+        break;
+      case AlignInstruction::kNop:
+        nop();
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+    cursor += kInstructionSizeInBytes;
+  }
 }
 
 void Assembler::bind(Label& l) {

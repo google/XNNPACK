@@ -38,6 +38,8 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 
   CHECK_ENCODING(0x9A8F322E, a.csel(x14, x17, x15, kLO));
 
+  CHECK_ENCODING(0xD4400000, a.hlt());
+
   CHECK_ENCODING(0xA9403FEE, a.ldp(x14, x15, mem[sp]));
   CHECK_ENCODING(0xA8C13FEE, a.ldp(x14, x15, mem[sp], 16));
   CHECK_ENCODING(0xA9413FEE, a.ldp(x14, x15, mem[sp, 16]));
@@ -62,6 +64,8 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[x4], -257));
 
   CHECK_ENCODING(0xAA0303E9, a.mov(x9, x3));
+
+  CHECK_ENCODING(0xD503201F, a.nop());
 
   CHECK_ENCODING(0xF98000A0, a.prfm(kPLDL1KEEP, mem[x5]));
   CHECK_ENCODING(0xF98020A0, a.prfm(kPLDL1KEEP, mem[x5, 64]));
@@ -364,6 +368,49 @@ TEST(AArch64Assembler, UnconditionalBranch) {
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
+
+TEST(AArch64Assembler, Align) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  Assembler a(&b);
+
+  a.add(x0, x1, x2);
+  a.align(4);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x3);
+  EXPECT_EQ(4, a.code_size_in_bytes());
+
+  a.align(8);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x7);
+  EXPECT_EQ(8, a.code_size_in_bytes());
+
+  a.add(x0, x1, x2);
+  a.align(8);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0x7);
+  EXPECT_EQ(16, a.code_size_in_bytes());
+
+  a.add(x0, x1, x2);
+  EXPECT_EQ(20, a.code_size_in_bytes());
+
+  a.align(16);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0xF);
+  EXPECT_EQ(32, a.code_size_in_bytes());
+
+  a.add(x0, x1, x2);
+  a.add(x0, x1, x2);
+  EXPECT_EQ(40, a.code_size_in_bytes());
+
+  a.align(16);
+  EXPECT_EQ(0, reinterpret_cast<uintptr_t>(a.offset<uint32_t*>()) & 0xF);
+  EXPECT_EQ(48, a.code_size_in_bytes());
+
+  // Not power-of-two.
+  EXPECT_ERROR(Error::kInvalidOperand, a.align(6));
+  // Is power-of-two but is not a multiple of instruction size.
+  EXPECT_ERROR(Error::kInvalidOperand, a.align(2));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
 
 }  // namespace aarch64
 }  // namespace xnnpack
