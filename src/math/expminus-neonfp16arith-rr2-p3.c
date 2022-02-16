@@ -41,7 +41,7 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
     // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
     // to an integer, then subtracing the large number back. The first addition is combined with multiplication by
     // log2e into a single FMA instruction. The trick with adding large number is valid only within certain bounds
-    // (|x / log(2)| <= 2**9, i.e. |x| <= 0x1.630p+8 = 355), but that is acceptable, because inputs outside
+    // (|x / log(2)| <= 2**9, i.e. |x| <= 0x1.630p+8 = 355.0), but that is acceptable, because inputs outside
     // of [-9.703125, 0.0] underflow exph(x) anyway. We fixup the result for such inputs at the very end of the
     // algorithm.
     float16x8_t vn = vfmaq_f16(vmagic_bias, vx, vlog2e);
