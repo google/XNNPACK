@@ -3300,7 +3300,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x8.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
-  src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c)
+  src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
+  src/math/exp-neonfp16arith-rr2-p3.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
    src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
@@ -8595,6 +8596,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE XNNPACK benchmark cpuinfo jit)
 
   # ---[ Build accuracy microbenchmarks
+  ADD_EXECUTABLE(f16-exp-ulp-eval eval/f16-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-exp-ulp-eval PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(f16-exp-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f16-exp-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
     CXX_STANDARD 11

@@ -12,6 +12,11 @@
 extern "C" {
 #endif
 
+typedef void (*xnn_f16_unary_math_function)(
+  size_t n,
+  const void* input,
+  void* output);
+
 typedef void (*xnn_f32_unary_math_function)(
   size_t n,
   const float* input,
@@ -22,6 +27,12 @@ typedef void (*xnn_f32_ext_unary_math_function)(
   const float* input,
   float* output_mantissa,
   float* output_exponent);
+
+#define DECLARE_F16_UNARY_MATH_FUNCTION(fn_name) \
+  void fn_name(                                  \
+    size_t n,                                    \
+    const void* input,                           \
+    void* output);
 
 #define DECLARE_F32_UNARY_MATH_FUNCTION(fn_name) \
   void fn_name(                                  \
@@ -139,6 +150,8 @@ DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundz__sse41)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundz__wasmsimd_addsub)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundz__wasmsimd_cvt)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_roundz__wasmsimd_native)
+
+DECLARE_F16_UNARY_MATH_FUNCTION(xnn_math_f16_exp__neonfp16arith_rr2_p3)
 
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx_rr2_p5)
 DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_exp__avx2_rr2_lut8_p3_perm)
