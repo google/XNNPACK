@@ -159,6 +159,29 @@ static void SigmoidError(benchmark::State& state,
     ->Iterations(1);
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(SigmoidError, avx2_rr1_p2_div,
+                    xnn_math_f16_sigmoid__avx2_rr1_p2_div,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(SigmoidError, avx2_rr1_p2_rcp,
+                    xnn_math_f16_sigmoid__avx2_rr1_p2_rcp,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(SigmoidError, avx2_rr1_p3_div,
+                    xnn_math_f16_sigmoid__avx2_rr1_p3_div,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(SigmoidError, avx2_rr1_p3_rcp,
+                    xnn_math_f16_sigmoid__avx2_rr1_p3_rcp,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
