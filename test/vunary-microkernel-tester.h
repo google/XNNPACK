@@ -486,6 +486,49 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_vsigmoid_ukernel_function vsigmoid, xnn_init_f16_sigmoid_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto distribution = std::uniform_real_distribution<float>(-25.0f, 25.0f);
+    auto f32rng = std::bind(distribution, std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), std::ref(f16rng));
+      } else {
+        std::generate(x.begin(), x.end(), std::ref(f16rng));
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float e = std::exp(fp16_ieee_to_fp32_value(x_data[i]));
+        y_ref[i] = e / (1.0f + e);
+      }
+
+      // Prepare parameters.
+      union xnn_f16_sigmoid_params params;
+      init_params(&params);
+
+      // Call optimized micro-kernel.
+      vsigmoid(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(
+            fp16_ieee_to_fp32_value(y[i]),
+            y_ref[i],
+            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
+  }
+
   void Test(xnn_f32_vsigmoid_ukernel_function vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

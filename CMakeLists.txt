@@ -3302,6 +3302,22 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x8.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x16.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x24.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x32.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x40.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x48.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x56.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x64.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x8.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x16.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x24.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x32.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x40.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x48.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x56.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x64.c
   src/math/exp-f16-neonfp16arith-rr2-p3.c
   src/math/expminus-f16-neonfp16arith-rr2-p3.c
   src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c
@@ -7299,6 +7315,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-prelu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f16-prelu-test f16-prelu-test)
 
+  ADD_EXECUTABLE(f16-vsigmoid-test test/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-vsigmoid-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vsigmoid-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f16-vsigmoid-test f16-vsigmoid-test)
+
   ADD_EXECUTABLE(f16-vsub-minmax-test test/f16-vsub-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-vsub-minmax-test PROPERTIES
     CXX_STANDARD 11
@@ -9045,6 +9070,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-vsigmoid-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-vsigmoid-bench PRIVATE benchmark bench-utils fp16 pthreadpool)
 
   ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-f32-vcvt-bench PROPERTIES

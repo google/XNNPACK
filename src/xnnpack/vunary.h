@@ -44,6 +44,32 @@ DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x16)
 
 
+#define DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                           \
+      size_t batch,                                    \
+      const void* input,                               \
+      void* output,                                    \
+      const union xnn_f16_sigmoid_params* params);
+
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x8)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x16)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x24)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x32)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x40)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x48)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x56)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x64)
+
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x16)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x24)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x32)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x40)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x48)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x56)
+DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x64)
+
+
 #define DECLARE_F32_VABS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t n,                                    \

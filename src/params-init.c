@@ -1955,6 +1955,19 @@ void xnn_init_f32_hswish_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_ARM64
+void xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params(
+  union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfp16arith_rr1_p3.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->neonfp16arith_rr1_p3.minus_log2e = UINT16_C(0xBDC5);  // -0x1.714p+0h
+  params->neonfp16arith_rr1_p3.ln2 = UINT16_C(0x398C);  // 0x1.630p-1h
+  params->neonfp16arith_rr1_p3.c3 = UINT16_C(0xB156);  // -0x1.558p-3h
+  params->neonfp16arith_rr1_p3.c2 = UINT16_C(0x3808);  // 0x1.020p-1h
+  params->neonfp16arith_rr1_p3.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
+}
+#endif  // XNN_ARCH_ARM64
+
 void xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {

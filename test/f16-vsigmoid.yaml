@@ -1,0 +1,70 @@
+# Copyright 2022 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x8
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x16
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x24
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x32
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x40
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x48
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x56
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_div_x64
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x16
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x24
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x32
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x40
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x48
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x56
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64
+- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x64
+  init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
+  arch:
+    - aarch64

@@ -25,9 +25,9 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr1_p3_recpe(
   // Coefficient of polynomial approximation
   //   exp(-t) ~ 1 + t * (-1 + t * (c2 + t * c3))
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vone = vmovq_n_f16(1.0f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
   const float16x8_t vc3 = vmovq_n_f16(-0x1.558p-3f);
+  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
+  const float16x8_t vone = vmovq_n_f16(1.0f);
   // The largest z for which sigmoidh(-z) is normalized.
   // This number is also the largest z for which exph(-z) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p+3f);

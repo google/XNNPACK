@@ -4549,6 +4549,22 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c",
     "src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c",
     "src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x8.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x16.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x24.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x32.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x40.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x48.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x56.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-div-x64.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x8.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x16.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x24.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x32.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x40.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x48.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x56.c",
+    "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x64.c",
     "src/math/exp-f16-neonfp16arith-rr2-p3.c",
     "src/math/expminus-f16-neonfp16arith-rr2-p3.c",
     "src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c",
@@ -10011,6 +10027,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_vsigmoid_bench",
+    srcs = [
+        "bench/f16-vsigmoid.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_f32_vcvt_bench",
     srcs = [
         "bench/f16-f32-vcvt.cc",
@@ -11291,6 +11316,15 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f16_vsigmoid_test",
+    srcs = [
+        "test/f16-vsigmoid.cc",
+        "test/vunary-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

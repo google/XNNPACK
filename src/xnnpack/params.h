@@ -587,6 +587,20 @@ union xnn_f32_lrelu_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f16_sigmoid_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM64
+  struct {
+    uint16_t magic_bias;
+    uint16_t minus_log2e;
+    uint16_t ln2;
+    uint16_t c3;
+    uint16_t c2;
+    uint16_t denorm_cutoff;
+  } neonfp16arith_rr1_p3;
+#endif  // XNN_ARCH_ARM64
+};
+
 union xnn_f32_sigmoid_params {
   struct {
     float magic_bias;
@@ -3139,6 +3153,12 @@ typedef void (*xnn_f32_vround_ukernel_function)(
     float* y,
     const union xnn_f32_rnd_params* params);
 
+typedef void (*xnn_f16_vsigmoid_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const union xnn_f16_sigmoid_params* params);
+
 typedef void (*xnn_f32_vsigmoid_ukernel_function)(
     size_t n,
     const float* x,
@@ -3605,6 +3625,9 @@ typedef void (*xnn_init_f32_scaleminmax_params_fn)(
 typedef void (*xnn_update_f32_scaleminmax_params_fn)(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
+
+typedef void (*xnn_init_f16_sigmoid_params_fn)(
+  union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_sigmoid_params_fn)(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
