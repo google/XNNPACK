@@ -1,0 +1,78 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/math-stubs.h>
+
+
+void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
+    size_t n,
+    const void* input,
+    void* output)
+{
+  assert(n % (8 * sizeof(__fp16)) == 0);
+
+  // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
+  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
+  const float16x8_t vlog2e = vmovq_n_f16(0x1.714p+0f);
+  const float16x8_t vminus_ln2_hi = vmovq_n_f16(-0x1.630p-1f);
+  const float16x8_t vminus_ln2_lo = vmovq_n_f16(0x1.BD0p-13f);
+  // Coefficient of polynomial approximation
+  //   exp(t) ~ 1 + t * (1 + t * (c2 + t * c3))
+  // on [-log(2)/2, log(2)/2]
+  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
+  const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
+  // The smallest x for which exph(x) is normalized.
+  const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
+
+  const __fp16* i = (const __fp16*) input;
+  __fp16* o = (__fp16*) output;
+  for (; n != 0; n -= 8 * sizeof(__fp16)) {
+    const float16x8_t vx = vld1q_f16(i); i += 8;
+
+    // Compute reduced argument n := round(x / log(2)).
+    // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
+    // to an integer, then subtracing the large number back. The first addition is combined with multiplication by
+    // log2e into a single FMA instruction. The trick with adding large number is valid only within certain bounds
+    // (|x / log(2)| <= 2**9, i.e. |x| <= 0x1.630p+8 = 355), but that is acceptable, because inputs outside
+    // of [-9.703125, 0.0] underflow exph(x) anyway. We fixup the result for such inputs at the very end of the
+    // algorithm.
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vx, vlog2e);
+
+    // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
+    // -9.703125 <= x <= 0.0, and -14 <= n <= 0 accordingly.
+    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+
+    // Subtract the large number back to get final n := round(x / log(2)) as a floating-point number.
+    vn = vsubq_f16(vn, vmagic_bias);
+
+    // Compute reduced argument t := x - n * log(2).
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
+    vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
+
+    // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2]:
+    //   P(t) = 1 + t * (1 + t * (c2 + t * c3)) = 1 + t * p
+    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
+    vp = vfmaq_f16(vone, vp, vt);
+
+    // Reconstruct the exp(x) value:
+    //   exp(x) = s * (1 + t * (1 + t * (c2 + t * c3)))
+    //          = s + (t * s) * (1 + t * (c2 + t * c3))
+    //          = s + (t * s) * p
+    vt = vmulq_f16(vt, vs);
+    float16x8_t vf = vfmaq_f16(vs, vp, vt);
+
+    // For inputs below denormal cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    vf = vreinterpretq_f16_u32(vbicq_u16(vreinterpretq_u16_f16(vf), vcltq_f16(vx, vdenorm_cutoff)));
+    vst1q_f16(o, vf); o += 8;
+  }
+}

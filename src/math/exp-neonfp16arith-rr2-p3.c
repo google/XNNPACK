@@ -19,7 +19,7 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
 {
   assert(n % (8 * sizeof(__fp16)) == 0);
 
-  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.800000p+10f);
+  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.800p+10f);
   // The smallest x for which exph(x) is non-zero.
   const float16x8_t vzero_cutoff = vmovq_n_f16(-0x1.154p+4f);
   // The largest x for which exph(x) is finite.
