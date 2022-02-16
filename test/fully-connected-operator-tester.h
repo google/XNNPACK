@@ -231,7 +231,6 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          NULL,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -354,7 +353,6 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          NULL,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -466,7 +464,6 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          NULL,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -603,7 +600,6 @@ class FullyConnectedOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          NULL,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();

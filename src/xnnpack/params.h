@@ -3646,18 +3646,12 @@ typedef enum xnn_status (*xnn_jit_igemm_code_generator_function)(
 
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -3677,18 +3671,12 @@ static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) 
 
 struct xnn_hmp_igemm_ukernel {
   xnn_igemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function function) {
   struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }

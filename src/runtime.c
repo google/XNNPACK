@@ -11,7 +11,6 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/codecache.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/memory-planner.h>
@@ -77,11 +76,6 @@ enum xnn_status xnn_create_runtime_v2(
     }
   }
 
-  status = xnn_init_code_cache(&runtime->code_cache);
-  if (status != xnn_status_success) {
-    goto error;
-  }
-
   struct xnn_value* values = subgraph->values;
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
@@ -89,15 +83,13 @@ enum xnn_status xnn_create_runtime_v2(
     // Ignore fused nodes
     if (node->type != xnn_node_type_invalid) {
       assert(node->create != NULL);
-      status = node->create(node, values, subgraph->num_values, runtime->opdata + i, &runtime->code_cache);
+      status = node->create(node, values, subgraph->num_values, runtime->opdata + i);
       if (status != xnn_status_success) {
         goto error;
       }
       runtime->opdata[i].setup = node->setup;
     }
   }
-
-  xnn_finalize_code_memory(&runtime->code_cache.code_buffer);
 
   runtime->blobs = xnn_allocate_zero_memory(sizeof(struct xnn_blob) * subgraph->num_values);
   if (runtime->blobs == NULL) {
@@ -240,7 +232,6 @@ enum xnn_status xnn_delete_runtime(
       xnn_release_memory(runtime->blobs);
       xnn_release_simd_memory(runtime->workspace);
     }
-    xnn_release_code_cache(&runtime->code_cache);
     xnn_release_memory(runtime);
   }
   return xnn_status_success;

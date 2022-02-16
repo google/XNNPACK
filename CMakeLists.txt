@@ -261,7 +261,6 @@ SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
   src/jit/aarch64-assembler.cc
   src/jit/assembler.cc
-  src/jit/cache.c
   src/jit/memory.c)
 
 SET(JIT_AARCH32_SRCS

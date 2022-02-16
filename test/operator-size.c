@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         0, 0, 0, 0, 0,
         NULL, NULL,
         0.0f, 0.0f,
-        0, NULL, &op);
+        0, &op);
       break;
     case 10:
       xnn_setup_convolution2d_nhwc_f32(
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
         0, 0, 0, 0, 0,
         NULL, NULL,
         0.0f, 0.0f,
-        0, NULL, &op);
+        0, &op);
       break;
     case 12:
       xnn_setup_deconvolution2d_nhwc_f32(
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         0, 0, 0, 0,
         NULL, NULL,
         0.0f, 0.0f,
-        0, NULL, &op);
+        0, &op);
       break;
     case 16:
       xnn_setup_fully_connected_nc_f32(

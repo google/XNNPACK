@@ -108,8 +108,6 @@ struct xnn_code_buffer {
 enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size);
 // Finalize buffer, users won't need to call this directly, called by Assembler.
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf);
-// Grows the code memory owned by buf.
-enum xnn_status xnn_grow_code_memory(struct xnn_code_buffer* buf);
 // Free all memory associated with `buf`.
 enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf);
 

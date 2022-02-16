@@ -155,6 +155,10 @@ struct xnn_ukernel_dwconv2d {
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel general_case;
   struct xnn_hmp_gemm_ukernel mr1_case;
+#if XNN_PLATFORM_JIT
+  struct xnn_code_buffer general_code_buffer;
+  struct xnn_code_buffer mr1_code_buffer;
+#endif  // XNN_PLATFORM_JIT
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -165,6 +169,10 @@ struct xnn_ukernel_igemm {
   struct xnn_hmp_igemm_ukernel general_case;
   struct xnn_hmp_igemm_ukernel mr1_case;
   struct xnn_hmp_gemm_ukernel gemm_case;
+#if XNN_PLATFORM_JIT
+  struct xnn_code_buffer general_code_buffer;
+  struct xnn_code_buffer mr1_code_buffer;
+#endif  // XNN_PLATFORM_JIT
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -393,6 +401,5 @@ struct xnn_operator {
     struct vmulcaddc_context vmulcaddc;
   } context;
 
-  struct xnn_code_cache* cache;
   enum xnn_run_state state;
 };

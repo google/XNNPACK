@@ -23,10 +23,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 
-#define XNN_CODE_BUFFER_GROWTH_FACTOR 2
-
 enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size) {
-  memset(buf, 0, sizeof(struct xnn_code_buffer));
 #if XNN_PLATFORM_WINDOWS
   void* p = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (p == NULL) {
@@ -135,26 +132,5 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
   buf->code = NULL;
   buf->size = 0;
   buf->capacity = 0;
-  return xnn_status_success;
-}
-
-enum xnn_status xnn_grow_code_memory(struct xnn_code_buffer* buf) {
-  // TODO(zhin): use mremap
-  size_t size = buf->size;
-  struct xnn_code_buffer new_code_buffer;
-  enum xnn_status status = xnn_allocate_code_memory(&new_code_buffer, size * XNN_CODE_BUFFER_GROWTH_FACTOR);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  memcpy(new_code_buffer.code, buf->code, size);
-  new_code_buffer.size = size;
-
-  // Release old code_buffer.
-  status = xnn_release_code_memory(buf);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  // Copy over all the new code_buffer information.
-  memcpy(buf, &new_code_buffer, sizeof(struct xnn_code_buffer));
   return xnn_status_success;
 }
