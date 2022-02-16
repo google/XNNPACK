@@ -160,6 +160,15 @@ static void IGEMMBenchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+  static void f16_igemm_4x16__aarch64_neonfp16arith_ld32(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32, 4, 16, 1, 1,
+      xnn_init_f16_scaleminmax_neon_params, benchmark::utils::CheckNEONFP16ARITH);
+  }
+
+  BENCHMARK_CONV(f16_igemm_4x16__aarch64_neonfp16arith_ld32)
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+
 #if XNN_ARCH_ARM64
   static void f16_igemm_1x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64, 1, 8, 1, 1,
