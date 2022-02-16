@@ -299,6 +299,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
+    xnn_code_cache_t code_cache,
     xnn_operator_t* deconvolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -394,6 +395,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
+    xnn_code_cache_t code_cache,
     xnn_operator_t* deconvolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -484,6 +486,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
+    xnn_code_cache_t code_cache,
     xnn_operator_t* deconvolution_op_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
@@ -577,6 +580,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
+    xnn_code_cache_t code_cache,
     xnn_operator_t* deconvolution_op_out)
 {
   if (isnan(output_min)) {

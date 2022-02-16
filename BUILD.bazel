@@ -47,6 +47,7 @@ MICROKERNEL_TEST_DEPS = [
 
 OPERATOR_TEST_DEPS = [
     ":XNNPACK_test_mode",
+    ":jit_test_mode",
     "@pthreadpool",
     "@FP16",
 ]
@@ -7643,6 +7644,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/allocator.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
+    "src/xnnpack/codecache.h",
     "src/xnnpack/common.h",
     "src/xnnpack/conv.h",
     "src/xnnpack/depthtospace.h",
@@ -9459,7 +9461,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":indirection",
-        ":jit_memory",
+        ":jit",
         ":logging_utils",
         ":operator_run",
         ":packing",
@@ -9493,7 +9495,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":indirection_test_mode",
-        ":jit_memory_test_mode",
+        ":jit_test_mode",
         ":logging_utils",
         ":operator_run_test_mode",
         ":packing_test_mode",
@@ -9505,39 +9507,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "jit_memory",
-    srcs = [
-        "src/jit/memory.c",
-    ],
-    hdrs = INTERNAL_HDRS,
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":logging_utils",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "jit_memory_test_mode",
-    srcs = [
-        "src/jit/memory.c",
-    ],
-    hdrs = INTERNAL_HDRS,
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":logging_utils",
-    ],
-)
-
-xnnpack_cc_library(
     name = "jit",
     srcs = [
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
+        "src/jit/cache.c",
+        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -9548,7 +9524,6 @@ xnnpack_cc_library(
     aarch64_srcs = JIT_AARCH64_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":jit_memory",
         ":logging_utils",
     ],
 )
@@ -9559,6 +9534,8 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
+        "src/jit/cache.c",
+        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -9573,7 +9550,6 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":jit_memory_test_mode",
         ":logging_utils",
     ],
 )
@@ -10493,221 +10469,221 @@ xnnpack_benchmark(
 
 ############################# End-to-end benchmarks ############################
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_mobilenet_v1",
     srcs = ["models/fp32-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v1",
     srcs = ["models/fp32-sparse-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp16_mobilenet_v1",
     srcs = ["models/fp16-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qc8_mobilenet_v1",
     srcs = ["models/qc8-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qc8_mobilenet_v2",
     srcs = ["models/qc8-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qs8_mobilenet_v1",
     srcs = ["models/qs8-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qs8_mobilenet_v2",
     srcs = ["models/qs8-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qu8_mobilenet_v1",
     srcs = ["models/qu8-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "qu8_mobilenet_v2",
     srcs = ["models/qu8-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_mobilenet_v2",
     srcs = ["models/fp32-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v2",
     srcs = ["models/fp32-sparse-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp16_mobilenet_v2",
     srcs = ["models/fp16-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_mobilenet_v3_large",
     srcs = ["models/fp32-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v3_large",
     srcs = ["models/fp32-sparse-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp16_mobilenet_v3_large",
     srcs = ["models/fp16-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_mobilenet_v3_small",
     srcs = ["models/fp32-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v3_small",
     srcs = ["models/fp32-sparse-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@pthreadpool",
     ],
 )
 
-cc_library(
+xnnpack_cc_library(
     name = "fp16_mobilenet_v3_small",
     srcs = ["models/fp16-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
-    linkstatic = True,
     deps = [
         ":XNNPACK",
+        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
@@ -10814,6 +10790,7 @@ xnnpack_benchmark(
         ":fp32_sparse_mobilenet_v2",
         ":fp32_sparse_mobilenet_v3_large",
         ":fp32_sparse_mobilenet_v3_small",
+        ":jit",
         ":qc8_mobilenet_v1",
         ":qc8_mobilenet_v2",
         ":qs8_mobilenet_v1",
@@ -13090,6 +13067,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = [
+        "src/xnnpack/allocator.h",
+        "src/xnnpack/codecache.h",
+        "src/xnnpack/common.h",
+        "src/xnnpack/params.h",
         "src/xnnpack/subgraph.h",
         "test/subgraph-nchw.cc",
         "test/subgraph-tester.h",

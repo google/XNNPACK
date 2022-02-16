@@ -17,7 +17,8 @@ static enum xnn_status create_fully_connected_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
-  struct xnn_operator_data* opdata)
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache)
 {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
@@ -69,6 +70,7 @@ static enum xnn_status create_fully_connected_operator(
         node->activation.output_min,
         node->activation.output_max,
         node->flags /* flags */,
+        code_cache,
         &opdata->operator_object);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
@@ -93,6 +95,7 @@ static enum xnn_status create_fully_connected_operator(
         (int8_t) output_zero_point,
         output_scale, output_min, output_max,
         node->flags /* flags */,
+        code_cache,
         &opdata->operator_object);
       break;
     }
@@ -120,6 +123,7 @@ static enum xnn_status create_fully_connected_operator(
         (uint8_t) output_zero_point,
         output_scale, output_min, output_max,
         node->flags /* flags */,
+        code_cache,
         &opdata->operator_object);
       break;
     }

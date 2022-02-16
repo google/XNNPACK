@@ -17,7 +17,8 @@ static enum xnn_status create_max_pooling_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
-  struct xnn_operator_data* opdata)
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache)
 {
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
