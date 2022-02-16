@@ -72,7 +72,7 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
 
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = vreinterpretq_f16_u32(vbicq_u16(vreinterpretq_u16_f16(vf), vcltq_f16(vx, vdenorm_cutoff)));
+    vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcltq_f16(vx, vdenorm_cutoff)));
     vst1q_f16(o, vf); o += 8;
   }
 }
