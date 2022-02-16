@@ -142,8 +142,18 @@ static void SigmoidError(benchmark::State& state,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(SigmoidError, neonfp16arith_rr1_p3_recpe,
+                    xnn_math_f16_sigmoid__neonfp16arith_rr1_p3_recpe,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(SigmoidError, neonfp16arith_rr2_p3_div,
                     xnn_math_f16_sigmoid__neonfp16arith_rr2_p3_div,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(SigmoidError, neonfp16arith_rr2_p3_recpe,
+                    xnn_math_f16_sigmoid__neonfp16arith_rr2_p3_recpe,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);

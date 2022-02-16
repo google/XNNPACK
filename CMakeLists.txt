@@ -3304,7 +3304,9 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/exp-neonfp16arith-rr2-p3.c
   src/math/expminus-neonfp16arith-rr2-p3.c
   src/math/sigmoid-neonfp16arith-rr1-p3-div.c
-  src/math/sigmoid-neonfp16arith-rr2-p3-div.c)
+  src/math/sigmoid-neonfp16arith-rr1-p3-recpe.c
+  src/math/sigmoid-neonfp16arith-rr2-p3-div.c
+  src/math/sigmoid-neonfp16arith-rr2-p3-recpe.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
    src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
