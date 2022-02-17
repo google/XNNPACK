@@ -599,6 +599,18 @@ union xnn_f16_sigmoid_params {
     uint16_t denorm_cutoff;
   } neonfp16arith_rr1_p3;
 #endif  // XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float sign_mask[8];
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float c1[8];
+    XNN_ALIGN(32) float one[8];
+    XNN_ALIGN(32) float denorm_cutoff[8];
+  } avx2_rr1_p2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_sigmoid_params {

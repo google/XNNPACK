@@ -68,3 +68,37 @@
   init: xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params
   arch:
     - aarch64
+
+# x86 AVX2
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x8
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x16
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x24
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x32
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x40
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x48
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x56
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x64
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x8
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x16
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x24
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x40
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x48
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x56
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params
+- name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x64
+  init: xnn_init_f16_sigmoid_avx2_rr1_p2_params

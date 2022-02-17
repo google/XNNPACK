@@ -1968,6 +1968,23 @@ void xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params(
 }
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_sigmoid_avx2_rr1_p2_params(
+  union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2_rr1_p2.sign_mask[i] = -0.0f;
+    params->avx2_rr1_p2.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx2_rr1_p2.log2e[i] = 0x1.715476p0f;
+    params->avx2_rr1_p2.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_p2.c2[i] = 0x1.FF3A32p-2f;
+    params->avx2_rr1_p2.c1[i] = 0x1.039E10p+0f;
+    params->avx2_rr1_p2.one[i] = 1.0f;
+    params->avx2_rr1_p2.denorm_cutoff[i] = -0x1.368000p+3f;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_init_f32_sigmoid_scalar_rr2_lut64_p2_params(
   union xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {

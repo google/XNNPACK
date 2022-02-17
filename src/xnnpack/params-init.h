@@ -401,6 +401,10 @@ DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_scalar_params)
   DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params)
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(xnn_init_f16_sigmoid_avx2_rr1_p2_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 
 #define DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL void fn_name(                                   \

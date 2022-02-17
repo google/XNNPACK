@@ -161,6 +161,106 @@ static void f16_vsigmoid(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x8,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x8,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x16,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x16,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x24,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x24,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x32,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x32,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x40,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x40,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x48,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x48,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x56,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x56,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x64,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x64,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x8,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x8,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x16,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x16,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x24,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x24,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x32,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x40,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x40,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x48,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x48,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x56,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x56,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_rcp_x64,
+                    xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x64,
+                    xnn_init_f16_sigmoid_avx2_rr1_p2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

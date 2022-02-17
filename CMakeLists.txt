@@ -5397,6 +5397,22 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c
   src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x8.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x16.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x24.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x32.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x40.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x48.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x56.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x64.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x8.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x16.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x24.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x32.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x40.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x48.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x56.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x64.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x16.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x32.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x48.c
