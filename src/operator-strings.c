@@ -96,6 +96,10 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Deconvolution (NHWC, QU8)";
     case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
       return "Depth To Space (NCHW2NHWC, X32)";
+    case xnn_operator_type_depth_to_space_nhwc_x8:
+      return "Depth To Space (NHWC, X8)";
+    case xnn_operator_type_depth_to_space_nhwc_x16:
+      return "Depth To Space (NHWC, X16)";
     case xnn_operator_type_depth_to_space_nhwc_x32:
       return "Depth To Space (NHWC, X32)";
     case xnn_operator_type_divide_nd_f32:

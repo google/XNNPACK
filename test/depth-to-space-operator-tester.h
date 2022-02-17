@@ -130,10 +130,144 @@ class DepthToSpaceOperatorTester {
     return this->iterations_;
   }
 
+  void TestNHWCxX8() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i8rng = std::bind(
+      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+      std::ref(rng));
+
+    std::vector<int8_t> input(
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+    std::vector<int8_t> output(
+      (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::fill(output.begin(), output.end(), INT8_C(0xAF));
+
+      // Create, setup, run, and destroy Depth To Space operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t depth_to_space_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_create_depth_to_space_nhwc_x8(
+                    output_channels(), input_channels_stride(), output_channels_stride(),
+                    block_size(), 0, &depth_to_space_op));
+      ASSERT_NE(nullptr, depth_to_space_op);
+
+      // Smart pointer to automatically delete depth_to_space_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_depth_to_space_op(depth_to_space_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_depth_to_space_nhwc_x8(
+                    depth_to_space_op,
+                    batch_size(), input_height(), input_width(),
+                    input.data(), output.data(), nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t iy = 0; iy < input_height(); iy++) {
+          for (size_t by = 0; by < block_size(); by++) {
+            for (size_t ix = 0; ix < input_width(); ix++) {
+              for (size_t bx = 0; bx < block_size(); bx++) {
+                for (size_t oc = 0; oc < output_channels(); oc++) {
+                  const size_t input_index =
+                    ((i * input_height() + iy) * input_width() + ix) * input_channels_stride() +
+                      (by * block_size() + bx) * output_channels() + oc;
+                  const size_t output_index =
+                    ((i * output_height() + iy * block_size() + by) * output_width() + ix * block_size() + bx) *
+                      output_channels_stride() + oc;
+                  ASSERT_EQ(int32_t(output[output_index]), int32_t(input[input_index]))
+                    << "batch: " << i << " / " << batch_size()
+                    << ", input x: " << ix << " / " << input_width()
+                    << ", input y: " << iy << " / " << input_height()
+                    << ", block x: " << bx << " / " << block_size()
+                    << ", block y: " << by << " / " << block_size()
+                    << ", output channel: " << oc << " / " << output_channels()
+                    << ", input stride: " << input_channels_stride()
+                    << ", output stride: " << output_channels_stride();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void TestNHWCxX16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
+
+    std::vector<int16_t> input(
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+    std::vector<int16_t> output(
+      (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(i16rng));
+      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
+
+      // Create, setup, run, and destroy Depth To Space operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t depth_to_space_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_create_depth_to_space_nhwc_x16(
+                    output_channels(), input_channels_stride(), output_channels_stride(),
+                    block_size(), 0, &depth_to_space_op));
+      ASSERT_NE(nullptr, depth_to_space_op);
+
+      // Smart pointer to automatically delete depth_to_space_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_depth_to_space_op(depth_to_space_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_depth_to_space_nhwc_x16(
+                    depth_to_space_op,
+                    batch_size(), input_height(), input_width(),
+                    input.data(), output.data(), nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(depth_to_space_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t iy = 0; iy < input_height(); iy++) {
+          for (size_t by = 0; by < block_size(); by++) {
+            for (size_t ix = 0; ix < input_width(); ix++) {
+              for (size_t bx = 0; bx < block_size(); bx++) {
+                for (size_t oc = 0; oc < output_channels(); oc++) {
+                  const size_t input_index =
+                    ((i * input_height() + iy) * input_width() + ix) * input_channels_stride() +
+                      (by * block_size() + bx) * output_channels() + oc;
+                  const size_t output_index =
+                    ((i * output_height() + iy * block_size() + by) * output_width() + ix * block_size() + bx) *
+                      output_channels_stride() + oc;
+                  ASSERT_EQ(output[output_index], input[input_index])
+                    << "batch: " << i << " / " << batch_size()
+                    << ", input x: " << ix << " / " << input_width()
+                    << ", input y: " << iy << " / " << input_height()
+                    << ", block x: " << bx << " / " << block_size()
+                    << ", block y: " << by << " / " << block_size()
+                    << ", output channel: " << oc << " / " << output_channels()
+                    << ", input stride: " << input_channels_stride()
+                    << ", output stride: " << output_channels_stride();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestNHWCxX32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     std::vector<int32_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
@@ -199,7 +333,7 @@ class DepthToSpaceOperatorTester {
   void TestNCHW2NHWCxX32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), rng);
+    auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
       ((batch_size() - 1) * input_channels_stride() + input_channels()) * input_height() * input_width());
