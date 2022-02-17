@@ -12,6 +12,8 @@
 #include <limits>
 #include <random>
 
+#include <xnnpack/codecache.h>
+
 #include "models/models.h"
 
 namespace models {
@@ -436,6 +438,8 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
 
   ExecutionPlan operators;
   xnn_status status;
+  xnn_code_cache code_cache;
+  xnn_init_code_cache(&code_cache);
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f32(
@@ -1718,6 +1722,7 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     w169.data(), w170.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
+    &code_cache,
     &op63);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #63" << std::endl;
@@ -1725,7 +1730,7 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
   }
   operators.emplace_back(op63, xnn_delete_operator);
 
-
+  xnn_finalize_code_memory(&code_cache.code_buffer);
 
   status = xnn_setup_convolution2d_nchw_f32(
     op0,

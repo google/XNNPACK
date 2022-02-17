@@ -540,7 +540,7 @@ class DeconvolutionOperatorTester {
               1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
               output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-              /*flags=*/0, &deconvolution_op));
+              /*flags=*/0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -681,7 +681,7 @@ class DeconvolutionOperatorTester {
               1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
               output_scale, qmin(), qmax(),
-              /*flags=*/0, &deconvolution_op));
+              /*flags=*/0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -843,7 +843,7 @@ class DeconvolutionOperatorTester {
         input_pixel_stride(), output_pixel_stride(),
         kernel_data, has_bias() ? bias_data : nullptr,
         output_min, output_max,
-        flags, &deconvolution_op);
+        flags, NULL, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -980,7 +980,7 @@ class DeconvolutionOperatorTester {
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, &deconvolution_op));
+              /*flags=*/0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -1129,7 +1129,7 @@ class DeconvolutionOperatorTester {
           1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          0, &deconvolution_op));
+          0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -1361,7 +1361,7 @@ class DeconvolutionOperatorTester {
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
-          0, &deconvolution_op));
+          0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -1593,7 +1593,7 @@ class DeconvolutionOperatorTester {
         input_pixel_stride(), output_pixel_stride(),
         kernel.data(), has_bias() ? bias.data() : nullptr,
         output_min, output_max,
-        0, &deconvolution_op);
+        0, NULL, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1817,7 +1817,7 @@ class DeconvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
-          0, &deconvolution_op));
+          0, NULL, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);

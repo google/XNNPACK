@@ -18,7 +18,8 @@ static enum xnn_status create_divide_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
-  struct xnn_operator_data* opdata)
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache)
 {
   assert(node->compute_type == xnn_compute_type_fp32);
 

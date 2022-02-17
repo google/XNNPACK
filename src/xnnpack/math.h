@@ -15,6 +15,7 @@
 
 #ifdef _MSC_VER
   #include <intrin.h>
+  #include <stdlib.h> // For _rotl.
 #endif
 
 #include <xnnpack/common.h>
@@ -182,5 +183,14 @@ inline static uint32_t math_ctz_u32(uint32_t x) {
     return (uint32_t) index;
   #else
     return __builtin_ctz(x);
+  #endif
+}
+
+inline static uint32_t math_rotl_u32(uint32_t x, int8_t r)
+{
+  #if XNN_COMPILER_MSVC
+    return _rotl((unsigned int) x, (int) r);
+  #else
+    return (x << r) | (x >> (32 - r));
   #endif
 }

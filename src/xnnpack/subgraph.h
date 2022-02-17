@@ -9,6 +9,8 @@
 #include <stdint.h>
 
 #include <xnnpack.h>
+#include <xnnpack/common.h>
+#include <xnnpack/codecache.h>
 
 #define XNN_MAX_INPUTS 3
 #define XNN_MAX_OUTPUTS 2
@@ -108,7 +110,8 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
-  struct xnn_operator_data* opdata);
+  struct xnn_operator_data* opdata,
+  struct xnn_code_cache* code_cache);
 
 typedef enum xnn_status (*xnn_setup_operator_fn)(
   const struct xnn_operator_data* opdata,
@@ -326,6 +329,10 @@ struct xnn_runtime {
   size_t num_blobs;
 
   void* workspace;
+
+#ifdef XNN_PLATFORM_JIT
+  struct xnn_code_cache code_cache;
+#endif // XNN_PLATFORM_JIT
 
   pthreadpool_t threadpool;
 };
