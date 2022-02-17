@@ -246,6 +246,7 @@ enum xnn_status xnn_define_clamp(
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
+  assert(compute_type != xnn_compute_type_invalid);
 
   if (input_value->datatype != output_value->datatype) {
     xnn_log_error(
