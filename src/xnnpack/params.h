@@ -3824,6 +3824,7 @@ struct vunary_parameters {
     xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f16_lrelu_params_fn f16_lrelu;
     xnn_init_f16_minmax_params_fn f16_minmax;
+    xnn_init_f16_sigmoid_params_fn f16_sigmoid;
     xnn_init_f32_abs_params_fn f32_abs;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_elu_params_fn f32_elu;
@@ -4174,6 +4175,7 @@ struct xnn_parameters {
     struct vunary_parameters clamp;
     struct vunary_parameters hswish;
     struct vunary_parameters lrelu;
+    struct vunary_parameters sigmoid;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;

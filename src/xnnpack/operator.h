@@ -109,6 +109,7 @@ enum xnn_operator_type {
   xnn_operator_type_resize_bilinear_nhwc_f32,
   xnn_operator_type_resize_bilinear_nhwc_s8,
   xnn_operator_type_resize_bilinear_nhwc_u8,
+  xnn_operator_type_sigmoid_nc_f16,
   xnn_operator_type_sigmoid_nc_f32,
   xnn_operator_type_sigmoid_nc_qs8,
   xnn_operator_type_sigmoid_nc_qu8,
@@ -304,6 +305,7 @@ struct xnn_operator {
     union xnn_f16_f32_cvt_params f16_f32_cvt;
     union xnn_f16_hswish_params f16_hswish;
     union xnn_f16_lrelu_params f16_lrelu;
+    union xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;

@@ -107,12 +107,14 @@ class HardSwishOperatorTester {
       // Create, setup, run, and destroy HardSwish operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t hardswish_op = nullptr;
-      xnn_status status = xnn_create_hardswish_nc_f16(
+
+      const xnn_status status = xnn_create_hardswish_nc_f16(
           channels(), input_stride(), output_stride(),
           0, &hardswish_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
+      ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, hardswish_op);
 
       // Smart pointer to automatically delete hardswish_op.

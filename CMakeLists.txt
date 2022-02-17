@@ -3194,7 +3194,8 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
-  src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c)
+  src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x32.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c
@@ -5348,6 +5349,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-gemm/gen/4x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/1x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/4x16-minmax-avx2-broadcast.c
+  src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x32.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-qu8-vcvt/gen/vcvt-avx2-x64.c
   src/f32-velu/gen/velu-avx2-rr1-lut4-p4-perm-x56.c
@@ -7021,7 +7023,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(sigmoid-nc-test sigmoid-nc-test)
 
   ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
@@ -9028,7 +9030,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK benchmark bench-utils)
+  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
   ADD_EXECUTABLE(softmax-bench bench/softmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(softmax-bench PROPERTIES

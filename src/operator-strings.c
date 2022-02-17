@@ -170,6 +170,8 @@ const char* xnn_operator_type_to_string(enum xnn_operator_type type) {
       return "Resize Bilinear (NHWC, U8)";
     case xnn_operator_type_resize_bilinear_nchw_f32:
       return "Resize Bilinear (NCHW, F32)";
+    case xnn_operator_type_sigmoid_nc_f16:
+      return "Sigmoid (NC, F16)";
     case xnn_operator_type_sigmoid_nc_f32:
       return "Sigmoid (NC, F32)";
     case xnn_operator_type_sigmoid_nc_qs8:

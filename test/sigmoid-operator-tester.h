@@ -20,6 +20,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 
@@ -128,6 +130,124 @@ class SigmoidOperatorTester {
 
   inline size_t iterations() const {
     return this->iterations_;
+  }
+
+  void TestF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const float x = fp16_ieee_to_fp32_value(input[i * input_stride() + c]);
+          const float exp_x = std::exp(x);
+          const float sigmoid_x = exp_x / (1.0 + exp_x);
+          output_ref[i * channels() + c] = sigmoid_x;
+        }
+      }
+
+      // Create, setup, run, and destroy Sigmoid operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t sigmoid_op = nullptr;
+
+      const xnn_status status = xnn_create_sigmoid_nc_f16(
+          channels(), input_stride(), output_stride(),
+          0, &sigmoid_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, sigmoid_op);
+
+      // Smart pointer to automatically delete sigmoid_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_sigmoid_nc_f16(
+          sigmoid_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
+              output_ref[i * channels() + c],
+              std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 5.0e-3f));
+        }
+      }
+    }
+  }
+
+  void TestF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
+
+    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<double> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const double x = input[i * input_stride() + c];
+          const double exp_x = std::exp(x);
+          const double sigmoid_x = exp_x / (1.0 + exp_x);
+          output_ref[i * channels() + c] = sigmoid_x;
+        }
+      }
+
+      // Create, setup, run, and destroy Sigmoid operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t sigmoid_op = nullptr;
+
+      xnn_status status = xnn_create_sigmoid_nc_f32(
+          channels(), input_stride(), output_stride(),
+          0, &sigmoid_op);
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, sigmoid_op);
+
+      // Smart pointer to automatically delete sigmoid_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_sigmoid_nc_f32(
+          sigmoid_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+            output[i * output_stride() + c],
+            output_ref[i * channels() + c],
+            5.0e-6);
+        }
+      }
+    }
   }
 
   void TestQS8() const {
@@ -249,63 +369,6 @@ class SigmoidOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.6f);
-        }
-      }
-    }
-  }
-
-  void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-25.0f, 25.0f), rng);
-
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<double> output_ref(batch_size() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::fill(output.begin(), output.end(), 0xA5);
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          const double x = input[i * input_stride() + c];
-          const double exp_x = std::exp(x);
-          const double sigmoid_x = exp_x / (1.0 + exp_x);
-          output_ref[i * channels() + c] = sigmoid_x;
-        }
-      }
-
-      // Create, setup, run, and destroy Sigmoid operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t sigmoid_op = nullptr;
-
-      xnn_status status = xnn_create_sigmoid_nc_f32(
-          channels(), input_stride(), output_stride(),
-          0, &sigmoid_op);
-      ASSERT_EQ(xnn_status_success, status);
-      ASSERT_NE(nullptr, sigmoid_op);
-
-      // Smart pointer to automatically delete sigmoid_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_sigmoid_nc_f32(
-          sigmoid_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-            output[i * output_stride() + c],
-            output_ref[i * channels() + c],
-            5.0e-6);
         }
       }
     }

@@ -14,6 +14,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
@@ -27,6 +29,72 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
+
+#ifndef XNN_NO_F16_OPERATORS
+static void xnnpack_sigmoid_f16(benchmark::State& state) {
+  const size_t batch_size = state.range(0);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+  std::vector<uint16_t> input(batch_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t> output(batch_size);
+  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t sigmoid_op = nullptr;
+  status = xnn_create_sigmoid_nc_f16(
+    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
+    0 /* flags */, &sigmoid_op);
+  if (status != xnn_status_success || sigmoid_op == nullptr) {
+    state.SkipWithError("failed to create Sigmoid operator");
+    return;
+  }
+
+  status = xnn_setup_sigmoid_nc_f16(
+    sigmoid_op, batch_size,
+    input.data(), output.data(),
+    nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup Sigmoid operator");
+    return;
+  }
+
+  for (auto _ : state) {
+    status = xnn_run_operator(sigmoid_op, nullptr /* thread pool */);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to run Sigmoid operator");
+      return;
+    }
+  }
+
+  status = xnn_delete_operator(sigmoid_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete Sigmoid operator");
+    return;
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration = 2 * batch_size * sizeof(uint16_t);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+}
+#endif  // XNN_NO_F16_OPERATORS
 
 static void xnnpack_sigmoid_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -540,6 +608,11 @@ static void tflite_sigmoid_qu8(benchmark::State& state) {
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
+#ifndef XNN_NO_F16_OPERATORS
+  BENCHMARK(xnnpack_sigmoid_f16)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_NO_F16_OPERATORS
 BENCHMARK(xnnpack_sigmoid_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();

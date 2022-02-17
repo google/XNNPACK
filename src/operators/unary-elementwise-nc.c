@@ -765,6 +765,31 @@ enum xnn_status xnn_create_negate_nc_f32(
     negate_op_out);
 }
 
+enum xnn_status xnn_create_sigmoid_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* sigmoid_op_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f16_sigmoid_params params;
+  if (xnn_params.f16.sigmoid.init.f16_sigmoid != NULL) {
+    xnn_params.f16.sigmoid.init.f16_sigmoid(&params);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_sigmoid_nc_f16,
+    xnn_params.f16.sigmoid.ukernel,
+    sigmoid_op_out);
+}
+
 enum xnn_status xnn_create_sigmoid_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -1390,6 +1415,30 @@ enum xnn_status xnn_setup_negate_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &negate_op->params.f32_neg, sizeof(negate_op->params.f32_neg),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_sigmoid_nc_f16(
+    xnn_operator_t sigmoid_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  if (sigmoid_op->type != xnn_operator_type_sigmoid_nc_f16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f16),
+      xnn_operator_type_to_string(sigmoid_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  sigmoid_op->state = xnn_run_state_invalid;
+
+  return setup_unary_elementwise_nc(
+    sigmoid_op,
+    batch_size, input, output,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    &sigmoid_op->params.f16_sigmoid, sizeof(sigmoid_op->params.f16_sigmoid),
     pthreadpool_get_threads_count(threadpool));
 }
 
