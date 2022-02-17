@@ -797,8 +797,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         # Is there a remainder? - 4 channels
         TBZ     x20, 2, 4f
 
-        LDR     q10, [x8], 16        // load 9 inputs
-        LDP     q0, q1, [x19], 32    // load bias and 9 weights
+        LDR     q10, [x8], 16           // load 9 inputs
+        LDP     q0, q1, [x19], 32       // load bias and 9 weights
         LDR     q11, [x9], 16
         LDR     q12, [x10], 16
         LDR     q13, [x11], 16
@@ -832,8 +832,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55
         TST     x20, 3
         B.EQ    6f
 
-        LDR     q10, [x8], 16        // load 9 inputs
-        LDP     q0, q1, [x19], 32    // load bias and 9 weights
+        LDR     q10, [x8], 16           // load 9 inputs
+        LDP     q0, q1, [x19], 32       // load bias and 9 weights
         LDR     q11, [x9], 16
         LDR     q12, [x10], 16
         LDR     q13, [x11], 16

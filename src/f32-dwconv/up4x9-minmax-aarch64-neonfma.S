@@ -96,8 +96,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         # skip main loop if c <= 4
         B.LO    2f
 1:
-        LDR     q21, [x8], 16      // load 9 inputs
-        LDP     q0, q1, [x19], 32  // load bias and 9 weights
+        LDR     q21, [x8], 16           // load 9 inputs
+        LDP     q0, q1, [x19], 32       // load bias and 9 weights
         LDR     q22, [x9], 16
         LDR     q23, [x10], 16
         LDR     q24, [x11], 16
@@ -132,8 +132,8 @@ BEGIN_FUNCTION xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma
         TST     x20, 3
         B.EQ    4f
 
-        LDR     q21, [x8], 16      // load 9 inputs
-        LDP     q0, q1, [x19], 32  // load bias and 9 weights
+        LDR     q21, [x8], 16           // load 9 inputs
+        LDP     q0, q1, [x19], 32       // load bias and 9 weights
         LDR     q22, [x9], 16
         LDR     q23, [x10], 16
         LDR     q24, [x11], 16
