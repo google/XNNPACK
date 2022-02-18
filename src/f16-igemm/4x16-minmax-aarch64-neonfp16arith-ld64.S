@@ -27,7 +27,7 @@
 # A2 x14 v2
 # A3 x15 v3
 
-# B   x5 v20 v21 v22 v23
+# B   x5 v20 v21 v22 v23 v24 v25 v26 v27
 
 # C0  x6 v16 v17
 # C1 x16 v18 v19
@@ -60,12 +60,13 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
 
 0:
         # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
+        LDR     q16, [x5], 16
+        LDR     q17, [x5], 16
         MOV     v18.16b, v16.16b
-        MOV     v19.16b, v17.16b
         MOV     v28.16b, v16.16b
-        MOV     v29.16b, v17.16b
         MOV     v30.16b, v16.16b
+        MOV     v19.16b, v17.16b
+        MOV     v29.16b, v17.16b
         MOV     v31.16b, v17.16b
 
         MOV     x9, x3                  // p = ks
@@ -92,21 +93,26 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         SUBS    x0, x2, 8               // k = kc - 8
         B.LO    4f
 
+       .p2align 3
         # Main loop - 2 halffloats of A (4 bytes)
 2:
-        LDR     d0, [x8], 8
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     d0,  [x8], 8
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     d1, [x13], 8
         LDR     d2, [x14], 8
         LDR     d3, [x15], 8
+        LDR     q22, [x5], 16
+        LDR     q23, [x5], 16
+        LDR     q24, [x5], 16
+        LDR     q25, [x5], 16
+        LDR     q26, [x5], 16
+        LDR     q27, [x5], 16
         SUBS    x0, x0, 8
         FMLA    v16.8h, v20.8h, v0.h[0]
         FMLA    v17.8h, v21.8h, v0.h[0]
         FMLA    v18.8h, v20.8h, v1.h[0]
         FMLA    v19.8h, v21.8h, v1.h[0]
-        LDR     q22,  [x5], 16
-        LDR     q23,  [x5], 16
         FMLA    v28.8h, v20.8h, v2.h[0]
         FMLA    v29.8h, v21.8h, v2.h[0]
         FMLA    v30.8h, v20.8h, v3.h[0]
@@ -115,36 +121,32 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         FMLA    v17.8h, v23.8h, v0.h[1]
         FMLA    v18.8h, v22.8h, v1.h[1]
         FMLA    v19.8h, v23.8h, v1.h[1]
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
         FMLA    v28.8h, v22.8h, v2.h[1]
         FMLA    v29.8h, v23.8h, v2.h[1]
         FMLA    v30.8h, v22.8h, v3.h[1]
         FMLA    v31.8h, v23.8h, v3.h[1]
 
-        FMLA    v16.8h, v20.8h, v0.h[2]
-        FMLA    v17.8h, v21.8h, v0.h[2]
-        FMLA    v18.8h, v20.8h, v1.h[2]
-        FMLA    v19.8h, v21.8h, v1.h[2]
-        LDR     q22,  [x5], 16
-        LDR     q23,  [x5], 16
-        FMLA    v28.8h, v20.8h, v2.h[2]
-        FMLA    v29.8h, v21.8h, v2.h[2]
-        FMLA    v30.8h, v20.8h, v3.h[2]
-        FMLA    v31.8h, v21.8h, v3.h[2]
-        FMLA    v16.8h, v22.8h, v0.h[3]
-        FMLA    v17.8h, v23.8h, v0.h[3]
-        FMLA    v18.8h, v22.8h, v1.h[3]
-        FMLA    v19.8h, v23.8h, v1.h[3]
-        FMLA    v28.8h, v22.8h, v2.h[3]
-        FMLA    v29.8h, v23.8h, v2.h[3]
-        FMLA    v30.8h, v22.8h, v3.h[3]
-        FMLA    v31.8h, v23.8h, v3.h[3]
+        FMLA    v16.8h, v24.8h, v0.h[2]
+        FMLA    v17.8h, v25.8h, v0.h[2]
+        FMLA    v18.8h, v24.8h, v1.h[2]
+        FMLA    v19.8h, v25.8h, v1.h[2]
+        FMLA    v28.8h, v24.8h, v2.h[2]
+        FMLA    v29.8h, v25.8h, v2.h[2]
+        FMLA    v30.8h, v24.8h, v3.h[2]
+        FMLA    v31.8h, v25.8h, v3.h[2]
+        FMLA    v16.8h, v26.8h, v0.h[3]
+        FMLA    v17.8h, v27.8h, v0.h[3]
+        FMLA    v18.8h, v26.8h, v1.h[3]
+        FMLA    v19.8h, v27.8h, v1.h[3]
+        FMLA    v28.8h, v26.8h, v2.h[3]
+        FMLA    v29.8h, v27.8h, v2.h[3]
+        FMLA    v30.8h, v26.8h, v3.h[3]
+        FMLA    v31.8h, v27.8h, v3.h[3]
         B.HS    2b
 
-        # Is there a remainder?- 1 or 2 halffloats of A (2 or 4 bytes)
-        ADD     x0, x0, 8
-        CBNZ    x0, 4f
+        # Is there a remainder?- 1 halffloat of A (2 bytes)
+        ANDS    x0, x0, 7
+        B.NE    4f
 
 3:
         # ks loop
@@ -197,21 +199,21 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         RET
 
 
-        # Remainder- 1 or 2 halffloats of A
+        # Remainder- 1 to 3 halffloats of A (2 to 6 bytes)
 4:
         TBZ     x0, 2, 5f
         LDR     s0, [x8], 4
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     s1, [x13], 4
         LDR     s2, [x14], 4
         LDR     s3, [x15], 4
+        LDR     q22, [x5], 16
+        LDR     q23, [x5], 16
         FMLA    v16.8h, v20.8h, v0.h[0]
         FMLA    v17.8h, v21.8h, v0.h[0]
         FMLA    v18.8h, v20.8h, v1.h[0]
         FMLA    v19.8h, v21.8h, v1.h[0]
-        LDR     q22,  [x5], 16
-        LDR     q23,  [x5], 16
         FMLA    v28.8h, v20.8h, v2.h[0]
         FMLA    v29.8h, v21.8h, v2.h[0]
         FMLA    v30.8h, v20.8h, v3.h[0]
@@ -228,8 +230,8 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
 
 5:
         LDR     h0, [x8], 2
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     h1, [x13], 2
         LDR     h2, [x14], 2
         LDR     h3, [x15], 2

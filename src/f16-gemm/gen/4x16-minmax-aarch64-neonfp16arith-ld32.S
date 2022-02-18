@@ -23,17 +23,18 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointers
-# x3  a0
-# x11 a1
-# x12 a2
-# x4  a3 / a_stride
+# Register usage
+# A0  x3 v0
+# A1 x11 v1
+# A2 x12 v2
+# A3  x4 v3
 
-# C pointers
-# x6  c0
-# x9  c1
-# x10 c2
-# x7  c3 / cm_stride
+# B   x5 v20 v21 v22 v23
+
+# C0  x6 v16 v17
+# C1  x9 v18 v19
+# C2 x10 v28 v29
+# C3  x7 v30 v31
 
 # Clamp v4, v5, v6
 
@@ -66,33 +67,35 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
 
 0:
         # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
+        LDR     q16, [x5], 16
+        LDR     q17, [x5], 16
         MOV     v18.16b, v16.16b
-        MOV     v19.16b, v17.16b
         MOV     v28.16b, v16.16b
-        MOV     v29.16b, v17.16b
         MOV     v30.16b, v16.16b
+        MOV     v19.16b, v17.16b
+        MOV     v29.16b, v17.16b
         MOV     v31.16b, v17.16b
 
         # Is there at least 2 halffloats (4 bytes)?
         SUBS    x0, x2, 4               // k = kc - 4
         B.LO    3f
 
+       .p2align 3
         # Main loop - 2 halffloats of A (4 bytes)
 1:
         LDR     s0,  [x3], 4
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     s1, [x11], 4
         LDR     s2, [x12], 4
         LDR     s3,  [x4], 4
+        LDR     q22, [x5], 16
+        LDR     q23, [x5], 16
         SUBS    x0, x0, 4
         FMLA    v16.8h, v20.8h, v0.h[0]
         FMLA    v17.8h, v21.8h, v0.h[0]
         FMLA    v18.8h, v20.8h, v1.h[0]
         FMLA    v19.8h, v21.8h, v1.h[0]
-        LDR     q22,  [x5], 16
-        LDR     q23,  [x5], 16
         FMLA    v28.8h, v20.8h, v2.h[0]
         FMLA    v29.8h, v21.8h, v2.h[0]
         FMLA    v30.8h, v20.8h, v3.h[0]
@@ -157,8 +160,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         # Remainder- 1 halffloat of A (2 bytes)
 3:
         LDR     h0,  [x3], 2
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     h1, [x11], 2
         LDR     h2, [x12], 2
         LDR     h3,  [x4], 2

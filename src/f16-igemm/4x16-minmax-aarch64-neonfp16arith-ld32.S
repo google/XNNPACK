@@ -60,12 +60,13 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
 
 0:
         # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
+        LDR     q16, [x5], 16
+        LDR     q17, [x5], 16
         MOV     v18.16b, v16.16b
-        MOV     v19.16b, v17.16b
         MOV     v28.16b, v16.16b
-        MOV     v29.16b, v17.16b
         MOV     v30.16b, v16.16b
+        MOV     v19.16b, v17.16b
+        MOV     v29.16b, v17.16b
         MOV     v31.16b, v17.16b
 
         MOV     x9, x3                  // p = ks
@@ -92,21 +93,22 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         SUBS    x0, x2, 4               // k = kc - 4
         B.LO    4f
 
+       .p2align 3
         # Main loop - 2 halffloats of A (4 bytes)
 2:
-        LDR     s0, [x8], 4
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     s0,  [x8], 4
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     s1, [x13], 4
         LDR     s2, [x14], 4
         LDR     s3, [x15], 4
+        LDR     q22, [x5], 16
+        LDR     q23, [x5], 16
         SUBS    x0, x0, 4
         FMLA    v16.8h, v20.8h, v0.h[0]
         FMLA    v17.8h, v21.8h, v0.h[0]
         FMLA    v18.8h, v20.8h, v1.h[0]
         FMLA    v19.8h, v21.8h, v1.h[0]
-        LDR     q22,  [x5], 16
-        LDR     q23,  [x5], 16
         FMLA    v28.8h, v20.8h, v2.h[0]
         FMLA    v29.8h, v21.8h, v2.h[0]
         FMLA    v30.8h, v20.8h, v3.h[0]
@@ -177,8 +179,8 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         # Remainder- 1 halffloat of A
 4:
         LDR     h0, [x8], 2
-        LDR     q20,  [x5], 16
-        LDR     q21,  [x5], 16
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
         LDR     h1, [x13], 2
         LDR     h2, [x14], 2
         LDR     h3, [x15], 2
