@@ -69,6 +69,7 @@ static enum xnn_status create_depth_to_space_operator(
         break;
 #if !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
       case xnn_compute_type_qs8:
+      case xnn_compute_type_qu8:
         status = xnn_create_depth_to_space_nhwc_x8(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
@@ -290,7 +291,7 @@ enum xnn_status xnn_define_depth_to_space(
   }
 
   node->type = xnn_node_type_depth_to_space;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;
