@@ -603,6 +603,22 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
       return false;
     }
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      if (subgraph->values[node->inputs[i]].layout == xnn_layout_type_nchw) {
+        xnn_log_warning(
+          "FP16 rewrite aborted: input #%" PRIu32 " (Value #%" PRIu32 ") of node #%" PRIu32 " (%s) has NCHW layout",
+          i, node->inputs[i], n, xnn_node_type_to_string(node->type));
+        return false;
+      }
+    }
+    for (uint32_t o = 0; o < node->num_outputs; o++) {
+      if (subgraph->values[node->outputs[o]].layout == xnn_layout_type_nchw) {
+        xnn_log_warning(
+          "FP16 rewrite aborted: output #%" PRIu32 " (Value #%" PRIu32 ") of node #%" PRIu32 " (%s) has NCHW layout",
+          o, node->outputs[o], n, xnn_node_type_to_string(node->type));
+        return false;
+      }
+    }
     switch (node->type) {
       case xnn_node_type_add2:
       case xnn_node_type_multiply2:
