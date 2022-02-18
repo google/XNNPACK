@@ -5229,6 +5229,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up16x4-minmax-fma3.c
   src/f16-dwconv/gen/up16x9-minmax-fma3.c
   src/f16-ibilinear/gen/fma3-c8.c
+  src/f16-ibilinear/gen/fma3-c16.c
   src/f16-vmulcaddc/gen/c8-minmax-fma3-2x.c
   src/f32-dwconv/gen/up8x25-minmax-fma3.c
   src/f32-dwconv/gen/up16x3-minmax-fma3.c
@@ -6166,6 +6167,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/8x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld32.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld64.S
+  src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a53.S

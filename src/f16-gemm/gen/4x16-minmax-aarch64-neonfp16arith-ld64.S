@@ -164,7 +164,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         FMIN    v31.8h, v31.8h, v6.8h
 
         # Store full 4 x 16
-        B.LO    4f
+        B.LO    5f
 
         ST1     {v16.16b, v17.16b},  [x6], x14
         SUB     x3,  x3, x2             // a0 -= kc
@@ -181,7 +181,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
 
         # Remainder- 1 to 3 halffloats of A (2 to 6 bytes)
 3:
-        TBZ     x0, 2, 31f
+        TBZ     x0, 2, 4f
         LDR     s0,  [x3], 4
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
@@ -208,7 +208,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         FMLA    v31.8h, v23.8h, v3.h[1]
         TBZ     x0, 1, 2b
 
-31:
+4:
         LDR     h0,  [x3], 2
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
@@ -227,8 +227,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
 
 
         # Store odd width
-4:
-        TBZ     x1, 3, 5f
+5:
+        TBZ     x1, 3, 6f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
         STR     q18, [x9], 16
@@ -238,8 +238,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         STR     q30, [x7], 16
         MOV     v30.16b, v31.16b
 
-5:
-        TBZ     x1, 2, 6f
+6:
+        TBZ     x1, 2, 7f
         STR     d16, [x6], 8
         STR     d18, [x9], 8
         DUP     d16, v16.d[1]
@@ -249,8 +249,8 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-6:
-        TBZ     x1, 1, 7f
+7:
+        TBZ     x1, 1, 8f
         STR     s16,  [x6], 4
         STR     s18,  [x9], 4
         DUP     s16, v16.s[1]
@@ -260,13 +260,13 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         DUP     s28, v28.s[1]
         DUP     s30, v30.s[1]
 
-7:
-        TBZ     x1, 0, 8f
+8:
+        TBZ     x1, 0, 9f
         STR     h16,  [x6]
         STR     h18,  [x9]
         STR     h28, [x10]
         STR     h30,  [x7]
-8:
+9:
         RET
 
 END_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
