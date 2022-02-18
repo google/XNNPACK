@@ -603,7 +603,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   ExecutionPlan operators;
   xnn_status status;
   xnn_code_cache code_cache;
+#if XNN_PLATFORM_JIT
   xnn_init_code_cache(&code_cache);
+#endif
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f32(
@@ -2606,7 +2608,9 @@ ExecutionPlan FP32SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
   }
   operators.emplace_back(op112, xnn_delete_operator);
 
+#if XNN_PLATFORM_JIT
   xnn_finalize_code_memory(&code_cache.code_buffer);
+#endif
 
   status = xnn_setup_convolution2d_nchw_f32(
     op0,

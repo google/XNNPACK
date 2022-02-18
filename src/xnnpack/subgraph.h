@@ -330,7 +330,7 @@ struct xnn_runtime {
 
   void* workspace;
 
-#ifdef XNN_PLATFORM_JIT
+#if XNN_PLATFORM_JIT
   struct xnn_code_cache code_cache;
 #endif // XNN_PLATFORM_JIT
 
