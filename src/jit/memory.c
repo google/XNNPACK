@@ -49,6 +49,11 @@ enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t siz
 }
 
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
+#if !XNN_PLATFORM_JIT
+  xnn_log_error("trying to finalize code memory on a platform which does not support JIT");
+  return xnn_status_invalid_state;
+#endif  // XNN_PLATFORM_JIT
+
   // Get page size.
 #if XNN_PLATFORM_WINDOWS
   SYSTEM_INFO sysinfo;
@@ -95,24 +100,24 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   }
 
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
-  // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-  __builtin___clear_cache(buf->code, (void*) ((uint8_t*) buf->code + buf->capacity));
-#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
+    // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
+    __builtin___clear_cache(buf->code, (void*) ((uint8_t*) buf->code + buf->capacity));
+  #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
   // Set permissions to RX (no write).
-#if XNN_PLATFORM_WINDOWS
-  DWORD old = 0;
-  if (!VirtualProtect(buf->code, buf->size, PAGE_EXECUTE_READ, &old)) {
-    xnn_log_error("failed to make code buffer read+execute, error code: %" PRIu32, (uint32_t) GetLastError());
-    return xnn_status_invalid_state;
-  }
-#else
-  if (mprotect(buf->code, buf->size, PROT_READ | PROT_EXEC) == -1) {
-    xnn_log_error("failed to make code buffer read+execute, error code: %d", errno);
-    return xnn_status_invalid_state;
-  }
-#endif
+  #if XNN_PLATFORM_WINDOWS
+    DWORD old = 0;
+    if (!VirtualProtect(buf->code, buf->size, PAGE_EXECUTE_READ, &old)) {
+      xnn_log_error("failed to make code buffer read+execute, error code: %" PRIu32, (uint32_t) GetLastError());
+      return xnn_status_invalid_state;
+    }
+  #else
+    if (mprotect(buf->code, buf->size, PROT_READ | PROT_EXEC) == -1) {
+      xnn_log_error("failed to make code buffer read+execute, error code: %d", errno);
+      return xnn_status_invalid_state;
+    }
+  #endif
   return xnn_status_success;
 }
 
