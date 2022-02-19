@@ -67,7 +67,7 @@ static void SigmoidError(benchmark::State& state,
   }
 
   // The smallest x for which sigmoidf(x) is normalized (-0x1.368p+3h).
-  // const uint16_t min_input = UINT16_C(0xC8DA);
+  const uint16_t min_input = UINT16_C(0xC8DA);
   // The largest x for which sigmoidf(x) is not 1.0f (0x1.0A0p3h).
   const uint16_t max_input = UINT16_C(0x4828);
   // Number of elements in one block of inputs/outputs.
@@ -97,23 +97,23 @@ static void SigmoidError(benchmark::State& state,
   context.output = y.data();
   context.error = ulp_error.data();
   for (auto _ : state) {
-    // for (uint16_t n = min_input; int16_t(n) < 0; n -= block_size) {
-    //   for (uint16_t i = 0; i < block_size; i++) {
-    //     x[i] = std::max<uint16_t>(n - i, UINT16_C(0x8000));
-    //   }
-    //   std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+    for (uint16_t n = min_input; int16_t(n) < 0; n -= block_size) {
+      for (uint16_t i = 0; i < block_size; i++) {
+        x[i] = std::max<uint16_t>(n - i, UINT16_C(0x8000));
+      }
+      std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
-    //   sigmoid(block_size * sizeof(uint16_t), x.data(), y.data());
+      sigmoid(block_size * sizeof(uint16_t), x.data(), y.data());
 
-    //   pthreadpool_parallelize_1d_tile_1d(
-    //       threadpool.get(),
-    //       reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
-    //       static_cast<void*>(&context),
-    //       block_size, tile_size, 0 /* flags */);
+      pthreadpool_parallelize_1d_tile_1d(
+          threadpool.get(),
+          reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
+          static_cast<void*>(&context),
+          block_size, tile_size, 0 /* flags */);
 
-    //   max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
-    //     static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
-    // }
+      max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
+        static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
+    }
     for (uint16_t n = 0; n < max_input; n += block_size) {
       for (uint16_t i = 0; i < block_size; i++) {
         x[i] = std::min<uint16_t>(n + i, max_input);
