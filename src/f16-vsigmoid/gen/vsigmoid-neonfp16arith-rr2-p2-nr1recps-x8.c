@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8(
+void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x8(
     size_t batch,
     const void* input,
     void* output,
@@ -23,13 +23,14 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8(
 {
   assert(batch % sizeof(__fp16) == 0);
 
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.magic_bias));
-  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.minus_log2e));
-  const float16x8_t vln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.ln2));
-  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c3));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c2));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.magic_bias));
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.minus_log2e));
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.ln2_hi));
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.ln2_lo));
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.c2));
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.c1));
   const float16x8_t vone = vmovq_n_f16(1.0f);
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.denorm_cutoff));
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.denorm_cutoff));
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;
@@ -41,16 +42,19 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8(
     float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vminus_log2e);
     const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
     vn = vsubq_f16(vn, vmagic_bias);
-    float16x8_t vt = vfmaq_f16(vz, vn, vln2);
 
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmsq_f16(vone, vp, vt);
+    float16x8_t vt = vfmaq_f16(vz, vn, vln2_hi);
+    vt = vfmaq_f16(vt, vn, vln2_lo);
 
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
     vt = vmulq_f16(vt, vs);
-    const float16x8_t ve = vfmsq_f16(vs, vp, vt);
+    const float16x8_t ve = vfmaq_f16(vs, vp, vt);
     const float16x8_t vd = vaddq_f16(ve, vone);
 
-    const float16x8_t vr = vrecpeq_f16(vd);
+    float16x8_t vr = vrecpeq_f16(vd);
+    const float16x8_t vadj = vrecpsq_f16(vr, vd);
+    vr = vmulq_f16(vr, vadj);
+
     float16x8_t vf = vmulq_f16(ve, vr);
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
     const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));
@@ -66,16 +70,19 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x8(
     float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vminus_log2e);
     const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
     vn = vsubq_f16(vn, vmagic_bias);
-    float16x8_t vt = vfmaq_f16(vz, vn, vln2);
 
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmsq_f16(vone, vp, vt);
+    float16x8_t vt = vfmaq_f16(vz, vn, vln2_hi);
+    vt = vfmaq_f16(vt, vn, vln2_lo);
 
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
     vt = vmulq_f16(vt, vs);
-    const float16x8_t ve = vfmsq_f16(vs, vp, vt);
+    const float16x8_t ve = vfmaq_f16(vs, vp, vt);
     const float16x8_t vd = vaddq_f16(ve, vone);
 
-    const float16x8_t vr = vrecpeq_f16(vd);
+    float16x8_t vr = vrecpeq_f16(vd);
+    const float16x8_t vadj = vrecpsq_f16(vr, vd);
+    vr = vmulq_f16(vr, vadj);
+
     float16x8_t vf = vmulq_f16(ve, vr);
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
     const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));

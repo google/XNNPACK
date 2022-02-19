@@ -2564,9 +2564,9 @@ static void init(void) {
         .element_tile = 16,
       };
       xnn_params.f16.sigmoid = (struct vunary_parameters) {
-        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr1_p3_recpe_x32,
-        .init.f16_sigmoid = xnn_init_f16_sigmoid_neonfp16arith_rr1_p3_params,
-        .element_tile = 32,
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40,
+        .init.f16_sigmoid = xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params,
+        .element_tile = 40,
       };
     }
   #endif  // XNN_NO_F16_OPERATORS
