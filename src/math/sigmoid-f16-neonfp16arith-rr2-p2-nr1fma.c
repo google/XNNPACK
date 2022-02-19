@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_sigmoid__neonfp16arith_rr1_p3_recpe(
+void xnn_math_f16_sigmoid__neonfp16arith_rr2_p2_nr1fma(
     size_t n,
     const void* input,
     void* output)
@@ -21,12 +21,13 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr1_p3_recpe(
   // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
   const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
   const float16x8_t vminus_log2e = vmovq_n_f16(-0x1.714p+0f);
-  const float16x8_t vln2 = vmovq_n_f16(0x1.630p-1f);
+  const float16x8_t vln2_hi = vmovq_n_f16(0x1.630p-1f);
+  const float16x8_t vln2_lo = vmovq_n_f16(-0x1.BD0p-13f);
   // Coefficient of polynomial approximation
-  //   exp(-t) ~ 1 + t * (-1 + t * (c2 + t * c3))
+  //   exp(-t) ~ 1 + t * (c1 + t * c2)
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc3 = vmovq_n_f16(-0x1.558p-3f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
+  const float16x8_t vc2 = vmovq_n_f16(0x1.FE4p-2f);
+  const float16x8_t vc1 = vmovq_n_f16(-0x1.038p+0f);
   const float16x8_t vone = vmovq_n_f16(1.0f);
   // The largest z for which sigmoidh(-z) is normalized.
   // This number is also the largest z for which exph(-z) is normalized.
@@ -64,27 +65,29 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr1_p3_recpe(
     vn = vsubq_f16(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2). Note that -t = -z - n * log(2).
-    float16x8_t vt = vfmaq_f16(vz, vn, vln2);
+    // Use Cody-Waite range reduction method (note two constants to represent -log(2)) to improve accuracy.
+    float16x8_t vt = vfmaq_f16(vz, vn, vln2_hi);
+    vt = vfmaq_f16(vt, vn, vln2_lo);
 
-    // Compute degree-3 polynomial approximation for exp(-t) on [-log(2)/2, log(2)/2]:
-    //   P(t) = 1 + t * (-1 + t * (c2 + t * c3)) = -(1 - t * p)
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmsq_f16(vone, vp, vt);
+    // Compute degree-2 polynomial approximation for exp(-t) on [-log(2)/2, log(2)/2]:
+    //   P(t) = 1 + t * (c1 + t * c2) = 1 + t * p
+    float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
 
     // Reconstruct the exp(-z) value:
-    //   e = s * (1 + t * (-1 + t * (c2 + t * c3))
-    //     = s * (1 - t * (-p))
-    //     = s - (t * s) * (-p)
+    //   e = s * (1 + t * (c1 + t * c2)
+    //     = s * (1 + t * p)
+    //     = s + (t * s) * p
     vt = vmulq_f16(vt, vs);
-    float16x8_t ve = vfmsq_f16(vs, vp, vt);
+    float16x8_t ve = vfmaq_f16(vs, vp, vt);
 
     // Denominator of the sigmoid fraction: 1.0 + exp(-z)
     float16x8_t vd = vaddq_f16(ve, vone);
 
-    // Compute approximate reciprocal of denominator.
+    // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
     // Note: 1 < d <= 2, because z >= 0.0 and 0 < exp(-z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
-    const float16x8_t vr = vrecpeq_f16(vd);
+    float16x8_t vr = vrecpeq_f16(vd);
+    vr = vfmaq_f16(vr, vr, vfmsq_f16(vone, vr, vd));
 
     // Reconstruct sigmoid(-z) = exp(-z) / (1.0 + exp(-z))
     float16x8_t vf = vmulq_f16(ve, vr);

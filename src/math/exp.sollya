@@ -118,6 +118,14 @@ lb = round(-log(2)/2, halfprecision, RN);
 ub = round(log(2)/2, halfprecision, RN);
 print("-log(2)/2 = ", lb);
 print("+log(2)/2 =", ub);
+P = fpminimax(exp(x), [|1,2|], [|HP...|], [lb; ub], relative, 1);
+print("Degree-2 P[exp(x)] with 1 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), halfprecision, RU));
+
+lb = round(-log(2)/2, halfprecision, RN);
+ub = round(log(2)/2, halfprecision, RN);
+print("-log(2)/2 = ", lb);
+print("+log(2)/2 =", ub);
 P = fpminimax(exp(x), [|1,2,3|], [|HP...|], [lb; ub], relative, 1);
 print("Degree-3 P[exp(x)] with 1 constraint on [-log(2)/2, log(2)/2] =", horner(P));
 print("relative error =", round(dirtyinfnorm(P / exp(x) - 1, [lb; ub]), halfprecision, RU));

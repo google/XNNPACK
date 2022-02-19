@@ -3322,9 +3322,15 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr1-p3-recpe-x64.c
   src/math/exp-f16-neonfp16arith-rr2-p3.c
   src/math/expminus-f16-neonfp16arith-rr2-p3.c
+  src/math/sigmoid-f16-neonfp16arith-rr1-p2-div.c
   src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c
-  src/math/sigmoid-f16-neonfp16arith-rr1-p3-recpe.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p2-nr1fma.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p2-nr1recps.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p2-recpe.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p3-nr1fma.c
+  src/math/sigmoid-f16-neonfp16arith-rr2-p3-nr1recps.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p3-recpe.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
