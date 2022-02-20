@@ -441,6 +441,31 @@ union xnn_f32_elu_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_f16_expminus_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM64
+  struct {
+    uint16_t magic_bias;
+    uint16_t log2e;
+    uint16_t minus_ln2_hi;
+    uint16_t minus_ln2_lo;
+    uint16_t c2;
+    uint16_t c1;
+    uint16_t denorm_cutoff;
+  } neonfp16arith_rr2_p2;
+#endif  // XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float c1[8];
+    XNN_ALIGN(32) float denorm_cutoff[8];
+  } avx2_rr1_p2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_expminus_params {
   struct {
     float log2e;
@@ -3188,6 +3213,11 @@ typedef void (*xnn_u8_rmax_ukernel_function)(
     const uint8_t* x,
     uint8_t* y);
 
+typedef void (*xnn_f16_rmax_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y);
+
 typedef void (*xnn_f32_rmax_ukernel_function)(
     size_t n,
     const float* x,
@@ -3424,6 +3454,14 @@ typedef void (*xnn_f32_raddexpminusmax_ukernel_function)(
     float* sum,
     float max);
 
+typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_function)(
+    size_t n,
+    const void* input,
+    const void* max,
+    void* output,
+    void* sum,
+    const union xnn_f16_expminus_params* params);
+
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_function)(
     size_t n,
     const float* input,
@@ -3597,6 +3635,9 @@ typedef void (*xnn_init_f32_abs_params_fn)(
 
 typedef void (*xnn_init_f32_default_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f16_expminus_params_fn)(
+  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_expminus_params_fn)(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);

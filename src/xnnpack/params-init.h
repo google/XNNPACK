@@ -520,6 +520,19 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_rr2_p6_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#define DECLARE_INIT_F16_EXPMINUS_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL void fn_name(                                    \
+    union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+
+#if XNN_ARCH_ARM64
+  DECLARE_INIT_F16_EXPMINUS_PARAMS_FUNCTION(xnn_init_f16_expminus_neonfp16arith_rr2_p2_params)
+#endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_EXPMINUS_PARAMS_FUNCTION(xnn_init_f16_expminus_avx2_rr1_p2_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_EXPMINUS_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL void fn_name(                                   \
     union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);

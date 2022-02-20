@@ -2914,6 +2914,35 @@ void xnn_init_f32_elu_wasmsimd_rr2_p6_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_ARM64
+void xnn_init_f16_expminus_neonfp16arith_rr2_p2_params(
+  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->neonfp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->neonfp16arith_rr2_p2.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
+  params->neonfp16arith_rr2_p2.minus_ln2_hi = UINT16_C(0xB98C);  // -0x1.630p-1h
+  params->neonfp16arith_rr2_p2.minus_ln2_lo = UINT16_C(0x0AF4);  // 0x1.BD0p-13h
+  params->neonfp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
+  params->neonfp16arith_rr2_p2.c1 = UINT16_C(0x3C0E);  // 0x1.038p+0h
+  params->neonfp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
+}
+#endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_expminus_avx2_rr1_p2_params(
+  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2_rr1_p2.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx2_rr1_p2.log2e[i] = 0x1.715476p0f;
+    params->avx2_rr1_p2.minus_ln2[i] = -0x1.62E43p-1f;
+    params->avx2_rr1_p2.c2[i] = 0x1.FF3A32p-2f;
+    params->avx2_rr1_p2.c1[i] = 0x1.039E10p+0f;
+    params->avx2_rr1_p2.denorm_cutoff[i] = -0x1.368000p+3f;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_init_f32_expminus_scalar_rr2_p5_params(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)])
 {

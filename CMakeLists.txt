@@ -3304,6 +3304,27 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc4.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc5.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc4.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc5.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc6.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x24.c
@@ -5418,6 +5439,27 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c
   src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc4.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc5.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc3.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc4.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72-acc3.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc5.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc2.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc3.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc6.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x24.c
@@ -7354,6 +7396,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-prelu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f16-prelu-test f16-prelu-test)
 
+  ADD_EXECUTABLE(f16-raddstoreexpminusmax-test test/f16-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-raddstoreexpminusmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f16-raddstoreexpminusmax-test f16-raddstoreexpminusmax-test)
+
   ADD_EXECUTABLE(f16-vsigmoid-test test/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-vsigmoid-test PROPERTIES
     CXX_STANDARD 11
@@ -9110,6 +9161,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
+  ADD_EXECUTABLE(f16-raddstoreexpminusmax-bench bench/f16-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-raddstoreexpminusmax-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
   ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f16-vsigmoid-bench PROPERTIES
     CXX_STANDARD 11
@@ -9200,6 +9259,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(f32-raddstoreexpminusmax-bench bench/f32-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f32-raddstoreexpminusmax-bench PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f32-raddstoreexpminusmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES

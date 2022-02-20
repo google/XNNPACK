@@ -4507,6 +4507,27 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-maxpool/9p8x-minmax-neonfp16arith-c8.c",
     "src/f16-prelu/gen/neonfp16arith-2x8.c",
     "src/f16-prelu/gen/neonfp16arith-2x16.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc4.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc5.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc4.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc5.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc6.c",
     "src/f16-spmm/gen/8x1-minmax-neonfp16arith-x2.c",
     "src/f16-spmm/gen/8x1-minmax-neonfp16arith.c",
     "src/f16-spmm/gen/16x1-minmax-neonfp16arith-x2.c",
@@ -6686,6 +6707,27 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c",
     "src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c",
     "src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc4.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc5.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc4.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc5.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc2.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc3.c",
+    "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc6.c",
     "src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x8.c",
     "src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x16.c",
     "src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x24.c",
@@ -10030,6 +10072,15 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_raddstoreexpminusmax_bench",
+    srcs = [
+        "bench/f16-raddstoreexpminusmax.cc",
+        "src/xnnpack/AlignedAllocator.h",
+    ] + MICROKERNEL_BENCHMARK_HDRS,
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "bench/f16-spmm.cc",
@@ -11330,6 +11381,15 @@ xnnpack_unit_test(
         "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f16_raddstoreexpminusmax_test",
+    srcs = [
+        "test/f16-raddstoreexpminusmax.cc",
+        "test/raddstoreexpminusmax-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
