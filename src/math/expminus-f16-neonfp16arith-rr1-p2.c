@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
+void xnn_math_f16_expminus__neonfp16arith_rr1_p2(
     size_t n,
     const void* input,
     void* output)
@@ -21,14 +21,12 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
   // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
   const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
   const float16x8_t vlog2e = vmovq_n_f16(0x1.714p+0f);
-  const float16x8_t vminus_ln2_hi = vmovq_n_f16(-0x1.630p-1f);
-  const float16x8_t vminus_ln2_lo = vmovq_n_f16(0x1.BD0p-13f);
+  const float16x8_t vminus_ln2 = vmovq_n_f16(-0x1.630p-1f);
   // Coefficient of polynomial approximation
-  //   exp(t) ~ 1 + t * (1 + t * (c2 + t * c3))
+  //   exp(t) ~ 1 + t * (c1 + t * c2)
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vc2 = vmovq_n_f16(0x1.FE4p-2f);
+  const float16x8_t vc1 = vmovq_n_f16(0x1.038p0f);
   // The smallest x for which exph(x) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
 
@@ -54,18 +52,15 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
     vn = vsubq_f16(vn, vmagic_bias);
 
     // Compute reduced argument t := x - n * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
-    vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
+    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2);
 
-    // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2]:
-    //   P(t) = 1 + t * (1 + t * (c2 + t * c3)) = 1 + t * p
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmaq_f16(vone, vp, vt);
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2]:
+    //   P(t) = 1 + t * (c1 + t * c2) = 1 + t * p
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
 
     // Reconstruct the exp(x) value:
-    //   exp(x) = s * (1 + t * (1 + t * (c2 + t * c3)))
-    //          = s + (t * s) * (1 + t * (c2 + t * c3))
+    //   exp(x) = s * (1 + t * (c1 + t * c2))
+    //          = s + (t * s) * (c1 + t * c2)
     //          = s + (t * s) * p
     vt = vmulq_f16(vt, vs);
     float16x8_t vf = vfmaq_f16(vs, vp, vt);

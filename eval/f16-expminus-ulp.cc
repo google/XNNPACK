@@ -113,6 +113,21 @@ static void ExpError(
 }
 
 #if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(ExpError, neonfp16arith_rr1_p2,
+                    xnn_math_f16_expminus__neonfp16arith_rr1_p2,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpError, neonfp16arith_rr1_p3,
+                    xnn_math_f16_expminus__neonfp16arith_rr1_p3,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpError, neonfp16arith_rr2_p2,
+                    xnn_math_f16_expminus__neonfp16arith_rr2_p2,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(ExpError, neonfp16arith_rr2_p3,
                     xnn_math_f16_expminus__neonfp16arith_rr2_p3,
                     benchmark::utils::CheckNEONFP16ARITH)

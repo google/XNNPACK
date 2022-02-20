@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
+void xnn_math_f16_expminus__neonfp16arith_rr2_p2(
     size_t n,
     const void* input,
     void* output)
@@ -26,9 +26,8 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
   // Coefficient of polynomial approximation
   //   exp(t) ~ 1 + t * (1 + t * (c2 + t * c3))
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vc2 = vmovq_n_f16(0x1.FE4p-2f);
+  const float16x8_t vc1 = vmovq_n_f16(0x1.038p0f);
   // The smallest x for which exph(x) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
 
@@ -58,14 +57,13 @@ void xnn_math_f16_expminus__neonfp16arith_rr2_p3(
     float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
     vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
 
-    // Compute degree-3 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2]:
-    //   P(t) = 1 + t * (1 + t * (c2 + t * c3)) = 1 + t * p
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmaq_f16(vone, vp, vt);
+    // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2]:
+    //   P(t) = 1 + t * (c1 + t * c2) = 1 + t * p
+    const float16x8_t vp = vfmaq_f16(vc1, vc2, vt);
 
     // Reconstruct the exp(x) value:
-    //   exp(x) = s * (1 + t * (1 + t * (c2 + t * c3)))
-    //          = s + (t * s) * (1 + t * (c2 + t * c3))
+    //   exp(x) = s * (1 + t * (c1 + t * c2))
+    //          = s + (t * s) * (c1 + t * c2)
     //          = s + (t * s) * p
     vt = vmulq_f16(vt, vs);
     float16x8_t vf = vfmaq_f16(vs, vp, vt);
