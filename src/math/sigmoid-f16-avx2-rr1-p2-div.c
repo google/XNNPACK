@@ -58,7 +58,7 @@ void xnn_math_f16_sigmoid__avx2_rr1_p2_div(
     __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
-    // -87.33642 <= z <= 0.0, and -126 <= n <= 0 accordingly.
+    // -9.703125 <= z <= 0.0, and -14 <= n <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
 
     // Subtract the large number back to get the final n := round(z / log(2)) as a floating-point number.

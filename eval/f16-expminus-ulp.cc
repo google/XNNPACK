@@ -135,6 +135,19 @@ static void ExpError(
     ->Iterations(1);
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(ExpError, avx2_rr1_p2,
+                    xnn_math_f16_expminus__avx2_rr1_p2,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(ExpError, avx2_rr1_p3,
+                    xnn_math_f16_expminus__avx2_rr1_p3,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

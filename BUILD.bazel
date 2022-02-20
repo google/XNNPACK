@@ -6892,6 +6892,8 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/math/expm1minus-f32-avx2-rr1-lut16-p3-gather.c",
     "src/math/expm1minus-f32-avx2-rr1-p6.c",
     "src/math/extexp-avx2-p5.c",
+    "src/math/expminus-f16-avx2-rr1-p2.c",
+    "src/math/expminus-f16-avx2-rr1-p3.c",
     "src/math/sigmoid-f16-avx2-rr1-p2-div.c",
     "src/math/sigmoid-f16-avx2-rr1-p2-rcp.c",
     "src/math/sigmoid-f16-avx2-rr1-p3-div.c",
