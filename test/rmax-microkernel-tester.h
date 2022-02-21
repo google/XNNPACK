@@ -19,6 +19,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack/params.h>
 
 
@@ -43,6 +45,57 @@ class RMaxMicrokernelTester {
     return this->iterations_;
   }
 
+  void Test(xnn_f16_rmax_ukernel_function rmax) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> x(n() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f16rng));
+
+      // Compute reference results.
+      float y_ref = -std::numeric_limits<float>::infinity();
+      for (size_t i = 0; i < n(); i++) {
+        y_ref = std::max(y_ref, fp16_ieee_to_fp32_value(x[i]));
+      }
+
+      // Call optimized micro-kernel.
+      uint16_t y = UINT16_C(0x7E00) /* NaN */;
+      rmax(n() * sizeof(uint16_t), x.data(), &y);
+
+      // Verify results.
+      ASSERT_EQ(fp16_ieee_to_fp32_value(y), y_ref)
+        << "batch " << n() << " y = " << y;
+    }
+  }
+
+  void Test(xnn_f32_rmax_ukernel_function rmax) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+
+    std::vector<float> x(n());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(f32rng));
+
+      // Compute reference results.
+      float y_ref = -std::numeric_limits<float>::infinity();
+      for (size_t i = 0; i < n(); i++) {
+        y_ref = std::max(y_ref, x[i]);
+      }
+
+      // Call optimized micro-kernel.
+      float y = std::nanf("");
+      rmax(n() * sizeof(float), x.data(), &y);
+
+      // Verify results.
+      ASSERT_EQ(y_ref, y)
+        << "batch " << n();
+    }
+  }
+
   void Test(xnn_u8_rmax_ukernel_function rmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -63,31 +116,8 @@ class RMaxMicrokernelTester {
       rmax(n() * sizeof(uint8_t), x.data(), &y);
 
       // Verify results.
-      ASSERT_EQ(y_ref, y) << "n = " << n();
-    }
-  }
-
-  void Test(xnn_f32_rmax_ukernel_function rmax) const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
-
-    std::vector<float> x(n());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32rng));
-
-      // Compute reference results.
-      float y_ref = 0;
-      for (size_t i = 0; i < n(); i++) {
-        y_ref = std::max(y_ref, x[i]);
-      }
-
-      // Call optimized micro-kernel.
-      float y = std::nanf("");
-      rmax(n() * sizeof(float), x.data(), &y);
-
-      // Verify results.
-      ASSERT_EQ(y_ref, y) << "n = " << n();
+      ASSERT_EQ(int32_t(y_ref), int32_t(y))
+        << "batch " << n();
     }
   }
 

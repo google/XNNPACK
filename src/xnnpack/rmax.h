@@ -18,6 +18,16 @@ extern "C" {
 #endif
 
 
+#define DECLARE_F16_RMAX_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const void* x,                               \
+      void* y);
+
+DECLARE_F16_RMAX_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__f16c)
+DECLARE_F16_RMAX_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith)
+
+
 #define DECLARE_F32_RMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t n,                                    \
