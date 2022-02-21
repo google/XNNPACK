@@ -123,7 +123,7 @@ class SoftMaxOperatorTester {
     auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
     std::vector<uint16_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f16rng));
@@ -187,7 +187,7 @@ class SoftMaxOperatorTester {
     auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
 
     std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(f32rng));
