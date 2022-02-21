@@ -988,21 +988,30 @@ struct u8_softmax_context {
       size_t batch_index);
 #endif
 
-struct f32_three_pass_softmax_context {
+typedef void (*xnn_compute_reciprocal_function)(const void* input, void* output);
+
+struct floating_point_softmax_context {
   size_t n;
   const void* x;
   size_t x_stride;
   void* y;
   size_t y_stride;
-  xnn_f32_rmax_ukernel_function rmax_ukernel;
-  xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax_ukernel;
+  xnn_rmax_ukernel_function rmax_ukernel;
+  xnn_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax_ukernel;
+  xnn_compute_reciprocal_function compute_reciprocal;
   xnn_vbinary_ukernel_function vmulc_ukernel;
-  union xnn_f32_minmax_params minmax_params;
-  union xnn_f32_expminus_params expminus_params;
+  union {
+    union xnn_f16_minmax_params f16;
+    union xnn_f32_minmax_params f32;
+  } minmax_params;
+  union {
+    union xnn_f16_expminus_params f16;
+    union xnn_f32_expminus_params f32;
+  } expminus_params;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_f32_three_pass_softmax(
-      const struct f32_three_pass_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_floating_point_softmax(
+      const struct floating_point_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 #endif

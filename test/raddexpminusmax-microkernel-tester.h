@@ -44,7 +44,7 @@ class RAddExpMinusMaxMicrokernelTester {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
-    // However, the range is still narrow enough that double-precision exp doesn't overflow.
+    // However, the range is still narrow enough that single-precision exp doesn't overflow.
     auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
 
     std::vector<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));

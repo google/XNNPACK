@@ -2170,6 +2170,20 @@ enum xnn_status xnn_setup_sigmoid_nc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_softmax_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* softmax_op_out);
+
+enum xnn_status xnn_setup_softmax_nc_f16(
+  xnn_operator_t softmax_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 #endif  // XNN_NO_F16_OPERATORS
 
 #ifndef XNN_NO_X16_OPERATORS

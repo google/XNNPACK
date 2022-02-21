@@ -115,6 +115,7 @@ enum xnn_operator_type {
   xnn_operator_type_sigmoid_nc_f32,
   xnn_operator_type_sigmoid_nc_qs8,
   xnn_operator_type_sigmoid_nc_qu8,
+  xnn_operator_type_softmax_nc_f16,
   xnn_operator_type_softmax_nc_f32,
   xnn_operator_type_softmax_nc_qu8,
   xnn_operator_type_square_nc_f32,
@@ -389,7 +390,7 @@ struct xnn_operator {
     struct spmm_context spmm;
     struct subconv_context subconv;
     struct subgemm_context subgemm;
-    struct f32_three_pass_softmax_context f32_three_pass_softmax;
+    struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;
     struct univector_contiguous_context univector_contiguous;
     struct univector_strided_context univector_strided;

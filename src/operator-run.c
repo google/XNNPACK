@@ -861,24 +861,34 @@ void xnn_compute_u8_softmax(
   context->lut_norm_ukernel(n, x, t, y);
 }
 
-void xnn_compute_f32_three_pass_softmax(
-    const struct f32_three_pass_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_floating_point_softmax(
+    const struct floating_point_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)
 {
-  const float* x = (const float*) ((uintptr_t) context->x + context->x_stride * batch_index);
-  float* y = (float*) ((uintptr_t) context->y + context->y_stride * batch_index);
+  const void* x = (const void*) ((uintptr_t) context->x + context->x_stride * batch_index);
+  void* y = (void*) ((uintptr_t) context->y + context->y_stride * batch_index);
   const size_t n = context->n;
 
   // First pass: reduce-max
-  float x_max;
+  union {
+    float as_float;
+    uint16_t as_half;
+  } x_max;
   context->rmax_ukernel(n, x, &x_max);
 
   // Second pass: reduce-add & store exp(x-x_max)
-  float y_sum;
+  union {
+    float as_float;
+    uint16_t as_half;
+  } y_sum;
   context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum, &context->expminus_params);
 
   // Third pass: scale y
-  const float y_scale = 1.0f / y_sum;
+  union {
+    float as_float;
+    uint16_t as_half;
+  } y_scale;
+  context->compute_reciprocal(&y_sum, &y_scale);
   context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
 }
 

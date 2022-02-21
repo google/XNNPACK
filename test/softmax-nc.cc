@@ -11,6 +11,220 @@
 #include "softmax-operator-tester.h"
 
 
+TEST(SOFTMAX_NC_F16, single_class) {
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1)
+    .iterations(100)
+    .TestF16();
+}
+
+TEST(SOFTMAX_NC_F16, two_classes) {
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(2)
+    .iterations(100)
+    .TestF16();
+}
+
+TEST(SOFTMAX_NC_F16, many_classes) {
+  for (size_t channels = 3; channels < 100; channels++) {
+    SoftMaxOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .iterations(1)
+      .TestF16();
+  }
+}
+
+TEST(SOFTMAX_NC_F16, cifar_classes) {
+  // CIFAR-10
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(10)
+    .iterations(15)
+    .TestF16();
+  // CIFAR-100
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(100)
+    .iterations(15)
+    .TestF16();
+}
+
+TEST(SOFTMAX_NC_F16, imagenet_classes) {
+  // ImageNet-1K
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1000)
+    .iterations(10)
+    .TestF16();
+  // ImageNet-1K+1
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1001)
+    .iterations(10)
+    .TestF16();
+  // ImageNet-22K
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(21841)
+    .iterations(10)
+    .TestF16();
+}
+
+TEST(SOFTMAX_NC_F16, small_batch) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .iterations(3)
+      .TestF16();
+  }
+}
+
+TEST(SOFTMAX_NC_F16, small_batch_with_input_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .iterations(3)
+      .TestF16();
+  }
+}
+
+TEST(SOFTMAX_NC_F16, small_batch_with_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .output_stride(117)
+      .iterations(3)
+      .TestF16();
+  }
+}
+
+TEST(SOFTMAX_NC_F16, strided_batch_with_input_and_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .output_stride(117)
+      .iterations(3)
+      .TestF16();
+  }
+}
+
+
+TEST(SOFTMAX_NC_F32, single_class) {
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1)
+    .iterations(100)
+    .TestF32();
+}
+
+TEST(SOFTMAX_NC_F32, two_classes) {
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(2)
+    .iterations(100)
+    .TestF32();
+}
+
+TEST(SOFTMAX_NC_F32, many_classes) {
+  for (size_t channels = 3; channels < 100; channels++) {
+    SoftMaxOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(SOFTMAX_NC_F32, cifar_classes) {
+  // CIFAR-10
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(10)
+    .iterations(15)
+    .TestF32();
+  // CIFAR-100
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(100)
+    .iterations(15)
+    .TestF32();
+}
+
+TEST(SOFTMAX_NC_F32, imagenet_classes) {
+  // ImageNet-1K
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1000)
+    .iterations(10)
+    .TestF32();
+  // ImageNet-1K+1
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(1001)
+    .iterations(10)
+    .TestF32();
+  // ImageNet-22K
+  SoftMaxOperatorTester()
+    .batch_size(1)
+    .channels(21841)
+    .iterations(10)
+    .TestF32();
+}
+
+TEST(SOFTMAX_NC_F32, small_batch) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(SOFTMAX_NC_F32, small_batch_with_input_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(SOFTMAX_NC_F32, small_batch_with_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .output_stride(117)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(SOFTMAX_NC_F32, strided_batch_with_input_and_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 5) {
+    SoftMaxOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .output_stride(117)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+
 TEST(SOFTMAX_NC_QU8, single_class) {
   SoftMaxOperatorTester()
     .batch_size(1)
@@ -140,111 +354,5 @@ TEST(SOFTMAX_NC_QU8, strided_batch_with_input_and_output_stride) {
       .output_stride(117)
       .iterations(3)
       .TestQU8();
-  }
-}
-
-TEST(SOFTMAX_NC_F32, single_class) {
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(1)
-    .iterations(100)
-    .TestF32();
-}
-
-TEST(SOFTMAX_NC_F32, two_classes) {
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(2)
-    .iterations(100)
-    .TestF32();
-}
-
-TEST(SOFTMAX_NC_F32, many_classes) {
-  for (size_t channels = 3; channels < 100; channels++) {
-    SoftMaxOperatorTester()
-      .batch_size(1)
-      .channels(channels)
-      .iterations(1)
-      .TestF32();
-  }
-}
-
-TEST(SOFTMAX_NC_F32, cifar_classes) {
-  // CIFAR-10
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(10)
-    .iterations(15)
-    .TestF32();
-  // CIFAR-100
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(100)
-    .iterations(15)
-    .TestF32();
-}
-
-TEST(SOFTMAX_NC_F32, imagenet_classes) {
-  // ImageNet-1K
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(1000)
-    .iterations(10)
-    .TestF32();
-  // ImageNet-1K+1
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(1001)
-    .iterations(10)
-    .TestF32();
-  // ImageNet-22K
-  SoftMaxOperatorTester()
-    .batch_size(1)
-    .channels(21841)
-    .iterations(10)
-    .TestF32();
-}
-
-TEST(SOFTMAX_NC_F32, small_batch) {
-  for (size_t channels = 1; channels < 100; channels += 5) {
-    SoftMaxOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SOFTMAX_NC_F32, small_batch_with_input_stride) {
-  for (size_t channels = 1; channels < 100; channels += 5) {
-    SoftMaxOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SOFTMAX_NC_F32, small_batch_with_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 5) {
-    SoftMaxOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
-  }
-}
-
-TEST(SOFTMAX_NC_F32, strided_batch_with_input_and_output_stride) {
-  for (size_t channels = 1; channels < 100; channels += 5) {
-    SoftMaxOperatorTester()
-      .batch_size(3)
-      .channels(channels)
-      .input_stride(129)
-      .output_stride(117)
-      .iterations(3)
-      .TestF32();
   }
 }

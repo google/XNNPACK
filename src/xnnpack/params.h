@@ -3454,6 +3454,14 @@ typedef void (*xnn_f32_raddexpminusmax_ukernel_function)(
     float* sum,
     float max);
 
+typedef void (*xnn_raddstoreexpminusmax_ukernel_function)(
+    size_t n,
+    const void* input,
+    const void* max,
+    void* output,
+    void* sum,
+    const void* params);
+
 typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_function)(
     size_t n,
     const void* input,
@@ -4107,8 +4115,11 @@ struct prelu_parameters {
 };
 
 struct raddstoreexpminusmax_parameters {
-  xnn_f32_raddstoreexpminusmax_ukernel_function ukernel;
-  xnn_init_f32_expminus_params_fn init;
+  xnn_raddstoreexpminusmax_ukernel_function ukernel;
+  union {
+    xnn_init_f16_expminus_params_fn f16;
+    xnn_init_f32_expminus_params_fn f32;
+  } init;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
   uint8_t element_tile;
@@ -4234,6 +4245,8 @@ struct xnn_parameters {
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
     struct vmulcaddc_parameters vmulcaddc;
+    struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
+    xnn_rmax_ukernel_function rmax;
   } f16;
   struct {
     struct gemm_parameters gemm;
@@ -4270,7 +4283,7 @@ struct xnn_parameters {
     struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    xnn_f32_rmax_ukernel_function rmax;
+    xnn_rmax_ukernel_function rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).

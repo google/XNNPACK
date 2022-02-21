@@ -20,6 +20,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 
 
@@ -112,6 +114,132 @@ class SoftMaxOperatorTester {
     return this->iterations_;
   }
 
+  void TestF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    // Choose such range that exph(x[i]) overflows, but exph(x[i] - x_max) doesn't.
+    // However, the range is still narrow enough that single-precision exp doesn't overflow.
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(15.0f, 20.0f), std::ref(rng));
+    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+    std::vector<uint16_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        float sum_exp = 0.0;
+        for (size_t c = 0; c < channels(); c++) {
+          sum_exp += std::exp(fp16_ieee_to_fp32_value(input[i * input_stride() + c]));
+        }
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[i * channels() + c] = std::exp(fp16_ieee_to_fp32_value(input[i * input_stride() + c])) / sum_exp;
+        }
+      }
+
+      // Create, setup, run, and destroy SoftMax operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t softmax_op = nullptr;
+
+      const xnn_status status = xnn_create_softmax_nc_f16(
+          channels(), input_stride(), output_stride(),
+          0, &softmax_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, softmax_op);
+
+      // Smart pointer to automatically delete softmax_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_softmax_nc_f16(
+          softmax_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(softmax_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
+              output_ref[i * channels() + c],
+              std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 5.0e-3f))
+            << "element " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void TestF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
+    // However, the range is still narrow enough that single-precision exp doesn't overflow.
+    auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
+
+    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<double> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        double sum_exp = 0.0;
+        for (size_t c = 0; c < channels(); c++) {
+          sum_exp += std::exp(double(input[i * input_stride() + c]));
+        }
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[i * channels() + c] = std::exp(double(input[i * input_stride() + c])) / sum_exp;
+        }
+      }
+
+      // Create, setup, run, and destroy SoftMax operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t softmax_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_softmax_nc_f32(
+          channels(), input_stride(), output_stride(),
+          0, &softmax_op));
+      ASSERT_NE(nullptr, softmax_op);
+
+      // Smart pointer to automatically delete softmax_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_softmax_nc_f32(
+          softmax_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(softmax_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+              double(output[i * output_stride() + c]),
+              output_ref[i * channels() + c],
+              output_ref[i * channels() + c] * 1.0e-5)
+            << "element " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
   void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -173,68 +301,6 @@ class SoftMaxOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.6f);
-        }
-      }
-    }
-  }
-
-  void TestF32() const {
-    std::random_device random_device;
-    auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
-
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<double> output_ref(batch_size() * channels());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::fill(output.begin(), output.end(), std::nanf(""));
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        const double max_input = *std::max_element(
-          input.data() + i * input_stride(),
-          input.data() + i * input_stride() + channels());
-        double sum_exp = 0.0;
-        for (size_t c = 0; c < channels(); c++) {
-          sum_exp += std::exp(double(input[i * input_stride() + c]) - max_input);
-        }
-        for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] =
-              std::exp(double(input[i * input_stride() + c]) - max_input) / sum_exp;
-        }
-      }
-
-      // Create, setup, run, and destroy SoftMax operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-      xnn_operator_t softmax_op = nullptr;
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_create_softmax_nc_f32(
-          channels(), input_stride(), output_stride(),
-          0, &softmax_op));
-      ASSERT_NE(nullptr, softmax_op);
-
-      // Smart pointer to automatically delete softmax_op.
-      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_softmax_op(softmax_op, xnn_delete_operator);
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_softmax_nc_f32(
-          softmax_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(softmax_op, nullptr /* thread pool */));
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-            double(output[i * output_stride() + c]),
-            output_ref[i * channels() + c],
-            output_ref[i * channels() + c] * 1.0e-4);
         }
       }
     }
