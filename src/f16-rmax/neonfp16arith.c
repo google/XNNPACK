@@ -56,7 +56,5 @@ void xnn_f16_rmax_ukernel__neonfp16arith(
       vmax_lo = vmax_f16(vmax_lo, vext_f16(vmax_lo, vx_lo, 1));
     }
   }
-  vmax_lo = vpmax_f16(vmax_lo, vmax_lo);
-  vmax_lo = vpmax_f16(vmax_lo, vmax_lo);
-  vst1_lane_f16(output, vmax_lo, 0);
+  *((__fp16*) output) = vmaxv_f16(vmax_lo);
 }
