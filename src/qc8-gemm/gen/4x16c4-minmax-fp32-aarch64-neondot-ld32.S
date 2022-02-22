@@ -204,7 +204,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32
         SQXTN2  v1.16b, v25.8h
         SQXTN2  v2.16b, v26.8h
         SQXTN2  v3.16b, v27.8h
-        SUB     x11, x11, 3            // rewind params pointer
+        SUB     x11, x11, 3             // rewind params pointer
 
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b

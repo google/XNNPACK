@@ -263,10 +263,10 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x8__aarch64_neon_mlal_lane_pr
         SQADD   v26.8h, v26.8h, v6.8h
         SQADD   v27.8h, v27.8h, v6.8h
         LD1R    {v5.8b}, [x11]          // clamp max value
-        SQXTN  v0.8b, v24.8h
-        SQXTN  v1.8b, v25.8h
-        SQXTN  v2.8b, v26.8h
-        SQXTN  v3.8b, v27.8h
+        SQXTN   v0.8b, v24.8h
+        SQXTN   v1.8b, v25.8h
+        SQXTN   v2.8b, v26.8h
+        SQXTN   v3.8b, v27.8h
         SUB     x11, x11, 15             // rewind params pointer
 
         SMAX    v0.8b, v0.8b, v4.8b
