@@ -76,7 +76,6 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
         SUBS    x1, x1, 16
 
         # Scale and Clamp
-
         FMUL    v16.8h, v16.8h, v4.8h
         FMUL    v17.8h, v17.8h, v4.8h
         FMAX    v16.8h, v16.8h, v5.8h

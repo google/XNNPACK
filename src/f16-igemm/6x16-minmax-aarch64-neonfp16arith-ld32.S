@@ -137,13 +137,13 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
         LDR     s3, [x21], 4              // A3
         LDR     s4, [x22], 4              // A4
         LDR     s5, [x23], 4              // A5
+        LDR     q18, [x5], 16             // B
+        LDR     q19, [x5], 16             // B
         SUBS    x0, x0, 4
         FMLA    v20.8h, v16.8h,  v0.h[0]
         FMLA    v21.8h, v17.8h,  v0.h[0]
         FMLA    v22.8h, v16.8h,  v1.h[0]
         FMLA    v23.8h, v17.8h,  v1.h[0]
-        LDR     q18, [x5], 16             // B
-        LDR     q19, [x5], 16             // B
         FMLA    v24.8h, v16.8h,  v2.h[0]
         FMLA    v25.8h, v17.8h,  v2.h[0]
         FMLA    v26.8h, v16.8h,  v3.h[0]

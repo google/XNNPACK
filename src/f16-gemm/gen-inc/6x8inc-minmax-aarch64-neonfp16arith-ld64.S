@@ -121,6 +121,8 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x8__aarch64_neonfp16arith_ld64
         LDR     d3, [x11], 8
         LDR     d4, [x12], 8
         LDR     d5,  [x4], 8
+        LDR     q18, [x5], 16
+        LDR     q19, [x5], 16
         SUBS    x0, x0, 8
         FMLA    v20.8h, v16.8h,  v0.h[0]
         FMLA    v22.8h, v16.8h,  v1.h[0]
@@ -128,9 +130,6 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x8__aarch64_neonfp16arith_ld64
         FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v28.8h, v16.8h,  v4.h[0]
         FMLA    v30.8h, v16.8h,  v5.h[0]
-        LDR     q18, [x5], 16
-        LDR     q19, [x5], 16
-
         FMLA    v20.8h, v17.8h,  v0.h[1]
         FMLA    v22.8h, v17.8h,  v1.h[1]
         FMLA    v24.8h, v17.8h,  v2.h[1]
@@ -144,7 +143,6 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_6x8__aarch64_neonfp16arith_ld64
         FMLA    v26.8h, v18.8h,  v3.h[2]
         FMLA    v28.8h, v18.8h,  v4.h[2]
         FMLA    v30.8h, v18.8h,  v5.h[2]
-
         FMLA    v20.8h, v19.8h,  v0.h[3]
         FMLA    v22.8h, v19.8h,  v1.h[3]
         FMLA    v24.8h, v19.8h,  v2.h[3]
