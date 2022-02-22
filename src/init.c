@@ -2407,26 +2407,26 @@ static void init(void) {
             xnn_params.f16.gemm.mr = 6;
             xnn_params.f16.gemm.nr = 16;
             break;
+          case cpuinfo_uarch_exynos_m4:
+            xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32);
+            xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32);
+            xnn_params.f16.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64);
+            xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
+            xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_neon_params;
+            xnn_params.f16.gemm.mr = 6;
+            xnn_params.f16.gemm.nr = 16;
+            break;
           case cpuinfo_uarch_cortex_a77:
           case cpuinfo_uarch_cortex_a78:
           case cpuinfo_uarch_exynos_m5:
           case cpuinfo_uarch_cortex_x1:
+          default:
             xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64);
             xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64);
             xnn_params.f16.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64);
             xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
             xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_neon_params;
             xnn_params.f16.gemm.mr = 4;
-            xnn_params.f16.gemm.nr = 16;
-            break;
-          case cpuinfo_uarch_exynos_m4:
-          default:
-            xnn_params.f16.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32);
-            xnn_params.f16.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64);
-            xnn_params.f16.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64);
-            xnn_params.f16.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
-            xnn_params.f16.gemm.init.f16 = xnn_init_f16_scaleminmax_neon_params;
-            xnn_params.f16.gemm.mr = 6;
             xnn_params.f16.gemm.nr = 16;
             break;
         }

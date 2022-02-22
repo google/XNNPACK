@@ -6240,6 +6240,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a75.S
+  src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-ld32.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a53.S
