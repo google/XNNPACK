@@ -18,8 +18,9 @@ tools/generate-maxpool-test.py --spec test/s8-maxpool-minmax.yaml --output test/
 tools/generate-maxpool-test.py --spec test/u8-maxpool-minmax.yaml --output test/u8-maxpool-minmax.cc &
 
 ### Tests for AvgPool micro-kernels
-tools/generate-avgpool-test.py --spec test/qu8-avgpool-minmax.yaml --output test/qu8-avgpool-minmax.cc &
+tools/generate-avgpool-test.py --spec test/f16-avgpool-minmax.yaml --output test/f16-avgpool-minmax.cc &
 tools/generate-avgpool-test.py --spec test/f32-avgpool-minmax.yaml --output test/f32-avgpool-minmax.cc &
+tools/generate-avgpool-test.py --spec test/qu8-avgpool-minmax.yaml --output test/qu8-avgpool-minmax.cc &
 
 ### Tests for GAvgPool micro-kernels
 tools/generate-gavgpool-test.py --spec test/f32-gavgpool-minmax.yaml --output test/f32-gavgpool-minmax.cc &

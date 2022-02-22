@@ -3201,6 +3201,8 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
+  src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
@@ -7202,6 +7204,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-f32-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(f16-f32-vcvt-test f16-f32-vcvt-test)
+
+  ADD_EXECUTABLE(f16-avgpool-minmax-test test/f16-avgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(f16-avgpool-minmax-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(f16-avgpool-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-avgpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(f16-avgpool-minmax-test f16-avgpool-minmax-test)
 
   ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(f16-dwconv-minmax-test PROPERTIES

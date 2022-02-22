@@ -2893,6 +2893,18 @@ typedef void (*xnn_avgpool_unipass_ukernel_function)(
     size_t output_increment,
     const void* params);
 
+typedef void (*xnn_f16_avgpool_minmax_unipass_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    const void* zero,
+    void* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f16_scaleminmax_params* params);
+
 typedef void (*xnn_f32_avgpool_minmax_unipass_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
@@ -2929,6 +2941,19 @@ typedef void (*xnn_avgpool_multipass_ukernel_function)(
     size_t input_increment,
     size_t output_increment,
     const void* params);
+
+typedef void (*xnn_f16_avgpool_minmax_multipass_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    const void* zero,
+    void* buffer,
+    void* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f16_scaleminmax_params* params);
 
 typedef void (*xnn_f32_avgpool_minmax_multipass_ukernel_function)(
     size_t output_pixels,
