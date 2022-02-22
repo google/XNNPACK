@@ -45,9 +45,6 @@
 
 BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55
 
-        # Load a_offset
-        LDR     x11, [sp, 8]
-
         # Load zero, params pointer
         LDP     x12, x8, [sp, 16]
 
@@ -72,12 +69,11 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         ADD     x7, x13, x7             // c5 = c4 + cm_stride
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
-        LDR     x8, [sp]                // load cn_stride
+        LDP     x8, x11, [sp]           // load cn_stride, a_offset
 
-        # Save x19-x23 on stack
-        STP     x19, x20, [sp, -48]!
-        STP     x21, x22, [sp, 16]
-        STR     x23,      [sp, 32]
+        # Save x20-x23 on stack
+        STP     x20, x21, [sp, -32]!
+        STP     x22, x23, [sp, 16]
 
 0:
         # Load initial bias from w into accumulators
@@ -99,7 +95,6 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         MOV     v29.16b, v21.16b
         MOV     v30.16b, v20.16b
         MOV     v31.16b, v21.16b
-
 
 1:
         # Load next 6 A pointers
@@ -125,7 +120,6 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         CMP     x23, x12                // if a5 == zero
         ADD     x23, x23, x11           // a5 += a_offset
         CSEL    x23, x12, x23, EQ       //   a5 = zero, else += a5 + a_offset
-
 
         # Is there at least 2 halffloats (4 bytes)?
         SUBS    x0, x2, 4               // k = kc - 4
@@ -287,11 +281,9 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         # nc loop
         B.HI    0b
 
-        # Restore x19-x23 from stack
-        LDR     x23,      [sp, 32]
-        LDP     x21, x22, [sp, 16]
-        LDP     x19, x20, [sp], 48
-
+        # Restore x20-x23 from stack
+        LDP     x22, x23, [sp, 16]
+        LDP     x20, x21, [sp], 32
         RET
 
 5:
@@ -372,10 +364,9 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         STR     h22, [x16]
         STR     h20,  [x6]
 10:
-        # Restore x19-x23 from stack
-        LDR     x23,      [sp, 32]
-        LDP     x21, x22, [sp, 16]
-        LDP     x19, x20, [sp], 48
+        # Restore x20-x23 from stack
+        LDP     x22, x23, [sp, 16]
+        LDP     x20, x21, [sp], 32
         RET
 
 END_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55

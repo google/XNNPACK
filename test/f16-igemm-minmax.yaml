@@ -16,6 +16,10 @@
   init: xnn_init_f16_scaleminmax_neon_params
   k-block: 4
   assembly: true
+- name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75
+  init: xnn_init_f16_scaleminmax_neon_params
+  k-block: 4
+  assembly: true
 # ARM NEON
 - name: xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64
   init: xnn_init_f16_scaleminmax_neon_params
