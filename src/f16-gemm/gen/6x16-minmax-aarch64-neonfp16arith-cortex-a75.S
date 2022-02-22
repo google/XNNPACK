@@ -18,47 +18,33 @@
 #     const void*restrict w,    x5
 #     void*restrict c,          x6
 #     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x8)
+#     size_t cn_stride,         [sp] -> x8
 
 #     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointers
-#  x3 a0
-#  x9 a1
-# x10 a2
-# x11 a3
-# x12 a4
-#  x4 a5
+# Register usage
+# A0  x3 v0
+# A1  x9 v1
+# A2 x10 v2
+# A3 x11 v3
+# A4 x12 v4
+# A5  x4 v5
 
-# C pointers
-#  x6 c0
-# x16 c1
-# x17 c2
-# x14 c3
-# x13 c4
-#  x7 c5
+# B   x5 v16 v17 v18 v19
 
-# Vector register usage
-# A0   v0
-# A1   v1
-# A2   v2
-# A3   v3
-# A4   v4
-# A5   v5
-# B   v16 v17 v18 v19
-# C   v20 v21
-# C   v22 v23
-# C   v24 v25
-# C   v26 v27
-# C   v28 v29
-# C   v30 v31
+# C0  x6  v20 v21
+# C1 x16  v22 v23
+# C2 x17  v24 v25
+# C3 x14  v26 v27
+# C4 x13  v28 v29
+# C5  x7  v30 v31
+
 # Clamp v6, (v4), (v5)
 # unused     v7
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
-
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75
 
@@ -132,19 +118,20 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         SUBS    x0, x0, 4
         B.LO    2f
 
+       .p2align 3
         # Main loop - 2 halffloats of A (4 bytes)
         # 24 FMA + 6 ld32 A + 4 LDR B
 1:
         FMLA    v20.8h, v16.8h,  v0.h[0]
-        LDR     s4, [x12], 4
+        LDR     s4, [x12], 4              // A4
         FMLA    v21.8h, v17.8h,  v0.h[0]
-        LDR     s5,  [x4], 4
+        LDR     s5,  [x4], 4              // A5
         FMLA    v22.8h, v16.8h,  v1.h[0]
-        LDR     q18, [x5], 16
+        LDR     q18, [x5], 16             // B0
         FMLA    v23.8h, v17.8h,  v1.h[0]
         FMLA    v24.8h, v16.8h,  v2.h[0]
-        LDR     q19, [x5], 16
         FMLA    v25.8h, v17.8h,  v2.h[0]
+        LDR     q19, [x5], 16             // B1
         FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v27.8h, v17.8h,  v3.h[0]
         FMLA    v28.8h, v16.8h,  v4.h[0]
@@ -154,37 +141,37 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
         SUBS    x0, x0, 4
 
         FMLA    v20.8h, v18.8h,  v0.h[1]
-        LDR     q16, [x5], 16
+        LDR     q16, [x5], 16             // B0
         FMLA    v21.8h, v19.8h,  v0.h[1]
         FMLA    v22.8h, v18.8h,  v1.h[1]
-        LDR     q17, [x5], 16
         FMLA    v23.8h, v19.8h,  v1.h[1]
+        LDR     q17, [x5], 16             // B1
         FMLA    v24.8h, v18.8h,  v2.h[1]
-        LDR     s0,  [x3], 4
         FMLA    v25.8h, v19.8h,  v2.h[1]
         FMLA    v26.8h, v18.8h,  v3.h[1]
-        LDR     s1,  [x9], 4
         FMLA    v27.8h, v19.8h,  v3.h[1]
+        LDR     s0,  [x3], 4              // A0
         FMLA    v28.8h, v18.8h,  v4.h[1]
-        LDR     s2, [x10], 4
+        LDR     s1,  [x9], 4              // A1
         FMLA    v29.8h, v19.8h,  v4.h[1]
+        LDR     s2, [x10], 4              // A2
         FMLA    v30.8h, v18.8h,  v5.h[1]
-        LDR     s3, [x11], 4
+        LDR     s3, [x11], 4              // A3
         FMLA    v31.8h, v19.8h,  v5.h[1]
         B.HS    1b
 
         # Epilogue - same as main loop but no loads for next loop
 2:
         FMLA    v20.8h, v16.8h,  v0.h[0]
-        LDR     s4, [x12], 4
+        LDR     s4, [x12], 4              // A4
         FMLA    v21.8h, v17.8h,  v0.h[0]
-        LDR     s5,  [x4], 4
+        LDR     s5,  [x4], 4              // A5
         FMLA    v22.8h, v16.8h,  v1.h[0]
-        LDR     q18, [x5], 16
+        LDR     q18, [x5], 16             // B0
         FMLA    v23.8h, v17.8h,  v1.h[0]
         FMLA    v24.8h, v16.8h,  v2.h[0]
-        LDR     q19, [x5], 16
         FMLA    v25.8h, v17.8h,  v2.h[0]
+        LDR     q19, [x5], 16             // B1
         FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v27.8h, v17.8h,  v3.h[0]
         FMLA    v28.8h, v16.8h,  v4.h[0]
@@ -270,19 +257,19 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a7
 
 4:
         # Remainder- 1 halffloat of A (2 bytes)
-        LDR     h0,  [x3], 2
-        LDR     q16, [x5], 16
-        LDR     q17, [x5], 16
-        LDR     h1,  [x9], 2
-        LDR     h2, [x10], 2
-        LDR     h3, [x11], 2
-        LDR     h4, [x12], 2
-        LDR     h5,  [x4], 2
+        LDR     h0,  [x3], 2              // A0
+        LDR     q16, [x5], 16             // B
+        LDR     q17, [x5], 16             // B
         FMLA    v20.8h, v16.8h,  v0.h[0]
+        LDR     h1,  [x9], 2              // A1
         FMLA    v22.8h, v16.8h,  v1.h[0]
+        LDR     h2, [x10], 2              // A2
         FMLA    v24.8h, v16.8h,  v2.h[0]
+        LDR     h3, [x11], 2              // A3
         FMLA    v26.8h, v16.8h,  v3.h[0]
+        LDR     h4, [x12], 2              // A4
         FMLA    v28.8h, v16.8h,  v4.h[0]
+        LDR     h5,  [x4], 2              // A5
         FMLA    v30.8h, v16.8h,  v5.h[0]
         FMLA    v21.8h, v17.8h,  v0.h[0]
         FMLA    v23.8h, v17.8h,  v1.h[0]
