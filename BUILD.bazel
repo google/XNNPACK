@@ -6715,6 +6715,8 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/5x16-minmax-avx2-broadcast.c",
     "src/f16-igemm/gen/6x8-minmax-avx2-broadcast.c",
     "src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c",
+    "src/f16-pavgpool/9p8x-minmax-avx2-c8.c",
+    "src/f16-pavgpool/9x-minmax-avx2-c8.c",
     "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32.c",
     "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc2.c",
     "src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc4.c",

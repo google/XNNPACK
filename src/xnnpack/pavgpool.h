@@ -31,6 +31,7 @@ extern "C" {
       size_t output_increment,                                          \
       const union xnn_f16_minmax_params* params);
 
+DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8)
 DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8)
 
 
@@ -48,6 +49,7 @@ DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_u
       size_t output_increment,                                        \
       const union xnn_f16_minmax_params* params);
 
+DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8)
 DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8)
 
 
