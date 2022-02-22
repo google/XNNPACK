@@ -2969,6 +2969,19 @@ typedef void (*xnn_pavgpool_unipass_ukernel_function)(
     size_t output_increment,
     const void* params);
 
+typedef void (*xnn_f16_pavgpool_minmax_unipass_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    const void* zero,
+    const void* multiplier,
+    void* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f16_minmax_params* params);
+
 typedef void (*xnn_f32_pavgpool_minmax_unipass_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
@@ -2995,6 +3008,20 @@ typedef void (*xnn_pavgpool_multipass_ukernel_function)(
     size_t input_increment,
     size_t output_increment,
     const void* params);
+
+typedef void (*xnn_f16_pavgpool_minmax_multipass_ukernel_function)(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const void** input,
+    size_t input_offset,
+    const void* zero,
+    const void* multiplier,
+    void* buffer,
+    void* output,
+    size_t input_increment,
+    size_t output_increment,
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_pavgpool_minmax_multipass_ukernel_function)(
     size_t output_pixels,
