@@ -1,0 +1,15 @@
+name: Build using CMake
+on: [push]
+jobs:
+  build-xnnpack-cmake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install ninja
+        run: sudo apt-get install ninja-build
+      - name: Configure CMake
+        run: cmake -S . -B build -G Ninja
+        working-directory: ${{ github.workspace }}
+      - name: Build
+        run: cmake --build build -j
+        working-directory: ${{ github.workspace }}
