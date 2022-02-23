@@ -12949,6 +12949,7 @@ xnnpack_unit_test(
         "test/convolution-nhwc.cc",
         "test/convolution-operator-tester.h",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 

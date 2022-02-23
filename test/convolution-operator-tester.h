@@ -23,6 +23,8 @@
 #include <fp16.h>
 
 #include <xnnpack.h>
+#include <xnnpack/codecache.h>
+#include <xnnpack/allocator.h>
 
 
 class ConvolutionOperatorTester {
@@ -518,6 +520,15 @@ class ConvolutionOperatorTester {
 
   inline size_t iterations() const {
     return this->iterations_;
+  }
+
+  inline ConvolutionOperatorTester& use_jit(bool use_jit) {
+    this->use_jit_ = use_jit;
+    return *this;
+  }
+
+  inline bool use_jit() const {
+    return this->use_jit_;
   }
 
   void TestNHWCxQC8() const {
@@ -1172,6 +1183,11 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
+      xnn_code_cache code_cache;
+      if (use_jit()) {
+        xnn_init_code_cache(&code_cache);
+      }
+
       xnn_status status = xnn_create_convolution2d_nhwc_f32(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
@@ -1183,7 +1199,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          NULL,
+          use_jit() ? &code_cache : NULL,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1193,6 +1209,10 @@ class ConvolutionOperatorTester {
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
+
+      if (use_jit()) {
+        xnn_finalize_code_memory(&code_cache.code_buffer);
+      }
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_convolution2d_nhwc_f32(
@@ -2807,4 +2827,5 @@ class ConvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
+  bool use_jit_{false};
 };
