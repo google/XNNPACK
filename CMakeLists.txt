@@ -7113,7 +7113,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK gtest gtest_main)
+  TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
   ADD_TEST(softmax-nc-test softmax-nc-test)
 
   ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
