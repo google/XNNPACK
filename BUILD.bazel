@@ -9631,7 +9631,6 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/cache.c",
         "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
@@ -9653,7 +9652,6 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/cache.c",
         "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
@@ -9676,6 +9674,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
+        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -9730,6 +9729,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "XNNPACK_test_mode",
     srcs = [
+        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -9788,6 +9788,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xnnpack_for_tflite",
     srcs = [
+        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -9860,6 +9861,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xnnpack_for_tfjs",
     srcs = [
+        "src/code-cache.c",
         "src/init.c",
     ],
     hdrs = ["include/xnnpack.h"],

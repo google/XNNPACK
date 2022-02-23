@@ -236,6 +236,7 @@ SET(LOGGING_SRCS
 SET(COLD_SRCS ${OPERATOR_SRCS} ${SUBGRAPH_SRCS} ${LOGGING_SRCS})
 LIST(APPEND COLD_SRCS
   src/allocator.c
+  src/code-cache.c
   src/init.c
   src/memory-planner.c
   src/operator-delete.c
@@ -261,7 +262,6 @@ SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
   src/jit/aarch64-assembler.cc
   src/jit/assembler.cc
-  src/jit/cache.c
   src/jit/memory.c)
 
 SET(JIT_AARCH32_SRCS
