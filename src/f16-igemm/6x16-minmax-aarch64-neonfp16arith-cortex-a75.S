@@ -282,19 +282,19 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
 
 5:
         # Remainder- 1 halffloat of A (2 bytes)
-        LDR     s0, [x14], 2              // A0
+        LDR     h0, [x14], 2              // A0
         LDR     q16, [x5], 16             // B
         LDR     q17, [x5], 16             // B
         FMLA    v20.8h, v16.8h,  v0.h[0]
-        LDR     s1, [x15], 2              // A1
+        LDR     h1, [x15], 2              // A1
         FMLA    v21.8h, v17.8h,  v0.h[0]
-        LDR     s2, [x20], 2              // A2
+        LDR     h2, [x20], 2              // A2
         FMLA    v22.8h, v16.8h,  v1.h[0]
-        LDR     s3, [x21], 2              // A3
+        LDR     h3, [x21], 2              // A3
         FMLA    v23.8h, v17.8h,  v1.h[0]
-        LDR     s4,  [x22], 2             // A4
+        LDR     h4,  [x22], 2             // A4
         FMLA    v24.8h, v16.8h,  v2.h[0]
-        LDR     s5,  [x23], 2             // A5
+        LDR     h5,  [x23], 2             // A5
         FMLA    v25.8h, v17.8h,  v2.h[0]
         FMLA    v26.8h, v16.8h,  v3.h[0]
         FMLA    v27.8h, v17.8h,  v3.h[0]
