@@ -384,7 +384,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
     1.0f / (float) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
-    xnn_init_f32_minmax_params(&average_pooling_op->params.f32_minmax, output_min, output_max);
+    xnn_params.f32.pavgpool.init.f32(&average_pooling_op->params.f32_minmax, output_min, output_max);
     average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
   } else {
     average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;

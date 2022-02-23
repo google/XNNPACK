@@ -4099,6 +4099,9 @@ struct avgpool_parameters {
 struct pavgpool_parameters {
   xnn_pavgpool_unipass_ukernel_function unipass;
   xnn_pavgpool_multipass_ukernel_function multipass;
+  union {
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   // Number of rows in a primary tile.
   // Unipass micro-kernel must be called with this number of rows, or fewer.
   // Multipass micro-kernel must be called with more than this number of rows.
