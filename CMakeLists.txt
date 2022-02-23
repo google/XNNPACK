@@ -3266,6 +3266,27 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-pavgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-prelu/gen/neonfp16arith-2x8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc4.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc5.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc4.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc5.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc2.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc3.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc6.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96.c
   src/f16-rmax/neonfp16arith.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith-x2.c
   src/f16-spmm/gen/8x1-minmax-neonfp16arith.c
@@ -3311,27 +3332,6 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32-acc4.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40-acc5.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x48-acc3.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x64-acc4.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x72-acc3.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x80-acc5.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc2.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc3.c
-  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x96-acc6.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x24.c
@@ -5012,10 +5012,10 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS
-  src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
-  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f16-avgpool/9p8x-minmax-f16c-c8.c
   src/f16-avgpool/9x-minmax-f16c-c8.c
+  src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
+  src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c16.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c24.c
@@ -5453,27 +5453,27 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f16-igemm/gen/7x8-minmax-avx2-broadcast.c
   src/f16-pavgpool/9p8x-minmax-avx2-c8.c
   src/f16-pavgpool/9x-minmax-avx2-c8.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32-acc4.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x32.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40-acc5.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48-acc3.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x48.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64-acc4.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x64.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72-acc3.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x72.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80-acc5.c
-  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x80.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc2.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc3.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc6.c
+  src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x24.c
@@ -6239,12 +6239,14 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S
   src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-cortex-a75.S
   src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/8x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld32.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a75.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-dwconv/up4x9-minmax-aarch64-neonfma.S
   src/f32-gemm/gen-inc/1x8inc-minmax-aarch64-neonfma-cortex-a53.S

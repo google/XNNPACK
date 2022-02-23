@@ -9,6 +9,7 @@ tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f1
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S &
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld32.S &
+tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in -D INC=1 -o src/f16-gemm/gen-inc/1x16inc-minmax-aarch64-neonfp16arith-ld32.S &
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld32.S.in -D INC=1 -o src/f16-gemm/gen-inc/4x16inc-minmax-aarch64-neonfp16arith-ld32.S &
 tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-ld32.S.in -D INC=1 -o src/f16-gemm/gen-inc/6x16inc-minmax-aarch64-neonfp16arith-ld32.S &
