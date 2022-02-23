@@ -5014,6 +5014,8 @@ SET(PROD_F16C_MICROKERNEL_SRCS
 SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-f16c-x8.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
+  src/f16-avgpool/9p8x-minmax-f16c-c8.c
+  src/f16-avgpool/9x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c16.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c24.c
