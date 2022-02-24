@@ -62,7 +62,8 @@ struct Label {
 
 class AssemblerBase {
  public:
-  // Takes an xnn_code_buffer with a pointer to allocated memory.
+  // Takes an xnn_code_buffer with a pointer to allocated memory. If the buffer
+  // already contains content (size != 0), appends to after size (up to capacity).
   explicit AssemblerBase(xnn_code_buffer* buf);
 
   // Write value into the code buffer and advances cursor_.
@@ -83,9 +84,9 @@ class AssemblerBase {
   const Error error() const { return error_; }
 
  protected:
-  // Pointer to start of code buffer.
+  // Pointer into code buffer to start writing code.
   byte* buffer_;
-  // Pointer to current place in code buffer.
+  // Pointer to current position in code buffer.
   byte* cursor_;
   // Pointer to out-of-bounds of code buffer.
   byte* top_;
