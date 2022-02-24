@@ -87,7 +87,8 @@ inline static void xnn_release_simd_memory(void* memory_pointer) {
     ((void*) ((((uintptr_t) alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
 #endif
 
-#define XNN_DEFAULT_CODE_BUFFER_SIZE 16384  // 16kb.
+#define XNN_DEFAULT_CODE_BUFFER_SIZE 16384 // Default size for buffer to hold all generated microkernels, 16kb.
+#define XNN_DEFAULT_MICROKERNEL_SIZE 4096  // Default size required for generating one microkernel, 4kb.
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,8 +109,9 @@ struct xnn_code_buffer {
 enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size);
 // Finalize buffer, users won't need to call this directly, called by Assembler.
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf);
-// Grows the code memory owned by buf.
-enum xnn_status xnn_grow_code_memory(struct xnn_code_buffer* buf);
+// Grows the code memory owned by buf, ensures that there are at least space bytes free,
+// i.e. buf->capacity - buf->size >= space
+enum xnn_status xnn_grow_code_memory(struct xnn_code_buffer* buf, size_t space);
 // Free all memory associated with `buf`.
 enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf);
 

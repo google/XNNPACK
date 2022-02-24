@@ -196,7 +196,7 @@ bool xnn_code_cache_insert(struct xnn_code_cache* cache, struct xnn_code_span co
 
   // Ensure we have enough space in the cache's code_buffer.
   if (cache->code_buffer.size + code_span.size > cache->code_buffer.capacity) {
-    const enum xnn_status status = xnn_grow_code_memory(&cache->code_buffer);
+    const enum xnn_status status = xnn_grow_code_memory(&cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
     if (xnn_status_success != status) {
       return false;
     }
