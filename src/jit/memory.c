@@ -143,15 +143,15 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
   return xnn_status_success;
 }
 
-enum xnn_status xnn_grow_code_memory(struct xnn_code_buffer* buf, size_t space) {
-  if (buf->size + space <= buf->capacity) {
+enum xnn_status xnn_ensure_code_memory_has_space(struct xnn_code_buffer* buf, size_t n) {
+  if (buf->size + n <= buf->capacity) {
     return xnn_status_success;
   }
 
   // TODO(zhin): use mremap
   size_t size = buf->size;
   struct xnn_code_buffer new_code_buffer;
-  enum xnn_status status = xnn_allocate_code_memory(&new_code_buffer, buf->capacity + space);
+  enum xnn_status status = xnn_allocate_code_memory(&new_code_buffer, buf->size + n);
   if (status != xnn_status_success) {
     return status;
   }
