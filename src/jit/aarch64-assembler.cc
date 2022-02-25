@@ -600,6 +600,10 @@ void Assembler::align(uint8_t n, AlignInstruction instr) {
 }
 
 void Assembler::bind(Label& l) {
+  if (error_ != Error::kNoError) {
+    return;
+  }
+
   if (l.bound) {
     error_ = Error::kLabelAlreadyBound;
     return;

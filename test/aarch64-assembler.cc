@@ -458,6 +458,23 @@ TEST(AArch64Assembler, FinalizeWithError) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
+TEST(AArch64Assembler, BindOverflow) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, 4);
+  Assembler a(&b);
+  Label l1;
+  a.add(x0, x0, 2);
+  EXPECT_EQ(Error::kNoError, a.error());
+
+  // This is out of bounds, not written.
+  a.tbz(x1, 1, l1);
+  EXPECT_EQ(Error::kOutOfMemory, a.error());
+
+  a.bind(l1);
+  ASSERT_EQ(false, l1.bound);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
 
 }  // namespace aarch64
 }  // namespace xnnpack

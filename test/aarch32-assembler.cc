@@ -423,6 +423,24 @@ TEST(AArch32Assembler, CodeBufferOverflow) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
+TEST(AArch32Assembler, BoundOverflow) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, 4);
+  Assembler a(&b);
+  Label l1;
+  a.add(r0, r0, 2);
+  EXPECT_EQ(Error::kNoError, a.error());
+
+  // This is out of bounds, not written.
+  a.bhi(l1);
+  EXPECT_EQ(Error::kOutOfMemory, a.error());
+
+  a.bind(l1);
+  EXPECT_EQ(false, l1.bound);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
 #if XNN_ARCH_ARM && XNN_PLATFORM_JIT
 TEST(AArch32Assembler, JitAllocCodeBuffer) {
   typedef uint32_t (*Func)(uint32_t);

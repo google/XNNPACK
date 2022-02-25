@@ -122,6 +122,10 @@ void Assembler::b(Condition c, Label& l) {
 }
 
 void Assembler::bind(Label& l) {
+  if (error_ != Error::kNoError) {
+    return;
+  }
+
   if (l.bound) {
     error_ = Error::kLabelAlreadyBound;
     return;
