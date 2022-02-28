@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstdint> // For uintptr_t.
+#include <cstring> // For memcpy.
 
 #include <xnnpack.h>
 #include <xnnpack/codecache.h>
