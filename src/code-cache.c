@@ -173,7 +173,7 @@ static bool cache_lookup(struct xnn_code_cache* cache, struct xnn_code_span code
   }
 }
 
-bool xnn_code_cache_insert(struct xnn_code_cache* cache, struct xnn_code_span code_span)
+static bool insert(struct xnn_code_cache* cache, struct xnn_code_span code_span)
 {
   uint32_t hash = murmur_hash3(code_span.code, code_span.size, /*seed=*/XNN_CODE_CACHE_HASH_SEED);
   size_t idx;
@@ -191,21 +191,11 @@ bool xnn_code_cache_insert(struct xnn_code_cache* cache, struct xnn_code_span co
     }
   }
 
-  // Record the offset before we grow the buffer.
-  size_t offset = cache->code_buffer.size;
+  // Check that code_span points into cache's buffer.
+  assert((uintptr_t) code_span.code >= (uintptr_t) cache->code_buffer.code);
+  assert((uintptr_t) code_span.code < (uintptr_t) cache->code_buffer.code + cache->code_buffer.size);
 
-  // Ensure we have enough space in the cache's code_buffer.
-  if (cache->code_buffer.size + code_span.size > cache->code_buffer.capacity) {
-    const enum xnn_status status = xnn_ensure_code_memory_has_space(&cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
-    if (xnn_status_success != status) {
-      return false;
-    }
-    assert(cache->code_buffer.size + code_span.size <= cache->code_buffer.capacity);
-  }
-
-  // Copy to end of cache's code_buffer.
-  memcpy((void*) ((uintptr_t) cache->code_buffer.code + cache->code_buffer.size), code_span.code, code_span.size);
-  cache->code_buffer.size += code_span.size;
+  const size_t offset = (uintptr_t) code_span.code - (uintptr_t) cache->code_buffer.code;
 
   // Insert the entry.
   cache->buckets[idx].size = code_span.size;
@@ -215,7 +205,9 @@ bool xnn_code_cache_insert(struct xnn_code_cache* cache, struct xnn_code_span co
   return true;
 }
 
-size_t xnn_code_cache_lookup(struct xnn_code_cache* code_cache, struct xnn_code_span code_span)
+// Checks if a generated microkernel is already in the cache, returns the offset
+// if found, XNN_CODE_CACHE_NOT_FOUND otherwise.
+static size_t code_cache_lookup(struct xnn_code_cache* code_cache, struct xnn_code_span code_span)
 {
   uint32_t hash = murmur_hash3(code_span.code, code_span.size, /*seed=*/XNN_CODE_CACHE_HASH_SEED);
   size_t bucket_idx;
@@ -230,13 +222,14 @@ size_t xnn_code_cache_lookup(struct xnn_code_cache* code_cache, struct xnn_code_
 
 size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_code_span code_span)
 {
-  const size_t found_offset = xnn_code_cache_lookup(cache, code_span);
+  const size_t found_offset = code_cache_lookup(cache, code_span);
   if (found_offset != XNN_CODE_CACHE_NOT_FOUND) {
+    // Found in the cache, rewind the buffer.
+    cache->code_buffer.size -= code_span.size;
     return found_offset;
   }
-
-  const size_t code_offset = cache->code_buffer.size;
-  if (!xnn_code_cache_insert(cache, code_span)) {
+  const size_t code_offset = (uintptr_t) code_span.code - (uintptr_t) cache->code_buffer.code;
+  if (!insert(cache, code_span)) {
     return XNN_CODE_CACHE_NOT_FOUND;
   }
   return code_offset;

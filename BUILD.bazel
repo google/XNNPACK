@@ -13302,6 +13302,14 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "code_cache_test",
+    srcs = [
+        "test/code-cache.cc",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = [":XNNPACK"] + MICROKERNEL_TEST_DEPS,
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of assembly kernels.

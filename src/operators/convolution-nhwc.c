@@ -74,35 +74,36 @@ size_t get_generated_gemm(
   size_t offset = XNN_CODE_CACHE_NOT_FOUND;
   xnn_jit_gemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
-    goto not_found;
+    goto error;
   }
 
-  enum xnn_status status;
-  // TODO(zhin): generate into an on-stack buffer.
-  struct xnn_code_buffer temp_code_buffer;
-  status = xnn_allocate_code_memory(&temp_code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to initialize code buffer to generate GEMM");
-    goto cleanup;
+  enum xnn_status status = xnn_status_success;
+
+  status = xnn_ensure_code_memory_has_space(&code_cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
+  if (xnn_status_success != status) {
+    xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
+    goto error;
   }
 
-  status = generator(&temp_code_buffer, group_output_channels % nr,
+  const size_t old_size = code_cache->code_buffer.size;
+  void* old_code = (uint8_t*) code_cache->code_buffer.code + old_size;
+  status = generator(&code_cache->code_buffer, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
-                     (void*)jit_gemm_params);
+                     jit_gemm_params);
 
   if (xnn_status_success != status) {
-    goto cleanup;
+    xnn_log_error("failed to generate GEMM microkernel");
+    goto error;
   }
 
-  struct xnn_code_span code_span = {
-    .code = temp_code_buffer.code,
-    .size = temp_code_buffer.size
+  const size_t new_size = code_cache->code_buffer.size;
+  const struct xnn_code_span code_span = {
+    .code = old_code,
+    .size = new_size - old_size
   };
-  offset = xnn_code_cache_get_or_insert(code_cache, code_span);
+  return xnn_code_cache_get_or_insert(code_cache, code_span);
 
-cleanup:
-  xnn_release_code_memory(&temp_code_buffer);
-not_found:
+error:
   return offset;
 }
 
@@ -120,34 +121,35 @@ size_t get_generated_igemm(
   size_t offset = XNN_CODE_CACHE_NOT_FOUND;
   xnn_jit_igemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
-    goto not_found;
+    goto error;
   }
-  enum xnn_status status;
-  // TODO(zhin): generate into an on-stack buffer.
-  struct xnn_code_buffer temp_code_buffer;
-  status = xnn_allocate_code_memory(&temp_code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to initialize code buffer to generate IGEMM");
-    goto cleanup;
+  enum xnn_status status = xnn_status_success;
+
+  status = xnn_ensure_code_memory_has_space(&code_cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
+  if (xnn_status_success != status) {
+    xnn_log_error("failed to ensure sufficient space in code_buffer for microkernel");
+    goto error;
   }
 
-  status = generator(&temp_code_buffer, group_output_channels % nr,
+  const size_t old_size = code_cache->code_buffer.size;
+  void* old_code = (uint8_t*) code_cache->code_buffer.code + old_size;
+  status = generator(&code_cache->code_buffer, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
-                     kernel_size * mr * sizeof(void*), (void*)jit_gemm_params);
+                     kernel_size * mr * sizeof(void*), jit_gemm_params);
   if (status != xnn_status_success) {
-    goto cleanup;
+    xnn_log_error("failed to generate IGEMM microkernel");
+    goto error;
   }
 
-  struct xnn_code_span code_span = {
-    .code = temp_code_buffer.code,
-    .size = temp_code_buffer.size
+  const size_t new_size = code_cache->code_buffer.size;
+  const struct xnn_code_span code_span = {
+    .code = old_code,
+    .size = new_size - old_size
   };
-  offset = xnn_code_cache_get_or_insert(code_cache, code_span);
+  return xnn_code_cache_get_or_insert(code_cache, code_span);
 
-cleanup:
-    xnn_release_code_memory(&temp_code_buffer);
-not_found:
-    return offset;
+error:
+  return offset;
 }
 #endif  // XNN_PLATFORM_JIT
 

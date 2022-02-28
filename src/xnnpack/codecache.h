@@ -53,16 +53,10 @@ struct xnn_code_cache {
 
 enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache);
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
-// Inserts code_buffer containing generated microkernel into the cache. Does not
-// take ownership of code_buffer, as it will copy the code (if not found in
-// cache).
-bool xnn_code_cache_insert(struct xnn_code_cache* cache, struct xnn_code_span code_span);
-// Checks if a generated microkernel is already in the cache, returns the offset
-// if found, XNN_CODE_CACHE_NOT_FOUND otherwise.
-size_t xnn_code_cache_lookup(struct xnn_code_cache* code_cache, struct xnn_code_span code_span);
-// Looks up code_span in the cache, returns offset into cache's buffer if found,
-// otherwise copies code_span into cache's buffer, and returns the offset to
-// copied code_span.
+// Looks up code_span in the cache, returns offset into cache's buffer if found.
+// code_span should already point into cache->code_buffer.
+// If it already exists within the cache, the buffer will be rewound, so we can
+// reuse the same section of the buffer.
 size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_code_span code_span);
 
 #ifdef __cplusplus

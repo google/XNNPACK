@@ -8739,6 +8739,14 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(aarch64-assembler-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(code-cache-test test/code-cache.cc)
+  SET_TARGET_PROPERTIES(code-cache-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(code-cache-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(code-cache-test PRIVATE jit pthreadpool gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
