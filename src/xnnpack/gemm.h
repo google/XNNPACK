@@ -454,7 +454,7 @@ DECLARE_F32_GEMMINC_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemminc_minmax_ukernel_4x4__
       void* c,                                            \
       size_t cm_stride,                                   \
       size_t cn_stride,                                   \
-      const union xnn_f16_scaleminmax_params* params);
+      const union xnn_f16_minmax_params* params);
 
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64)
 DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64)

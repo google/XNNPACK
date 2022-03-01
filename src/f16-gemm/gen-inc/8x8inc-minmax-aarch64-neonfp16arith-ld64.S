@@ -21,7 +21,7 @@
 #     size_t cn_stride,         [sp] -> (x8)
 
 #     const float*restrict acc,  [sp + 8] -> x15
-#     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> (x8)
+#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -64,7 +64,7 @@
 # C   v30
 # C   v31
 
-# Clamp v20 v21 v22
+# Clamp v20 v21
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
@@ -85,7 +85,7 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
         # Load params
-        LD3R    {v20.8h, v21.8h, v22.8h}, [x8]
+        LD2R    {v20.8h, v21.8h}, [x8]
 
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
@@ -194,32 +194,24 @@ BEGIN_FUNCTION xnn_f16_gemminc_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         # Is there a remainder?- 1 halffloats of A (2 bytes)
         TBNZ    x0, 1, 5f
 2:
-        # Scale and Clamp
-        FMUL    v24.8h, v24.8h, v20.8h
-        FMUL    v25.8h, v25.8h, v20.8h
-        FMUL    v26.8h, v26.8h, v20.8h
-        FMUL    v27.8h, v27.8h, v20.8h
-        FMUL    v28.8h, v28.8h, v20.8h
-        FMUL    v29.8h, v29.8h, v20.8h
-        FMUL    v30.8h, v30.8h, v20.8h
-        FMUL    v31.8h, v31.8h, v20.8h
-        FMAX    v24.8h, v24.8h, v21.8h
-        FMAX    v25.8h, v25.8h, v21.8h
-        FMAX    v26.8h, v26.8h, v21.8h
-        FMAX    v27.8h, v27.8h, v21.8h
-        FMAX    v28.8h, v28.8h, v21.8h
-        FMAX    v29.8h, v29.8h, v21.8h
-        FMAX    v30.8h, v30.8h, v21.8h
-        FMAX    v31.8h, v31.8h, v21.8h
+        # Clamp
+        FMAX    v24.8h, v24.8h, v20.8h
+        FMAX    v25.8h, v25.8h, v20.8h
+        FMAX    v26.8h, v26.8h, v20.8h
+        FMAX    v27.8h, v27.8h, v20.8h
+        FMAX    v28.8h, v28.8h, v20.8h
+        FMAX    v29.8h, v29.8h, v20.8h
+        FMAX    v30.8h, v30.8h, v20.8h
+        FMAX    v31.8h, v31.8h, v20.8h
         SUBS    x1, x1, 8
-        FMIN    v24.8h, v24.8h, v22.8h
-        FMIN    v25.8h, v25.8h, v22.8h
-        FMIN    v26.8h, v26.8h, v22.8h
-        FMIN    v27.8h, v27.8h, v22.8h
-        FMIN    v28.8h, v28.8h, v22.8h
-        FMIN    v29.8h, v29.8h, v22.8h
-        FMIN    v30.8h, v30.8h, v22.8h
-        FMIN    v31.8h, v31.8h, v22.8h
+        FMIN    v24.8h, v24.8h, v21.8h
+        FMIN    v25.8h, v25.8h, v21.8h
+        FMIN    v26.8h, v26.8h, v21.8h
+        FMIN    v27.8h, v27.8h, v21.8h
+        FMIN    v28.8h, v28.8h, v21.8h
+        FMIN    v29.8h, v29.8h, v21.8h
+        FMIN    v30.8h, v30.8h, v21.8h
+        FMIN    v31.8h, v31.8h, v21.8h
 
         # Store full 8 x 8
         B.LO    6f

@@ -509,9 +509,9 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  union xnn_f16_scaleminmax_params params;
+  union xnn_f16_minmax_params params;
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
-    xnn_params.f16.gemm.init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
+    xnn_params.f16.gemm.init.f16(&params, fp16_output_min, fp16_output_max);
   }
   xnn_pack_gemm_io_w_function pack_gemm_io_w = (xnn_pack_gemm_io_w_function) xnn_pack_f16_gemm_io_w;
   xnn_pack_gemm_goi_w_function pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w;
@@ -642,7 +642,7 @@ enum xnn_status xnn_setup_fully_connected_nc_f16(
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,
     1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
-    &fully_connected_op->params.f16_scaleminmax,
-    sizeof(fully_connected_op->params.f16_scaleminmax),
+    &fully_connected_op->params.f16_minmax,
+    sizeof(fully_connected_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
 }

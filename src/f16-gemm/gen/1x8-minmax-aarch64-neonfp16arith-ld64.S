@@ -19,7 +19,7 @@
 #     void*restrict c,          x6
 #     size_t cm_stride,         (x7) - unused
 #     size_t cn_stride,         [sp] -> x14
-#     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -33,7 +33,8 @@
 # A0   v0 v1
 # B   v20 v21 v22 v23
 # C   v16 v18
-# Clamp v4, v5, v6
+
+# Clamp v4, v5
 
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
@@ -42,7 +43,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         LDP     x14, x8, [sp]
 
         # Load params values
-        LD3R    {v4.8h, v5.8h, v6.8h}, [x8]
+        LD2R    {v4.8h, v5.8h}, [x8]
 0:
         # Load initial bias from w into accumulators
         LDR     q16, [x5], 16
@@ -77,10 +78,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         FADD    v16.8h, v16.8h, v18.8h
         SUBS    x1, x1, 8
 
-        # Scale and Clamp
-        FMUL    v16.8h, v16.8h, v4.8h
-        FMAX    v16.8h, v16.8h, v5.8h
-        FMIN    v16.8h, v16.8h, v6.8h
+        # Clamp
+        FMAX    v16.8h, v16.8h, v4.8h
+        FMIN    v16.8h, v16.8h, v5.8h
 
         # Store full 1 x 8
         B.LO    6f

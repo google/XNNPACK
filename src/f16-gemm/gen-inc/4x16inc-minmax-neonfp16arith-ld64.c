@@ -28,7 +28,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x16__neonfp16arith_ld64(
     size_t cm_stride,
     size_t cn_stride,
     const void*restrict acc,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -212,15 +212,6 @@ void xnn_f16_gemminc_minmax_ukernel_4x16__neonfp16arith_ld64(
       } while (k != 0);
     }
 
-    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
-    vacc0x01234567 = vmulq_f16(vacc0x01234567, vscale);
-    vacc1x01234567 = vmulq_f16(vacc1x01234567, vscale);
-    vacc2x01234567 = vmulq_f16(vacc2x01234567, vscale);
-    vacc3x01234567 = vmulq_f16(vacc3x01234567, vscale);
-    vacc0x89ABCDEF = vmulq_f16(vacc0x89ABCDEF, vscale);
-    vacc1x89ABCDEF = vmulq_f16(vacc1x89ABCDEF, vscale);
-    vacc2x89ABCDEF = vmulq_f16(vacc2x89ABCDEF, vscale);
-    vacc3x89ABCDEF = vmulq_f16(vacc3x89ABCDEF, vscale);
 
     const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
     vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);

@@ -20,7 +20,7 @@
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> x8
 
-#     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -59,7 +59,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a5
         CSEL    x16, x6, x16, LO        //   c1 = c0
 
         # Load params
-        LDR     d6, [x8]
+        LDR     s6, [x8]
 
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
@@ -201,21 +201,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a5
         # Is there a remainder?- 1 halffloat of A (2 bytes)
         TBNZ    x0, 1, 4f
 3:
-        # Scale and Clamp
-        FMUL    v20.8h, v20.8h, v6.h[0]
-        DUP     v4.8h, v6.h[1]
-        FMUL    v21.8h, v21.8h, v6.h[0]
-        DUP     v5.8h, v6.h[2]
-        FMUL    v22.8h, v22.8h, v6.h[0]
-        FMUL    v23.8h, v23.8h, v6.h[0]
-        FMUL    v24.8h, v24.8h, v6.h[0]
-        FMUL    v25.8h, v25.8h, v6.h[0]
-        FMUL    v26.8h, v26.8h, v6.h[0]
-        FMUL    v27.8h, v27.8h, v6.h[0]
-        FMUL    v28.8h, v28.8h, v6.h[0]
-        FMUL    v29.8h, v29.8h, v6.h[0]
-        FMUL    v30.8h, v30.8h, v6.h[0]
-        FMUL    v31.8h, v31.8h, v6.h[0]
+        # Clamp
+        DUP     v4.8h, v6.h[0]
+        DUP     v5.8h, v6.h[1]
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h

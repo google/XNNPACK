@@ -25,7 +25,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     size_t cn_stride,
     size_t a_offset,
     const void* zero,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -112,10 +112,6 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
-    $for N in range(0, NR, 8):
-      $for M in range(MR):
-        vacc${M}x${ABC[N:N+8]} = vmulq_f16(vacc${M}x${ABC[N:N+8]}, vscale);
 
     const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
     $for N in range(0, NR, 8):

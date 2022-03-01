@@ -27,7 +27,7 @@ void xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast(
     size_t cn_stride,
     size_t a_offset,
     const void* zero,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -73,10 +73,6 @@ void xnn_f16_igemm_minmax_ukernel_1x16__avx2_broadcast(
       } while (k != 0);
       p -= 1 * sizeof(void*);
     } while (p != 0);
-
-    const __m256 vscale = _mm256_load_ps(params->avx.scale);
-    vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc0x01234567, vscale), _MM_FROUND_NO_EXC));
-    vacc0x89ABCDEF = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vacc0x89ABCDEF, vscale), _MM_FROUND_NO_EXC));
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);

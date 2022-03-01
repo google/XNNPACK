@@ -716,7 +716,7 @@ void GemmMicrokernelTester::Test(
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_f16_gemm_minmax_ukernel_function gemm_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const
+void GemmMicrokernelTester::Test(xnn_f16_gemm_minmax_ukernel_function gemm_minmax, xnn_init_f16_minmax_params_fn init_params) const
 {
   ASSERT_LE(m(), mr());
   ASSERT_GE(a_stride(), k());
@@ -764,9 +764,8 @@ void GemmMicrokernelTester::Test(xnn_f16_gemm_minmax_ukernel_function gemm_minma
     const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
 
     // Prepare parameters.
-    xnn_f16_scaleminmax_params params;
+    xnn_f16_minmax_params params;
     init_params(&params,
-      UINT16_C(0x3C00) /* 1.0 */,
       fp16_ieee_from_fp32_value(c_min),
       fp16_ieee_from_fp32_value(c_max));
 
@@ -792,7 +791,7 @@ void GemmMicrokernelTester::Test(xnn_f16_gemm_minmax_ukernel_function gemm_minma
   }
 }
 
-void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_function igemm_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
+void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_function igemm_minmax, xnn_init_f16_minmax_params_fn init_params) const {
   ASSERT_LE(m(), mr());
 
   std::random_device random_device;
@@ -874,9 +873,8 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_function igemm_min
     }
 
     // Prepare parameters.
-    xnn_f16_scaleminmax_params params;
+    xnn_f16_minmax_params params;
     init_params(&params,
-      UINT16_C(0x3C00) /* 1.0 */,
       fp16_ieee_from_fp32_value(c_min),
       fp16_ieee_from_fp32_value(c_max));
 

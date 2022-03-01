@@ -21,7 +21,7 @@ union xnn_f16_default_params {
   char _; // Dummy member variable to comply with the C standard
 };
 
-// scaleminmax is used for gemm/igemm ukernels.
+// scaleminmax is used for avgpool ukernels.
 union xnn_f16_scaleminmax_params {
   // Empty; serves to differentiate pointer types for micro-kernels without fused activation.
   char _; // Dummy member variable to comply with the C standard
@@ -30,7 +30,6 @@ union xnn_f16_scaleminmax_params {
     uint16_t scale;
     uint16_t min;
     uint16_t max;
-    uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2139,7 +2138,7 @@ typedef void (*xnn_f16_ppmm_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_gemm_ukernel_function)(
     size_t mr,
@@ -2244,7 +2243,7 @@ typedef void (*xnn_f16_gemm_minmax_ukernel_function)(
     void* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     size_t mr,
@@ -2258,7 +2257,7 @@ typedef void (*xnn_f16_igemm_minmax_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const void* zero,
-    const union xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_qc8_gemm_minmax_ukernel_function)(
     size_t mr,
@@ -2474,7 +2473,7 @@ typedef void (*xnn_f16_spmm_minmax_ukernel_function)(
     const uint32_t* nidx_nnzmap,
     void* output,
     size_t output_stride,
-    const union xnn_f16_scaleminmax_params* params);
+    const union xnn_f16_minmax_params* params);
 
 typedef void (*xnn_f32_spmm_minmax_ukernel_function)(
     size_t batch_size,
@@ -3922,7 +3921,7 @@ struct gemm_parameters {
     xnn_init_qs8_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
-    xnn_init_f16_scaleminmax_params_fn f16;
+    xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
   } init;
   uint8_t mr;

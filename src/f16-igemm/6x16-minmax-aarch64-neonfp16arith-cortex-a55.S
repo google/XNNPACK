@@ -57,7 +57,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         # Load params
-        LDR     d6, [x8]
+        LDR     s6, [x8]
 
         CMP     x0, 4                   // if mr < 4
         ADD     x10, x17, x7            // c3 = c2 + cm_stride
@@ -225,21 +225,9 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a
         SUBS    x9, x9, 48              // ks -= MR * sizeof(void*)
         B.HI    1b
 
-        # Scale and Clamp
-        DUP     v4.8h, v6.h[1]
-        DUP     v5.8h, v6.h[2]
-        FMUL    v20.8h, v20.8h, v6.h[0]
-        FMUL    v21.8h, v21.8h, v6.h[0]
-        FMUL    v22.8h, v22.8h, v6.h[0]
-        FMUL    v23.8h, v23.8h, v6.h[0]
-        FMUL    v24.8h, v24.8h, v6.h[0]
-        FMUL    v25.8h, v25.8h, v6.h[0]
-        FMUL    v26.8h, v26.8h, v6.h[0]
-        FMUL    v27.8h, v27.8h, v6.h[0]
-        FMUL    v28.8h, v28.8h, v6.h[0]
-        FMUL    v29.8h, v29.8h, v6.h[0]
-        FMUL    v30.8h, v30.8h, v6.h[0]
-        FMUL    v31.8h, v31.8h, v6.h[0]
+        # Clamp
+        DUP     v4.8h, v6.h[0]
+        DUP     v5.8h, v6.h[1]
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h

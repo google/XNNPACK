@@ -17,7 +17,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const void* zero,                  [sp + 16] -> x12
-#     const xnn_f16_scaleminmax_params params [sp + 24] -> (x8)
+#     const xnn_f16_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -34,7 +34,7 @@
 # C2 x17 v28 v29
 # C3  x7 v30 v31
 
-# Clamp v4, v5, v6
+# Clamp v4, v5
 
 BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
 
@@ -45,7 +45,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         LDP     x12, x8, [sp, 16]
 
         # Load params values
-        LD3R    {v4.8h, v5.8h, v6.8h}, [x8]
+        LD2R    {v4.8h, v5.8h}, [x8]
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -132,31 +132,23 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
         SUBS    x9, x9, 32              // ks -= MR * sizeof(void*)
         B.HI    1b
 
-        # Scale and Clamp
-        FMUL    v16.8h, v16.8h, v4.8h
-        FMUL    v17.8h, v17.8h, v4.8h
-        FMUL    v18.8h, v18.8h, v4.8h
-        FMUL    v19.8h, v19.8h, v4.8h
-        FMUL    v28.8h, v28.8h, v4.8h
-        FMUL    v29.8h, v29.8h, v4.8h
-        FMUL    v30.8h, v30.8h, v4.8h
-        FMUL    v31.8h, v31.8h, v4.8h
-        FMAX    v16.8h, v16.8h, v5.8h
-        FMAX    v17.8h, v17.8h, v5.8h
-        FMAX    v18.8h, v18.8h, v5.8h
-        FMAX    v19.8h, v19.8h, v5.8h
-        FMAX    v28.8h, v28.8h, v5.8h
-        FMAX    v29.8h, v29.8h, v5.8h
-        FMAX    v30.8h, v30.8h, v5.8h
-        FMAX    v31.8h, v31.8h, v5.8h
-        FMIN    v16.8h, v16.8h, v6.8h
-        FMIN    v17.8h, v17.8h, v6.8h
-        FMIN    v18.8h, v18.8h, v6.8h
-        FMIN    v19.8h, v19.8h, v6.8h
-        FMIN    v28.8h, v28.8h, v6.8h
-        FMIN    v29.8h, v29.8h, v6.8h
-        FMIN    v30.8h, v30.8h, v6.8h
-        FMIN    v31.8h, v31.8h, v6.8h
+        # Clamp
+        FMAX    v16.8h, v16.8h, v4.8h
+        FMAX    v17.8h, v17.8h, v4.8h
+        FMAX    v18.8h, v18.8h, v4.8h
+        FMAX    v19.8h, v19.8h, v4.8h
+        FMAX    v28.8h, v28.8h, v4.8h
+        FMAX    v29.8h, v29.8h, v4.8h
+        FMAX    v30.8h, v30.8h, v4.8h
+        FMAX    v31.8h, v31.8h, v4.8h
+        FMIN    v16.8h, v16.8h, v5.8h
+        FMIN    v17.8h, v17.8h, v5.8h
+        FMIN    v18.8h, v18.8h, v5.8h
+        FMIN    v19.8h, v19.8h, v5.8h
+        FMIN    v28.8h, v28.8h, v5.8h
+        FMIN    v29.8h, v29.8h, v5.8h
+        FMIN    v30.8h, v30.8h, v5.8h
+        FMIN    v31.8h, v31.8h, v5.8h
 
         # Store full 4 x 16
         SUBS    x1, x1, 16

@@ -292,7 +292,7 @@ class SpMMMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_spmm_minmax_ukernel_function spmm, xnn_init_f16_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f16_spmm_minmax_ukernel_function spmm, xnn_init_f16_minmax_params_fn init_params) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
@@ -435,9 +435,9 @@ class SpMMMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_scaleminmax_params params;
+      xnn_f16_minmax_params params;
       init_params(&params,
-        UINT16_C(0x3C00) /* 1.0 */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+        fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
 
       spmm(m() * sizeof(uint16_t), n(),
         input.data() + first_kk * m(),

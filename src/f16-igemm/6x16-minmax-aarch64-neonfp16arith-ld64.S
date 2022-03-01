@@ -57,7 +57,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         CSEL    x17, x16, x17, LS       //   c2 = c1
 
         # Load params
-        LDR     d6, [x8]
+        LDR     s6, [x8]
 
         CMP     x0, 4                   // if mr < 4
         ADD     x10, x17, x7            // c3 = c2 + cm_stride
@@ -206,21 +206,9 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         SUBS    x9, x9, 48              // ks -= MR * sizeof(void*)
         B.HI    1b
 
-        # Scale and Clamp
-        DUP     v4.8h, v6.h[1]
-        DUP     v5.8h, v6.h[2]
-        FMUL    v20.8h, v20.8h, v6.h[0]
-        FMUL    v21.8h, v21.8h, v6.h[0]
-        FMUL    v22.8h, v22.8h, v6.h[0]
-        FMUL    v23.8h, v23.8h, v6.h[0]
-        FMUL    v24.8h, v24.8h, v6.h[0]
-        FMUL    v25.8h, v25.8h, v6.h[0]
-        FMUL    v26.8h, v26.8h, v6.h[0]
-        FMUL    v27.8h, v27.8h, v6.h[0]
-        FMUL    v28.8h, v28.8h, v6.h[0]
-        FMUL    v29.8h, v29.8h, v6.h[0]
-        FMUL    v30.8h, v30.8h, v6.h[0]
-        FMUL    v31.8h, v31.8h, v6.h[0]
+        # Clamp
+        DUP     v4.8h, v6.h[0]
+        DUP     v5.8h, v6.h[1]
         FMAX    v20.8h, v20.8h, v4.8h
         FMAX    v21.8h, v21.8h, v4.8h
         FMAX    v22.8h, v22.8h, v4.8h
@@ -248,7 +236,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         FMIN    v31.8h, v31.8h, v5.8h
 
         # Store full 6 x 16
-        B.LO    5f
+        B.LO    6f
 
         ST1     {v30.16b, v31.16b},  [x7], x8
         ST1     {v28.16b, v29.16b}, [x13], x8
@@ -269,7 +257,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
 
         # Remainder- 1-3 halffloats of A (2-6 bytes)
 4:
-        TBZ     x0, 2, 41f
+        TBZ     x0, 2, 5f
         LDR     s0, [x14], 4              // A0
         LDR     q16, [x5], 16             // B
         LDR     q17, [x5], 16             // B
@@ -307,7 +295,7 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         FMLA    v30.8h, v18.8h,  v5.h[1]
         FMLA    v31.8h, v19.8h,  v5.h[1]
 
-41:
+5:
         TBZ     x0, 1, 3b
         LDR     h0, [x14], 2              // A0
         LDR     q16, [x5], 16             // B
@@ -332,8 +320,8 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         B       3b
 
         # Store odd width
-5:
-        TBZ     x1, 3, 6f
+6:
+        TBZ     x1, 3, 7f
         STR     q30,  [x7], 16
         MOV     v30.16b, v31.16b
         STR     q28, [x13], 16
@@ -346,8 +334,8 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         MOV     v22.16b, v23.16b
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
-6:
-        TBZ     x1, 2, 7f
+7:
+        TBZ     x1, 2, 8f
         STR     d30,  [x7], 8
         STR     d28, [x13], 8
         DUP     d30, v30.d[1]
@@ -361,8 +349,8 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         DUP     d22, v22.d[1]
         DUP     d20, v20.d[1]
 
-7:
-        TBZ     x1, 1, 8f
+8:
+        TBZ     x1, 1, 9f
         STR     s30,  [x7], 4
         STR     s28, [x13], 4
         DUP     s30, v30.s[1]
@@ -376,15 +364,15 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
         DUP     s22, v22.s[1]
         DUP     s20, v20.s[1]
 
-8:
-        TBZ     x1, 0, 9f
+9:
+        TBZ     x1, 0, 10f
         STR     h30,  [x7]
         STR     h28, [x13]
         STR     h26, [x10]
         STR     h24, [x17]
         STR     h22, [x16]
         STR     h20,  [x6]
-9:
+10:
         # Restore x20-x23 from stack
         LDP     x22, x23, [sp, 16]
         LDP     x20, x21, [sp], 32

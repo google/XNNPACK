@@ -19,7 +19,7 @@
 #     void*restrict c,          x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> x14
-#     const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -45,8 +45,9 @@
 # C   v18
 # C   v28
 # C   v30
-# Clamp v4, v5, v6
-# unused A   v7 v8 v9 v10 v11
+
+# Clamp v4, v5
+# unused A   v6, v7 v8 v9 v10 v11
 # unused B   v19
 
 BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
@@ -55,7 +56,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
         LDP     x14, x8, [sp]
 
         # Load params values
-        LD3R    {v4.8h, v5.8h, v6.8h}, [x8]
+        LD2R    {v4.8h, v5.8h}, [x8]
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -122,20 +123,16 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
         # Is there a remainder?- 1 halffloats of A (2 bytes)
         TBNZ    x0, 1, 5f
 2:
-        # Scale and Clamp
-        FMUL    v16.8h, v16.8h, v4.8h
+        # Clamp
+        FMAX    v16.8h, v16.8h, v4.8h
         SUBS    x1, x1, 8
-        FMUL    v18.8h, v18.8h, v4.8h
-        FMUL    v28.8h, v28.8h, v4.8h
-        FMUL    v30.8h, v30.8h, v4.8h
-        FMAX    v16.8h, v16.8h, v5.8h
-        FMAX    v18.8h, v18.8h, v5.8h
-        FMAX    v28.8h, v28.8h, v5.8h
-        FMAX    v30.8h, v30.8h, v5.8h
-        FMIN    v16.8h, v16.8h, v6.8h
-        FMIN    v18.8h, v18.8h, v6.8h
-        FMIN    v28.8h, v28.8h, v6.8h
-        FMIN    v30.8h, v30.8h, v6.8h
+        FMAX    v18.8h, v18.8h, v4.8h
+        FMAX    v28.8h, v28.8h, v4.8h
+        FMAX    v30.8h, v30.8h, v4.8h
+        FMIN    v16.8h, v16.8h, v5.8h
+        FMIN    v18.8h, v18.8h, v5.8h
+        FMIN    v28.8h, v28.8h, v5.8h
+        FMIN    v30.8h, v30.8h, v5.8h
 
         # Store full 4 x 8
         B.LO    6f

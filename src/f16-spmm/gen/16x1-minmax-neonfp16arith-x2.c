@@ -23,7 +23,7 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2(
     const uint32_t*restrict nidx_nnzmap,
     void*restrict output,
     size_t output_stride,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mc != 0);
   assert(mc % sizeof(__fp16) == 0);
@@ -32,7 +32,6 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2(
   const __fp16*restrict i = (const __fp16*) input;
   __fp16*restrict o = (__fp16*) output;
 
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
   const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
   const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
 
@@ -80,10 +79,8 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2(
           vacc89ABCDEF = vfmaq_f16(vacc89ABCDEF, va89ABCDEF, vb);
         } while (--nnz != 0);
       }
-      float16x8_t vout01234567 = vmulq_f16(vacc01234567, vscale);
-      float16x8_t vout89ABCDEF = vmulq_f16(vacc89ABCDEF, vscale);
-      vout01234567 = vminq_f16(vout01234567, vmax);
-      vout89ABCDEF = vminq_f16(vout89ABCDEF, vmax);
+      float16x8_t vout01234567 = vminq_f16(vacc01234567, vmax);
+      float16x8_t vout89ABCDEF = vminq_f16(vacc89ABCDEF, vmax);
       vout01234567 = vmaxq_f16(vout01234567, vmin);
       vout89ABCDEF = vmaxq_f16(vout89ABCDEF, vmin);
       vst1q_f16(o, vout01234567);

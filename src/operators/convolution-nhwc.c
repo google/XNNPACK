@@ -983,10 +983,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  union xnn_f16_scaleminmax_params gemm_params;
+  union xnn_f16_minmax_params gemm_params;
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
     xnn_params.f16.gemm.init.f16(&gemm_params,
-      UINT16_C(0x3C00) /* 1.0 */, fp16_output_min, fp16_output_max);
+      fp16_output_min, fp16_output_max);
   }
 
   union xnn_f16_minmax_params dwconv_params;

@@ -527,9 +527,9 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     gemm_ukernels = &gemm_parameters->linear;
   }
 
-  union xnn_f16_scaleminmax_params params;
+  union xnn_f16_minmax_params params;
   if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
-    gemm_parameters->init.f16(&params, UINT16_C(0x3C00) /* 1.0 */, output_min_as_half, output_max_as_half);
+    gemm_parameters->init.f16(&params, output_min_as_half, output_max_as_half);
   }
 
   xnn_pack_conv_goki_w_function pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w;
@@ -1121,7 +1121,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,
     1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
-    &deconvolution_op->params.f16_scaleminmax, sizeof(deconvolution_op->params.f16_scaleminmax),
+    &deconvolution_op->params.f16_minmax, sizeof(deconvolution_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
