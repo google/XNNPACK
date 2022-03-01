@@ -343,15 +343,15 @@ enum xnn_status xnn_define_concatenate2(
             i, output_value->shape.dim[i], input1_value->shape.dim[i] + input2_value->shape.dim[i]);
         return xnn_status_invalid_parameter;
       }
-    }
-
-    if (output_value->shape.dim[i] != input1_value->shape.dim[i]) {
-      xnn_log_error(
-          "failed to define %s operator with output ID #%" PRIu32
-          ": mismatch dimension %zu, output has %zu, input has %zu",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), output_id,
-          i, output_value->shape.dim[i], input1_value->shape.dim[i]);
-      return xnn_status_invalid_parameter;
+    } else {
+      if (output_value->shape.dim[i] != input1_value->shape.dim[i]) {
+        xnn_log_error(
+            "failed to define %s operator with output ID #%" PRIu32
+            ": mismatch dimension %zu, output has %zu, input has %zu",
+            xnn_node_type_to_string(xnn_node_type_concatenate2), output_id,
+            i, output_value->shape.dim[i], input1_value->shape.dim[i]);
+        return xnn_status_invalid_parameter;
+      }
     }
   }
 
