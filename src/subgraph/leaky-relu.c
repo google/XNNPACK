@@ -41,7 +41,7 @@ static enum xnn_status create_leaky_relu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.leaky_relu.negative_slope,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp32:
@@ -49,7 +49,7 @@ static enum xnn_status create_leaky_relu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.leaky_relu.negative_slope,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     default:
       XNN_UNREACHABLE;
@@ -84,11 +84,11 @@ static enum xnn_status setup_leaky_relu_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_leaky_relu_nc_f16:
       return xnn_setup_leaky_relu_nc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -96,7 +96,7 @@ static enum xnn_status setup_leaky_relu_operator(
 #endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_leaky_relu_nc_f32:
       return xnn_setup_leaky_relu_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

@@ -71,7 +71,7 @@ static enum xnn_status create_convolution_operator(
       node->activation.output_min,
       node->activation.output_max,
       node->flags | (values[input_id].layout == xnn_layout_type_nhwc ? XNN_FLAG_INPUT_NHWC : 0),
-      &opdata->operator_object);
+      &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
@@ -99,7 +99,7 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_max,
           node->flags,
           code_cache,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #ifndef XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp16:
@@ -125,7 +125,7 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_max,
           node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
           NULL,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #endif  // XNN_NO_F16_OPERATORS
 #ifndef XNN_NO_QS8_OPERATORS
@@ -162,7 +162,7 @@ static enum xnn_status create_convolution_operator(
           output_scale, output_min, output_max,
           node->flags,
           NULL,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
       }
       case xnn_compute_type_qc8:
@@ -198,7 +198,7 @@ static enum xnn_status create_convolution_operator(
           output_scale, output_min, output_max,
           node->flags,
           NULL,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
       }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
@@ -237,7 +237,7 @@ static enum xnn_status create_convolution_operator(
           output_scale, output_min, output_max,
           node->flags,
           NULL,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
       }
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
@@ -277,10 +277,10 @@ static enum xnn_status setup_convolution_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_convolution_nchw_f32:
       return xnn_setup_convolution2d_nchw_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -290,7 +290,7 @@ static enum xnn_status setup_convolution_operator(
       break;
     case xnn_operator_type_convolution_nhwc_f32:
       return xnn_setup_convolution2d_nhwc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -301,7 +301,7 @@ static enum xnn_status setup_convolution_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_convolution_nhwc_f16:
       return xnn_setup_convolution2d_nhwc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -313,7 +313,7 @@ static enum xnn_status setup_convolution_operator(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_convolution_nhwc_qc8:
       return xnn_setup_convolution2d_nhwc_qc8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -323,7 +323,7 @@ static enum xnn_status setup_convolution_operator(
       break;
     case xnn_operator_type_convolution_nhwc_qs8:
       return xnn_setup_convolution2d_nhwc_qs8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -335,7 +335,7 @@ static enum xnn_status setup_convolution_operator(
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_convolution_nhwc_qu8:
       return xnn_setup_convolution2d_nhwc_qu8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,

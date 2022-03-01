@@ -38,7 +38,7 @@ static enum xnn_status create_maximum_operator(
 
   const enum xnn_status status = xnn_create_maximum_nd_f32(
     node->flags,
-    &opdata->operator_object);
+    &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
     opdata->shape1.num_dims = values[input1_id].shape.num_dims;
     opdata->shape2.num_dims = values[input2_id].shape.num_dims;
@@ -100,7 +100,7 @@ static enum xnn_status setup_maximum_operator(
   assert(output_data != NULL);
 
   return xnn_setup_maximum_nd_f32(
-    opdata->operator_object,
+    opdata->operator_objects[0],
     opdata->shape1.num_dims,
     opdata->shape1.dim,
     opdata->shape2.num_dims,

@@ -42,7 +42,7 @@ static enum xnn_status create_depth_to_space_operator(
         output_channel_dim /* output stride */,
         node->params.depth_to_space.block_size,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
@@ -55,7 +55,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output stride */,
             node->params.depth_to_space.block_size,
             node->flags,
-            &opdata->operator_object);
+            &opdata->operator_objects[0]);
         break;
 #endif  // XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp32:
@@ -65,7 +65,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output stride */,
             node->params.depth_to_space.block_size,
             node->flags,
-            &opdata->operator_object);
+            &opdata->operator_objects[0]);
         break;
 #if !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
       case xnn_compute_type_qs8:
@@ -76,7 +76,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output stride */,
             node->params.depth_to_space.block_size,
             node->flags,
-            &opdata->operator_object);
+            &opdata->operator_objects[0]);
         break;
 #endif  // !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
       default:
@@ -117,10 +117,10 @@ static enum xnn_status setup_depth_to_space_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
       return xnn_setup_depth_to_space_nchw2nhwc_x32(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -130,7 +130,7 @@ static enum xnn_status setup_depth_to_space_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nhwc_x16:
       return xnn_setup_depth_to_space_nhwc_x16(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -140,7 +140,7 @@ static enum xnn_status setup_depth_to_space_operator(
 #endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nhwc_x32:
       return xnn_setup_depth_to_space_nhwc_x32(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -150,7 +150,7 @@ static enum xnn_status setup_depth_to_space_operator(
 #if !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
     case xnn_operator_type_depth_to_space_nhwc_x8:
       return xnn_setup_depth_to_space_nhwc_x8(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,

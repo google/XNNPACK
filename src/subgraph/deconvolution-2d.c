@@ -77,7 +77,7 @@ static enum xnn_status create_deconvolution_operator(
           node->activation.output_max,
           node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
           code_cache,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
@@ -103,7 +103,7 @@ static enum xnn_status create_deconvolution_operator(
           node->activation.output_max,
           node->flags,
           code_cache,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -141,7 +141,7 @@ static enum xnn_status create_deconvolution_operator(
           output_max,
           node->flags,
           code_cache,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
@@ -182,7 +182,7 @@ static enum xnn_status create_deconvolution_operator(
           output_max,
           node->flags,
           code_cache,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
@@ -223,11 +223,11 @@ static enum xnn_status setup_deconvolution_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_deconvolution_nhwc_f16:
       return xnn_setup_deconvolution2d_nhwc_f16(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -240,7 +240,7 @@ static enum xnn_status setup_deconvolution_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_deconvolution_nhwc_f32:
       return xnn_setup_deconvolution2d_nhwc_f32(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -253,7 +253,7 @@ static enum xnn_status setup_deconvolution_operator(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_deconvolution_nhwc_qs8:
       return xnn_setup_deconvolution2d_nhwc_qs8(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,
@@ -267,7 +267,7 @@ static enum xnn_status setup_deconvolution_operator(
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_deconvolution_nhwc_qu8:
       return xnn_setup_deconvolution2d_nhwc_qu8(
-          opdata->operator_object,
+          opdata->operator_objects[0],
           opdata->batch_size,
           opdata->input_height,
           opdata->input_width,

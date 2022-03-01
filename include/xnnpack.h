@@ -906,6 +906,30 @@ enum xnn_status xnn_define_static_constant_pad(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a 2-Input Concatenate Node and add it to a Subgraph.
+///
+/// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param axis - the axis to concatenate the two input tensors along
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    second input.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph with each dimension, except the axis, equal to the corresponding dimension of the
+///                    first input.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a N-dimensional tensor defined
+///                    in the @a subgraph with each dimension equal to the dimension of both inputs, except the axis
+///                    dimension, where it is the sum of the corresponding dimensions of both inputs.
+/// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
+enum xnn_status xnn_define_concatenate2(
+  xnn_subgraph_t subgraph,
+  size_t axis,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Reshape Node with static shape specification and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

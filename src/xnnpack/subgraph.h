@@ -20,6 +20,8 @@
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
+#define XNN_MAX_OPERATOR_OBJECTS 2
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -143,6 +145,7 @@ enum xnn_node_type {
   xnn_node_type_bankers_rounding,
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
+  xnn_node_type_concatenate2,
   xnn_node_type_convert,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
@@ -258,6 +261,9 @@ struct xnn_node {
       size_t new_height;
       size_t new_width;
     } static_resize;
+    struct {
+      size_t axis;
+    } concatenate;
   } params;
   struct {
     float output_min;
@@ -285,7 +291,7 @@ struct xnn_node {
 };
 
 struct xnn_operator_data {
-  xnn_operator_t operator_object;
+  xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_setup_operator_fn setup;
   size_t batch_size;
   size_t input_height;

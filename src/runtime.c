@@ -201,7 +201,7 @@ enum xnn_status xnn_setup_runtime(
 
   for (size_t i = 0; i < runtime->num_ops; i++) {
     const struct xnn_operator_data* opdata = &runtime->opdata[i];
-    if (opdata->operator_object == NULL) {
+    if (opdata->operator_objects[0] == NULL) {
       // Operator was removed during optimization
       continue;
     }
@@ -221,15 +221,18 @@ enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
   for (size_t i = 0; i < runtime->num_ops; i++) {
-    if (runtime->opdata[i].operator_object == NULL) {
-      // Operator was removed after fusion
-      continue;
+    for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+      if (runtime->opdata[i].operator_objects[j] == NULL) {
+        // Operator was removed after fusion
+        continue;
+      }
+
+      const enum xnn_status status = xnn_run_operator(runtime->opdata[i].operator_objects[j], runtime->threadpool);
+      if (status != xnn_status_success) {
+        return status;
+      }
     }
 
-    const enum xnn_status status = xnn_run_operator(runtime->opdata[i].operator_object, runtime->threadpool);
-    if (status != xnn_status_success) {
-      return status;
-    }
   }
   return xnn_status_success;
 }
@@ -240,7 +243,9 @@ enum xnn_status xnn_delete_runtime(
   if (runtime != NULL) {
     if (runtime->opdata != NULL) {
       for (size_t i = 0; i < runtime->num_ops; i++) {
-        xnn_delete_operator(runtime->opdata[i].operator_object);
+        for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+          xnn_delete_operator(runtime->opdata[i].operator_objects[j]);
+        }
       }
       xnn_release_memory(runtime->opdata);
 

@@ -39,14 +39,14 @@ static enum xnn_status create_softmax_operator(
       status = xnn_create_softmax_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_datatype_fp16:
       status = xnn_create_softmax_nc_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
@@ -82,10 +82,10 @@ static enum xnn_status setup_softmax_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_softmax_nc_f32:
       return xnn_setup_softmax_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -93,7 +93,7 @@ static enum xnn_status setup_softmax_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_softmax_nc_f16:
       return xnn_setup_softmax_nc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

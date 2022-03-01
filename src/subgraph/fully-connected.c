@@ -71,7 +71,7 @@ static enum xnn_status create_fully_connected_operator(
         node->activation.output_max,
         node->flags /* flags */,
         code_cache,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -96,7 +96,7 @@ static enum xnn_status create_fully_connected_operator(
         output_scale, output_min, output_max,
         node->flags /* flags */,
         code_cache,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
@@ -124,7 +124,7 @@ static enum xnn_status create_fully_connected_operator(
         output_scale, output_min, output_max,
         node->flags /* flags */,
         code_cache,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
@@ -161,10 +161,10 @@ static enum xnn_status setup_fully_connected_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_fully_connected_nc_f32:
       return xnn_setup_fully_connected_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -172,7 +172,7 @@ static enum xnn_status setup_fully_connected_operator(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_fully_connected_nc_qs8:
       return xnn_setup_fully_connected_nc_qs8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -181,7 +181,7 @@ static enum xnn_status setup_fully_connected_operator(
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_fully_connected_nc_qu8:
       return xnn_setup_fully_connected_nc_qu8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

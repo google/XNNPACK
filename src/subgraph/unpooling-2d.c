@@ -48,7 +48,7 @@ static enum xnn_status create_unpooling_operator(
     node->params.pooling_2d.pooling_width,
     channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     node->flags,
-    &opdata->operator_object);
+    &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
     opdata->batch_size = values[input_value_id].shape.dim[0];
     opdata->input_height = values[input_value_id].shape.dim[1];
@@ -91,7 +91,7 @@ static enum xnn_status setup_unpooling_operator(
   assert(output_data != NULL);
 
   return xnn_setup_unpooling2d_nhwc_x32(
-    opdata->operator_object,
+    opdata->operator_objects[0],
     opdata->batch_size,
     opdata->input_height,
     opdata->input_width,

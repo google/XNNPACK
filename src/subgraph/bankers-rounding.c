@@ -39,7 +39,7 @@ static enum xnn_status create_bankers_rounding_operator(
   const enum xnn_status status = xnn_create_bankers_rounding_nc_f32(
     channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     node->flags,
-    &opdata->operator_object);
+    &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
     opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
     opdata->inputs[0] = input_id;
@@ -71,7 +71,7 @@ static enum xnn_status setup_bankers_rounding_operator(
   assert(output_data != NULL);
 
   return xnn_setup_bankers_rounding_nc_f32(
-    opdata->operator_object,
+    opdata->operator_objects[0],
     opdata->batch_size,
     input_data,
     output_data,

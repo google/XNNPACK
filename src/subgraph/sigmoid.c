@@ -40,14 +40,14 @@ static enum xnn_status create_sigmoid_operator(
       status = xnn_create_sigmoid_nc_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_sigmoid_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -60,7 +60,7 @@ static enum xnn_status create_sigmoid_operator(
         values[output_id].quantization.scale,
         INT8_MIN, INT8_MAX,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
@@ -75,7 +75,7 @@ static enum xnn_status create_sigmoid_operator(
         values[output_id].quantization.scale,
         0, UINT8_MAX,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
@@ -112,11 +112,11 @@ static enum xnn_status setup_sigmoid_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_sigmoid_nc_f16:
       return xnn_setup_sigmoid_nc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -124,7 +124,7 @@ static enum xnn_status setup_sigmoid_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_sigmoid_nc_f32:
       return xnn_setup_sigmoid_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -132,7 +132,7 @@ static enum xnn_status setup_sigmoid_operator(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_sigmoid_nc_qs8:
       return xnn_setup_sigmoid_nc_qs8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -141,7 +141,7 @@ static enum xnn_status setup_sigmoid_operator(
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_sigmoid_nc_qu8:
       return xnn_setup_sigmoid_nc_qu8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

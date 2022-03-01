@@ -48,7 +48,7 @@ static enum xnn_status create_average_pooling_operator(
     node->activation.output_min,
     node->activation.output_max,
     node->flags,
-    &opdata->operator_object);
+    &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
     opdata->batch_size = values[input_id].shape.dim[0];
     opdata->input_height = values[input_id].shape.dim[1];
@@ -82,7 +82,7 @@ static enum xnn_status setup_average_pooling_operator(
   assert(output_data != NULL);
 
   return xnn_setup_average_pooling2d_nhwc_f32(
-    opdata->operator_object,
+    opdata->operator_objects[0],
     opdata->batch_size,
     opdata->input_height,
     opdata->input_width,

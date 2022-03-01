@@ -40,7 +40,7 @@ static enum xnn_status create_convert_operator(
       status = xnn_create_convert_nc_f32_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32_to_qs8:
       status = xnn_create_convert_nc_f32_qs8(
@@ -49,7 +49,7 @@ static enum xnn_status create_convert_operator(
         (int8_t) values[output_id].quantization.zero_point,
         INT8_MIN, INT8_MAX,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32_to_qu8:
       status = xnn_create_convert_nc_f32_qu8(
@@ -58,13 +58,13 @@ static enum xnn_status create_convert_operator(
         (uint8_t) values[output_id].quantization.zero_point,
         0, UINT8_MAX,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp16_to_fp32:
       status = xnn_create_convert_nc_f16_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_qs8_to_fp32:
       status = xnn_create_convert_nc_qs8_f32(
@@ -72,7 +72,7 @@ static enum xnn_status create_convert_operator(
         values[input_id].quantization.scale,
         (int8_t) values[input_id].quantization.zero_point,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_qu8_to_fp32:
       status = xnn_create_convert_nc_qu8_f32(
@@ -80,7 +80,7 @@ static enum xnn_status create_convert_operator(
         values[input_id].quantization.scale,
         (uint8_t) values[input_id].quantization.zero_point,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     default:
       XNN_UNREACHABLE;
@@ -115,45 +115,45 @@ static enum xnn_status setup_convert_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_convert_nc_f32_f16:
       return xnn_setup_convert_nc_f32_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
         threadpool);
     case xnn_operator_type_convert_nc_f32_qs8:
       return xnn_setup_convert_nc_f32_qs8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
         threadpool);
     case xnn_operator_type_convert_nc_f32_qu8:
       return xnn_setup_convert_nc_f32_qu8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
         threadpool);
     case xnn_operator_type_convert_nc_f16_f32:
       return xnn_setup_convert_nc_f16_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
         threadpool);
     case xnn_operator_type_convert_nc_qs8_f32:
       return xnn_setup_convert_nc_qs8_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
         threadpool);
     case xnn_operator_type_convert_nc_qu8_f32:
       return xnn_setup_convert_nc_qu8_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

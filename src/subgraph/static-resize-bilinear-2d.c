@@ -40,7 +40,7 @@ static enum xnn_status create_resize_bilinear_operator(
     status = xnn_create_resize_bilinear2d_nchw_f32(
       channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
       node->flags,
-      &opdata->operator_object);
+      &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
@@ -50,21 +50,21 @@ static enum xnn_status create_resize_bilinear_operator(
         status = xnn_create_resize_bilinear2d_nhwc_f16(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->flags,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
       case xnn_compute_type_fp32:
         status = xnn_create_resize_bilinear2d_nhwc_f32(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->flags,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #ifndef XNN_NO_S8_OPERATORS
       case xnn_compute_type_qs8:
         status = xnn_create_resize_bilinear2d_nhwc_s8(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->flags,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #endif  // !defined(XNN_NO_S8_OPERATORS)
 #ifndef XNN_NO_U8_OPERATORS
@@ -72,7 +72,7 @@ static enum xnn_status create_resize_bilinear_operator(
         status = xnn_create_resize_bilinear2d_nhwc_u8(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
           node->flags,
-          &opdata->operator_object);
+          &opdata->operator_objects[0]);
         break;
 #endif  // !defined(XNN_NO_U8_OPERATORS)
       default:
@@ -113,10 +113,10 @@ static enum xnn_status setup_resize_bilinear_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_resize_bilinear_nchw_f32:
       return xnn_setup_resize_bilinear2d_nchw_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -129,7 +129,7 @@ static enum xnn_status setup_resize_bilinear_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_resize_bilinear_nhwc_f16:
       return xnn_setup_resize_bilinear2d_nhwc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -142,7 +142,7 @@ static enum xnn_status setup_resize_bilinear_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return xnn_setup_resize_bilinear2d_nhwc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -155,7 +155,7 @@ static enum xnn_status setup_resize_bilinear_operator(
 #ifndef XNN_NO_S8_OPERATORS
     case xnn_operator_type_resize_bilinear_nhwc_s8:
       return xnn_setup_resize_bilinear2d_nhwc_s8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -169,7 +169,7 @@ static enum xnn_status setup_resize_bilinear_operator(
 #ifndef XNN_NO_U8_OPERATORS
     case xnn_operator_type_resize_bilinear_nhwc_u8:
       return xnn_setup_resize_bilinear2d_nhwc_u8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,

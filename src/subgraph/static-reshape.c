@@ -38,14 +38,14 @@ static enum xnn_status create_copy_operator(
       status = xnn_create_copy_nc_x16(
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_copy_nc_x32(
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -57,7 +57,7 @@ static enum xnn_status create_copy_operator(
       status = xnn_create_copy_nc_x8(
         1 /* channels */, 1 /* input stride */, 1 /* output stride */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
@@ -93,11 +93,11 @@ static enum xnn_status setup_copy_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     case xnn_operator_type_copy_nc_x8:
       return xnn_setup_copy_nc_x8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -107,7 +107,7 @@ static enum xnn_status setup_copy_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_copy_nc_x16:
       return xnn_setup_copy_nc_x16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -116,7 +116,7 @@ static enum xnn_status setup_copy_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_copy_nc_x32:
       return xnn_setup_copy_nc_x32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

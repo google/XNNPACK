@@ -52,7 +52,7 @@ static enum xnn_status create_max_pooling_operator(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
@@ -71,7 +71,7 @@ static enum xnn_status create_max_pooling_operator(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_S8_OPERATORS
     case xnn_compute_type_qs8:
@@ -97,7 +97,7 @@ static enum xnn_status create_max_pooling_operator(
         output_min,
         output_max,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_S8_OPERATORS)
@@ -125,7 +125,7 @@ static enum xnn_status create_max_pooling_operator(
         output_min,
         output_max,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     }
 #endif  // !defined(XNN_NO_U8_OPERATORS)
@@ -164,11 +164,11 @@ static enum xnn_status setup_max_pooling_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_max_pooling_nhwc_f16:
       return xnn_setup_max_pooling2d_nhwc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -178,7 +178,7 @@ static enum xnn_status setup_max_pooling_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_max_pooling_nhwc_f32:
       return xnn_setup_max_pooling2d_nhwc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -188,7 +188,7 @@ static enum xnn_status setup_max_pooling_operator(
 #ifndef XNN_NO_S8_OPERATORS
     case xnn_operator_type_max_pooling_nhwc_s8:
       return xnn_setup_max_pooling2d_nhwc_s8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,
@@ -199,7 +199,7 @@ static enum xnn_status setup_max_pooling_operator(
 #ifndef XNN_NO_U8_OPERATORS
     case xnn_operator_type_max_pooling_nhwc_u8:
       return xnn_setup_max_pooling2d_nhwc_u8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
         opdata->input_width,

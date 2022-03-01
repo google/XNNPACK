@@ -40,7 +40,7 @@ static enum xnn_status create_elu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->params.elu.alpha,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -53,7 +53,7 @@ static enum xnn_status create_elu_operator(
         values[output_id].quantization.scale,
         INT8_MIN, INT8_MAX,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // XNN_NO_QS8_OPERATORS
     default:
@@ -89,10 +89,10 @@ static enum xnn_status setup_elu_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_elu_nc_f32:
       return xnn_setup_elu_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -100,7 +100,7 @@ static enum xnn_status setup_elu_operator(
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_elu_nc_qs8:
       return xnn_setup_elu_nc_qs8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,

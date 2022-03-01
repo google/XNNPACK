@@ -40,14 +40,14 @@ static enum xnn_status create_constant_pad_operator(
       status = xnn_create_constant_pad_nd_x16(
         &node->params.static_pad.padding_value,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_constant_pad_nd_x32(
         &node->params.static_pad.padding_value,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
@@ -59,7 +59,7 @@ static enum xnn_status create_constant_pad_operator(
       status = xnn_create_constant_pad_nd_x8(
         &node->params.static_pad.padding_value,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
@@ -97,11 +97,11 @@ static enum xnn_status setup_constant_pad_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     case xnn_operator_type_constant_pad_nd_x8:
       return xnn_setup_constant_pad_nd_x8(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
         opdata->pre_paddings,
@@ -114,7 +114,7 @@ static enum xnn_status setup_constant_pad_operator(
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_constant_pad_nd_x16:
       return xnn_setup_constant_pad_nd_x16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
         opdata->pre_paddings,
@@ -126,7 +126,7 @@ static enum xnn_status setup_constant_pad_operator(
 #endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_constant_pad_nd_x32:
       return xnn_setup_constant_pad_nd_x32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->shape1.num_dims,
         opdata->shape1.dim,
         opdata->pre_paddings,

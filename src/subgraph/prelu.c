@@ -44,7 +44,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         values[slope_id].data /* negative slope */,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
 #endif  // XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp32:
@@ -52,7 +52,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         values[slope_id].data /* negative slope */,
         node->flags,
-        &opdata->operator_object);
+        &opdata->operator_objects[0]);
       break;
     default:
       XNN_UNREACHABLE;
@@ -87,11 +87,11 @@ static enum xnn_status setup_prelu_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  switch (opdata->operator_object->type) {
+  switch (opdata->operator_objects[0]->type) {
 #ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_prelu_nc_f16:
       return xnn_setup_prelu_nc_f16(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
@@ -99,7 +99,7 @@ static enum xnn_status setup_prelu_operator(
 #endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_prelu_nc_f32:
       return xnn_setup_prelu_nc_f32(
-        opdata->operator_object,
+        opdata->operator_objects[0],
         opdata->batch_size,
         input_data,
         output_data,
