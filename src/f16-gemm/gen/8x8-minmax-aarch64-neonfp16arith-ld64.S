@@ -275,7 +275,6 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_8x8__aarch64_neonfp16arith_ld64
         FMLA    v29.8h, v17.8h,  v5.h[1]
         FMLA    v30.8h, v17.8h,  v6.h[1]
         FMLA    v31.8h, v17.8h,  v7.h[1]
-
         TBZ     x0, 1, 2b
 
 5:

@@ -244,7 +244,6 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x8__aarch64_n
         FMLA    v26.8h, v17.8h,  v3.h[1]
         FMLA    v28.8h, v17.8h,  v4.h[1]
         FMLA    v30.8h, v17.8h,  v5.h[1]
-
         TBZ     x0, 1, 2b
 
 5:
