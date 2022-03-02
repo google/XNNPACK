@@ -165,6 +165,7 @@ enum xnn_node_type {
   xnn_node_type_negate,
   xnn_node_type_prelu,
   xnn_node_type_sigmoid,
+  xnn_node_type_split_even2,
   xnn_node_type_softmax,
   xnn_node_type_static_constant_pad,
   xnn_node_type_static_reshape,
@@ -264,6 +265,9 @@ struct xnn_node {
     struct {
       size_t axis;
     } concatenate;
+    struct {
+      size_t axis;
+    } split;
   } params;
   struct {
     float output_min;
