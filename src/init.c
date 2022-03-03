@@ -820,7 +820,6 @@ static void init(void) {
           /* Choose micro-kernels for little cores according to micro-kernel specification for the big core */
           const uint32_t mr = xnn_params.f32.gemm.mr;
           const uint32_t nr = xnn_params.f32.gemm.nr;
-          const uint32_t log2_sr = xnn_params.f32.gemm.log2_sr;
           for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
             const struct cpuinfo_uarch_info* uarch_info = cpuinfo_get_uarch(i);
             if (uarch_info == NULL) {
@@ -830,7 +829,7 @@ static void init(void) {
 
             switch (uarch_info->uarch) {
               case cpuinfo_uarch_cortex_a53:
-                if (mr == 4 && nr == 8 && log2_sr == 0) {
+                if (mr == 4 && nr == 8) {
                   xnn_params.f32.gemm.minmax.gemm.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53;
                   xnn_params.f32.gemm.minmax.igemm.function[i] = (xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53;
                   xnn_params.f32.gemm.minmax.gemm1.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64;
@@ -838,7 +837,7 @@ static void init(void) {
                 }
                 break;
               case cpuinfo_uarch_cortex_a55r0:
-                if (mr == 4 && nr == 8 && log2_sr == 0) {
+                if (mr == 4 && nr == 8) {
                   xnn_params.f32.gemm.minmax.gemm.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53;
                   xnn_params.f32.gemm.minmax.igemm.function[i] = (xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53;
                   xnn_params.f32.gemm.minmax.gemm1.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64;
@@ -846,7 +845,7 @@ static void init(void) {
                 }
                 break;
               case cpuinfo_uarch_cortex_a55:
-                if (mr == 4 && nr == 8 && log2_sr == 0) {
+                if (mr == 4 && nr == 8) {
                   xnn_params.f32.gemm.minmax.gemm.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55;
                   xnn_params.f32.gemm.minmax.igemm.function[i] = (xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55;
                   xnn_params.f32.gemm.minmax.gemm1.function[i] = (xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64;
