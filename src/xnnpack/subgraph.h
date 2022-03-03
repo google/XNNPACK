@@ -13,6 +13,16 @@
 #include <xnnpack/codecache.h>
 #include <xnnpack/node-type.h>
 
+#if defined(__MACH__)
+#include <time.h>
+#elif defined(EMSCRIPTEN)
+#include <emscripten/emscripten.h>
+#elif XNN_PLATFORM_WINDOWS
+#include <windows.h>
+#else
+#include <time.h>
+#endif
+
 #define XNN_MAX_INPUTS 4
 #define XNN_MAX_OUTPUTS 4
 
@@ -254,6 +264,16 @@ struct xnn_node {
   xnn_setup_operator_fn setup;
 };
 
+#if defined(__MACH__)
+typedef uint64_t xnn_timestamp;
+#elif defined(__EMSCRIPTEN__)
+typedef double xnn_timestamp;
+#elif XNN_PLATFORM_WINDOWS
+typedef LARGE_INTEGER xnn_timestamp;
+#else
+typedef struct timespec xnn_timestamp;
+#endif
+
 struct xnn_operator_data {
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_setup_operator_fn setup;
@@ -270,6 +290,7 @@ struct xnn_operator_data {
   uint32_t adjustment_width;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
+  xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
 };
 
 struct xnn_subgraph {
@@ -305,6 +326,9 @@ struct xnn_runtime {
 #endif // XNN_PLATFORM_JIT
 
   pthreadpool_t threadpool;
+
+  bool profiling;
+  xnn_timestamp start_ts;
 };
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
