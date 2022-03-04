@@ -10,6 +10,7 @@ PointerAlignment: Left
 ForEachMacros: ['XNN_UNPREDICTABLE', 'XNN_LIKELY', 'XNN_UNLIKELY']
 IfMacros: ['IF']
 IndentCaseLabels: true
+ContinuationIndentWidth: 2
 SpaceBeforeParens: Custom
 SpaceBeforeParensOptions:
   AfterControlStatements: true
