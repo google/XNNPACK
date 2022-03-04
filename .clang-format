@@ -15,3 +15,4 @@ SpaceBeforeParensOptions:
   AfterControlStatements: true
   AfterIfMacros: true
   AfterForeachMacros: false
+SpacesBeforeTrailingComments: 2
