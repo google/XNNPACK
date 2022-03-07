@@ -53,15 +53,16 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
         # Main loop - 2 halffloats of A (4 bytes)
 1:
         LDR     s0, [x3], 4
-        LDR     q20, [x5], 16
-        LDR     q21, [x5], 16
-        LDR     q22, [x5], 16
-        LDR     q23, [x5], 16
+        LDR     q20, [x5, 0]
+        LDR     q21, [x5, 16]
+        LDR     q22, [x5, 32]
+        LDR     q23, [x5, 48]
         SUBS    x0, x0, 4
         FMLA    v16.8h, v20.8h, v0.h[0]
         FMLA    v17.8h, v21.8h, v0.h[0]
         FMLA    v18.8h, v22.8h, v0.h[1]
         FMLA    v19.8h, v23.8h, v0.h[1]
+        ADD     x5, x5, 64
         B.HS    1b
 
         # Is there a remainder?- 1 halffloat of A (2 bytes)

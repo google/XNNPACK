@@ -4,6 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch64 assembly
+- name: xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
+  init: xnn_init_f16_minmax_neon_params
+  k-block: 2
+  assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
   init: xnn_init_f16_minmax_neon_params
   k-block: 2
