@@ -164,7 +164,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         FMLA    v31.4s, v19.4s,  v5.s[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 3f
 2:
         # Clamp
@@ -216,7 +216,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld64
         RET
 
 3:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         LDR     s0,  [x3], 4
         LDP     q16,  q17, [x5], 32
         LDR     s1,  [x9], 4

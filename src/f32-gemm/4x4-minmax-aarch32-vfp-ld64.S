@@ -138,7 +138,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
 
         BHS     1b
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TST     r5, 4
         BNE     3f
 
@@ -264,7 +264,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x4__aarch32_vfp_ld64
         BX      lr
 
 3:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d6-d7}            // B
         VLDM    r12!, {s1}              // A1

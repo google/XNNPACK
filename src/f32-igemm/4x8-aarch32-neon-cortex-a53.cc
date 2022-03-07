@@ -458,12 +458,12 @@ void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
   vmla_f32(q14, q6, d3[1]);
   vmla_f32(q15, q7, d3[1]);
 
-  // Is there a remainder?- 1 floats of A (4 bytes)
+  // Is there a remainder?- 1 float of A (4 bytes)
   tst(r5, 4);
   beq(l4);
 
   bind(l6);
-  // Remainder- 1 floats of A (4 bytes)
+  // Remainder- 1 float of A (4 bytes)
   vldm(mem[r3]++, {s0}); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
   vldm(mem[r12]++, {s2}); // A1

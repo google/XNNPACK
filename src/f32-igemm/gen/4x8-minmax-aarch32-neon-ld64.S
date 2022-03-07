@@ -144,7 +144,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         VMLA.F32 q15, q7, d3[1]
         BHS     2b
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TST     r5, 4
         BNE     4f
 
@@ -189,7 +189,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 4:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1

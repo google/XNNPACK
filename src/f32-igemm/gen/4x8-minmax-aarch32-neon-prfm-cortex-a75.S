@@ -321,12 +321,12 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a75
         VMLA.F32 q14, q6, d3[1]
         VMLA.F32 q15, q7, d3[1]
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TST     r5, 4
         BEQ     4b
 
 6:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         VLDM    r3!, {s0}               // A0
         VLDM    r9!, {d8-d11}           // B0
         VLDM    r12!, {s2}              // A1

@@ -170,7 +170,7 @@ void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
   pld(mem[r0, 128]); // Prefetch A3
   bhs(l2);
 
-  // Is there a remainder?- 1 floats of A (4 bytes)
+  // Is there a remainder?- 1 float of A (4 bytes)
   tst(r5, 4);
   bne(l4);
 
@@ -215,7 +215,7 @@ void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
   pop({r4, r5, r6, r7, r8, r9, r10, r11, pc});
 
   bind(l4);
-  // Remainder- 1 floats of A (4 bytes)
+  // Remainder- 1 float of A (4 bytes)
   vldm(mem[r3]++, {s0}); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
   vldm(mem[r12]++, {s2}); // A1

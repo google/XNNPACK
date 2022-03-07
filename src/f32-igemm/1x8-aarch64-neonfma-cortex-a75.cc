@@ -191,7 +191,7 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, 
   tbnz(x0, 4, l6);
   // Is there a remainder?- 2 floats of A (8 bytes)
   tbnz(x0, 3, l7);
-  // Is there a remainder?- 1 floats of A (4 bytes)
+  // Is there a remainder?- 1 float of A (4 bytes)
   tbnz(x0, 2, l9);
 
   bind(l5);

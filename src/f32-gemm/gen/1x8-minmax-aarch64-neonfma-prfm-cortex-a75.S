@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75
         TBNZ    x0, 4, 5f
         # Is there a remainder?- 2 floats of A (8 bytes)
         TBNZ    x0, 3, 6f
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 8f
 
 4:

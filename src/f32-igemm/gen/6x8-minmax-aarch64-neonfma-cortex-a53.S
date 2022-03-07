@@ -508,10 +508,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA    v29.4s, v19.4s,  v2.s[1]
         FMLA    v31.4s, v19.4s,  v2.s[3]
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBZ     x0, 2, 4b
 6:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         LDR     s0,  [x14], 4
         LDR     q16, [x5], 16
         LD1     {v0.s}[2], [x15], 4

@@ -283,7 +283,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
         FMLA    v29.4s, v19.4s,  v4.s[1]
         FMLA    v31.4s, v19.4s,  v5.s[1]
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBZ     x0, 2, 2b
 
         # Remainder- 1 float of A (4 bytes)

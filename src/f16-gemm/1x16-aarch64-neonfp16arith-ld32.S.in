@@ -74,7 +74,7 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_1x16__aarch64_
         FMLA    v19.8h, v23.8h, v0.h[1]
         B.HS    1b
 
-        # Is there a remainder?- 1 halffloats of A (2 bytes)
+        # Is there a remainder?- 1 halffloat of A (2 bytes)
         TBNZ    x0, 1, 3f
 
 2:

@@ -340,7 +340,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
 4:
         # Is there a remainder?- 2 floats of A (8 bytes)
         TBNZ    x0, 3, 6f
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 7f
 5:
         # ks loop
@@ -416,11 +416,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55
         FMLA    v25.4s, v19.4s,  v1.s[1]
         FMLA    v27.4s, v19.4s,  v1.s[3]
 
-        # Is there a remainder?- 1 floats of A (4 bytes)
+        # Is there a remainder?- 1 float of A (4 bytes)
         TBZ     x0, 2, 5b
 
 7:
-        # Remainder- 1 floats of A (4 bytes)
+        # Remainder- 1 float of A (4 bytes)
         LDR     s0,  [x13], 4
         LDP     q16,  q17, [x5], 32
         LD1     {v0.s}[2], [x14], 4

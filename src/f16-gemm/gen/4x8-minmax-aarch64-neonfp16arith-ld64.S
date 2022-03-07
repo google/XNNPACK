@@ -120,7 +120,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64
 
         # Is there a remainder?- 2 halffloats of A (4 bytes)
         TBNZ    x0, 2, 4f
-        # Is there a remainder?- 1 halffloats of A (2 bytes)
+        # Is there a remainder?- 1 halffloat of A (2 bytes)
         TBNZ    x0, 1, 5f
 2:
         # Clamp
