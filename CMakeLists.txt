@@ -6234,6 +6234,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen-inc/8x8inc-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/1x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/4x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S
   src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld64.S
@@ -6244,6 +6245,7 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-gemm/gen/8x8-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/1x16-minmax-aarch64-neonfp16arith-ld32.S
+  src/f16-igemm/1x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld32.S
   src/f16-igemm/4x16-minmax-aarch64-neonfp16arith-ld64.S
   src/f16-igemm/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S

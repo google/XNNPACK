@@ -131,7 +131,7 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
         FMLA    v31.8h, v27.8h, v3.h[3]
         B.HS    1b
 
-        # Is there a remainder?- 1 halffloat of A (2 bytes)
+        # Is there a remainder- 1 to 3 halffloats of A (2 to 6 bytes)
         ANDS    x0, x0, 7
         B.NE    3f
 
