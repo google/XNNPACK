@@ -953,6 +953,35 @@ enum xnn_status xnn_define_even_split2(
   uint32_t output2_id,
   uint32_t flags);
 
+/// Define a 3-Output Split Node and add it to a Subgraph.
+///
+/// The 3-Output Split Node splits an input tensor into three output tensors along a specified axis evenly.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param split_dim - the dimension to split the input tensor along
+/// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
+///                   subgraph.
+/// @param output1_id - Value ID for the first output tensor. The output tensor must be an N-dimensional tensor defined
+///                     in the @a subgraph with each dimension, except the axis, equal to the corresponding dimension
+///                     of the second and third output. The split_dim dimension is one third of the input's split_dim.
+/// @param output2_id - Value ID for the second output tensor. The output tensor must be an N-dimensional tensor
+///                     defined in the @a subgraph with each dimension, except the axis, equal to the corresponding
+///                     dimension of the first and third output. The split_dim dimension is one third of the input's
+///                     split_dim.
+/// @param output3_id - Value ID for the third output tensor. The output tensor must be an N-dimensional tensor
+///                     defined in the @a subgraph with each dimension, except the axis, equal to the corresponding
+///                     dimension of the second and third output. The split_dim dimension is one third of the input's
+///                     split_dim.
+/// @param flags - binary features of the Split Node. No supported flags are currently defined.
+enum xnn_status xnn_define_even_split3(
+  xnn_subgraph_t subgraph,
+  size_t split_dim,
+  uint32_t input_id,
+  uint32_t output1_id,
+  uint32_t output2_id,
+  uint32_t output3_id,
+  uint32_t flags);
+
 /// Define a Reshape Node with static shape specification and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

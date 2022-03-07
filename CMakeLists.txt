@@ -207,6 +207,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/elu.c
+  src/subgraph/even-split.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
   src/subgraph/global-average-pooling-2d.c
@@ -220,7 +221,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/prelu.c
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
-  src/subgraph/even-split2.c
   src/subgraph/square-root.c
   src/subgraph/square.c
   src/subgraph/squared-difference.c

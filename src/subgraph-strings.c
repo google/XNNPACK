@@ -73,7 +73,9 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
     case xnn_node_type_sigmoid:
       return "Sigmoid";
     case xnn_node_type_even_split2:
-      return "EvenSplit2";
+      return "Even Split2";
+    case xnn_node_type_even_split3:
+      return "Even Split3";
     case xnn_node_type_softmax:
       return "Softmax";
     case xnn_node_type_static_constant_pad:
