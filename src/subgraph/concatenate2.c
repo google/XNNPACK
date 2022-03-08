@@ -10,6 +10,39 @@
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
+static enum xnn_status create_concatenate_operator_helper(
+  const struct xnn_node *node,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  struct xnn_operator_data *opdata,
+  size_t index)
+{
+  switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16: {
+      return xnn_create_copy_nc_x16(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
+    }
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    case xnn_compute_type_fp32: {
+      return xnn_create_copy_nc_x32(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
+    }
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_compute_type_qs8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_compute_type_qu8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    {
+      return xnn_create_copy_nc_x8(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
+    }
+#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status create_concatenate_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
@@ -33,8 +66,9 @@ static enum xnn_status create_concatenate_operator(
   const size_t axis = node->params.concatenate.axis;
   size_t batch_size = 1, channels_1 = 1, channels_2 = 1;
   for (size_t i = 0; i < axis; i++) {
-    batch_size *= values[input1_id].shape.dim[i];
+    batch_size *= values[output_id].shape.dim[i];
   }
+
   for (size_t i = axis; i < values[input1_id].shape.num_dims; i++) {
     channels_1 *= values[input1_id].shape.dim[i];
     channels_2 *= values[input2_id].shape.dim[i];
@@ -42,56 +76,68 @@ static enum xnn_status create_concatenate_operator(
   const size_t output_stride = channels_1 + channels_2;
 
   enum xnn_status status;
-  switch (node->compute_type) {
+  status = create_concatenate_operator_helper(node, channels_1, channels_1, output_stride, opdata, 0);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  status = create_concatenate_operator_helper(node, channels_2, channels_2, output_stride, opdata, 1);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  opdata->inputs[0] = input1_id;
+  opdata->inputs[1] = input2_id;
+  opdata->outputs[0] = output_id;
+  opdata->batch_size = batch_size;
+
+  return status;
+}
+
+static enum xnn_status setup_concatenate_operator_helper(
+  const void* input_data,
+  void* output_data,
+  const struct xnn_operator_data *opdata,
+  size_t index,
+  pthreadpool_t threadpool)
+{
+  // The output pointer of this operator is the sum of all channels of the earlier operators.
+  size_t channels = 0;
+  for (size_t i = 0; i < index; i++) {
+    channels += opdata->operator_objects[i]->channels;
+  }
+
+  switch (opdata->operator_objects[index]->type) {
 #ifndef XNN_NO_F16_OPERATORS
-    case xnn_compute_type_fp16:
-    {
-      status = xnn_create_copy_nc_x16(channels_1, channels_1, output_stride, node->flags, &opdata->operator_objects[0]);
-      if (status != xnn_status_success) {
-        break;
-      }
-      status = xnn_create_copy_nc_x16(channels_2, channels_2, output_stride, node->flags, &opdata->operator_objects[1]);
-      break;
+    case xnn_operator_type_copy_nc_x16: {
+      return xnn_setup_copy_nc_x16(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        input_data,
+        (uint16_t*) output_data + index * channels,
+        threadpool);
     }
 #endif  // !defined(XNN_NO_F16_OPERATORS)
-    case xnn_compute_type_fp32:
-    {
-      status = xnn_create_copy_nc_x32(channels_1, channels_1, output_stride, node->flags, &opdata->operator_objects[0]);
-      if (status != xnn_status_success) {
-        break;
-      }
-      status = xnn_create_copy_nc_x32(channels_2, channels_2, output_stride, node->flags, &opdata->operator_objects[1]);
-      break;
+    case xnn_operator_type_copy_nc_x32: {
+      return xnn_setup_copy_nc_x32(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        input_data,
+        (uint32_t*) output_data + index * channels,
+        threadpool);
     }
-#ifndef XNN_NO_QS8_OPERATORS
-    case xnn_compute_type_qs8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
-    case xnn_compute_type_qu8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
 #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    {
-      status = xnn_create_copy_nc_x8(channels_1, channels_1, output_stride, node->flags, &opdata->operator_objects[0]);
-      if (status != xnn_status_success) {
-        break;
-      }
-      status = xnn_create_copy_nc_x8(channels_2, channels_2, output_stride, node->flags, &opdata->operator_objects[1]);
-      break;
-
+    case xnn_operator_type_copy_nc_x8: {
+      return xnn_setup_copy_nc_x8(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        input_data,
+        (uint8_t*) output_data + index * channels,
+        threadpool);
     }
 #endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
-
-  if (status == xnn_status_success) {
-    opdata->inputs[0] = input1_id;
-    opdata->inputs[1] = input2_id;
-    opdata->outputs[0] = output_id;
-    opdata->batch_size = batch_size;
-  }
-
-  return status;
 }
 
 static enum xnn_status setup_concatenate_operator(
@@ -125,71 +171,100 @@ static enum xnn_status setup_concatenate_operator(
   assert(output_data != NULL);
 
   enum xnn_status status;
-  size_t channels = opdata->operator_objects[0]->channels;
 
-  switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
-    case xnn_operator_type_copy_nc_x16: {
-      status = xnn_setup_copy_nc_x16(
-          opdata->operator_objects[0],
-          opdata->batch_size,
-          input1_data,
-          output_data,
-          threadpool);
-      if (status != xnn_status_success) {
-        return status;
-      }
-      status = xnn_setup_copy_nc_x16(
-          opdata->operator_objects[1],
-          opdata->batch_size,
-          input2_data,
-          (uint16_t*) output_data + channels,
-          threadpool);
-      return status;
-    }
-#endif  // !defined(XNN_NO_F16_OPERATORS)
-    case xnn_operator_type_copy_nc_x32: {
-      status = xnn_setup_copy_nc_x32(
-          opdata->operator_objects[0],
-          opdata->batch_size,
-          input1_data,
-          output_data,
-          threadpool);
-      if (status != xnn_status_success) {
-        return status;
-      }
-      status = xnn_setup_copy_nc_x32(
-          opdata->operator_objects[1],
-          opdata->batch_size,
-          input2_data,
-          (uint32_t *) output_data + channels,
-          threadpool);
-      return status;
-    }
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    case xnn_operator_type_copy_nc_x8: {
-      status = xnn_setup_copy_nc_x8(
-          opdata->operator_objects[0],
-          opdata->batch_size,
-          input1_data,
-          output_data,
-          threadpool);
-      if (status != xnn_status_success) {
-        return status;
-      }
-      status = xnn_setup_copy_nc_x8(
-          opdata->operator_objects[1],
-          opdata->batch_size,
-          input2_data,
-          (uint8_t*) output_data + channels,
-          threadpool);
-      return status;
-    }
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    default:
-      XNN_UNREACHABLE;
+  status = setup_concatenate_operator_helper(input1_data, output_data, opdata, 0, threadpool);
+  if (status != xnn_status_success) {
+    return status;
   }
+  return setup_concatenate_operator_helper(input2_data, output_data, opdata, 1, threadpool);
 }
+
+enum xnn_status check_input_value(
+  xnn_subgraph_t subgraph,
+  size_t axis,
+  uint32_t input_id,
+  uint32_t output_id,
+  const char* nth,
+  enum xnn_node_type node_type)
+{
+
+  if (input_id >= subgraph->num_values) {
+    xnn_log_error(
+      "failed to define %s operator with the %s input ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(node_type), nth, input_id);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  if (input_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with the %s input ID #%" PRIu32
+      ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(node_type), nth, input_id, input_value->type);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_value* output_value = &subgraph->values[output_id];
+  if (input_value->shape.num_dims != output_value->shape.num_dims) {
+    xnn_log_error(
+      "failed to define %s operator with %s input ID #%" PRIu32
+      ": mismatch number of dimensions, %s, input has %zu, output has %zu",
+      xnn_node_type_to_string(node_type), nth, input_id, nth, input_value->shape.num_dims,
+      output_value->shape.num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  for (size_t i = 0; i < input_value->shape.num_dims; i++) {
+    if (i != axis && input_value->shape.dim[i] != output_value->shape.dim[i]) {
+      xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32
+        ": mismatch dimension %zu, %s input has %zu, output has %zu",
+        xnn_node_type_to_string(node_type), input_id, i, nth, input_value->shape.dim[i], output_value->shape.dim[i]);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  if (input_value->datatype != output_value->datatype) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 " and %s output ID #%" PRIu32
+      ": mismatching datatypes across the %s input (%s), the output (%s)",
+      xnn_node_type_to_string(node_type), input_id, nth, output_id,
+      nth, xnn_datatype_to_string(input_value->datatype), xnn_datatype_to_string(output_value->datatype));
+    return xnn_status_invalid_parameter;
+  }
+
+  return xnn_status_success;
+}
+
+#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+enum xnn_status check_input_compute_type(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  const char* nth,
+  enum xnn_node_type node_type)
+{
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  const struct xnn_value* output_value = &subgraph->values[output_id];
+  if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": mismatching quantization zero point across the %s input (%d) and the output (%d)",
+        xnn_node_type_to_string(node_type), input_id, output_id,
+        nth, input_value->quantization.zero_point, output_value->quantization.zero_point);
+    return xnn_status_invalid_parameter;
+  }
+  if (input_value->quantization.scale != output_value->quantization.scale) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": mismatching quantization scale across the %s input (%.7g) and the output (%.7g)",
+        xnn_node_type_to_string(node_type), input_id, output_id,
+        nth, input_value->quantization.scale, output_value->quantization.scale);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_status_success;
+}
+#endif  // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
 
 enum xnn_status xnn_define_concatenate2(
   xnn_subgraph_t subgraph,
@@ -205,110 +280,6 @@ enum xnn_status xnn_define_concatenate2(
     return xnn_status_uninitialized;
   }
 
-  if (input1_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with the first input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  const struct xnn_value* input1_value = &subgraph->values[input1_id];
-  if (input1_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input1_value->type);
-    return xnn_status_invalid_parameter;
-  }
-
-  switch (input1_value->datatype) {
-    case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id,
-        xnn_datatype_to_string(input1_value->datatype), input1_value->datatype);
-      return xnn_status_invalid_parameter;
-  }
-
-  if (axis >= input1_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with the first input ID #%" PRIu32
-      ": axis (%zu) exceeds the number of dimensions (%zu)",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, axis, input1_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (input2_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with the second input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input2_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  const struct xnn_value* input2_value = &subgraph->values[input2_id];
-  if (input2_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input2_id, input2_value->type);
-    return xnn_status_invalid_parameter;
-  }
-
-  switch (input2_value->datatype) {
-    case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
-    case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
-    case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_concatenate2), input2_id,
-        xnn_datatype_to_string(input2_value->datatype), input2_value->datatype);
-      return xnn_status_invalid_parameter;
-  }
-
-  if (axis >= input2_value->shape.num_dims) {
-    xnn_log_error(
-      "failed to define %s operator with the second input ID #%" PRIu32
-      ": axis (%zu) exceeds the number of dimensions (%zu)",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input2_id, axis, input2_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (input1_value->shape.num_dims != input2_value->shape.num_dims) {
-      xnn_log_error(
-        "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32
-        ": mismatching number of input dimensions %zu and %zu",
-        xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input2_id,
-        input1_value->shape.num_dims, input2_value->shape.num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  for (size_t i = 0; i < input1_value->shape.num_dims; i++) {
-    if (i == axis) {
-      continue;
-    }
-
-    if (input1_value->shape.dim[i] != input2_value->shape.dim[i]) {
-      xnn_log_error(
-          "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32
-          ": mismatch dimension %zu, first input has %zu, second input has %zu",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input2_id,
-          i, input1_value->shape.dim[i], input2_value->shape.dim[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   if (output_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
@@ -317,6 +288,7 @@ enum xnn_status xnn_define_concatenate2(
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
+
   if (output_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
       "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
@@ -324,35 +296,27 @@ enum xnn_status xnn_define_concatenate2(
     return xnn_status_invalid_parameter;
   }
 
-  if (input1_value->shape.num_dims != output_value->shape.num_dims) {
-      xnn_log_error(
-        "failed to define %s operator with output ID #%" PRIu32
-        ": mismatch number of dimensions, first input has %zu, output has %zu",
-        xnn_node_type_to_string(xnn_node_type_concatenate2), output_id,
-        input1_value->shape.num_dims, output_value->shape.num_dims);
+  if (axis >= output_value->shape.num_dims) {
+    xnn_log_error(
+      "failed to define %s operator with the output ID #%" PRIu32
+      ": axis (%zu) exceeds the number of dimensions (%zu)",
+      xnn_node_type_to_string(xnn_node_type_concatenate2), output_id, axis, output_value->shape.num_dims);
     return xnn_status_invalid_parameter;
   }
 
-  for (size_t i = 0; i < output_value->shape.num_dims; i++) {
-    if (i == axis) {
-      if (output_value->shape.dim[i] != input1_value->shape.dim[i] + input2_value->shape.dim[i]) {
-        xnn_log_error(
-            "failed to define %s operator with output ID #%" PRIu32
-            ": mismatch axis dimension %zu, output has %zu, sum of input dimensions is %zu",
-            xnn_node_type_to_string(xnn_node_type_concatenate2), output_id,
-            i, output_value->shape.dim[i], input1_value->shape.dim[i] + input2_value->shape.dim[i]);
-        return xnn_status_invalid_parameter;
-      }
-    } else {
-      if (output_value->shape.dim[i] != input1_value->shape.dim[i]) {
-        xnn_log_error(
-            "failed to define %s operator with output ID #%" PRIu32
-            ": mismatch dimension %zu, output has %zu, input has %zu",
-            xnn_node_type_to_string(xnn_node_type_concatenate2), output_id,
-            i, output_value->shape.dim[i], input1_value->shape.dim[i]);
-        return xnn_status_invalid_parameter;
-      }
-    }
+  check_input_value(subgraph, axis, input1_id, output_id, "first", xnn_node_type_concatenate2);
+  check_input_value(subgraph, axis, input2_id, output_id, "second", xnn_node_type_concatenate2);
+
+  const struct xnn_value* input1_value = &subgraph->values[input1_id];
+  const struct xnn_value* input2_value = &subgraph->values[input2_id];
+
+  if (output_value->shape.dim[axis] != input1_value->shape.dim[axis] + input2_value->shape.dim[axis]) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32
+      ": mismatch axis dimension %zu, output has %zu, sum of input dimensions is %zu",
+      xnn_node_type_to_string(xnn_node_type_concatenate2), output_id, axis, output_value->shape.dim[axis],
+      input1_value->shape.dim[axis] + input2_value->shape.dim[axis]);
+    return xnn_status_invalid_parameter;
   }
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
@@ -383,55 +347,12 @@ enum xnn_status xnn_define_concatenate2(
       return xnn_status_invalid_parameter;
   }
 
-  if (input1_value->datatype != input2_value->datatype ||
-      input1_value->datatype != output_value->datatype)
-  {
-    xnn_log_error(
-      "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32 " and output ID #%" PRIu32
-      ": mismatching datatypes across the first input (%s), the second input (%s), and output (%s)",
-      xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input2_id, output_id,
-      xnn_datatype_to_string(input1_value->datatype),
-      xnn_datatype_to_string(input2_value->datatype),
-      xnn_datatype_to_string(output_value->datatype));
-    return xnn_status_invalid_parameter;
-  }
-
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-  if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
-    if (input1_value->quantization.zero_point != input2_value->quantization.zero_point) {
-      xnn_log_error(
-          "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32
-          ": mismatching quantization zero point across the first input (%d) and second input (%d)",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input2_id,
-          input1_value->quantization.zero_point, input2_value->quantization.zero_point);
-      return xnn_status_invalid_parameter;
+  #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+    if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
+      check_input_compute_type(subgraph, input1_id, output_id, "first", xnn_node_type_concatenate2);
+      check_input_compute_type(subgraph, input2_id, output_id, "second", xnn_node_type_concatenate2);
     }
-    if (input1_value->quantization.zero_point != output_value->quantization.zero_point) {
-      xnn_log_error(
-          "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-          ": mismatching quantization zero point across the first input (%d) and the output (%d)",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, output_id,
-          input1_value->quantization.zero_point, output_value->quantization.zero_point);
-      return xnn_status_invalid_parameter;
-    }
-    if (input1_value->quantization.scale != input2_value->quantization.scale) {
-      xnn_log_error(
-          "failed to define %s operator with input IDs #%" PRIu32 " and #%" PRIu32
-          ": mismatching quantization scale across the first input (%.7g) and second input (%.7g)",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, input2_id,
-          input1_value->quantization.scale, input2_value->quantization.scale);
-      return xnn_status_invalid_parameter;
-    }
-    if (input1_value->quantization.scale != output_value->quantization.scale) {
-      xnn_log_error(
-          "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-          ": mismatching quantization scale across the first input (%.7g) and the output (%.7g)",
-          xnn_node_type_to_string(xnn_node_type_concatenate2), input1_id, output_id,
-          input1_value->quantization.scale, output_value->quantization.scale);
-      return xnn_status_invalid_parameter;
-    }
-  }
-#endif // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+  #endif  // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
