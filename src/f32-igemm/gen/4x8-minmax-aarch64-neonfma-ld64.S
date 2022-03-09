@@ -43,8 +43,8 @@
 # A2  v2
 # A3  v3
 # B  v20 v21 v22 v23
-# C  v16 v17
-# C  v18 v19
+# C  v24 v25
+# C  v26 v27
 # C  v28 v29
 # C  v30 v31
 # Clamp v4 v5
@@ -75,13 +75,13 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
 
 0:
         # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
-        MOV     v18.16b, v16.16b
-        MOV     v19.16b, v17.16b
-        MOV     v28.16b, v16.16b
-        MOV     v29.16b, v17.16b
-        MOV     v30.16b, v16.16b
-        MOV     v31.16b, v17.16b
+        LDP     q24, q25, [x5], 32
+        MOV     v26.16b, v24.16b
+        MOV     v27.16b, v25.16b
+        MOV     v28.16b, v24.16b
+        MOV     v29.16b, v25.16b
+        MOV     v30.16b, v24.16b
+        MOV     v31.16b, v25.16b
 
         MOV     x9, x3                  // p = ks
 
@@ -115,19 +115,19 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         LDR     d1, [x13], 8
         LDR     d2, [x14], 8
         LDR     d3, [x15], 8
-        FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v18.4s, v20.4s, v1.s[0]
-        FMLA    v19.4s, v21.4s, v1.s[0]
+        FMLA    v24.4s, v20.4s, v0.s[0]
+        FMLA    v25.4s, v21.4s, v0.s[0]
+        FMLA    v26.4s, v20.4s, v1.s[0]
+        FMLA    v27.4s, v21.4s, v1.s[0]
         LDP     q22, q23, [x5], 32
         FMLA    v28.4s, v20.4s, v2.s[0]
         FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
         FMLA    v31.4s, v21.4s, v3.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
-        FMLA    v18.4s, v22.4s, v1.s[1]
-        FMLA    v19.4s, v23.4s, v1.s[1]
+        FMLA    v24.4s, v22.4s, v0.s[1]
+        FMLA    v25.4s, v23.4s, v0.s[1]
+        FMLA    v26.4s, v22.4s, v1.s[1]
+        FMLA    v27.4s, v23.4s, v1.s[1]
         SUBS    x0, x0, 8
         FMLA    v28.4s, v22.4s, v2.s[1]
         FMLA    v29.4s, v23.4s, v2.s[1]
@@ -144,18 +144,18 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         B.HI    1b
 
         # Clamp
-        FMAX    v16.4s, v16.4s, v4.4s
-        FMAX    v17.4s, v17.4s, v4.4s
-        FMAX    v18.4s, v18.4s, v4.4s
-        FMAX    v19.4s, v19.4s, v4.4s
+        FMAX    v24.4s, v24.4s, v4.4s
+        FMAX    v25.4s, v25.4s, v4.4s
+        FMAX    v26.4s, v26.4s, v4.4s
+        FMAX    v27.4s, v27.4s, v4.4s
         FMAX    v28.4s, v28.4s, v4.4s
         FMAX    v29.4s, v29.4s, v4.4s
         FMAX    v30.4s, v30.4s, v4.4s
         FMAX    v31.4s, v31.4s, v4.4s
-        FMIN    v16.4s, v16.4s, v5.4s
-        FMIN    v17.4s, v17.4s, v5.4s
-        FMIN    v18.4s, v18.4s, v5.4s
-        FMIN    v19.4s, v19.4s, v5.4s
+        FMIN    v24.4s, v24.4s, v5.4s
+        FMIN    v25.4s, v25.4s, v5.4s
+        FMIN    v26.4s, v26.4s, v5.4s
+        FMIN    v27.4s, v27.4s, v5.4s
         FMIN    v28.4s, v28.4s, v5.4s
         FMIN    v29.4s, v29.4s, v5.4s
         FMIN    v30.4s, v30.4s, v5.4s
@@ -169,9 +169,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         ADD     x7,  x7, x10
         STP     q28, q29, [x17]
         ADD     x17, x17, x10
-        STP     q18, q19, [x16]
+        STP     q26, q27, [x16]
         ADD     x16, x16, x10
-        STP     q16, q17,  [x6]
+        STP     q24, q25,  [x6]
         ADD     x6,  x6, x10
 
         SUB     x4, x4, x3              // a -= ks
@@ -187,10 +187,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         LDR     s1, [x13], 4
         LDR     s2, [x14], 4
         LDR     s3, [x15], 4
-        FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v18.4s, v20.4s, v1.s[0]
-        FMLA    v19.4s, v21.4s, v1.s[0]
+        FMLA    v24.4s, v20.4s, v0.s[0]
+        FMLA    v25.4s, v21.4s, v0.s[0]
+        FMLA    v26.4s, v20.4s, v1.s[0]
+        FMLA    v27.4s, v21.4s, v1.s[0]
         FMLA    v28.4s, v20.4s, v2.s[0]
         FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
@@ -204,10 +204,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         MOV     v30.16b, v31.16b
         STR     q28, [x17], 16
         MOV     v28.16b, v29.16b
-        STR     q18, [x16], 16
-        MOV     v18.16b, v19.16b
-        STR     q16, [x6], 16
-        MOV     v16.16b, v17.16b
+        STR     q26, [x16], 16
+        MOV     v26.16b, v27.16b
+        STR     q24, [x6], 16
+        MOV     v24.16b, v25.16b
 
 6:
         TBZ     x1, 1, 7f
@@ -215,17 +215,17 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64
         STR     d28, [x17], 8
         DUP     d30, v30.d[1]
         DUP     d28, v28.d[1]
-        STR     d18, [x16], 8
-        STR     d16, [x6], 8
-        DUP     d18, v18.d[1]
-        DUP     d16, v16.d[1]
+        STR     d26, [x16], 8
+        STR     d24, [x6], 8
+        DUP     d26, v26.d[1]
+        DUP     d24, v24.d[1]
 
 7:
         TBZ     x1, 0, 8f
         STR     s30,  [x7]
         STR     s28, [x17]
-        STR     s18, [x16]
-        STR     s16,  [x6]
+        STR     s26, [x16]
+        STR     s24,  [x6]
 8:
         RET
 

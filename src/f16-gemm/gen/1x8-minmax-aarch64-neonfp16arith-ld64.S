@@ -32,7 +32,7 @@
 # Vector register usage
 # A0   v0 v1
 # B   v20 v21 v22 v23
-# C   v16 v18
+# C   v24 v26
 
 # Clamp v4, v5
 
@@ -46,9 +46,9 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         LD2R    {v4.8h, v5.8h}, [x8]
 0:
         # Load initial bias from w into accumulators
-        LDR     q16, [x5], 16
+        LDR     q24, [x5], 16
 
-        MOVI    v18.8h, 0               // second set of C for pipelining FMLA
+        MOVI    v26.8h, 0               // second set of C for pipelining FMLA
 
         # Is there at least 4 halffloats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
@@ -63,10 +63,10 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         LDR     q22, [x5, 32]
         LDR     q23, [x5, 48]
         SUBS    x0, x0, 8
-        FMLA    v16.8h, v20.8h, v0.h[0]
-        FMLA    v18.8h, v21.8h, v0.h[1]
-        FMLA    v16.8h, v22.8h, v0.h[2]
-        FMLA    v18.8h, v23.8h, v0.h[3]
+        FMLA    v24.8h, v20.8h, v0.h[0]
+        FMLA    v26.8h, v21.8h, v0.h[1]
+        FMLA    v24.8h, v22.8h, v0.h[2]
+        FMLA    v26.8h, v23.8h, v0.h[3]
         ADD     x5, x5, 64
         B.HS    1b
 
@@ -76,17 +76,17 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         TBNZ    x0, 1, 5f
 
 2:
-        FADD    v16.8h, v16.8h, v18.8h
+        FADD    v24.8h, v24.8h, v26.8h
         SUBS    x1, x1, 8
 
         # Clamp
-        FMAX    v16.8h, v16.8h, v4.8h
-        FMIN    v16.8h, v16.8h, v5.8h
+        FMAX    v24.8h, v24.8h, v4.8h
+        FMIN    v24.8h, v24.8h, v5.8h
 
         # Store full 1 x 8
         B.LO    6f
 
-        ST1     {v16.16b},  [x6], x14
+        ST1     {v24.16b},  [x6], x14
         SUB     x3,  x3, x2             // a0 -= kc
 
         B.HI    0b
@@ -99,31 +99,31 @@ BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x8__aarch64_neonfp16arith_ld64
         LDR     s0, [x3], 4
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
-        FMLA    v16.8h, v20.8h, v0.h[0]
-        FMLA    v18.8h, v21.8h, v0.h[1]
+        FMLA    v24.8h, v20.8h, v0.h[0]
+        FMLA    v26.8h, v21.8h, v0.h[1]
         TBZ     x0, 1, 2b
 
 5:
         # Remainder- 1 halffloat of A (2 bytes)
         LDR     h0,  [x3], 2
         LDR     q20, [x5], 16
-        FMLA    v16.8h, v20.8h, v0.h[0]
+        FMLA    v24.8h, v20.8h, v0.h[0]
         B       2b
 
         # Store odd channels
 6:
         TBZ     x1, 2, 7f
-        STR     d16, [x6], 8
-        DUP     d16, v16.d[1]
+        STR     d24, [x6], 8
+        DUP     d24, v24.d[1]
 
 7:
         TBZ     x1, 1, 8f
-        STR     s16, [x6], 4
-        DUP     s16, v16.s[1]
+        STR     s24, [x6], 4
+        DUP     s24, v24.s[1]
 
 8:
         TBZ     x1, 0, 9f
-        STR     h16, [x6]
+        STR     h24, [x6]
 9:
         RET
 

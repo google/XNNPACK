@@ -26,7 +26,7 @@
 
 # B   x5 v20 v21 v22 v23
 
-# C0  x6 v16 v17
+# C0  x6 v24 v25
 
 # Clamp v4, v5
 
@@ -43,10 +43,10 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
 
 0:
         # Load initial bias from w into accumulators
-        LDR     q16, [x5], 16
-        LDR     q17, [x5], 16
-        MOVI    v18.8h, 0               // second set of C for pipelining FMLA
-        MOVI    v19.8h, 0
+        LDR     q24, [x5], 16
+        LDR     q25, [x5], 16
+        MOVI    v26.8h, 0               // second set of C for pipelining FMLA
+        MOVI    v27.8h, 0
 
         MOV     x9, x3                  // p = ks
 
@@ -71,10 +71,10 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
         LDR     q22, [x5, 32]
         LDR     q23, [x5, 48]
         SUBS    x0, x0, 4
-        FMLA    v16.8h, v20.8h, v0.h[0]
-        FMLA    v17.8h, v21.8h, v0.h[0]
-        FMLA    v18.8h, v22.8h, v0.h[1]
-        FMLA    v19.8h, v23.8h, v0.h[1]
+        FMLA    v24.8h, v20.8h, v0.h[0]
+        FMLA    v25.8h, v21.8h, v0.h[0]
+        FMLA    v26.8h, v22.8h, v0.h[1]
+        FMLA    v27.8h, v23.8h, v0.h[1]
         ADD     x5, x5, 64
         B.HS    2b
 
@@ -86,20 +86,20 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
         SUBS    x9, x9, 8               // ks -= MR * sizeof(void*)
         B.HI    1b
 
-        FADD    v16.8h, v16.8h, v18.8h
-        FADD    v17.8h, v17.8h, v19.8h
+        FADD    v24.8h, v24.8h, v26.8h
+        FADD    v25.8h, v25.8h, v27.8h
 
         # Clamp
-        FMAX    v16.8h, v16.8h, v4.8h
-        FMAX    v17.8h, v17.8h, v4.8h
-        FMIN    v16.8h, v16.8h, v5.8h
-        FMIN    v17.8h, v17.8h, v5.8h
+        FMAX    v24.8h, v24.8h, v4.8h
+        FMAX    v25.8h, v25.8h, v4.8h
+        FMIN    v24.8h, v24.8h, v5.8h
+        FMIN    v25.8h, v25.8h, v5.8h
 
         # Store full 1 x 16
         SUBS    x1, x1, 16
         B.LO    5f
 
-        STP     q16, q17,  [x6]
+        STP     q24, q25,  [x6]
         ADD     x6,  x6, x10
 
         SUB     x4, x4, x3              // a -= ks
@@ -113,26 +113,26 @@ BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
         LDR     h0, [x8], 2
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
-        FMLA    v16.8h, v20.8h, v0.h[0]
-        FMLA    v17.8h, v21.8h, v0.h[0]
+        FMLA    v24.8h, v20.8h, v0.h[0]
+        FMLA    v25.8h, v21.8h, v0.h[0]
         B       3b
 
         # Store odd width
 5:
         TBZ     x1, 3, 6f
-        STR     q16, [x6], 16
-        MOV     v16.16b, v17.16b
+        STR     q24, [x6], 16
+        MOV     v24.16b, v25.16b
 6:
         TBZ     x1, 2, 7f
-        STR     d16, [x6], 8
-        DUP     d16, v16.d[1]
+        STR     d24, [x6], 8
+        DUP     d24, v24.d[1]
 7:
         TBZ     x1, 1, 8f
-        STR     s16,  [x6], 4
-        DUP     s16, v16.s[1]
+        STR     s24,  [x6], 4
+        DUP     s24, v24.s[1]
 8:
         TBZ     x1, 0, 9f
-        STR     h16,  [x6]
+        STR     h24,  [x6]
 9:
         RET
 
