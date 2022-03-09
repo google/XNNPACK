@@ -13,14 +13,14 @@
 #include <xnnpack/codecache.h>
 
 #define XNN_MAX_INPUTS 3
-#define XNN_MAX_OUTPUTS 3
+#define XNN_MAX_OUTPUTS 4
 
 #define XNN_MAX_RUNTIME_INPUTS 3
-#define XNN_MAX_RUNTIME_OUTPUTS 3
+#define XNN_MAX_RUNTIME_OUTPUTS 4
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
-#define XNN_MAX_OPERATOR_OBJECTS 3
+#define XNN_MAX_OPERATOR_OBJECTS 4
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,6 +168,7 @@ enum xnn_node_type {
   xnn_node_type_sigmoid,
   xnn_node_type_even_split2,
   xnn_node_type_even_split3,
+  xnn_node_type_even_split4,
   xnn_node_type_softmax,
   xnn_node_type_static_constant_pad,
   xnn_node_type_static_reshape,
