@@ -89,6 +89,21 @@ tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=32 -o src/x32-transpose/gen/4x4-multi-dec-zip-neon.c &
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=32 -o src/x32-transpose/gen/4x4-multi-mov-zip-neon.c &
 
+#################################### WAsm SIMD ###############################
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 -o src/x8-transpose/gen/16x16-reuse-mov-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=8 -o src/x8-transpose/gen/16x16-reuse-switch-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=16 -o src/x16-transpose/gen/8x8-reuse-mov-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=16 -o src/x16-transpose/gen/8x8-reuse-switch-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=16 -o src/x16-transpose/gen/8x8-reuse-multi-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=16 -o src/x16-transpose/gen/8x8-multi-switch-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=16 -o src/x16-transpose/gen/8x8-multi-mov-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=32 -o src/x32-transpose/gen/4x4-reuse-mov-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=32 -o src/x32-transpose/gen/4x4-reuse-switch-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=32 -o src/x32-transpose/gen/4x4-reuse-multi-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=32 -o src/x32-transpose/gen/4x4-multi-switch-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE=32 -o src/x32-transpose/gen/4x4-multi-multi-wasmsimd.c &
+tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=32 -o src/x32-transpose/gen/4x4-multi-mov-wasmsimd.c &
+
 ################################## Unit tests #################################
 tools/generate-transpose-test.py --spec test/x8-transpose.yaml --output=test/x8-transpose.cc &
 tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output=test/x16-transpose.cc &

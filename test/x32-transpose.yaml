@@ -31,7 +31,12 @@
 - name: xnn_x32_transpose_ukernel__4x4_reuse_switch_sse2
 - name: xnn_x32_transpose_ukernel__4x4_sse
 # WAsm SIMD
-- name: xnn_x32_transpose_ukernel__4x4_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_multi_mov_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_multi_multi_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_multi_switch_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_reuse_mov_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_reuse_multi_wasmsimd
+- name: xnn_x32_transpose_ukernel__4x4_reuse_switch_wasmsimd
 # ARM NEON
 - name: xnn_x32_transpose_ukernel__4x4_multi_dec_zip_neon
 - name: xnn_x32_transpose_ukernel__4x4_multi_mov_zip_neon
