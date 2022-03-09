@@ -95,6 +95,21 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar_float, xnn_x32_transpose_ukernel__4x4_sc
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(transpose, 4x4_multi_mov_wasmsimd, xnn_x32_transpose_ukernel__4x4_multi_mov_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_multi_multi_wasmsimd, xnn_x32_transpose_ukernel__4x4_multi_multi_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_multi_switch_wasmsimd, xnn_x32_transpose_ukernel__4x4_multi_switch_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_reuse_mov_wasmsimd, xnn_x32_transpose_ukernel__4x4_reuse_mov_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_reuse_multi_wasmsimd, xnn_x32_transpose_ukernel__4x4_reuse_multi_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_reuse_switch_wasmsimd, xnn_x32_transpose_ukernel__4x4_reuse_switch_wasmsimd)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(transpose, 4x4_sse, xnn_x32_transpose_ukernel__4x4_sse)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
