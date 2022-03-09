@@ -74,7 +74,7 @@ class TransposeMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
+          ASSERT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }
@@ -100,7 +100,7 @@ class TransposeMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
+          ASSERT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }
@@ -126,7 +126,7 @@ class TransposeMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
+          ASSERT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }
@@ -152,7 +152,7 @@ class TransposeMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ((int)input[c + r * input_stride()], (int)output[r + c * output_stride()])
+          ASSERT_EQ((int)input[c + r * input_stride()], (int)output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }
