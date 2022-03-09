@@ -15,7 +15,7 @@
 #define XNN_MAX_INPUTS 3
 #define XNN_MAX_OUTPUTS 3
 
-#define XNN_MAX_RUNTIME_INPUTS 2
+#define XNN_MAX_RUNTIME_INPUTS 3
 #define XNN_MAX_RUNTIME_OUTPUTS 3
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
@@ -146,6 +146,7 @@ enum xnn_node_type {
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
   xnn_node_type_concatenate2,
+  xnn_node_type_concatenate3,
   xnn_node_type_convert,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,

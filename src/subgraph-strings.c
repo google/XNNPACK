@@ -34,6 +34,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Clamp";
     case xnn_node_type_concatenate2:
       return "Concatenate2";
+    case xnn_node_type_concatenate3:
+      return "Concatenate3";
     case xnn_node_type_convert:
       return "Convert";
     case xnn_node_type_convolution_2d:

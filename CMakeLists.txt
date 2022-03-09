@@ -199,7 +199,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/bankers-rounding.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
-  src/subgraph/concatenate2.c
+  src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
   src/subgraph/deconvolution-2d.c
