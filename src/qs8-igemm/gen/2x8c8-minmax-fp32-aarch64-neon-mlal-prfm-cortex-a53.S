@@ -327,7 +327,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__aarch64_neon_mlal_prfm_c
         LD1R    {v1.16b}, [x11], 1
         LD1R    {v2.16b}, [x11]
         SMAX    v0.16b, v0.16b, v1.16b
-        SUB     x11, x11, 7             // rewind params pointer
+        SUB     x11, x11, 7          // rewind params pointer
         SMIN    v0.16b, v0.16b, v2.16b
         B.LO    6f
 

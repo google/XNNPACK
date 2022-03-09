@@ -248,7 +248,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld64
         LDR     x0, [sp]                 // cn_stride
         SMAX    v0.16b, v0.16b, v4.16b
         SMAX    v1.16b, v1.16b, v4.16b
-        SUB     x11, x11, 15            // rewind params pointer
+        SUB     x11, x11, 15          // rewind params pointer
         SMAX    v2.16b, v2.16b, v4.16b
         SMAX    v3.16b, v3.16b, v4.16b
         SUBS    x1, x1, 16

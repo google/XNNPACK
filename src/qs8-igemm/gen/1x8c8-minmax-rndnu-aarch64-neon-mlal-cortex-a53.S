@@ -232,7 +232,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_1x8c8__aarch64_neon_mlal_corte
         SQXTN   v0.8b, v0.8h
         LD1R    {v17.16b}, [x11]
         SMAX    v0.8b, v0.8b, v1.8b
-        SUB     x11, x11, 15            // rewind params pointer
+        SUB     x11, x11, 15          // rewind params pointer
 
         SMIN    v0.8b, v0.8b, v17.8b
         B.LO    6f
