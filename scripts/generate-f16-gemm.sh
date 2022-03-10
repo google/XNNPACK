@@ -6,7 +6,6 @@
 
 ############################### AArch64 assembly ##############################
 tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld32.S &
-tools/xngen src/f16-gemm/1x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/1x16-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld32.S &
 tools/xngen src/f16-gemm/4x16-aarch64-neonfp16arith-ld64.S.in -D INC=0 -o src/f16-gemm/gen/4x16-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-ld32.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-ld32.S &
@@ -23,6 +22,9 @@ tools/xngen src/f16-gemm/1x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16
 tools/xngen src/f16-gemm/4x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/4x8inc-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/6x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/6x8inc-minmax-aarch64-neonfp16arith-ld64.S &
 tools/xngen src/f16-gemm/8x8-aarch64-neonfp16arith-ld64.S.in -D INC=1 -o src/f16-gemm/gen-inc/8x8inc-minmax-aarch64-neonfp16arith-ld64.S &
+
+### Cortex A55r0 micro-kernel
+tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-cortex-a55r0.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-cortex-a55r0.S &
 
 ### Cortex A55 micro-kernels
 tools/xngen src/f16-gemm/6x16-aarch64-neonfp16arith-cortex-a55.S.in -D INC=0 -o src/f16-gemm/gen/6x16-minmax-aarch64-neonfp16arith-cortex-a55.S &
