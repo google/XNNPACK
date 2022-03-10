@@ -430,13 +430,16 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/u8-vclamp/scalar-x4.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
+  src/x8-transpose/gen/2x4-scalar-int.c
   src/x8-zip/xm-scalar.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
+  src/x16-transpose/gen/2x4-scalar-int.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
+  src/x32-transpose/gen/2x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/xm-scalar.c
   src/x32-zip/x2-scalar.c
@@ -572,13 +575,16 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/u8-vclamp/scalar-x4.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
+  src/x8-transpose/gen/2x4-scalar-int.c
   src/x8-zip/xm-scalar.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
+  src/x16-transpose/gen/2x4-scalar-int.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
+  src/x32-transpose/gen/2x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/xm-scalar.c
   src/x32-zip/x2-scalar.c
@@ -2812,7 +2818,8 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vdivc-minmax-neon-x8.c
   src/f32-vbinary/gen/vrdivc-minmax-neon-x8.c
   src/f32-vsqrt/gen/neon-sqrt-x4.c
-  src/x8-lut/gen/lut-neon-tbx128x4-x64.c)
+  src/x8-lut/gen/lut-neon-tbx128x4-x64.c
+  src/x32-transpose/4x4-aarch64-tbl.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
@@ -3528,7 +3535,8 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vunary/gen/vabs-sse-x8.c
   src/f32-vunary/gen/vneg-sse-x8.c
   src/f32-vunary/gen/vsqr-sse-x8.c
-  src/x32-packx/x4-sse.c)
+  src/x32-packx/x4-sse.c
+  src/x32-transpose/4x4-sse.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-sse-c4.c
@@ -3768,10 +3776,12 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/u8-vclamp/sse2-x64.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c
+  src/x8-transpose/gen/16x16-reuse-mov-sse2.c
   src/x8-zip/xm-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
+  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/xm-sse2.c
   src/x32-zip/x2-sse2.c
