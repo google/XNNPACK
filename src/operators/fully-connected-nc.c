@@ -239,8 +239,18 @@ static enum xnn_status setup_fully_connected_nc(
       nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
     }
   }
-  fully_connected_op->compute.type = xnn_parallelization_type_2d_tile_2d;
-  fully_connected_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+  #if XNN_MAX_UARCH_TYPES > 1
+    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+      fully_connected_op->compute.type = xnn_parallelization_type_2d_tile_2d_with_uarch;
+      fully_connected_op->compute.task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
+    } else {
+      fully_connected_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+      fully_connected_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+    }
+  #else
+    fully_connected_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+    fully_connected_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+  #endif
   fully_connected_op->compute.range[0] = batch_size;
   fully_connected_op->compute.range[1] = output_channels;
   fully_connected_op->compute.tile[0] = mr;
