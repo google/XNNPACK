@@ -45,9 +45,15 @@
 
 # Clamp v6 v7
 # unused A   v8 v9 v10 v11
-# x19 temporary vector shadow register
+# x8 temporary vector shadow register
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
+
+        # Load a_offset
+        LDR     x11, [sp, 8]
+
+        # Load zero, params pointer
+        LDP     x12, x8, [sp, 16]
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -63,29 +69,21 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         CSEL    x10, x17, x10, LO       //   c3 = c2
 
         ADD     x13, x10, x7            // c4 = c3 + cm_stride
-                                 // if mr <= 4
+                                        // if mr <= 4
         CSEL    x13, x10, x13, LS       //   c4 = c3
-
 
         CMP     x0, 6                   // if mr < 6
         ADD     x7, x13, x7             // c5 = c4 + cm_stride
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
-        # Load a_offset
-        LDR     x11, [sp, 8]
-
-        # Load zero, params pointer
-        LDP     x12, x8, [sp, 16]
-
         # Load min/max values
         LD2R    {v6.4s, v7.4s}, [x8]
 
-        # Save x19-x23, d12-d15 on stack
-        STP     d12, d13, [sp, -80]!
+        # Save x20-x23, d12-d15 on stack
+        STP     d12, d13, [sp, -64]!
         STP     d14, d15, [sp, 16]
-        STP     x19, x20, [sp, 32]
-        STP     x21, x22, [sp, 48]
-        STR     x23,      [sp, 64]
+        STP     x20, x21, [sp, 32]
+        STP     x22, x23, [sp, 48]
 
 0:
         # Load initial bias from w into accumulators
@@ -110,22 +108,22 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         LDP     x22, x23, [x4], 16
 
         CMP     x14, x12                // if a0 == zero
-        ADD     x14, x14, x11           // a0 += a_offset
+        ADD     x14, x14, x11           // A0 += a_offset
         CSEL    x14, x12, x14, EQ       //   a0 = zero, else += a0 + a_offset
         CMP     x15, x12                // if a1 == zero
-        ADD     x15, x15, x11           // a1 += a_offset
+        ADD     x15, x15, x11           // A1 += a_offset
         CSEL    x15, x12, x15, EQ       //   a1 = zero, else += a1 + a_offset
         CMP     x20, x12                // if a2 == zero
-        ADD     x20, x20, x11           // a2 += a_offset
+        ADD     x20, x20, x11           // A2 += a_offset
         CSEL    x20, x12, x20, EQ       //   a2 = zero, else += a2 + a_offset
         CMP     x21, x12                // if a3 == zero
-        ADD     x21, x21, x11           // a3 += a_offset
+        ADD     x21, x21, x11           // A3 += a_offset
         CSEL    x21, x12, x21, EQ       //   a3 = zero, else += a3 + a_offset
         CMP     x22, x12                // if a4 == zero
-        ADD     x22, x22, x11           // a4 += a_offset
+        ADD     x22, x22, x11           // A4 += a_offset
         CSEL    x22, x12, x22, EQ       //   a4 = zero, else += a4 + a_offset
         CMP     x23, x12                // if a5 == zero
-        ADD     x23, x23, x11           // a5 += a_offset
+        ADD     x23, x23, x11           // A5 += a_offset
         CSEL    x23, x12, x23, EQ       //   a5 = zero, else += a5 + a_offset
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
@@ -133,17 +131,17 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         B.LO    5f
 
         # Prologue - First group loads, no FMA
-        LDR     d0, [x14], 8              // a0
-        LDP     q16, q17, [x5], 32         // b
-        LDR     d1, [x20], 8              // a2
-        LDR     d2, [x22], 8              // a4
-        LD1     {v0.d}[1], [x15], 8       // a1
-        LD1     {v1.d}[1], [x21], 8       // a3
-        LD1     {v2.d}[1],  [x23], 8      // a5
+        LDR     d0, [x14], 8              // A0
+        LDP     q16, q17, [x5], 32        // B
+        LDR     d1, [x20], 8              // A2
+        LDR     d2, [x22], 8              // A4
+        LD1     {v0.d}[1], [x15], 8       // A1
+        LD1     {v1.d}[1], [x21], 8       // A3
+        LD1     {v2.d}[1],  [x23], 8      // A5
         SUBS    x0, x0, 16
         LDR     q18, [x5], 16
         LDR     d19, [x5], 8
-        LDR     x19, [x5], 8            // ins is in BLOCK 0
+        LDR     x8, [x5], 8              // ins is in BLOCK 0
 
         # Is there at least 4 floats (16 bytes) for main loop?
         B.LO    3f
@@ -153,125 +151,125 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 2:
         # First group of 24 FMA, Second group loads
         # BLOCK 0
-        LDR     d3, [x14], 8             // a0
-        INS     v19.d[1], x19              // b from second group
+        LDR     d3, [x14], 8              // A0
+        INS     v19.d[1], x8              // B from second group
         FMLA    v20.4s, v16.4s,  v0.s[0]
-        LDR     x19, [x15], 8             // a1
+        LDR     x8, [x15], 8              // A1
         FMLA    v22.4s, v16.4s,  v0.s[2]
         FMLA    v24.4s, v16.4s,  v1.s[0]
 
         # BLOCK 1
         LDR     d12, [x5]
-        INS     v3.d[1], x19               // a1 ins
+        INS     v3.d[1], x8               // A1 ins
         FMLA    v26.4s, v16.4s,  v1.s[2]
-        LDR     x19, [x5, 8]            // b
+        LDR     x8, [x5, 8]               // B
         FMLA    v28.4s, v16.4s,  v2.s[0]
         FMLA    v30.4s, v16.4s,  v2.s[2]
 
         # BLOCK 2
-        LDR     d4, [x20], 8             // a2
-        INS     v12.d[1], x19           // b  ins
+        LDR     d4, [x20], 8              // A2
+        INS     v12.d[1], x8              // B  ins
         FMLA    v21.4s, v17.4s,  v0.s[0]
-        LDR     x19, [x21], 8             // a3
+        LDR     x8, [x21], 8              // A3
         FMLA    v23.4s, v17.4s,  v0.s[2]
         FMLA    v25.4s, v17.4s,  v1.s[0]
 
         # BLOCK 3
-        LDR     d5, [x22], 8             // a4
-        INS     v4.d[1], x19               // a3 ins
+        LDR     d5, [x22], 8              // A4
+        INS     v4.d[1], x8               // A3 ins
         FMLA    v27.4s, v17.4s,  v1.s[2]
-        LDR     x19, [x23], 8             // a5
+        LDR     x8, [x23], 8              // A5
         FMLA    v29.4s, v17.4s,  v2.s[0]
         FMLA    v31.4s, v17.4s,  v2.s[2]
 
         # BLOCK 4
         LDR     d13, [x5, 16]
-        INS     v5.d[1], x19               // a5 ins
+        INS     v5.d[1], x8               // A5 ins
         FMLA    v20.4s, v18.4s,  v0.s[1]
-        LDR     x19, [x5, 24]
+        LDR     x8, [x5, 24]
         FMLA    v22.4s, v18.4s,  v0.s[3]
         FMLA    v24.4s, v18.4s,  v1.s[1]
 
         # BLOCK 5
         LDR     d14, [x5, 32]
-        INS     v13.d[1], x19           // b
+        INS     v13.d[1], x8              // B
         FMLA    v26.4s, v18.4s,  v1.s[3]
-        LDR     x19, [x5, 40]
+        LDR     x8, [x5, 40]
         FMLA    v28.4s, v18.4s,  v2.s[1]
         FMLA    v30.4s, v18.4s,  v2.s[3]
 
         # BLOCK 6
         LDR     d15, [x5, 48]
-        INS     v14.d[1], x19           // b
+        INS     v14.d[1], x8              // B
         FMLA    v21.4s, v19.4s,  v0.s[1]
-        LDR     x19, [x5, 56]
+        LDR     x8, [x5, 56]
         FMLA    v23.4s, v19.4s,  v0.s[3]
         FMLA    v25.4s, v19.4s,  v1.s[1]
 
         # BLOCK 7
-        INS     v15.d[1], x19
+        INS     v15.d[1], x8
         FMLA    v27.4s, v19.4s,  v1.s[3]
         FMLA    v29.4s, v19.4s,  v2.s[1]
         FMLA    v31.4s, v19.4s,  v2.s[3]
 
         # Second group of 24 FMA, First group of loads
         # BLOCK 0
-        LDR     d0, [x14], 8             // a0
+        LDR     d0, [x14], 8              // A0
         FMLA    v20.4s, v12.4s,  v3.s[0]
-        LDR     x19, [x15], 8             // a1
+        LDR     x8, [x15], 8              // A1
         FMLA    v22.4s, v12.4s,  v3.s[2]
         FMLA    v24.4s, v12.4s,  v4.s[0]
 
         # BLOCK 1
         LDR     d16, [x5, 64]
-        INS     v0.d[1], x19               // a1 ins
+        INS     v0.d[1], x8               // A1 ins
         FMLA    v26.4s, v12.4s,  v4.s[2]
-        LDR     x19, [x5, 72]           // b
+        LDR     x8, [x5, 72]              // B
         FMLA    v28.4s, v12.4s,  v5.s[0]
         FMLA    v30.4s, v12.4s,  v5.s[2]
 
         # BLOCK 2
-        LDR     d1, [x20], 8             // a2
-        INS     v16.d[1], x19           // b
+        LDR     d1, [x20], 8              // A2
+        INS     v16.d[1], x8              // B
         FMLA    v21.4s, v13.4s,  v3.s[0]
-        LDR     x19, [x21], 8             // a3
+        LDR     x8, [x21], 8              // A3
         FMLA    v23.4s, v13.4s,  v3.s[2]
         FMLA    v25.4s, v13.4s,  v4.s[0]
 
         # BLOCK 3
-        LDR     d2, [x22], 8             // a4
-        INS     v1.d[1], x19               // a3 ins
+        LDR     d2, [x22], 8              // A4
+        INS     v1.d[1], x8               // A3 ins
         FMLA    v27.4s, v13.4s,  v4.s[2]
-        LDR     x19,  [x23], 8            // a5
+        LDR     x8,  [x23], 8             // A5
         FMLA    v29.4s, v13.4s,  v5.s[0]
         FMLA    v31.4s, v13.4s,  v5.s[2]
 
         # BLOCK 4
         LDR     d17, [x5, 80]
-        INS     v2.d[1], x19               // a5 ins
+        INS     v2.d[1], x8               // A5 ins
         FMLA    v20.4s, v14.4s,  v3.s[1]
-        LDR     x19, [x5, 88]
+        LDR     x8, [x5, 88]
         FMLA    v22.4s, v14.4s,  v3.s[3]
         FMLA    v24.4s, v14.4s,  v4.s[1]
 
         # BLOCK 5
         LDR     d18, [x5, 96]
-        INS     v17.d[1], x19           // b
+        INS     v17.d[1], x8              // B
         FMLA    v26.4s, v14.4s,  v4.s[3]
-        LDR     x19, [x5, 104]
+        LDR     x8, [x5, 104]
         FMLA    v28.4s, v14.4s,  v5.s[1]
         FMLA    v30.4s, v14.4s,  v5.s[3]
 
         # BLOCK 6
         LDR     d19, [x5, 112]
-        INS     v18.d[1], x19           // b
+        INS     v18.d[1], x8              // B
         FMLA    v21.4s, v15.4s,  v3.s[1]
-        LDR     x19, [x5, 120]
+        LDR     x8, [x5, 120]
         FMLA    v23.4s, v15.4s,  v3.s[3]
         FMLA    v25.4s, v15.4s,  v4.s[1]
 
         # BLOCK 7
-        SUBS    x0, x0, 16              // LDR lands here
+        SUBS    x0, x0, 16                // LDR lands here
         FMLA    v27.4s, v15.4s,  v4.s[3]
         FMLA    v29.4s, v15.4s,  v5.s[1]
         ADD     x5, x5, 128
@@ -283,63 +281,63 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
 3:
         # First group of 24 FMA, Second group loads
         # BLOCK 0
-        LDR     d3, [x14], 8             // a0
-        INS     v19.d[1], x19              // b from second group
+        LDR     d3, [x14], 8              // A0
+        INS     v19.d[1], x8              // B from second group
         FMLA    v20.4s, v16.4s,  v0.s[0]
-        LDR     x19, [x15], 8             // a1
+        LDR     x8, [x15], 8              // A1
         FMLA    v22.4s, v16.4s,  v0.s[2]
         FMLA    v24.4s, v16.4s,  v1.s[0]
 
         # BLOCK 1
         LDR     d12, [x5]
-        INS     v3.d[1], x19               // a1 ins
+        INS     v3.d[1], x8               // A1 ins
         FMLA    v26.4s, v16.4s,  v1.s[2]
-        LDR     x19, [x5, 8]            // b
+        LDR     x8, [x5, 8]               // B
         FMLA    v28.4s, v16.4s,  v2.s[0]
         FMLA    v30.4s, v16.4s,  v2.s[2]
 
         # BLOCK 2
-        LDR     d4, [x20], 8             // a2
-        INS     v12.d[1], x19           // b  ins
+        LDR     d4, [x20], 8              // A2
+        INS     v12.d[1], x8              // B  ins
         FMLA    v21.4s, v17.4s,  v0.s[0]
-        LDR     x19, [x21], 8             // a3
+        LDR     x8, [x21], 8              // A3
         FMLA    v23.4s, v17.4s,  v0.s[2]
         FMLA    v25.4s, v17.4s,  v1.s[0]
 
         # BLOCK 3
-        LDR     d5, [x22], 8             // a4
-        INS     v4.d[1], x19               // a3 ins
+        LDR     d5, [x22], 8              // A4
+        INS     v4.d[1], x8               // A3 ins
         FMLA    v27.4s, v17.4s,  v1.s[2]
-        LDR     x19, [x23], 8             // a5
+        LDR     x8, [x23], 8              // A5
         FMLA    v29.4s, v17.4s,  v2.s[0]
         FMLA    v31.4s, v17.4s,  v2.s[2]
 
         # BLOCK 4
         LDR     d13, [x5, 16]
-        INS     v5.d[1], x19               // a5 ins
+        INS     v5.d[1], x8               // A5 ins
         FMLA    v20.4s, v18.4s,  v0.s[1]
-        LDR     x19, [x5, 24]
+        LDR     x8, [x5, 24]
         FMLA    v22.4s, v18.4s,  v0.s[3]
         FMLA    v24.4s, v18.4s,  v1.s[1]
 
         # BLOCK 5
         LDR     d14, [x5, 32]
-        INS     v13.d[1], x19           // b
+        INS     v13.d[1], x8              // B
         FMLA    v26.4s, v18.4s,  v1.s[3]
-        LDR     x19, [x5, 40]
+        LDR     x8, [x5, 40]
         FMLA    v28.4s, v18.4s,  v2.s[1]
         FMLA    v30.4s, v18.4s,  v2.s[3]
 
         # BLOCK 6
         LDR     d15, [x5, 48]
-        INS     v14.d[1], x19           // b
+        INS     v14.d[1], x8              // B
         FMLA    v21.4s, v19.4s,  v0.s[1]
-        LDR     x19, [x5, 56]
+        LDR     x8, [x5, 56]
         FMLA    v23.4s, v19.4s,  v0.s[3]
         FMLA    v25.4s, v19.4s,  v1.s[1]
 
         # BLOCK 7
-        INS     v15.d[1], x19           // b from previous
+        INS     v15.d[1], x8              // B from previous
         FMLA    v27.4s, v19.4s,  v1.s[3]
         FMLA    v29.4s, v19.4s,  v2.s[1]
         FMLA    v31.4s, v19.4s,  v2.s[3]
@@ -374,18 +372,18 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         FMLA    v26.4s, v14.4s,  v4.s[3]
         FMLA    v28.4s, v14.4s,  v5.s[1]
         FMLA    v30.4s, v14.4s,  v5.s[3]
+        TST     x0, 15
 
         # BLOCK 6
         FMLA    v21.4s, v15.4s,  v3.s[1]
         FMLA    v23.4s, v15.4s,  v3.s[3]
         FMLA    v25.4s, v15.4s,  v4.s[1]
-        TST     x0, 15
+        ADD     x5, x5, 64
 
         # BLOCK 7
         FMLA    v27.4s, v15.4s,  v4.s[3]
         FMLA    v29.4s, v15.4s,  v5.s[1]
         FMLA    v31.4s, v15.4s,  v5.s[3]
-        ADD     x5, x5, 64
 
         # Is there a remainder?- 2 floats of A (8 bytes) or less
         B.NE    5f
@@ -398,7 +396,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         # Clamp
         FMAX    v20.4s, v20.4s, v6.4s
         # Load cn_stride
-        LDR     x0, [sp, 80]
+        LDR     x0, [sp, 64]
         FMAX    v21.4s, v21.4s, v6.4s
         FMAX    v22.4s, v22.4s, v6.4s
         FMAX    v23.4s, v23.4s, v6.4s
@@ -440,17 +438,16 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STP     q20, q21,  [x6]
         ADD     x6,  x6, x0
 
-        SUB     x4, x4, x3              // a -= ks
+        SUB     x4, x4, x3              // A -= ks
 
         # nc loop
         B.HI    0b
 
-        # Restore x19-x23, d12-d15 from stack
-        LDR     x23,      [sp, 64]
-        LDP     x21, x22, [sp, 48]
-        LDP     x19, x20, [sp, 32]
+        # Restore x20-x23, d12-d15 from stack
+        LDP     x22, x23, [sp, 48]
+        LDP     x20, x21, [sp, 32]
         LDP     d14, d15, [sp, 16]
-        LDP     d12, d13, [sp], 80
+        LDP     d12, d13, [sp], 64
         RET
 
 5:
@@ -560,12 +557,11 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
         STR     s22, [x16]
         STR     s20,  [x6]
 10:
-        # Restore x19-x23, d12-d15 from stack
-        LDR     x23,      [sp, 64]
-        LDP     x21, x22, [sp, 48]
-        LDP     x19, x20, [sp, 32]
+        # Restore x20-x23, d12-d15 from stack
+        LDP     x22, x23, [sp, 48]
+        LDP     x20, x21, [sp, 32]
         LDP     d14, d15, [sp, 16]
-        LDP     d12, d13, [sp], 80
+        LDP     d12, d13, [sp], 64
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53
