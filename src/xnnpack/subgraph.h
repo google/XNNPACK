@@ -12,10 +12,10 @@
 #include <xnnpack/common.h>
 #include <xnnpack/codecache.h>
 
-#define XNN_MAX_INPUTS 3
+#define XNN_MAX_INPUTS 4
 #define XNN_MAX_OUTPUTS 4
 
-#define XNN_MAX_RUNTIME_INPUTS 3
+#define XNN_MAX_RUNTIME_INPUTS 4
 #define XNN_MAX_RUNTIME_OUTPUTS 4
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
@@ -147,6 +147,7 @@ enum xnn_node_type {
   xnn_node_type_clamp,
   xnn_node_type_concatenate2,
   xnn_node_type_concatenate3,
+  xnn_node_type_concatenate4,
   xnn_node_type_convert,
   xnn_node_type_convolution_2d,
   xnn_node_type_deconvolution_2d,
