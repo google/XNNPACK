@@ -2164,7 +2164,7 @@ typedef void (*xnn_f32_gemm_ukernel_function)(
     size_t cn_stride,
     const union xnn_f32_default_params* params);
 
-typedef void (*xnn_x8_transpose_ukernel_function)(
+typedef void (*xnn_x8_transposec_ukernel_function)(
     const uint8_t* a,
     uint8_t* b,
     size_t input_stride,
@@ -2172,7 +2172,7 @@ typedef void (*xnn_x8_transpose_ukernel_function)(
     size_t block_width,
     size_t block_height);
 
-typedef void (*xnn_x16_transpose_ukernel_function)(
+typedef void (*xnn_x16_transposec_ukernel_function)(
     const uint16_t* a,
     uint16_t* b,
     size_t input_stride,
@@ -2180,7 +2180,7 @@ typedef void (*xnn_x16_transpose_ukernel_function)(
     size_t block_width,
     size_t block_height);
 
-typedef void (*xnn_x32_transpose_ukernel_function)(
+typedef void (*xnn_x32_transposec_ukernel_function)(
     const uint32_t* a,
     uint32_t* b,
     size_t input_stride,
@@ -2188,7 +2188,7 @@ typedef void (*xnn_x32_transpose_ukernel_function)(
     size_t block_width,
     size_t block_height);
 
-typedef void (*xnn_x64_transpose_ukernel_function)(
+typedef void (*xnn_x64_transposec_ukernel_function)(
     const uint64_t* a,
     uint64_t* b,
     size_t input_stride,

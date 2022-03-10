@@ -56,7 +56,7 @@ class TransposeMicrokernelTester {
 
   inline size_t iterations() const { return this->iterations_; }
 
-  void Test(xnn_x64_transpose_ukernel_function transpose) const {
+  void Test(xnn_x64_transposec_ukernel_function transpose) const {
     std::vector<uint64_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint64_t));
     std::vector<uint64_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -82,7 +82,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x32_transpose_ukernel_function transpose) const {
+  void Test(xnn_x32_transposec_ukernel_function transpose) const {
     std::vector<uint32_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -108,7 +108,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x16_transpose_ukernel_function transpose) const {
+  void Test(xnn_x16_transposec_ukernel_function transpose) const {
     std::vector<uint16_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -134,7 +134,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x8_transpose_ukernel_function transpose) const {
+  void Test(xnn_x8_transposec_ukernel_function transpose) const {
     std::vector<uint8_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES);
     std::vector<uint8_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
