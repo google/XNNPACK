@@ -19,6 +19,13 @@
 - name: xnn_x8_transpose_ukernel__16x16_reuse_mov_wasmsimd
 - name: xnn_x8_transpose_ukernel__16x16_reuse_switch_wasmsimd
 # ARM NEON
+- name: xnn_x8_transpose_ukernel__8x8_multi_dec_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_multi_mov_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_multi_switch_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_reuse_dec_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_reuse_multi_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_reuse_mov_zip_neon
+- name: xnn_x8_transpose_ukernel__8x8_reuse_switch_zip_neon
 - name: xnn_x8_transpose_ukernel__16x16_reuse_dec_zip_neon
 - name: xnn_x8_transpose_ukernel__16x16_reuse_mov_zip_neon
 - name: xnn_x8_transpose_ukernel__16x16_reuse_switch_zip_neon

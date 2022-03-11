@@ -70,24 +70,31 @@ tools/xngen src/x32-transpose/sse2.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE=64 
 tools/xngen src/x32-transpose/sse2.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=64 -o src/x64-transpose/gen/2x2-multi-mov-sse2.c &
 
 #################################### ARM NEON ###############################
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=8 -o src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 -o src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=8 -o src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=16 -o src/x16-transpose/gen/8x8-reuse-dec-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=16 -o src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=16 -o src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=16 -o src/x16-transpose/gen/8x8-reuse-multi-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=16 -o src/x16-transpose/gen/8x8-multi-switch-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=16 -o src/x16-transpose/gen/8x8-multi-dec-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=16 -o src/x16-transpose/gen/8x8-multi-mov-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=32 -o src/x32-transpose/gen/4x4-reuse-dec-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=32 -o src/x32-transpose/gen/4x4-reuse-mov-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=32 -o src/x32-transpose/gen/4x4-reuse-switch-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=32 -o src/x32-transpose/gen/4x4-reuse-multi-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=32 -o src/x32-transpose/gen/4x4-multi-switch-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE=32 -o src/x32-transpose/gen/4x4-multi-multi-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=32 -o src/x32-transpose/gen/4x4-multi-dec-zip-neon.c &
-tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=32 -o src/x32-transpose/gen/4x4-multi-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-multi-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-multi-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-multi-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-reuse-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-reuse-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-reuse-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=8 VECTOR_SIZE=64 -o src/x8-transpose/gen/8x8-reuse-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-multi-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-multi-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-multi-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-reuse-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-reuse-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-reuse-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-reuse-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-multi-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-multi-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-multi-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=32 VECTOR_SIZE=128 -o src/x32-transpose/gen/4x4-multi-mov-zip-neon.c &
 
 #################################### WAsm SIMD ###############################
 tools/xngen src/x32-transpose/wasmsimd.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 -o src/x8-transpose/gen/16x16-reuse-mov-wasmsimd.c &

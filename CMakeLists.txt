@@ -2519,6 +2519,13 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-vclamp/neon-x64.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
+  src/x8-transpose/gen/8x8-multi-dec-zip-neon.c
+  src/x8-transpose/gen/8x8-multi-mov-zip-neon.c
+  src/x8-transpose/gen/8x8-multi-switch-zip-neon.c
+  src/x8-transpose/gen/8x8-reuse-dec-zip-neon.c
+  src/x8-transpose/gen/8x8-reuse-multi-zip-neon.c
+  src/x8-transpose/gen/8x8-reuse-mov-zip-neon.c
+  src/x8-transpose/gen/8x8-reuse-switch-zip-neon.c
   src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c
   src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c
   src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c
