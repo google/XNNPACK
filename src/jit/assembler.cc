@@ -5,17 +5,14 @@
 
 #include <xnnpack/assembler.h>
 
-#include <assert.h>
-
 #include <xnnpack/allocator.h>
 
 namespace xnnpack {
 
 AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
-  byte* buf_start = reinterpret_cast<byte*>(buf->code);
-  buffer_ = buf_start + buf->size;
+  buffer_ = reinterpret_cast<byte*>(buf->code);
   cursor_ = buffer_;
-  top_ = buf_start + buf->capacity;
+  top_ = buffer_ + buf->capacity;
   xnn_buffer = buf;
 }
 
@@ -35,15 +32,14 @@ void AssemblerBase::emit32(uint32_t value) {
 
 
 void* AssemblerBase::finalize() {
-  if (error_ != Error::kNoError) {
-    return NULL;
+  xnn_buffer->size = code_size_in_bytes();
+  if (xnn_finalize_code_memory(xnn_buffer) != xnn_status_success) {
+    error_ = Error::kFinalizeCodeMemoryFail;
   }
-  xnn_buffer->size += code_size_in_bytes();
   return reinterpret_cast<void*>(buffer_);
 }
 
 void AssemblerBase::reset() {
-  xnn_buffer->size -= (cursor_ - buffer_);
   cursor_ = buffer_;
   error_ = Error::kNoError;
 }

@@ -411,53 +411,6 @@ TEST(AArch64Assembler, Align) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
-TEST(AArch64Assembler, AssembleToEndOfBuffer) {
-  xnn_code_buffer b;
-  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
-
-  Assembler a1(&b);
-  a1.emit32(1);
-  a1.finalize();
-
-  // Different assembler, but same code buffer.
-  Assembler a2(&b);
-  a2.emit32(2);
-  a2.finalize();
-
-  // Check that we wrote to end of buffer and did not overwrite.
-  uint32_t* p = (uint32_t*) b.code;
-  ASSERT_EQ(1, *p);
-  ASSERT_EQ(2, *(p+1));
-
-  ASSERT_EQ(8, b.size);
-
-  a2.reset();
-
-  ASSERT_EQ(4, b.size);
-  ASSERT_EQ((byte*)b.code + 4, a2.offset());
-
-  a2.emit32(3);
-  ASSERT_EQ(3, *(p+1));
-
-  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
-}
-
-TEST(AArch64Assembler, FinalizeWithError) {
-  xnn_code_buffer b;
-  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
-
-  Assembler a(&b);
-  // Write a valid instruction.
-  a.add(x1, x2, 32);
-  // Then write an invalid instruction.
-  a.ldp(x14, x15, mem[sp], 15);
-  // Since we have an error, size should not be updated.
-  a.finalize();
-  ASSERT_EQ(0, b.size);
-
-  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
-}
-
 TEST(AArch64Assembler, BindOverflow) {
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, 4);
