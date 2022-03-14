@@ -7615,6 +7615,7 @@ AARCH64_ASM_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a53.S",
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a55.S",
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a75.S",
+    "src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-ld64.S",
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld64.S",
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld128.S",
     "src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-prfm-cortex-a53.S",
