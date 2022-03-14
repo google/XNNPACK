@@ -222,6 +222,7 @@ static void ruy_st(benchmark::State& state, const char* net)
     const size_t nc = state.range(1);
     const size_t kc = state.range(2);
     generator(&code_buffer, nc, kc, nullptr);
+    xnn_finalize_code_memory(&code_buffer);
     GEMMBenchmark(
         state,
         reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code),

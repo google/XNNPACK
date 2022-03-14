@@ -262,6 +262,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
   generator(&code_buffer, group_output_channels, group_input_channels * sizeof(float), kernel_size * mr * sizeof(void *), &jit_params);
+  xnn_finalize_code_memory(&code_buffer);
   auto f32_igemm = reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.code);
 
   size_t buffer_index = 0;
