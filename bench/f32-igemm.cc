@@ -497,6 +497,10 @@ static void IGEMMBenchmark(benchmark::State& state,
     IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x2__neonfma_lane_ld64, 4, 2, 1, 1,
       xnn_init_f32_minmax_scalar_params);
   }
+  static void f32_igemm_6x2__neonfma_lane_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x2__neonfma_lane_ld64, 6, 2, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
+  }
   static void f32_igemm_4x4__neonfma_lane_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x4__neonfma_lane_ld64, 4, 4, 1, 1,
       xnn_init_f32_minmax_scalar_params);
@@ -543,6 +547,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_6x8__aarch64_neonfma_ld128)
   BENCHMARK_CONV(f32_igemm_1x8__neonfma_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x2__neonfma_lane_ld64)
+  BENCHMARK_CONV(f32_igemm_6x2__neonfma_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x4__neonfma_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x8__neonfma_lane_ld128)
   BENCHMARK_CONV(f32_igemm_4x8__neonfma_lane_ld64)
@@ -558,6 +563,10 @@ static void IGEMMBenchmark(benchmark::State& state,
   }
   static void f32_igemm_4x2__neon_lane_ld64(benchmark::State& state, const char* net) {
     IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64, 4, 2, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void f32_igemm_6x2__neon_lane_ld64(benchmark::State& state, const char* net) {
+    IGEMMBenchmark(state, xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64, 6, 2, 1, 1,
       xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
   }
   static void f32_igemm_4x4__neon_lane_ld64(benchmark::State& state, const char* net) {
@@ -655,6 +664,7 @@ static void IGEMMBenchmark(benchmark::State& state,
 
   BENCHMARK_CONV(f32_igemm_1x8__neon_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x2__neon_lane_ld64)
+  BENCHMARK_CONV(f32_igemm_6x2__neon_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x4__neon_lane_ld64)
   BENCHMARK_CONV(f32_igemm_4x8__neon_lane_ld128)
   BENCHMARK_CONV(f32_igemm_4x8__neon_lane_ld64)

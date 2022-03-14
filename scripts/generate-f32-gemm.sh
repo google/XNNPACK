@@ -144,6 +144,8 @@ tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D INC=1 
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/4x2-minmax-neon-lane-ld64.c &
 tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/4x2-minmax-neonfma-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/6x2-minmax-neon-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c &
 ### DUP LD64 micro-kernels
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -D DUP=1 -o src/f32-gemm/gen/1x8-minmax-neon-dup-ld64.c &
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -D DUP=1 -o src/f32-gemm/gen-inc/1x8inc-minmax-neon-dup-ld64.c &

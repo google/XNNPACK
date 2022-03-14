@@ -1606,6 +1606,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/1x8s4-minmax-neon.c
   src/f32-gemm/gen/4x2-minmax-neon-lane-ld64.c
+  src/f32-gemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-dup-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-dup-ld128.c
   src/f32-gemm/gen/4x8-minmax-neon-lane-ld64.c
@@ -1626,6 +1627,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/1x8s4-minmax-neon.c
   src/f32-igemm/gen/4x2-minmax-neon-lane-ld64.c
+  src/f32-igemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/4x4-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/4x8-minmax-neon-dup-ld128.c
@@ -2831,10 +2833,10 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-4x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-1x4-acc2.c
   src/f32-gemm/gen/1x8-minmax-neonfma-lane-ld64.c
-  src/f32-gemm/gen/4x2-minmax-neonfma-lane-ld64.c
+  src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/1x8-minmax-neonfma-lane-ld64.c
-  src/f32-igemm/gen/4x2-minmax-neonfma-lane-ld64.c
+  src/f32-igemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-spmm/gen/32x2-minmax-neonfma.c
   src/f32-spmm/gen/32x4-minmax-neonfma.c
@@ -2904,6 +2906,7 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8inc-minmax-neonfma-lane-ld128.c
   src/f32-gemm/gen/1x8-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x2-minmax-neonfma-lane-ld64.c
+  src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neonfma-lane-ld128.c
   src/f32-gemm/gen/5x8-minmax-neonfma-lane-ld64.c
@@ -2911,6 +2914,7 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/6x8-minmax-neonfma-lane-ld128.c
   src/f32-igemm/gen/1x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x2-minmax-neonfma-lane-ld64.c
+  src/f32-igemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x4-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neonfma-lane-ld128.c
