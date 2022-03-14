@@ -59,7 +59,10 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
     uint${SIZE}_t* o = (uint${SIZE}_t*) output;
   $else:
     uint${SIZE}_t* o = (uint${SIZE}_t*) ((uintptr_t) output - tile_hbytes);
-  $if OUT_PTRS != "MULTI":
+  $if OUT_PTRS == "SWITCH":
+    $if int(VECTOR_SIZE/SIZE) > 2:
+      const size_t minus_output_stride = -output_stride;
+  $elif OUT_PTRS != "MULTI":
     const size_t minus_output_stride = -output_stride;
 
   do {
@@ -252,7 +255,7 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
         $for N in range(TILE_SIZE):
           uint${SIZE}x${TILE_SIZE}_t v${N}_low = v0_${(N>>1)}.val[${N%2}];
 
-      $if NUM_ITERS>1:
+      $if NUM_ITERS>=NUM_D_REGISTERS:
         if (bh & ${TILE_SIZE>>NUM_D_REGISTERS}) {
           $if OUT_PTRS == "SWITCH":
             uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
