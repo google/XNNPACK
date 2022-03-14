@@ -178,7 +178,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75
         FMLA    v30.4s, v22.4s, v3.s[3]
         FMLA    v31.4s, v23.4s, v3.s[3]
 
-        # Second block of 4.  FMA for second 4, loads for 1nd block of 4.
+        # Second block of 4.  FMA for second 4, loads for 1st block of 4.
         FMLA    v24.4s, v8.4s, v4.s[0]
         LDP     q16, q17, [x5], 32
         FMLA    v25.4s, v9.4s, v4.s[0]
