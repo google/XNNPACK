@@ -1334,6 +1334,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x64-transpose/gen/4x1-scalar-int.c",
     "src/x64-transpose/gen/4x2-scalar-float.c",
     "src/x64-transpose/gen/4x2-scalar-int.c",
+    "src/xx-transpose/1x1-memcpy.c",
 ]
 
 ALL_WASM_MICROKERNEL_SRCS = [
@@ -12856,6 +12857,15 @@ xnnpack_unit_test(
     name = "x64_transpose_test",
     srcs = [
         "test/x64-transpose.cc",
+        "test/transpose-microkernel-tester.h",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "xx_transpose_test",
+    srcs = [
+        "test/xx-transpose.cc",
         "test/transpose-microkernel-tester.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,

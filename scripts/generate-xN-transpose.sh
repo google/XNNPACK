@@ -135,5 +135,6 @@ tools/generate-transpose-test.py --spec test/x8-transpose.yaml --output=test/x8-
 tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output=test/x16-transpose.cc &
 tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output=test/x32-transpose.cc &
 tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output=test/x64-transpose.cc &
+tools/generate-transpose-test.py --spec test/xx-transpose.yaml --output=test/xx-transpose.cc &
 
 wait

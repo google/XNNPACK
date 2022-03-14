@@ -34,14 +34,18 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(x\d+)_transpose_ukernel__(\d+)x(\d+)_(.+)$", name)
+  match = re.fullmatch(r"^xnn_x(.+)_transpose(c|v)_ukernel__(\d+)x(\d+)_(.+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
-  tile_height = int(match.group(2))
-  tile_width = int(match.group(3))
+  if match.group(1) == 'x':
+    element_size = None
+  else:
+    element_size = int(int(match.group(1)) / 8)
+  tile_height = int(match.group(3))
+  tile_width = int(match.group(4))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(4))
-  return tile_height, tile_width, arch, isa
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
+  return tile_height, tile_width, element_size, arch, isa
 
 
 TRANSPOSE_TEST_TEMPLATE = """\
@@ -53,6 +57,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}) {
     .output_stride(${TILE_HEIGHT})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
@@ -67,6 +72,7 @@ TEST(${TEST_NAME}, bh_1_${TILE_HEIGHT * 2}_bw_1_${TILE_WIDTH * 2}) {
         .output_stride(i)
         .block_width(j)
         .block_height(i)
+        .element_size(${ELEMENT_SIZE})
         .iterations(1)
         .Test(${KERNEL});
     }
@@ -81,6 +87,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH * 2}) {
     .output_stride(${TILE_HEIGHT})
     .block_width(${TILE_WIDTH * 2})
     .block_height(${TILE_HEIGHT})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
@@ -94,6 +101,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
       .output_stride(${TILE_HEIGHT})
       .block_width(i)
       .block_height(${TILE_HEIGHT})
+      .element_size(${ELEMENT_SIZE})
       .iterations(1)
       .Test(${KERNEL});
   }
@@ -108,6 +116,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2})
       .output_stride(${TILE_HEIGHT * 2})
       .block_width(i)
       .block_height(${TILE_HEIGHT * 2})
+      .element_size(${ELEMENT_SIZE})
       .iterations(1)
       .Test(${KERNEL});
   }
@@ -121,6 +130,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}) {
     .output_stride(${TILE_HEIGHT * 2})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT * 2})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
@@ -134,6 +144,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}){
       .output_stride(i)
       .block_width(${TILE_WIDTH})
       .block_height(i)
+      .element_size(${ELEMENT_SIZE})
       .iterations(1)
       .Test(${KERNEL});
   }
@@ -148,6 +159,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH * 2}
       .output_stride(i)
       .block_width(${TILE_WIDTH * 2})
       .block_height(i)
+      .element_size(${ELEMENT_SIZE})
       .iterations(1)
       .Test(${KERNEL});
   }
@@ -163,6 +175,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH + 1}
         .output_stride(i)
         .block_width(j)
         .block_height(i)
+        .element_size(${ELEMENT_SIZE})
         .iterations(1)
         .Test(${KERNEL});
     }
@@ -177,6 +190,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}_is_${TILE_WIDTH * 2}) {
     .output_stride(${TILE_HEIGHT})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
@@ -189,6 +203,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}_os_${TILE_HEIGHT * 2}) {
     .output_stride(${TILE_HEIGHT * 2})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
@@ -201,19 +216,21 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}_is_${TILE_WIDTH * 2}_os_${
     .output_stride(${TILE_HEIGHT * 2})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT})
+    .element_size(${ELEMENT_SIZE})
     .iterations(1)
     .Test(${KERNEL});
 }
 """
 
 
-def generate_test_cases(ukernel, tile_height, tile_width, isa):
+def generate_test_cases(ukernel, tile_height, tile_width, element_size, isa):
   """Generates all tests cases for a Vector Convert Operation micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     tile_height: Number of vertical elements processed by the ukernel.
     tile_width: Number of horizontal elements processed by the ukernel.
+    element_size: Size of each element in bytes.
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
 
@@ -224,10 +241,33 @@ def generate_test_cases(ukernel, tile_height, tile_width, isa):
   test_args = [ukernel]
   return xngen.preprocess(
       TRANSPOSE_TEST_TEMPLATE, {
-          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", "") + '_' + str(element_size),
           "KERNEL": ukernel,
           "TILE_HEIGHT": tile_height,
           "TILE_WIDTH": tile_width,
+          "ELEMENT_SIZE": element_size,
+          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
+      })
+
+def generate_memcpy_test_cases(ukernel, tile_height, isa):
+  """Generates all tests cases for a Vector Convert Operation micro-kernel.
+
+  Args:
+    ukernel: C name of the micro-kernel function.
+    tile_height: Number of vertical elements processed by the ukernel.
+    isa: instruction set required to run the micro-kernel. Generated unit test
+      will skip execution if the host processor doesn't support this ISA.
+
+  Returns:
+    Code for the test case.
+  """
+  _, test_name = ukernel.split("_", 1)
+  test_args = [ukernel]
+  return xngen.preprocess(
+      TRANSPOSE_MEMCPY_TEST_TEMPLATE, {
+          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
+          "KERNEL": ukernel,
+          "TILE_HEIGHT": tile_height,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       })
 
@@ -263,12 +303,17 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      tile_height, tile_width, arch, isa = split_ukernel_name(name)
+      tile_height, tile_width, element_size, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, tile_height, tile_width, isa)
+      if element_size is not None:
+        test_case = generate_test_cases(name, tile_height, tile_width, element_size, isa)
+      else:
+        test_case = generate_test_cases(name, tile_height, tile_width, 1, isa)
+        test_case += generate_test_cases(name, tile_height, tile_width, 3, isa)
+        test_case += generate_test_cases(name, tile_height, tile_width, 5, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

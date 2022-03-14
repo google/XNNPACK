@@ -1362,7 +1362,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x64-transpose/gen/4x1-scalar-float.c
   src/x64-transpose/gen/4x1-scalar-int.c
   src/x64-transpose/gen/4x2-scalar-float.c
-  src/x64-transpose/gen/4x2-scalar-int.c)
+  src/x64-transpose/gen/4x2-scalar-int.c
+  src/xx-transpose/1x1-memcpy.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
@@ -8755,6 +8756,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(xx-pad-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(xx-pad-test xx-pad-test)
+
+  ADD_EXECUTABLE(xx-transpose-test test/xx-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  SET_TARGET_PROPERTIES(xx-transpose-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(xx-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(xx-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(xx-transpose-test xx-transpose-test)
 
   ADD_EXECUTABLE(jit-test test/jit.cc)
   SET_TARGET_PROPERTIES(jit-test PROPERTIES

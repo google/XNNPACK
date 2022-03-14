@@ -2197,10 +2197,19 @@ typedef void (*xnn_x64_transposec_ukernel_function)(
     size_t block_height);
 
 typedef void (*xnn_transposec_ukernel_function)(
-    const void* a,
-    void* b,
+    const void* input,
+    void* output,
+    size_t input_stride,
+    size_t output_size,
+    size_t block_width,
+    size_t block_height);
+
+typedef void (*xnn_transposev_ukernel_function)(
+    const void* input,
+    void* output,
     size_t input_stride,
     size_t output_stride,
+    size_t element_size,
     size_t block_width,
     size_t block_height);
 
