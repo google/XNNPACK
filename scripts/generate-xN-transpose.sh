@@ -80,6 +80,17 @@ tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZ
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c &
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c &
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=8 VECTOR_SIZE=128 -o src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c &
+
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=DEC SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-multi-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-multi-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=MULTI SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-multi-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=MULTI OUT_PTRS=SWITCH SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-multi-switch-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-reuse-dec-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MULTI SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-reuse-multi-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-reuse-mov-zip-neon.c &
+tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=16 VECTOR_SIZE=64 -o src/x16-transpose/gen/4x4-reuse-switch-zip-neon.c &
+
+
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=DEC SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-dec-zip-neon.c &
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=MOV SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c &
 tools/xngen src/x32-transpose/neon-zip.c.in -D IN_PTRS=REUSE OUT_PTRS=SWITCH SIZE=16 VECTOR_SIZE=128 -o src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c &

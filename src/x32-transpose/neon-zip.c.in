@@ -326,14 +326,14 @@ void xnn_x${SIZE}_transpose_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()
                 vst1_lane_u32(o${N}, v${N}_low, 0);
               $else:
                 vst1_lane_u32((void*) o${N}, vreinterpret_u32_u${SIZE}(v${N}_low), 0); o${N} += ${TILE_SIZE>>NUM_D_REGISTERS};
-          $if NUM_ITERS > 2:
+          $if NUM_ITERS > NUM_D_REGISTERS:
             $for N in range(TILE_SIZE):
               $if SIZE == 16:
                 v${N}_low = vext_u16(v${N}_low, v${N}_low, 2);
               $else:
                 v${N}_low = vext_u8(v${N}_low, v${N}_low, 4);
         }
-      $if NUM_ITERS>2:
+      $if NUM_ITERS>NUM_D_REGISTERS:
         if (bh & ${TILE_SIZE>>(NUM_D_REGISTERS+1)}) {
           $if OUT_PTRS == "SWITCH":
             uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
