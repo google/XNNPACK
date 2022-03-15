@@ -57,63 +57,63 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({1024, 1024});
 }
 
-BENCHMARK_CAPTURE(transpose, 1x2_scalar_int, xnn_x16_transpose_ukernel__1x2_scalar_int)
+BENCHMARK_CAPTURE(transpose, 1x2_scalar_int, xnn_x16_transposec_ukernel__1x2_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 1x4_scalar_int, xnn_x16_transpose_ukernel__1x4_scalar_int)
+BENCHMARK_CAPTURE(transpose, 1x4_scalar_int, xnn_x16_transposec_ukernel__1x4_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 2x1_scalar_int, xnn_x16_transpose_ukernel__2x1_scalar_int)
+BENCHMARK_CAPTURE(transpose, 2x1_scalar_int, xnn_x16_transposec_ukernel__2x1_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 2x2_scalar_int, xnn_x16_transpose_ukernel__2x2_scalar_int)
+BENCHMARK_CAPTURE(transpose, 2x2_scalar_int, xnn_x16_transposec_ukernel__2x2_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 2x4_scalar_int, xnn_x16_transpose_ukernel__2x4_scalar_int)
+BENCHMARK_CAPTURE(transpose, 2x4_scalar_int, xnn_x16_transposec_ukernel__2x4_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 4x1_scalar_int, xnn_x16_transpose_ukernel__4x1_scalar_int)
+BENCHMARK_CAPTURE(transpose, 4x1_scalar_int, xnn_x16_transposec_ukernel__4x1_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 4x2_scalar_int, xnn_x16_transpose_ukernel__4x2_scalar_int)
+BENCHMARK_CAPTURE(transpose, 4x2_scalar_int, xnn_x16_transposec_ukernel__4x2_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 4x4_scalar_int, xnn_x16_transpose_ukernel__4x4_scalar_int)
+BENCHMARK_CAPTURE(transpose, 4x4_scalar_int, xnn_x16_transposec_ukernel__4x4_scalar_int)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_wasmsimd, xnn_x16_transpose_ukernel__8x8_multi_mov_wasmsimd)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_wasmsimd, xnn_x16_transposec_ukernel__8x8_multi_mov_wasmsimd)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_wasmsimd, xnn_x16_transpose_ukernel__8x8_multi_switch_wasmsimd)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_wasmsimd, xnn_x16_transposec_ukernel__8x8_multi_switch_wasmsimd)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_wasmsimd, xnn_x16_transpose_ukernel__8x8_reuse_mov_wasmsimd)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_wasmsimd, xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_wasmsimd, xnn_x16_transpose_ukernel__8x8_reuse_switch_wasmsimd)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_wasmsimd, xnn_x16_transposec_ukernel__8x8_reuse_switch_wasmsimd)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_dec_zip_neon, xnn_x16_transpose_ukernel__8x8_multi_dec_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_dec_zip_neon, xnn_x16_transposec_ukernel__8x8_multi_dec_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_zip_neon, xnn_x16_transpose_ukernel__8x8_multi_mov_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_zip_neon, xnn_x16_transposec_ukernel__8x8_multi_mov_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_zip_neon, xnn_x16_transpose_ukernel__8x8_multi_switch_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_zip_neon, xnn_x16_transposec_ukernel__8x8_multi_switch_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_dec_zip_neon, xnn_x16_transpose_ukernel__8x8_reuse_dec_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_dec_zip_neon, xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_zip_neon, xnn_x16_transpose_ukernel__8x8_reuse_mov_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_zip_neon, xnn_x16_transposec_ukernel__8x8_reuse_mov_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_multi_zip_neon, xnn_x16_transpose_ukernel__8x8_reuse_multi_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_multi_zip_neon, xnn_x16_transposec_ukernel__8x8_reuse_multi_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_zip_neon, xnn_x16_transpose_ukernel__8x8_reuse_switch_zip_neon)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_zip_neon, xnn_x16_transposec_ukernel__8x8_reuse_switch_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(transpose, 8x8_sse, xnn_x16_transpose_ukernel__4x8_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_sse, xnn_x16_transposec_ukernel__4x8_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_sse2, xnn_x16_transpose_ukernel__8x8_multi_mov_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_mov_sse2, xnn_x16_transposec_ukernel__8x8_multi_mov_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_sse2, xnn_x16_transpose_ukernel__8x8_multi_switch_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_multi_switch_sse2, xnn_x16_transposec_ukernel__8x8_multi_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_sse2, xnn_x16_transpose_ukernel__8x8_reuse_mov_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_mov_sse2, xnn_x16_transposec_ukernel__8x8_reuse_mov_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_multi_sse2, xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_multi_sse2, xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
-  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_sse2, xnn_x16_transpose_ukernel__8x8_reuse_switch_sse2)
+  BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_sse2, xnn_x16_transposec_ukernel__8x8_reuse_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

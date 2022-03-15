@@ -8315,7 +8315,7 @@ void xnn_x32_packx_ukernel_4x__sse(
   }
 }
 
-void xnn_x32_transpose_ukernel__4x4_sse(
+void xnn_x32_transposec_ukernel__4x4_sse(
     const uint32_t* input,
     uint32_t* output,
     size_t input_stride,

@@ -11608,7 +11608,7 @@ void xnn_u8_vclamp_ukernel__sse2_x64(
   }
 }
 
-void xnn_x16_transpose_ukernel__8x8_reuse_multi_sse2(
+void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
     const uint16_t* input,
     uint16_t* output,
     size_t input_stride,
@@ -12200,7 +12200,7 @@ void xnn_x32_zip_xm_ukernel__sse2(
   }
 }
 
-void xnn_x8_transpose_ukernel__16x16_reuse_mov_sse2(
+void xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2(
     const uint8_t* input,
     uint8_t* output,
     size_t input_stride,

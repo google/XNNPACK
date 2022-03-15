@@ -34,7 +34,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"^xnn_x(.+)_transpose(v*)_ukernel__(\d+)x(\d+)_(.+)$", name)
+  match = re.fullmatch(r"^xnn_x(.+)_transpose(v|c)_ukernel__(\d+)x(\d+)_(.+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   if match.group(1) == 'x':

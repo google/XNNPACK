@@ -430,16 +430,16 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/u8-vclamp/scalar-x4.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
-  src/x8-transpose/gen/2x4-scalar-int.c
+  src/x8-transposec/gen/2x4-scalar-int.c
   src/x8-zip/xm-scalar.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
-  src/x16-transpose/gen/2x4-scalar-int.c
+  src/x16-transposec/gen/2x4-scalar-int.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-transpose/gen/2x4-scalar-int.c
+  src/x32-transposec/gen/2x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/xm-scalar.c
   src/x32-zip/x2-scalar.c
@@ -575,16 +575,16 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/u8-vclamp/scalar-x4.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
-  src/x8-transpose/gen/2x4-scalar-int.c
+  src/x8-transposec/gen/2x4-scalar-int.c
   src/x8-zip/xm-scalar.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
-  src/x16-transpose/gen/2x4-scalar-int.c
+  src/x16-transposec/gen/2x4-scalar-int.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-transpose/gen/2x4-scalar-int.c
+  src/x32-transposec/gen/2x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/xm-scalar.c
   src/x32-zip/x2-scalar.c
@@ -1308,61 +1308,61 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-scalar-x4.c
   src/x8-lut/gen/lut-scalar-x8.c
   src/x8-lut/gen/lut-scalar-x16.c
-  src/x8-transpose/gen/1x2-scalar-int.c
-  src/x8-transpose/gen/1x4-scalar-int.c
-  src/x8-transpose/gen/2x1-scalar-int.c
-  src/x8-transpose/gen/2x2-scalar-int.c
-  src/x8-transpose/gen/2x4-scalar-int.c
-  src/x8-transpose/gen/4x1-scalar-int.c
-  src/x8-transpose/gen/4x2-scalar-int.c
-  src/x8-transpose/gen/4x4-scalar-int.c
+  src/x8-transposec/gen/1x2-scalar-int.c
+  src/x8-transposec/gen/1x4-scalar-int.c
+  src/x8-transposec/gen/2x1-scalar-int.c
+  src/x8-transposec/gen/2x2-scalar-int.c
+  src/x8-transposec/gen/2x4-scalar-int.c
+  src/x8-transposec/gen/4x1-scalar-int.c
+  src/x8-transposec/gen/4x2-scalar-int.c
+  src/x8-transposec/gen/4x4-scalar-int.c
   src/x8-zip/xm-scalar.c
   src/x8-zip/x2-scalar.c
   src/x8-zip/x3-scalar.c
   src/x8-zip/x4-scalar.c
-  src/x16-transpose/gen/1x2-scalar-int.c
-  src/x16-transpose/gen/1x4-scalar-int.c
-  src/x16-transpose/gen/2x1-scalar-int.c
-  src/x16-transpose/gen/2x2-scalar-int.c
-  src/x16-transpose/gen/2x4-scalar-int.c
-  src/x16-transpose/gen/4x1-scalar-int.c
-  src/x16-transpose/gen/4x2-scalar-int.c
-  src/x16-transpose/gen/4x4-scalar-int.c
+  src/x16-transposec/gen/1x2-scalar-int.c
+  src/x16-transposec/gen/1x4-scalar-int.c
+  src/x16-transposec/gen/2x1-scalar-int.c
+  src/x16-transposec/gen/2x2-scalar-int.c
+  src/x16-transposec/gen/2x4-scalar-int.c
+  src/x16-transposec/gen/4x1-scalar-int.c
+  src/x16-transposec/gen/4x2-scalar-int.c
+  src/x16-transposec/gen/4x4-scalar-int.c
   src/x32-depthtospace2d-chw2hwc/scalar.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
-  src/x32-transpose/gen/1x2-scalar-float.c
-  src/x32-transpose/gen/1x2-scalar-int.c
-  src/x32-transpose/gen/1x4-scalar-float.c
-  src/x32-transpose/gen/1x4-scalar-int.c
-  src/x32-transpose/gen/2x1-scalar-float.c
-  src/x32-transpose/gen/2x1-scalar-int.c
-  src/x32-transpose/gen/2x2-scalar-float.c
-  src/x32-transpose/gen/2x2-scalar-int.c
-  src/x32-transpose/gen/2x4-scalar-float.c
-  src/x32-transpose/gen/2x4-scalar-int.c
-  src/x32-transpose/gen/4x1-scalar-float.c
-  src/x32-transpose/gen/4x1-scalar-int.c
-  src/x32-transpose/gen/4x2-scalar-float.c
-  src/x32-transpose/gen/4x2-scalar-int.c
-  src/x32-transpose/gen/4x4-scalar-float.c
-  src/x32-transpose/gen/4x4-scalar-int.c
+  src/x32-transposec/gen/1x2-scalar-float.c
+  src/x32-transposec/gen/1x2-scalar-int.c
+  src/x32-transposec/gen/1x4-scalar-float.c
+  src/x32-transposec/gen/1x4-scalar-int.c
+  src/x32-transposec/gen/2x1-scalar-float.c
+  src/x32-transposec/gen/2x1-scalar-int.c
+  src/x32-transposec/gen/2x2-scalar-float.c
+  src/x32-transposec/gen/2x2-scalar-int.c
+  src/x32-transposec/gen/2x4-scalar-float.c
+  src/x32-transposec/gen/2x4-scalar-int.c
+  src/x32-transposec/gen/4x1-scalar-float.c
+  src/x32-transposec/gen/4x1-scalar-int.c
+  src/x32-transposec/gen/4x2-scalar-float.c
+  src/x32-transposec/gen/4x2-scalar-int.c
+  src/x32-transposec/gen/4x4-scalar-float.c
+  src/x32-transposec/gen/4x4-scalar-int.c
   src/x32-unpool/scalar.c
   src/x32-zip/xm-scalar.c
   src/x32-zip/x2-scalar.c
   src/x32-zip/x3-scalar.c
   src/x32-zip/x4-scalar.c
-  src/x64-transpose/gen/1x2-scalar-float.c
-  src/x64-transpose/gen/1x2-scalar-int.c
-  src/x64-transpose/gen/2x1-scalar-float.c
-  src/x64-transpose/gen/2x1-scalar-int.c
-  src/x64-transpose/gen/2x2-scalar-float.c
-  src/x64-transpose/gen/2x2-scalar-int.c
-  src/x64-transpose/gen/4x1-scalar-float.c
-  src/x64-transpose/gen/4x1-scalar-int.c
-  src/x64-transpose/gen/4x2-scalar-float.c
-  src/x64-transpose/gen/4x2-scalar-int.c
+  src/x64-transposec/gen/1x2-scalar-float.c
+  src/x64-transposec/gen/1x2-scalar-int.c
+  src/x64-transposec/gen/2x1-scalar-float.c
+  src/x64-transposec/gen/2x1-scalar-int.c
+  src/x64-transposec/gen/2x2-scalar-float.c
+  src/x64-transposec/gen/2x2-scalar-int.c
+  src/x64-transposec/gen/4x1-scalar-float.c
+  src/x64-transposec/gen/4x1-scalar-int.c
+  src/x64-transposec/gen/4x2-scalar-float.c
+  src/x64-transposec/gen/4x2-scalar-int.c
   src/xx-transpose/1x1-memcpy.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
@@ -2522,52 +2522,52 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-vclamp/neon-x64.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
-  src/x8-transpose/gen/8x8-multi-dec-zip-neon.c
-  src/x8-transpose/gen/8x8-multi-mov-zip-neon.c
-  src/x8-transpose/gen/8x8-multi-switch-zip-neon.c
-  src/x8-transpose/gen/8x8-reuse-dec-zip-neon.c
-  src/x8-transpose/gen/8x8-reuse-multi-zip-neon.c
-  src/x8-transpose/gen/8x8-reuse-mov-zip-neon.c
-  src/x8-transpose/gen/8x8-reuse-switch-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-dec-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-mov-zip-neon.c
-  src/x8-transpose/gen/16x16-reuse-switch-zip-neon.c
+  src/x8-transposec/gen/8x8-multi-dec-zip-neon.c
+  src/x8-transposec/gen/8x8-multi-mov-zip-neon.c
+  src/x8-transposec/gen/8x8-multi-switch-zip-neon.c
+  src/x8-transposec/gen/8x8-reuse-dec-zip-neon.c
+  src/x8-transposec/gen/8x8-reuse-multi-zip-neon.c
+  src/x8-transposec/gen/8x8-reuse-mov-zip-neon.c
+  src/x8-transposec/gen/8x8-reuse-switch-zip-neon.c
+  src/x8-transposec/gen/16x16-reuse-dec-zip-neon.c
+  src/x8-transposec/gen/16x16-reuse-mov-zip-neon.c
+  src/x8-transposec/gen/16x16-reuse-switch-zip-neon.c
   src/x8-zip/xm-neon.c
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
-  src/x16-transpose/gen/4x4-multi-dec-zip-neon.c
-  src/x16-transpose/gen/4x4-multi-mov-zip-neon.c
-  src/x16-transpose/gen/4x4-multi-multi-zip-neon.c
-  src/x16-transpose/gen/4x4-multi-switch-zip-neon.c
-  src/x16-transpose/gen/4x4-reuse-dec-zip-neon.c
-  src/x16-transpose/gen/4x4-reuse-mov-zip-neon.c
-  src/x16-transpose/gen/4x4-reuse-multi-zip-neon.c
-  src/x16-transpose/gen/4x4-reuse-switch-zip-neon.c
-  src/x16-transpose/gen/8x8-multi-dec-zip-neon.c
-  src/x16-transpose/gen/8x8-multi-mov-zip-neon.c
-  src/x16-transpose/gen/8x8-multi-switch-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-dec-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-mov-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-multi-zip-neon.c
-  src/x16-transpose/gen/8x8-reuse-switch-zip-neon.c
+  src/x16-transposec/gen/4x4-multi-dec-zip-neon.c
+  src/x16-transposec/gen/4x4-multi-mov-zip-neon.c
+  src/x16-transposec/gen/4x4-multi-multi-zip-neon.c
+  src/x16-transposec/gen/4x4-multi-switch-zip-neon.c
+  src/x16-transposec/gen/4x4-reuse-dec-zip-neon.c
+  src/x16-transposec/gen/4x4-reuse-mov-zip-neon.c
+  src/x16-transposec/gen/4x4-reuse-multi-zip-neon.c
+  src/x16-transposec/gen/4x4-reuse-switch-zip-neon.c
+  src/x16-transposec/gen/8x8-multi-dec-zip-neon.c
+  src/x16-transposec/gen/8x8-multi-mov-zip-neon.c
+  src/x16-transposec/gen/8x8-multi-switch-zip-neon.c
+  src/x16-transposec/gen/8x8-reuse-dec-zip-neon.c
+  src/x16-transposec/gen/8x8-reuse-mov-zip-neon.c
+  src/x16-transposec/gen/8x8-reuse-multi-zip-neon.c
+  src/x16-transposec/gen/8x8-reuse-switch-zip-neon.c
   src/x32-packx/x4-neon-st4.c
-  src/x32-transpose/gen/2x2-multi-dec-zip-neon.c
-  src/x32-transpose/gen/2x2-multi-mov-zip-neon.c
-  src/x32-transpose/gen/2x2-multi-multi-zip-neon.c
-  src/x32-transpose/gen/2x2-multi-switch-zip-neon.c
-  src/x32-transpose/gen/2x2-reuse-dec-zip-neon.c
-  src/x32-transpose/gen/2x2-reuse-mov-zip-neon.c
-  src/x32-transpose/gen/2x2-reuse-multi-zip-neon.c
-  src/x32-transpose/gen/2x2-reuse-switch-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-dec-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-mov-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-multi-zip-neon.c
-  src/x32-transpose/gen/4x4-multi-switch-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-dec-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-mov-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-multi-zip-neon.c
-  src/x32-transpose/gen/4x4-reuse-switch-zip-neon.c
+  src/x32-transposec/gen/2x2-multi-dec-zip-neon.c
+  src/x32-transposec/gen/2x2-multi-mov-zip-neon.c
+  src/x32-transposec/gen/2x2-multi-multi-zip-neon.c
+  src/x32-transposec/gen/2x2-multi-switch-zip-neon.c
+  src/x32-transposec/gen/2x2-reuse-dec-zip-neon.c
+  src/x32-transposec/gen/2x2-reuse-mov-zip-neon.c
+  src/x32-transposec/gen/2x2-reuse-multi-zip-neon.c
+  src/x32-transposec/gen/2x2-reuse-switch-zip-neon.c
+  src/x32-transposec/gen/4x4-multi-dec-zip-neon.c
+  src/x32-transposec/gen/4x4-multi-mov-zip-neon.c
+  src/x32-transposec/gen/4x4-multi-multi-zip-neon.c
+  src/x32-transposec/gen/4x4-multi-switch-zip-neon.c
+  src/x32-transposec/gen/4x4-reuse-dec-zip-neon.c
+  src/x32-transposec/gen/4x4-reuse-mov-zip-neon.c
+  src/x32-transposec/gen/4x4-reuse-multi-zip-neon.c
+  src/x32-transposec/gen/4x4-reuse-switch-zip-neon.c
   src/x32-unpool/neon.c
   src/x32-zip/xm-neon.c
   src/x32-zip/x2-neon.c
@@ -2845,7 +2845,7 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/vrdivc-minmax-neon-x8.c
   src/f32-vsqrt/gen/neon-sqrt-x4.c
   src/x8-lut/gen/lut-neon-tbx128x4-x64.c
-  src/x32-transpose/4x4-aarch64-tbl.c)
+  src/x32-transposec/4x4-aarch64-tbl.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
@@ -2966,7 +2966,7 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-neon-tbx128x4-x32.c
   src/x8-lut/gen/lut-neon-tbx128x4-x48.c
   src/x8-lut/gen/lut-neon-tbx128x4-x64.c
-  src/x32-transpose/4x4-aarch64-tbl.c)
+  src/x32-transposec/4x4-aarch64-tbl.c)
 
 SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/vcvt-neonv8-x32.c
@@ -3564,7 +3564,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-sse-x8.c
   src/f32-vunary/gen/vsqr-sse-x8.c
   src/x32-packx/x4-sse.c
-  src/x32-transpose/4x4-sse.c)
+  src/x32-transposec/4x4-sse.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-sse-c4.c
@@ -3742,7 +3742,7 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/sqrt-sse-nr1mac.c
   src/math/sqrt-sse-nr2mac.c
   src/x32-packx/x4-sse.c
-  src/x32-transpose/4x4-sse.c)
+  src/x32-transposec/4x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c
@@ -3804,12 +3804,12 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/u8-vclamp/sse2-x64.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c
-  src/x8-transpose/gen/16x16-reuse-mov-sse2.c
+  src/x8-transposec/gen/16x16-reuse-mov-sse2.c
   src/x8-zip/xm-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
-  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
+  src/x16-transposec/gen/8x8-reuse-multi-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/xm-sse2.c
   src/x32-zip/x2-sse2.c
@@ -4144,35 +4144,35 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/u8-vclamp/sse2-x64.c
   src/xx-fill/sse2-x64.c
   src/xx-pad/sse2.c
-  src/x8-transpose/gen/16x16-reuse-mov-sse2.c
-  src/x8-transpose/gen/16x16-reuse-switch-sse2.c
+  src/x8-transposec/gen/16x16-reuse-mov-sse2.c
+  src/x8-transposec/gen/16x16-reuse-switch-sse2.c
   src/x8-zip/xm-sse2.c
   src/x8-zip/x2-sse2.c
   src/x8-zip/x3-sse2.c
   src/x8-zip/x4-sse2.c
-  src/x16-transpose/gen/8x8-multi-mov-sse2.c
-  src/x16-transpose/gen/8x8-multi-switch-sse2.c
-  src/x16-transpose/gen/8x8-reuse-mov-sse2.c
-  src/x16-transpose/gen/8x8-reuse-multi-sse2.c
-  src/x16-transpose/gen/8x8-reuse-switch-sse2.c
-  src/x16-transpose/4x8-sse2.c
-  src/x32-transpose/gen/4x4-multi-mov-sse2.c
-  src/x32-transpose/gen/4x4-multi-multi-sse2.c
-  src/x32-transpose/gen/4x4-multi-switch-sse2.c
-  src/x32-transpose/gen/4x4-reuse-mov-sse2.c
-  src/x32-transpose/gen/4x4-reuse-multi-sse2.c
-  src/x32-transpose/gen/4x4-reuse-switch-sse2.c
+  src/x16-transposec/gen/8x8-multi-mov-sse2.c
+  src/x16-transposec/gen/8x8-multi-switch-sse2.c
+  src/x16-transposec/gen/8x8-reuse-mov-sse2.c
+  src/x16-transposec/gen/8x8-reuse-multi-sse2.c
+  src/x16-transposec/gen/8x8-reuse-switch-sse2.c
+  src/x16-transposec/4x8-sse2.c
+  src/x32-transposec/gen/4x4-multi-mov-sse2.c
+  src/x32-transposec/gen/4x4-multi-multi-sse2.c
+  src/x32-transposec/gen/4x4-multi-switch-sse2.c
+  src/x32-transposec/gen/4x4-reuse-mov-sse2.c
+  src/x32-transposec/gen/4x4-reuse-multi-sse2.c
+  src/x32-transposec/gen/4x4-reuse-switch-sse2.c
   src/x32-unpool/sse2.c
   src/x32-zip/xm-sse2.c
   src/x32-zip/x2-sse2.c
   src/x32-zip/x3-sse2.c
   src/x32-zip/x4-sse2.c
-  src/x64-transpose/gen/2x2-multi-mov-sse2.c
-  src/x64-transpose/gen/2x2-multi-multi-sse2.c
-  src/x64-transpose/gen/2x2-multi-switch-sse2.c
-  src/x64-transpose/gen/2x2-reuse-mov-sse2.c
-  src/x64-transpose/gen/2x2-reuse-multi-sse2.c
-  src/x64-transpose/gen/2x2-reuse-switch-sse2.c)
+  src/x64-transposec/gen/2x2-multi-mov-sse2.c
+  src/x64-transposec/gen/2x2-multi-multi-sse2.c
+  src/x64-transposec/gen/2x2-multi-switch-sse2.c
+  src/x64-transposec/gen/2x2-reuse-mov-sse2.c
+  src/x64-transposec/gen/2x2-reuse-multi-sse2.c
+  src/x64-transposec/gen/2x2-reuse-switch-sse2.c)
 
 SET(PROD_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-2x4-acc2.c)
