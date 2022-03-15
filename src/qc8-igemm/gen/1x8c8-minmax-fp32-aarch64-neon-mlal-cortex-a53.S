@@ -24,7 +24,7 @@
 #     const int8_t* zero,                [sp + 16] -> x12
 #     const union xnn_qs8_minmax_params params [sp + 24] -> x11
 
-# d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
 # A0 x13  v0  v6

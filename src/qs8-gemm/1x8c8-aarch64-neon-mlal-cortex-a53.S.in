@@ -23,7 +23,7 @@ $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATIO
 #     size_t cn_stride,          [sp] -> x10
 #     const union ${PARAMS_UNION} params)  [sp + 8] -> x11
 
-# d2-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
 # A0  x3  v0  v6
