@@ -3868,7 +3868,10 @@ struct gemm_fused_ukernels {
 };
 
 struct transpose_parameters {
-  xnn_transposec_ukernel_function ukernel;
+  union {
+    xnn_transposec_ukernel_function const_size_ukernel;
+    xnn_transposev_ukernel_function variable_size_ukernel;
+  };
   // Maximum number of elements to process per ukernel call.
   uint8_t tile_size;
 };
@@ -4405,6 +4408,7 @@ struct xnn_parameters {
     xnn_univector_ukernel_function copy;
     struct fill_parameters fill;
     struct pad_parameters pad;
+    struct transpose_parameters transpose;
   } xx;
 };
 

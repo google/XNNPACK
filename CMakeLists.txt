@@ -296,6 +296,7 @@ SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/params-init.c
   src/u8-lut32norm/scalar.c
   src/xx-copy/memcpy.c
+  src/xx-transpose/1x1-memcpy.c
   src/x8-lut/gen/lut-scalar-x4.c
   src/x32-depthtospace2d-chw2hwc/scalar.c)
 
