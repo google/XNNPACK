@@ -96,6 +96,22 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar_float, xnn_x32_transposec_ukernel__4x4_s
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_dec_neon, xnn_x32_transposec_ukernel__2x2_multi_dec_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_mov_neon, xnn_x32_transposec_ukernel__2x2_multi_mov_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_multi_neon, xnn_x32_transposec_ukernel__2x2_multi_multi_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_switch_neon, xnn_x32_transposec_ukernel__2x2_multi_switch_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_dec_neon, xnn_x32_transposec_ukernel__2x2_reuse_dec_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_mov_neon, xnn_x32_transposec_ukernel__2x2_reuse_mov_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_multi_neon, xnn_x32_transposec_ukernel__2x2_reuse_multi_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_switch_neon, xnn_x32_transposec_ukernel__2x2_reuse_switch_zip_neon)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 4x4_multi_dec_zip_neon, xnn_x32_transposec_ukernel__4x4_multi_dec_zip_neon)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 4x4_multi_mov_zip_neon, xnn_x32_transposec_ukernel__4x4_multi_mov_zip_neon)
