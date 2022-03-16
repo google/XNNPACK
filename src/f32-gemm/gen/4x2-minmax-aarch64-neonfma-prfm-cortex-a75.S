@@ -21,33 +21,21 @@
 #     size_t cn_stride,         [sp] -> x14
 #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
-# d16-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointers
-# x3  a0
-# x11 a1
-# x12 a2
-# x4  a3 / a_stride
+# Register usage
+# A0  x3 v0  v4
+# A1 x11 v1  v5
+# A2 x12 v2  v6
+# A3  x4 v3  v7
 
-# C pointers
-# x6  c0
-# x9  c1
-# x10 c2
-# x7  c3 / cm_stride
+# B   x5 v16 v17 v18 v19 v20 v21 v22 v23
 
-# Vector register usage
-# A0  v0  v4
-# A1  v1  v5
-# A2  v2  v6
-# A3  v3  v7
-# B  v16 v17
-# B  v18 v19
-# B  v20 v21
-# B  v22 v23
-# C  v24 v25
-# C  v26 v27
-# C  v28 v29
-# C  v30 v31
+# C0  x6 v24 v25
+# C1  x9 v26 v27
+# C2 x10 v28 v29
+# C3  x7 v30 v31
+
 # Clamp v4 v5
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75
@@ -83,7 +71,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75
         MOV     v26.8b, v24.8b
         MOV     v30.8b, v24.8b
         MOV     v28.8b, v24.8b
-        PRFM    PLDL1KEEP, [x5, 0]
         MOVI    v25.2s, 0
         PRFM    PLDL1KEEP, [x5, 64]
         MOVI    v27.2s, 0
@@ -97,7 +84,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75
         SUBS    x0, x2, 32              // k = kc - 32
         B.LO    4f
 
-        # 16 prologue
+        # Prologue
         # Read first block of 4 A and B.
         LDR     q0,  [x3], 16
         LDP     d20, d21, [x5], 16
@@ -172,33 +159,30 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75
         # Epilogue
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v24.2s, v20.2s, v0.s[0]
-        LDR     d16, [x5], 8
-        FMLA    v26.2s, v20.2s, v1.s[0]
-        LDR     d17, [x5], 8
-        FMLA    v28.2s, v20.2s, v2.s[0]
-        LDR     d18, [x5], 8
-        FMLA    v30.2s, v20.2s, v3.s[0]
-        LDR     d19, [x5], 8
-        FMLA    v25.2s, v21.2s, v0.s[1]
         LDR     q4, [x3], 16
-        FMLA    v27.2s, v21.2s, v1.s[1]
+        FMLA    v26.2s, v20.2s, v1.s[0]
+        FMLA    v28.2s, v20.2s, v2.s[0]
+        LDR     d16, [x5, 0]
+        FMLA    v30.2s, v20.2s, v3.s[0]
+        FMLA    v25.2s, v21.2s, v0.s[1]
         LDR     q5, [x11], 16
+        FMLA    v27.2s, v21.2s, v1.s[1]
         FMLA    v29.2s, v21.2s, v2.s[1]
         LDR     q6, [x12], 16
         FMLA    v31.2s, v21.2s, v3.s[1]
-        LDR     q7, [x4], 16
         FMLA    v24.2s, v22.2s, v0.s[2]
-        PRFM    PLDL1KEEP, [x5, 128]
+        LDR     q7, [x4], 16
         FMLA    v26.2s, v22.2s, v1.s[2]
-        PRFM    PLDL1KEEP, [x5, 192]
         FMLA    v28.2s, v22.2s, v2.s[2]
-        PRFM    PLDL1KEEP, [x5, 256]
+        LDR     d17, [x5, 8]
         FMLA    v30.2s, v22.2s, v3.s[2]
-        PRFM    PLDL1KEEP, [x5, 320]
         FMLA    v25.2s, v23.2s, v0.s[3]
+        LDR     d18, [x5, 16]
         FMLA    v27.2s, v23.2s, v1.s[3]
         FMLA    v29.2s, v23.2s, v2.s[3]
+        LDR     d19, [x5, 24]
         FMLA    v31.2s, v23.2s, v3.s[3]
+        PRFM    PLDL1KEEP, [x5, 320]
 
         # Second block of 4.  FMA for second 4, no loads
         FMLA    v24.2s, v16.2s, v4.s[0]
@@ -212,12 +196,13 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75
         FMLA    v24.2s, v18.2s, v4.s[2]
         FMLA    v26.2s, v18.2s, v5.s[2]
         FMLA    v28.2s, v18.2s, v6.s[2]
-        FMLA    v30.2s, v18.2s, v7.s[2]
         ADDS    x0, x0, 32
+        FMLA    v30.2s, v18.2s, v7.s[2]
         FMLA    v25.2s, v19.2s, v4.s[3]
+        ADD     x5, x5, 32
         FMLA    v27.2s, v19.2s, v5.s[3]
-        LD2R    {v4.2s, v5.2s}, [x8]     // Load min/max values
         FMLA    v29.2s, v19.2s, v6.s[3]
+        LD2R    {v4.2s, v5.2s}, [x8]     // Load min/max values
         FMLA    v31.2s, v19.2s, v7.s[3]
 
         # Is there a remainder? up to 8 floats (32 bytes)
