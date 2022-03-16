@@ -1113,8 +1113,7 @@ class MaxPoolingOperatorTester {
     auto rng = std::mt19937(random_device());
     // Note: we need to avoid FP16 denormals in the generated tensor because they might be processed differently in
     // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.001f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(0.001f, 1.0f);
 
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
@@ -1125,7 +1124,7 @@ class MaxPoolingOperatorTester {
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -1223,7 +1222,7 @@ class MaxPoolingOperatorTester {
       }
 
       // Re-generate data for the second run.
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results for the second run, including clamping.
