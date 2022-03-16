@@ -198,7 +198,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(uint32_t(output[c]), uint32_t(qmin()))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.5f)
+        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
         ASSERT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
@@ -267,7 +267,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(uint32_t(output[c]), uint32_t(qmin()))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.5f)
+        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
         ASSERT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
@@ -333,7 +333,7 @@ class GAvgPoolMicrokernelTester {
           << "at channel " << c << " / " << channels() << ", rows = " << rows();
         ASSERT_GE(int32_t(output[c]), int32_t(qmin() - 0x80))
           << "at channel " << c << " / " << channels() << ", rows = " << rows();
-        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.5f)
+        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
         ASSERT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
@@ -401,7 +401,7 @@ class GAvgPoolMicrokernelTester {
           << "at channel " << c << " / " << channels() << ", rows = " << rows();
         ASSERT_GE(int32_t(output[c]), int32_t(qmin() - 0x80))
           << "at channel " << c << " / " << channels() << ", rows = " << rows();
-        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.5f)
+        ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
         ASSERT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
