@@ -102,6 +102,8 @@ tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld128.S.in -o src/f32-igemm/gen/6x
 
 ### MRx2 micro-kernels
 tools/xngen src/f32-igemm/4x2-aarch64-neonfma-ld64.S.in  -o src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-prfm-cortex-a75.S &
 
 ### Cortex A53 micro-kernels
 tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-cortex-a53.S &

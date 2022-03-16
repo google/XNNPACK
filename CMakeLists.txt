@@ -1304,6 +1304,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/xx-copy/memcpy.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
+  src/xx-transpose/1x1-memcpy.c
   src/x8-lut/gen/lut-scalar-x1.c
   src/x8-lut/gen/lut-scalar-x2.c
   src/x8-lut/gen/lut-scalar-x4.c
@@ -1363,8 +1364,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x64-transposec/gen/4x1-scalar-float.c
   src/x64-transposec/gen/4x1-scalar-int.c
   src/x64-transposec/gen/4x2-scalar-float.c
-  src/x64-transposec/gen/4x2-scalar-int.c
-  src/xx-transpose/1x1-memcpy.c)
+  src/x64-transposec/gen/4x2-scalar-int.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
@@ -1607,13 +1607,13 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/1x8s4-minmax-neon.c
   src/f32-gemm/gen/4x2-minmax-neon-lane-ld64.c
-  src/f32-gemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-dup-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-dup-ld128.c
   src/f32-gemm/gen/4x8-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neon-lane-ld128.c
   src/f32-gemm/gen/4x8s4-minmax-neon.c
   src/f32-gemm/gen/5x8-minmax-neon-lane-ld64.c
+  src/f32-gemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-gemm/gen/6x8-minmax-neon-dup-ld64.c
   src/f32-gemm/gen/6x8-minmax-neon-dup-ld128.c
   src/f32-gemm/gen/6x8-minmax-neon-lane-ld64.c
@@ -1628,13 +1628,13 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-igemm/gen/1x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/1x8s4-minmax-neon.c
   src/f32-igemm/gen/4x2-minmax-neon-lane-ld64.c
-  src/f32-igemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/4x4-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/4x8-minmax-neon-dup-ld128.c
   src/f32-igemm/gen/4x8-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neon-lane-ld128.c
   src/f32-igemm/gen/4x8s4-minmax-neon.c
+  src/f32-igemm/gen/6x2-minmax-neon-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neon-dup-ld64.c
   src/f32-igemm/gen/6x8-minmax-neon-dup-ld128.c
   src/f32-igemm/gen/6x8-minmax-neon-lane-ld64.c
@@ -2527,8 +2527,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x8-transposec/gen/8x8-multi-mov-zip-neon.c
   src/x8-transposec/gen/8x8-multi-switch-zip-neon.c
   src/x8-transposec/gen/8x8-reuse-dec-zip-neon.c
-  src/x8-transposec/gen/8x8-reuse-multi-zip-neon.c
   src/x8-transposec/gen/8x8-reuse-mov-zip-neon.c
+  src/x8-transposec/gen/8x8-reuse-multi-zip-neon.c
   src/x8-transposec/gen/8x8-reuse-switch-zip-neon.c
   src/x8-transposec/gen/16x16-reuse-dec-zip-neon.c
   src/x8-transposec/gen/16x16-reuse-mov-zip-neon.c
@@ -2907,18 +2907,18 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8inc-minmax-neonfma-lane-ld128.c
   src/f32-gemm/gen/1x8-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x2-minmax-neonfma-lane-ld64.c
-  src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/4x8-minmax-neonfma-lane-ld128.c
   src/f32-gemm/gen/5x8-minmax-neonfma-lane-ld64.c
+  src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x8-minmax-neonfma-lane-ld128.c
   src/f32-igemm/gen/1x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x2-minmax-neonfma-lane-ld64.c
-  src/f32-igemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x4-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/4x8-minmax-neonfma-lane-ld128.c
+  src/f32-igemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld128.c
   src/f32-spmm/gen/4x2-minmax-neonfma.c
@@ -6321,13 +6321,12 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/1x12-minmax-aarch64-neonfma-cortex-a53.S
+  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S
-  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-prfm-cortex-a75.S
-  src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-ld64.S
-  src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld64.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-ld128.S
   src/f32-gemm/gen/4x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
@@ -6345,6 +6344,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+  src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-ld64.S
+  src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-ld64.S
