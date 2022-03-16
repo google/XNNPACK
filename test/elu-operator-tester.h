@@ -12,7 +12,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -152,13 +151,13 @@ class ELUOperatorTester {
   void TestF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-20.0f, 20.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-20.0f, 20.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (batch_size() - 1) * input_stride() + channels());
     std::vector<float> output((batch_size() - 1) * output_stride() + channels());
     std::vector<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
@@ -209,16 +208,15 @@ class ELUOperatorTester {
   void TestQS8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      std::ref(rng));
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

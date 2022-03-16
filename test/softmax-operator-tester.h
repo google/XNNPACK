@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
@@ -119,14 +118,13 @@ class SoftMaxOperatorTester {
     auto rng = std::mt19937(random_device());
     // Choose such range that exph(x[i]) overflows, but exph(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that single-precision exp doesn't overflow.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(15.0f, 20.0f), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
     std::vector<uint16_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.
@@ -184,13 +182,13 @@ class SoftMaxOperatorTester {
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that single-precision exp doesn't overflow.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
+    std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
     std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
@@ -243,14 +241,15 @@ class SoftMaxOperatorTester {
   void TestQU8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels());
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

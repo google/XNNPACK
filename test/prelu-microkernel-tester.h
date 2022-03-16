@@ -12,7 +12,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -96,20 +95,18 @@ class PReLUMicrokernelTester {
   void Test(xnn_f16_prelu_ukernel_function prelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-    auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
-    auto f16irng = std::bind(fp16_ieee_from_fp32_value, f32irng);
-    auto f16wrng = std::bind(fp16_ieee_from_fp32_value, f32wrng);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+    std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
     std::vector<uint16_t> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16irng));
-      std::generate(w.begin(), w.end(), std::ref(f16wrng));
+      std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(w.begin(), w.end(), [&]() { return fp16_ieee_from_fp32_value(w32dist(rng)); });
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16irng));
+        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       } else {
         std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
@@ -144,18 +141,18 @@ class PReLUMicrokernelTester {
   void Test(xnn_f32_prelu_ukernel_function prelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-    auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+    std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
     std::vector<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float, AlignedAllocator<float, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32irng));
-      std::generate(w.begin(), w.end(), std::ref(f32wrng));
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+      std::generate(w.begin(), w.end(), [&]() { return w32dist(rng); });
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32irng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
         std::fill(y.begin(), y.end(), nanf(""));
       }

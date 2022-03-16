@@ -11,7 +11,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -147,7 +146,7 @@ class ArgMaxPoolMicrokernelTester {
   void Test(xnn_f32_argmaxpool_unipass_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -157,7 +156,7 @@ class ArgMaxPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
@@ -214,7 +213,7 @@ class ArgMaxPoolMicrokernelTester {
   void Test(xnn_f32_argmaxpool_multipass_ukernel_function argmaxpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -228,7 +227,7 @@ class ArgMaxPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {

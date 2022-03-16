@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
@@ -208,8 +207,7 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f16_avgpool_minmax_unipass_ukernel_function avgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -218,7 +216,7 @@ class AvgPoolMicrokernelTester {
     std::vector<uint16_t> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(input.begin(), input.begin() + input_offset(), UINT16_C(0x7E00) /* NaN */);
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint16_t), input.end(), UINT16_C(0x7E00) /* NaN */);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
@@ -300,8 +298,7 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f16_avgpool_minmax_multipass_ukernel_function avgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -311,7 +308,7 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(XNN_EXTRA_BYTES / sizeof(uint16_t) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(input.begin(), input.begin() + input_offset(), UINT16_C(0x7E00) /* NaN */);
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint16_t), input.end(), UINT16_C(0x7E00) /* NaN */);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
@@ -393,7 +390,7 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f32_avgpool_minmax_unipass_ukernel_function avgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -402,7 +399,7 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::fill(output.begin(), output.end(), std::nanf(""));
@@ -480,7 +477,7 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f32_avgpool_minmax_multipass_ukernel_function avgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -490,7 +487,7 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::fill(output.begin(), output.end(), std::nanf(""));
@@ -568,7 +565,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_qu8_avgpool_minmax_unipass_ukernel_function avgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
@@ -580,11 +578,11 @@ class AvgPoolMicrokernelTester {
     std::vector<int32_t> accumulator(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(input.begin(), input.end(), std::ref(u8rng));
+        std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(input.begin(), input.begin() + input_offset(), 0xA5);
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), 0xA5);
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -658,7 +656,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_qu8_avgpool_minmax_multipass_ukernel_function avgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
@@ -671,11 +670,11 @@ class AvgPoolMicrokernelTester {
     std::vector<int32_t, AlignedAllocator<int32_t, 64>> buffer(XNN_EXTRA_BYTES / sizeof(uint8_t) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(input.begin(), input.end(), std::ref(u8rng));
+        std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(input.begin(), input.begin() + input_offset(), 0xA5);
-      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), 0xA5);
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
+      std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -749,10 +748,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_function pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-    auto f16irng = std::bind(fp16_ieee_from_fp32_value, f32irng);
-    auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), std::ref(rng));
-    auto f16mrng = std::bind(fp16_ieee_from_fp32_value, f32mrng);
+    std::uniform_real_distribution<float> f32dist;
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -762,10 +759,10 @@ class AvgPoolMicrokernelTester {
     std::vector<uint16_t> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16irng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(input.begin(), input.begin() + input_offset(), UINT16_C(0x7E00) /* NaN */);
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint16_t), input.end(), UINT16_C(0x7E00) /* NaN */);
-      std::generate(multiplier.begin(), multiplier.end(), std::ref(f16mrng));
+      std::generate(multiplier.begin(), multiplier.end(), [&]() { return fp16_ieee_from_fp32_value(m32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
@@ -845,10 +842,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_function pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-    auto f16irng = std::bind(fp16_ieee_from_fp32_value, f32irng);
-    auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), std::ref(rng));
-    auto f16mrng = std::bind(fp16_ieee_from_fp32_value, f32mrng);
+    std::uniform_real_distribution<float> f32dist;
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -859,10 +854,10 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(XNN_EXTRA_BYTES / sizeof(uint16_t) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16irng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(input.begin(), input.begin() + input_offset(), UINT16_C(0x7E00) /* NaN */);
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint16_t), input.end(), UINT16_C(0x7E00) /* NaN */);
-      std::generate(multiplier.begin(), multiplier.end(), std::ref(f16mrng));
+      std::generate(multiplier.begin(), multiplier.end(), [&]() { return fp16_ieee_from_fp32_value(m32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
@@ -942,8 +937,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f32_pavgpool_minmax_unipass_ukernel_function pavgpool_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(), rng);
-    auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), rng);
+    std::uniform_real_distribution<float> f32dist;
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -953,10 +948,10 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32irng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::generate(multiplier.begin(), multiplier.end(), std::ref(f32mrng));
+      std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
@@ -1032,8 +1027,8 @@ class AvgPoolMicrokernelTester {
   void Test(xnn_f32_pavgpool_minmax_multipass_ukernel_function pavgpool_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(), rng);
-    auto f32mrng = std::bind(std::uniform_real_distribution<float>(0.1f, 0.5f), rng);
+    std::uniform_real_distribution<float> f32dist;
+    std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -1044,10 +1039,10 @@ class AvgPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32irng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::generate(multiplier.begin(), multiplier.end(), std::ref(f32mrng));
+      std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {

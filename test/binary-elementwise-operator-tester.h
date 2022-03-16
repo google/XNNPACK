@@ -12,7 +12,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <initializer_list>
 #include <limits>
 #include <numeric>
@@ -208,8 +207,8 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -248,8 +247,8 @@ class BinaryElementwiseOperatorTester {
     std::vector<int8_t> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input1.begin(), input1.end(), std::ref(i8rng));
-      std::generate(input2.begin(), input2.end(), std::ref(i8rng));
+      std::generate(input1.begin(), input1.end(), [&]() { return i8dist(rng); });
+      std::generate(input2.begin(), input2.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), 0xAA);
 
       // Compute reference results.
@@ -390,8 +389,8 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(
-      std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -430,8 +429,8 @@ class BinaryElementwiseOperatorTester {
     std::vector<uint8_t> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input1.begin(), input1.end(), std::ref(u8rng));
-      std::generate(input2.begin(), input2.end(), std::ref(u8rng));
+      std::generate(input1.begin(), input1.end(), [&]() { return u8dist(rng); });
+      std::generate(input2.begin(), input2.end(), [&]() { return u8dist(rng); });
       std::fill(output.begin(), output.end(), 0xAA);
 
       // Compute reference results.
@@ -566,8 +565,7 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -606,8 +604,8 @@ class BinaryElementwiseOperatorTester {
     std::vector<uint16_t> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input1.begin(), input1.end(), std::ref(f16rng));
-      std::generate(input2.begin(), input2.end(), std::ref(f16rng));
+      std::generate(input1.begin(), input1.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input2.begin(), input2.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.
@@ -718,7 +716,7 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -757,8 +755,8 @@ class BinaryElementwiseOperatorTester {
     std::vector<float> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input1.begin(), input1.end(), std::ref(f32rng));
-      std::generate(input2.begin(), input2.end(), std::ref(f32rng));
+      std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
+      std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results.

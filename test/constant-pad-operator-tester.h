@@ -11,7 +11,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <initializer_list>
 #include <numeric>
 #include <random>
@@ -108,7 +107,8 @@ class ConstantPadOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
@@ -141,9 +141,9 @@ class ConstantPadOperatorTester {
     std::vector<uint8_t> output(num_output_elements());
     std::vector<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::fill(output.begin(), output.end(), UINT32_C(0xAA));
-      const uint8_t padding_value = u8rng();
+      const uint8_t padding_value = u8dist(rng);
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), padding_value);
@@ -223,7 +223,7 @@ class ConstantPadOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), rng);
+    std::uniform_int_distribution<uint16_t> u16dist;
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
@@ -256,9 +256,9 @@ class ConstantPadOperatorTester {
     std::vector<uint16_t> output(num_output_elements());
     std::vector<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u16rng));
+      std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
-      const uint16_t padding_value = u16rng();
+      const uint16_t padding_value = u16dist(rng);
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), padding_value);
@@ -338,7 +338,7 @@ class ConstantPadOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
+    std::uniform_int_distribution<uint32_t> u32dist;
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
@@ -371,9 +371,9 @@ class ConstantPadOperatorTester {
     std::vector<uint32_t> output(num_output_elements());
     std::vector<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u32rng));
+      std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
       std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
-      const uint32_t padding_value = u32rng();
+      const uint32_t padding_value = u32dist(rng);
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), padding_value);

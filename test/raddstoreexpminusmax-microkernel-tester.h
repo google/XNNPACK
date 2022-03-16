@@ -11,7 +11,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -48,14 +47,13 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     auto rng = std::mt19937(random_device());
     // Choose such range that exph(x[i]) overflows, but exph(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(15.0f, 20.0f), std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
     std::vector<uint16_t> x(elements() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(elements());
     std::vector<float> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.
@@ -92,13 +90,13 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(90.0f, 100.0f), rng);
+    std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
     std::vector<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(elements());
     std::vector<double> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32rng));
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results.

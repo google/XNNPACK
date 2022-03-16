@@ -14,7 +14,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
@@ -158,9 +157,8 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_s8_maxpool_ukernel_function maxpool, xnn_init_s8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      std::ref(rng));
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<const int8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
@@ -170,9 +168,9 @@ class MaxPoolMicrokernelTester {
     std::vector<int8_t> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(input.begin(), input.end(), std::ref(i8rng));
+        std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -227,7 +225,8 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_u8_maxpool_ukernel_function maxpool, xnn_init_u8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
@@ -237,9 +236,9 @@ class MaxPoolMicrokernelTester {
     std::vector<uint8_t> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
-        std::generate(input.begin(), input.end(), std::ref(u8rng));
+        std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -294,8 +293,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_f16_maxpool_ukernel_function maxpool, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<const uint16_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
@@ -304,7 +302,7 @@ class MaxPoolMicrokernelTester {
       (output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
@@ -378,7 +376,7 @@ class MaxPoolMicrokernelTester {
   void Test(xnn_f32_maxpool_ukernel_function maxpool, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
@@ -387,7 +385,7 @@ class MaxPoolMicrokernelTester {
       (output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {

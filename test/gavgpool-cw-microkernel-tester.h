@@ -12,7 +12,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -80,13 +79,13 @@ class GAvgPoolCWMicrokernelTester {
   void Test(xnn_f32_gavgpool_cw_ukernel_function gavgpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> x(elements() * channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(channels());
     std::vector<float> y_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32rng));
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results, without clamping.

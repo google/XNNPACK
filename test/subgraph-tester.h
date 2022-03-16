@@ -13,7 +13,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -49,15 +48,15 @@ class SubgraphTester {
       const size_t num_elements = std::accumulate(std::begin(dims), std::end(dims), size_t(1), std::multiplies<size_t>());
       static_data_.emplace_back(num_elements);
       std::vector<float>& weights = static_data_.back();
-      auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng_));
+      std::uniform_real_distribution<float> f32dist(-1.0f, +1.0f);
       if (tensor_type == kStaticDense) {
-        std::generate(weights.begin(), weights.end(), std::ref(f32rng));
+        std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng_); });
       } else {
         // Create tensor with 90% sparsity in two steps:
         // 1. Generate non-zero elements in the beginning of the vector
         // 2. Randomize positions of non-zero elements
         const size_t num_nonzero_elements = num_elements / 10;
-        std::generate(weights.begin(), weights.begin() + num_nonzero_elements, std::ref(f32rng));
+        std::generate(weights.begin(), weights.begin() + num_nonzero_elements, [&]() { return f32dist(rng_); });
         std::shuffle(weights.begin(), weights.end(), rng_);
       }
       data = weights.data();

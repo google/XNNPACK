@@ -92,18 +92,17 @@ class VBinaryMicrokernelTester {
   void Test(xnn_f16_vbinary_ukernel_function vbinary, OpType op_type) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(a.begin(), a.end(), std::ref(f16rng));
-      std::generate(b.begin(), b.end(), std::ref(f16rng));
+      std::generate(a.begin(), a.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(b.begin(), b.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       if (inplace_a() || inplace_b()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
+        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       } else {
         std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
@@ -154,18 +153,17 @@ class VBinaryMicrokernelTester {
   void Test(xnn_f16_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(a.begin(), a.end(), std::ref(f16rng));
-      std::generate(b.begin(), b.end(), std::ref(f16rng));
+      std::generate(a.begin(), a.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(b.begin(), b.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       if (inplace_a() || inplace_b()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
+        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       } else {
         std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
@@ -234,17 +232,17 @@ class VBinaryMicrokernelTester {
   void Test(xnn_f32_vbinary_ukernel_function vbinary, OpType op_type, xnn_init_f32_default_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(a.begin(), a.end(), std::ref(f32rng));
-      std::generate(b.begin(), b.end(), std::ref(f32rng));
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       if (inplace_a() || inplace_b()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
         std::fill(y.begin(), y.end(), nanf(""));
       }
@@ -301,17 +299,17 @@ class VBinaryMicrokernelTester {
   void Test(xnn_f32_vbinary_relu_ukernel_function vbinary_relu, OpType op_type) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(a.begin(), a.end(), std::ref(f32rng));
-      std::generate(b.begin(), b.end(), std::ref(f32rng));
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       if (inplace_a() || inplace_b()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
         std::fill(y.begin(), y.end(), nanf(""));
       }
@@ -367,17 +365,17 @@ class VBinaryMicrokernelTester {
   void Test(xnn_f32_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(a.begin(), a.end(), std::ref(f32rng));
-      std::generate(b.begin(), b.end(), std::ref(f32rng));
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       if (inplace_a() || inplace_b()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
         std::fill(y.begin(), y.end(), nanf(""));
       }

@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
@@ -150,7 +149,8 @@ class GAvgPoolMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (rows() - 1) * input_stride() + channels());
@@ -160,8 +160,8 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_fp(channels());
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qu8_avgpool_minmax_params params;
@@ -215,7 +215,8 @@ class GAvgPoolMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (rows() - 1) * input_stride() + channels());
@@ -226,8 +227,8 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_fp(channels());
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qu8_avgpool_minmax_params params;
@@ -283,8 +284,8 @@ class GAvgPoolMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (rows() - 1) * input_stride() + channels());
@@ -294,8 +295,8 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_fp(channels());
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qs8_avgpool_minmax_params params;
@@ -349,8 +350,8 @@ class GAvgPoolMicrokernelTester {
   {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (rows() - 1) * input_stride() + channels());
@@ -361,8 +362,8 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_fp(channels());
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qs8_avgpool_minmax_params params;
@@ -413,8 +414,7 @@ class GAvgPoolMicrokernelTester {
   void Test(xnn_f16_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -423,7 +423,7 @@ class GAvgPoolMicrokernelTester {
 
     std::fill(zero.begin(), zero.end(), 0);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -476,8 +476,7 @@ class GAvgPoolMicrokernelTester {
   void Test(xnn_f16_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
@@ -485,7 +484,7 @@ class GAvgPoolMicrokernelTester {
     std::vector<uint16_t> output(channels());
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -539,7 +538,7 @@ class GAvgPoolMicrokernelTester {
   void Test(xnn_f32_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
@@ -548,7 +547,7 @@ class GAvgPoolMicrokernelTester {
 
     std::fill(zero.begin(), zero.end(), 0.0f);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
@@ -598,7 +597,7 @@ class GAvgPoolMicrokernelTester {
   void Test(xnn_f32_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float, AlignedAllocator<float, 64>> buffer(channels() + XNN_EXTRA_BYTES / sizeof(float));
@@ -606,7 +605,7 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output(channels());
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.

@@ -116,8 +116,7 @@ class VMulCAddCMicrokernelTester {
   void Test(xnn_f16_vmulcaddc_ukernel_function vmulcaddc, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist;
 
     if (inplace()) {
       ASSERT_EQ(input_stride(), output_stride());
@@ -131,9 +130,9 @@ class VMulCAddCMicrokernelTester {
     std::vector<float> y_ref(rows() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(scale.begin(), scale.end(), std::ref(f16rng));
-      std::generate(bias.begin(), bias.end(), std::ref(f16rng));
-      std::generate(x.begin(), x.end(), std::ref(f16rng));
+      std::generate(scale.begin(), scale.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       if (inplace()) {
         std::copy(x.cbegin(), x.cend(), y.begin());
       } else {
@@ -186,7 +185,7 @@ class VMulCAddCMicrokernelTester {
   void Test(xnn_f32_vmulcaddc_ukernel_function vmulcaddc, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     if (inplace()) {
       ASSERT_EQ(input_stride(), output_stride());
@@ -199,9 +198,9 @@ class VMulCAddCMicrokernelTester {
     std::vector<float> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(rows() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(scale.begin(), scale.end(), std::ref(f32rng));
-      std::generate(bias.begin(), bias.end(), std::ref(f32rng));
-      std::generate(x.begin(), x.end(), std::ref(f32rng));
+      std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
         std::copy(x.cbegin(), x.cend(), y.begin());
       } else {

@@ -15,7 +15,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -172,7 +171,7 @@ class DWConv2DMicrokernelTester {
   void Test(xnn_f32_dwconv2d_chw_ukernel_function dwconv, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), rng);
+    std::uniform_real_distribution<float> f32dist;
 
     std::vector<float, AlignedAllocator<float, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
     std::vector<float> zero(input_width() + 2 * XNN_EXTRA_BYTES);
@@ -181,8 +180,8 @@ class DWConv2DMicrokernelTester {
     std::vector<float> output_ref(output_height() * output_width());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::generate(packed_weights.begin(), packed_weights.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t oy = 0; oy < output_height(); oy++) {

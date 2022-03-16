@@ -86,14 +86,12 @@ class VCvtMicrokernelTester {
   void Test(xnn_f16_f32_vcvt_ukernel_function vcvt, xnn_init_f16_f32_cvt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-100.0f, 100.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
-    auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+    std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
     std::vector<uint16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> output(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f16rng));
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), nanf(""));
 
       union xnn_f16_f32_cvt_params params;
@@ -116,14 +114,13 @@ class VCvtMicrokernelTester {
   void Test(xnn_f32_f16_vcvt_ukernel_function vcvt, xnn_init_f32_f16_cvt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-100.0f, 100.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
     std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<uint16_t> output(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       union xnn_f32_f16_cvt_params params;
       if (init_params) {
@@ -153,14 +150,13 @@ class VCvtMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-1.0f, 1.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<int8_t> output(batch_size());
     std::vector<int8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       union xnn_f32_qs8_cvt_params params;
@@ -199,14 +195,13 @@ class VCvtMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-1.0f, 1.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<uint8_t> output(batch_size());
     std::vector<uint8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       union xnn_f32_qu8_cvt_params params;
@@ -239,15 +234,14 @@ class VCvtMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    auto i8rng = std::bind(distribution, std::ref(rng));
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
     std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<float> output(batch_size());
     std::vector<float> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       union xnn_qs8_f32_cvt_params params;
@@ -276,15 +270,14 @@ class VCvtMicrokernelTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    auto u8rng = std::bind(distribution, std::ref(rng));
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<float> output(batch_size());
     std::vector<float> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       union xnn_qu8_f32_cvt_params params;

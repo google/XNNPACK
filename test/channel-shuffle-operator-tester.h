@@ -14,7 +14,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <vector>
@@ -100,13 +99,14 @@ class ChannelShuffleOperatorTester {
   void TestX8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + (batch_size() - 1) * input_stride() + channels());
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::fill(output.begin(), output.end(), 0xA5);
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Create, setup, run, and destroy Channel Shuffle operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -136,8 +136,8 @@ class ChannelShuffleOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t g = 0; g < groups(); g++) {
           for (size_t c = 0; c < group_channels(); c++) {
-            ASSERT_EQ(uint32_t(input[i * input_stride() + g * group_channels() + c]),
-                uint32_t(output[i * output_stride() + c * groups() + g]))
+            ASSERT_EQ(int32_t(input[i * input_stride() + g * group_channels() + c]),
+                int32_t(output[i * output_stride() + c * groups() + g]))
               << "batch index " << i << ", group " << g << ", channel " << c;
           }
         }
@@ -148,13 +148,13 @@ class ChannelShuffleOperatorTester {
   void TestX32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(), rng);
+    std::uniform_int_distribution<uint32_t> u32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + (batch_size() - 1) * input_stride() + channels());
+    std::vector<uint32_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(f32rng));
-      std::fill(output.begin(), output.end(), std::nanf(""));
+      std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
+      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Channel Shuffle operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

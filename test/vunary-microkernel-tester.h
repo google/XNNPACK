@@ -11,7 +11,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
-#include <functional>
 #include <random>
 #include <vector>
 
@@ -122,17 +121,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vunary_ukernel_function vunary, OpType op_type, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<double> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -163,16 +161,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vabs_ukernel_function vabs, xnn_init_f32_abs_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -202,16 +200,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vclamp_ukernel_function vclamp, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(0.0f, 255.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -239,16 +237,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_velu_ukernel_function velu, xnn_init_f32_elu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-20.0f, 20.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-20.0f, 20.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<double> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -276,16 +274,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vhswish_ukernel_function vhswish, xnn_init_f32_hswish_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<double> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -357,16 +355,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vlrelu_ukernel_function vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<double> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -394,16 +392,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vneg_ukernel_function vneg, xnn_init_f32_neg_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -433,17 +431,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vround_ukernel_function vrnd, OpType op_type, xnn_init_f32_rnd_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-5.0f, 5.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -532,17 +529,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vsigmoid_ukernel_function vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto distribution = std::uniform_real_distribution<float>(-125.0f, 125.0f);
-    auto f32rng = std::bind(distribution, std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<double> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -571,16 +567,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vsqr_ukernel_function vsqr, xnn_init_f32_default_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
@@ -610,16 +606,16 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f32_vsqrt_ukernel_function vsqrt, xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 10.0f), std::ref(rng));
+    std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
 
     std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
     std::vector<float> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f32rng));
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
       } else {
-        std::generate(x.begin(), x.end(), std::ref(f32rng));
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
         std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
