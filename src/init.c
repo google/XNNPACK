@@ -6945,7 +6945,7 @@ static void init(void) {
     };
 
     xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int;
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
       .tile_size = 32,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
