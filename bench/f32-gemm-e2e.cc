@@ -147,18 +147,18 @@ static void GEMMEnd2EndBenchmark(
   static void f32_gemm_4x2__aarch64_neonfma_cortex_a75(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
-      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
+      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
-      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
+      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
   static void f32_gemm_4x2__aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
-      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
+      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
-      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
+      xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
