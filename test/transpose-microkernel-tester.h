@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 #include <gtest/gtest.h>
