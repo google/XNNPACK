@@ -723,7 +723,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     switch (node->type) {
       case xnn_node_type_add2:
       case xnn_node_type_multiply2:
-        assert(node->num_inputs == 2);
+      case xnn_node_type_concatenate2:
+      case xnn_node_type_concatenate3:
+      case xnn_node_type_concatenate4:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
           if (subgraph->values[node->inputs[i]].data != NULL) {
             xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",
@@ -737,6 +739,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_depth_to_space:
+      case xnn_node_type_even_split2:
+      case xnn_node_type_even_split3:
+      case xnn_node_type_even_split4:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_hardswish:
       case xnn_node_type_leaky_relu:
