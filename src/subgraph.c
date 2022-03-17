@@ -215,6 +215,9 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
 
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
   if (node->compute_type != xnn_compute_type_fp32) {
+    xnn_log_info(
+        "Node %s compute type %d is incompatible with sparse inference",
+        xnn_node_type_to_string(node->type), node->compute_type);
     return 0;
   }
 
@@ -224,31 +227,66 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       // - 1x1 convolution (no stride, no dilation, no padding, no groups)
       // - 3x3 stride-2 convolution (no dilation, padding 1 on each side, no groups, 3 input channels)
       if (node->params.convolution_2d.groups != 1) {
+        xnn_log_info("Node %s groups (%" PRIu32 ") "
+                     "is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->params.convolution_2d.groups);
         return 0;
       }
       if ((node->params.convolution_2d.dilation_height | node->params.convolution_2d.dilation_width) != 1) {
+        xnn_log_info("Node %s dilation (height=%" PRIu32 ", width=%" PRIu32 ") "
+                     "is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->params.convolution_2d.dilation_height,
+                     node->params.convolution_2d.dilation_width);
         return 0;
       }
       if ((node->params.convolution_2d.kernel_height | node->params.convolution_2d.kernel_width) == 1) {
         if ((node->params.convolution_2d.input_padding_top | node->params.convolution_2d.input_padding_right |
-             node->params.convolution_2d.input_padding_bottom | node->params.convolution_2d.input_padding_left) != 0)
-        {
+             node->params.convolution_2d.input_padding_bottom | node->params.convolution_2d.input_padding_left) != 0) {
+          xnn_log_info("Node %s (1x1 kernel) padding (top=%" PRIu32 ", right=%" PRIu32", bottom=%" PRIu32 ", left=%" PRIu32") "
+                       "is incompatible with sparse inference",
+                       xnn_node_type_to_string(node->type),
+                       node->params.convolution_2d.input_padding_top,
+                       node->params.convolution_2d.input_padding_right,
+                       node->params.convolution_2d.input_padding_bottom,
+                       node->params.convolution_2d.input_padding_left);
           return 0;
         }
         if ((node->params.convolution_2d.subsampling_height | node->params.convolution_2d.subsampling_width) != 1) {
+          xnn_log_info("Node %s (1x1 kernel) subsampling (height=%" PRIu32 ", width=%" PRIu32 ") "
+                       "is incompatible with sparse inference",
+                       xnn_node_type_to_string(node->type),
+                       node->params.convolution_2d.subsampling_height,
+                       node->params.convolution_2d.subsampling_width);
           return 0;
         }
         return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
       } else if (node->params.convolution_2d.kernel_height == 3 && node->params.convolution_2d.kernel_width == 3) {
         if (node->params.convolution_2d.input_padding_top != 1 || node->params.convolution_2d.input_padding_right != 1 ||
-            node->params.convolution_2d.input_padding_bottom != 1 || node->params.convolution_2d.input_padding_left != 1)
-        {
+            node->params.convolution_2d.input_padding_bottom != 1 || node->params.convolution_2d.input_padding_left != 1) {
+          xnn_log_info("Node %s (3x3 kernel) padding (top=%" PRIu32 ", right=%" PRIu32 ", bottom=%" PRIu32 ", left=%" PRIu32 ") "
+                       "is incompatible with sparse inference",
+                       xnn_node_type_to_string(node->type),
+                       node->params.convolution_2d.input_padding_top,
+                       node->params.convolution_2d.input_padding_right,
+                       node->params.convolution_2d.input_padding_bottom,
+                       node->params.convolution_2d.input_padding_left);
           return 0;
         }
         if ((node->params.convolution_2d.subsampling_height | node->params.convolution_2d.subsampling_width) != 2) {
+          xnn_log_info("Node %s (3x3 kernel) subsampling (height=%" PRIu32 ", width=%" PRIu32 ") "
+                       "is incompatible with sparse inference",
+                       xnn_node_type_to_string(node->type),
+                       node->params.convolution_2d.subsampling_height,
+                       node->params.convolution_2d.subsampling_width);
           return 0;
         }
         if (node->params.convolution_2d.group_input_channels != 3) {
+          xnn_log_info("Node %s (3x3 kernel) input channels (%zu) "
+                       "is incompatible with sparse inference",
+                       xnn_node_type_to_string(node->type),
+                       node->params.convolution_2d.group_input_channels);
           return 0;
         }
         return XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW;
@@ -261,15 +299,31 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       // - 5x5 stride-1 convolution (no dilation, padding 2 on each side)
       // - 5x5 stride-2 convolution (no dilation, padding 2 on each side)
       if ((node->params.depthwise_convolution_2d.dilation_height | node->params.depthwise_convolution_2d.dilation_width) != 1) {
+        xnn_log_info("Node %s dilation (height=%" PRIu32 ", width=%" PRIu32 ") "
+                     "is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->params.convolution_2d.dilation_height,
+                     node->params.convolution_2d.dilation_width);
         return 0;
       }
       if (node->flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) {
+        xnn_log_info("Node %s flags (%" PRIu32 ") has padding incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->flags);
         return 0;
       }
       if (node->params.depthwise_convolution_2d.depth_multiplier != 1) {
+        xnn_log_info("Node %s depth_multiplier (%" PRIu32 ") is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->params.depthwise_convolution_2d.depth_multiplier);
         return 0;
       }
       if (node->params.depthwise_convolution_2d.subsampling_height != node->params.depthwise_convolution_2d.subsampling_width) {
+        xnn_log_info("Node %s subsampling (height=%" PRIu32 ", width=%" PRIu32 ") "
+                     "is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type),
+                     node->params.depthwise_convolution_2d.subsampling_height,
+                     node->params.depthwise_convolution_2d.subsampling_width);
         return 0;
       }
       switch (node->params.depthwise_convolution_2d.subsampling_height) {
@@ -277,22 +331,55 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
         case 2:
           break;
         default:
+          xnn_log_info("Node %s subsampling_height (%" PRIu32 ") "
+                       "is incompatible with sparse inference",
+                        xnn_node_type_to_string(node->type),
+                        node->params.depthwise_convolution_2d.subsampling_height);
           return 0;
       }
       if (node->params.depthwise_convolution_2d.kernel_height != node->params.depthwise_convolution_2d.kernel_width) {
+         xnn_log_info("Node %s kernel (height=%" PRIu32 ", width=%" PRIu32 ") "
+                      "is incompatible with sparse inference",
+                      xnn_node_type_to_string(node->type),
+                      node->params.depthwise_convolution_2d.kernel_height,
+                      node->params.depthwise_convolution_2d.kernel_width);
         return 0;
       }
       switch (node->params.depthwise_convolution_2d.kernel_height) {
         case 3:
-          return node->params.depthwise_convolution_2d.input_padding_top == 1 &&
-                 node->params.depthwise_convolution_2d.input_padding_right == 1 &&
-                 node->params.depthwise_convolution_2d.input_padding_bottom == 1 &&
-                 node->params.depthwise_convolution_2d.input_padding_left == 1 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+          if (node->params.depthwise_convolution_2d.input_padding_top == 1 &&
+              node->params.depthwise_convolution_2d.input_padding_right == 1 &&
+              node->params.depthwise_convolution_2d.input_padding_bottom == 1 &&
+              node->params.depthwise_convolution_2d.input_padding_left == 1) {
+            return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+          } else {
+            xnn_log_info("Node %s (3x3 kernel) padding "
+                         "(top=%" PRIu32 ", right=%" PRIu32 ", bottom=%" PRIu32 ", left=%" PRIu32 ") "
+                         "is incompatible with sparse inference",
+                         xnn_node_type_to_string(node->type),
+                         node->params.depthwise_convolution_2d.input_padding_top,
+                         node->params.depthwise_convolution_2d.input_padding_right,
+                         node->params.depthwise_convolution_2d.input_padding_bottom,
+                         node->params.depthwise_convolution_2d.input_padding_left);
+            return 0;
+          }
         case 5:
-          return node->params.depthwise_convolution_2d.input_padding_top == 2 &&
-                 node->params.depthwise_convolution_2d.input_padding_right == 2 &&
-                 node->params.depthwise_convolution_2d.input_padding_bottom == 2 &&
-                 node->params.depthwise_convolution_2d.input_padding_left == 2 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+          if (node->params.depthwise_convolution_2d.input_padding_top == 2 &&
+              node->params.depthwise_convolution_2d.input_padding_right == 2 &&
+              node->params.depthwise_convolution_2d.input_padding_bottom == 2 &&
+              node->params.depthwise_convolution_2d.input_padding_left == 2) {
+            return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+          } else {
+            xnn_log_info("Node %s (5x5 kernel) padding "
+                         "(top=%" PRIu32 ", right=%" PRIu32 ", bottom=%" PRIu32 ", left=%" PRIu32 ") "
+                         "is incompatible with sparse inference",
+                         xnn_node_type_to_string(node->type),
+                         node->params.depthwise_convolution_2d.input_padding_top,
+                         node->params.depthwise_convolution_2d.input_padding_right,
+                         node->params.depthwise_convolution_2d.input_padding_bottom,
+                         node->params.depthwise_convolution_2d.input_padding_left);
+            return 0;
+          }
         default:
           return 0;
       }
@@ -307,6 +394,8 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       if (subgraph->values[node->inputs[0]].shape.num_dims != 4 ||
           subgraph->values[node->inputs[1]].shape.num_dims != 4)
       {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
         return 0;
       }
 
@@ -338,8 +427,14 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
 
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
     case xnn_node_type_static_resize_bilinear_2d:
-      return subgraph->values[node->inputs[0]].shape.dim[1] > 1 &&
-             subgraph->values[node->inputs[0]].shape.dim[2] > 1 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+      if (subgraph->values[node->inputs[0]].shape.dim[1] > 1 &&
+          subgraph->values[node->inputs[0]].shape.dim[2] > 1) {
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+      } else {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
+        return 0;
+      }
     case xnn_node_type_abs:
     case xnn_node_type_bankers_rounding:
     case xnn_node_type_ceiling:
@@ -353,7 +448,13 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
     case xnn_node_type_square:
       assert(node->num_inputs == 1);
       assert(node->num_outputs == 1);
-      return subgraph->values[node->inputs[0]].shape.num_dims == 4 ? XNN_LAYOUT_FLAG_COMPATIBLE_NCHW : 0;
+      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+      } else {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
+        return 0;
+      }
     default:
       return false;
   }
