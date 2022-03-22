@@ -54,6 +54,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53
         PRFM    PLDL1KEEP, [x5, 192]
         PRFM    PLDL1KEEP, [x5, 256]
         PRFM    PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 384]
+        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 576]
 
         MOV     x9, x3                  // p = ks
 
@@ -102,10 +106,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53
         LDR     q26, [x5], 16
         LDR     q27, [x5], 16
 
-        PRFM    PLDL1KEEP, [x5, 128]
-        PRFM    PLDL1KEEP, [x5, 192]
-        PRFM    PLDL1KEEP, [x5, 256]
-        PRFM    PLDL1KEEP, [x5, 320]
+        PRFM    PLDL1KEEP, [x5, 384]
+        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 576]
 
         # Second block of 4.  FMA for second 4, loads for 1st block of 4.
         FMLA    v16.4s, v20.4s, v1.s[0]
@@ -123,8 +127,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53
         FMLA    v18.4s, v26.4s, v1.s[3]
         LDR     q25, [x5], 16
         FMLA    v19.4s, v27.4s, v1.s[3]
-        LDR     q26, [x5], 16
         SUBS    x0, x0, 32
+        LDR     q26, [x5], 16
         LDR     q27, [x5], 16
         B.HS    2b
 
