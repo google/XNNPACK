@@ -1790,7 +1790,7 @@ ExecutionPlan QS8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op63, xnn_delete_operator);
 
 #if XNN_PLATFORM_JIT
-  xnn_finalize_code_memory(&code_cache.code_buffer);
+  xnn_finalize_code_memory(&code_cache.cache.buffer);
 #endif
 
   status = xnn_setup_convolution2d_nhwc_qs8(

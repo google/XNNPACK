@@ -1206,7 +1206,7 @@ class ConvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
       if (use_jit()) {
-        xnn_finalize_code_memory(&code_cache.code_buffer);
+        xnn_finalize_code_memory(&code_cache.cache.buffer);
       }
 
       ASSERT_EQ(xnn_status_success,

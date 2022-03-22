@@ -14,32 +14,39 @@
 extern "C" {
 #endif
 
-#define XNN_CODE_CACHE_NOT_FOUND SIZE_MAX // Return value when code is not found in the cache.
+#define XNN_CACHE_NOT_FOUND SIZE_MAX // Return value when code is not found in the cache.
 
-struct xnn_code_span {
-  void* code;
+struct xnn_byte_span {
+  void* start;
   size_t size;
 };
 
-// A cache for JIT generated microkernel code.
+// A cache for arbitrary bytes.
 // The implementation is similar to a hash table with open addressing and linear
-// probing, but restricted to our JIT use cases.
+// probing, but restricted to our use cases.
 
 // Similar to buckets in a hash table implementation, this is an entry in the
 // cache. It stores "metadata" about the generated code (size and offset). The
-// actual code bytes are in the cache's code_buffer.
+// actual bytes are in the cache's buffer.
 struct xnn_cache_bucket {
   // A hash for quick comparison.
   uint32_t hash;
-  // Size of generated microkernel.
+  // Size of bytes.
   size_t size;
-  // Offset of generated microkernel, relative to cache's code_buffer.
+  // Offset of bytes, relative to cache's buffer.
   size_t offset;
 };
 
-struct xnn_code_cache {
-  // A growing code_buffer that is used to keep all generated code.
-  struct xnn_code_buffer code_buffer;
+enum xnn_cache_type {
+  xnn_cache_type_invalid = 0,
+  xnn_cache_type_code,
+  xnn_cache_type_weights,
+};
+
+struct xnn_cache {
+  enum xnn_cache_type type;
+  // A growing buffer that is used to keep all generated code.
+  struct xnn_code_buffer buffer;
 
   // Entries in the cache.
   struct xnn_cache_bucket* buckets;
@@ -51,13 +58,18 @@ struct xnn_code_cache {
   size_t misses;
 };
 
+// A cache for JIT generated microkernel code.
+struct xnn_code_cache {
+  struct xnn_cache cache;
+};
+
 enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache);
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
-// Looks up code_span in the cache, returns offset into cache's buffer if found.
-// code_span should already point into cache->code_buffer.
+// Looks up byte_span in the cache, returns offset into cache's buffer if found.
+// byte_span should already point into cache->buffer.
 // If it already exists within the cache, the buffer will be rewound, so we can
 // reuse the same section of the buffer.
-size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_code_span code_span);
+size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byte_span byte_span);
 
 #ifdef __cplusplus
 } // extern "C"

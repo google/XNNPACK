@@ -71,7 +71,7 @@ size_t get_generated_gemm(
     size_t log2_input_element_size,
     struct xnn_code_cache* code_cache)
 {
-  size_t offset = XNN_CODE_CACHE_NOT_FOUND;
+  size_t offset = XNN_CACHE_NOT_FOUND;
   xnn_jit_gemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
@@ -79,15 +79,15 @@ size_t get_generated_gemm(
 
   enum xnn_status status = xnn_status_success;
 
-  status = xnn_ensure_code_memory_has_space(&code_cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
+  status = xnn_ensure_code_memory_has_space(&code_cache->cache.buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
     xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
     goto error;
   }
 
-  const size_t old_size = code_cache->code_buffer.size;
-  void* old_code = (uint8_t*) code_cache->code_buffer.code + old_size;
-  status = generator(&code_cache->code_buffer, group_output_channels % nr,
+  const size_t old_size = code_cache->cache.buffer.size;
+  void* old_code = (uint8_t*) code_cache->cache.buffer.code + old_size;
+  status = generator(&code_cache->cache.buffer, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
                      jit_gemm_params);
 
@@ -96,12 +96,12 @@ size_t get_generated_gemm(
     goto error;
   }
 
-  const size_t new_size = code_cache->code_buffer.size;
-  const struct xnn_code_span code_span = {
-    .code = old_code,
+  const size_t new_size = code_cache->cache.buffer.size;
+  const struct xnn_byte_span span = {
+    .start = old_code,
     .size = new_size - old_size
   };
-  return xnn_code_cache_get_or_insert(code_cache, code_span);
+  return xnn_code_cache_get_or_insert(code_cache, span);
 
 error:
   return offset;
@@ -118,22 +118,22 @@ size_t get_generated_igemm(
     size_t mr,
     struct xnn_code_cache* code_cache)
 {
-  size_t offset = XNN_CODE_CACHE_NOT_FOUND;
+  size_t offset = XNN_CACHE_NOT_FOUND;
   xnn_jit_igemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
   }
   enum xnn_status status = xnn_status_success;
 
-  status = xnn_ensure_code_memory_has_space(&code_cache->code_buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
+  status = xnn_ensure_code_memory_has_space(&code_cache->cache.buffer, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
-    xnn_log_error("failed to ensure sufficient space in code_buffer for microkernel");
+    xnn_log_error("failed to ensure sufficient space in code buffer for microkernel");
     goto error;
   }
 
-  const size_t old_size = code_cache->code_buffer.size;
-  void* old_code = (uint8_t*) code_cache->code_buffer.code + old_size;
-  status = generator(&code_cache->code_buffer, group_output_channels % nr,
+  const size_t old_size = code_cache->cache.buffer.size;
+  void* old_code = (uint8_t*) code_cache->cache.buffer.code + old_size;
+  status = generator(&code_cache->cache.buffer, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
                      kernel_size * mr * sizeof(void*), jit_gemm_params);
   if (status != xnn_status_success) {
@@ -141,12 +141,12 @@ size_t get_generated_igemm(
     goto error;
   }
 
-  const size_t new_size = code_cache->code_buffer.size;
-  const struct xnn_code_span code_span = {
-    .code = old_code,
+  const size_t new_size = code_cache->cache.buffer.size;
+  const struct xnn_byte_span span = {
+    .start = old_code,
     .size = new_size - old_size
   };
-  return xnn_code_cache_get_or_insert(code_cache, code_span);
+  return xnn_code_cache_get_or_insert(code_cache, span);
 
 error:
   return offset;
@@ -1230,14 +1230,14 @@ static enum xnn_status setup_convolution2d_nhwc(
         // Convolution maps directly to GEMM and doesn't use indirection buffer.
       #if XNN_PLATFORM_JIT
         if (convolution_op->cache != NULL) {
-          if (convolution_op->ukernel.gemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CODE_CACHE_NOT_FOUND) {
+          if (convolution_op->ukernel.gemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND) {
             convolution_op->ukernel.gemm.general_case.function[XNN_UARCH_DEFAULT] =
-                (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->cache->code_buffer.code +
+                (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->cache->cache.buffer.code +
                                              convolution_op->ukernel.gemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT]);
           }
-          if (convolution_op->ukernel.gemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CODE_CACHE_NOT_FOUND) {
+          if (convolution_op->ukernel.gemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND) {
             convolution_op->ukernel.gemm.mr1_case.function[XNN_UARCH_DEFAULT] =
-                (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->cache->code_buffer.code +
+                (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->cache->cache.buffer.code +
                                              convolution_op->ukernel.gemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT]);
           }
         }
@@ -1331,14 +1331,14 @@ static enum xnn_status setup_convolution2d_nhwc(
     {
       #if XNN_PLATFORM_JIT
         if (convolution_op->cache != NULL) {
-          if (convolution_op->ukernel.igemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CODE_CACHE_NOT_FOUND) {
+          if (convolution_op->ukernel.igemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND) {
             convolution_op->ukernel.igemm.general_case.function[XNN_UARCH_DEFAULT] =
-                (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->cache->code_buffer.code +
+                (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->cache->cache.buffer.code +
                                               convolution_op->ukernel.igemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT]);
           }
-          if (convolution_op->ukernel.igemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CODE_CACHE_NOT_FOUND) {
+          if (convolution_op->ukernel.igemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND) {
             convolution_op->ukernel.igemm.mr1_case.function[XNN_UARCH_DEFAULT] =
-                (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->cache->code_buffer.code +
+                (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->cache->cache.buffer.code +
                                               convolution_op->ukernel.igemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT]);
           }
         }
