@@ -79,7 +79,7 @@ static uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
   return fmix32(h1);
 }
 
-size_t cache_size(struct xnn_cache* cache) {
+static inline size_t cache_size(struct xnn_cache* cache) {
   switch (cache->type) {
     case xnn_cache_type_code:
       return cache->code.size;
@@ -91,7 +91,7 @@ size_t cache_size(struct xnn_cache* cache) {
   return SIZE_MAX;
 }
 
-void* cache_start(struct xnn_cache* cache) {
+static inline void* cache_start(struct xnn_cache* cache) {
   switch (cache->type) {
     case xnn_cache_type_code:
       return cache->code.start;
