@@ -79,6 +79,30 @@ static uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
   return fmix32(h1);
 }
 
+size_t cache_size(struct xnn_cache* cache) {
+  switch (cache->type) {
+    case xnn_cache_type_code:
+      return cache->code.size;
+    case xnn_cache_type_weights:
+      return cache->weights.size;
+    default:
+      XNN_UNREACHABLE;
+  }
+  return SIZE_MAX;
+}
+
+void* cache_start(struct xnn_cache* cache) {
+  switch (cache->type) {
+    case xnn_cache_type_code:
+      return cache->code.start;
+    case xnn_cache_type_weights:
+      return cache->weights.start;
+    default:
+      XNN_UNREACHABLE;
+  }
+  return NULL;
+}
+
 enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buckets, enum xnn_cache_type cache_type)
 {
   memset(cache, 0, sizeof(struct xnn_cache));
@@ -166,7 +190,7 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
 static inline bool bytes_equal(struct xnn_cache* cache, struct xnn_byte_span byte_span, size_t size, size_t offset)
 {
   return byte_span.size == size &&
-         memcmp(byte_span.start, (void*) ((uintptr_t) cache->code.start + offset), size) == 0;
+         memcmp(byte_span.start, (void*) ((uintptr_t) cache_start(cache) + offset), size) == 0;
 }
 
 static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint32_t hash, size_t* index)
@@ -208,10 +232,10 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
   }
 
   // Check that byte_span points into cache's buffer.
-  assert((uintptr_t) byte_span.start >= (uintptr_t) cache->code.start);
-  assert((uintptr_t) byte_span.start < (uintptr_t) cache->code.start + cache->code.size);
+  assert((uintptr_t) byte_span.start >= (uintptr_t) cache_start(cache));
+  assert((uintptr_t) byte_span.start < (uintptr_t) cache_start(cache) + cache_size(cache));
 
-  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache->code.start;
+  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache_start(cache);
 
   // Insert the entry.
   cache->buckets[idx].size = byte_span.size;
@@ -241,14 +265,24 @@ size_t xnn_cache_get_or_insert(struct xnn_cache* cache, struct xnn_byte_span byt
   const size_t found_offset = cache_lookup(cache, byte_span);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
     // Found in the cache, rewind the buffer.
-    cache->code.size -= byte_span.size;
+    switch (cache->type) {
+      case xnn_cache_type_code:
+        cache->code.size -= byte_span.size;
+        break;
+      case xnn_cache_type_weights:
+        cache->weights.size -= byte_span.size;
+        break;
+      default:
+        XNN_UNREACHABLE;
+        break;
+    }
     return found_offset;
   }
-  const size_t code_offset = (uintptr_t) byte_span.start - (uintptr_t) cache->code.start;
+  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache_start(cache);
   if (!insert(cache, byte_span)) {
     return XNN_CACHE_NOT_FOUND;
   }
-  return code_offset;
+  return offset;
 }
 
 size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byte_span byte_span)
@@ -258,8 +292,11 @@ size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byt
 
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
 {
-  xnn_release_code_memory(&cache->cache.code);
-  xnn_release_memory(cache->cache.buckets);
+  if XNN_LIKELY(cache != NULL) {
+    assert(cache->cache.type == xnn_cache_type_code);
+    xnn_release_code_memory(&cache->cache.code);
+    xnn_release_memory(cache->cache.buckets);
+  }
   return xnn_status_success;
 }
 
@@ -295,8 +332,11 @@ enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
 
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
 {
-  xnn_release_simd_memory(cache->cache.weights.start);
-  xnn_release_memory(cache->cache.buckets);
+  if XNN_LIKELY(cache != NULL) {
+    assert(cache->cache.type == xnn_cache_type_weights);
+    xnn_release_simd_memory(cache->cache.weights.start);
+    xnn_release_memory(cache->cache.buckets);
+  }
   return xnn_status_success;
 }
 

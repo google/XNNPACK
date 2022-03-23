@@ -29,6 +29,11 @@ TEST(WEIGHTS_CACHE, init_and_release)
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
+TEST(WEIGHTS_CACHE, release_null)
+{
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(NULL));
+}
+
 TEST(WEIGHTS_CACHE, get_or_insert)
 {
   xnn_initialize(/*allocator=*/nullptr);
@@ -37,7 +42,7 @@ TEST(WEIGHTS_CACHE, get_or_insert)
 
   write_weights(&cache, "1234");
   const xnn_byte_span span1 = {
-    .start = cache.cache.code.start,
+    .start = cache.cache.weights.start,
     .size = 4
   };
   ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, span1));

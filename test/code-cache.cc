@@ -29,6 +29,12 @@ TEST(JIT_CACHE, init_and_release)
   EXPECT_EQ(xnn_status_success, xnn_release_code_cache(&cache));
 }
 
+
+TEST(JIT_CACHE, release_null)
+{
+  EXPECT_EQ(xnn_status_success, xnn_release_code_cache(NULL));
+}
+
 TEST(JIT_CACHE, get_or_insert)
 {
   xnn_initialize(/*allocator=*/nullptr);
