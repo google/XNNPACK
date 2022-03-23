@@ -11,6 +11,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
+#include <xnnpack/subgraph-validation.h>
 
 
 static enum xnn_status create_elu_operator(
@@ -118,10 +119,9 @@ enum xnn_status xnn_define_elu(
   uint32_t output_id,
   uint32_t flags)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
-      xnn_node_type_to_string(xnn_node_type_elu));
-    return xnn_status_uninitialized;
+  enum xnn_status status;
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_elu)) != xnn_status_success) {
+    return status;
   }
 
   if (alpha <= 0.0f || !isnormal(alpha)) {

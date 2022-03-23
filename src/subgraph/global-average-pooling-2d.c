@@ -11,6 +11,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
+#include <xnnpack/subgraph-validation.h>
 
 
 static enum xnn_status create_global_average_pooling_operator(
@@ -205,10 +206,9 @@ enum xnn_status xnn_define_global_average_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
-      xnn_node_type_to_string(xnn_node_type_global_average_pooling_2d));
-    return xnn_status_uninitialized;
+  enum xnn_status status;
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_global_average_pooling_2d)) != xnn_status_success) {
+    return status;
   }
 
   if (isnan(output_min)) {

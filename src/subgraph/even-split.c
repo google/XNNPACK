@@ -9,6 +9,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
+#include <xnnpack/subgraph-validation.h>
 
 static size_t calculate_batch_size(const struct xnn_value* input, size_t axis)
 {
@@ -488,10 +489,9 @@ enum xnn_status xnn_define_even_split_n(
   assert(num_outputs > 1);
   assert(num_outputs < 5);
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error(
-      "failed to define %s operator: XNNPACK is not initialized", xnn_node_type_to_string(node_type));
-    return xnn_status_uninitialized;
+  enum xnn_status status;
+  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
+    return status;
   }
 
   // Check input.

@@ -10,6 +10,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
+#include <xnnpack/subgraph-validation.h>
 
 
 static enum xnn_status create_depth_to_space_operator(
@@ -170,10 +171,9 @@ enum xnn_status xnn_define_depth_to_space(
   uint32_t block_size,
   uint32_t flags)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to define %s operator: XNNPACK is not initialized",
-      xnn_node_type_to_string(xnn_node_type_depth_to_space));
-    return xnn_status_uninitialized;
+  enum xnn_status status;
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_depth_to_space)) != xnn_status_success) {
+    return status;
   }
 
   if (input_id >= subgraph->num_values) {
