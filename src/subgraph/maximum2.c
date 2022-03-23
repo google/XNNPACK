@@ -118,14 +118,12 @@ enum xnn_status xnn_define_maximum2(
   uint32_t output_id,
   uint32_t flags)
 {
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_maximum2)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_xnnpack_initialized(xnn_node_type_maximum2)) {
+    return xnn_status_uninitialized;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(
-        xnn_node_type_maximum2, input1_id, subgraph->num_values, 1)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_nth_input_id(xnn_node_type_maximum2, input1_id, subgraph->num_values, 1)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
@@ -147,9 +145,8 @@ enum xnn_status xnn_define_maximum2(
       return xnn_status_invalid_parameter;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(
-        xnn_node_type_maximum2, input2_id, subgraph->num_values, 2)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_nth_input_id(xnn_node_type_maximum2, input2_id, subgraph->num_values, 2)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];

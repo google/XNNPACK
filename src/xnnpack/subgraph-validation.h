@@ -12,13 +12,9 @@
 extern "C" {
 #endif
 
-enum xnn_status xnn_subgraph_check_xnnpack_initialized(enum xnn_node_type node_type);
-enum xnn_status xnn_subgraph_check_input_node_id(enum xnn_node_type node_type, uint32_t input_id, size_t num_values);
-enum xnn_status xnn_subgraph_check_nth_input_node_id(
-  enum xnn_node_type node_type,
-  uint32_t input_id,
-  size_t num_values,
-  size_t nth);
+bool xnn_subgraph_xnnpack_initialized(enum xnn_node_type node_type);
+bool xnn_subgraph_valid_input_id(enum xnn_node_type node_type, uint32_t input_id, size_t num_values);
+bool xnn_subgraph_valid_nth_input_id(enum xnn_node_type node_type, uint32_t input_id, size_t num_values, size_t nth);
 
 #ifdef __cplusplus
 }  // extern "C"

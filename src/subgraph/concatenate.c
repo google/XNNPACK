@@ -431,10 +431,8 @@ enum xnn_status check_input_value(
   size_t nth,
   enum xnn_node_type node_type)
 {
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_nth_input_node_id(node_type, input_id, subgraph->num_values, nth)) !=
-      xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_nth_input_id(node_type, input_id, subgraph->num_values, nth)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
@@ -520,9 +518,8 @@ enum xnn_status xnn_define_concatenate_n(
   assert(num_inputs >= 2);
   assert(num_inputs <= 4);
 
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_xnnpack_initialized(node_type)) {
+    return xnn_status_uninitialized;
   }
 
   if (output_id >= subgraph->num_values) {

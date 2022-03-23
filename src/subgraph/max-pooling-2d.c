@@ -233,9 +233,8 @@ enum xnn_status xnn_define_max_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_max_pooling_2d)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_xnnpack_initialized(xnn_node_type_max_pooling_2d)) {
+    return xnn_status_uninitialized;
   }
 
   const uint32_t pooling_size = pooling_height * pooling_width;
@@ -301,9 +300,8 @@ enum xnn_status xnn_define_max_pooling_2d(
     }
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_max_pooling_2d, input_id, subgraph->num_values)) !=
-      xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_input_id(xnn_node_type_max_pooling_2d, input_id, subgraph->num_values)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];

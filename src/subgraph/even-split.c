@@ -491,13 +491,12 @@ enum xnn_status xnn_define_even_split_n(
   assert(num_outputs > 1);
   assert(num_outputs < 5);
 
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_xnnpack_initialized(node_type)) {
+    return xnn_status_uninitialized;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(node_type, input_id, subgraph->num_values)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_input_id(node_type, input_id, subgraph->num_values)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];

@@ -173,14 +173,12 @@ enum xnn_status xnn_define_depth_to_space(
   uint32_t block_size,
   uint32_t flags)
 {
-  enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_depth_to_space)) != xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_xnnpack_initialized(xnn_node_type_depth_to_space)) {
+    return xnn_status_uninitialized;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_depth_to_space, input_id, subgraph->num_values)) !=
-      xnn_status_success) {
-    return status;
+  if (!xnn_subgraph_valid_input_id(xnn_node_type_depth_to_space, input_id, subgraph->num_values)) {
+    return xnn_status_invalid_parameter;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
