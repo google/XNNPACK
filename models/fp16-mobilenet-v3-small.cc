@@ -2237,7 +2237,7 @@ ExecutionPlan FP16MobileNetV3Small(pthreadpool_t threadpool) {
   operators.emplace_back(op98, xnn_delete_operator);
 
 #if XNN_PLATFORM_JIT
-  xnn_finalize_code_memory(&code_cache.cache.buffer);
+  xnn_finalize_code_memory(&code_cache.cache.code);
 #endif
 
   status = xnn_setup_convolution2d_nhwc_f16(

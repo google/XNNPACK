@@ -89,6 +89,7 @@ inline static void xnn_release_simd_memory(void* memory_pointer) {
 
 #define XNN_DEFAULT_CODE_BUFFER_SIZE 16384 // Default size for buffer to hold all generated microkernels, 16kb.
 #define XNN_DEFAULT_MICROKERNEL_SIZE 4096  // Default size required for generating one microkernel, 4kb.
+#define XNN_DEFAULT_WEIGHTS_BUFFER_SIZE 1048576 // Default size for buffer to hold repacked weights, 1MB.
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,7 +97,7 @@ extern "C" {
 
 struct xnn_code_buffer {
   // Pointer to allocated, externally managed memory.
-  void* code;
+  void* start;
   // Actual size of instructions (bytes). It is only safe to access code within
   // this size.
   size_t size;
@@ -113,6 +114,16 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf);
 enum xnn_status xnn_ensure_code_memory_has_space(struct xnn_code_buffer* buf, size_t n);
 // Free all memory associated with `buf`.
 enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf);
+
+// Buffer to hold repacked weights.
+struct xnn_weights_buffer {
+  // Pointer to allocated memory for weights.
+  void* start;
+  // Size of weights.
+  size_t size;
+  // Maximum capacity of this buffer pointed to by `code`. This is the size of the allcoated memory.
+  size_t capacity;
+};
 
 #ifdef __cplusplus
 }  // extern "C"

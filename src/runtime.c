@@ -102,7 +102,7 @@ enum xnn_status xnn_create_runtime_v2(
   }
 
 #if XNN_PLATFORM_JIT
-  xnn_finalize_code_memory(&code_cache->cache.buffer);
+  xnn_finalize_code_memory(&code_cache->cache.code);
 #endif
 
   runtime->blobs = xnn_allocate_zero_memory(sizeof(struct xnn_blob) * subgraph->num_values);

@@ -13,13 +13,13 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 
-#define XNN_CODE_CACHE_HASH_SEED 7
-#define XNN_CODE_CACHE_INITIAL_BUCKETS 32
-#define XNN_CODE_CACHE_MAX_LOAD 0.75
+#define XNN_CACHE_HASH_SEED 7
+#define XNN_CACHE_INITIAL_BUCKETS 32
+#define XNN_CACHE_MAX_LOAD 0.75
 // Max load factor is 0.75 (3/4), i.e. num_entries / num_buckets > 3 / 4.
-#define XNN_CODE_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER 4
-#define XNN_CODE_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER 3
-#define XNN_CODE_CACHE_GROWTH_FACTOR 2
+#define XNN_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER 4
+#define XNN_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER 3
+#define XNN_CACHE_GROWTH_FACTOR 2
 
 // MurmurHash3 implementation, copied from smhasher, with minor modifications in
 // style and main loop.
@@ -79,29 +79,37 @@ static uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
   return fmix32(h1);
 }
 
+enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buckets, enum xnn_cache_type cache_type)
+{
+  memset(cache, 0, sizeof(struct xnn_cache));
+  cache->buckets = (struct xnn_cache_bucket*) xnn_allocate_zero_memory(num_buckets * sizeof(struct xnn_cache_bucket));
+  if (cache->buckets == NULL) {
+    xnn_log_error("fail to allocate memory for cache buckets");
+    return xnn_status_out_of_memory;
+  }
+
+  cache->type = cache_type;
+  cache->num_buckets = num_buckets;
+  cache->num_entries = 0;
+  cache->hits = 0;
+  cache->misses = 0;
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_init_code_cache_with_size(struct xnn_code_cache* cache, size_t num_buckets)
 {
   memset(cache, 0, sizeof(struct xnn_code_cache));
-
-  cache->cache.buckets = (struct xnn_cache_bucket*) xnn_allocate_zero_memory(num_buckets * sizeof(struct xnn_cache_bucket));
-
-  enum xnn_status status;
-  if (cache->cache.buckets == NULL) {
-    xnn_log_error("fail to allocate memory for JIT cache buckets");
-    status = xnn_status_out_of_memory;
-    goto error;
-  }
-
-  status = xnn_allocate_code_memory(&cache->cache.buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  enum xnn_status status = xnn_status_success;
+  status = xnn_init_cache_with_size(&cache->cache, num_buckets, xnn_cache_type_code);
   if (status != xnn_status_success) {
     goto error;
   }
 
-  cache->cache.type = xnn_cache_type_code;
-  cache->cache.num_buckets = num_buckets;
-  cache->cache.num_entries = 0;
-  cache->cache.hits = 0;
-  cache->cache.misses = 0;
+  status = xnn_allocate_code_memory(&cache->cache.code, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  if (status != xnn_status_success) {
+    goto error;
+  }
+
   return xnn_status_success;
 
 error:
@@ -111,14 +119,14 @@ error:
 
 enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache)
 {
-  return xnn_init_code_cache_with_size(cache, XNN_CODE_CACHE_INITIAL_BUCKETS);
+  return xnn_init_code_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
 }
 
 static bool cache_buckets_grow(struct xnn_cache* cache)
 {
   struct xnn_code_cache tmp_code_cache;
   struct xnn_cache* tmp_cache = NULL;
-  const size_t new_num_buckets = cache->num_buckets * XNN_CODE_CACHE_GROWTH_FACTOR;
+  const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
   if (cache->type == xnn_cache_type_code) {
     bool init_ok = xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) == xnn_status_success;
     if (!init_ok) {
@@ -158,7 +166,7 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
 static inline bool bytes_equal(struct xnn_cache* cache, struct xnn_byte_span byte_span, size_t size, size_t offset)
 {
   return byte_span.size == size &&
-         memcmp(byte_span.start, (void*) ((uintptr_t) cache->buffer.code + offset), size) == 0;
+         memcmp(byte_span.start, (void*) ((uintptr_t) cache->code.start + offset), size) == 0;
 }
 
 static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint32_t hash, size_t* index)
@@ -183,7 +191,7 @@ static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint
 
 static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 {
-  uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CODE_CACHE_HASH_SEED);
+  const uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CACHE_HASH_SEED);
   size_t idx;
   const bool found = lookup(cache, byte_span, hash, &idx);
   if (found) {
@@ -191,8 +199,8 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
   }
 
   // Ensure we have enough buckets to keep under our load limit.
-  if (cache->num_entries * XNN_CODE_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER >
-      cache->num_buckets * XNN_CODE_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER) {
+  if (cache->num_entries * XNN_CACHE_MAX_LOAD_ENTRIES_MULTIPLIER >
+      cache->num_buckets * XNN_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER) {
     if (!cache_buckets_grow(cache)) {
       // Can't grow hash table anymore.
       return false;
@@ -200,10 +208,10 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
   }
 
   // Check that byte_span points into cache's buffer.
-  assert((uintptr_t) byte_span.start >= (uintptr_t) cache->buffer.code);
-  assert((uintptr_t) byte_span.start < (uintptr_t) cache->buffer.code + cache->buffer.size);
+  assert((uintptr_t) byte_span.start >= (uintptr_t) cache->code.start);
+  assert((uintptr_t) byte_span.start < (uintptr_t) cache->code.start + cache->code.size);
 
-  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache->buffer.code;
+  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache->code.start;
 
   // Insert the entry.
   cache->buckets[idx].size = byte_span.size;
@@ -217,7 +225,7 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 // if found, XNN_CACHE_NOT_FOUND otherwise.
 static size_t cache_lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 {
-  uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CODE_CACHE_HASH_SEED);
+  const uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CACHE_HASH_SEED);
   size_t bucket_idx;
   if (lookup(cache, byte_span, hash, &bucket_idx)) {
     cache->hits++;
@@ -233,10 +241,10 @@ size_t xnn_cache_get_or_insert(struct xnn_cache* cache, struct xnn_byte_span byt
   const size_t found_offset = cache_lookup(cache, byte_span);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
     // Found in the cache, rewind the buffer.
-    cache->buffer.size -= byte_span.size;
+    cache->code.size -= byte_span.size;
     return found_offset;
   }
-  const size_t code_offset = (uintptr_t) byte_span.start - (uintptr_t) cache->buffer.code;
+  const size_t code_offset = (uintptr_t) byte_span.start - (uintptr_t) cache->code.start;
   if (!insert(cache, byte_span)) {
     return XNN_CACHE_NOT_FOUND;
   }
@@ -250,7 +258,42 @@ size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byt
 
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
 {
-  xnn_release_code_memory(&cache->cache.buffer);
+  xnn_release_code_memory(&cache->cache.code);
+  xnn_release_memory(cache->cache.buckets);
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t num_buckets)
+{
+  memset(cache, 0, sizeof(struct xnn_weights_cache));
+
+  enum xnn_status status = xnn_status_success;
+  status = xnn_init_cache_with_size(&cache->cache, num_buckets, xnn_cache_type_weights);
+  if (status != xnn_status_success) {
+    goto error;
+  }
+
+  cache->cache.weights.start = xnn_allocate_simd_memory(XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
+  if (cache->cache.weights.start == NULL) {
+    status = xnn_status_out_of_memory;
+    goto error;
+  }
+
+  return xnn_status_success;
+
+error:
+  xnn_release_weights_cache(cache);
+  return status;
+}
+
+enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
+{
+  return xnn_init_weights_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
+}
+
+enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
+{
+  xnn_release_simd_memory(cache->cache.weights.start);
   xnn_release_memory(cache->cache.buckets);
   return xnn_status_success;
 }

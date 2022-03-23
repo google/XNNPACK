@@ -225,7 +225,7 @@ static void ruy_st(benchmark::State& state, const char* net)
     xnn_finalize_code_memory(&code_buffer);
     GEMMBenchmark(
         state,
-        reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.code),
+        reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.start),
         mr, nr, kr, sr, init_params, isa_check);
     xnn_release_code_memory(&code_buffer);
   }

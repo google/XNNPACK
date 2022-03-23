@@ -425,7 +425,7 @@ TEST(AArch64Assembler, AssembleToEndOfBuffer) {
   a2.finalize();
 
   // Check that we wrote to end of buffer and did not overwrite.
-  uint32_t* p = (uint32_t*) b.code;
+  uint32_t* p = (uint32_t*) b.start;
   ASSERT_EQ(1, *p);
   ASSERT_EQ(2, *(p+1));
 
@@ -434,7 +434,7 @@ TEST(AArch64Assembler, AssembleToEndOfBuffer) {
   a2.reset();
 
   ASSERT_EQ(4, b.size);
-  ASSERT_EQ((byte*)b.code + 4, a2.offset());
+  ASSERT_EQ((byte*)b.start + 4, a2.offset());
 
   a2.emit32(3);
   ASSERT_EQ(3, *(p+1));

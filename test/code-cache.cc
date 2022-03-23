@@ -12,9 +12,9 @@
 #include <gtest/gtest.h>
 
 static void write_string(xnn_code_cache* cache, std::string str) {
-  ASSERT_GE(cache->cache.buffer.capacity - cache->cache.buffer.size, str.length());
-  std::memcpy((void*) ((uintptr_t)cache->cache.buffer.code + cache->cache.buffer.size), str.data(), str.length());
-  cache->cache.buffer.size += str.length();
+  ASSERT_GE(cache->cache.code.capacity - cache->cache.code.size, str.length());
+  std::memcpy((void*) ((uintptr_t)cache->cache.code.start + cache->cache.code.size), str.data(), str.length());
+  cache->cache.code.size += str.length();
 };
 
 TEST(JIT_CACHE, init_and_release)
@@ -33,14 +33,14 @@ TEST(JIT_CACHE, get_or_insert)
 
   write_string(&cache, "1234");
   const xnn_byte_span span1 = {
-    .start = cache.cache.buffer.code,
+    .start = cache.cache.code.start,
     .size = 4
   };
   ASSERT_EQ(0, xnn_code_cache_get_or_insert(&cache, span1));
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
-  void* span2_code = (void*) ((uintptr_t) cache.cache.buffer.code + cache.cache.buffer.size);
+  void* span2_code = (void*) ((uintptr_t) cache.cache.code.start + cache.cache.code.size);
   // Simulate a cache hit.
   write_string(&cache, "1234");
   const xnn_byte_span span2 = {
@@ -51,7 +51,7 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
-  void* span3_code = (void*) ((uintptr_t) cache.cache.buffer.code + cache.cache.buffer.size);
+  void* span3_code = (void*) ((uintptr_t) cache.cache.code.start + cache.cache.code.size);
   // Simulate a cache miss.
   write_string(&cache, "5678");
   const xnn_byte_span span3 = {
@@ -64,4 +64,12 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(2, cache.cache.num_entries);
 
   EXPECT_EQ(xnn_status_success, xnn_release_code_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, init_and_release)
+{
+  xnn_initialize(/*allocator=*/nullptr);
+  struct xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }

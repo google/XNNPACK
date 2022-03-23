@@ -45,8 +45,11 @@ enum xnn_cache_type {
 
 struct xnn_cache {
   enum xnn_cache_type type;
-  // A growing buffer that is used to keep all generated code.
-  struct xnn_code_buffer buffer;
+  // A growing buffer that is used to keep all generated code or repacked weights.
+  union {
+    struct xnn_code_buffer code;
+    struct xnn_weights_buffer weights;
+  };
 
   // Entries in the cache.
   struct xnn_cache_bucket* buckets;
@@ -70,6 +73,14 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
 // If it already exists within the cache, the buffer will be rewound, so we can
 // reuse the same section of the buffer.
 size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byte_span byte_span);
+
+// A cache for repacked weights.
+struct xnn_weights_cache {
+  struct xnn_cache cache;
+};
+
+enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
+enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
 
 #ifdef __cplusplus
 } // extern "C"

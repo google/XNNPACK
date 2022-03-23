@@ -410,7 +410,7 @@ static void GEMMBenchmark(benchmark::State& state,
   };
   generator(&code_buffer, nc, kc * sizeof(float), &jit_params);
   xnn_finalize_code_memory(&code_buffer);
-  xnn_f32_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.code);
+  xnn_f32_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.start);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

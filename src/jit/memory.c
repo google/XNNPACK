@@ -42,7 +42,7 @@ enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t siz
   }
 #endif
 
-  buf->code = p;
+  buf->start = p;
   buf->size = 0;
   buf->capacity = size;
   return xnn_status_success;
@@ -70,7 +70,7 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
 
   // Release all unused pages.
   const size_t page_aligned_code_size = round_up_po2(buf->size, page_size);
-  const uint8_t* start = (uint8_t*) buf->code;
+  const uint8_t* start = (uint8_t*) buf->start;
   const uint8_t* unused_start = start + page_aligned_code_size;
   const size_t unused_capacity = buf->capacity - page_aligned_code_size;
 
@@ -102,18 +102,18 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
     // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-    __builtin___clear_cache(buf->code, (void*) ((uint8_t*) buf->code + buf->capacity));
+    __builtin___clear_cache(buf->start, (void*) ((uint8_t*) buf->start + buf->capacity));
   #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
   // Set permissions to RX (no write).
   #if XNN_PLATFORM_WINDOWS
     DWORD old = 0;
-    if (!VirtualProtect(buf->code, buf->size, PAGE_EXECUTE_READ, &old)) {
+    if (!VirtualProtect(buf->start, buf->size, PAGE_EXECUTE_READ, &old)) {
       xnn_log_error("failed to make code buffer read+execute, error code: %" PRIu32, (uint32_t) GetLastError());
       return xnn_status_invalid_state;
     }
   #else
-    if (mprotect(buf->code, buf->size, PROT_READ | PROT_EXEC) == -1) {
+    if (mprotect(buf->start, buf->size, PROT_READ | PROT_EXEC) == -1) {
       xnn_log_error("failed to make code buffer read+execute, error code: %d", errno);
       return xnn_status_invalid_state;
     }
@@ -127,17 +127,17 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
   }
 #if XNN_PLATFORM_WINDOWS
   // We only decommited any unused capacity, so we release all of it now.
-  if (!VirtualFree(buf->code, 0, MEM_RELEASE)) {
+  if (!VirtualFree(buf->start, 0, MEM_RELEASE)) {
     xnn_log_error("failed to release code buffer for JIT, error code: %" PRIu32, (uint32_t) GetLastError());
     return xnn_status_invalid_state;
   }
 #else
-  if (munmap(buf->code, buf->capacity) == -1) {
+  if (munmap(buf->start, buf->capacity) == -1) {
     xnn_log_error("failed to release code buffer for JIT, error code: %d", errno);
     return xnn_status_invalid_state;
   }
 #endif
-  buf->code = NULL;
+  buf->start = NULL;
   buf->size = 0;
   buf->capacity = 0;
   return xnn_status_success;
@@ -155,7 +155,7 @@ enum xnn_status xnn_ensure_code_memory_has_space(struct xnn_code_buffer* buf, si
   if (status != xnn_status_success) {
     return status;
   }
-  memcpy(new_code_buffer.code, buf->code, size);
+  memcpy(new_code_buffer.start, buf->start, size);
   new_code_buffer.size = size;
 
   // Release old code_buffer.

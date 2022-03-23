@@ -12,7 +12,7 @@
 namespace xnnpack {
 
 AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
-  byte* buf_start = reinterpret_cast<byte*>(buf->code);
+  byte* buf_start = reinterpret_cast<byte*>(buf->start);
   buffer_ = buf_start + buf->size;
   cursor_ = buffer_;
   top_ = buf_start + buf->capacity;
