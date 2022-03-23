@@ -81,6 +81,9 @@ struct xnn_weights_cache {
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
+size_t xnn_get_or_insert_weights_cache(
+    struct xnn_weights_cache* cache,
+    struct xnn_byte_span byte_span);
 
 #ifdef __cplusplus
 } // extern "C"

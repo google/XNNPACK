@@ -13394,6 +13394,14 @@ xnnpack_unit_test(
     deps = [":XNNPACK"] + MICROKERNEL_TEST_DEPS,
 )
 
+xnnpack_unit_test(
+    name = "weights_cache_test",
+    srcs = [
+        "test/weights-cache.cc",
+    ] + MICROKERNEL_TEST_HDRS,
+    deps = [":XNNPACK"] + MICROKERNEL_TEST_DEPS,
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of assembly kernels.

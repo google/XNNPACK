@@ -8811,6 +8811,14 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(code-cache-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(code-cache-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(weights-cache-test test/weights-cache.cc)
+  SET_TARGET_PROPERTIES(weights-cache-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(weights-cache-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks

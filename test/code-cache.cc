@@ -11,9 +11,13 @@
 
 #include <gtest/gtest.h>
 
-static void write_string(xnn_code_cache* cache, std::string str) {
+static void* cache_end(const xnn_code_cache* cache) {
+  return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cache->cache.code.start) + cache->cache.code.size);
+}
+
+static void write_code(xnn_code_cache* cache, const std::string& str) {
   ASSERT_GE(cache->cache.code.capacity - cache->cache.code.size, str.length());
-  std::memcpy((void*) ((uintptr_t)cache->cache.code.start + cache->cache.code.size), str.data(), str.length());
+  std::memcpy(cache_end(cache), str.data(), str.length());
   cache->cache.code.size += str.length();
 };
 
@@ -31,7 +35,7 @@ TEST(JIT_CACHE, get_or_insert)
   xnn_code_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_code_cache(&cache));
 
-  write_string(&cache, "1234");
+  write_code(&cache, "1234");
   const xnn_byte_span span1 = {
     .start = cache.cache.code.start,
     .size = 4
@@ -40,9 +44,9 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
-  void* span2_code = (void*) ((uintptr_t) cache.cache.code.start + cache.cache.code.size);
+  void* span2_code = cache_end(&cache);
   // Simulate a cache hit.
-  write_string(&cache, "1234");
+  write_code(&cache, "1234");
   const xnn_byte_span span2 = {
     .start = span2_code,
     .size = 4
@@ -51,9 +55,9 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
-  void* span3_code = (void*) ((uintptr_t) cache.cache.code.start + cache.cache.code.size);
+  void* span3_code = cache_end(&cache);
   // Simulate a cache miss.
-  write_string(&cache, "5678");
+  write_code(&cache, "5678");
   const xnn_byte_span span3 = {
     .start = span3_code,
     .size = 4
@@ -64,12 +68,4 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(2, cache.cache.num_entries);
 
   EXPECT_EQ(xnn_status_success, xnn_release_code_cache(&cache));
-}
-
-TEST(WEIGHTS_CACHE, init_and_release)
-{
-  xnn_initialize(/*allocator=*/nullptr);
-  struct xnn_weights_cache cache;
-  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
-  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
