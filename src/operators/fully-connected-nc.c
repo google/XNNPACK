@@ -276,7 +276,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -357,7 +357,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -431,7 +431,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
 {
   if (isnan(output_min)) {
@@ -491,7 +491,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
 {
   if (isnan(output_min)) {

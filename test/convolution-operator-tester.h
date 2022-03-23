@@ -1178,9 +1178,13 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
+      xnn_caches caches;
       xnn_code_cache code_cache;
       if (use_jit()) {
         xnn_init_code_cache(&code_cache);
+        caches.code_cache = &code_cache;
+      } else {
+        caches.code_cache = NULL;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1194,7 +1198,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          use_jit() ? &code_cache : NULL,
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();

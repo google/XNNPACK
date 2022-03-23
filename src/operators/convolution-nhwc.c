@@ -201,7 +201,7 @@ static enum xnn_status create_convolution2d_nhwc(
     bool relu_activation,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   xnn_operator_t convolution_op = NULL;
@@ -460,16 +460,16 @@ static enum xnn_status create_convolution2d_nhwc(
           };
 
           #if XNN_PLATFORM_JIT
-            if (code_cache != NULL) {
-              convolution_op->cache = code_cache;
+            if (caches != NULL && caches->code_cache != NULL) {
+              convolution_op->cache = caches->code_cache;
               convolution_op->ukernel.gemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_gemm(
                       gemm_parameters->generator.gemm, jit_gemm_params, group_output_channels, nr,
-                      group_input_channels, log2_input_element_size, code_cache);
+                      group_input_channels, log2_input_element_size, caches->code_cache);
               convolution_op->ukernel.gemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_gemm(
                       gemm_parameters->generator.gemm1, jit_gemm_params, group_output_channels, nr,
-                      group_input_channels, log2_input_element_size, code_cache);
+                      group_input_channels, log2_input_element_size, caches->code_cache);
             }
           #endif  // XNN_PLATFORM_JIT
 
@@ -496,15 +496,15 @@ static enum xnn_status create_convolution2d_nhwc(
           };
 
           #if XNN_PLATFORM_JIT
-            if (code_cache != NULL) {
-              convolution_op->cache = code_cache;
+            if (caches != NULL && caches->code_cache != NULL) {
+              convolution_op->cache = caches->code_cache;
               convolution_op->ukernel.igemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_igemm(
                       gemm_parameters->generator.igemm, jit_gemm_params, group_output_channels, nr,
-                      group_input_channels, log2_input_element_size, kernel_size, gemm_parameters->mr, code_cache);
+                      group_input_channels, log2_input_element_size, kernel_size, gemm_parameters->mr, caches->code_cache);
               convolution_op->ukernel.igemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_igemm( gemm_parameters->generator.igemm1, jit_gemm_params, group_output_channels, nr,
-                                       group_input_channels, log2_input_element_size, kernel_size, gemm_parameters->mr, code_cache);
+                                       group_input_channels, log2_input_element_size, kernel_size, gemm_parameters->mr, caches->code_cache);
             }
           #endif  // XNN_PLATFORM_JIT
 
@@ -609,7 +609,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -696,7 +696,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QU8,
     xnn_operator_type_convolution_nhwc_qu8,
-    code_cache,
+    caches,
     convolution_op_out);
 }
 
@@ -726,7 +726,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -809,7 +809,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QS8,
     xnn_operator_type_convolution_nhwc_qs8,
-    code_cache,
+    caches,
     convolution_op_out);
 }
 
@@ -839,7 +839,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -930,7 +930,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QC8,
     xnn_operator_type_convolution_nhwc_qc8,
-    code_cache,
+    caches,
     convolution_op_out);
 }
 
@@ -955,7 +955,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   if (isnan(output_min)) {
@@ -1042,7 +1042,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_F16,
     xnn_operator_type_convolution_nhwc_f16,
-    code_cache,
+    caches,
     convolution_op_out);
 }
 
@@ -1067,7 +1067,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   if (isnan(output_min)) {
@@ -1144,7 +1144,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     &jit_gemm_params,
     linear_activation, relu_activation, XNN_INIT_FLAG_F32,
     xnn_operator_type_convolution_nhwc_f32,
-    code_cache,
+    caches,
     convolution_op_out);
 }
 

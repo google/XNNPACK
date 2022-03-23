@@ -19,7 +19,7 @@ static enum xnn_status create_maximum_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->compute_type == xnn_compute_type_fp32);
 

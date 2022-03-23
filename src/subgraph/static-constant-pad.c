@@ -21,7 +21,7 @@ static enum xnn_status create_constant_pad_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];

@@ -85,6 +85,11 @@ size_t xnn_get_or_insert_weights_cache(
     struct xnn_weights_cache* cache,
     struct xnn_byte_span byte_span);
 
+struct xnn_caches {
+  struct xnn_code_cache *code_cache;
+  struct xnn_weights_cache *weights_cache;
+};
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

@@ -205,6 +205,8 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
 #if XNN_PLATFORM_JIT
   xnn_init_code_cache(&code_cache);
 #endif
+  xnn_caches caches;
+  caches.code_cache = &code_cache;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nhwc_f16(
@@ -221,7 +223,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w30.data(), w31.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #0" << std::endl;
@@ -244,7 +246,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w32.data(), w33.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #1" << std::endl;
@@ -267,7 +269,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w34.data(), w35.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #2" << std::endl;
@@ -290,7 +292,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w36.data(), w37.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op3);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #3" << std::endl;
@@ -313,7 +315,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w38.data(), w39.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #4" << std::endl;
@@ -336,7 +338,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w40.data(), w41.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op5);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #5" << std::endl;
@@ -359,7 +361,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w42.data(), w43.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op6);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #6" << std::endl;
@@ -382,7 +384,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w44.data(), w45.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op7);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #7" << std::endl;
@@ -405,7 +407,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w46.data(), w47.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op8);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #8" << std::endl;
@@ -428,7 +430,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w48.data(), w49.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op9);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #9" << std::endl;
@@ -451,7 +453,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w50.data(), w51.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op10);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #10" << std::endl;
@@ -474,7 +476,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w52.data(), w53.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #11" << std::endl;
@@ -497,7 +499,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w54.data(), w55.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op12);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #12" << std::endl;
@@ -520,7 +522,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w56.data(), w57.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op13);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #13" << std::endl;
@@ -543,7 +545,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w58.data(), w59.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op14);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #14" << std::endl;
@@ -566,7 +568,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w60.data(), w61.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op15);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #15" << std::endl;
@@ -589,7 +591,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w62.data(), w63.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op16);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #16" << std::endl;
@@ -612,7 +614,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w64.data(), w65.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op17);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #17" << std::endl;
@@ -635,7 +637,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w66.data(), w67.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op18);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #18" << std::endl;
@@ -658,7 +660,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w68.data(), w69.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op19);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #19" << std::endl;
@@ -681,7 +683,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w70.data(), w71.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op20);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #20" << std::endl;
@@ -704,7 +706,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w72.data(), w73.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op21);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #21" << std::endl;
@@ -727,7 +729,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w74.data(), w75.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op22);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #22" << std::endl;
@@ -750,7 +752,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w76.data(), w77.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op23);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #23" << std::endl;
@@ -773,7 +775,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w78.data(), w79.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op24);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #24" << std::endl;
@@ -796,7 +798,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w80.data(), w81.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op25);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #25" << std::endl;
@@ -819,7 +821,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w82.data(), w83.data(),
     0.0f /* output min */, 6.0f /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op26);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #26" << std::endl;
@@ -854,7 +856,7 @@ ExecutionPlan FP16MobileNetV1(pthreadpool_t threadpool) {
     w84.data(), w85.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op28);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #28" << std::endl;

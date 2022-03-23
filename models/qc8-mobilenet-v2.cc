@@ -480,6 +480,8 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
 #if XNN_PLATFORM_JIT
   xnn_init_code_cache(&code_cache);
 #endif
+  xnn_caches caches;
+  caches.code_cache = &code_cache;
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nhwc_qc8(
@@ -497,7 +499,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s65.data(), w65.data(), w66.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #0" << std::endl;
@@ -521,7 +523,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s67.data(), w67.data(), w68.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op1);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #1" << std::endl;
@@ -545,7 +547,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s69.data(), w69.data(), w70.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #2" << std::endl;
@@ -569,7 +571,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s71.data(), w71.data(), w72.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op3);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #3" << std::endl;
@@ -593,7 +595,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s73.data(), w73.data(), w74.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #4" << std::endl;
@@ -617,7 +619,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s75.data(), w75.data(), w76.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op5);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #5" << std::endl;
@@ -641,7 +643,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s77.data(), w77.data(), w78.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op6);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #6" << std::endl;
@@ -665,7 +667,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s79.data(), w79.data(), w80.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op7);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #7" << std::endl;
@@ -689,7 +691,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s81.data(), w81.data(), w82.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op8);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #8" << std::endl;
@@ -726,7 +728,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s83.data(), w83.data(), w84.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op10);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #10" << std::endl;
@@ -750,7 +752,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s85.data(), w85.data(), w86.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #11" << std::endl;
@@ -774,7 +776,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s87.data(), w87.data(), w88.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op12);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #12" << std::endl;
@@ -798,7 +800,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s89.data(), w89.data(), w90.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op13);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #13" << std::endl;
@@ -822,7 +824,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s91.data(), w91.data(), w92.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op14);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #14" << std::endl;
@@ -846,7 +848,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s93.data(), w93.data(), w94.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op15);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #15" << std::endl;
@@ -883,7 +885,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s95.data(), w95.data(), w96.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op17);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #17" << std::endl;
@@ -907,7 +909,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s97.data(), w97.data(), w98.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op18);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #18" << std::endl;
@@ -931,7 +933,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s99.data(), w99.data(), w100.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op19);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #19" << std::endl;
@@ -968,7 +970,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s101.data(), w101.data(), w102.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op21);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #21" << std::endl;
@@ -992,7 +994,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s103.data(), w103.data(), w104.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op22);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #22" << std::endl;
@@ -1016,7 +1018,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s105.data(), w105.data(), w106.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op23);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #23" << std::endl;
@@ -1040,7 +1042,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s107.data(), w107.data(), w108.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op24);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #24" << std::endl;
@@ -1064,7 +1066,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s109.data(), w109.data(), w110.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op25);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #25" << std::endl;
@@ -1088,7 +1090,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s111.data(), w111.data(), w112.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op26);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #26" << std::endl;
@@ -1125,7 +1127,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s113.data(), w113.data(), w114.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op28);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #28" << std::endl;
@@ -1149,7 +1151,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s115.data(), w115.data(), w116.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op29);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #29" << std::endl;
@@ -1173,7 +1175,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s117.data(), w117.data(), w118.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op30);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #30" << std::endl;
@@ -1210,7 +1212,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s119.data(), w119.data(), w120.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op32);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #32" << std::endl;
@@ -1234,7 +1236,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s121.data(), w121.data(), w122.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op33);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #33" << std::endl;
@@ -1258,7 +1260,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s123.data(), w123.data(), w124.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op34);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #34" << std::endl;
@@ -1295,7 +1297,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s125.data(), w125.data(), w126.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op36);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #36" << std::endl;
@@ -1319,7 +1321,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s127.data(), w127.data(), w128.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op37);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #37" << std::endl;
@@ -1343,7 +1345,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s129.data(), w129.data(), w130.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op38);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #38" << std::endl;
@@ -1367,7 +1369,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s131.data(), w131.data(), w132.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op39);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #39" << std::endl;
@@ -1391,7 +1393,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s133.data(), w133.data(), w134.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op40);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #40" << std::endl;
@@ -1415,7 +1417,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s135.data(), w135.data(), w136.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op41);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #41" << std::endl;
@@ -1452,7 +1454,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s137.data(), w137.data(), w138.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op43);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #43" << std::endl;
@@ -1476,7 +1478,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s139.data(), w139.data(), w140.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op44);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #44" << std::endl;
@@ -1500,7 +1502,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s141.data(), w141.data(), w142.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op45);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #45" << std::endl;
@@ -1537,7 +1539,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s143.data(), w143.data(), w144.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op47);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #47" << std::endl;
@@ -1561,7 +1563,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s145.data(), w145.data(), w146.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op48);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #48" << std::endl;
@@ -1585,7 +1587,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s147.data(), w147.data(), w148.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op49);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #49" << std::endl;
@@ -1609,7 +1611,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s149.data(), w149.data(), w150.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op50);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #50" << std::endl;
@@ -1633,7 +1635,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s151.data(), w151.data(), w152.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op51);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #51" << std::endl;
@@ -1657,7 +1659,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s153.data(), w153.data(), w154.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op52);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #52" << std::endl;
@@ -1694,7 +1696,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s155.data(), w155.data(), w156.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op54);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #54" << std::endl;
@@ -1718,7 +1720,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s157.data(), w157.data(), w158.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op55);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #55" << std::endl;
@@ -1742,7 +1744,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s159.data(), w159.data(), w160.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op56);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #56" << std::endl;
@@ -1779,7 +1781,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s161.data(), w161.data(), w162.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op58);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #58" << std::endl;
@@ -1803,7 +1805,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s163.data(), w163.data(), w164.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op59);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #59" << std::endl;
@@ -1827,7 +1829,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s165.data(), w165.data(), w166.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op60);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #60" << std::endl;
@@ -1851,7 +1853,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s167.data(), w167.data(), w168.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op61);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #61" << std::endl;
@@ -1888,7 +1890,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     s169.data(), w169.data(), w170.data(),
     -1 /* output zero point */, 0.5f /* output scale */, -126 /* output min */, 126 /* output max */,
     0 /* flags */,
-    &code_cache,
+    &caches,
     &op63);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #63" << std::endl;
