@@ -122,11 +122,9 @@ enum xnn_status xnn_define_minimum2(
     return status;
   }
 
-  if (input1_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with the first input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_minimum2), input1_id);
-    return xnn_status_invalid_parameter;
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+        xnn_node_type_minimum2, input1_id, subgraph->num_values, 1)) != xnn_status_success) {
+    return status;
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
@@ -148,11 +146,9 @@ enum xnn_status xnn_define_minimum2(
       return xnn_status_invalid_parameter;
   }
 
-  if (input2_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with the second input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_minimum2), input2_id);
-    return xnn_status_invalid_parameter;
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+        xnn_node_type_minimum2, input2_id, subgraph->num_values, 2)) != xnn_status_success) {
+    return status;
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];

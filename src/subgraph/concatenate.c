@@ -426,21 +426,19 @@ enum xnn_status check_input_value(
   size_t axis,
   uint32_t input_id,
   uint32_t output_id,
-  const char* nth,
+  size_t nth,
   enum xnn_node_type node_type)
 {
-
-  if (input_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with the %s input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(node_type), nth, input_id);
-    return xnn_status_invalid_parameter;
+  enum xnn_status status;
+  if ((status = xnn_subgraph_check_nth_input_node_id(node_type, input_id, subgraph->num_values, nth)) !=
+      xnn_status_success) {
+    return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
   if (input_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
-      "failed to define %s operator with the %s input ID #%" PRIu32
+      "failed to define %s operator with the input %zu ID #%" PRIu32
       ": unsupported Value type %d (expected dense tensor)",
       xnn_node_type_to_string(node_type), nth, input_id, input_value->type);
     return xnn_status_invalid_parameter;
@@ -449,8 +447,8 @@ enum xnn_status check_input_value(
   const struct xnn_value* output_value = &subgraph->values[output_id];
   if (input_value->shape.num_dims != output_value->shape.num_dims) {
     xnn_log_error(
-      "failed to define %s operator with %s input ID #%" PRIu32
-      ": mismatch number of dimensions, %s, input has %zu, output has %zu",
+      "failed to define %s operator with input %zu ID #%" PRIu32
+      ": mismatch number of dimensions, input %zu has %zu, output has %zu",
       xnn_node_type_to_string(node_type), nth, input_id, nth, input_value->shape.num_dims,
       output_value->shape.num_dims);
     return xnn_status_invalid_parameter;
@@ -460,7 +458,7 @@ enum xnn_status check_input_value(
     if (i != axis && input_value->shape.dim[i] != output_value->shape.dim[i]) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32
-        ": mismatch dimension %zu, %s input has %zu, output has %zu",
+        ": mismatch dimension %zu, input %zu has %zu, output has %zu",
         xnn_node_type_to_string(node_type), input_id, i, nth, input_value->shape.dim[i], output_value->shape.dim[i]);
       return xnn_status_invalid_parameter;
     }
@@ -468,9 +466,9 @@ enum xnn_status check_input_value(
 
   if (input_value->datatype != output_value->datatype) {
     xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 " and %s output ID #%" PRIu32
-      ": mismatching datatypes across the %s input (%s), the output (%s)",
-      xnn_node_type_to_string(node_type), input_id, nth, output_id,
+      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+      ": mismatching datatypes across input %zu (%s), the output (%s)",
+      xnn_node_type_to_string(node_type), input_id, output_id,
       nth, xnn_datatype_to_string(input_value->datatype), xnn_datatype_to_string(output_value->datatype));
     return xnn_status_invalid_parameter;
   }
@@ -549,13 +547,13 @@ enum xnn_status xnn_define_concatenate_n(
     return xnn_status_invalid_parameter;
   }
 
-  check_input_value(subgraph, axis, input_ids[0], output_id, "first", node_type);
-  check_input_value(subgraph, axis, input_ids[1], output_id, "second", node_type);
+  check_input_value(subgraph, axis, input_ids[0], output_id, 1, node_type);
+  check_input_value(subgraph, axis, input_ids[1], output_id, 2, node_type);
   if (num_inputs > 2) {
-    check_input_value(subgraph, axis, input_ids[2], output_id, "third", node_type);
+    check_input_value(subgraph, axis, input_ids[2], output_id, 3, node_type);
   }
   if (num_inputs > 3) {
-    check_input_value(subgraph, axis, input_ids[3], output_id, "fourth", node_type);
+    check_input_value(subgraph, axis, input_ids[3], output_id, 4, node_type);
   }
 
   size_t input_axis_dimensions_sum = 0;
