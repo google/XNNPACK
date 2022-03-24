@@ -97,11 +97,7 @@ size_t get_generated_gemm(
   }
 
   const size_t new_size = code_cache->cache.code.size;
-  const struct xnn_byte_span span = {
-    .start = old_code,
-    .size = new_size - old_size
-  };
-  return xnn_get_or_insert_code_cache(code_cache, span);
+  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
 
 error:
   return offset;
@@ -142,11 +138,7 @@ size_t get_generated_igemm(
   }
 
   const size_t new_size = code_cache->cache.code.size;
-  const struct xnn_byte_span span = {
-    .start = old_code,
-    .size = new_size - old_size
-  };
-  return xnn_get_or_insert_code_cache(code_cache, span);
+  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
 
 error:
   return offset;

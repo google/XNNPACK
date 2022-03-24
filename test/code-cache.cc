@@ -42,33 +42,21 @@ TEST(JIT_CACHE, get_or_insert)
   EXPECT_EQ(xnn_status_success, xnn_init_code_cache(&cache));
 
   write_code(&cache, "1234");
-  const xnn_byte_span span1 = {
-    .start = cache.cache.code.start,
-    .size = 4
-  };
-  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, span1));
+  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, cache.cache.code.start, 4));
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
   void* span2_code = cache_end(&cache);
   // Simulate a cache hit.
   write_code(&cache, "1234");
-  const xnn_byte_span span2 = {
-    .start = span2_code,
-    .size = 4
-  };
-  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, span2));
+  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, span2_code, 4));
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
   void* span3_code = cache_end(&cache);
   // Simulate a cache miss.
   write_code(&cache, "5678");
-  const xnn_byte_span span3 = {
-    .start = span3_code,
-    .size = 4
-  };
-  ASSERT_EQ(4, xnn_get_or_insert_code_cache(&cache, span3));
+  ASSERT_EQ(4, xnn_get_or_insert_code_cache(&cache, span3_code, 4));
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(2, cache.cache.misses);
   ASSERT_EQ(2, cache.cache.num_entries);

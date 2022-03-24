@@ -187,13 +187,12 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
   return true;
 }
 
-static inline bool bytes_equal(struct xnn_cache* cache, struct xnn_byte_span byte_span, size_t size, size_t offset)
+static inline bool bytes_equal(struct xnn_cache* cache, void* ptr, size_t size, size_t offset)
 {
-  return byte_span.size == size &&
-         memcmp(byte_span.start, (void*) ((uintptr_t) cache_start(cache) + offset), size) == 0;
+  return memcmp(ptr, (void*) ((uintptr_t) cache_start(cache) + offset), size) == 0;
 }
 
-static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint32_t hash, size_t* index)
+static bool lookup(struct xnn_cache* cache, void* ptr, size_t size, uint32_t hash, size_t* index)
 {
   assert(is_po2(cache->num_buckets));
   const size_t mask = cache->num_buckets - 1;
@@ -202,7 +201,9 @@ static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint
 
   // Linear probing.
   while (buckets[idx].size != 0 &&
-         !(buckets[idx].hash == hash && bytes_equal(cache, byte_span, buckets[idx].size, buckets[idx].offset))) {
+         !(buckets[idx].hash == hash &&
+           size == buckets[idx].size &&
+           bytes_equal(cache, ptr, buckets[idx].size, buckets[idx].offset))) {
     idx = (idx + 1) & mask;
   }
   *index = idx;
@@ -213,11 +214,11 @@ static bool lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span, uint
   }
 }
 
-static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
+static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
 {
-  const uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CACHE_HASH_SEED);
+  const uint32_t hash = murmur_hash3(ptr, size, /*seed=*/XNN_CACHE_HASH_SEED);
   size_t idx;
-  const bool found = lookup(cache, byte_span, hash, &idx);
+  const bool found = lookup(cache, ptr, size, hash, &idx);
   if (found) {
     return false;
   }
@@ -231,14 +232,14 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
     }
   }
 
-  // Check that byte_span points into cache's buffer.
-  assert((uintptr_t) byte_span.start >= (uintptr_t) cache_start(cache));
-  assert((uintptr_t) byte_span.start < (uintptr_t) cache_start(cache) + cache_size(cache));
+  // Check that ptr points into cache's buffer.
+  assert((uintptr_t) ptr >= (uintptr_t) cache_start(cache));
+  assert((uintptr_t) ptr < (uintptr_t) cache_start(cache) + cache_size(cache));
 
-  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache_start(cache);
+  const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
 
   // Insert the entry.
-  cache->buckets[idx].size = byte_span.size;
+  cache->buckets[idx].size = size;
   cache->buckets[idx].hash = hash;
   cache->buckets[idx].offset = offset;
   cache->num_entries++;
@@ -247,11 +248,11 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 
 // Checks if a generated microkernel is already in the cache, returns the offset
 // if found, XNN_CACHE_NOT_FOUND otherwise.
-static size_t lookup_cache(struct xnn_cache* cache, struct xnn_byte_span byte_span)
+static size_t lookup_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
-  const uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CACHE_HASH_SEED);
+  const uint32_t hash = murmur_hash3(ptr, size, /*seed=*/XNN_CACHE_HASH_SEED);
   size_t bucket_idx;
-  if (lookup(cache, byte_span, hash, &bucket_idx)) {
+  if (lookup(cache, ptr, size, hash, &bucket_idx)) {
     cache->hits++;
     return cache->buckets[bucket_idx].offset;
   } else {
@@ -260,17 +261,17 @@ static size_t lookup_cache(struct xnn_cache* cache, struct xnn_byte_span byte_sp
   }
 }
 
-size_t xnn_get_or_insert_cache(struct xnn_cache* cache, struct xnn_byte_span byte_span)
+size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
-  const size_t found_offset = lookup_cache(cache, byte_span);
+  const size_t found_offset = lookup_cache(cache, ptr, size);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
     // Found in the cache, rewind the buffer.
     switch (cache->type) {
       case xnn_cache_type_code:
-        cache->code.size -= byte_span.size;
+        cache->code.size -= size;
         break;
       case xnn_cache_type_weights:
-        cache->weights.size -= byte_span.size;
+        cache->weights.size -= size;
         break;
       default:
         XNN_UNREACHABLE;
@@ -278,16 +279,16 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, struct xnn_byte_span byt
     }
     return found_offset;
   }
-  const size_t offset = (uintptr_t) byte_span.start - (uintptr_t) cache_start(cache);
-  if (!insert(cache, byte_span)) {
+  const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
+  if (!insert(cache, ptr, size)) {
     return XNN_CACHE_NOT_FOUND;
   }
   return offset;
 }
 
-size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, struct xnn_byte_span byte_span)
+size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, size_t size)
 {
-  return xnn_get_or_insert_cache(&cache->cache, byte_span);
+  return xnn_get_or_insert_cache(&cache->cache, ptr, size);
 }
 
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
@@ -337,9 +338,7 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
   return xnn_status_success;
 }
 
-size_t xnn_get_or_insert_weights_cache(
-    struct xnn_weights_cache* cache,
-    struct xnn_byte_span byte_span)
+size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size)
 {
-  return xnn_get_or_insert_cache(&cache->cache, byte_span);
+  return xnn_get_or_insert_cache(&cache->cache, ptr, size);
 }

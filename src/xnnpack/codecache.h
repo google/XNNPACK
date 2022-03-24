@@ -16,11 +16,6 @@ extern "C" {
 
 #define XNN_CACHE_NOT_FOUND SIZE_MAX // Return value when code is not found in the cache.
 
-struct xnn_byte_span {
-  void* start;
-  size_t size;
-};
-
 // A cache for arbitrary bytes.
 // The implementation is similar to a hash table with open addressing and linear
 // probing, but restricted to our use cases.
@@ -68,11 +63,11 @@ struct xnn_code_cache {
 
 enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache);
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
-// Looks up byte_span in the cache, returns offset into cache's buffer if found.
-// byte_span should already point into cache->buffer.
+// Looks up `ptr` in the cache, returns offset into cache's buffer if found.
+// `ptr` should already point into cache->buffer.
 // If it already exists within the cache, the buffer will be rewound, so we can
 // reuse the same section of the buffer.
-size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, struct xnn_byte_span byte_span);
+size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, size_t size);
 
 // A cache for repacked weights.
 struct xnn_weights_cache {
@@ -81,9 +76,7 @@ struct xnn_weights_cache {
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
-size_t xnn_get_or_insert_weights_cache(
-    struct xnn_weights_cache* cache,
-    struct xnn_byte_span byte_span);
+size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size);
 
 struct xnn_caches {
   struct xnn_code_cache *code_cache;
