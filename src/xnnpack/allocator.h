@@ -125,6 +125,13 @@ struct xnn_weights_buffer {
   size_t capacity;
 };
 
+// Allocates a weights region and associates it with `buf`.
+enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size_t size);
+// Free all memory associated with `buf`.
+enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf);
+// Ensure that buf has at least n bytes free (i.e. buf->capacity - buf->size >= n), grows if not.
+enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

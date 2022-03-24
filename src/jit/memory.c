@@ -25,24 +25,51 @@
 
 #define XNN_CODE_BUFFER_GROWTH_FACTOR 2
 
-enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size) {
-  memset(buf, 0, sizeof(struct xnn_code_buffer));
+// Helpers to allocate/mmap and release memory used by both code and weights cache.
+
+// Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
+void* allocate_buffer(size_t size) {
 #if XNN_PLATFORM_WINDOWS
   void* p = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (p == NULL) {
     xnn_log_error("failed to allocate %zu bytes for JIT code buffer, error code: %" PRIu32,
                   size, (uint32_t) GetLastError());
-    return xnn_status_out_of_memory;
+    return NULL;
   }
 #else
   void* p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (p == MAP_FAILED) {
     xnn_log_error("failed to allocate %zu bytes for JIT code buffer, error code: %d", size, errno);
-    return xnn_status_out_of_memory;
+    return NULL;
   }
 #endif
+  return p;
+}
 
-  buf->start = p;
+// Releases memory previously mapped by `allocate_buffer`, returns xnn_status_success on success.
+static enum xnn_status release_memory(void* start, size_t capacity) {
+#if XNN_PLATFORM_WINDOWS
+  // We only decommited any unused capacity, so we release all of it now.
+  if (!VirtualFree(start, 0, MEM_RELEASE)) {
+    xnn_log_error("failed to release code buffer for JIT, error code: %" PRIu32, (uint32_t) GetLastError());
+    return xnn_status_invalid_state;
+  }
+#else
+  if (munmap(start, capacity) == -1) {
+    xnn_log_error("failed to release code buffer for JIT, error code: %d", errno);
+    return xnn_status_invalid_state;
+  }
+#endif
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size) {
+  memset(buf, 0, sizeof(struct xnn_code_buffer));
+  buf->start = allocate_buffer(size);
+  if (buf->start == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
   buf->size = 0;
   buf->capacity = size;
   return xnn_status_success;
@@ -125,21 +152,11 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
   if (buf->capacity == 0) {
     return xnn_status_success;
   }
-#if XNN_PLATFORM_WINDOWS
-  // We only decommited any unused capacity, so we release all of it now.
-  if (!VirtualFree(buf->start, 0, MEM_RELEASE)) {
-    xnn_log_error("failed to release code buffer for JIT, error code: %" PRIu32, (uint32_t) GetLastError());
-    return xnn_status_invalid_state;
+  const enum xnn_status status = release_memory(buf->start, buf->capacity);
+  if (status != xnn_status_success) {
+    return status;
   }
-#else
-  if (munmap(buf->start, buf->capacity) == -1) {
-    xnn_log_error("failed to release code buffer for JIT, error code: %d", errno);
-    return xnn_status_invalid_state;
-  }
-#endif
-  buf->start = NULL;
-  buf->size = 0;
-  buf->capacity = 0;
+  memset(buf, 0, sizeof(struct xnn_code_buffer));
   return xnn_status_success;
 }
 
@@ -165,5 +182,54 @@ enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n) {
   }
   // Copy over all the new code_buffer information.
   memcpy(buf, &new_code_buffer, sizeof(struct xnn_code_buffer));
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size_t size) {
+  memset(buf, 0, sizeof(struct xnn_weights_buffer));
+  buf->start = allocate_buffer(size);
+  if (buf->start == NULL) {
+    return xnn_status_out_of_memory;
+  }
+
+  buf->size = 0;
+  buf->capacity = size;
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf) {
+  if (buf->capacity == 0) {
+    return xnn_status_success;
+  }
+  enum xnn_status status = release_memory(buf->start, buf->capacity);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  memset(buf, 0, sizeof(struct xnn_code_buffer));
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n) {
+  if (buf->size + n <= buf->capacity) {
+    return xnn_status_success;
+  }
+
+  // TODO(zhin): use mremap
+  size_t size = buf->size;
+  struct xnn_weights_buffer new_weights_buffer;
+  enum xnn_status status = xnn_allocate_weights_memory(&new_weights_buffer, buf->size + n);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  memcpy(new_weights_buffer.start, buf->start, size);
+  new_weights_buffer.size = size;
+
+  // Release old weights_buffer.
+  status = xnn_release_weights_memory(buf);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  // Copy over all the new weights_buffer information.
+  memcpy(buf, &new_weights_buffer, sizeof(struct xnn_weights_buffer));
   return xnn_status_success;
 }

@@ -310,13 +310,10 @@ enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache
     goto error;
   }
 
-  cache->cache.weights.start = xnn_allocate_simd_memory(XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
-  if (cache->cache.weights.start == NULL) {
-    status = xnn_status_out_of_memory;
+  status = xnn_allocate_weights_memory(&cache->cache.weights, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
+  if (status != xnn_status_success) {
     goto error;
   }
-  cache->cache.weights.size = 0;
-  cache->cache.weights.capacity = XNN_DEFAULT_WEIGHTS_BUFFER_SIZE;
 
   return xnn_status_success;
 
@@ -334,7 +331,7 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
 {
   if XNN_LIKELY(cache != NULL) {
     assert(cache->cache.type == xnn_cache_type_weights);
-    xnn_release_simd_memory(cache->cache.weights.start);
+    xnn_release_weights_memory(&cache->cache.weights);
     xnn_release_memory(cache->cache.buckets);
   }
   return xnn_status_success;
