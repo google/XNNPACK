@@ -247,7 +247,7 @@ static bool insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 
 // Checks if a generated microkernel is already in the cache, returns the offset
 // if found, XNN_CACHE_NOT_FOUND otherwise.
-static size_t cache_lookup(struct xnn_cache* cache, struct xnn_byte_span byte_span)
+static size_t lookup_cache(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 {
   const uint32_t hash = murmur_hash3(byte_span.start, byte_span.size, /*seed=*/XNN_CACHE_HASH_SEED);
   size_t bucket_idx;
@@ -260,9 +260,9 @@ static size_t cache_lookup(struct xnn_cache* cache, struct xnn_byte_span byte_sp
   }
 }
 
-size_t xnn_cache_get_or_insert(struct xnn_cache* cache, struct xnn_byte_span byte_span)
+size_t xnn_get_or_insert_cache(struct xnn_cache* cache, struct xnn_byte_span byte_span)
 {
-  const size_t found_offset = cache_lookup(cache, byte_span);
+  const size_t found_offset = lookup_cache(cache, byte_span);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
     // Found in the cache, rewind the buffer.
     switch (cache->type) {
@@ -285,9 +285,9 @@ size_t xnn_cache_get_or_insert(struct xnn_cache* cache, struct xnn_byte_span byt
   return offset;
 }
 
-size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byte_span byte_span)
+size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, struct xnn_byte_span byte_span)
 {
-  return xnn_cache_get_or_insert(&cache->cache, byte_span);
+  return xnn_get_or_insert_cache(&cache->cache, byte_span);
 }
 
 enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
@@ -344,5 +344,5 @@ size_t xnn_get_or_insert_weights_cache(
     struct xnn_weights_cache* cache,
     struct xnn_byte_span byte_span)
 {
-  return xnn_cache_get_or_insert(&cache->cache, byte_span);
+  return xnn_get_or_insert_cache(&cache->cache, byte_span);
 }

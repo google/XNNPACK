@@ -46,7 +46,7 @@ TEST(JIT_CACHE, get_or_insert)
     .start = cache.cache.code.start,
     .size = 4
   };
-  ASSERT_EQ(0, xnn_code_cache_get_or_insert(&cache, span1));
+  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, span1));
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
@@ -57,7 +57,7 @@ TEST(JIT_CACHE, get_or_insert)
     .start = span2_code,
     .size = 4
   };
-  ASSERT_EQ(0, xnn_code_cache_get_or_insert(&cache, span2));
+  ASSERT_EQ(0, xnn_get_or_insert_code_cache(&cache, span2));
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
 
@@ -68,7 +68,7 @@ TEST(JIT_CACHE, get_or_insert)
     .start = span3_code,
     .size = 4
   };
-  ASSERT_EQ(4, xnn_code_cache_get_or_insert(&cache, span3));
+  ASSERT_EQ(4, xnn_get_or_insert_code_cache(&cache, span3));
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(2, cache.cache.misses);
   ASSERT_EQ(2, cache.cache.num_entries);

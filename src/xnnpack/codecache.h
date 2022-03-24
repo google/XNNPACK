@@ -72,7 +72,7 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
 // byte_span should already point into cache->buffer.
 // If it already exists within the cache, the buffer will be rewound, so we can
 // reuse the same section of the buffer.
-size_t xnn_code_cache_get_or_insert(struct xnn_code_cache* cache, struct xnn_byte_span byte_span);
+size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, struct xnn_byte_span byte_span);
 
 // A cache for repacked weights.
 struct xnn_weights_cache {

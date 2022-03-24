@@ -101,7 +101,7 @@ size_t get_generated_gemm(
     .start = old_code,
     .size = new_size - old_size
   };
-  return xnn_code_cache_get_or_insert(code_cache, span);
+  return xnn_get_or_insert_code_cache(code_cache, span);
 
 error:
   return offset;
@@ -146,7 +146,7 @@ size_t get_generated_igemm(
     .start = old_code,
     .size = new_size - old_size
   };
-  return xnn_code_cache_get_or_insert(code_cache, span);
+  return xnn_get_or_insert_code_cache(code_cache, span);
 
 error:
   return offset;
