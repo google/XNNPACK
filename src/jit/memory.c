@@ -143,7 +143,7 @@ enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
   return xnn_status_success;
 }
 
-enum xnn_status xnn_ensure_code_memory_has_space(struct xnn_code_buffer* buf, size_t n) {
+enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n) {
   if (buf->size + n <= buf->capacity) {
     return xnn_status_success;
   }

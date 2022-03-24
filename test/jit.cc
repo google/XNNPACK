@@ -50,7 +50,7 @@ TEST(JitMemory, GrowMemory) {
   const uintptr_t old_code = reinterpret_cast<uintptr_t>(b.start);
 
   // This should be a no-op, since we have enough space.
-  ASSERT_EQ(xnn_status_success, xnn_ensure_code_memory_has_space(&b, 4));
+  ASSERT_EQ(xnn_status_success, xnn_reserve_code_memory(&b, 4));
   ASSERT_EQ(old_code, reinterpret_cast<uintptr_t>(b.start));
 
   // Copy 4 more bytes, now we are full.
@@ -58,7 +58,7 @@ TEST(JitMemory, GrowMemory) {
   b.size += junk.length();
 
   const size_t old_size = b.size;
-  ASSERT_EQ(xnn_status_success, xnn_ensure_code_memory_has_space(&b, 4));
+  ASSERT_EQ(xnn_status_success, xnn_reserve_code_memory(&b, 4));
 
   // After growing, the new capacity should be bigger than the old one.
   ASSERT_EQ(12, b.capacity);

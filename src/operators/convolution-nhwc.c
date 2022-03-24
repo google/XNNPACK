@@ -79,7 +79,7 @@ size_t get_generated_gemm(
 
   enum xnn_status status = xnn_status_success;
 
-  status = xnn_ensure_code_memory_has_space(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
+  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
     xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
     goto error;
@@ -125,7 +125,7 @@ size_t get_generated_igemm(
   }
   enum xnn_status status = xnn_status_success;
 
-  status = xnn_ensure_code_memory_has_space(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
+  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
     xnn_log_error("failed to ensure sufficient space in code buffer for microkernel");
     goto error;
