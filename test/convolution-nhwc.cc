@@ -4720,6 +4720,18 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_5x5d2x1) {
     .TestNHWCxF32();
 }
 
+// Tests GEMM microkernel with weights_cache.
+TEST(CONVOLUTION_NHWC_F32, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .iterations(3)
+    .use_weights_cache(true)
+    .TestNHWCxF32();
+}
+
 #if XNN_PLATFORM_JIT
 TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
   ConvolutionOperatorTester()
@@ -5935,6 +5947,18 @@ TEST(CONVOLUTION_NHWC_F32, jit_depthwise_5x5d2x1) {
     .groups(27)
     .iterations(3)
     .use_jit(true)
+    .TestNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, jit_weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .iterations(3)
+    .use_jit(true)
+    .use_weights_cache(true)
     .TestNHWCxF32();
 }
 #endif  // XNN_PLATFORM_JIT

@@ -84,14 +84,14 @@ static enum xnn_status create_prelu_nc(
   }
 
   const size_t packed_weights_size = (channels << log2_weights_element_size) + XNN_EXTRA_BYTES;
-  prelu_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-  if (prelu_op->packed_weights == NULL) {
+  prelu_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+  if (prelu_op->packed_weights.pointer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
       packed_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  pack_prelu_w(channels, negative_slope, prelu_op->packed_weights);
+  pack_prelu_w(channels, negative_slope, prelu_op->packed_weights.pointer);
 
   prelu_op->channels = channels;
   prelu_op->input_pixel_stride = input_stride;
@@ -191,7 +191,7 @@ static enum xnn_status setup_prelu_nc(
     .n = channels << log2_element_size,
     .x = input,
     .x_stride = prelu_op->input_pixel_stride << log2_element_size,
-    .w = prelu_op->packed_weights,
+    .w = packed_weights(prelu_op),
     .y = output,
     .y_stride = prelu_op->output_pixel_stride << log2_element_size,
     .ukernel = prelu->ukernel,

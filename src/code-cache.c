@@ -234,7 +234,9 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
 
   // Check that ptr points into cache's buffer.
   assert((uintptr_t) ptr >= (uintptr_t) cache_start(cache));
-  assert((uintptr_t) ptr < (uintptr_t) cache_start(cache) + cache_size(cache));
+  if (cache->type == xnn_cache_type_code) {
+    assert((uintptr_t) ptr < (uintptr_t) cache_start(cache) + cache_size(cache));
+  }
 
   const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
 
@@ -265,13 +267,14 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const size_t found_offset = lookup_cache(cache, ptr, size);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
-    // Found in the cache, rewind the buffer.
     switch (cache->type) {
       case xnn_cache_type_code:
+        // Found in the cache, rewind the buffer because code generators update buffer size.
         cache->code.size -= size;
         break;
       case xnn_cache_type_weights:
-        cache->weights.size -= size;
+        // Weights packing functions don't update the buffer size, so update them here.
+        cache->code.size += size;
         break;
       default:
         XNN_UNREACHABLE;

@@ -530,6 +530,15 @@ class ConvolutionOperatorTester {
     return this->use_jit_;
   }
 
+  inline ConvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
+    this->use_weights_cache_ = use_weights_cache;
+    return *this;
+  }
+
+  inline bool use_weights_cache() const {
+    return this->use_weights_cache_;
+  }
+
   void TestNHWCxQC8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -1178,13 +1187,19 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_caches caches;
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
       xnn_code_cache code_cache;
       if (use_jit()) {
         xnn_init_code_cache(&code_cache);
         caches.code_cache = &code_cache;
-      } else {
-        caches.code_cache = NULL;
+      }
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1222,6 +1237,13 @@ class ConvolutionOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
+
+      if (use_jit()) {
+        xnn_release_code_cache(&code_cache);
+      }
+      if (use_weights_cache()) {
+        xnn_release_weights_cache(&weights_cache);
+      }
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -2821,4 +2843,5 @@ class ConvolutionOperatorTester {
   WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
   bool use_jit_{false};
+  bool use_weights_cache_{false};
 };

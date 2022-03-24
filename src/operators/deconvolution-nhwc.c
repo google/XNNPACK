@@ -194,21 +194,21 @@ static enum xnn_status create_deconvolution2d_nhwc(
       }
     }
   }
-  deconvolution_op->packed_weights = xnn_allocate_simd_memory(packed_group_weights_size * groups);
-  if (deconvolution_op->packed_weights == NULL) {
+  deconvolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_group_weights_size * groups);
+  if (deconvolution_op->packed_weights.pointer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
       packed_group_weights_size * groups, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  memset(deconvolution_op->packed_weights, packed_weights_padding_byte, packed_group_weights_size * groups);
+  memset(deconvolution_op->packed_weights.pointer, packed_weights_padding_byte, packed_group_weights_size * groups);
 
   switch (ukernel_type) {
     case xnn_ukernel_type_igemm:
       pack_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights,
+        kernel, bias, deconvolution_op->packed_weights.pointer,
         0 /* extra bytes */,
         packing_params);
       break;
@@ -217,7 +217,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights, deconvolution_op->subconvolution_buffer,
+        kernel, bias, deconvolution_op->packed_weights.pointer, deconvolution_op->subconvolution_buffer,
         packing_params);
       break;
     default:
@@ -701,7 +701,7 @@ static enum xnn_status setup_conv_path(
       .indirect_a = deconvolution_op->indirection_buffer,
       .a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input),
       .zero = deconvolution_op->zero_buffer,
-      .packed_w = deconvolution_op->packed_weights,
+      .packed_w = packed_weights(deconvolution_op),
       .c = deconvolution_op->output,
       .cm_stride = deconvolution_op->output_pixel_stride << log2_output_element_size,
       .cn_stride = nr << log2_output_element_size,

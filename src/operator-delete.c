@@ -27,7 +27,9 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
   }
 
   xnn_release_memory(op->indirection_buffer);
-  xnn_release_simd_memory(op->packed_weights);
+  if (op->type != xnn_operator_type_convolution_nhwc_f32 || op->weights_cache == NULL) {
+    xnn_release_simd_memory(op->packed_weights.pointer);
+  }
   xnn_release_simd_memory(op->zero_buffer);
   xnn_release_memory(op->pixelwise_buffer);
   xnn_release_memory(op->subconvolution_buffer);

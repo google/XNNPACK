@@ -244,9 +244,9 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
     resize_op->indirection_buffer = indirection_buffer;
 
     // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
-    xnn_release_simd_memory(resize_op->packed_weights);
-    resize_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-    if (resize_op->packed_weights == NULL) {
+    xnn_release_simd_memory(resize_op->packed_weights.pointer);
+    resize_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+    if (resize_op->packed_weights.pointer == NULL) {
       xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
         packed_weights_size, xnn_operator_type_to_string(resize_op->type));
@@ -265,7 +265,7 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
       input_pixel_stride_in_bytes,
       input_height, input_width,
       output_height, output_width,
-      input, resize_op->indirection_buffer, resize_op->packed_weights,
+      input, resize_op->indirection_buffer, resize_op->packed_weights.pointer,
       !!(flags & XNN_FLAG_ALIGN_CORNERS),
       !!(flags & XNN_FLAG_TENSORFLOW_LEGACY_MODE));
 
@@ -277,12 +277,14 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
   }
 
   const size_t output_pixel_stride_in_bytes = resize_op->output_pixel_stride << log2_element_size;
+  // Resize bilinear packed weights can change when the operator is resized, we will not use weights cache.
+  assert(resize_op->weights_cache == NULL);
   resize_op->context.resize_bilinear = (struct resize_bilinear_context) {
     .scaled_channels = resize_op->channels << log2_element_size,
     .indirect_input = resize_op->indirection_buffer,
     .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) resize_op->last_input),
     .input_batch_stride = input_pixel_stride_in_bytes * input_height * input_width,
-    .packed_weights = resize_op->packed_weights,
+    .packed_weights = resize_op->packed_weights.pointer,
     .output = output,
     .output_pixel_stride = output_pixel_stride_in_bytes,
     .output_batch_stride = output_pixel_stride_in_bytes * output_height * output_width,
