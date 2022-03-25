@@ -1495,6 +1495,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
+  src/x8-transposec/gen/16x16-reuse-dec-zip-neon.c
+  src/x16-transposec/gen/8x8-reuse-dec-zip-neon.c
   src/x32-packx/x4-neon-st4.c
   src/x32-unpool/neon.c
   src/x32-zip/xm-neon.c
@@ -2531,7 +2533,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x8-transposec/gen/8x8-reuse-mov-zip-neon.c
   src/x8-transposec/gen/8x8-reuse-multi-zip-neon.c
   src/x8-transposec/gen/8x8-reuse-switch-zip-neon.c
-  src/x8-transposec/gen/16x16-reuse-dec-zip-neon.c
   src/x8-transposec/gen/16x16-reuse-mov-zip-neon.c
   src/x8-transposec/gen/16x16-reuse-switch-zip-neon.c
   src/x8-zip/xm-neon.c
@@ -2549,7 +2550,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transposec/gen/8x8-multi-dec-zip-neon.c
   src/x16-transposec/gen/8x8-multi-mov-zip-neon.c
   src/x16-transposec/gen/8x8-multi-switch-zip-neon.c
-  src/x16-transposec/gen/8x8-reuse-dec-zip-neon.c
   src/x16-transposec/gen/8x8-reuse-mov-zip-neon.c
   src/x16-transposec/gen/8x8-reuse-multi-zip-neon.c
   src/x16-transposec/gen/8x8-reuse-switch-zip-neon.c
