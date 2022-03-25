@@ -1238,29 +1238,70 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
+      VerifyNHWCxF32(output, output_ref, output_min, output_max);
+
+      if (use_weights_cache()) {
+        // To test weights cache, we create the operator with the same parameters, and setup with a different output.
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(xnn_status_success, xnn_create_convolution2d_nhwc_f32(
+            padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+            padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
+            kernel_height(), kernel_width(),
+            subsampling_height(), subsampling_width(),
+            dilation_height(), dilation_width(),
+            groups(), group_input_channels(), group_output_channels(),
+            input_channel_stride(), output_channel_stride(),
+            kernel.data(), has_bias() ? bias.data() : nullptr,
+            output_min, output_max,
+            (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
+            &caches,
+            &convolution_op2));
+
+        ASSERT_NE(nullptr, convolution_op2);
+        std::vector<float> output2(output.size(), nanf(""));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nhwc_f32(
+                      convolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      input.data(), output2.data(),
+                      nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op2(convolution_op2, xnn_delete_operator);
+        ASSERT_EQ(weights_cache.cache.hits, 1);
+        // Ensure that we did not write more weights to the cache because it was a cache hit.
+        ASSERT_EQ(old_weights_cache_size, weights_cache.cache.weights.size);
+
+        VerifyNHWCxF32(output2, output_ref, output_min, output_max);
+      }
+
       if (use_jit()) {
         xnn_release_code_cache(&code_cache);
       }
       if (use_weights_cache()) {
         xnn_release_weights_cache(&weights_cache);
       }
+    }
+  }
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
+  void VerifyNHWCxF32(const std::vector<float>& output, const std::vector<float>& output_ref, const float output_min, const float output_max) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
+              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
-                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
-                    1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                  output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
+                  1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
             }
           }
         }

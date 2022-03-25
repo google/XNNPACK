@@ -267,21 +267,18 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const size_t found_offset = lookup_cache(cache, ptr, size);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
-    switch (cache->type) {
-      case xnn_cache_type_code:
-        // Found in the cache, rewind the buffer because code generators update buffer size.
-        cache->code.size -= size;
-        break;
-      case xnn_cache_type_weights:
-        // Weights packing functions don't update the buffer size, so update them here.
-        cache->code.size += size;
-        break;
-      default:
-        XNN_UNREACHABLE;
-        break;
+    if (cache->type == xnn_cache_type_code) {
+      // Found in the cache, rewind the buffer because code generators update buffer size.
+      cache->code.size -= size;
     }
     return found_offset;
   }
+
+  if (cache->type == xnn_cache_type_weights) {
+    // Cache miss, weights packing functions don't update buffer size, update it here.
+    cache->weights.size += size;
+  }
+
   const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
   if (!insert(cache, ptr, size)) {
     return XNN_CACHE_NOT_FOUND;

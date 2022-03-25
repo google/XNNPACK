@@ -43,6 +43,7 @@ TEST(WEIGHTS_CACHE, get_or_insert)
   ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
+  ASSERT_EQ(4, cache.cache.weights.size);
 
   void* span2_weights = cache_end(&cache);
   // Simulate a cache hit.
@@ -50,6 +51,7 @@ TEST(WEIGHTS_CACHE, get_or_insert)
   ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, span2_weights, 4));
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(1, cache.cache.misses);
+  ASSERT_EQ(4, cache.cache.weights.size);
 
   void* span3_weights = cache_end(&cache);
   // Simulate a cache miss.
@@ -58,6 +60,7 @@ TEST(WEIGHTS_CACHE, get_or_insert)
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(2, cache.cache.misses);
   ASSERT_EQ(2, cache.cache.num_entries);
+  ASSERT_EQ(8, cache.cache.weights.size);
 
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
