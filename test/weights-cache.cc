@@ -18,7 +18,6 @@ static void* cache_end(const xnn_weights_cache* cache) {
 static void write_weights(xnn_weights_cache* cache, const std::string& str) {
   ASSERT_GE(cache->cache.weights.capacity - cache->cache.weights.size, str.length());
   std::memcpy(cache_end(cache), str.data(), str.length());
-  cache->cache.weights.size += str.length();
 };
 
 TEST(WEIGHTS_CACHE, init_and_release)

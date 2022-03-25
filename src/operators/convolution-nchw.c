@@ -302,8 +302,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       const size_t packed_weights_size = num_output_channel_blocks * sizeof(uint32_t) +
         (num_nonzero_blocks * 2) * sizeof(int32_t) + (num_nonzero_values + group_output_channels) * sizeof(float);
 
-      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights == NULL) {
+      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+      if (convolution_op->packed_weights.pointer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
@@ -313,7 +313,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
 
-      float* nonzero_values = convolution_op->packed_weights;
+      float* nonzero_values = convolution_op->packed_weights.pointer;
       int32_t* input_increments = (int32_t*) (nonzero_values + num_nonzero_values + group_output_channels);
       uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
       int32_t* input_channel_diffs = (int32_t*) (output_channel_nonzeros + num_output_channel_blocks);
@@ -415,8 +415,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         round_up(group_output_channels, xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile);
       const size_t packed_weights_size = groups * packed_group_output_channels *
         (group_input_channels * kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
-      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights == NULL) {
+      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+      if (convolution_op->packed_weights.pointer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
@@ -428,7 +428,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         group_input_channels,
         xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
         kernel_height, kernel_width,
-        kernel, bias, convolution_op->packed_weights, NULL);
+        kernel, bias, convolution_op->packed_weights.pointer, NULL);
 
       convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
         .hwc2chw_function = xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
@@ -445,8 +445,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       assert(group_output_channels == 1);
 
       const size_t packed_weights_size = groups * (kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
-      convolution_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights == NULL) {
+      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+      if (convolution_op->packed_weights.pointer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
@@ -456,11 +456,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         xnn_pack_f32_chw_dwconv_hwg_w(
           kernel_height * kernel_width, groups,
-          kernel, bias, convolution_op->packed_weights, NULL);
+          kernel, bias, convolution_op->packed_weights.pointer, NULL);
       } else {
         xnn_pack_f32_chw_dwconv_ghw_w(
           kernel_height * kernel_width, groups,
-          kernel, bias, convolution_op->packed_weights, NULL);
+          kernel, bias, convolution_op->packed_weights.pointer, NULL);
       }
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
@@ -576,7 +576,7 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
 
-      float* nonzero_values = convolution_op->packed_weights;
+      float* nonzero_values = packed_weights(convolution_op);
       int32_t* input_increments = (int32_t*) (nonzero_values + num_nonzero_values + convolution_op->group_output_channels);
       uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
       int32_t* input_channel_diffs = (int32_t*) (output_channel_nonzeros + num_output_channel_blocks);
@@ -645,7 +645,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .input = input,
         .input_batch_stride = input_batch_stride,
         .zero = zero_buffer,
-        .packed_weights = convolution_op->packed_weights,
+        .packed_weights = packed_weights(convolution_op),
         .output = output,
         .output_batch_stride = output_batch_stride,
         .input_padding_top = convolution_op->padding_top,
@@ -697,7 +697,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .input_padding_top = convolution_op->padding_top,
         .input_channel_stride = input_height * input_width << log2_input_element_size,
         .input_batch_stride = input_batch_stride,
-        .packed_weights = convolution_op->packed_weights,
+        .packed_weights = packed_weights(convolution_op),
         .weights_channel_stride = bias_element_size +
           (convolution_op->kernel_height * convolution_op->kernel_width << log2_filter_element_size),
         .output = output,

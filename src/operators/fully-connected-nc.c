@@ -114,28 +114,28 @@ static enum xnn_status create_fully_connected_nc(
   const size_t k_stride = round_up_po2(input_channels, kr * sr);
 
   const size_t packed_weights_size = n_stride * (bias_element_size + (k_stride << log2_filter_element_size));
-  fully_connected_op->packed_weights = xnn_allocate_simd_memory(packed_weights_size);
-  if (fully_connected_op->packed_weights == NULL) {
+  fully_connected_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+  if (fully_connected_op->packed_weights.pointer == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
       packed_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  memset(fully_connected_op->packed_weights, packed_weights_padding_byte, packed_weights_size);
+  memset(fully_connected_op->packed_weights.pointer, packed_weights_padding_byte, packed_weights_size);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     pack_gemm_io_w(
       output_channels, input_channels,
       nr, kr, sr,
       kernel, bias,
-      fully_connected_op->packed_weights,
+      fully_connected_op->packed_weights.pointer,
       packing_params);
   } else {
     pack_gemm_goi_w(
       1, output_channels, input_channels,
       nr, kr, sr,
       kernel, bias,
-      fully_connected_op->packed_weights,
+      fully_connected_op->packed_weights.pointer,
       0 /* extra bytes */,
       packing_params);
   }
@@ -221,7 +221,7 @@ static enum xnn_status setup_fully_connected_nc(
     .w_stride = (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr) << log2_input_element_size) + bias_element_size,
     .a = input,
     .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,
-    .packed_w = fully_connected_op->packed_weights,
+    .packed_w = packed_weights(fully_connected_op),
     .c = output,
     .cm_stride = fully_connected_op->output_pixel_stride << log2_output_element_size,
     .cn_stride = nr << log2_output_element_size,

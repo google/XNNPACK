@@ -15,6 +15,7 @@ exports_files(["LICENSE"])
 OPERATOR_BENCHMARK_DEPS = [
     ":XNNPACK",
     ":bench_utils",
+    ":code_cache",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
@@ -49,6 +50,7 @@ MICROKERNEL_TEST_DEPS = [
 ]
 
 OPERATOR_TEST_DEPS = [
+    ":code_cache",
     ":common",
     ":XNNPACK_test_mode",
     ":jit_test_mode",
@@ -9716,6 +9718,20 @@ cc_library(
 )
 
 xnnpack_cc_library(
+    name = "code_cache",
+    srcs = ["src/code-cache.c"],
+    hdrs = INTERNAL_HDRS + [],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging_utils",
+        "@clog",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
         "src/allocator.c",
@@ -9735,6 +9751,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":code_cache",
         ":common",
         ":indirection",
         ":jit",
@@ -9834,7 +9851,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
-        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -9869,6 +9885,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":code_cache",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -9890,7 +9907,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "XNNPACK_test_mode",
     srcs = [
-        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -9950,7 +9966,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xnnpack_for_tflite",
     srcs = [
-        "src/code-cache.c",
         "src/init.c",
         "src/runtime.c",
         "src/subgraph.c",
@@ -10024,7 +10039,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xnnpack_for_tfjs",
     srcs = [
-        "src/code-cache.c",
         "src/init.c",
     ],
     hdrs = ["include/xnnpack.h"],

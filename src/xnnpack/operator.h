@@ -166,7 +166,12 @@ struct xnn_operator {
   size_t output_pixel_stride;
   void* output;
 
-  void* packed_weights;
+  union {
+    // Pointer to allocated packed weights. Use this if weights_cache is NULL.
+    void* pointer;
+    // Offset into the weights cache where the packed weights are. Only valid if weights_cache is not NULL.
+    size_t offset;
+  } packed_weights;
   // Total number of non-zero kernel elements when weights use sparse representation.
   size_t num_nonzero_values;
   // Total number of non-zero kernel blocks when weights use sparse representation.
@@ -302,5 +307,14 @@ struct xnn_operator {
   } context;
 
   struct xnn_code_cache* code_cache;
+  struct xnn_weights_cache* weights_cache;
   enum xnn_run_state state;
 };
+
+static inline void* packed_weights(struct xnn_operator* op) {
+  if (op->weights_cache == NULL) {
+    return op->packed_weights.pointer;
+  } else {
+    return (void*) ((uintptr_t) op->weights_cache->cache.weights.start + op->packed_weights.offset);
+  }
+}
