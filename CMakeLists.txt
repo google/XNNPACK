@@ -1491,11 +1491,14 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/u8-vclamp/neon-x64.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
+  src/x8-transposec/gen/16x16-reuse-dec-zip-neon.c
   src/x8-zip/xm-neon.c
   src/x8-zip/x2-neon.c
   src/x8-zip/x3-neon.c
   src/x8-zip/x4-neon.c
+  src/x16-transposec/gen/8x8-reuse-dec-zip-neon.c
   src/x32-packx/x4-neon-st4.c
+  src/x32-transposec/gen/4x4-reuse-dec-zip-neon.c
   src/x32-unpool/neon.c
   src/x32-zip/xm-neon.c
   src/x32-zip/x2-neon.c
