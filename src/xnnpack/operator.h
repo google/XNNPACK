@@ -14,6 +14,7 @@
 #include <pthreadpool.h>
 
 #include <xnnpack/allocator.h>
+#include <xnnpack/codecache.h>
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 #include <xnnpack/operator-enum.h>
@@ -300,6 +301,6 @@ struct xnn_operator {
     struct vmulcaddc_context vmulcaddc;
   } context;
 
-  struct xnn_code_cache* cache;
+  struct xnn_code_cache* code_cache;
   enum xnn_run_state state;
 };
