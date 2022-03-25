@@ -21,6 +21,7 @@ OPERATOR_BENCHMARK_DEPS = [
 ]
 
 MICROKERNEL_BENCHMARK_DEPS = [
+    ":common",
     ":bench_microkernels",
     ":bench_utils",
     ":enable_assembly",
@@ -31,6 +32,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
 ]
 
 ACCURACY_EVAL_DEPS = [
+    ":common",
     ":XNNPACK",
     ":bench_microkernels",
     "@FP16",
@@ -38,6 +40,7 @@ ACCURACY_EVAL_DEPS = [
 ]
 
 MICROKERNEL_TEST_DEPS = [
+    ":common",
     ":test_microkernels",
     ":enable_assembly",
     "@cpuinfo",
@@ -46,6 +49,7 @@ MICROKERNEL_TEST_DEPS = [
 ]
 
 OPERATOR_TEST_DEPS = [
+    ":common",
     ":XNNPACK_test_mode",
     ":jit_test_mode",
     "@pthreadpool",
@@ -7837,7 +7841,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
     "src/xnnpack/codecache.h",
-    "src/xnnpack/common.h",
     "src/xnnpack/conv.h",
     "src/xnnpack/depthtospace.h",
     "src/xnnpack/dwconv.h",
@@ -7924,11 +7927,19 @@ LOGGING_HDRS = [
 ]
 
 xnnpack_cc_library(
+    name = "common",
+    hdrs = ["src/xnnpack/common.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
     hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [":common"],
 )
 
 xnnpack_cc_library(
@@ -7942,6 +7953,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -7965,6 +7977,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -7987,6 +8000,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8006,6 +8020,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8025,6 +8040,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8048,6 +8064,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8068,6 +8085,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8087,6 +8105,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8110,6 +8129,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8133,6 +8153,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8156,6 +8177,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8183,6 +8205,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8206,6 +8229,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8229,6 +8253,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8256,6 +8281,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8279,6 +8305,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8302,6 +8329,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8329,6 +8357,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8343,6 +8372,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8357,6 +8387,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8375,6 +8406,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8457,6 +8489,7 @@ xnnpack_cc_library(
         "src/amalgam/sse2.c",
     ],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8472,6 +8505,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8487,6 +8521,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE_MICROKERNEL_SRCS + PROD_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8506,6 +8541,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8521,6 +8557,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/ssse3.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8536,6 +8573,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8551,6 +8589,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8570,6 +8609,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8585,6 +8625,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/sse41.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8600,6 +8641,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8615,6 +8657,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8634,6 +8677,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8650,6 +8694,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/avx.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8666,6 +8711,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8682,6 +8728,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8702,6 +8749,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8718,6 +8766,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/f16c.c"],
     deps = [
+        ":common",
         "@FP16",
         "@pthreadpool",
     ],
@@ -8733,6 +8782,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_F16C_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         "@FP16",
         "@pthreadpool",
     ],
@@ -8748,6 +8798,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_F16C_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         "@FP16",
         "@pthreadpool",
     ],
@@ -8767,6 +8818,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_F16C_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         "@FP16",
         "@pthreadpool",
     ],
@@ -8782,6 +8834,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8798,6 +8851,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8818,6 +8872,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8837,6 +8892,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/fma3.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8856,6 +8912,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8875,6 +8932,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8898,6 +8956,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8918,6 +8977,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ["src/amalgam/avx2.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8938,6 +8998,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8958,6 +9019,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = PROD_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8982,6 +9044,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9000,6 +9063,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/avx512f.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9018,6 +9082,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9036,6 +9101,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = PROD_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9058,6 +9124,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9082,6 +9149,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/avx512skx.c"],
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9106,6 +9174,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9130,6 +9199,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = PROD_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9158,6 +9228,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":common",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9232,6 +9303,7 @@ xnnpack_cc_library(
         ":xnn_log_level_explicit_debug": [],
         "//conditions:default": [":log_level_default"],
     }) + [
+        ":common",
         "@FP16",
         "@clog",
         "@pthreadpool",
@@ -9476,6 +9548,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -9493,6 +9566,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -9506,6 +9580,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -9523,6 +9598,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -9540,6 +9616,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
         "@FP16",
         "@FXdiv",
@@ -9562,6 +9639,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
         "@FP16",
         "@FXdiv",
@@ -9582,6 +9660,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
         "@pthreadpool",
     ],
@@ -9603,6 +9682,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
         "@pthreadpool",
     ],
@@ -9655,6 +9735,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":indirection",
         ":jit",
         ":logging_utils",
@@ -9689,6 +9770,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":indirection_test_mode",
         ":jit_test_mode",
         ":logging_utils",
@@ -9718,6 +9800,7 @@ xnnpack_cc_library(
     aarch64_srcs = JIT_AARCH64_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
     ],
 )
@@ -9743,6 +9826,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":logging_utils",
     ],
 )
@@ -9785,6 +9869,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":common",
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
@@ -9842,6 +9927,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":common",
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
@@ -9914,6 +10000,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":common",
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
@@ -9964,6 +10051,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":common",
         ":enable_assembly",
         ":enable_jit",
         ":jit",
@@ -13360,6 +13448,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":common",
         ":jit_test_mode",
     ],
 )
@@ -13372,6 +13461,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":common",
         ":jit_test_mode",
     ],
 )
@@ -13384,6 +13474,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":common",
         ":jit_test_mode",
     ],
 )
