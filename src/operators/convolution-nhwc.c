@@ -370,17 +370,23 @@ static enum xnn_status create_convolution2d_nhwc(
 
       const size_t c_stride = round_up_po2(groups, vmulcaddc_parameters->channel_tile);
       const size_t packed_weights_size = ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) * c_stride;
-      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights.pointer == NULL) {
-        xnn_log_error(
-          "failed to allocate %zu bytes for %s operator packed weights",
-          packed_weights_size, xnn_operator_type_to_string(operator_type));
+      size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+      void* weights_ptr = get_pointer_to_write_weights(
+          convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+      if (weights_ptr == NULL) {
+        xnn_log_error("failed to reserve or allocated %zu bytes for %s operator vmulcaddc packed weights",
+                      aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
 
       pack_vmulcaddc_w(
         groups, vmulcaddc_parameters->channel_tile,
-        kernel, bias, convolution_op->packed_weights.pointer, packing_params);
+        kernel, bias, weights_ptr, packing_params);
+
+      if (use_weights_cache(caches)) {
+        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+      }
 
       memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
 
@@ -397,30 +403,34 @@ static enum xnn_status create_convolution2d_nhwc(
 
       const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
       const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
-      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights.pointer == NULL) {
-        xnn_log_error(
-          "failed to allocate %zu bytes for %s operator packed weights",
-          packed_weights_size, xnn_operator_type_to_string(operator_type));
+      size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+      void* weights_ptr = get_pointer_to_write_weights(
+          convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+      if (weights_ptr == NULL) {
+        xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
+                      aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
-      memset(convolution_op->packed_weights.pointer, packed_weights_padding_byte, packed_weights_size);
       memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         pack_dwconv_hwg_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights.pointer,
+          kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
           packing_params);
       } else {
         pack_dwconv_ghw_w(
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
-          kernel, bias, convolution_op->packed_weights.pointer,
+          kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
           packing_params);
+      }
+      if (use_weights_cache(caches)) {
+        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+            caches->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       if (scale_params != NULL) {
@@ -430,7 +440,7 @@ static enum xnn_status create_convolution2d_nhwc(
           groups, dwconv_ukernel->channel_tile,
           dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
           scale_params,
-          (void*) ((uintptr_t) convolution_op->packed_weights.pointer + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
+          (void*) ((uintptr_t) weights_ptr + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;
@@ -511,12 +521,16 @@ static enum xnn_status create_convolution2d_nhwc(
             pack_conv_kgo_w(
               groups, group_output_channels, kernel_size,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights.pointer, gemm_parameters->nr * extra_weights_bytes, packing_params);
+              kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
           } else {
             pack_conv_goki_w(
               groups, group_output_channels, kernel_size, group_input_channels,
               nr, kr, sr,
-              kernel, bias, convolution_op->packed_weights.pointer, gemm_parameters->nr * extra_weights_bytes, packing_params);
+              kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
+          }
+          if (use_weights_cache(caches)) {
+            convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+                caches->weights_cache, weights_ptr, aligned_total_weights_size);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = gemm_parameters->mr,

@@ -4727,10 +4727,48 @@ TEST(CONVOLUTION_NHWC_F32, weights_cache_1x1) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+// Tests IGEMM microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F32, weights_cache_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+// Tests vmulcaddc microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F32, weights_cache_depthwise_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F32, weights_cache_depthwise_2x2d2) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .dilation(2)
+    .groups(27)
     .iterations(3)
     .use_weights_cache(true)
     .TestNHWCxF32();
 }
+
 
 #if XNN_PLATFORM_JIT
 TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
@@ -5950,6 +5988,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_depthwise_5x5d2x1) {
     .TestNHWCxF32();
 }
 
+// Test interaction of JIT with weights cache.
 TEST(CONVOLUTION_NHWC_F32, jit_weights_cache_1x1) {
   ConvolutionOperatorTester()
     .input_size(27, 29)
@@ -6134,6 +6173,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, 7x7_without_bias) {
     .padding(3, 3)
     .kernel_size(7, 7)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+// Tests dwconv microkernek with non 1x1 kernel (dwconv_hwg packing).
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, weights_cache_2x2) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .groups(24)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNHWCxF32();
 }
