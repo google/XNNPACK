@@ -12,8 +12,8 @@ PROJECT(googlebenchmark-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(googlebenchmark
-  URL https://github.com/google/benchmark/archive/v1.5.3.zip
-  URL_HASH SHA256=bdefa4b03c32d1a27bd50e37ca466d8127c1688d834800c38f3c587a396188ee
+  URL https://github.com/google/benchmark/archive/refs/tags/v1.5.5.zip
+  URL_HASH SHA256=30f2e5156de241789d772dd8b130c1cb5d33473cc2f29e4008eab680df7bd1f0
   SOURCE_DIR "${CMAKE_BINARY_DIR}/googlebenchmark-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/googlebenchmark"
   CONFIGURE_COMMAND ""
