@@ -1307,6 +1307,20 @@ enum xnn_status xnn_define_square_root(
   uint32_t output_id,
   uint32_t flags);
 
+/// Weights cache is a cache for packed weights. It can be reused between runtimes.
+typedef struct xnn_weights_cache* xnn_weights_cache_t;
+
+/// Create a weights cache object.
+/// @param weights_cache_out - pointer to the variable that will be initialized to a handle to the weights cache object
+///                            upon successful return. Once created, the weights cache object can be shared between
+///                            different Runtime objects.
+enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out);
+
+
+/// Destroy a weights cache object, as well as memory used for the cache.
+/// @param weights_cache - the weights cache object to destroy.
+enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache);
+
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
 
@@ -1314,6 +1328,8 @@ typedef struct xnn_runtime* xnn_runtime_t;
 ///
 /// @param subgraph - a Subgraph object with all Values and Nodes that would be handled by the runtime. No Values or
 ///                   Nodes can be added to the runtime once it is constructed.
+/// @param weights_cache - a cache for packed weights. The runtime will look up and reuse packed weights in this cache,
+///                        this will reduce memory allocated for packed weights.
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
 /// @param flags - binary features of the runtime. The only currently supported values are
@@ -1323,6 +1339,13 @@ typedef struct xnn_runtime* xnn_runtime_t;
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
+enum xnn_status xnn_create_runtime_v3(
+  xnn_subgraph_t subgraph,
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool,
+  uint32_t flags,
+  xnn_runtime_t* runtime_out);
+
 enum xnn_status xnn_create_runtime_v2(
   xnn_subgraph_t subgraph,
   pthreadpool_t threadpool,

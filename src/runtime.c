@@ -20,6 +20,44 @@
 #include <xnnpack/subgraph.h>
 
 
+enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
+{
+  struct xnn_weights_cache* weights_cache = NULL;
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create runtime: XNNPACK is not initialized");
+    goto error;
+  }
+
+  weights_cache = xnn_allocate_zero_memory(sizeof(struct xnn_weights_cache));
+  if (weights_cache == NULL) {
+    xnn_log_error("failed to allocate %zu bytes for weights cache descriptor", sizeof(struct xnn_weights_cache));
+    goto error;
+  }
+
+  status = xnn_init_weights_cache(weights_cache);
+  if (status != xnn_status_success) {
+    goto error;
+  }
+  *weights_cache_out = weights_cache;
+  return xnn_status_success;
+
+error:
+  xnn_release_weights_cache(weights_cache);
+  return status;
+}
+
+enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache)
+{
+  enum xnn_status status = xnn_release_weights_cache(weights_cache);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  xnn_release_memory(weights_cache);
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_create_runtime(
   xnn_subgraph_t subgraph,
   xnn_runtime_t* runtime_out)
@@ -33,6 +71,16 @@ enum xnn_status xnn_create_runtime_v2(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
+  return xnn_create_runtime_v3(subgraph, /* weights_cache */ NULL, threadpool, flags, runtime_out);
+}
+
+enum xnn_status xnn_create_runtime_v3(
+  xnn_subgraph_t subgraph,
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool,
+  uint32_t flags,
+  xnn_runtime_t* runtime_out)
+{
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
@@ -41,7 +89,7 @@ enum xnn_status xnn_create_runtime_v2(
     goto error;
   }
 
-  const uint32_t optimization_flags = XNN_FLAG_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE | XNN_FLAG_FORCE_FP16_INFERENCE; 
+  const uint32_t optimization_flags = XNN_FLAG_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE | XNN_FLAG_FORCE_FP16_INFERENCE;
   status = xnn_subgraph_optimize(subgraph, flags & optimization_flags);
   if (status != xnn_status_success) {
     xnn_log_error("failed to optimize subgraph");
@@ -78,7 +126,6 @@ enum xnn_status xnn_create_runtime_v2(
   }
 
   struct xnn_code_cache* code_cache = NULL;
-  struct xnn_weights_cache* weights_cache = NULL;
 #if XNN_PLATFORM_JIT
   code_cache = &runtime->code_cache;
   status = xnn_init_code_cache(code_cache);
