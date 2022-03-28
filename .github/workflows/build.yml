@@ -11,9 +11,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install ninja
         run: sudo apt-get install ninja-build
-      - name: Configure CMake
-        run: cmake -S . -B build -G Ninja
-        working-directory: ${{ github.workspace }}
-      - name: Build
-        run: cmake --build build -j
+      - name: Configure CMake and build
+        run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
