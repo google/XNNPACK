@@ -24,6 +24,7 @@ OPERATOR_BENCHMARK_DEPS = [
 MICROKERNEL_BENCHMARK_DEPS = [
     ":math",
     ":params",
+    ":params_init",
     ":common",
     ":bench_microkernels",
     ":bench_utils",
@@ -46,6 +47,7 @@ ACCURACY_EVAL_DEPS = [
 MICROKERNEL_TEST_DEPS = [
     ":math",
     ":params",
+    ":params_init",
     ":common",
     ":test_microkernels",
     ":enable_assembly",
@@ -140,7 +142,6 @@ TABLE_SRCS = [
 ]
 
 PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS = [
-    "src/params-init.c",
     "src/u8-lut32norm/scalar.c",
     "src/xx-copy/memcpy.c",
     "src/xx-transpose/1x1-memcpy.c",
@@ -991,7 +992,6 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/math/sigmoid-f32-scalar-rr2-lut64-p2-div.c",
     "src/math/sigmoid-f32-scalar-rr2-lut2048-p1-div.c",
     "src/math/sigmoid-f32-scalar-rr2-p5-div.c",
-    "src/params-init.c",
     "src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c",
     "src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c",
     "src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-lrintf.c",
@@ -7893,7 +7893,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/operator.h",
     "src/xnnpack/operator-enum.h",
     "src/xnnpack/pack.h",
-    "src/xnnpack/params-init.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/requantization.h",
     "src/xnnpack/subgraph.h",
@@ -7906,13 +7905,11 @@ ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 
 MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "include/xnnpack.h",
-    "src/xnnpack/params-init.h",
 ]
 
 MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "include/xnnpack.h",
     "src/xnnpack/isa-checks.h",
-    "src/xnnpack/params-init.h",
     "src/xnnpack/requantization.h",
 ]
 
@@ -7926,6 +7923,16 @@ WEIGHTS_PACK_HDRS = [
 LOGGING_HDRS = [
     "src/xnnpack/log.h",
 ]
+
+xnnpack_cc_library(
+    name = "xnnpack_h",
+    hdrs = ["include/xnnpack.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        "@pthreadpool",
+    ],
+)
 
 xnnpack_cc_library(
     name = "common",
@@ -7955,6 +7962,21 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "params_init",
+    srcs = ["src/params-init.c"],
+    hdrs = ["src/xnnpack/params-init.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":params",
+        ":xnnpack_h",
+        "@FP16",
+    ],
+)
+
+xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
     hdrs = INTERNAL_HDRS,
@@ -7980,6 +8002,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":params",
+        ":params_init",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8031,6 +8054,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":params",
+        ":params_init",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -9930,6 +9954,7 @@ xnnpack_cc_library(
         ":operator_run",
         ":packing",
         ":params",
+        ":params_init",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -9967,6 +9992,7 @@ xnnpack_cc_library(
         ":operator_run_test_mode",
         ":packing_test_mode",
         ":params",
+        ":params_init",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -10074,6 +10100,7 @@ xnnpack_cc_library(
         ":memory_planner",
         ":operators",
         ":params",
+        ":params_init",
         ":prod_microkernels",
         "@clog",
         "@FP16",
@@ -10133,6 +10160,7 @@ xnnpack_cc_library(
         ":memory_planner_test_mode",
         ":operators_test_mode",
         ":params",
+        ":params_init",
         ":test_microkernels",
         "@clog",
         "@FP16",
@@ -10209,6 +10237,7 @@ xnnpack_cc_library(
         ":operators",
         ":amalgam_microkernels",
         ":params",
+        ":params_init",
         "@clog",
         "@FP16",
         "@pthreadpool",
@@ -10258,6 +10287,7 @@ xnnpack_cc_library(
         ":operator_run",
         ":operators",
         ":params",
+        ":params_init",
         ":prod_microkernels",
         "@clog",
         "@pthreadpool",
