@@ -5,12 +5,23 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-xnnpack-cmake:
+    strategy:
+      matrix:
+        script: [build-local.sh, build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v2
       - name: Install ninja
         run: sudo apt-get install ninja-build
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1.0.6
+        with:
+          ndk-version: r23b
+          add-to-path: false
       - name: Configure CMake and build
-        run: scripts/build-local.sh
+        run: scripts/${{ matrix.script }}
         working-directory: ${{ github.workspace }}
+        env:
+          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
