@@ -9,7 +9,7 @@ jobs:
       matrix:
         script: [build-local.sh, build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
       - name: Install ninja
