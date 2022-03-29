@@ -65,6 +65,36 @@ TEST(WEIGHTS_CACHE, get_or_insert)
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
+TEST(WEIGHTS_CACHE, grow) {
+  xnn_initialize(/*allocator=*/nullptr);
+  xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  size_t old_num_buckets = cache.cache.num_buckets;
+  for (size_t i = 0, expected_offset = 0; i < old_num_buckets; i++) {
+    // Add many entries to force cache to grow.
+    const std::string s = std::to_string(i);
+    write_weights(&cache, s);
+    ASSERT_EQ(expected_offset, xnn_get_or_insert_weights_cache(&cache, cache_end(&cache), s.length()));
+    expected_offset += s.length();
+  }
+
+  ASSERT_EQ(0, cache.cache.hits);
+  ASSERT_EQ(old_num_buckets, cache.cache.num_entries);
+  // Check that cache has grown.
+  ASSERT_LT(old_num_buckets, cache.cache.num_buckets);
+  // Check that all the entries are still in cache.
+  for (size_t i = 0, expected_offset = 0; i < old_num_buckets; i++) {
+    const std::string s = std::to_string(i);
+    write_weights(&cache, s);
+    ASSERT_EQ(expected_offset, xnn_get_or_insert_weights_cache(&cache, cache_end(&cache), s.length()));
+    expected_offset += s.length();
+  }
+  // And now all of the lookups should be cache hits.
+  ASSERT_EQ(old_num_buckets, cache.cache.hits);
+
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
 TEST(WEIGHTS_MEMORY, allocate_and_release) {
   xnn_weights_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));

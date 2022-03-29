@@ -21,7 +21,7 @@ static void write_code(xnn_code_cache* cache, const std::string& str) {
   cache->cache.code.size += str.length();
 };
 
-TEST(JIT_CACHE, init_and_release)
+TEST(CODE_CACHE, init_and_release)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_code_cache cache;
@@ -30,12 +30,12 @@ TEST(JIT_CACHE, init_and_release)
 }
 
 
-TEST(JIT_CACHE, release_null)
+TEST(CODE_CACHE, release_null)
 {
   EXPECT_EQ(xnn_status_success, xnn_release_code_cache(NULL));
 }
 
-TEST(JIT_CACHE, get_or_insert)
+TEST(CODE_CACHE, get_or_insert)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_code_cache cache;
@@ -60,6 +60,40 @@ TEST(JIT_CACHE, get_or_insert)
   ASSERT_EQ(1, cache.cache.hits);
   ASSERT_EQ(2, cache.cache.misses);
   ASSERT_EQ(2, cache.cache.num_entries);
+
+  EXPECT_EQ(xnn_status_success, xnn_release_code_cache(&cache));
+}
+
+TEST(CODE_CACHE, grow) {
+  xnn_initialize(/*allocator=*/nullptr);
+  xnn_code_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_code_cache(&cache));
+  size_t old_num_buckets = cache.cache.num_buckets;
+  for (size_t i = 0, expected_offset = 0; i < old_num_buckets; i++) {
+    // Add many entries to force cache to grow.
+    const std::string s = std::to_string(i);
+    // write_code will update cache size, so get the code offset first.
+    void* code_ptr = cache_end(&cache);
+    write_code(&cache, s);
+    ASSERT_EQ(expected_offset, xnn_get_or_insert_code_cache(&cache, code_ptr, s.length()));
+    expected_offset += s.length();
+  }
+
+  ASSERT_EQ(0, cache.cache.hits);
+  ASSERT_EQ(old_num_buckets, cache.cache.num_entries);
+  // Check that cache has grown.
+  ASSERT_LT(old_num_buckets, cache.cache.num_buckets);
+  // Check that all the entries are still in cache.
+  for (size_t i = 0, expected_offset = 0; i < old_num_buckets; i++) {
+    const std::string s = std::to_string(i);
+    // write_code will update cache size, so get the code offset first.
+    void* code_ptr = cache_end(&cache);
+    write_code(&cache, s);
+    ASSERT_EQ(expected_offset, xnn_get_or_insert_code_cache(&cache, code_ptr, s.length()));
+    expected_offset += s.length();
+  }
+  // And now all of the lookups should be cache hits.
+  ASSERT_EQ(old_num_buckets, cache.cache.hits);
 
   EXPECT_EQ(xnn_status_success, xnn_release_code_cache(&cache));
 }

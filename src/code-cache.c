@@ -146,20 +146,26 @@ enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache)
   return xnn_init_code_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
 }
 
+// Forward declare.
+enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t num_buckets);
+
 static bool cache_buckets_grow(struct xnn_cache* cache)
 {
-  struct xnn_code_cache tmp_code_cache;
   struct xnn_cache* tmp_cache = NULL;
   const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
+  assert(is_po2(new_num_buckets));
   if (cache->type == xnn_cache_type_code) {
-    bool init_ok = xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) == xnn_status_success;
-    if (!init_ok) {
+    struct xnn_code_cache tmp_code_cache;
+    if(!(xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) == xnn_status_success)) {
       return false;
     }
     tmp_cache = &tmp_code_cache.cache;
   } else {
-    // TODO(zhin): Unsupported for now.
-    assert(false);
+    struct xnn_weights_cache tmp_weights_cache;
+    if (!(xnn_init_weights_cache_with_size(&tmp_weights_cache, new_num_buckets) == xnn_status_success)) {
+      return false;
+    }
+    tmp_cache = &tmp_weights_cache.cache;
   }
 
   for (size_t i = 0; i < cache->num_buckets; i++) {
@@ -171,11 +177,12 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
     // Find the first empty slot by linear probing to insert. No need to check
     // hashes since we are not looking up anything, just moving things around
     // into a bigger hash table.
-    const size_t mask = cache->num_buckets - 1;
+    const size_t mask = tmp_cache->num_buckets - 1;
     size_t idx = b.hash & mask;
     while (tmp_cache->buckets[idx].size != 0) {
       idx = (idx + 1) & mask;
     }
+    tmp_cache->buckets[idx].hash = b.hash;
     tmp_cache->buckets[idx].size = b.size;
     tmp_cache->buckets[idx].offset = b.offset;
   }
@@ -230,6 +237,11 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
       // Can't grow hash table anymore.
       return false;
     }
+
+    // If the cache grew, idx is stale, since that is based on the old cache's num_buckets.
+    const bool found_in_grown_cache = lookup(cache, ptr, size, hash, &idx);
+    assert(!found_in_grown_cache);
+    (void) found_in_grown_cache;  // Silence unused variable warnings.
   }
 
   // Check that ptr points into cache's buffer.
