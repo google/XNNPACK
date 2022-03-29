@@ -12,8 +12,9 @@
 
 #include <clog.h>
 
-#include <xnnpack/operator-enum.h>
-#include <xnnpack/subgraph.h>
+#include <xnnpack.h>
+#include <xnnpack/node-type.h>
+#include <xnnpack/operator-type.h>
 
 #ifndef XNN_LOG_LEVEL
   #error "Undefined XNN_LOG_LEVEL"

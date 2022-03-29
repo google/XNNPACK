@@ -7890,8 +7890,9 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/indirection.h",
     "src/xnnpack/math-stubs.h",
     "src/xnnpack/memory-planner.h",
+    "src/xnnpack/node-type.h",
     "src/xnnpack/operator.h",
-    "src/xnnpack/operator-enum.h",
+    "src/xnnpack/operator-type.h",
     "src/xnnpack/pack.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/requantization.h",
@@ -7916,7 +7917,7 @@ MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 WEIGHTS_PACK_HDRS = [
     "src/xnnpack/compute.h",
     "src/xnnpack/operator.h",
-    "src/xnnpack/operator-enum.h",
+    "src/xnnpack/operator-type.h",
     "src/xnnpack/pack.h",
 ]
 
@@ -13664,6 +13665,7 @@ xnnpack_unit_test(
     srcs = [
         "src/xnnpack/allocator.h",
         "src/xnnpack/codecache.h",
+        "src/xnnpack/node-type.h",
         "src/xnnpack/subgraph.h",
         "test/subgraph-nchw.cc",
         "test/subgraph-tester.h",

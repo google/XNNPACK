@@ -15,9 +15,9 @@
 
 #include <xnnpack/allocator.h>
 #include <xnnpack/codecache.h>
-#include <xnnpack/params.h>
 #include <xnnpack/compute.h>
-#include <xnnpack/operator-enum.h>
+#include <xnnpack/operator-type.h>
+#include <xnnpack/params.h>
 
 
 enum xnn_ukernel_type {
