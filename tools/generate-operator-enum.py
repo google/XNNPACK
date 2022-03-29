@@ -51,6 +51,8 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#pragma once
+
 enum xnn_operator_type {{
 """.format(
     specification=options.spec, generator=sys.argv[0])

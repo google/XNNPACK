@@ -12,7 +12,7 @@
 
 #include <clog.h>
 
-#include <xnnpack/operator.h>
+#include <xnnpack/operator-enum.h>
 #include <xnnpack/subgraph.h>
 
 #ifndef XNN_LOG_LEVEL

@@ -7,6 +7,8 @@
 //   Specification: src/operator-strings.yaml
 //   Generator: tools/generate-operator-enum.py
 
+#pragma once
+
 enum xnn_operator_type {
   xnn_operator_type_invalid = 0,
   xnn_operator_type_abs_nc_f32,
