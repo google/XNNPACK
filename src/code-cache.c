@@ -153,16 +153,16 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
 {
   struct xnn_cache* tmp_cache = NULL;
   const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
+  struct xnn_code_cache tmp_code_cache;
+  struct xnn_weights_cache tmp_weights_cache;
   assert(is_po2(new_num_buckets));
   if (cache->type == xnn_cache_type_code) {
-    struct xnn_code_cache tmp_code_cache;
-    if(!(xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) == xnn_status_success)) {
+    if (xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) != xnn_status_success) {
       return false;
     }
     tmp_cache = &tmp_code_cache.cache;
   } else {
-    struct xnn_weights_cache tmp_weights_cache;
-    if (!(xnn_init_weights_cache_with_size(&tmp_weights_cache, new_num_buckets) == xnn_status_success)) {
+    if (xnn_init_weights_cache_with_size(&tmp_weights_cache, new_num_buckets) != xnn_status_success) {
       return false;
     }
     tmp_cache = &tmp_weights_cache.cache;
