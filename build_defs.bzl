@@ -38,10 +38,6 @@ def xnnpack_optional_tflite_copts():
     """Compiler flags to optionally enable TensorFlow Lite benchmarks."""
     return []
 
-def xnnpack_optional_armcl_copts():
-    """Compiler flags to optionally enable ARM ComputeLibrary benchmarks."""
-    return []
-
 def xnnpack_optional_dnnl_copts():
     """Compiler flags to optionally enable Intel DNNL benchmarks."""
     return []
@@ -56,10 +52,6 @@ def xnnpack_optional_gemmlowp_deps():
 
 def xnnpack_optional_tflite_deps():
     """Optional TensorFlow Lite dependencies."""
-    return []
-
-def xnnpack_optional_armcl_deps():
-    """Optional ARM ComputeLibrary dependencies."""
     return []
 
 def xnnpack_optional_dnnl_deps():
