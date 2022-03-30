@@ -53,8 +53,9 @@ def main(args):
 
 
 #include <assert.h>
+#include <stdint.h>
 
-#include <xnnpack/operator.h>
+#include <xnnpack/operator-type.h>
 
 """.format(
     specification=options.spec, generator=sys.argv[0])
