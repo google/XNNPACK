@@ -233,8 +233,8 @@ SET(SUBGRAPH_SRCS
 
 SET(LOGGING_SRCS
   src/datatype-strings.c
-  src/operator-strings.c
-  src/subgraph-strings.c)
+  src/node-type.c
+  src/operator-strings.c)
 
 SET(COLD_SRCS ${OPERATOR_SRCS} ${SUBGRAPH_SRCS} ${LOGGING_SRCS})
 LIST(APPEND COLD_SRCS

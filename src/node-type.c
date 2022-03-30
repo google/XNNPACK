@@ -9,7 +9,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
-#include <xnnpack/subgraph.h>
+#include <xnnpack/node-type.h>
 
 
 // This function is defined inline when logging is disabled

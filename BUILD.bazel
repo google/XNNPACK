@@ -9449,8 +9449,8 @@ xnnpack_cc_library(
     name = "logging_utils",
     srcs = [
         "src/datatype-strings.c",
+        "src/node-type.c",
         "src/operator-strings.c",
-        "src/subgraph-strings.c",
     ],
     hdrs = INTERNAL_HDRS + LOGGING_HDRS,
     copts = [
