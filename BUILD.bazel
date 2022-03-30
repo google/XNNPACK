@@ -7921,10 +7921,6 @@ WEIGHTS_PACK_HDRS = [
     "src/xnnpack/pack.h",
 ]
 
-LOGGING_HDRS = [
-    "src/xnnpack/log.h",
-]
-
 xnnpack_cc_library(
     name = "xnnpack_h",
     hdrs = ["include/xnnpack.h"],
@@ -7975,6 +7971,20 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "@FP16",
     ],
+)
+
+xnnpack_cc_library(
+    name = "node_type",
+    hdrs = ["src/xnnpack/node-type.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
+    name = "operator_type",
+    hdrs = ["src/xnnpack/operator-type.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
@@ -9446,13 +9456,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "logging_utils",
+    name = "logging",
     srcs = [
         "src/datatype-strings.c",
         "src/node-type.c",
         "src/operator-strings.c",
     ],
-    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    hdrs = ["src/xnnpack/log.h"],
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -9481,12 +9491,11 @@ xnnpack_cc_library(
         ":xnn_log_level_explicit_debug": [],
         "//conditions:default": [":log_level_default"],
     }) + [
+        ":operator_type",
+        ":node_type",
+        ":xnnpack_h",
         ":common",
-        ":math",
-        ":params",
-        "@FP16",
         "@clog",
-        "@pthreadpool",
     ],
 )
 
@@ -9796,7 +9805,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
-    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    hdrs = INTERNAL_HDRS,
     copts = select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
@@ -9805,7 +9814,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":params",
         "@FP16",
@@ -9818,7 +9827,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operator_run_test_mode",
     srcs = ["src/operator-run.c"],
-    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    hdrs = INTERNAL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9830,7 +9839,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":params",
         "@FP16",
@@ -9853,7 +9862,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9877,7 +9886,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9919,8 +9928,9 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":math",
+        ":params",
         "@clog",
         "@pthreadpool",
     ],
@@ -9932,7 +9942,7 @@ xnnpack_cc_library(
         "src/allocator.c",
         "src/operator-delete.c",
     ],
-    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    hdrs = INTERNAL_HDRS,
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -9950,7 +9960,7 @@ xnnpack_cc_library(
         ":common",
         ":indirection",
         ":jit",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":operator_run",
         ":packing",
@@ -9969,7 +9979,7 @@ xnnpack_cc_library(
         "src/allocator.c",
         "src/operator-delete.c",
     ],
-    hdrs = INTERNAL_HDRS + LOGGING_HDRS,
+    hdrs = INTERNAL_HDRS,
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -9988,7 +9998,7 @@ xnnpack_cc_library(
         ":common",
         ":indirection_test_mode",
         ":jit_test_mode",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":operator_run_test_mode",
         ":packing_test_mode",
@@ -10019,7 +10029,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":params",
     ],
@@ -10047,7 +10057,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":params",
     ],
@@ -10096,7 +10106,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":enable_sparse",
         ":jit",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":memory_planner",
         ":operators",
@@ -10156,7 +10166,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":enable_sparse",
         ":jit_test_mode",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":memory_planner_test_mode",
         ":operators_test_mode",
@@ -10231,7 +10241,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":enable_sparse",
         ":jit",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":memory_planner",
         ":operator_run",
@@ -10283,7 +10293,7 @@ xnnpack_cc_library(
         ":enable_assembly",
         ":enable_jit",
         ":jit",
-        ":logging_utils",
+        ":logging",
         ":math",
         ":operator_run",
         ":operators",
