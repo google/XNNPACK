@@ -7511,7 +7511,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(f32-gemm-minmax-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(f32-gemm-minmax-test f32-gemm-minmax-test)
 
   ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc test/f32-gemminc-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -7557,7 +7557,7 @@ IF(XNNPACK_BUILD_TESTS)
     # Work-around for "too many sections" error
     TARGET_COMPILE_OPTIONS(f32-igemm-minmax-test PRIVATE "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:-Wa,-mbig-obj>")
   ENDIF()
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(f32-igemm-minmax-test f32-igemm-minmax-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8005,14 +8005,14 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(qc8-gemm-minmax-fp32-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qc8-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(qc8-gemm-minmax-fp32-test qc8-gemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc test/qc8-igemm-minmax-fp32-2.cc test/qc8-igemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qc8-igemm-minmax-fp32-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qc8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(qc8-igemm-minmax-fp32-test qc8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -8061,21 +8061,21 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(qs8-gemm-minmax-rndnu-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(qs8-gemm-minmax-rndnu-test qs8-gemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc test/qs8-igemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-igemm-minmax-fp32-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester params_init allocator)
   ADD_TEST(qs8-igemm-minmax-fp32-test qs8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc test/qs8-igemm-minmax-rndnu-2.cc test/qs8-igemm-minmax-rndnu-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   SET_TARGET_PROPERTIES(qs8-igemm-minmax-rndnu-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester params_init allocator)
   ADD_TEST(qs8-igemm-minmax-rndnu-test qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
