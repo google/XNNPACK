@@ -238,7 +238,6 @@ SET(LOGGING_SRCS
 
 SET(COLD_SRCS ${OPERATOR_SRCS} ${SUBGRAPH_SRCS})
 LIST(APPEND COLD_SRCS
-  src/allocator.c
   src/init.c
   src/memory-planner.c
   src/operator-delete.c
@@ -250,6 +249,10 @@ SET(HOT_SRCS
   src/indirection.c
   src/operator-run.c
   src/packing.c)
+
+set (ALLOCATOR_SRCS
+  src/allocator.c
+  src/jit/memory.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
@@ -263,8 +266,7 @@ SET(TABLE_SRCS
 SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
   src/jit/aarch64-assembler.cc
-  src/jit/assembler.cc
-  src/jit/memory.c)
+  src/jit/assembler.cc)
 
 SET(JIT_AARCH32_SRCS
   src/f32-gemm/4x8-aarch32-neon-cortex-a7.cc
@@ -6578,6 +6580,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv(32|64)$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SCALAR_RISCV_MICROKERNEL_SRCS})
 ENDIF()
 ADD_LIBRARY(all_microkernels OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
+ADD_LIBRARY(allocator OBJECT ${ALLOCATOR_SRCS})
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(packing OBJECT src/packing.c)
 ADD_LIBRARY(params_init OBJECT "src/params-init.c")
@@ -6690,6 +6693,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86|x86_64|AMD64)$" OR IOS_ARCH 
   ENDIF()
 ENDIF()
 TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(allocator PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(jit PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(code_cache PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(logging PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
@@ -6712,6 +6716,7 @@ ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(XNNPACK PUBLIC include)
 TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE src)
+TARGET_INCLUDE_DIRECTORIES(allocator PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(all_microkernels PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(params_init PRIVATE include src)
@@ -6753,6 +6758,7 @@ IF(NOT TARGET clog)
   ENDIF()
 ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE clog)
+TARGET_LINK_LIBRARIES(allocator PRIVATE clog)
 TARGET_LINK_LIBRARIES(jit PRIVATE clog)
 TARGET_LINK_LIBRARIES(logging PRIVATE clog)
 TARGET_LINK_LIBRARIES(code_cache PRIVATE clog)
@@ -6796,7 +6802,8 @@ IF(NOT TARGET pthreadpool)
     SET_PROPERTY(TARGET pthreadpool PROPERTY IMPORTED_LOCATION "${PTHREADPOOL_LIBRARY}")
   ENDIF()
 ENDIF()
-TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool)
+TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool allocator)
+TARGET_LINK_LIBRARIES(allocator PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(code_cache PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(indirection PRIVATE pthreadpool)
@@ -8804,7 +8811,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(jit-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(jit-test PRIVATE jit pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(jit-test PRIVATE jit pthreadpool gtest gtest_main allocator)
 
   ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc)
   SET_TARGET_PROPERTIES(aarch32-assembler-test PROPERTIES
@@ -8812,7 +8819,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit pthreadpool gtest gtest_main allocator)
 
   ADD_EXECUTABLE(aarch64-assembler-test test/aarch64-assembler.cc)
   SET_TARGET_PROPERTIES(aarch64-assembler-test PROPERTIES
@@ -8820,7 +8827,7 @@ IF(XNNPACK_BUILD_TESTS)
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(aarch64-assembler-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit pthreadpool gtest gtest_main allocator)
 
   ADD_EXECUTABLE(code-cache-test test/code-cache.cc)
   SET_TARGET_PROPERTIES(code-cache-test PROPERTIES

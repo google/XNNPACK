@@ -7988,6 +7988,24 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "allocator",
+    srcs = [
+        "src/allocator.c",
+        "src/jit/memory.c",
+    ],
+    hdrs = ["src/xnnpack/allocator.h"],
+    # Do not use xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS undefined
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging",
+        ":math",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
     hdrs = INTERNAL_HDRS,
@@ -9939,7 +9957,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS + [
-        "src/allocator.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS,
@@ -9956,6 +9973,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":code_cache",
         ":common",
         ":indirection",
@@ -9976,7 +9994,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operators_test_mode",
     srcs = OPERATOR_SRCS + [
-        "src/allocator.c",
         "src/operator-delete.c",
     ],
     hdrs = INTERNAL_HDRS,
@@ -9995,6 +10012,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":indirection_test_mode",
         ":jit_test_mode",
@@ -10017,7 +10035,6 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -10028,6 +10045,7 @@ xnnpack_cc_library(
     aarch64_srcs = JIT_AARCH64_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
@@ -10041,7 +10059,6 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
-        "src/jit/memory.c",
     ],
     hdrs = INTERNAL_HDRS + [
         "src/xnnpack/aarch32-assembler.h",
@@ -10056,6 +10073,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
