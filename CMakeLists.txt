@@ -8858,167 +8858,56 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PUBLIC include src)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE XNNPACK benchmark cpuinfo jit)
 
+  FUNCTION(ADD_ACCURACY_BENCHMARK)
+    set(options CXX_EXTENSIONS)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS)
+    cmake_parse_arguments(BENCH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    ADD_EXECUTABLE(${BENCH_NAME} ${BENCH_SRCS} $<TARGET_OBJECTS:all_microkernels>)
+    SET_TARGET_PROPERTIES(${BENCH_NAME} PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS ${BENCH_CXX_EXTENSIONS})
+    TARGET_INCLUDE_DIRECTORIES(${BENCH_NAME} PRIVATE . src)
+    TARGET_LINK_LIBRARIES(${BENCH_NAME} PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+  ENDFUNCTION()
+
   # ---[ Build accuracy microbenchmarks
-  ADD_EXECUTABLE(f16-exp-ulp-eval eval/f16-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-exp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f16-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-exp-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+  ADD_ACCURACY_BENCHMARK(NAME f16-exp-ulp-eval SRCS eval/f16-exp-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f16-expminus-ulp-eval SRCS eval/f16-expminus-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f16-sigmoid-ulp-eval SRCS eval/f16-sigmoid-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f32-exp-ulp-eval SRCS eval/f32-exp-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f32-expminus-ulp-eval SRCS eval/f32-expminus-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f32-expm1minus-ulp-eval SRCS eval/f32-expm1minus-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f32-extexp-ulp-eval SRCS eval/f32-extexp-ulp.cc CXX_EXTENSIONS)
+  ADD_ACCURACY_BENCHMARK(NAME f32-sigmoid-ulp-eval SRCS eval/f32-sigmoid-ulp.cc)
+  ADD_ACCURACY_BENCHMARK(NAME f32-sqrt-ulp-eval SRCS eval/f32-sqrt-ulp.cc)
 
-  ADD_EXECUTABLE(f16-expminus-ulp-eval eval/f16-expminus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-expminus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f16-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-expminus-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f16-sigmoid-ulp-eval eval/f16-sigmoid-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-sigmoid-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f16-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f16-sigmoid-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-exp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-expminus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-expm1minus-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-sigmoid-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-sqrt-ulp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  FUNCTION(ADD_ACCURACY_TEST)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS)
+    cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    ADD_EXECUTABLE(${TEST_NAME} ${TEST_SRCS} $<TARGET_OBJECTS:all_microkernels>)
+    SET_TARGET_PROPERTIES(${TEST_NAME} PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE include src)
+    TARGET_LINK_LIBRARIES(${TEST_NAME} PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ENDFUNCTION()
 
   # ---[ Build accuracy tests
-  ADD_EXECUTABLE(f16-f32-cvt-eval eval/f16-f32-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-f32-cvt-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-f16-cvt-eval eval/f32-f16-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-f16-cvt-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-f16-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-f16-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-qs8-cvt-eval eval/f32-qs8-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-qs8-cvt-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-qs8-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-qs8-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-qu8-cvt-eval eval/f32-qu8-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-qu8-cvt-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-qu8-cvt-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-qu8-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-exp-eval eval/f32-exp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-exp-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-exp-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-exp-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-expm1minus-eval eval/f32-expm1minus.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-expm1minus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-expminus-eval eval/f32-expminus.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-expminus-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-expminus-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-expminus-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-roundne-eval eval/f32-roundne.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-roundne-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundne-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundne-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-roundd-eval eval/f32-roundd.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-roundd-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundd-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundd-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-roundu-eval eval/f32-roundu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-roundu-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundu-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundu-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-
-  ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-roundz-eval PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE include src)
-  TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_ACCURACY_TEST(NAME f16-f32-cvt-eval SRCS eval/f16-f32-cvt.cc)
+  ADD_ACCURACY_TEST(NAME f32-f16-cvt-eval SRCS eval/f32-f16-cvt.cc)
+  ADD_ACCURACY_TEST(NAME f32-qs8-cvt-eval SRCS eval/f32-qs8-cvt.cc)
+  ADD_ACCURACY_TEST(NAME f32-qu8-cvt-eval SRCS eval/f32-qu8-cvt.cc)
+  ADD_ACCURACY_TEST(NAME f32-exp-eval SRCS eval/f32-exp.cc)
+  ADD_ACCURACY_TEST(NAME f32-expm1minus-eval SRCS eval/f32-expm1minus.cc)
+  ADD_ACCURACY_TEST(NAME f32-expminus-eval SRCS eval/f32-expminus.cc)
+  ADD_ACCURACY_TEST(NAME f32-roundne-eval SRCS eval/f32-roundne.cc)
+  ADD_ACCURACY_TEST(NAME f32-roundd-eval SRCS eval/f32-roundd.cc)
+  ADD_ACCURACY_TEST(NAME f32-roundu-eval SRCS eval/f32-roundu.cc)
+  ADD_ACCURACY_TEST(NAME f32-roundz-eval SRCS eval/f32-roundz.cc)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
@@ -9055,592 +8944,122 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE .)
   TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils code_cache params_init logging)
 
-  ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-dwconv-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils code_cache params_init logging)
+  FUNCTION(ADD_MICROKERNEL_E2E_BENCH)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS)
+    cmake_parse_arguments(BENCH "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    ADD_EXECUTABLE(${BENCH_NAME} ${BENCH_SRCS} $<TARGET_OBJECTS:all_microkernels>)
+    SET_TARGET_PROPERTIES(${BENCH_NAME} PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(${BENCH_NAME} PRIVATE . src)
+    TARGET_LINK_LIBRARIES(${BENCH_NAME} PRIVATE XNNPACK benchmark bench-models bench-utils code_cache params_init logging)
+  ENDFUNCTION()
 
-  ADD_EXECUTABLE(f32-gemm-e2e-bench bench/f32-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-gemm-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache jit params_init logging)
+  ADD_MICROKERNEL_E2E_BENCH(NAME f32-dwconv-e2e-bench SRCS bench/f32-dwconv-e2e.cc)
+  ADD_MICROKERNEL_E2E_BENCH(NAME f32-gemm-e2e-bench SRCS bench/f32-gemm-e2e.cc)
+  ADD_MICROKERNEL_E2E_BENCH(NAME qs8-dwconv-e2e-bench SRCS bench/qs8-dwconv-e2e.cc)
+  ADD_MICROKERNEL_E2E_BENCH(NAME qs8-gemm-e2e-bench SRCS bench/qs8-gemm-e2e.cc)
+  ADD_MICROKERNEL_E2E_BENCH(NAME qu8-dwconv-e2e-bench SRCS bench/qu8-dwconv-e2e.cc)
+  ADD_MICROKERNEL_E2E_BENCH(NAME qu8-gemm-e2e-bench SRCS bench/qu8-gemm-e2e.cc)
 
-  ADD_EXECUTABLE(qs8-dwconv-e2e-bench bench/qs8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-dwconv-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+  FUNCTION(ADD_OPERATOR_E2E_BENCH)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS)
+    cmake_parse_arguments(BENCH "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-gemm-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
-
-  ADD_EXECUTABLE(qu8-gemm-e2e-bench bench/qu8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-gemm-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
-
-  ADD_EXECUTABLE(qu8-dwconv-e2e-bench bench/qu8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-dwconv-e2e-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+    ADD_EXECUTABLE(${BENCH_NAME} ${BENCH_SRCS} $<TARGET_OBJECTS:all_microkernels>)
+    SET_TARGET_PROPERTIES(${BENCH_NAME} PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO)
+    TARGET_INCLUDE_DIRECTORIES(${BENCH_NAME} PRIVATE .)
+    TARGET_LINK_LIBRARIES(${BENCH_NAME} PRIVATE XNNPACK benchmark bench-utils params_init logging fp16)
+  ENDFUNCTION()
 
   # ---[ Build operator-level microbenchmarks
-  ADD_EXECUTABLE(abs-bench bench/abs.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(abs-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(abs-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  ADD_OPERATOR_E2E_BENCH(NAME abs-bench SRCS bench/abs.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME average-pooling-bench SRCS bench/average-pooling.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME bankers-rounding-bench SRCS bench/bankers-rounding.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME ceiling-bench SRCS bench/ceiling.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME channel-shuffle-bench SRCS bench/channel-shuffle.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME convert-bench SRCS bench/convert.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME convolution-bench SRCS bench/convolution.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME deconvolution-bench SRCS bench/deconvolution.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME elu-bench SRCS bench/elu.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME floor-bench SRCS bench/floor.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME global-average-pooling-bench SRCS bench/global-average-pooling.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME hardswish-bench SRCS bench/hardswish.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME leaky-relu-bench SRCS bench/leaky-relu.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME max-pooling-bench SRCS bench/max-pooling.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME negate-bench SRCS bench/negate.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME prelu-bench SRCS bench/prelu.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME sigmoid-bench SRCS bench/sigmoid.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME softmax-bench SRCS bench/softmax.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME square-bench SRCS bench/square.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME square-root-bench SRCS bench/square-root.cc)
+  ADD_OPERATOR_E2E_BENCH(NAME truncation-bench SRCS bench/truncation.cc)
 
-  ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(average-pooling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  FUNCTION(ADD_MICROKERNEL_MICROBENCH)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS)
+    cmake_parse_arguments(BENCH "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  ADD_EXECUTABLE(bankers-rounding-bench bench/bankers-rounding.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(bankers-rounding-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(bankers-rounding-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(ceiling-bench bench/ceiling.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(ceiling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(ceiling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(channel-shuffle-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(convert-bench bench/convert.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(convert-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convert-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(convolution-bench bench/convolution.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK code_cache fp16 benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(elu-bench bench/elu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(elu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(elu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(floor-bench bench/floor.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(floor-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(global-average-pooling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(hardswish-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(hardswish-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(hardswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(leaky-relu-bench bench/leaky-relu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(leaky-relu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(leaky-relu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(max-pooling-bench bench/max-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(max-pooling-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(negate-bench bench/negate.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(negate-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(negate-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(prelu-bench bench/prelu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(prelu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(sigmoid-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(softmax-bench bench/softmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(softmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(square-bench bench/square.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(square-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK benchmark bench-utils params_init logging logging)
-
-  ADD_EXECUTABLE(square-root-bench bench/square-root.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(square-root-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
-
-  ADD_EXECUTABLE(truncation-bench bench/truncation.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(truncation-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
-  TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+    ADD_EXECUTABLE(${BENCH_NAME} ${BENCH_SRCS} $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+    SET_TARGET_PROPERTIES(${BENCH_NAME} PROPERTIES
+      CXX_STANDARD 11
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(${BENCH_NAME} PRIVATE . include src)
+    TARGET_LINK_LIBRARIES(${BENCH_NAME} PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
+  ENDFUNCTION()
 
   # ---[ Build microkernel-level microbenchmarks
-  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f16-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f16-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f16-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f16-raddstoreexpminusmax-bench bench/f16-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-raddstoreexpminusmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-vsigmoid-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vsigmoid-bench PRIVATE benchmark bench-utils fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f16-f32-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f32-conv-hwc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f32-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-dwconv2d-chw-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-f16-vcvt-bench bench/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-f16-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f32-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f32-igemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(f32-im2col-gemm-bench PROPERTIES
-    C_STANDARD 99
-    C_STANDARD_REQUIRED YES
-    C_EXTENSIONS NO
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-qs8-vcvt-bench bench/f32-qs8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-qs8-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-qu8-vcvt-bench bench/f32-qu8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-qu8-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-raddstoreexpminusmax-bench bench/f32-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-raddstoreexpminusmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddstoreexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-rmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-spmm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-softmax-bench bench/f32-softmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-softmax-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-softmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-velu-bench bench/f32-velu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-velu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-velu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-velu-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-vhswish-bench bench/f32-vhswish.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-vhswish-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vhswish-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vhswish-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-vlrelu-bench bench/f32-vlrelu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-vlrelu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vlrelu-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-vrelu-bench bench/f32-vrelu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-vrelu-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrelu-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-vsigmoid-bench bench/f32-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-vsigmoid-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsigmoid-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vsigmoid-bench PRIVATE benchmark bench-utils fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(f32-vsqrt-bench bench/f32-vsqrt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-vsqrt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE benchmark bench-utils fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-dwconv-bench bench/qs8-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(qs8-dwconv-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-f32-vcvt-bench bench/qs8-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-f32-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(qs8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool jit params_init)
-
-  ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(qs8-vadd-bench bench/qs8-vadd.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vadd-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vadd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vadd-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-vaddc-bench bench/qs8-vaddc.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vaddc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vaddc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-vmul-bench bench/qs8-vmul.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vmul-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmul-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vmul-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qs8-vmulc-bench bench/qs8-vmulc.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vmulc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vmulc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-f32-vcvt-bench bench/qu8-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-f32-vcvt-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
-  SET_TARGET_PROPERTIES(qu8-gemm-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(qu8-vadd-bench bench/qu8-vadd.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vadd-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vadd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vadd-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-vaddc-bench bench/qu8-vaddc.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vaddc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vaddc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-vmul-bench bench/qu8-vmul.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmul-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vmul-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(qu8-vmulc-bench bench/qu8-vmulc.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmulc-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(rounding-bench bench/rounding.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(rounding-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(rounding-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
-
-  ADD_EXECUTABLE(x8-lut-bench bench/x8-lut.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x8-lut-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(x8-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x8-transpose-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x8-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(x16-transpose-bench bench/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x16-transpose-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x16-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x16-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(x32-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x32-transpose-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x32-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x32-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
-
-  ADD_EXECUTABLE(x64-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(x64-transpose-bench PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(x64-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-dwconv-bench SRCS bench/f16-dwconv.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-gemm-bench SRCS bench/f16-gemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-igemm-bench SRCS bench/f16-igemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-raddstoreexpminusmax-bench SRCS bench/f16-raddstoreexpminusmax.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-vsigmoid-bench SRCS bench/f16-vsigmoid.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f16-f32-vcvt-bench SRCS bench/f16-f32-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-conv-hwc-bench SRCS bench/f32-conv-hwc.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-dwconv-bench SRCS bench/f32-dwconv.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-dwconv2d-chw-bench SRCS bench/f32-dwconv2d-chw.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-f16-vcvt-bench SRCS bench/f32-f16-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-gemm-bench SRCS bench/f32-gemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-igemm-bench SRCS bench/f32-igemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-im2col-gemm-bench SRCS bench/f32-im2col-gemm.cc src/im2col.c)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-qs8-vcvt-bench SRCS bench/f32-qs8-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-qu8-vcvt-bench SRCS bench/f32-qu8-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-raddstoreexpminusmax-bench SRCS bench/f32-raddstoreexpminusmax.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-rmax-bench SRCS bench/f32-rmax.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-spmm-bench SRCS bench/f32-spmm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-softmax-bench SRCS bench/f32-softmax.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-velu-bench SRCS bench/f32-velu.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-vhswish-bench SRCS bench/f32-vhswish.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-vlrelu-bench SRCS bench/f32-vlrelu.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-vrelu-bench SRCS bench/f32-vrelu.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-vsigmoid-bench SRCS bench/f32-vsigmoid.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME f32-vsqrt-bench SRCS bench/f32-vsqrt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-dwconv-bench SRCS bench/qs8-dwconv.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-f32-vcvt-bench SRCS bench/qs8-f32-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-gemm-bench SRCS bench/qs8-gemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-requantization-bench SRCS bench/qs8-requantization.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-vadd-bench SRCS bench/qs8-vadd.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-vaddc-bench SRCS bench/qs8-vaddc.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-vmul-bench SRCS bench/qs8-vmul.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qs8-vmulc-bench SRCS bench/qs8-vmulc.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-f32-vcvt-bench SRCS bench/qu8-f32-vcvt.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-gemm-bench SRCS bench/qu8-gemm.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-requantization-bench SRCS bench/qu8-requantization.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-vadd-bench SRCS bench/qu8-vadd.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-vaddc-bench SRCS bench/qu8-vaddc.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-vmul-bench SRCS bench/qu8-vmul.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME qu8-vmulc-bench SRCS bench/qu8-vmulc.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME rounding-bench SRCS bench/rounding.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME x8-lut-bench SRCS bench/x8-lut.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME x8-transpose-bench SRCS bench/x32-transpose.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME x16-transpose-bench SRCS bench/x16-transpose.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME x32-transpose-bench SRCS bench/x32-transpose.cc)
+  ADD_MICROKERNEL_MICROBENCH(NAME x64-transpose-bench SRCS bench/x32-transpose.cc)
 ENDIF()
