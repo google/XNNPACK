@@ -501,12 +501,9 @@ enum xnn_status xnn_define_even_split_n(
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  if (input_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with the input ID #%" PRIu32
-      ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(node_type), input_id, input_value->type);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_input_type_dense(node_type, input_id, input_value);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   check_output_value(subgraph, split_dim, input_id, output_ids[0], "first", node_type);

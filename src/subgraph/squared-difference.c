@@ -129,11 +129,9 @@ enum xnn_status xnn_define_squared_difference(
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
-  if (input1_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_squared_difference), input1_id, input1_value->type);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_squared_difference, input1_id, input1_value, 1);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   switch (input1_value->datatype) {
@@ -153,11 +151,9 @@ enum xnn_status xnn_define_squared_difference(
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];
-  if (input2_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_squared_difference), input2_id, input2_value->type);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_squared_difference, input2_id, input2_value, 2);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   switch (input2_value->datatype) {
