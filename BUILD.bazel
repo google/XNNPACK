@@ -10084,7 +10084,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "memory_planner",
     srcs = ["src/memory-planner.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/memory-planner.h"],
     defines = select({
         ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
         ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
@@ -10095,8 +10095,6 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":logging",
-        ":params",
         ":subgraph",
         "@FP16",
         "@pthreadpool",
@@ -10106,7 +10104,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "memory_planner_test_mode",
     srcs = ["src/memory-planner.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/memory-planner.h"],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -10121,8 +10119,6 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":logging",
-        ":params",
         ":subgraph",
         "@FP16",
         "@pthreadpool",
