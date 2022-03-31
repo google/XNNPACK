@@ -98,6 +98,11 @@ tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=3 -
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x3-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x3-minmax-wasmsimd-x86-acc2.c &
 
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x3-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x3-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x3-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x3-minmax-wasmrelaxedsimd-acc2.c &
+
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=MINMAX  -o src/f32-dwconv/gen/up4x4-minmax-wasmsimd-arm.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=MINMAX  -o src/f32-dwconv/gen/up4x4-minmax-wasmsimd-arm-acc2.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=MINMAX  -o src/f32-dwconv/gen/up8x4-minmax-wasmsimd-arm.c &
@@ -107,6 +112,11 @@ tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up4x4-minmax-wasmsimd-x86-acc2.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x4-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x4-minmax-wasmsimd-x86-acc2.c &
+
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x4-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=4 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x4-minmax-wasmrelaxedsimd-acc2.c &
 
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up4x3-wasmsimd.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=4 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up4x4-wasmsimd.c &
@@ -123,6 +133,11 @@ tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x9-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x9-minmax-wasmsimd-x86-acc2.c &
 
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x9-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x9-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x9-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x9-minmax-wasmrelaxedsimd-acc2.c &
+
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up4x9-wasmsimd.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=9 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up8x9-wasmsimd.c &
 
@@ -135,6 +150,11 @@ tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up4x25-minmax-wasmsimd-x86-acc2.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x25-minmax-wasmsimd-x86.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=PMINMAX -o src/f32-dwconv/gen/up8x25-minmax-wasmsimd-x86-acc2.c &
+
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x25-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up4x25-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x25-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D ACTIVATION=MINMAX -D MINMAX=RELAXED -o src/f32-dwconv/gen/up8x25-minmax-wasmrelaxedsimd-acc2.c &
 
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up4x25-wasmsimd.c &
 tools/xngen src/f32-dwconv/up-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/up8x25-wasmsimd.c &

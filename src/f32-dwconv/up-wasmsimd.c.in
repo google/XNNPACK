@@ -7,7 +7,7 @@ $assert CHANNEL_TILE % 4 == 0
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert ACTIVATION != "MINMAX" or MINMAX in ["MINMAX", "PMINMAX"]
+$assert ACTIVATION != "MINMAX" or MINMAX in ["MINMAX", "PMINMAX", "RELAXED"]
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -17,12 +17,13 @@ $assert ACTIVATION != "MINMAX" or MINMAX in ["MINMAX", "PMINMAX"]
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $if ACTIVATION == "MINMAX":
-$  WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
-$  WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
+$  WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[MINMAX]
+$  WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[MINMAX]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else "_x86" if MINMAX == "PMINMAX" else "_arm"
+$ISA = "wasmsimd" if ACTIVATION in ["LINEAR", "RELU"] or MINMAX != "RELAXED" else "wasmrelaxedsimd"
+$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else {"MINMAX": "_arm", "PMINMAX": "_x86", "RELAXED": ""}[MINMAX]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__wasmsimd${ARCH_SUFFIX}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}${ARCH_SUFFIX}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,
