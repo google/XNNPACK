@@ -22,6 +22,7 @@ OPERATOR_BENCHMARK_DEPS = [
 ]
 
 MICROKERNEL_BENCHMARK_DEPS = [
+    ":aligned_allocator",
     ":math",
     ":params",
     ":params_init",
@@ -36,6 +37,8 @@ MICROKERNEL_BENCHMARK_DEPS = [
 ]
 
 ACCURACY_EVAL_DEPS = [
+    ":aligned_allocator",
+    ":math_stubs",
     ":common",
     ":params",
     ":XNNPACK",
@@ -45,6 +48,9 @@ ACCURACY_EVAL_DEPS = [
 ]
 
 MICROKERNEL_TEST_DEPS = [
+    ":aligned_allocator",
+    ":isa_checks",
+    ":math_stubs",
     ":math",
     ":params",
     ":params_init",
@@ -7888,7 +7894,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
-    "src/xnnpack/math-stubs.h",
     "src/xnnpack/memory-planner.h",
     "src/xnnpack/node-type.h",
     "src/xnnpack/operator.h",
@@ -7901,7 +7906,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 ]
 
 ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-    "src/xnnpack/math-stubs.h",
 ]
 
 MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
@@ -7910,7 +7914,6 @@ MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 
 MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "include/xnnpack.h",
-    "src/xnnpack/isa-checks.h",
     "src/xnnpack/requantization.h",
 ]
 
@@ -8006,6 +8009,36 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "aligned_allocator",
+    hdrs = [
+        "src/xnnpack/aligned-allocator.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
+    name = "isa_checks",
+    hdrs = [
+        "src/xnnpack/isa-checks.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "math_stubs",
+    hdrs = [
+        "src/xnnpack/math-stubs.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
     hdrs = INTERNAL_HDRS,
@@ -8030,6 +8063,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":params_init",
         ":tables",
@@ -8082,6 +8116,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":params_init",
         ":tables",
@@ -8105,6 +8140,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8127,6 +8163,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8153,6 +8190,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8176,6 +8214,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8198,6 +8237,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8224,6 +8264,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8250,6 +8291,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8276,6 +8318,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8306,6 +8349,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8332,6 +8376,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8358,6 +8403,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8388,6 +8434,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8414,6 +8461,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8440,6 +8488,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8470,6 +8519,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8487,6 +8537,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8504,6 +8555,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8525,6 +8577,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8548,6 +8601,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8571,6 +8625,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8598,6 +8653,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8637,6 +8693,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8677,6 +8734,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8713,6 +8771,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8731,6 +8790,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8753,6 +8813,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8789,6 +8850,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8807,6 +8869,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8829,6 +8892,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8867,6 +8931,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8886,6 +8951,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8909,6 +8975,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -8946,6 +9013,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -8964,6 +9032,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -8986,6 +9055,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9004,6 +9074,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9023,6 +9094,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9090,6 +9162,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9138,6 +9211,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9184,6 +9258,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9207,6 +9282,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9234,6 +9310,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9276,6 +9353,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9297,6 +9375,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -9322,6 +9401,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":math_stubs",
         ":params",
         ":tables",
         "@FP16",
@@ -10350,7 +10430,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/dwconv.h",
         "bench/qs8-dwconv.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10362,7 +10441,6 @@ xnnpack_benchmark(
     name = "qs8_f32_vcvt_bench",
     srcs = [
         "bench/qs8-f32-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10372,7 +10450,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qs8-gemm.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -10385,7 +10462,6 @@ xnnpack_benchmark(
     name = "qs8_requantization_bench",
     srcs = [
         "bench/qs8-requantization.cc",
-        "src/xnnpack/AlignedAllocator.h",
         "src/xnnpack/requantization-stubs.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -10395,7 +10471,6 @@ xnnpack_benchmark(
     name = "qs8_vadd_bench",
     srcs = [
         "bench/qs8-vadd.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10404,7 +10479,6 @@ xnnpack_benchmark(
     name = "qs8_vaddc_bench",
     srcs = [
         "bench/qs8-vaddc.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10413,7 +10487,6 @@ xnnpack_benchmark(
     name = "qs8_vmul_bench",
     srcs = [
         "bench/qs8-vmul.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10422,7 +10495,6 @@ xnnpack_benchmark(
     name = "qs8_vmulc_bench",
     srcs = [
         "bench/qs8-vmulc.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10431,7 +10503,6 @@ xnnpack_benchmark(
     name = "qu8_f32_vcvt_bench",
     srcs = [
         "bench/qu8-f32-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10441,7 +10512,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qu8-gemm.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -10453,7 +10523,6 @@ xnnpack_benchmark(
     name = "qu8_requantization_bench",
     srcs = [
         "bench/qu8-requantization.cc",
-        "src/xnnpack/AlignedAllocator.h",
         "src/xnnpack/requantization-stubs.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -10463,7 +10532,6 @@ xnnpack_benchmark(
     name = "qu8_vadd_bench",
     srcs = [
         "bench/qu8-vadd.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10472,7 +10540,6 @@ xnnpack_benchmark(
     name = "qu8_vaddc_bench",
     srcs = [
         "bench/qu8-vaddc.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10481,7 +10548,6 @@ xnnpack_benchmark(
     name = "qu8_vmul_bench",
     srcs = [
         "bench/qu8-vmul.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10490,7 +10556,6 @@ xnnpack_benchmark(
     name = "qu8_vmulc_bench",
     srcs = [
         "bench/qu8-vmulc.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10500,7 +10565,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-igemm.cc",
         "bench/conv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10513,7 +10577,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-gemm.cc",
         "bench/gemm.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10524,7 +10587,6 @@ xnnpack_benchmark(
     name = "f16_raddstoreexpminusmax_bench",
     srcs = [
         "bench/f16-raddstoreexpminusmax.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10534,7 +10596,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-spmm.cc",
         "bench/spmm.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10543,7 +10604,6 @@ xnnpack_benchmark(
     name = "f16_vsigmoid_bench",
     srcs = [
         "bench/f16-vsigmoid.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10552,7 +10612,6 @@ xnnpack_benchmark(
     name = "f16_f32_vcvt_bench",
     srcs = [
         "bench/f16-f32-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10562,7 +10621,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-igemm.cc",
         "bench/conv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10575,7 +10633,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-conv-hwc.cc",
         "bench/dconv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10587,7 +10644,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-conv-hwc2chw.cc",
         "bench/dconv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10599,7 +10655,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-dwconv.cc",
         "bench/dwconv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10612,7 +10667,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-dwconv.cc",
         "bench/dwconv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10625,7 +10679,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-dwconv2d-chw.cc",
         "bench/dwconv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
@@ -10637,7 +10690,6 @@ xnnpack_benchmark(
     name = "f32_f16_vcvt_bench",
     srcs = [
         "bench/f32-f16-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10646,7 +10698,6 @@ xnnpack_benchmark(
     name = "x8_transpose_bench",
     srcs = [
         "bench/x8-transpose.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10655,7 +10706,6 @@ xnnpack_benchmark(
     name = "x16_transpose_bench",
     srcs = [
         "bench/x16-transpose.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10664,7 +10714,6 @@ xnnpack_benchmark(
     name = "x32_transpose_bench",
     srcs = [
         "bench/x32-transpose.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10673,7 +10722,6 @@ xnnpack_benchmark(
     name = "x64_transpose_bench",
     srcs = [
         "bench/x64-transpose.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10683,7 +10731,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-gemm.cc",
         "bench/gemm.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -10696,7 +10743,6 @@ xnnpack_benchmark(
     name = "f32_qs8_vcvt_bench",
     srcs = [
         "bench/f32-qs8-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10705,7 +10751,6 @@ xnnpack_benchmark(
     name = "f32_qu8_vcvt_bench",
     srcs = [
         "bench/f32-qu8-vcvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10714,7 +10759,6 @@ xnnpack_benchmark(
     name = "f32_raddexpminusmax_bench",
     srcs = [
         "bench/f32-raddexpminusmax.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10723,7 +10767,6 @@ xnnpack_benchmark(
     name = "f32_raddextexp_bench",
     srcs = [
         "bench/f32-raddextexp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10732,7 +10775,6 @@ xnnpack_benchmark(
     name = "f32_raddstoreexpminusmax_bench",
     srcs = [
         "bench/f32-raddstoreexpminusmax.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10741,7 +10783,6 @@ xnnpack_benchmark(
     name = "f32_rmax_bench",
     srcs = [
         "bench/f32-rmax.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10751,7 +10792,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-spmm.cc",
         "bench/spmm.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10769,7 +10809,6 @@ xnnpack_benchmark(
     name = "f32_velu_bench",
     srcs = [
         "bench/f32-velu.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10778,7 +10817,6 @@ xnnpack_benchmark(
     name = "f32_vhswish_bench",
     srcs = [
         "bench/f32-vhswish.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10787,7 +10825,6 @@ xnnpack_benchmark(
     name = "f32_vlrelu_bench",
     srcs = [
         "bench/f32-vlrelu.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10796,7 +10833,6 @@ xnnpack_benchmark(
     name = "f32_vrelu_bench",
     srcs = [
         "bench/f32-vrelu.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10805,7 +10841,6 @@ xnnpack_benchmark(
     name = "f32_vscaleexpminusmax_bench",
     srcs = [
         "bench/f32-vscaleexpminusmax.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10814,7 +10849,6 @@ xnnpack_benchmark(
     name = "f32_vscaleextexp_bench",
     srcs = [
         "bench/f32-vscaleextexp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10823,7 +10857,6 @@ xnnpack_benchmark(
     name = "f32_vsigmoid_bench",
     srcs = [
         "bench/f32-vsigmoid.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10832,7 +10865,6 @@ xnnpack_benchmark(
     name = "f32_vsqrt_bench",
     srcs = [
         "bench/f32-vsqrt.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -10842,7 +10874,6 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-im2col-gemm.cc",
         "bench/conv.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":im2col",
@@ -10854,17 +10885,14 @@ xnnpack_benchmark(
     name = "rounding_bench",
     srcs = [
         "bench/rounding.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":math_stubs"],
 )
 
 xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -11373,7 +11401,6 @@ xnnpack_benchmark(
     name = "f16_exp_ulp_eval",
     srcs = [
         "eval/f16-exp-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11385,7 +11412,6 @@ xnnpack_benchmark(
     name = "f16_expminus_ulp_eval",
     srcs = [
         "eval/f16-expminus-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11397,7 +11423,6 @@ xnnpack_benchmark(
     name = "f16_sigmoid_ulp_eval",
     srcs = [
         "eval/f16-sigmoid-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11409,7 +11434,6 @@ xnnpack_benchmark(
     name = "f32_exp_ulp_eval",
     srcs = [
         "eval/f32-exp-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11421,7 +11445,6 @@ xnnpack_benchmark(
     name = "f32_expminus_ulp_eval",
     srcs = [
         "eval/f32-expminus-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11433,7 +11456,6 @@ xnnpack_benchmark(
     name = "f32_expm1minus_ulp_eval",
     srcs = [
         "eval/f32-expm1minus-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11445,7 +11467,6 @@ xnnpack_benchmark(
     name = "f32_extexp_ulp_eval",
     srcs = [
         "eval/f32-extexp-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11457,7 +11478,6 @@ xnnpack_benchmark(
     name = "f32_sigmoid_ulp_eval",
     srcs = [
         "eval/f32-sigmoid-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11469,7 +11489,6 @@ xnnpack_benchmark(
     name = "f32_sqrt_ulp_eval",
     srcs = [
         "eval/f32-sqrt-ulp.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + ACCURACY_EVAL_HDRS,
     deps = ACCURACY_EVAL_DEPS + [
         ":bench_utils",
@@ -11483,9 +11502,7 @@ xnnpack_unit_test(
     name = "f16_f32_cvt_eval",
     srcs = [
         "eval/f16-f32-cvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11494,9 +11511,7 @@ xnnpack_unit_test(
     name = "f32_f16_cvt_eval",
     srcs = [
         "eval/f32-f16-cvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11505,9 +11520,7 @@ xnnpack_unit_test(
     name = "f32_qs8_cvt_eval",
     srcs = [
         "eval/f32-qs8-cvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11516,9 +11529,7 @@ xnnpack_unit_test(
     name = "f32_qu8_cvt_eval",
     srcs = [
         "eval/f32-qu8-cvt.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11527,9 +11538,7 @@ xnnpack_unit_test(
     name = "f32_exp_eval",
     srcs = [
         "eval/f32-exp.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11538,9 +11547,7 @@ xnnpack_unit_test(
     name = "f32_expm1minus_eval",
     srcs = [
         "eval/f32-expm1minus.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11549,9 +11556,7 @@ xnnpack_unit_test(
     name = "f32_expminus_eval",
     srcs = [
         "eval/f32-expminus.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11560,9 +11565,7 @@ xnnpack_unit_test(
     name = "f32_roundne_eval",
     srcs = [
         "eval/f32-roundne.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11571,9 +11574,7 @@ xnnpack_unit_test(
     name = "f32_roundd_eval",
     srcs = [
         "eval/f32-roundd.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11582,9 +11583,7 @@ xnnpack_unit_test(
     name = "f32_roundu_eval",
     srcs = [
         "eval/f32-roundu.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11593,9 +11592,7 @@ xnnpack_unit_test(
     name = "f32_roundz_eval",
     srcs = [
         "eval/f32-roundz.cc",
-        "src/xnnpack/AlignedAllocator.h",
-        "src/xnnpack/math-stubs.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     automatic = False,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11607,7 +11604,6 @@ xnnpack_cc_library(
     testonly = True,
     srcs = [
         "test/gemm-microkernel-tester.cc",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     hdrs = [
         "test/gemm-microkernel-tester.h",
@@ -11632,7 +11628,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11642,7 +11637,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -11652,7 +11646,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-gavgpool-minmax.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11672,7 +11665,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11701,7 +11693,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-pavgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11711,7 +11702,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-prelu.cc",
         "test/prelu-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11721,7 +11711,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-spmm-minmax.cc",
         "test/spmm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11857,7 +11846,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -11921,7 +11909,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-argmaxpool.cc",
         "test/argmaxpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11931,7 +11918,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11941,7 +11927,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11951,7 +11936,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-ibilinear-chw.cc",
         "test/ibilinear-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -11996,7 +11980,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-conv-hwc.cc",
         "test/conv-hwc-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12006,7 +11989,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-conv-hwc2chw.cc",
         "test/conv-hwc2chw-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12016,7 +11998,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12026,7 +12007,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12036,7 +12016,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv2d-chw.cc",
         "test/dwconv2d-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12055,7 +12034,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gavgpool-minmax.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12065,7 +12043,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gavgpool-cw.cc",
         "test/gavgpool-cw-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12140,7 +12117,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-pavgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12160,7 +12136,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-prelu.cc",
         "test/prelu-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12224,7 +12199,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-spmm-minmax.cc",
         "test/spmm-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12486,7 +12460,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12704,7 +12677,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qc8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
@@ -12745,7 +12717,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
@@ -12756,7 +12727,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12775,7 +12745,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-gavgpool-minmax-fp32.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12785,7 +12754,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-gavgpool-minmax-rndnu.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12917,7 +12885,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12927,7 +12894,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12937,7 +12903,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12956,7 +12921,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gavgpool-minmax-fp32.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -12966,7 +12930,6 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gavgpool-minmax-rndnu.cc",
         "test/gavgpool-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -13088,7 +13051,6 @@ xnnpack_unit_test(
     srcs = [
         "test/s8-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -13116,7 +13078,6 @@ xnnpack_unit_test(
     srcs = [
         "test/u8-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -13189,7 +13150,6 @@ xnnpack_unit_test(
     srcs = [
         "test/x32-packx.cc",
         "test/pack-microkernel-tester.h",
-        "src/xnnpack/AlignedAllocator.h",
     ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS,
 )

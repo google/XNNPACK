@@ -19,7 +19,7 @@
 #include <vector>
 
 #include <xnnpack.h>
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params-init.h>

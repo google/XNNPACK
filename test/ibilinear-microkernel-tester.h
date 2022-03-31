@@ -18,7 +18,7 @@
 #include <fp16.h>
 
 #include <xnnpack.h>
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
 #include <xnnpack/params.h>
 

@@ -14,7 +14,7 @@
 #include <benchmark/benchmark.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/indirection.h>

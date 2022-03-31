@@ -11,7 +11,7 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/raddextexp.h>

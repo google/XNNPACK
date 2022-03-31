@@ -13,7 +13,7 @@
 #include <benchmark/benchmark.h>
 #include "bench/spmm.h"
 #include "bench/utils.h"
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>

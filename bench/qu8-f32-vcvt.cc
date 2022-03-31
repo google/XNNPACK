@@ -13,7 +13,7 @@
 #include "bench/utils.h"
 
 #include <fp16/fp16.h>
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 #include <xnnpack/params-init.h>

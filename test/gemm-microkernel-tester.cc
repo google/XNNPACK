@@ -16,7 +16,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/AlignedAllocator.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>
