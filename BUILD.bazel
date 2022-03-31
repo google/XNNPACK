@@ -22,6 +22,7 @@ OPERATOR_BENCHMARK_DEPS = [
 ]
 
 MICROKERNEL_BENCHMARK_DEPS = [
+    ":allocator",
     ":aligned_allocator",
     ":math",
     ":params",
@@ -37,6 +38,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
 ]
 
 ACCURACY_EVAL_DEPS = [
+    ":allocator",
     ":aligned_allocator",
     ":math_stubs",
     ":common",
@@ -48,6 +50,7 @@ ACCURACY_EVAL_DEPS = [
 ]
 
 MICROKERNEL_TEST_DEPS = [
+    ":allocator",
     ":aligned_allocator",
     ":isa_checks",
     ":math_stubs",
@@ -63,6 +66,7 @@ MICROKERNEL_TEST_DEPS = [
 ]
 
 OPERATOR_TEST_DEPS = [
+    ":allocator",
     ":cache",
     ":common",
     ":params",
@@ -7851,7 +7855,6 @@ JIT_AARCH64_SRCS = [
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [
-    "src/xnnpack/allocator.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
     "src/xnnpack/cache.h",
@@ -8060,6 +8063,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8088,6 +8092,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8113,6 +8118,7 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8137,6 +8143,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8160,6 +8167,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8187,6 +8195,7 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     wasmsimd_srcs = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8211,6 +8220,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8234,6 +8244,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8261,6 +8272,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8288,6 +8300,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8315,6 +8328,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8346,6 +8360,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8373,6 +8388,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8400,6 +8416,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8431,6 +8448,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8458,6 +8476,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8485,6 +8504,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8516,6 +8536,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8534,6 +8555,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8552,6 +8574,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8574,6 +8597,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8598,6 +8622,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8622,6 +8647,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8650,6 +8676,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8672,6 +8699,7 @@ xnnpack_cc_library(
         "src/amalgam/sse2.c",
     ],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8690,6 +8718,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8709,6 +8738,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE_MICROKERNEL_SRCS + PROD_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8731,6 +8761,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8750,6 +8781,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/ssse3.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8768,6 +8800,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8787,6 +8820,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8810,6 +8844,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8829,6 +8864,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/sse41.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8847,6 +8883,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8866,6 +8903,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8889,6 +8927,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8909,6 +8948,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/avx.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -8928,6 +8968,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8948,6 +8989,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -8972,6 +9014,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_AVX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9071,6 +9114,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9091,6 +9135,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9115,6 +9160,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_XOP_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9137,6 +9183,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ["src/amalgam/fma3.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9159,6 +9206,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9182,6 +9230,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = PROD_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9208,6 +9257,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX"],
     x86_srcs = ALL_FMA3_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9232,6 +9282,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ["src/amalgam/avx2.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9255,6 +9306,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9279,6 +9331,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = PROD_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9307,6 +9360,7 @@ xnnpack_cc_library(
     msvc_x86_64_copts = ["/arch:AVX2"],
     x86_srcs = ALL_AVX2_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9329,6 +9383,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/avx512f.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9350,6 +9405,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9372,6 +9428,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = PROD_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9398,6 +9455,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512F_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":math_stubs",
@@ -9426,6 +9484,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ["src/amalgam/avx512skx.c"],
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9453,6 +9512,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9480,6 +9540,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = PROD_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9511,6 +9572,7 @@ xnnpack_cc_library(
     msys_copts = ["-fno-asynchronous-unwind-tables"],
     x86_srcs = ALL_AVX512SKX_MICROKERNEL_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9834,6 +9896,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9854,6 +9917,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9870,6 +9934,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9890,6 +9955,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":math",
         ":params",
@@ -9910,6 +9976,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
@@ -9935,6 +10002,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
@@ -9958,6 +10026,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":params",
@@ -9982,6 +10051,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":params",
@@ -10196,6 +10266,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":allocator",
         ":cache",
         ":common",
         ":enable_assembly",
@@ -10257,6 +10328,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":allocator",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -10332,6 +10404,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":allocator",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -10385,6 +10458,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
+        ":allocator",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -10407,12 +10481,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
-    hdrs = [
-        "bench/utils.h",
-        "src/xnnpack/allocator.h",
-    ],
+    hdrs = ["bench/utils.h"],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":common",
         ":jit",
         ":params",
@@ -13649,7 +13721,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = [
-        "src/xnnpack/allocator.h",
         "src/xnnpack/cache.h",
         "src/xnnpack/node-type.h",
         "src/xnnpack/subgraph.h",
@@ -13658,6 +13729,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":common",
         ":params",
     ],
@@ -13670,6 +13742,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":common",
         ":jit_test_mode",
     ],
@@ -13683,6 +13756,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":common",
         ":jit_test_mode",
     ],
@@ -13696,6 +13770,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":common",
         ":jit_test_mode",
     ],
