@@ -56,6 +56,7 @@ MICROKERNEL_TEST_DEPS = [
     ":isa_checks",
     ":math",
     ":math_stubs",
+    ":microkernels_h",
     ":params",
     ":params_init",
     ":requantization",
@@ -11812,25 +11813,25 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-f32-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f16_avgpool_minmax_test",
     srcs = [
-        "test/f16-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f16-avgpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f16_dwconv_minmax_test",
     srcs = [
-        "test/f16-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f16-dwconv-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11839,7 +11840,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-gavgpool-minmax.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11847,7 +11848,7 @@ xnnpack_unit_test(
     name = "f16_gemm_minmax_test",
     srcs = [
         "test/f16-gemm-minmax.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -11858,7 +11859,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11866,7 +11867,7 @@ xnnpack_unit_test(
     name = "f16_igemm_minmax_test",
     srcs = [
         "test/f16-igemm-minmax.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -11877,16 +11878,16 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-maxpool-minmax.cc",
         "test/maxpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f16_pavgpool_minmax_test",
     srcs = [
-        "test/f16-pavgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f16-pavgpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11895,7 +11896,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-prelu.cc",
         "test/prelu-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11904,7 +11905,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-spmm-minmax.cc",
         "test/spmm-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11913,7 +11914,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vadd-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11922,7 +11923,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vaddc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11931,7 +11932,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vclamp.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11940,7 +11941,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vdiv-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11949,7 +11950,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vdivc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11958,7 +11959,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vrdivc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11967,7 +11968,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vhswish.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11976,7 +11977,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vlrelu.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11985,7 +11986,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -11994,7 +11995,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmaxc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12003,7 +12004,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmin.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12012,7 +12013,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vminc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12021,7 +12022,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmul-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12030,7 +12031,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmulc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12039,7 +12040,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12048,7 +12049,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-raddstoreexpminusmax.cc",
         "test/raddstoreexpminusmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12057,7 +12058,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-rmax.cc",
         "test/rmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12066,7 +12067,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vsigmoid.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12075,7 +12076,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vsub-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12084,7 +12085,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vsubc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12093,25 +12094,25 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vrsubc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f32_argmaxpool_test",
     srcs = [
-        "test/f32-argmaxpool.cc",
         "test/argmaxpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-argmaxpool.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f32_avgpool_minmax_test",
     srcs = [
-        "test/f32-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-avgpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12120,7 +12121,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12129,7 +12130,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-ibilinear-chw.cc",
         "test/ibilinear-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12138,7 +12139,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm.cc",
         "test/f32-igemm-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12149,7 +12150,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm-relu.cc",
         "test/f32-igemm-relu-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12160,7 +12161,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm-minmax.cc",
         "test/f32-igemm-minmax-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12171,45 +12172,45 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "f32_conv_hwc_test",
     srcs = [
-        "test/f32-conv-hwc.cc",
         "test/conv-hwc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-conv-hwc.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
     name = "f32_conv_hwc2chw_test",
     srcs = [
-        "test/f32-conv-hwc2chw.cc",
         "test/conv-hwc2chw-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-conv-hwc2chw.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
     name = "f32_dwconv_test",
     srcs = [
-        "test/f32-dwconv.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-dwconv.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
     name = "f32_dwconv_minmax_test",
     srcs = [
-        "test/f32-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-dwconv-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
     name = "f32_dwconv2d_chw_test",
     srcs = [
-        "test/f32-dwconv2d-chw.cc",
         "test/dwconv2d-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-dwconv2d-chw.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12218,7 +12219,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-f16-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12227,7 +12228,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gavgpool-minmax.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12236,7 +12237,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gavgpool-cw.cc",
         "test/gavgpool-cw-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12245,7 +12246,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm.cc",
         "test/f32-gemm-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
         ":gemm_microkernel_tester",
@@ -12257,7 +12258,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm-relu.cc",
         "test/f32-gemm-relu-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12268,7 +12269,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm-minmax.cc",
         "test/f32-gemm-minmax-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12281,7 +12282,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemminc-minmax.cc",
         "test/f32-gemminc-minmax-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12292,7 +12293,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vhswish.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12301,16 +12302,16 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-maxpool-minmax.cc",
         "test/maxpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "f32_pavgpool_minmax_test",
     srcs = [
-        "test/f32-pavgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/f32-pavgpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12318,7 +12319,7 @@ xnnpack_unit_test(
     name = "f32_ppmm_minmax_test",
     srcs = [
         "test/f32-ppmm-minmax.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12329,7 +12330,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-prelu.cc",
         "test/prelu-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12338,7 +12339,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-qs8-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12347,7 +12348,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-qu8-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12356,7 +12357,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-raddexpminusmax.cc",
         "test/raddexpminusmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12365,7 +12366,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-raddextexp.cc",
         "test/raddextexp-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12374,7 +12375,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-raddstoreexpminusmax.cc",
         "test/raddstoreexpminusmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12383,7 +12384,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-rmax.cc",
         "test/rmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12392,7 +12393,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-spmm-minmax.cc",
         "test/spmm-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12401,7 +12402,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vabs.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12410,7 +12411,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vadd.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12419,7 +12420,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vadd-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12428,7 +12429,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vadd-relu.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12437,7 +12438,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vaddc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12446,7 +12447,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vaddc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12455,7 +12456,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vaddc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12464,7 +12465,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vclamp.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12473,7 +12474,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdiv.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12482,7 +12483,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdiv-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12491,7 +12492,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdiv-relu.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12500,7 +12501,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdivc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12509,7 +12510,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdivc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12518,7 +12519,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vdivc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12527,7 +12528,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrdivc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12536,7 +12537,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrdivc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12545,7 +12546,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrdivc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12554,7 +12555,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-velu.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12563,7 +12564,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12572,7 +12573,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmaxc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12581,7 +12582,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmin.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12590,7 +12591,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vminc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12599,7 +12600,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmul.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12608,7 +12609,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmul-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12617,7 +12618,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmul-relu.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12626,7 +12627,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12635,7 +12636,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12644,7 +12645,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12653,7 +12654,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12662,7 +12663,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vlrelu.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12671,7 +12672,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vneg.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12680,7 +12681,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrelu.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12689,7 +12690,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrndne.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12698,7 +12699,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrndz.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12707,7 +12708,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrndu.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12716,7 +12717,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrndd.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12725,7 +12726,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vscaleexpminusmax.cc",
         "test/vscaleexpminusmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12734,7 +12735,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vscaleextexp.cc",
         "test/vscaleextexp-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12743,7 +12744,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsigmoid.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12752,7 +12753,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsqr.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12761,7 +12762,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsqrdiff.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12770,7 +12771,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsqrdiffc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12779,7 +12780,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsqrt.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12788,7 +12789,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsub.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12797,7 +12798,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsub-minmax.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12806,7 +12807,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsub-relu.cc",
         "test/vbinary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12815,7 +12816,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsubc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12824,7 +12825,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsubc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12833,7 +12834,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vsubc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12842,7 +12843,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrsubc.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12851,7 +12852,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrsubc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12860,7 +12861,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vrsubc-relu.cc",
         "test/vbinaryc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12868,9 +12869,9 @@ xnnpack_unit_test(
     name = "qc8_dwconv_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
-        "test/qc8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qc8-dwconv-minmax-fp32.cc",
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12879,10 +12880,10 @@ xnnpack_unit_test(
     name = "qc8_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
-        "test/qc8-gemm-minmax-fp32-2.cc",
         "test/qc8-gemm-minmax-fp32.cc",
+        "test/qc8-gemm-minmax-fp32-2.cc",
         "test/qc8-gemm-minmax-fp32-3.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12897,7 +12898,7 @@ xnnpack_unit_test(
         "test/qc8-igemm-minmax-fp32.cc",
         "test/qc8-igemm-minmax-fp32-2.cc",
         "test/qc8-igemm-minmax-fp32-3.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12908,9 +12909,9 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "qs8_dwconv_minmax_fp32_test",
     srcs = [
-        "test/qs8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qs8-dwconv-minmax-fp32.cc",
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12918,9 +12919,9 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "qs8_dwconv_minmax_rndnu_test",
     srcs = [
-        "test/qs8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qs8-dwconv-minmax-rndnu.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12929,25 +12930,25 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-f32-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qs8_gavgpool_minmax_fp32_test",
     srcs = [
-        "test/qs8-gavgpool-minmax-fp32.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qs8-gavgpool-minmax-fp32.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qs8_gavgpool_minmax_rndnu_test",
     srcs = [
-        "test/qs8-gavgpool-minmax-rndnu.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qs8-gavgpool-minmax-rndnu.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -12957,7 +12958,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-gemm-minmax-fp32.cc",
         "test/qs8-gemm-minmax-fp32-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -12973,7 +12974,7 @@ xnnpack_unit_test(
         "test/qs8-gemm-minmax-rndnu-3.cc",
         "test/qs8-gemm-minmax-rndnu-4.cc",
         "test/qs8-gemm-minmax-rndnu-5.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12987,7 +12988,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-igemm-minmax-fp32.cc",
         "test/qs8-igemm-minmax-fp32-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13001,7 +13002,7 @@ xnnpack_unit_test(
         "test/qs8-igemm-minmax-rndnu.cc",
         "test/qs8-igemm-minmax-rndnu-2.cc",
         "test/qs8-igemm-minmax-rndnu-3.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -13015,7 +13016,7 @@ xnnpack_unit_test(
         "src/xnnpack/requantization-stubs.h",
         "test/qs8-requantization.cc",
         "test/requantization-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13024,7 +13025,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vadd-minmax.cc",
         "test/vadd-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13033,7 +13034,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vaddc-minmax.cc",
         "test/vaddc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13042,7 +13043,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vmul-minmax-fp32.cc",
         "test/vmul-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13051,7 +13052,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vmul-minmax-rndnu.cc",
         "test/vmul-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13060,7 +13061,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vmulc-minmax-fp32.cc",
         "test/vmulc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13069,34 +13070,34 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-vmulc-minmax-rndnu.cc",
         "test/vmulc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qu8_avgpool_minmax_test",
     srcs = [
-        "test/qu8-avgpool-minmax.cc",
         "test/avgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qu8-avgpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qu8_dwconv_minmax_fp32_test",
     srcs = [
-        "test/qu8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qu8-dwconv-minmax-fp32.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
 xnnpack_unit_test(
     name = "qu8_dwconv_minmax_rndnu_test",
     srcs = [
-        "test/qu8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qu8-dwconv-minmax-rndnu.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -13105,25 +13106,25 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-f32-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qu8_gavgpool_minmax_fp32_test",
     srcs = [
-        "test/qu8-gavgpool-minmax-fp32.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qu8-gavgpool-minmax-fp32.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "qu8_gavgpool_minmax_rndnu_test",
     srcs = [
-        "test/qu8-gavgpool-minmax-rndnu.cc",
         "test/gavgpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/qu8-gavgpool-minmax-rndnu.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13132,7 +13133,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gemm-minmax-fp32.cc",
         "test/qu8-gemm-minmax-fp32-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13144,7 +13145,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gemm-minmax-rndnu.cc",
         "test/qu8-gemm-minmax-rndnu-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13156,7 +13157,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-igemm-minmax-fp32.cc",
         "test/qu8-igemm-minmax-fp32-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13168,7 +13169,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-igemm-minmax-rndnu.cc",
         "test/qu8-igemm-minmax-rndnu-2.cc",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13181,7 +13182,7 @@ xnnpack_unit_test(
         "src/xnnpack/requantization-stubs.h",
         "test/qu8-requantization.cc",
         "test/requantization-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13190,7 +13191,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vadd-minmax.cc",
         "test/vadd-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13199,7 +13200,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vaddc-minmax.cc",
         "test/vaddc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13208,7 +13209,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmul-minmax-fp32.cc",
         "test/vmul-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13217,7 +13218,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmul-minmax-rndnu.cc",
         "test/vmul-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13226,7 +13227,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmulc-minmax-fp32.cc",
         "test/vmulc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13235,25 +13236,25 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmulc-minmax-rndnu.cc",
         "test/vmulc-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "s8_ibilinear_test",
     srcs = [
-        "test/s8-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/s8-ibilinear.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "s8_maxpool_minmax_test",
     srcs = [
-        "test/s8-maxpool-minmax.cc",
         "test/maxpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/s8-maxpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13262,43 +13263,43 @@ xnnpack_unit_test(
     srcs = [
         "test/s8-vclamp.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "u8_ibilinear_test",
     srcs = [
-        "test/u8-ibilinear.cc",
         "test/ibilinear-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/u8-ibilinear.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "u8_lut32norm_test",
     srcs = [
-        "test/u8-lut32norm.cc",
         "test/lut-norm-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/u8-lut32norm.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "u8_maxpool_minmax_test",
     srcs = [
-        "test/u8-maxpool-minmax.cc",
         "test/maxpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/u8-maxpool-minmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "u8_rmax_test",
     srcs = [
-        "test/u8-rmax.cc",
         "test/rmax-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/u8-rmax.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13307,16 +13308,16 @@ xnnpack_unit_test(
     srcs = [
         "test/u8-vclamp.cc",
         "test/vunary-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x8_lut_test",
     srcs = [
-        "test/x8-lut.cc",
         "test/lut-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x8-lut.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13325,79 +13326,79 @@ xnnpack_unit_test(
     srcs = [
         "test/x8-zip.cc",
         "test/zip-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x32_depthtospace2d_chw2hwc_test",
     srcs = [
-        "test/x32-depthtospace2d-chw2hwc.cc",
         "test/depthtospace-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x32-depthtospace2d-chw2hwc.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x32_packx_test",
     srcs = [
-        "test/x32-packx.cc",
         "test/pack-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x32-packx.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x8_transpose_test",
     srcs = [
-        "test/x8-transpose.cc",
         "test/transpose-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x8-transpose.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x16_transpose_test",
     srcs = [
-        "test/x16-transpose.cc",
         "test/transpose-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x16-transpose.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x32_transpose_test",
     srcs = [
-        "test/x32-transpose.cc",
         "test/transpose-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x32-transpose.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x64_transpose_test",
     srcs = [
-        "test/x64-transpose.cc",
         "test/transpose-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x64-transpose.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "xx_transpose_test",
     srcs = [
-        "test/xx-transpose.cc",
         "test/transpose-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/xx-transpose.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "x32_unpool_test",
     srcs = [
-        "test/x32-unpool.cc",
         "test/unpool-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/x32-unpool.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -13406,25 +13407,25 @@ xnnpack_unit_test(
     srcs = [
         "test/x32-zip.cc",
         "test/zip-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "xx_fill_test",
     srcs = [
-        "test/xx-fill.cc",
         "test/fill-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/xx-fill.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "xx_pad_test",
     srcs = [
-        "test/xx-pad.cc",
         "test/pad-microkernel-tester.h",
-    ] + MICROKERNEL_TEST_HDRS,
+        "test/xx-pad.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
