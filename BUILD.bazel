@@ -28,6 +28,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     ":enable_assembly",
     ":enable_jit",
     ":math",
+    ":microkernels_h",
     ":operator_h",
     ":params",
     ":params_init",
@@ -42,6 +43,7 @@ ACCURACY_EVAL_DEPS = [
     ":bench_microkernels",
     ":bench_utils",
     ":common",
+    ":isa_checks",
     ":math_stubs",
     "@FP16",
     "@cpuinfo",
@@ -55,7 +57,6 @@ MICROKERNEL_TEST_DEPS = [
     ":enable_assembly",
     ":isa_checks",
     ":math",
-    ":math_stubs",
     ":microkernels_h",
     ":params",
     ":params_init",
@@ -63,8 +64,6 @@ MICROKERNEL_TEST_DEPS = [
     ":test_microkernels",
     ":xnnpack_h",
     "@FP16",
-    "@cpuinfo",
-    "@pthreadpool",
 ]
 
 OPERATOR_TEST_DEPS = [
@@ -7965,10 +7964,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/zip.h",
 ]
 
-MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS
-
-MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS
-
 # Collection of internal microkernel related headers that declares all the microkernel functions.
 xnnpack_cc_library(
     name = "microkernels_h",
@@ -8080,6 +8075,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        "@cpuinfo",
     ],
 )
 
@@ -8129,7 +8125,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "scalar_bench_microkernels",
     srcs = ALL_SCALAR_MICROKERNEL_SRCS,
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = ["-marm"],
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
@@ -8141,6 +8136,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":params_init",
         ":requantization_stubs",
@@ -8154,7 +8150,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "scalar_prod_microkernels",
     srcs = PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS,
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = ["-marm"],
     aarch32_srcs = PROD_SCALAR_AARCH32_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts() + [
@@ -8170,6 +8165,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8181,7 +8177,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "scalar_test_microkernels",
     srcs = ALL_SCALAR_MICROKERNEL_SRCS,
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = ["-marm"],
     copts = [
         "-UNDEBUG",
@@ -8197,6 +8192,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":params_init",
         ":requantization_stubs",
@@ -8209,7 +8205,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "wasm_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
@@ -8223,6 +8218,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8234,7 +8230,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "wasm_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
@@ -8248,6 +8243,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8259,7 +8255,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "wasm_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -8277,6 +8272,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8288,7 +8284,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neon_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8303,6 +8298,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8313,7 +8309,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neon_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8328,6 +8323,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8337,7 +8333,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neon_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8356,6 +8351,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8366,7 +8362,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8385,6 +8380,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8394,7 +8390,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8413,6 +8408,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8422,7 +8418,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8445,6 +8440,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8454,7 +8450,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfma_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8473,6 +8468,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8482,7 +8478,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfma_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8501,6 +8496,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8510,7 +8506,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfma_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv7-a",
@@ -8533,6 +8528,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8542,7 +8538,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonv8_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
@@ -8561,6 +8556,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8570,7 +8566,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonv8_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
@@ -8589,6 +8584,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8598,7 +8594,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonv8_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8-a",
@@ -8621,6 +8616,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8630,7 +8626,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -8640,6 +8635,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8649,7 +8645,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -8659,6 +8654,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8668,7 +8664,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS,
     copts = [
@@ -8682,6 +8677,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8691,7 +8687,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neondot_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
@@ -8707,6 +8702,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8716,7 +8712,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neondot_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
@@ -8732,6 +8727,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8741,7 +8737,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neondot_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     aarch32_copts = [
         "-marm",
         "-march=armv8.2-a+dotprod",
@@ -8761,6 +8756,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8770,7 +8766,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse2_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8783,6 +8778,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8792,7 +8788,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse2_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8803,6 +8798,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8813,7 +8809,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse2_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8823,6 +8818,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8832,7 +8828,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse2_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -8847,6 +8842,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8857,7 +8853,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "ssse3_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8867,6 +8862,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8877,7 +8873,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "ssse3_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8888,6 +8883,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8898,7 +8894,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "ssse3_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8909,6 +8904,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8918,7 +8914,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "ssse3_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -8933,6 +8928,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8943,7 +8939,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse41_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8953,6 +8948,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -8962,7 +8958,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse41_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8973,6 +8968,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -8983,7 +8979,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse41_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -8994,6 +8989,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9003,7 +8999,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "sse41_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9018,6 +9013,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":requantization_stubs",
         ":tables",
@@ -9028,7 +9024,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9039,6 +9034,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9048,7 +9044,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9060,6 +9055,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9069,7 +9065,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9081,6 +9076,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9090,7 +9086,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9106,6 +9101,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9115,7 +9111,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "f16c_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mf16c"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9125,6 +9120,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9133,7 +9129,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "f16c_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mf16c"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9144,6 +9139,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9152,7 +9148,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "f16c_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mf16c"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9163,6 +9158,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9171,7 +9167,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "f16c_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9186,6 +9181,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         "@FP16",
         "@pthreadpool",
@@ -9194,7 +9190,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "xop_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mxop"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9206,6 +9201,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9215,7 +9211,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "xop_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mxop"],
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -9227,6 +9222,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9236,7 +9232,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "xop_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9251,6 +9246,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9260,7 +9256,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fma3_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9274,6 +9269,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9283,7 +9279,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fma3_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9298,6 +9293,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9307,7 +9303,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fma3_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9321,6 +9316,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9330,7 +9326,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fma3_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9349,6 +9344,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9358,7 +9354,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx2_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9373,6 +9368,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9382,7 +9378,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx2_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9398,6 +9393,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9407,7 +9403,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx2_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mf16c",
@@ -9423,6 +9418,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9432,7 +9428,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx2_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9452,6 +9447,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9461,7 +9457,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512f_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx512f"],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
@@ -9474,6 +9469,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9483,7 +9479,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512f_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx512f"],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
@@ -9497,6 +9492,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9506,7 +9502,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512f_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mavx512f"],
     mingw_copts = ["-fno-asynchronous-unwind-tables"],
@@ -9520,6 +9515,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9529,7 +9525,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512f_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9547,6 +9542,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":math_stubs",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9556,7 +9552,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512skx_amalgam_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mavx512f",
@@ -9575,6 +9570,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9584,7 +9580,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512skx_bench_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mavx512f",
@@ -9603,6 +9598,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9612,7 +9608,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512skx_prod_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
         "-mavx512f",
@@ -9631,6 +9626,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -9640,7 +9636,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "avx512skx_test_microkernels",
-    hdrs = INTERNAL_MICROKERNEL_HDRS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9663,6 +9658,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":microkernels_h",
         ":params",
         ":tables",
         "@FP16",
@@ -10637,7 +10633,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/dwconv.h",
         "bench/qs8-dwconv.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10648,7 +10644,7 @@ xnnpack_benchmark(
     name = "qs8_f32_vcvt_bench",
     srcs = [
         "bench/qs8-f32-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10657,7 +10653,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qs8-gemm.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10670,7 +10666,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/qs8-requantization.cc",
         "src/xnnpack/requantization-stubs.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10678,7 +10674,7 @@ xnnpack_benchmark(
     name = "qs8_vadd_bench",
     srcs = [
         "bench/qs8-vadd.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10686,7 +10682,7 @@ xnnpack_benchmark(
     name = "qs8_vaddc_bench",
     srcs = [
         "bench/qs8-vaddc.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10694,7 +10690,7 @@ xnnpack_benchmark(
     name = "qs8_vmul_bench",
     srcs = [
         "bench/qs8-vmul.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10702,7 +10698,7 @@ xnnpack_benchmark(
     name = "qs8_vmulc_bench",
     srcs = [
         "bench/qs8-vmulc.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10710,7 +10706,7 @@ xnnpack_benchmark(
     name = "qu8_f32_vcvt_bench",
     srcs = [
         "bench/qu8-f32-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10719,7 +10715,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qu8-gemm.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10731,7 +10727,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/qu8-requantization.cc",
         "src/xnnpack/requantization-stubs.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10739,7 +10735,7 @@ xnnpack_benchmark(
     name = "qu8_vadd_bench",
     srcs = [
         "bench/qu8-vadd.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10747,7 +10743,7 @@ xnnpack_benchmark(
     name = "qu8_vaddc_bench",
     srcs = [
         "bench/qu8-vaddc.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10755,7 +10751,7 @@ xnnpack_benchmark(
     name = "qu8_vmul_bench",
     srcs = [
         "bench/qu8-vmul.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10763,16 +10759,16 @@ xnnpack_benchmark(
     name = "qu8_vmulc_bench",
     srcs = [
         "bench/qu8-vmulc.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f16_igemm_bench",
     srcs = [
-        "bench/f16-igemm.cc",
         "bench/conv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f16-igemm.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10784,7 +10780,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-gemm.cc",
         "bench/gemm.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10794,7 +10790,7 @@ xnnpack_benchmark(
     name = "f16_raddstoreexpminusmax_bench",
     srcs = [
         "bench/f16-raddstoreexpminusmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10803,7 +10799,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-spmm.cc",
         "bench/spmm.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10811,7 +10807,7 @@ xnnpack_benchmark(
     name = "f16_vsigmoid_bench",
     srcs = [
         "bench/f16-vsigmoid.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10819,16 +10815,16 @@ xnnpack_benchmark(
     name = "f16_f32_vcvt_bench",
     srcs = [
         "bench/f16-f32-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_igemm_bench",
     srcs = [
-        "bench/f32-igemm.cc",
         "bench/conv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-igemm.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10838,9 +10834,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f32_conv_hwc_bench",
     srcs = [
-        "bench/f32-conv-hwc.cc",
         "bench/dconv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-conv-hwc.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10849,9 +10845,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f32_conv_hwc2chw_bench",
     srcs = [
-        "bench/f32-conv-hwc2chw.cc",
         "bench/dconv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-conv-hwc2chw.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10860,9 +10856,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f16_dwconv_bench",
     srcs = [
-        "bench/f16-dwconv.cc",
         "bench/dwconv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f16-dwconv.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10872,9 +10868,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f32_dwconv_bench",
     srcs = [
-        "bench/f32-dwconv.cc",
         "bench/dwconv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-dwconv.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10884,9 +10880,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f32_dwconv2d_chw_bench",
     srcs = [
-        "bench/f32-dwconv2d-chw.cc",
         "bench/dwconv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-dwconv2d-chw.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10897,7 +10893,7 @@ xnnpack_benchmark(
     name = "f32_f16_vcvt_bench",
     srcs = [
         "bench/f32-f16-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10905,7 +10901,7 @@ xnnpack_benchmark(
     name = "x8_transpose_bench",
     srcs = [
         "bench/x8-transpose.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10913,7 +10909,7 @@ xnnpack_benchmark(
     name = "x16_transpose_bench",
     srcs = [
         "bench/x16-transpose.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10921,7 +10917,7 @@ xnnpack_benchmark(
     name = "x32_transpose_bench",
     srcs = [
         "bench/x32-transpose.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10929,7 +10925,7 @@ xnnpack_benchmark(
     name = "x64_transpose_bench",
     srcs = [
         "bench/x64-transpose.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10938,7 +10934,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-gemm.cc",
         "bench/gemm.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10950,7 +10946,7 @@ xnnpack_benchmark(
     name = "f32_qs8_vcvt_bench",
     srcs = [
         "bench/f32-qs8-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10958,7 +10954,7 @@ xnnpack_benchmark(
     name = "f32_qu8_vcvt_bench",
     srcs = [
         "bench/f32-qu8-vcvt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10966,7 +10962,7 @@ xnnpack_benchmark(
     name = "f32_raddexpminusmax_bench",
     srcs = [
         "bench/f32-raddexpminusmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10974,7 +10970,7 @@ xnnpack_benchmark(
     name = "f32_raddextexp_bench",
     srcs = [
         "bench/f32-raddextexp.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10982,7 +10978,7 @@ xnnpack_benchmark(
     name = "f32_raddstoreexpminusmax_bench",
     srcs = [
         "bench/f32-raddstoreexpminusmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10990,7 +10986,7 @@ xnnpack_benchmark(
     name = "f32_rmax_bench",
     srcs = [
         "bench/f32-rmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -10999,7 +10995,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-spmm.cc",
         "bench/spmm.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11007,7 +11003,7 @@ xnnpack_benchmark(
     name = "f32_softmax_bench",
     srcs = [
         "bench/f32-softmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     copts = xnnpack_optional_dnnl_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + xnnpack_optional_dnnl_deps(),
 )
@@ -11016,7 +11012,7 @@ xnnpack_benchmark(
     name = "f32_velu_bench",
     srcs = [
         "bench/f32-velu.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11024,7 +11020,7 @@ xnnpack_benchmark(
     name = "f32_vhswish_bench",
     srcs = [
         "bench/f32-vhswish.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11032,7 +11028,7 @@ xnnpack_benchmark(
     name = "f32_vlrelu_bench",
     srcs = [
         "bench/f32-vlrelu.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11040,7 +11036,7 @@ xnnpack_benchmark(
     name = "f32_vrelu_bench",
     srcs = [
         "bench/f32-vrelu.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11048,7 +11044,7 @@ xnnpack_benchmark(
     name = "f32_vscaleexpminusmax_bench",
     srcs = [
         "bench/f32-vscaleexpminusmax.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11056,7 +11052,7 @@ xnnpack_benchmark(
     name = "f32_vscaleextexp_bench",
     srcs = [
         "bench/f32-vscaleextexp.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11064,7 +11060,7 @@ xnnpack_benchmark(
     name = "f32_vsigmoid_bench",
     srcs = [
         "bench/f32-vsigmoid.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11072,16 +11068,16 @@ xnnpack_benchmark(
     name = "f32_vsqrt_bench",
     srcs = [
         "bench/f32-vsqrt.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_im2col_gemm_bench",
     srcs = [
-        "bench/f32-im2col-gemm.cc",
         "bench/conv.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-im2col-gemm.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":im2col",
         ":packing",
@@ -11092,7 +11088,7 @@ xnnpack_benchmark(
     name = "rounding_bench",
     srcs = [
         "bench/rounding.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [":math_stubs"],
 )
 
@@ -11100,7 +11096,7 @@ xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
@@ -11511,9 +11507,9 @@ xnnpack_cc_library(
 xnnpack_benchmark(
     name = "f32_dwconv_e2e_bench",
     srcs = [
-        "bench/f32-dwconv-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-dwconv-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":fp32_mobilenet_v1",
@@ -11526,9 +11522,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "f32_gemm_e2e_bench",
     srcs = [
-        "bench/f32-gemm-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/f32-gemm-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":fp32_mobilenet_v1",
@@ -11542,9 +11538,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qs8_dwconv_e2e_bench",
     srcs = [
-        "bench/qs8-dwconv-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/qs8-dwconv-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":qs8_mobilenet_v1",
@@ -11555,9 +11551,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qs8_gemm_e2e_bench",
     srcs = [
-        "bench/qs8-gemm-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/qs8-gemm-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":qs8_mobilenet_v1",
@@ -11568,9 +11564,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qu8_gemm_e2e_bench",
     srcs = [
-        "bench/qu8-gemm-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/qu8-gemm-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":qu8_mobilenet_v1",
@@ -11581,9 +11577,9 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qu8_dwconv_e2e_bench",
     srcs = [
-        "bench/qu8-dwconv-e2e.cc",
         "bench/end2end.h",
-    ] + MICROKERNEL_BENCHMARK_HDRS,
+        "bench/qu8-dwconv-e2e.cc",
+    ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":XNNPACK",
         ":qu8_mobilenet_v1",
@@ -11702,7 +11698,7 @@ xnnpack_unit_test(
         "eval/f16-f32-cvt.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11711,7 +11707,7 @@ xnnpack_unit_test(
         "eval/f32-f16-cvt.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11720,7 +11716,7 @@ xnnpack_unit_test(
         "eval/f32-qs8-cvt.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11729,7 +11725,7 @@ xnnpack_unit_test(
         "eval/f32-qu8-cvt.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11738,7 +11734,7 @@ xnnpack_unit_test(
         "eval/f32-exp.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11747,7 +11743,7 @@ xnnpack_unit_test(
         "eval/f32-expm1minus.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11756,7 +11752,7 @@ xnnpack_unit_test(
         "eval/f32-expminus.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11765,7 +11761,7 @@ xnnpack_unit_test(
         "eval/f32-roundne.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11774,7 +11770,7 @@ xnnpack_unit_test(
         "eval/f32-roundd.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11783,7 +11779,7 @@ xnnpack_unit_test(
         "eval/f32-roundu.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_unit_test(
@@ -11792,7 +11788,7 @@ xnnpack_unit_test(
         "eval/f32-roundz.cc",
     ],
     automatic = False,
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 ######################### Unit tests for micro-kernels #########################
