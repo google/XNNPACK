@@ -25,6 +25,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packx.h>
 #include <xnnpack/params-init.h>

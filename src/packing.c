@@ -13,6 +13,7 @@
 #include <fp16.h>
 
 #include <xnnpack/math.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 
 

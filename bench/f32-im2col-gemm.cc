@@ -17,6 +17,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/im2col.h>
+#include <xnnpack/math.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params-init.h>
 #include <xnnpack/params.h>

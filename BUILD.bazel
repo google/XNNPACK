@@ -7971,7 +7971,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/node-type.h",
     "src/xnnpack/operator.h",
     "src/xnnpack/operator-type.h",
-    "src/xnnpack/pack.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/requantization.h",
 ]
@@ -7979,13 +7978,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
 MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS
 
 MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS
-
-WEIGHTS_PACK_HDRS = [
-    "src/xnnpack/compute.h",
-    "src/xnnpack/operator.h",
-    "src/xnnpack/operator-type.h",
-    "src/xnnpack/pack.h",
-]
 
 xnnpack_cc_library(
     name = "xnnpack_h",
@@ -9973,6 +9965,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":operator_h",
         ":params",
         "@FP16",
         "@FXdiv",
@@ -9994,6 +9987,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":math",
+        ":operator_h",
         ":params",
         "@FP16",
         "@FXdiv",
@@ -10004,24 +9998,21 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "packing",
     srcs = ["src/packing.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/pack.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":math",
-        ":params",
+        ":operator_h",
         "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
 xnnpack_cc_library(
     name = "packing_test_mode",
     srcs = ["src/packing.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/pack.h"],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -10029,13 +10020,10 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":math",
-        ":params",
+        ":operator_h",
         "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -10054,6 +10042,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":operator_h",
         ":params",
         ":xnnpack_h",
         "@FP16",
@@ -10081,6 +10070,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":operator_h",
         ":params",
         ":xnnpack_h",
         "@FP16",
@@ -10176,10 +10166,48 @@ xnnpack_cc_library(
     ],
 )
 
+# Define a library with just the header to remove circular dependencies:
+# operator-run (compute) <-> operators.
+xnnpack_cc_library(
+    name = "compute_h",
+    hdrs = [
+        "src/xnnpack/compute.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":params",
+        ":xnnpack_h",
+    ],
+)
+
+# Define a library with just the header to remove circular dependencies:
+# indirection <-> operators.
+xnnpack_cc_library(
+    name = "operator_h",
+    hdrs = [
+        "src/xnnpack/operator.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":allocator",
+        ":cache",
+        ":compute_h",
+        ":operator_type",
+        ":params",
+        "@pthreadpool",
+    ],
+)
+
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
-    hdrs = ["src/xnnpack/operator.h"],
+    hdrs = [
+        "src/xnnpack/operator.h",
+    ],
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -10215,7 +10243,9 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operators_test_mode",
     srcs = OPERATOR_SRCS,
-    hdrs = ["src/xnnpack/operator.h"],
+    hdrs = [
+        "src/xnnpack/operator.h",
+    ],
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -10611,7 +10641,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qs8-gemm.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10673,7 +10703,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/gemm.h",
         "bench/qu8-gemm.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -10738,7 +10768,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f16-gemm.cc",
         "bench/gemm.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10794,7 +10824,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-conv-hwc.cc",
         "bench/dconv.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10805,7 +10835,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-conv-hwc2chw.cc",
         "bench/dconv.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
     ],
@@ -10840,7 +10870,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-dwconv2d-chw.cc",
         "bench/dwconv.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
         ":packing",
@@ -10892,7 +10922,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-gemm.cc",
         "bench/gemm.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
@@ -11035,7 +11065,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-im2col-gemm.cc",
         "bench/conv.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_BENCHMARK_HDRS,
+    ] + MICROKERNEL_BENCHMARK_HDRS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":im2col",
         ":packing",
@@ -11767,7 +11797,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -11784,7 +11814,7 @@ xnnpack_unit_test(
     name = "f16_gemm_minmax_test",
     srcs = [
         "test/f16-gemm-minmax.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -11803,7 +11833,7 @@ xnnpack_unit_test(
     name = "f16_igemm_minmax_test",
     srcs = [
         "test/f16-igemm-minmax.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -11976,7 +12006,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12075,7 +12105,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm.cc",
         "test/f32-igemm-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12086,7 +12116,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm-relu.cc",
         "test/f32-igemm-relu-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12097,7 +12127,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm-minmax.cc",
         "test/f32-igemm-minmax-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12110,7 +12140,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-conv-hwc.cc",
         "test/conv-hwc-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12119,7 +12149,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-conv-hwc2chw.cc",
         "test/conv-hwc2chw-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12128,7 +12158,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12137,7 +12167,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv-minmax.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12146,7 +12176,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-dwconv2d-chw.cc",
         "test/dwconv2d-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12182,7 +12212,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm.cc",
         "test/f32-gemm-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
         ":gemm_microkernel_tester",
@@ -12194,7 +12224,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm-relu.cc",
         "test/f32-gemm-relu-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12205,7 +12235,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm-minmax.cc",
         "test/f32-gemm-minmax-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12218,7 +12248,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemminc-minmax.cc",
         "test/f32-gemminc-minmax-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12255,7 +12285,7 @@ xnnpack_unit_test(
     name = "f32_ppmm_minmax_test",
     srcs = [
         "test/f32-ppmm-minmax.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -12590,7 +12620,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vmulcaddc-minmax.cc",
         "test/vmulcaddc-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12807,7 +12837,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qc8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12819,7 +12849,7 @@ xnnpack_unit_test(
         "test/qc8-gemm-minmax-fp32-2.cc",
         "test/qc8-gemm-minmax-fp32.cc",
         "test/qc8-gemm-minmax-fp32-3.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12834,7 +12864,7 @@ xnnpack_unit_test(
         "test/qc8-igemm-minmax-fp32.cc",
         "test/qc8-igemm-minmax-fp32-2.cc",
         "test/qc8-igemm-minmax-fp32-3.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12847,7 +12877,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
@@ -12857,7 +12887,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -12894,7 +12924,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-gemm-minmax-fp32.cc",
         "test/qs8-gemm-minmax-fp32-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -12910,7 +12940,7 @@ xnnpack_unit_test(
         "test/qs8-gemm-minmax-rndnu-3.cc",
         "test/qs8-gemm-minmax-rndnu-4.cc",
         "test/qs8-gemm-minmax-rndnu-5.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -12924,7 +12954,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qs8-igemm-minmax-fp32.cc",
         "test/qs8-igemm-minmax-fp32-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -12938,7 +12968,7 @@ xnnpack_unit_test(
         "test/qs8-igemm-minmax-rndnu.cc",
         "test/qs8-igemm-minmax-rndnu-2.cc",
         "test/qs8-igemm-minmax-rndnu-3.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
@@ -13024,7 +13054,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-dwconv-minmax-fp32.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -13033,7 +13063,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-dwconv-minmax-rndnu.cc",
         "test/dwconv-microkernel-tester.h",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
@@ -13069,7 +13099,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gemm-minmax-fp32.cc",
         "test/qu8-gemm-minmax-fp32-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13081,7 +13111,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-gemm-minmax-rndnu.cc",
         "test/qu8-gemm-minmax-rndnu-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13093,7 +13123,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-igemm-minmax-fp32.cc",
         "test/qu8-igemm-minmax-fp32-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -13105,7 +13135,7 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-igemm-minmax-rndnu.cc",
         "test/qu8-igemm-minmax-rndnu-2.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
+    ] + MICROKERNEL_TEST_HDRS,
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
