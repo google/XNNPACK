@@ -102,6 +102,7 @@ OPERATOR_SRCS = [
 ]
 
 SUBGRAPH_SRCS = [
+    "src/subgraph.c",
     "src/subgraph/abs.c",
     "src/subgraph/add2.c",
     "src/subgraph/argmax-pooling-2d.c",
@@ -140,6 +141,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/subtract.c",
     "src/subgraph/unpooling-2d.c",
     "src/subgraph/validation.c",
+    "src/tensor.c",
 ]
 
 TABLE_SRCS = [
@@ -7971,8 +7973,6 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/pack.h",
     "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/requantization.h",
-    "src/xnnpack/subgraph.h",
-    "src/xnnpack/subgraph-validation.h",
 ]
 
 ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
@@ -10097,6 +10097,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":params",
+        ":subgraph",
         "@FP16",
         "@pthreadpool",
     ],
@@ -10122,6 +10123,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":params",
+        ":subgraph",
         "@FP16",
         "@pthreadpool",
     ],
@@ -10293,13 +10295,33 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "subgraph",
+    srcs = SUBGRAPH_SRCS,
+    hdrs = [
+        "src/xnnpack/subgraph.h",
+        "src/xnnpack/subgraph-validation.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":allocator",
+        ":cache",
+        ":common",
+        ":logging",
+        ":math",
+        ":operators",
+        ":params",
+        ":xnnpack_h",
+        "@FP16",
+    ],
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
         "src/runtime.c",
-        "src/subgraph.c",
-        "src/tensor.c",
-    ] + SUBGRAPH_SRCS,
+    ],
     hdrs = ["include/xnnpack.h"],
     copts = [
         "-Isrc",
@@ -10343,6 +10365,7 @@ xnnpack_cc_library(
         ":params",
         ":params_init",
         ":prod_microkernels",
+        ":subgraph",
         "@clog",
         "@FP16",
         "@pthreadpool",
@@ -10357,9 +10380,7 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
         "src/runtime.c",
-        "src/subgraph.c",
-        "src/tensor.c",
-    ] + SUBGRAPH_SRCS,
+    ],
     hdrs = ["include/xnnpack.h"],
     copts = [
         "-Isrc",
@@ -10403,6 +10424,7 @@ xnnpack_cc_library(
         ":operators_test_mode",
         ":params",
         ":params_init",
+        ":subgraph",
         ":test_microkernels",
         "@clog",
         "@FP16",
@@ -10420,9 +10442,7 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
         "src/runtime.c",
-        "src/subgraph.c",
-        "src/tensor.c",
-    ] + SUBGRAPH_SRCS,
+    ],
     hdrs = ["include/xnnpack.h"],
     copts = [
         "-Isrc",
@@ -10481,6 +10501,7 @@ xnnpack_cc_library(
         ":amalgam_microkernels",
         ":params",
         ":params_init",
+        ":subgraph",
         "@clog",
         "@FP16",
         "@pthreadpool",
@@ -13379,7 +13400,9 @@ xnnpack_binary(
 xnnpack_binary(
     name = "subgraph_size_test",
     srcs = ["test/subgraph-size.c"],
-    deps = [":XNNPACK"],
+    deps = [
+        ":XNNPACK",
+    ],
 )
 
 ########################### Unit tests for operators ##########################
@@ -13778,23 +13801,19 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK",
         ":memory_planner",
+        ":subgraph",
     ],
 )
 
 xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = [
-        "src/xnnpack/cache.h",
-        "src/xnnpack/node-type.h",
-        "src/xnnpack/subgraph.h",
         "test/subgraph-nchw.cc",
         "test/subgraph-tester.h",
     ],
     deps = [
         ":XNNPACK",
-        ":allocator",
-        ":common",
-        ":params",
+        ":subgraph",
     ],
 )
 

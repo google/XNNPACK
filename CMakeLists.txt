@@ -198,6 +198,7 @@ SET(OPERATOR_SRCS
   src/operators/unpooling-nhwc.c)
 
 SET(SUBGRAPH_SRCS
+  src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
   src/subgraph/argmax-pooling-2d.c
@@ -235,28 +236,27 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/subtract.c
   src/subgraph/unpooling-2d.c
-  src/subgraph/validation.c)
+  src/subgraph/validation.c
+  src/tensor.c)
 
 SET(LOGGING_SRCS
   src/datatype-strings.c
   src/node-type.c
   src/operator-strings.c)
 
-SET(COLD_SRCS ${OPERATOR_SRCS} ${SUBGRAPH_SRCS})
+SET(COLD_SRCS ${OPERATOR_SRCS})
 LIST(APPEND COLD_SRCS
   src/init.c
   src/memory-planner.c
   src/operator-delete.c
-  src/runtime.c
-  src/subgraph.c
-  src/tensor.c)
+  src/runtime.c)
 
 SET(HOT_SRCS
   src/indirection.c
   src/operator-run.c
   src/packing.c)
 
-set(ALLOCATOR_SRCS
+SET(ALLOCATOR_SRCS
   src/allocator.c
   src/jit/memory.c)
 
@@ -6595,6 +6595,7 @@ ADD_LIBRARY(params_init OBJECT "src/params-init.c")
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(cache OBJECT "src/cache.c")
+ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
   ADD_LIBRARY(XNNPACK ${COLD_SRCS} ${HOT_SRCS} ${TABLE_SRCS} ${JIT_SRCS} ${PROD_MICROKERNEL_SRCS})
 ELSEIF(XNNPACK_LIBRARY_TYPE STREQUAL "shared")
@@ -6699,6 +6700,7 @@ TARGET_COMPILE_DEFINITIONS(allocator PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>
 TARGET_COMPILE_DEFINITIONS(jit PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(cache PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(logging PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(subgraph PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "restrict=")
@@ -6726,6 +6728,7 @@ TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(jit PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
 IF(WIN32)
   # Target Windows 7+ API
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE _WIN32_WINNT=0x0601)
@@ -6764,6 +6767,7 @@ TARGET_LINK_LIBRARIES(allocator PRIVATE clog)
 TARGET_LINK_LIBRARIES(jit PRIVATE clog)
 TARGET_LINK_LIBRARIES(logging PRIVATE clog)
 TARGET_LINK_LIBRARIES(cache PRIVATE clog)
+TARGET_LINK_LIBRARIES(subgraph PRIVATE clog)
 
 # ---[ Configure cpuinfo
 IF(NOT TARGET cpuinfo)
@@ -6813,6 +6817,7 @@ TARGET_LINK_LIBRARIES(jit PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(logging PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(packing PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(params_init PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(subgraph PRIVATE pthreadpool)
 
 # ---[ Configure FXdiv
 IF(NOT TARGET fxdiv)
@@ -6859,6 +6864,7 @@ TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fp16)
 TARGET_LINK_LIBRARIES(packing PRIVATE fp16)
 TARGET_LINK_LIBRARIES(params_init PRIVATE fp16)
 TARGET_LINK_LIBRARIES(indirection PRIVATE fp16)
+TARGET_LINK_LIBRARIES(subgraph PRIVATE fp16)
 
 INSTALL(TARGETS XNNPACK
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -6885,7 +6891,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK cache params_init logging)
 
   ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
-  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK cache params_init logging)
+  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK cache params_init logging subgraph)
 
   # ---[ Build operator-level unit tests
   ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
@@ -7104,7 +7110,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)
   TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging subgraph)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
   # ---[ Build microkernel-level unit tests
