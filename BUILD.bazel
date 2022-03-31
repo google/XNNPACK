@@ -16,9 +16,7 @@ OPERATOR_BENCHMARK_DEPS = [
     ":XNNPACK",
     ":bench_utils",
     ":cache",
-    "@cpuinfo",
     "@FP16",
-    "@pthreadpool",
 ]
 
 MICROKERNEL_BENCHMARK_DEPS = [
