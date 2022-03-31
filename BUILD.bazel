@@ -7938,6 +7938,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/gemm.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",
+    "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/lut.h",
     "src/xnnpack/maxpool.h",
@@ -8139,7 +8140,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":params_init",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8195,7 +8195,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":params_init",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8220,7 +8219,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8245,7 +8243,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8274,7 +8271,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@FXdiv",
@@ -8300,7 +8296,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8353,7 +8348,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8800,7 +8794,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8844,7 +8837,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8864,7 +8856,6 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8885,7 +8876,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8930,7 +8920,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -8970,7 +8959,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -9015,7 +9003,6 @@ xnnpack_cc_library(
         ":math_stubs",
         ":microkernels_h",
         ":params",
-        ":requantization_stubs",
         ":tables",
         "@FP16",
         "@pthreadpool",
@@ -10665,9 +10652,8 @@ xnnpack_benchmark(
     name = "qs8_requantization_bench",
     srcs = [
         "bench/qs8-requantization.cc",
-        "src/xnnpack/requantization-stubs.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":requantization_stubs"],
 )
 
 xnnpack_benchmark(
@@ -10726,9 +10712,8 @@ xnnpack_benchmark(
     name = "qu8_requantization_bench",
     srcs = [
         "bench/qu8-requantization.cc",
-        "src/xnnpack/requantization-stubs.h",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":requantization_stubs"],
 )
 
 xnnpack_benchmark(
@@ -13009,11 +12994,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "qs8_requantization_test",
     srcs = [
-        "src/xnnpack/requantization-stubs.h",
         "test/qs8-requantization.cc",
         "test/requantization-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = MICROKERNEL_TEST_DEPS + [":requantization_stubs"],
 )
 
 xnnpack_unit_test(
@@ -13175,11 +13159,10 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "qu8_requantization_test",
     srcs = [
-        "src/xnnpack/requantization-stubs.h",
         "test/qu8-requantization.cc",
         "test/requantization-tester.h",
     ],
-    deps = MICROKERNEL_TEST_DEPS,
+    deps = MICROKERNEL_TEST_DEPS + [":requantization_stubs"],
 )
 
 xnnpack_unit_test(
