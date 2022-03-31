@@ -28,11 +28,12 @@ MICROKERNEL_BENCHMARK_DEPS = [
     ":enable_assembly",
     ":enable_jit",
     ":math",
+    ":operator_h",
     ":params",
     ":params_init",
     ":xnnpack_h",
-    "@cpuinfo",
     "@FP16",
+    "@cpuinfo",
     "@pthreadpool",
 ]
 
@@ -7966,7 +7967,6 @@ INTERNAL_MICROKERNEL_HDRS = [
 INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
-    "src/xnnpack/indirection.h",
     "src/xnnpack/memory-planner.h",
     "src/xnnpack/node-type.h",
     "src/xnnpack/operator.h",
@@ -9958,25 +9958,22 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "indirection",
     srcs = ["src/indirection.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/indirection.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":math",
         ":operator_h",
-        ":params",
         "@FP16",
         "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
 xnnpack_cc_library(
     name = "indirection_test_mode",
     srcs = ["src/indirection.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/indirection.h"],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9984,14 +9981,11 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":math",
         ":operator_h",
-        ":params",
         "@FP16",
         "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
