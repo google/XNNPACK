@@ -2704,6 +2704,8 @@ ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/6x8-minmax-wasmrelaxedsimd-loadsplat.c",
     "src/f32-igemm/gen/6x8-minmax-wasmrelaxedsimd-splat.c",
     "src/f32-igemm/gen/6x8s4-minmax-wasmrelaxedsimd.c",
+    "src/f32-vmulcaddc/gen/c4-minmax-wasmrelaxedsimd-2x.c",
+    "src/f32-vmulcaddc/gen/c8-minmax-wasmrelaxedsimd-2x.c",
 ]
 
 # ISA-specific micro-kernels
