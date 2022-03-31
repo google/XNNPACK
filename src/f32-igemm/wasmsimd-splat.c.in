@@ -5,6 +5,7 @@
 
 $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert ACTIVATION != "MINMAX" or MINMAX in ["MINMAX", "PMINMAX"]
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -13,8 +14,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$if ACTIVATION == "MINMAX":
+$  WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
+$  WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else "_x86" if X86 else "_arm"
+$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] else "_x86" if MINMAX == "PMINMAX" else "_arm"
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_splat(
     size_t mr,
@@ -58,7 +62,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFI
         c${M} = c${M-1};
       }
 
-  $if ACTIVATION == "MINMAX" and not X86:
+  $if ACTIVATION == "MINMAX":
     const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
@@ -121,24 +125,13 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFI
     } while (p != 0);
 
     $if ACTIVATION == "MINMAX":
-      $if X86:
-        const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vmin, vacc${M}x${ABC[N:N+4]});
+      $for N in range(0, NR, 4):
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MAX}(vmin, vacc${M}x${ABC[N:N+4]});
 
-        const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vmax, vacc${M}x${ABC[N:N+4]});
-      $else:
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_max(vacc${M}x${ABC[N:N+4]}, vmin);
-
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
+      $for N in range(0, NR, 4):
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MIN}(vmax, vacc${M}x${ABC[N:N+4]});
     $elif ACTIVATION == "RELU":
       const v128_t vzero = wasm_i32x4_const_splat(0);
       $for N in range(0, NR, 4):

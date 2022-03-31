@@ -5,14 +5,17 @@
 
 $assert MR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert MINMAX in ["MINMAX", "PMINMAX"]
 #include <assert.h>
 
 #include <wasm_simd128.h>
 
 #include <xnnpack/spmm.h>
 
-$ARCH_SUFFIX = "_x86" if X86 else "_arm"
 
+$WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
+$WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
+$ARCH_SUFFIX = "_x86" if MINMAX == "PMINMAX" else "_arm"
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
@@ -70,16 +73,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
             vi${ABC[M:M+4]} = wasm_v128_load(input + ${M});
         } while (--nnz != 0);
       }
-      $if X86:
-        $for M in range(0, MR, 4):
-          v128_t vout${ABC[M:M+4]} = wasm_f32x4_pmin(vmax, vacc${ABC[M:M+4]});
-        $for M in range(0, MR, 4):
-          vout${ABC[M:M+4]} = wasm_f32x4_pmax(vmin, vout${ABC[M:M+4]});
-      $else:
-        $for M in range(0, MR, 4):
-          v128_t vout${ABC[M:M+4]} = wasm_f32x4_min(vacc${ABC[M:M+4]}, vmax);
-        $for M in range(0, MR, 4):
-          vout${ABC[M:M+4]} = wasm_f32x4_max(vout${ABC[M:M+4]}, vmin);
+      $for M in range(0, MR, 4):
+        v128_t vout${ABC[M:M+4]} = ${WASM_F32X4_MIN}(vmax, vacc${ABC[M:M+4]});
+      $for M in range(0, MR, 4):
+        vout${ABC[M:M+4]} = ${WASM_F32X4_MAX}(vmin, vout${ABC[M:M+4]});
       wasm_v128_store(output, vout0123);
       $for M in range(4, MR, 4):
         wasm_v128_store(output + ${M}, vout${ABC[M:M+4]});
@@ -132,23 +129,13 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
             } while (--nnz != 0);
           }
           $if SUBMR == 1:
-            $if X86:
-              v128_t vout${ABC[0]} = wasm_f32x4_pmin(vmax, vacc${ABC[0]});
-              vout${ABC[0]} = wasm_f32x4_pmax(vmin, vout${ABC[0]});
-            $else:
-              v128_t vout${ABC[0]} = wasm_f32x4_min(vacc${ABC[0]}, vmax);
-              vout${ABC[0]} = wasm_f32x4_max(vout${ABC[0]}, vmin);
+            v128_t vout${ABC[0]} = ${WASM_F32X4_MIN}(vmax, vacc${ABC[0]});
+            vout${ABC[0]} = ${WASM_F32X4_MAX}(vmin, vout${ABC[0]});
           $else:
-            $if X86:
-              $for M in range(0, SUBMR, 4):
-                v128_t vout${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_pmin(vmax, vacc${ABC[M:min(M+4,SUBMR)]});
-              $for M in range(0, SUBMR, 4):
-                vout${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_pmax(vmin, vout${ABC[M:min(M+4,SUBMR)]});
-            $else:
-              $for M in range(0, SUBMR, 4):
-                v128_t vout${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_min(vacc${ABC[M:min(M+4,SUBMR)]}, vmax);
-              $for M in range(0, SUBMR, 4):
-                vout${ABC[M:min(M+4,SUBMR)]} = wasm_f32x4_max(vout${ABC[M:min(M+4,SUBMR)]}, vmin);
+            $for M in range(0, SUBMR, 4):
+              v128_t vout${ABC[M:min(M+4,SUBMR)]} = ${WASM_F32X4_MIN}(vmax, vacc${ABC[M:min(M+4,SUBMR)]});
+            $for M in range(0, SUBMR, 4):
+              vout${ABC[M:min(M+4,SUBMR)]} = ${WASM_F32X4_MAX}(vmin, vout${ABC[M:min(M+4,SUBMR)]});
           $if SUBMR >= 4:
             wasm_v128_store(output, vout0123);
           $elif SUBMR == 2:

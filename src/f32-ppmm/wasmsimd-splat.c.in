@@ -13,7 +13,10 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/ppmm.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"}_splat(
+$WASM_F32X4_MIN={"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
+$WASM_F32X4_MAX={"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
+$ARCH_SUFFIX = "_x86" if MINMAX == "PMINMAX" else "_arm"
+void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_splat(
   size_t mr,
   size_t nc,
   size_t kc,
@@ -46,9 +49,8 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"
         c${M} = c${M-1};
       }
 
-  $if not X86:
-    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
     v128_t vacc0x${ABC[0:4]} = wasm_v128_load(w);
     $for N in range(4, NR, 4):
@@ -82,24 +84,13 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd_${"x86" if X86 else "arm"
       k -= sizeof(float);
     } while (k != 0);
 
-    $if X86:
-      const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmax(vmin, vacc${M}x${ABC[N:N+4]});
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MAX}(vmin, vacc${M}x${ABC[N:N+4]});
 
-      const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_pmin(vmax, vacc${M}x${ABC[N:N+4]});
-    $else:
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_max(vacc${M}x${ABC[N:N+4]}, vmin);
-
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_min(vacc${M}x${ABC[N:N+4]}, vmax);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = ${WASM_F32X4_MIN}(vmax, vacc${M}x${ABC[N:N+4]});
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):

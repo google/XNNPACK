@@ -141,11 +141,11 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmsimd_arm(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-    vacc01x01 = wasm_f32x4_max(vacc01x01, vmin);
-    vacc23x01 = wasm_f32x4_max(vacc23x01, vmin);
+    vacc01x01 = wasm_f32x4_max(vmin, vacc01x01);
+    vacc23x01 = wasm_f32x4_max(vmin, vacc23x01);
 
-    vacc01x01 = wasm_f32x4_min(vacc01x01, vmax);
-    vacc23x01 = wasm_f32x4_min(vacc23x01, vmax);
+    vacc01x01 = wasm_f32x4_min(vmax, vacc01x01);
+    vacc23x01 = wasm_f32x4_min(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
       *((double*) c2) = wasm_f64x2_extract_lane(vacc23x01, 0);

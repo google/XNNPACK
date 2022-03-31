@@ -16,11 +16,11 @@ tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=2 -D ROW_TILE=2 -D WAS
 tools/xngen src/f32-vmulcaddc/scalar.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D WASM=1 -o src/f32-vmulcaddc/gen/c4-minmax-wasm-2x.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D X86=0 -o src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-arm-2x.c &
-tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D X86=0 -o src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-arm-2x.c &
+tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D MINMAX=MINMAX  -o src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-arm-2x.c &
+tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D MINMAX=MINMAX  -o src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-arm-2x.c &
 
-tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D X86=1 -o src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-x86-2x.c &
-tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D X86=1 -o src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-x86-2x.c &
+tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D MINMAX=PMINMAX -o src/f32-vmulcaddc/gen/c4-minmax-wasmsimd-x86-2x.c &
+tools/xngen src/f32-vmulcaddc/wasmsimd.c.in -D CHANNEL_TILE=8 -D ROW_TILE=2 -D MINMAX=PMINMAX -o src/f32-vmulcaddc/gen/c8-minmax-wasmsimd-x86-2x.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vmulcaddc/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -D FMA=0 -o src/f32-vmulcaddc/gen/c4-minmax-neon-2x.c &
