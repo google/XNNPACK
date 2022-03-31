@@ -8041,7 +8041,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
-    hdrs = INTERNAL_HDRS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
