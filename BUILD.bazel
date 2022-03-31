@@ -77,6 +77,7 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
+    "src/operator-delete.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/binary-elementwise-nd.c",
@@ -10104,10 +10105,8 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "operators",
-    srcs = OPERATOR_SRCS + [
-        "src/operator-delete.c",
-    ],
-    hdrs = INTERNAL_HDRS,
+    srcs = OPERATOR_SRCS,
+    hdrs = ["src/xnnpack/operator.h"],
     copts = [
         "-Isrc",
         "-Iinclude",
@@ -10141,10 +10140,8 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "operators_test_mode",
-    srcs = OPERATOR_SRCS + [
-        "src/operator-delete.c",
-    ],
-    hdrs = INTERNAL_HDRS,
+    srcs = OPERATOR_SRCS,
+    hdrs = ["src/xnnpack/operator.h"],
     copts = [
         "-Isrc",
         "-Iinclude",
