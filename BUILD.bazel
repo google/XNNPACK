@@ -15,7 +15,7 @@ exports_files(["LICENSE"])
 OPERATOR_BENCHMARK_DEPS = [
     ":XNNPACK",
     ":bench_utils",
-    ":code_cache",
+    ":cache",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
@@ -63,7 +63,7 @@ MICROKERNEL_TEST_DEPS = [
 ]
 
 OPERATOR_TEST_DEPS = [
-    ":code_cache",
+    ":cache",
     ":common",
     ":params",
     ":XNNPACK_test_mode",
@@ -7854,7 +7854,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/allocator.h",
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
-    "src/xnnpack/codecache.h",
+    "src/xnnpack/cache.h",
     "src/xnnpack/conv.h",
     "src/xnnpack/depthtospace.h",
     "src/xnnpack/dwconv.h",
@@ -10019,18 +10019,17 @@ cc_library(
 )
 
 xnnpack_cc_library(
-    name = "code_cache",
-    srcs = ["src/code-cache.c"],
-    hdrs = INTERNAL_HDRS + [],
+    name = "cache",
+    srcs = ["src/cache.c"],
+    hdrs = ["src/xnnpack/cache.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
-        ":params",
-        "@clog",
-        "@pthreadpool",
+        ":xnnpack_h",
     ],
 )
 
@@ -10054,7 +10053,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":allocator",
-        ":code_cache",
+        ":cache",
         ":common",
         ":indirection",
         ":jit",
@@ -10198,7 +10197,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
-        ":code_cache",
+        ":cache",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -13652,7 +13651,7 @@ xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = [
         "src/xnnpack/allocator.h",
-        "src/xnnpack/codecache.h",
+        "src/xnnpack/cache.h",
         "src/xnnpack/node-type.h",
         "src/xnnpack/subgraph.h",
         "test/subgraph-nchw.cc",
@@ -13705,18 +13704,20 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "code_cache_test",
-    srcs = [
-        "test/code-cache.cc",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = [":XNNPACK"] + MICROKERNEL_TEST_DEPS,
+    srcs = ["test/code-cache.cc"],
+    deps = [
+        ":XNNPACK",
+        ":cache",
+    ],
 )
 
 xnnpack_unit_test(
     name = "weights_cache_test",
-    srcs = [
-        "test/weights-cache.cc",
-    ] + MICROKERNEL_TEST_HDRS,
-    deps = [":XNNPACK"] + MICROKERNEL_TEST_DEPS,
+    srcs = ["test/weights-cache.cc"],
+    deps = [
+        ":XNNPACK",
+        ":cache",
+    ],
 )
 
 ############################# Build configurations #############################

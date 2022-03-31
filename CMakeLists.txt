@@ -6590,7 +6590,7 @@ ADD_LIBRARY(packing OBJECT src/packing.c)
 ADD_LIBRARY(params_init OBJECT "src/params-init.c")
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
-ADD_LIBRARY(code_cache OBJECT "src/code-cache.c")
+ADD_LIBRARY(cache OBJECT "src/cache.c")
 SET_TARGET_PROPERTIES(jit PROPERTIES
   CXX_EXTENSIONS NO)
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
@@ -6695,7 +6695,7 @@ ENDIF()
 TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(allocator PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(jit PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
-TARGET_COMPILE_DEFINITIONS(code_cache PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(cache PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(logging PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
@@ -6704,7 +6704,7 @@ IF(MSVC)
   TARGET_COMPILE_DEFINITIONS(packing PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(indirection PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(jit PRIVATE "restrict=")
-  TARGET_COMPILE_DEFINITIONS(code_cache PRIVATE "restrict=")
+  TARGET_COMPILE_DEFINITIONS(cache PRIVATE "restrict=")
   SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O2 >")
   SET_PROPERTY(SOURCE ${HOT_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O2 >")
   SET_PROPERTY(SOURCE ${COLD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O1 >")
@@ -6723,7 +6723,7 @@ TARGET_INCLUDE_DIRECTORIES(params_init PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(jit PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
-TARGET_INCLUDE_DIRECTORIES(code_cache PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
 IF(WIN32)
   # Target Windows 7+ API
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE _WIN32_WINNT=0x0601)
@@ -6761,7 +6761,7 @@ TARGET_LINK_LIBRARIES(XNNPACK PRIVATE clog)
 TARGET_LINK_LIBRARIES(allocator PRIVATE clog)
 TARGET_LINK_LIBRARIES(jit PRIVATE clog)
 TARGET_LINK_LIBRARIES(logging PRIVATE clog)
-TARGET_LINK_LIBRARIES(code_cache PRIVATE clog)
+TARGET_LINK_LIBRARIES(cache PRIVATE clog)
 
 # ---[ Configure cpuinfo
 IF(NOT TARGET cpuinfo)
@@ -6805,7 +6805,7 @@ ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool allocator)
 TARGET_LINK_LIBRARIES(allocator PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE pthreadpool)
-TARGET_LINK_LIBRARIES(code_cache PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(cache PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(indirection PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(jit PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(logging PRIVATE pthreadpool)
@@ -6850,7 +6850,7 @@ IF(NOT TARGET fp16)
     SET_PROPERTY(TARGET fp16 PROPERTY LINKER_LANGUAGE C)
   ENDIF()
 ENDIF()
-TARGET_LINK_LIBRARIES(XNNPACK PRIVATE code_cache)
+TARGET_LINK_LIBRARIES(XNNPACK PRIVATE cache)
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE fp16)
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE params_init)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fp16)
@@ -6882,12 +6882,12 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(operator-size-test test/operator-size.c)
   SET_TARGET_PROPERTIES(operator-size-test PROPERTIES
     C_EXTENSIONS NO)
-  TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK cache params_init logging)
 
   ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
   SET_TARGET_PROPERTIES(subgraph-size-test PROPERTIES
     C_EXTENSIONS NO)
-  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK cache params_init logging)
 
   # ---[ Build operator-level unit tests
   ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
@@ -6964,7 +6964,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK code_cache fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK cache fp16 gtest gtest_main params_init logging)
   ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
 
   ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
@@ -7188,7 +7188,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(subgraph-nchw-test PROPERTIES
     C_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK code_cache gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
   # ---[ Build microkernel-level unit tests
@@ -8401,13 +8401,13 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(code-cache-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(code-cache-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(code-cache-test PRIVATE XNNPACK code_cache jit pthreadpool gtest gtest_main params_init)
+  TARGET_LINK_LIBRARIES(code-cache-test PRIVATE XNNPACK cache jit pthreadpool gtest gtest_main params_init)
 
   ADD_EXECUTABLE(weights-cache-test test/weights-cache.cc)
   SET_TARGET_PROPERTIES(weights-cache-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(weights-cache-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main code_cache params_init)
+  TARGET_LINK_LIBRARIES(weights-cache-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main cache params_init)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
@@ -8578,43 +8578,43 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   SET_TARGET_PROPERTIES(end2end-bench PROPERTIES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging)
 
   ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-dwconv-e2e-bench PROPERTIES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging)
 
   ADD_EXECUTABLE(f32-gemm-e2e-bench bench/f32-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-gemm-e2e-bench PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache jit params_init logging)
+  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache jit params_init logging)
 
   ADD_EXECUTABLE(qs8-dwconv-e2e-bench bench/qs8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qs8-dwconv-e2e-bench PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
 
   ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qs8-gemm-e2e-bench PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
 
   ADD_EXECUTABLE(qu8-gemm-e2e-bench bench/qu8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-gemm-e2e-bench PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
 
   ADD_EXECUTABLE(qu8-dwconv-e2e-bench bench/qu8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-dwconv-e2e-bench PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils code_cache params_init logging)
+  TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
 
   # ---[ Build operator-level microbenchmarks
   ADD_EXECUTABLE(abs-bench bench/abs.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8657,7 +8657,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   SET_TARGET_PROPERTIES(convolution-bench PROPERTIES
     CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK code_cache fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK cache fp16 benchmark bench-utils params_init logging)
 
   ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(deconvolution-bench PROPERTIES

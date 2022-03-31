@@ -18,7 +18,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
 #include <xnnpack/indirection.h>

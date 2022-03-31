@@ -14,7 +14,7 @@
 #include <pthreadpool.h>
 
 #include <xnnpack/allocator.h>
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/compute.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>

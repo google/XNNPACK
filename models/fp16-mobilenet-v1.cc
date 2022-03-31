@@ -12,7 +12,7 @@
 #include <limits>
 #include <random>
 
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 
 #include <fp16/fp16.h>
 

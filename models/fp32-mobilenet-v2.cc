@@ -13,7 +13,7 @@
 #include <random>
 #include <iostream>
 
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 
 #include "models/models.h"
 

@@ -7,7 +7,7 @@
 #include <cstring> // For memcpy.
 
 #include <xnnpack.h>
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 
 #include <gtest/gtest.h>
 

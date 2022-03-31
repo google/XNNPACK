@@ -10,7 +10,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/node-type.h>
 
 #define XNN_MAX_INPUTS 4

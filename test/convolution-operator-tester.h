@@ -22,7 +22,7 @@
 #include <fp16.h>
 
 #include <xnnpack.h>
-#include <xnnpack/codecache.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/allocator.h>
 
 
