@@ -7979,6 +7979,14 @@ MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS
 
 MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS
 
+# Collection of internal microkernel related headers that declares all the microkernel functions.
+xnnpack_cc_library(
+    name = "microkernels_h",
+    hdrs = INTERNAL_MICROKERNEL_HDRS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
 xnnpack_cc_library(
     name = "xnnpack_h",
     hdrs = ["include/xnnpack.h"],
@@ -10248,6 +10256,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":allocator",
+        ":cache",
         ":common",
         ":indirection_test_mode",
         ":jit_test_mode",
@@ -10272,7 +10281,7 @@ xnnpack_cc_library(
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
     ],
-    hdrs = INTERNAL_HDRS + [
+    hdrs = [
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
         "src/xnnpack/assembler.h",
@@ -10285,6 +10294,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":microkernels_h",
         ":params",
     ],
 )
@@ -10296,7 +10306,7 @@ xnnpack_cc_library(
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
     ],
-    hdrs = INTERNAL_HDRS + [
+    hdrs = [
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
         "src/xnnpack/assembler.h",
@@ -10313,6 +10323,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":microkernels_h",
         ":params",
     ],
 )
@@ -10384,6 +10395,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":memory_planner",
+        ":microkernels_h",
         ":operators",
         ":params",
         ":params_init",
@@ -10444,6 +10456,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":memory_planner_test_mode",
+        ":microkernels_h",
         ":operators_test_mode",
         ":params",
         ":params_init",
@@ -10511,6 +10524,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
+        ":cache",
         ":common",
         ":enable_assembly",
         ":enable_jit",
@@ -10519,6 +10533,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":memory_planner",
+        ":microkernels_h",
         ":operator_run",
         ":operators",
         ":amalgam_microkernels",
@@ -10572,6 +10587,7 @@ xnnpack_cc_library(
         ":jit",
         ":logging",
         ":math",
+        ":microkernels_h",
         ":operator_run",
         ":operators",
         ":params",
@@ -11247,6 +11263,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11259,6 +11276,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11271,6 +11289,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@FP16",
         "@pthreadpool",
@@ -11284,6 +11303,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11296,6 +11316,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11308,6 +11329,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11320,6 +11342,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11332,6 +11355,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11344,6 +11368,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11356,6 +11381,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11368,6 +11394,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11380,6 +11407,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@FP16",
         "@pthreadpool",
@@ -11393,6 +11421,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11405,6 +11434,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11417,6 +11447,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@FP16",
         "@pthreadpool",
@@ -11430,6 +11461,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11442,6 +11474,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@pthreadpool",
     ],
@@ -11454,6 +11487,7 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
+        ":cache",
         ":jit",
         "@FP16",
         "@pthreadpool",
