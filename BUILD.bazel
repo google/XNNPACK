@@ -22,46 +22,48 @@ OPERATOR_BENCHMARK_DEPS = [
 ]
 
 MICROKERNEL_BENCHMARK_DEPS = [
-    ":allocator",
     ":aligned_allocator",
+    ":allocator",
+    ":bench_microkernels",
+    ":bench_utils",
+    ":common",
+    ":enable_assembly",
+    ":enable_jit",
     ":math",
     ":params",
     ":params_init",
-    ":common",
-    ":bench_microkernels",
-    ":bench_utils",
-    ":enable_assembly",
-    ":enable_jit",
+    ":xnnpack_h",
     "@cpuinfo",
     "@FP16",
     "@pthreadpool",
 ]
 
 ACCURACY_EVAL_DEPS = [
-    ":allocator",
     ":aligned_allocator",
-    ":math_stubs",
-    ":common",
-    ":params",
-    ":XNNPACK",
     ":bench_microkernels",
+    ":bench_utils",
+    ":common",
+    ":math_stubs",
     "@FP16",
+    "@cpuinfo",
     "@pthreadpool",
 ]
 
 MICROKERNEL_TEST_DEPS = [
-    ":allocator",
     ":aligned_allocator",
+    ":allocator",
+    ":common",
+    ":enable_assembly",
     ":isa_checks",
-    ":math_stubs",
     ":math",
+    ":math_stubs",
     ":params",
     ":params_init",
-    ":common",
+    ":requantization",
     ":test_microkernels",
-    ":enable_assembly",
-    "@cpuinfo",
+    ":xnnpack_h",
     "@FP16",
+    "@cpuinfo",
     "@pthreadpool",
 ]
 
@@ -7962,7 +7964,6 @@ INTERNAL_MICROKERNEL_HDRS = [
 ]
 
 INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-    "include/xnnpack.h",
     "src/xnnpack/compute.h",
     "src/xnnpack/im2col.h",
     "src/xnnpack/indirection.h",
@@ -7975,17 +7976,9 @@ INTERNAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
     "src/xnnpack/requantization.h",
 ]
 
-ACCURACY_EVAL_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-]
+MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS
 
-MICROKERNEL_BENCHMARK_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-    "include/xnnpack.h",
-]
-
-MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS + [
-    "include/xnnpack.h",
-    "src/xnnpack/requantization.h",
-]
+MICROKERNEL_TEST_HDRS = INTERNAL_MICROKERNEL_HDRS
 
 WEIGHTS_PACK_HDRS = [
     "src/xnnpack/compute.h",
@@ -8018,6 +8011,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":xnnpack_h",
     ],
 )
 
@@ -8106,6 +8100,19 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
+    name = "requantization",
+    hdrs = ["src/xnnpack/requantization.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":params",
+        "@FP16",
+    ],
 )
 
 xnnpack_cc_library(
@@ -10048,6 +10055,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":params",
+        ":xnnpack_h",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -10074,6 +10082,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":params",
+        ":xnnpack_h",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -10195,6 +10204,7 @@ xnnpack_cc_library(
         ":packing",
         ":params",
         ":params_init",
+        ":xnnpack_h",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -10231,6 +10241,7 @@ xnnpack_cc_library(
         ":packing_test_mode",
         ":params",
         ":params_init",
+        ":xnnpack_h",
         "@FP16",
         "@FXdiv",
         "@clog",
@@ -11551,99 +11562,72 @@ xnnpack_benchmark(
     name = "f16_exp_ulp_eval",
     srcs = [
         "eval/f16-exp-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f16_expminus_ulp_eval",
     srcs = [
         "eval/f16-expminus-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f16_sigmoid_ulp_eval",
     srcs = [
         "eval/f16-sigmoid-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_exp_ulp_eval",
     srcs = [
         "eval/f32-exp-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_expminus_ulp_eval",
     srcs = [
         "eval/f32-expminus-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_expm1minus_ulp_eval",
     srcs = [
         "eval/f32-expm1minus-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_extexp_ulp_eval",
     srcs = [
         "eval/f32-extexp-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_sigmoid_ulp_eval",
     srcs = [
         "eval/f32-sigmoid-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 xnnpack_benchmark(
     name = "f32_sqrt_ulp_eval",
     srcs = [
         "eval/f32-sqrt-ulp.cc",
-    ] + ACCURACY_EVAL_HDRS,
-    deps = ACCURACY_EVAL_DEPS + [
-        ":bench_utils",
-        "@cpuinfo",
     ],
+    deps = ACCURACY_EVAL_DEPS,
 )
 
 ################### Accuracy verification for math functions ##################
@@ -11752,12 +11736,8 @@ xnnpack_unit_test(
 xnnpack_cc_library(
     name = "gemm_microkernel_tester",
     testonly = True,
-    srcs = [
-        "test/gemm-microkernel-tester.cc",
-    ] + WEIGHTS_PACK_HDRS + MICROKERNEL_TEST_HDRS,
-    hdrs = [
-        "test/gemm-microkernel-tester.h",
-    ],
+    srcs = ["test/gemm-microkernel-tester.cc"],
+    hdrs = ["test/gemm-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         "@com_google_googletest//:gtest_main",
