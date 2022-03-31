@@ -10030,7 +10030,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operator_run",
     srcs = ["src/operator-run.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/compute.h"],
     copts = select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
@@ -10045,17 +10045,13 @@ xnnpack_cc_library(
         ":operator_h",
         ":params",
         ":xnnpack_h",
-        "@FP16",
-        "@FXdiv",
-        "@clog",
-        "@pthreadpool",
     ],
 )
 
 xnnpack_cc_library(
     name = "operator_run_test_mode",
     srcs = ["src/operator-run.c"],
-    hdrs = INTERNAL_HDRS,
+    hdrs = ["src/xnnpack/compute.h"],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -10073,10 +10069,6 @@ xnnpack_cc_library(
         ":operator_h",
         ":params",
         ":xnnpack_h",
-        "@FP16",
-        "@FXdiv",
-        "@clog",
-        "@pthreadpool",
     ],
 )
 
