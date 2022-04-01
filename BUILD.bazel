@@ -21,21 +21,16 @@ OPERATOR_BENCHMARK_DEPS = [
 
 MICROKERNEL_BENCHMARK_DEPS = [
     ":aligned_allocator",
-    ":allocator",
     ":bench_microkernels",
     ":bench_utils",
     ":common",
     ":enable_assembly",
-    ":enable_jit",
-    ":math",
     ":microkernels_h",
-    ":operator_h",
     ":params",
     ":params_init",
     ":xnnpack_h",
     "@FP16",
     "@cpuinfo",
-    "@pthreadpool",
 ]
 
 ACCURACY_EVAL_DEPS = [
@@ -10622,6 +10617,7 @@ xnnpack_benchmark(
         "bench/qs8-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
         ":indirection",
         ":packing",
     ],
@@ -10643,6 +10639,8 @@ xnnpack_benchmark(
     ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":enable_jit",
+        ":math",
         ":packing",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
@@ -10703,6 +10701,7 @@ xnnpack_benchmark(
     ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":math",
         ":packing",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
@@ -10754,6 +10753,7 @@ xnnpack_benchmark(
         "bench/f16-igemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
         ":indirection",
         ":packing",
     ],
@@ -10766,6 +10766,7 @@ xnnpack_benchmark(
         "bench/gemm.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":math",
         ":packing",
     ],
 )
@@ -10811,6 +10812,7 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":indirection",
+        ":operators",
         ":packing",
     ],
 )
@@ -10844,6 +10846,7 @@ xnnpack_benchmark(
         "bench/f16-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
         ":indirection",
         ":packing",
     ],
@@ -10856,6 +10859,7 @@ xnnpack_benchmark(
         "bench/f32-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
         ":indirection",
         ":packing",
     ],
@@ -10868,6 +10872,7 @@ xnnpack_benchmark(
         "bench/f32-dwconv2d-chw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
         ":indirection",
         ":packing",
     ],
@@ -10921,6 +10926,8 @@ xnnpack_benchmark(
     ],
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
         ":packing",
     ] + xnnpack_optional_ruy_deps(),
 )
@@ -11062,6 +11069,7 @@ xnnpack_benchmark(
         "bench/f32-im2col-gemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":math",
         ":im2col",
         ":packing",
     ],
