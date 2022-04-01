@@ -10410,17 +10410,14 @@ xnnpack_cc_library(
         ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
-    includes = ["include"],
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":cache",
         ":common",
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
-        ":jit",
         ":logging",
         ":math",
         ":memory_planner",
@@ -10430,9 +10427,6 @@ xnnpack_cc_library(
         ":params_init",
         ":prod_microkernels",
         ":subgraph",
-        "@clog",
-        "@FP16",
-        "@pthreadpool",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -10470,7 +10464,6 @@ xnnpack_cc_library(
         ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
-    includes = ["include"],
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
@@ -10479,7 +10472,6 @@ xnnpack_cc_library(
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
-        ":jit_test_mode",
         ":logging",
         ":math",
         ":memory_planner_test_mode",
@@ -10489,9 +10481,6 @@ xnnpack_cc_library(
         ":params_init",
         ":subgraph",
         ":test_microkernels",
-        "@clog",
-        "@FP16",
-        "@pthreadpool",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -10543,30 +10532,23 @@ xnnpack_cc_library(
         ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
-    includes = ["include"],
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":cache",
         ":common",
         ":enable_assembly",
         ":enable_jit",
         ":enable_sparse",
-        ":jit",
         ":logging",
         ":math",
         ":memory_planner",
         ":microkernels_h",
-        ":operator_run",
         ":operators",
         ":amalgam_microkernels",
         ":params",
         ":params_init",
         ":subgraph",
-        "@clog",
-        "@FP16",
-        "@pthreadpool",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -10597,7 +10579,6 @@ xnnpack_cc_library(
         "XNN_NO_NCHW_OPERATORS",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    includes = ["include"],
     msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
@@ -10605,17 +10586,13 @@ xnnpack_cc_library(
         ":common",
         ":enable_assembly",
         ":enable_jit",
-        ":jit",
         ":logging",
         ":math",
         ":microkernels_h",
-        ":operator_run",
         ":operators",
         ":params",
         ":params_init",
         ":prod_microkernels",
-        "@clog",
-        "@pthreadpool",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -10630,7 +10607,6 @@ xnnpack_cc_library(
         ":XNNPACK",
         ":allocator",
         ":common",
-        ":jit",
         ":params",
         "@com_google_benchmark//:benchmark",
         "@cpuinfo",
@@ -10668,7 +10644,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
-        ":jit",
     ] + xnnpack_optional_ruy_deps() + xnnpack_optional_gemmlowp_deps(),
 )
 
@@ -10947,7 +10922,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_ruy_copts(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packing",
-        ":jit",
     ] + xnnpack_optional_ruy_deps(),
 )
 
@@ -11283,7 +11257,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11296,7 +11269,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11309,7 +11281,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
@@ -11323,7 +11294,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11336,7 +11306,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11349,7 +11318,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11362,7 +11330,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11375,7 +11342,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11388,7 +11354,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11401,7 +11366,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11414,7 +11378,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11427,7 +11390,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
@@ -11441,7 +11403,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11454,7 +11415,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11467,7 +11427,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
@@ -11481,7 +11440,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11494,7 +11452,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@pthreadpool",
     ],
 )
@@ -11507,7 +11464,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":jit",
         "@FP16",
         "@pthreadpool",
     ],
@@ -11540,7 +11496,6 @@ xnnpack_benchmark(
         ":fp32_mobilenet_v2",
         ":fp32_mobilenet_v3_large",
         ":fp32_mobilenet_v3_small",
-        ":jit",
     ],
 )
 
@@ -11614,7 +11569,6 @@ xnnpack_benchmark(
         ":fp32_sparse_mobilenet_v2",
         ":fp32_sparse_mobilenet_v3_large",
         ":fp32_sparse_mobilenet_v3_small",
-        ":jit",
         ":qc8_mobilenet_v1",
         ":qc8_mobilenet_v2",
         ":qs8_mobilenet_v1",
@@ -12169,8 +12123,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
@@ -12253,7 +12207,6 @@ xnnpack_unit_test(
         "test/f32-gemm-2.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -12277,8 +12230,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
@@ -12892,8 +12845,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
@@ -12983,8 +12936,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
@@ -13011,8 +12964,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
