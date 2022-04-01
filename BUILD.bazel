@@ -8129,7 +8129,7 @@ xnnpack_cc_library(
     name = "allocator",
     srcs = [
         "src/allocator.c",
-        "src/jit/memory.c",
+        "src/memory.c",
     ],
     hdrs = ["src/xnnpack/allocator.h"],
     # Do not use xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS undefined

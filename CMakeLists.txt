@@ -258,7 +258,7 @@ SET(HOT_SRCS
 
 SET(ALLOCATOR_SRCS
   src/allocator.c
-  src/jit/memory.c)
+  src/memory.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
