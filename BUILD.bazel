@@ -73,6 +73,7 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
+    "src/operator-run.c",
     "src/operator-delete.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
@@ -10063,51 +10064,6 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
-    name = "operator_run",
-    srcs = ["src/operator-run.c"],
-    hdrs = ["src/xnnpack/compute.h"],
-    copts = select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":operator_h",
-        ":params",
-        ":xnnpack_h",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "operator_run_test_mode",
-    srcs = ["src/operator-run.c"],
-    hdrs = ["src/xnnpack/compute.h"],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ] + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":operator_h",
-        ":params",
-        ":xnnpack_h",
-    ],
-)
-
 cc_library(
     name = "enable_assembly",
     defines = select({
@@ -10190,6 +10146,7 @@ xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
+        "src/xnnpack/compute.h",
         "src/xnnpack/operator.h",
     ],
     copts = select({
@@ -10209,7 +10166,6 @@ xnnpack_cc_library(
         ":jit",
         ":logging",
         ":math",
-        ":operator_run",
         ":packing",
         ":params",
         ":params_init",
@@ -10225,6 +10181,7 @@ xnnpack_cc_library(
     name = "operators_test_mode",
     srcs = OPERATOR_SRCS,
     hdrs = [
+        "src/xnnpack/compute.h",
         "src/xnnpack/operator.h",
     ],
     copts = [
@@ -10247,7 +10204,6 @@ xnnpack_cc_library(
         ":jit_test_mode",
         ":logging",
         ":math",
-        ":operator_run_test_mode",
         ":packing_test_mode",
         ":params",
         ":params_init",
