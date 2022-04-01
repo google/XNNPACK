@@ -3,12 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cassert>
 #include <cstddef>
 #include <limits>
 
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
+
 
 namespace xnnpack {
 namespace aarch64 {
@@ -290,6 +292,7 @@ xnn_status xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75(
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
+  assert(params != nullptr);
   auto jit_params = static_cast<const jit_gemm_params*>(params);
   g.generate(false, nc_mod_nr, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
   g.finalize();
@@ -304,6 +307,7 @@ xnn_status xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
+  assert(params != nullptr);
   auto jit_params = static_cast<const jit_gemm_params*>(params);
   g.generate(true, nc_mod_nr, kc, ks, jit_params->f32_minmax.min, jit_params->f32_minmax.max);
   g.finalize();

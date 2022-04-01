@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
+#include <cassert>
 #include <cstddef>
 #include <limits>
 
@@ -259,6 +261,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75(
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
+  assert(params != nullptr);
   const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
   g.generate(false, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
@@ -273,6 +276,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
 {
   using namespace xnnpack::aarch64;
   Generator g(code);
+  assert(params != nullptr);
   const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
   g.generate(true, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();

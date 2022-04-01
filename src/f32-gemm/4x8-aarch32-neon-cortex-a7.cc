@@ -3,6 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
+#include <cassert>
+
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
@@ -248,6 +251,7 @@ void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
 xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
+  assert(params != nullptr);
   g.generate(nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
