@@ -54,7 +54,11 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-igemm/gen/4x8-minmax-aarch32-neon-ld64.S
-void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params) {
+void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params)
+{
+  assert(kc != 0);
+  assert(kc % sizeof(float) == 0);
+
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
 
   // Push 112 bytes

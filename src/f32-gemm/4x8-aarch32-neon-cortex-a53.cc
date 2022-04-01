@@ -56,7 +56,9 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a53.S
-void Generator::generate(size_t nc_mod_nr, size_t kc, float min, float max) {
+void Generator::generate(size_t nc_mod_nr, size_t kc, float min, float max)
+{
+  assert(kc != 0);
   assert(kc % sizeof(float) == 0);
 
   Label nc_loop, kc_loop, epilogue, clamp, remainder_kc, store_odd_width;
