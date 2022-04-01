@@ -12,7 +12,7 @@
 #include <stddef.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/operator.h>
+#include <xnnpack/subconvolution-params.h>
 
 
 #ifdef __cplusplus

@@ -175,6 +175,9 @@ ENDIF()
 
 # ---[ XNNPACK library
 SET(OPERATOR_SRCS
+  src/indirection.c
+  src/operator-delete.c
+  src/operator-run.c
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/binary-elementwise-nd.c
@@ -246,15 +249,10 @@ SET(LOGGING_SRCS
   src/node-type.c
   src/operator-strings.c)
 
-SET(COLD_SRCS ${OPERATOR_SRCS})
-LIST(APPEND COLD_SRCS
-  src/init.c
-  src/operator-delete.c
-  )
+SET(COLD_SRCS
+  src/init.c)
 
 SET(HOT_SRCS
-  src/indirection.c
-  src/operator-run.c
   src/packing.c)
 
 SET(ALLOCATOR_SRCS
@@ -6590,13 +6588,13 @@ ADD_LIBRARY(all_microkernels OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
 ADD_LIBRARY(allocator OBJECT ${ALLOCATOR_SRCS})
 # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
 SET_TARGET_PROPERTIES(allocator PROPERTIES C_EXTENSIONS YES)
-ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(packing OBJECT src/packing.c)
 ADD_LIBRARY(params_init OBJECT "src/params-init.c")
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(cache OBJECT "src/cache.c")
 ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
+ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
   ADD_LIBRARY(XNNPACK ${COLD_SRCS} ${HOT_SRCS} ${TABLE_SRCS} ${JIT_SRCS} ${PROD_MICROKERNEL_SRCS})
 ELSEIF(XNNPACK_LIBRARY_TYPE STREQUAL "shared")
@@ -6702,12 +6700,12 @@ TARGET_COMPILE_DEFINITIONS(jit PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NO
 TARGET_COMPILE_DEFINITIONS(cache PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(logging PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(subgraph PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(operators PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(all_microkernels PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(packing PRIVATE "restrict=")
-  TARGET_COMPILE_DEFINITIONS(indirection PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(jit PRIVATE "restrict=")
   TARGET_COMPILE_DEFINITIONS(cache PRIVATE "restrict=")
   SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O2 >")
@@ -6725,11 +6723,11 @@ TARGET_INCLUDE_DIRECTORIES(allocator PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(all_microkernels PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(params_init PRIVATE include src)
-TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(jit PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
 IF(WIN32)
   # Target Windows 7+ API
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE _WIN32_WINNT=0x0601)
@@ -6741,7 +6739,6 @@ FIND_LIBRARY(LIBM m)
 IF(LIBM)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE ${LIBM})
   TARGET_LINK_LIBRARIES(all_microkernels PRIVATE ${LIBM})
-  TARGET_LINK_LIBRARIES(indirection PRIVATE ${LIBM})
 ENDIF()
 
 # ---[ Configure clog
@@ -6769,6 +6766,7 @@ TARGET_LINK_LIBRARIES(jit PRIVATE clog)
 TARGET_LINK_LIBRARIES(logging PRIVATE clog)
 TARGET_LINK_LIBRARIES(cache PRIVATE clog)
 TARGET_LINK_LIBRARIES(subgraph PRIVATE clog)
+TARGET_LINK_LIBRARIES(operators PRIVATE clog)
 
 # ---[ Configure cpuinfo
 IF(NOT TARGET cpuinfo)
@@ -6813,12 +6811,12 @@ TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool allocator)
 TARGET_LINK_LIBRARIES(allocator PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(cache PRIVATE pthreadpool)
-TARGET_LINK_LIBRARIES(indirection PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(jit PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(logging PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(packing PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(params_init PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(subgraph PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(operators PRIVATE pthreadpool)
 
 # ---[ Configure FXdiv
 IF(NOT TARGET fxdiv)
@@ -6839,7 +6837,6 @@ IF(NOT TARGET fxdiv)
 ENDIF()
 TARGET_LINK_LIBRARIES(XNNPACK PRIVATE fxdiv)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fxdiv)
-TARGET_LINK_LIBRARIES(indirection PRIVATE fxdiv)
 
 # ---[ Configure FP16
 IF(NOT TARGET fp16)
@@ -6864,8 +6861,8 @@ TARGET_LINK_LIBRARIES(XNNPACK PRIVATE params_init)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE fp16)
 TARGET_LINK_LIBRARIES(packing PRIVATE fp16)
 TARGET_LINK_LIBRARIES(params_init PRIVATE fp16)
-TARGET_LINK_LIBRARIES(indirection PRIVATE fp16)
 TARGET_LINK_LIBRARIES(subgraph PRIVATE fp16)
+TARGET_LINK_LIBRARIES(operators PRIVATE fp16)
 
 INSTALL(TARGETS XNNPACK
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -6889,229 +6886,229 @@ IF(XNNPACK_BUILD_TESTS)
   # ---[ Build size tests
 
   ADD_EXECUTABLE(operator-size-test test/operator-size.c)
-  TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK cache params_init logging)
+  TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK cache params_init logging operators)
 
   ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
-  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK cache params_init logging subgraph)
+  TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK cache params_init logging subgraph operators)
 
   # ---[ Build operator-level unit tests
   ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(abs-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(abs-nc-test abs-nc-test)
 
   ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(add-nd-test add-nd-test)
 
   ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(argmax-pooling-nhwc-test argmax-pooling-nhwc-test)
 
   ADD_EXECUTABLE(average-pooling-nhwc-test test/average-pooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(average-pooling-nhwc-test average-pooling-nhwc-test)
 
   ADD_EXECUTABLE(bankers-rounding-nc-test test/bankers-rounding-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(bankers-rounding-nc-test bankers-rounding-nc-test)
 
   ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(ceiling-nc-test ceiling-nc-test)
 
   ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(channel-shuffle-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(channel-shuffle-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(channel-shuffle-nc-test channel-shuffle-nc-test)
 
   ADD_EXECUTABLE(clamp-nc-test test/clamp-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(clamp-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(clamp-nc-test clamp-nc-test)
 
   ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(constant-pad-nd-test constant-pad-nd-test)
 
   ADD_EXECUTABLE(convert-nc-test test/convert-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(convert-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(convert-nc-test convert-nc-test)
 
   ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
   SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK cache fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK cache fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
 
   ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
   SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES
     CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(convolution-nchw-test convolution-nchw-test)
 
   ADD_EXECUTABLE(copy-nc-test test/copy-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(copy-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(copy-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(copy-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(copy-nc-test copy-nc-test)
 
   ADD_EXECUTABLE(deconvolution-nhwc-test test/deconvolution-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(deconvolution-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(deconvolution-nhwc-test deconvolution-nhwc-test)
 
   ADD_EXECUTABLE(depth-to-space-nchw2nhwc-test test/depth-to-space-nchw2nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(depth-to-space-nchw2nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(depth-to-space-nchw2nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(depth-to-space-nchw2nhwc-test depth-to-space-nchw2nhwc-test)
 
   ADD_EXECUTABLE(depth-to-space-nhwc-test test/depth-to-space-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(depth-to-space-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(depth-to-space-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(depth-to-space-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(depth-to-space-nhwc-test depth-to-space-nhwc-test)
 
   ADD_EXECUTABLE(divide-nd-test test/divide-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(divide-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(divide-nd-test divide-nd-test)
 
   ADD_EXECUTABLE(elu-nc-test test/elu-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(elu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(elu-nc-test elu-nc-test)
 
   ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(fully-connected-nc-test fully-connected-nc-test)
 
   ADD_EXECUTABLE(floor-nc-test test/floor-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(floor-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(floor-nc-test floor-nc-test)
 
   ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-nwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(global-average-pooling-nwc-test global-average-pooling-nwc-test)
 
   ADD_EXECUTABLE(global-average-pooling-ncw-test test/global-average-pooling-ncw.cc)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-ncw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(global-average-pooling-ncw-test global-average-pooling-ncw-test)
 
   ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(hardswish-nc-test hardswish-nc-test)
 
   ADD_EXECUTABLE(leaky-relu-nc-test test/leaky-relu-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(leaky-relu-nc-test leaky-relu-nc-test)
 
   ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(max-pooling-nhwc-test max-pooling-nhwc-test)
 
   ADD_EXECUTABLE(maximum-nd-test test/maximum-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(maximum-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(maximum-nd-test maximum-nd-test)
 
   ADD_EXECUTABLE(minimum-nd-test test/minimum-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(minimum-nd-test minimum-nd-test)
 
   ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(multiply-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(multiply-nd-test multiply-nd-test)
 
   ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(negate-nc-test negate-nc-test)
 
   ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(prelu-nc-test prelu-nc-test)
 
   ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(resize-bilinear-nhwc-test resize-bilinear-nhwc-test)
 
   ADD_EXECUTABLE(resize-bilinear-nchw-test test/resize-bilinear-nchw.cc)
   TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(resize-bilinear-nchw-test resize-bilinear-nchw-test)
 
   ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(sigmoid-nc-test sigmoid-nc-test)
 
   ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(softmax-nc-test softmax-nc-test)
 
   ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(square-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(square-nc-test square-nc-test)
 
   ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(square-root-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(square-root-nc-test square-root-nc-test)
 
   ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(squared-difference-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(squared-difference-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(squared-difference-nd-test squared-difference-nd-test)
 
   ADD_EXECUTABLE(subtract-nd-test test/subtract-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(subtract-nd-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(subtract-nd-test subtract-nd-test)
 
   ADD_EXECUTABLE(tanh-nc-test test/tanh-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(tanh-nc-test tanh-nc-test)
 
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(truncation-nc-test truncation-nc-test)
 
   ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(unpooling-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging)
+  TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(unpooling-nhwc-test unpooling-nhwc-test)
 
   ADD_EXECUTABLE(memory-planner-test test/memory-planner-test.cc)
   TARGET_INCLUDE_DIRECTORIES(memory-planner-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK gtest gtest_main params_init logging subgraph)
+  TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK gtest gtest_main params_init subgraph logging operators)
   ADD_TEST(memory-planner-test memory-planner-test)
 
   ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)
   TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging subgraph)
+  TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging subgraph operators)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
   # ---[ Build microkernel-level unit tests
@@ -8127,127 +8124,127 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging operators)
 
   ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache params_init logging operators)
 
   ADD_EXECUTABLE(f32-gemm-e2e-bench bench/f32-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache jit params_init logging)
+  TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache jit params_init logging operators)
 
   ADD_EXECUTABLE(qs8-dwconv-e2e-bench bench/qs8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging operators)
 
   ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging operators)
 
   ADD_EXECUTABLE(qu8-gemm-e2e-bench bench/qu8-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qu8-gemm-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging operators)
 
   ADD_EXECUTABLE(qu8-dwconv-e2e-bench bench/qu8-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-e2e-bench PRIVATE . src)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging)
+  TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache params_init logging operators)
 
   # ---[ Build operator-level microbenchmarks
   ADD_EXECUTABLE(abs-bench bench/abs.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(abs-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(bankers-rounding-bench bench/bankers-rounding.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(bankers-rounding-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(ceiling-bench bench/ceiling.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(ceiling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(convert-bench bench/convert.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(convert-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(convolution-bench bench/convolution.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK cache fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK cache fp16 benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(elu-bench bench/elu.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(elu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(floor-bench bench/floor.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(hardswish-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(hardswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(hardswish-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(leaky-relu-bench bench/leaky-relu.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(leaky-relu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(max-pooling-bench bench/max-pooling.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(negate-bench bench/negate.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(negate-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(prelu-bench bench/prelu.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(softmax-bench bench/softmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(square-bench bench/square.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK benchmark bench-utils params_init logging logging)
+  TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK benchmark bench-utils params_init logging logging operators)
 
   ADD_EXECUTABLE(square-root-bench bench/square-root.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   ADD_EXECUTABLE(truncation-bench bench/truncation.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE .)
-  TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils params_init logging)
+  TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils params_init logging operators)
 
   # ---[ Build microkernel-level microbenchmarks
-  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
@@ -8267,7 +8264,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
@@ -8283,7 +8280,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
@@ -8339,7 +8336,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE benchmark bench-utils fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(qs8-dwconv-bench bench/qs8-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
+  ADD_EXECUTABLE(qs8-dwconv-bench bench/qs8-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 

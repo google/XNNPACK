@@ -13,8 +13,8 @@
 #include <fp16.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/subconvolution-params.h>
 
 
 void xnn_pack_f32_gemm_goi_w(

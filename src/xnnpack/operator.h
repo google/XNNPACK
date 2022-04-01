@@ -18,6 +18,7 @@
 #include <xnnpack/compute.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>
+#include <xnnpack/subconvolution-params.h>
 
 
 enum xnn_ukernel_type {
@@ -117,19 +118,6 @@ enum xnn_run_state {
   xnn_run_state_invalid = 0,
   xnn_run_state_ready,
   xnn_run_state_skip,
-};
-
-struct subconvolution_params {
-  void* weights;
-  size_t w_stride;
-  const void** indirection_buffer;
-  void* output;
-  size_t slice_width;
-  size_t slice_height;
-  size_t indirection_y_stride;
-  size_t indirection_x_stride;
-  // scaled_kernel_size := kernel_size * mr * sizeof(void*).
-  size_t scaled_kernel_size;
 };
 
 struct xnn_operator {

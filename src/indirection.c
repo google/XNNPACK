@@ -14,8 +14,8 @@
 #include <fxdiv.h>
 
 #include <xnnpack/indirection.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/math.h>
+#include <xnnpack/operator.h>
 
 
 void xnn_indirection_init_conv2d(

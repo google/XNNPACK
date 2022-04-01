@@ -73,6 +73,8 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
+    "src/indirection.c",
+    "src/operator-run.c",
     "src/operator-delete.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
@@ -9998,37 +10000,10 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "indirection",
-    srcs = ["src/indirection.c"],
-    hdrs = ["src/xnnpack/indirection.h"],
+    name = "subconvolution_params",
+    hdrs = ["src/xnnpack/subconvolution-params.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":operator_h",
-        "@FP16",
-        "@FXdiv",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "indirection_test_mode",
-    srcs = ["src/indirection.c"],
-    hdrs = ["src/xnnpack/indirection.h"],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":operator_h",
-        "@FP16",
-        "@FXdiv",
-    ],
 )
 
 xnnpack_cc_library(
@@ -10040,7 +10015,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":operator_h",
+        ":subconvolution_params",
         "@FP16",
     ],
 )
@@ -10058,53 +10033,8 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
-        ":operator_h",
+        ":subconvolution_params",
         "@FP16",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "operator_run",
-    srcs = ["src/operator-run.c"],
-    hdrs = ["src/xnnpack/compute.h"],
-    copts = select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":operator_h",
-        ":params",
-        ":xnnpack_h",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "operator_run_test_mode",
-    srcs = ["src/operator-run.c"],
-    hdrs = ["src/xnnpack/compute.h"],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ] + select({
-        ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
-        "//conditions:default": [],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":logging",
-        ":math",
-        ":operator_h",
-        ":params",
-        ":xnnpack_h",
     ],
 )
 
@@ -10150,46 +10080,12 @@ xnnpack_cc_library(
     ],
 )
 
-# Define a library with just the header to remove circular dependencies:
-# operator-run (compute) <-> operators.
-xnnpack_cc_library(
-    name = "compute_h",
-    hdrs = [
-        "src/xnnpack/compute.h",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":common",
-        ":math",
-        ":params",
-        ":xnnpack_h",
-    ],
-)
-
-# Define a library with just the header to remove circular dependencies:
-# indirection <-> operators.
-xnnpack_cc_library(
-    name = "operator_h",
-    hdrs = [
-        "src/xnnpack/operator.h",
-    ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":cache",
-        ":compute_h",
-        ":operator_type",
-        ":params",
-        "@pthreadpool",
-    ],
-)
-
 xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
+        "src/xnnpack/compute.h",
+        "src/xnnpack/indirection.h",
         "src/xnnpack/operator.h",
     ],
     copts = select({
@@ -10205,11 +10101,9 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
-        ":indirection",
         ":jit",
         ":logging",
         ":math",
-        ":operator_run",
         ":packing",
         ":params",
         ":params_init",
@@ -10225,6 +10119,8 @@ xnnpack_cc_library(
     name = "operators_test_mode",
     srcs = OPERATOR_SRCS,
     hdrs = [
+        "src/xnnpack/compute.h",
+        "src/xnnpack/indirection.h",
         "src/xnnpack/operator.h",
     ],
     copts = [
@@ -10243,11 +10139,9 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
-        ":indirection_test_mode",
         ":jit_test_mode",
         ":logging",
         ":math",
-        ":operator_run_test_mode",
         ":packing_test_mode",
         ":params",
         ":params_init",
@@ -10608,7 +10502,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
-        ":indirection",
         ":packing",
     ],
 )
@@ -10744,7 +10637,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
-        ":indirection",
         ":packing",
     ],
 )
@@ -10801,7 +10693,6 @@ xnnpack_benchmark(
         "bench/f32-igemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":indirection",
         ":operators",
         ":packing",
     ],
@@ -10837,7 +10728,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
-        ":indirection",
         ":packing",
     ],
 )
@@ -10850,7 +10740,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
-        ":indirection",
         ":packing",
     ],
 )
@@ -10863,7 +10752,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
-        ":indirection",
         ":packing",
     ],
 )
