@@ -338,6 +338,38 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
 # WAsm
 - name: xnn_f32_dwconv_minmax_ukernel_up1x3__wasm
   init: xnn_init_f32_minmax_scalar_params

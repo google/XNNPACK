@@ -16,6 +16,15 @@
   k-block: 4
 - name: xnn_f32_gemm_ukernel_5x8__wasmsimd_splat
   k-block: 4
+# WAsm Relaxed SIMD
+- name: xnn_f32_gemm_ukernel_1x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_gemm_ukernel_4x2c4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_gemm_ukernel_4x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_gemm_ukernel_5x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
 # WAsm
 - name: xnn_f32_gemm_ukernel_1x4__wasm
   k-block: 1

@@ -31,6 +31,10 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x
   init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_fma_2x
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_fma_2x
+  init: xnn_init_f32_minmax_wasmsimd_params
 # WAsm
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c1__wasm_2x
   init: xnn_init_f32_minmax_scalar_params

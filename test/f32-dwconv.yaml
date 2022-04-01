@@ -12,37 +12,31 @@
 - name: xnn_f32_dwconv_ukernel_up4x4__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up8x3__wasmsimd
 - name: xnn_f32_dwconv_ukernel_up8x4__wasmsimd
+# WAsm Relaxed SIMD
+- name: xnn_f32_dwconv_ukernel_up4x25__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up8x25__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up4x9__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up8x9__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up4x3__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up4x4__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up8x3__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_ukernel_up8x4__wasmrelaxedsimd_fma
 # WAsm
 - name: xnn_f32_dwconv_ukernel_up1x3__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x3__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x4__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x3__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x3__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x4__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x4__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x9__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x9__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x9__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x9__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x25__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up1x25__wasm_acc2
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x25__wasm
-# WAsm
 - name: xnn_f32_dwconv_ukernel_up2x25__wasm_acc2
 # Scalar
 - name: xnn_f32_dwconv_ukernel_up1x3__scalar

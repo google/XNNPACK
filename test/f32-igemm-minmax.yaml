@@ -570,6 +570,54 @@
 - name: xnn_f32_igemm_minmax_ukernel_6x8s4__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_splat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_3x8s4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_4x2c4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_4x8s4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_fma_loadsplat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_fma_splat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_5x8s4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_splat
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_igemm_minmax_ukernel_6x8s4__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
 # WAsm
 - name: xnn_f32_igemm_minmax_ukernel_1x4__wasm
   init: xnn_init_f32_minmax_scalar_params
