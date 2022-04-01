@@ -198,6 +198,8 @@ SET(OPERATOR_SRCS
   src/operators/unpooling-nhwc.c)
 
 SET(SUBGRAPH_SRCS
+  src/memory-planner.c
+  src/runtime.c
   src/subgraph.c
   src/subgraph/abs.c
   src/subgraph/add2.c
@@ -247,9 +249,8 @@ SET(LOGGING_SRCS
 SET(COLD_SRCS ${OPERATOR_SRCS})
 LIST(APPEND COLD_SRCS
   src/init.c
-  src/memory-planner.c
   src/operator-delete.c
-  src/runtime.c)
+  )
 
 SET(HOT_SRCS
   src/indirection.c
@@ -7105,7 +7106,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(memory-planner-test test/memory-planner-test.cc)
   TARGET_INCLUDE_DIRECTORIES(memory-planner-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK gtest gtest_main params_init)
+  TARGET_LINK_LIBRARIES(memory-planner-test PRIVATE XNNPACK gtest gtest_main params_init logging subgraph)
   ADD_TEST(memory-planner-test memory-planner-test)
 
   ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)

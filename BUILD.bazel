@@ -98,6 +98,8 @@ OPERATOR_SRCS = [
 ]
 
 SUBGRAPH_SRCS = [
+    "src/memory-planner.c",
+    "src/runtime.c",
     "src/subgraph.c",
     "src/subgraph/abs.c",
     "src/subgraph/add2.c",
@@ -10106,50 +10108,6 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
-    name = "memory_planner",
-    srcs = ["src/memory-planner.c"],
-    hdrs = ["src/xnnpack/memory-planner.h"],
-    defines = select({
-        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
-        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
-        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":subgraph",
-        "@FP16",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "memory_planner_test_mode",
-    srcs = ["src/memory-planner.c"],
-    hdrs = ["src/xnnpack/memory-planner.h"],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ],
-    defines = select({
-        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
-        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
-        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = [
-        ":allocator",
-        ":common",
-        ":subgraph",
-        "@FP16",
-        "@pthreadpool",
-    ],
-)
-
 cc_library(
     name = "enable_assembly",
     defines = select({
@@ -10359,9 +10317,47 @@ xnnpack_cc_library(
     name = "subgraph",
     srcs = SUBGRAPH_SRCS,
     hdrs = [
+        "src/xnnpack/memory-planner.h",
         "src/xnnpack/subgraph.h",
         "src/xnnpack/subgraph-validation.h",
     ],
+    defines = select({
+        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
+        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
+    }),
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":allocator",
+        ":cache",
+        ":common",
+        ":logging",
+        ":math",
+        ":operators",
+        ":params",
+        ":xnnpack_h",
+        "@FP16",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "subgraph_test_mode",
+    srcs = SUBGRAPH_SRCS,
+    hdrs = [
+        "src/xnnpack/memory-planner.h",
+        "src/xnnpack/subgraph.h",
+        "src/xnnpack/subgraph-validation.h",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    defines = select({
+        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
+        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -10381,7 +10377,6 @@ xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
-        "src/runtime.c",
     ],
     hdrs = ["include/xnnpack.h"],
     copts = select({
@@ -10415,7 +10410,6 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging",
         ":math",
-        ":memory_planner",
         ":microkernels_h",
         ":operators",
         ":params",
@@ -10432,7 +10426,6 @@ xnnpack_cc_library(
     name = "XNNPACK_test_mode",
     srcs = [
         "src/init.c",
-        "src/runtime.c",
     ],
     hdrs = ["include/xnnpack.h"],
     copts = [
@@ -10469,12 +10462,11 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging",
         ":math",
-        ":memory_planner_test_mode",
         ":microkernels_h",
         ":operators_test_mode",
         ":params",
         ":params_init",
-        ":subgraph",
+        ":subgraph_test_mode",
         ":test_microkernels",
     ] + select({
         ":emscripten": [],
@@ -10488,7 +10480,6 @@ xnnpack_cc_library(
     name = "xnnpack_for_tflite",
     srcs = [
         "src/init.c",
-        "src/runtime.c",
     ],
     hdrs = ["include/xnnpack.h"],
     copts = select({
@@ -10537,7 +10528,6 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging",
         ":math",
-        ":memory_planner",
         ":microkernels_h",
         ":operators",
         ":amalgam_microkernels",
@@ -13805,8 +13795,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
-        ":memory_planner",
-        ":subgraph",
+        ":subgraph_test_mode",
     ],
 )
 
@@ -13818,7 +13807,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
-        ":subgraph",
+        ":subgraph_test_mode",
     ],
 )
 
