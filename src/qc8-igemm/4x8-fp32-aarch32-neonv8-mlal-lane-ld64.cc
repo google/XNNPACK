@@ -4,6 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 
+#include <cassert>
+
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
@@ -58,7 +60,11 @@ class Generator : public Assembler {
 //  } xnn_qs8_minmax_params.neonv8;
 
 // Converted from: src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
-void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
+void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, const void* params)
+{
+  assert(ks != 0);
+  assert(kc != 0);
+
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
 
   // Push 80 bytes
