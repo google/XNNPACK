@@ -9736,10 +9736,7 @@ xnnpack_cc_library(
         "src/operator-strings.c",
     ],
     hdrs = ["src/xnnpack/log.h"],
-    copts = [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
+    copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }),
@@ -10242,10 +10239,7 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/operator.h",
     ],
-    copts = [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
+    copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }) + select({
@@ -10281,8 +10275,6 @@ xnnpack_cc_library(
         "src/xnnpack/operator.h",
     ],
     copts = [
-        "-Isrc",
-        "-Iinclude",
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ] + select({
@@ -10397,10 +10389,7 @@ xnnpack_cc_library(
         "src/runtime.c",
     ],
     hdrs = ["include/xnnpack.h"],
-    copts = [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
+    copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }) + select({
@@ -10458,8 +10447,6 @@ xnnpack_cc_library(
     ],
     hdrs = ["include/xnnpack.h"],
     copts = [
-        "-Isrc",
-        "-Iinclude",
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ] + select({
@@ -10520,10 +10507,7 @@ xnnpack_cc_library(
         "src/runtime.c",
     ],
     hdrs = ["include/xnnpack.h"],
-    copts = [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
+    copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }) + select({
@@ -10597,10 +10581,7 @@ xnnpack_cc_library(
         "src/init.c",
     ],
     hdrs = ["include/xnnpack.h"],
-    copts = [
-        "-Isrc",
-        "-Iinclude",
-    ] + select({
+    copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
     }) + select({
