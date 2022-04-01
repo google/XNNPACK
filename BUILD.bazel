@@ -12288,6 +12288,7 @@ xnnpack_unit_test(
         "test/f32-gemminc-minmax.cc",
         "test/f32-gemminc-minmax-2.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
