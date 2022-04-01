@@ -72,6 +72,7 @@ class Generator : public Assembler {
 // Converted from: src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, float min, float max)
 {
+  assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
 

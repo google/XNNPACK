@@ -63,6 +63,7 @@ class Generator : public Assembler {
 // Converted from: src/qs8-gemm/gen/4x8c4-minmax-rndnu-aarch32-neondot-ld64.S
 void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params)
 {
+  assert(nc_mod_nr < 8);
   assert(kc != 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7;

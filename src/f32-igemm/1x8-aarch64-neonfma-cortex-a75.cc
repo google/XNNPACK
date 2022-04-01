@@ -47,9 +47,10 @@ public:
 // Converted from: src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max)
 {
-  assert(ks != 0);
+  assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
