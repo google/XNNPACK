@@ -260,7 +260,7 @@ ExecutionPlan QC8MobileNetV1(pthreadpool_t threadpool) {
 #if XNN_PLATFORM_JIT
   xnn_init_code_cache(&code_cache);
 #endif
-  xnn_caches caches;
+  xnn_caches caches = { 0 };
   caches.code_cache = &code_cache;
 
   xnn_operator_t op0 = nullptr;

@@ -375,7 +375,7 @@ ExecutionPlan FP32MobileNetV2(pthreadpool_t threadpool) {
 #else
   xnn_code_cache code_cache;
 #endif
-  xnn_caches caches;
+  xnn_caches caches = { 0 };
   caches.code_cache = &code_cache;
 
   xnn_operator_t op0 = nullptr;
