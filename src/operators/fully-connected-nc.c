@@ -44,6 +44,7 @@ static enum xnn_status create_fully_connected_nc(
     const struct gemm_fused_ukernels* gemm_ukernels,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
 {
   xnn_operator_t fully_connected_op = NULL;
@@ -106,6 +107,10 @@ static enum xnn_status create_fully_connected_nc(
     goto error;
   }
 
+  if (caches != NULL) {
+    fully_connected_op->weights_cache = caches->weights_cache;
+  }
+
   const uint32_t nr = gemm_parameters->nr;
   const uint32_t kr = UINT32_C(1) << gemm_parameters->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_parameters->log2_sr;
@@ -114,30 +119,36 @@ static enum xnn_status create_fully_connected_nc(
   const size_t k_stride = round_up_po2(input_channels, kr * sr);
 
   const size_t packed_weights_size = n_stride * (bias_element_size + (k_stride << log2_filter_element_size));
-  fully_connected_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
-  if (fully_connected_op->packed_weights.pointer == NULL) {
+  size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+  void* weights_ptr = get_pointer_to_write_weights(
+      fully_connected_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+  if (weights_ptr == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
       packed_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  memset(fully_connected_op->packed_weights.pointer, packed_weights_padding_byte, packed_weights_size);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     pack_gemm_io_w(
       output_channels, input_channels,
       nr, kr, sr,
       kernel, bias,
-      fully_connected_op->packed_weights.pointer,
+      weights_ptr,
       packing_params);
   } else {
     pack_gemm_goi_w(
       1, output_channels, input_channels,
       nr, kr, sr,
       kernel, bias,
-      fully_connected_op->packed_weights.pointer,
+      weights_ptr,
       0 /* extra bytes */,
       packing_params);
+  }
+
+  if (use_weights_cache(caches)) {
+    fully_connected_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+        caches->weights_cache, weights_ptr, aligned_total_weights_size);
   }
 
   fully_connected_op->group_input_channels = input_channels;
@@ -339,6 +350,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
     XNN_INIT_FLAG_QU8,
     xnn_operator_type_fully_connected_nc_qu8,
+    caches,
     fully_connected_op_out);
 }
 
@@ -418,6 +430,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     &xnn_params.qs8.gemm, &xnn_params.qs8.gemm.minmax,
     XNN_INIT_FLAG_QS8,
     xnn_operator_type_fully_connected_nc_qs8,
+    caches,
     fully_connected_op_out);
 }
 
@@ -478,6 +491,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     &xnn_params.f32.gemm, gemm_ukernels,
     XNN_INIT_FLAG_F32,
     xnn_operator_type_fully_connected_nc_f32,
+    caches,
     fully_connected_op_out);
 }
 
@@ -542,6 +556,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     &xnn_params.f16.gemm, &xnn_params.f16.gemm.minmax,
     XNN_INIT_FLAG_F16,
     xnn_operator_type_fully_connected_nc_f16,
+    caches,
     fully_connected_op_out);
 }
 

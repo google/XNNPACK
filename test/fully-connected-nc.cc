@@ -149,6 +149,27 @@ TEST(FULLY_CONNECTED_NC_QS8, small_batch_without_bias) {
     .TestQS8();
 }
 
+TEST(FULLY_CONNECTED_NC_QS8, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
+TEST(FULLY_CONNECTED_NC_QS8, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 TEST(FULLY_CONNECTED_NC_QU8, unit_batch) {
   FullyConnectedOperatorTester()
     .batch_size(1)
@@ -283,6 +304,27 @@ TEST(FULLY_CONNECTED_NC_QU8, small_batch_without_bias) {
     .batch_size(12)
     .input_channels(23)
     .output_channels(19)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(FULLY_CONNECTED_NC_QU8, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(FULLY_CONNECTED_NC_QU8, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQU8();
 }
@@ -425,6 +467,26 @@ TEST(FULLY_CONNECTED_NC_F32, small_batch_without_bias) {
     .TestF32();
 }
 
+TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
 
 TEST(FULLY_CONNECTED_NC_F16, unit_batch) {
   FullyConnectedOperatorTester()
@@ -571,6 +633,27 @@ TEST(FULLY_CONNECTED_NC_F16, small_batch_without_bias) {
     .batch_size(12)
     .input_channels(23)
     .output_channels(19)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(FULLY_CONNECTED_NC_F16, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(FULLY_CONNECTED_NC_F16, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(23)
+    .output_channels(19)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF16();
 }

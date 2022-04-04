@@ -177,6 +177,7 @@ ENDIF()
 SET(OPERATOR_SRCS
   src/operator-delete.c
   src/operator-run.c
+  src/operator-utils.c
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/binary-elementwise-nd.c

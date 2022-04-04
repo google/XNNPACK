@@ -318,3 +318,15 @@ static inline void* packed_weights(struct xnn_operator* op) {
     return (void*) ((uintptr_t) op->weights_cache->cache.weights.start + op->packed_weights.offset);
   }
 }
+
+static inline bool use_weights_cache(xnn_caches_t caches) {
+  return caches != NULL && caches->weights_cache != NULL;
+}
+
+// Get a pointer to a region to pack weights into. If weights cache is available, use it, returning to a pointer to the
+// cache's buffer, otherwise, allocate and return a pointer to a new region. Returns NULL on error.
+void* get_pointer_to_write_weights(
+  xnn_operator_t op,
+  xnn_caches_t caches,
+  size_t aligned_weights_size,
+  int padding_byte);

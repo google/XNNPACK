@@ -73,8 +73,9 @@ OPERATOR_TEST_DEPS = [
 ]
 
 OPERATOR_SRCS = [
-    "src/operator-run.c",
     "src/operator-delete.c",
+    "src/operator-run.c",
+    "src/operator-utils.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/binary-elementwise-nd.c",
