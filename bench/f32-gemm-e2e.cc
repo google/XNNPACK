@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <functional>
 #include <random>
 #include <vector>
@@ -43,6 +44,8 @@ static void GEMMEnd2EndBenchmark(
 
   // Override microkernels chosen in xnn_initialize
   // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
+  std::memset(&xnn_params.f32.gemm, 0, sizeof(xnn_params.f32.gemm));
+  std::memset(&xnn_params.f32.gemm2, 0, sizeof(xnn_params.f32.gemm2));
   xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
   xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
   xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
