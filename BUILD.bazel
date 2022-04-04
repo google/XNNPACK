@@ -10172,8 +10172,6 @@ xnnpack_cc_library(
         ":params_init",
         ":xnnpack_h",
         "@FP16",
-        "@FXdiv",
-        "@clog",
         "@pthreadpool",
     ],
 )
@@ -10210,8 +10208,6 @@ xnnpack_cc_library(
         ":params_init",
         ":xnnpack_h",
         "@FP16",
-        "@FXdiv",
-        "@clog",
         "@pthreadpool",
     ],
 )
