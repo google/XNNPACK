@@ -325,7 +325,7 @@ static inline bool use_weights_cache(xnn_caches_t caches) {
 
 // Get a pointer to a region to pack weights into. If weights cache is available, use it, returning to a pointer to the
 // cache's buffer, otherwise, allocate and return a pointer to a new region. Returns NULL on error.
-void* get_pointer_to_write_weights(
+void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
   xnn_caches_t caches,
   size_t aligned_weights_size,

@@ -7,7 +7,7 @@
 #include <xnnpack/allocator.h> // For XNN_ALLOCATION_ALIGNMENT.
 #include <xnnpack/operator.h>  // For xnn_operator definition.
 
-void* get_pointer_to_write_weights(
+void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
   xnn_caches_t caches,
   size_t aligned_weights_size,

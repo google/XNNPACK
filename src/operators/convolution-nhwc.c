@@ -339,7 +339,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t c_stride = round_up_po2(groups, vmulcaddc_parameters->channel_tile);
       const size_t packed_weights_size = ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) * c_stride;
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-      void* weights_ptr = get_pointer_to_write_weights(
+      void* weights_ptr = xnn_get_pointer_to_write_weights(
           convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator vmulcaddc packed weights",
@@ -372,7 +372,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
       const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-      void* weights_ptr = get_pointer_to_write_weights(
+      void* weights_ptr = xnn_get_pointer_to_write_weights(
           convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
@@ -435,7 +435,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
       const size_t packed_group_weights_size = ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * n_stride;
       const size_t aligned_total_weights_size = round_up_po2(packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
-      void* weights_ptr = get_pointer_to_write_weights(
+      void* weights_ptr = xnn_get_pointer_to_write_weights(
         convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator gemm packed weights",

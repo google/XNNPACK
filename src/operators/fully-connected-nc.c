@@ -120,7 +120,7 @@ static enum xnn_status create_fully_connected_nc(
 
   const size_t packed_weights_size = n_stride * (bias_element_size + (k_stride << log2_filter_element_size));
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = get_pointer_to_write_weights(
+  void* weights_ptr = xnn_get_pointer_to_write_weights(
       fully_connected_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
   if (weights_ptr == NULL) {
     xnn_log_error(
