@@ -677,6 +677,15 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
 
       xnn_status status = xnn_create_convolution2d_nhwc_qc8(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
@@ -690,7 +699,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, 1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          NULL,
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -712,21 +721,65 @@ class ConvolutionOperatorTester {
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
-                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
-                    0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
+      VerifyNHWCxQC8(output, output_ref);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        xnn_status status = xnn_create_convolution2d_nhwc_qc8(
+            padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+            padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
+            kernel_height(), kernel_width(),
+            subsampling_height(), subsampling_width(),
+            dilation_height(), dilation_width(),
+            groups(), group_input_channels(), group_output_channels(),
+            input_channel_stride(), output_channel_stride(),
+            input_zero_point, 1.0f /* input scale */, requantization_scales.data(),
+            kernel.data(), has_bias() ? bias.data() : nullptr,
+            output_zero_point, 1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
+            &caches,
+            &convolution_op2);
+        (void) status;
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
+        std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nhwc_qc8(
+                      convolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        VerifyNHWCxQC8(output2, output_ref);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNHWCxQC8(const std::vector<int8_t> &output,
+                      const std::vector<double> &output_ref) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                  double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
+                  0.9)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -850,6 +903,15 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
 
       xnn_status status = xnn_create_convolution2d_nhwc_qs8(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
@@ -863,7 +925,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          NULL,
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -884,22 +946,70 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
-                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
-                    0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
+      VerifyNHWCxQS8(output, output_ref, output_zero_point);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_qs8(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                input_zero_point, 1.0f /* input scale */,
+                1.0f /* kernel scale */, kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_zero_point,
+                output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+                (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
+                    (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
+                &caches, &convolution_op2));
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_convolution_op(convolution_op2, xnn_delete_operator);
+
+        std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nhwc_qs8(
+                      convolution_op2, batch_size(), input_height(),
+                      input_width(), input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        VerifyNHWCxQS8(output2, output_ref, output_zero_point);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNHWCxQS8(const std::vector<int8_t> &output,
+                      const std::vector<double> &output_ref,
+                      const int8_t output_zero_point) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                  double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                  0.9)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -1023,6 +1133,16 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
+
       xnn_status status = xnn_create_convolution2d_nhwc_qu8(
           padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
           padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
@@ -1036,7 +1156,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          NULL,
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1058,21 +1178,71 @@ class ConvolutionOperatorTester {
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
-                    output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                    double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
-                    0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
+      VerifyNHWCxQU8(output, output_ref, output_zero_point);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nhwc_qu8(
+                padding_tf_same() ? 0 : padding_top(),
+                padding_tf_same() ? 0 : padding_right(),
+                padding_tf_same() ? 0 : padding_bottom(),
+                padding_tf_same() ? 0 : padding_left(), kernel_height(),
+                kernel_width(), subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(), groups(),
+                group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                input_zero_point, 1.0f /* input scale */, kernel_zero_point,
+                1.0f /* kernel scale */, kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_zero_point,
+                output_scale, qmin(), qmax(),
+                (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
+                    (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
+                &caches, &convolution_op2));
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_convolution_op2(convolution_op2, xnn_delete_operator);
+        std::vector<uint8_t> output2(output.size(), UINT8_C(0xA5));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nhwc_qu8(
+                      convolution_op2, batch_size(), input_height(),
+                      input_width(), input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        // Verify results.
+        VerifyNHWCxQU8(output2, output_ref, output_zero_point);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNHWCxQU8(const std::vector<uint8_t> &output,
+                      const std::vector<double> &output_ref,
+                      const uint8_t output_zero_point) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+                  double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+                  0.9)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -1429,6 +1599,15 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
 
       const void* kernel_data = kernel.data();
       const void* bias_data = bias.data();
@@ -1457,7 +1636,7 @@ class ConvolutionOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          NULL,
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1478,19 +1657,61 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-               ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
-                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-               ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
-                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              }
+      VerifyNHWCxF16(output, output_ref, output_min, output_max);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        ASSERT_EQ(xnn_status_success, xnn_create_convolution2d_nhwc_f16(
+            padding_tf_same() ? 0 : padding_top(), padding_tf_same() ? 0 : padding_right(),
+            padding_tf_same() ? 0 : padding_bottom(), padding_tf_same() ? 0 : padding_left(),
+            kernel_height(), kernel_width(),
+            subsampling_height(), subsampling_width(),
+            dilation_height(), dilation_width(),
+            groups(), group_input_channels(), group_output_channels(),
+            input_channel_stride(), output_channel_stride(),
+            kernel_data, has_bias() ? bias_data : nullptr,
+            output_min, output_max,
+            flags,
+            &caches,
+            &convolution_op2));
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
+
+        std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nhwc_f16(
+                      convolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        VerifyNHWCxF16(output2, output_ref, output_min, output_max);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNHWCxF16(const std::vector<uint16_t> &output,
+                      const std::vector<float> &output_ref,
+                      const float output_min, const float output_max) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+             ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+               << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+             ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+               << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -2851,6 +3072,12 @@ class ConvolutionOperatorTester {
       }
     }
   }
+
+  void VerifyWeightsCache(const xnn_weights_cache& weights_cache, size_t old_size) const {
+    ASSERT_EQ(weights_cache.cache.hits, 1);
+    // Ensure that we did not write more weights to the cache because it was a cache hit.
+    ASSERT_EQ(old_size, weights_cache.cache.weights.size);
+  };
 
  private:
   uint32_t padding_top_{0};

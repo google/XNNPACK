@@ -705,6 +705,55 @@ TEST(CONVOLUTION_NHWC_QC8, depthwise_3x3d2x1) {
     .TestNHWCxQC8();
 }
 
+// Tests GEMM microkernel with weights_cache.
+TEST(CONVOLUTION_NHWC_QC8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+// Tests IGEMM microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QC8, weights_cache_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+// Tests vmulcaddc microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QC8, weights_cache_depthwise_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QC8, weights_cache_depthwise_2x2d2) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .dilation(2)
+    .groups(27)
+    .iterations(3)
+    .use_weights_cache(true)
+    .TestNHWCxQC8();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_QC8, 1x1) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
@@ -876,6 +925,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_QC8, 7x7_without_bias) {
     .padding(3, 3)
     .kernel_size(7, 7)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QC8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+// Tests dwconv microkernek with non 1x1 kernel (dwconv_hwg packing).
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QC8, weights_cache_2x2) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .groups(24)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNHWCxQC8();
 }
@@ -1901,6 +1975,55 @@ TEST(CONVOLUTION_NHWC_QS8, depthwise_3x3d2x1) {
     .TestNHWCxQS8();
 }
 
+// Tests GEMM microkernel with weights_cache.
+TEST(CONVOLUTION_NHWC_QS8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+// Tests IGEMM microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QS8, weights_cache_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+// Tests vmulcaddc microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QS8, weights_cache_depthwise_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QS8, weights_cache_depthwise_2x2d2) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .dilation(2)
+    .groups(27)
+    .iterations(3)
+    .use_weights_cache(true)
+    .TestNHWCxQS8();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_QS8, 1x1) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
@@ -2072,6 +2195,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_QS8, 7x7_without_bias) {
     .padding(3, 3)
     .kernel_size(7, 7)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QS8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+// Tests dwconv microkernek with non 1x1 kernel (dwconv_hwg packing).
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QS8, weights_cache_2x2) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .groups(24)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNHWCxQS8();
 }
@@ -3096,6 +3244,55 @@ TEST(CONVOLUTION_NHWC_QU8, depthwise_3x3d2x1) {
     .TestNHWCxQU8();
 }
 
+// Tests GEMM microkernel with weights_cache.
+TEST(CONVOLUTION_NHWC_QU8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+// Tests IGEMM microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QU8, weights_cache_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+// Tests vmulcaddc microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QU8, weights_cache_depthwise_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_QU8, weights_cache_depthwise_2x2d2) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .dilation(2)
+    .groups(27)
+    .iterations(3)
+    .use_weights_cache(true)
+    .TestNHWCxQU8();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_QU8, 1x1) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
@@ -3267,6 +3464,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_QU8, 7x7_without_bias) {
     .padding(3, 3)
     .kernel_size(7, 7)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QU8, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+// Tests dwconv microkernek with non 1x1 kernel (dwconv_hwg packing).
+TEST(DEPTHWISE_CONVOLUTION_NHWC_QU8, weights_cache_2x2) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .groups(24)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNHWCxQU8();
 }
@@ -7720,6 +7942,55 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_5x5d2x1) {
     .TestNHWCxF16();
 }
 
+// Tests GEMM microkernel with weights_cache.
+TEST(CONVOLUTION_NHWC_F16, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+// Tests IGEMM microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F16, weights_cache_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+// Tests vmulcaddc microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F16, weights_cache_depthwise_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(CONVOLUTION_NHWC_F16, weights_cache_depthwise_2x2d2) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .dilation(2)
+    .groups(27)
+    .iterations(3)
+    .use_weights_cache(true)
+    .TestNHWCxF16();
+}
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
@@ -7939,6 +8210,31 @@ TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 7x7_without_bias) {
     .padding(3, 3)
     .kernel_size(7, 7)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+// Tests dwconv microkernel with weights cache.
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, weights_cache_1x1) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .kernel_size(1, 1)
+    .groups(24)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+// Tests dwconv microkernek with non 1x1 kernel (dwconv_hwg packing).
+TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, weights_cache_2x2) {
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(2, 2)
+    .groups(24)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNHWCxF16();
 }

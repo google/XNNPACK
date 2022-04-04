@@ -396,10 +396,6 @@ static enum xnn_status create_convolution2d_nhwc(
           dwconv_ukernel->channel_tile * extra_weights_bytes,
           packing_params);
       }
-      if (use_weights_cache(caches)) {
-        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
-      }
 
       if (scale_params != NULL) {
         assert(init_scale_params != NULL);
@@ -409,6 +405,11 @@ static enum xnn_status create_convolution2d_nhwc(
           dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
           scale_params,
           (void*) ((uintptr_t) weights_ptr + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
+      }
+
+      if (use_weights_cache(caches)) {
+        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+            caches->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;
@@ -456,10 +457,6 @@ static enum xnn_status create_convolution2d_nhwc(
                 groups, group_output_channels, group_input_channels,
                 nr, kr, sr,
                 kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
-          if (use_weights_cache(caches)) {
-            convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-                caches->weights_cache, weights_ptr, aligned_total_weights_size);
-          }
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
             .mr = gemm_parameters->mr,
             .nr = nr,
@@ -496,10 +493,6 @@ static enum xnn_status create_convolution2d_nhwc(
               nr, kr, sr,
               kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
           }
-          if (use_weights_cache(caches)) {
-            convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-                caches->weights_cache, weights_ptr, aligned_total_weights_size);
-          }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
             .mr = gemm_parameters->mr,
             .nr = nr,
@@ -531,7 +524,7 @@ static enum xnn_status create_convolution2d_nhwc(
         assert(init_scale_params != NULL);
 
         void* group_weights = (void*)
-          ((uintptr_t) packed_weights(convolution_op) + gemm_parameters->nr * ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size));
+          ((uintptr_t) weights_ptr + gemm_parameters->nr * ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size));
         const size_t weights_stride = (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
         for (uint32_t group = 0; group < groups; group++) {
           init_scale_params(
@@ -541,6 +534,11 @@ static enum xnn_status create_convolution2d_nhwc(
           scale_params += group_output_channels;
           group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);
         }
+      }
+
+      if (use_weights_cache(caches)) {
+        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+            caches->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);
