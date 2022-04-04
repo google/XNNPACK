@@ -170,7 +170,7 @@ class PReLUOperatorTester {
           ASSERT_NEAR(
               fp16_ieee_to_fp32_value(y[i * y_stride() + c]),
               y_ref[i * channels() + c],
-              std::max(1.0e-4f, std::abs(y_ref[i * channels() + c]) * 1.0e-4f))
+              std::max(1.0e-4f, std::abs(y_ref[i * channels() + c]) * 1.0e-3f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
