@@ -17,7 +17,7 @@ import xngen
 import xnncommon
 
 parser = argparse.ArgumentParser(
-    description="Generates operator-strings code.")
+    description="Generates xnn_operator_type enum.")
 parser.add_argument(
     "-s",
     "--spec",
@@ -30,6 +30,12 @@ parser.add_argument(
     metavar="FILE",
     required=True,
     help="Output (C source) file")
+parser.add_argument(
+    "-e",
+    "--enum",
+    metavar="FILE",
+    required=True,
+    help="Enum to generate")
 parser.set_defaults(defines=list())
 
 
@@ -51,41 +57,19 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
+#pragma once
 
-#include <assert.h>
-#include <stdint.h>
-
-#include <xnnpack/operator-type.h>
-
+enum xnn_{enum}_type {{
 """.format(
-    specification=options.spec, generator=sys.argv[0])
+    specification=options.spec, generator=sys.argv[0], enum=options.enum)
 
-    all_strings = ''
-    pos = 0
-    offset = "static const uint16_t offset[] = {";
-    last_member = ""
-    for ukernel_spec in spec_yaml:
+    name = spec_yaml[0]["name"]
+    output += "  " + name + " = 0,\n"
+    for ukernel_spec in spec_yaml[1:]:
       name = ukernel_spec["name"]
-      string = ukernel_spec["string"]
+      output += "  " + name + ",\n"
 
-      all_strings +=  '    "' + string + '\\0"\n'
-
-      offset += str(pos) + ","
-      pos += len(string) + 1
-      last_member = name
-
-    offset = offset[:-1] + "};"
-    output += offset + '\n\n';
-    output += """static const char *data =
-{all_strings};
-""".format(all_strings=all_strings)
-
-    output += """
-const char* xnn_operator_type_to_string(enum xnn_operator_type type) {{
-  assert(type <= {last_member});
-  return &data[offset[type]];
-}}""".format(last_member=last_member)
-
+    output += "};"
     txt_changed = True
     if os.path.exists(options.output):
       with codecs.open(options.output, "r", encoding="utf-8") as output_file:

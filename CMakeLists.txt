@@ -247,7 +247,8 @@ SET(SUBGRAPH_SRCS
 SET(LOGGING_SRCS
   src/datatype-strings.c
   src/node-type.c
-  src/operator-strings.c)
+  src/operator-strings.c
+  src/ukernel-strings.c)
 
 SET(COLD_SRCS
   src/init.c)

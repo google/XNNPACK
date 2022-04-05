@@ -8130,6 +8130,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "ukernel_type",
+    hdrs = ["src/xnnpack/ukernel-type.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "allocator",
     srcs = [
         "src/allocator.c",
@@ -9733,6 +9740,7 @@ xnnpack_cc_library(
         "src/datatype-strings.c",
         "src/node-type.c",
         "src/operator-strings.c",
+        "src/ukernel-strings.c",
     ],
     hdrs = ["src/xnnpack/log.h"],
     copts = select({
@@ -9761,6 +9769,7 @@ xnnpack_cc_library(
         "//conditions:default": [":log_level_default"],
     }) + [
         ":operator_type",
+        ":ukernel_type",
         ":node_type",
         ":xnnpack_h",
         ":common",
@@ -10139,6 +10148,7 @@ xnnpack_cc_library(
         ":compute_h",
         ":operator_type",
         ":params",
+        ":ukernel_type",
         "@pthreadpool",
     ],
 )

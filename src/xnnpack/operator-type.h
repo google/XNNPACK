@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: src/operator-strings.yaml
-//   Generator: tools/generate-operator-enum.py
+//   Generator: tools/generate-enum.py
 
 #pragma once
 

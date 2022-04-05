@@ -15,6 +15,7 @@
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator-type.h>
+#include <xnnpack/ukernel-type.h>
 
 #ifndef XNN_LOG_LEVEL
   #error "Undefined XNN_LOG_LEVEL"
@@ -43,6 +44,7 @@ extern "C" {
   const char* xnn_node_type_to_string(enum xnn_node_type type);
 #endif
 const char* xnn_operator_type_to_string(enum xnn_operator_type type);
+const char* xnn_ukernel_type_to_string(enum xnn_ukernel_type type);
 
 #ifdef __cplusplus
 }  // extern "C"

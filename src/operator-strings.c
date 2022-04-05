@@ -5,7 +5,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: src/operator-strings.yaml
-//   Generator: tools/generate-operator-strings.py
+//   Generator: tools/generate-enum-strings.py
 
 
 #include <assert.h>

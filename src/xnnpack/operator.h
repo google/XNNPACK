@@ -18,20 +18,8 @@
 #include <xnnpack/compute.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>
+#include <xnnpack/ukernel-type.h>
 
-
-enum xnn_ukernel_type {
-  xnn_ukernel_type_default = 0,
-  xnn_ukernel_type_average_pooling,
-  xnn_ukernel_type_conv2d_hwc2chw,
-  xnn_ukernel_type_dwconv,
-  xnn_ukernel_type_gemm,
-  xnn_ukernel_type_igemm,
-  xnn_ukernel_type_pixelwise_average_pooling,
-  xnn_ukernel_type_spmm,
-  xnn_ukernel_type_subconv2d,
-  xnn_ukernel_type_vmulcaddc,
-};
 
 struct xnn_ukernel_conv2d {
   union {
