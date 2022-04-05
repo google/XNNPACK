@@ -47,6 +47,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         values[slope_id].data /* negative slope */,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
+        caches,
         &opdata->operator_objects[0]);
       break;
 #endif  // XNN_NO_F16_OPERATORS
@@ -55,6 +56,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         values[slope_id].data /* negative slope */,
         node->flags,
+        caches,
         &opdata->operator_objects[0]);
       break;
     default:

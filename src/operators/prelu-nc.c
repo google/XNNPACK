@@ -11,6 +11,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/cache.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
@@ -28,6 +29,7 @@ static enum xnn_status create_prelu_nc(
     xnn_pack_prelu_w_function pack_prelu_w,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
   xnn_operator_t prelu_op = NULL;
@@ -83,15 +85,20 @@ static enum xnn_status create_prelu_nc(
     goto error;
   }
 
-  const size_t packed_weights_size = (channels << log2_weights_element_size) + XNN_EXTRA_BYTES;
-  prelu_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
-  if (prelu_op->packed_weights.pointer == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator packed weights",
-      packed_weights_size, xnn_operator_type_to_string(operator_type));
-    goto error;
+  if (caches != NULL) {
+    prelu_op->weights_cache = caches->weights_cache;
   }
-  pack_prelu_w(channels, negative_slope, prelu_op->packed_weights.pointer);
+
+  const size_t packed_weights_size = (channels << log2_weights_element_size) + XNN_EXTRA_BYTES;
+  const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+  void* weights_ptr = xnn_get_pointer_to_write_weights(
+      prelu_op, caches, aligned_total_weights_size, 0);
+  pack_prelu_w(channels, negative_slope, weights_ptr);
+
+  if (use_weights_cache(caches)) {
+    prelu_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+        caches->weights_cache, weights_ptr, aligned_total_weights_size);
+  }
 
   prelu_op->channels = channels;
   prelu_op->input_pixel_stride = input_stride;
@@ -117,6 +124,7 @@ enum xnn_status xnn_create_prelu_nc_f16(
     size_t output_stride,
     const void* negative_slope,
     uint32_t flags,
+    xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
   xnn_pack_prelu_w_function pack_prelu_w = (xnn_pack_prelu_w_function) xnn_pack_f16_prelu_w;
@@ -130,6 +138,7 @@ enum xnn_status xnn_create_prelu_nc_f16(
     1 /* log2(sizeof(uint16_t)) */,
     pack_prelu_w,
     XNN_INIT_FLAG_F16, xnn_operator_type_prelu_nc_f16,
+    caches,
     prelu_op_out);
 }
 
@@ -139,6 +148,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
     size_t output_stride,
     const float* negative_slope,
     uint32_t flags,
+    xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
   return create_prelu_nc(
@@ -147,6 +157,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
     2 /* log2(sizeof(float)) */,
     (xnn_pack_prelu_w_function) xnn_pack_f32_prelu_w,
     XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
+    caches,
     prelu_op_out);
 }
 

@@ -18,6 +18,7 @@
 #include <vector>
 
 #include <xnnpack.h>
+#include <xnnpack/cache.h>
 
 
 class PReLUOperatorTester {
@@ -95,6 +96,15 @@ class PReLUOperatorTester {
     return this->iterations_;
   }
 
+  inline PReLUOperatorTester& use_weights_cache(bool use_weights_cache) {
+    this->use_weights_cache_ = use_weights_cache;
+    return *this;
+  }
+
+  inline bool use_weights_cache() const {
+    return this->use_weights_cache_;
+  }
+
   void TestF16() const {
     switch (weights_type()) {
       case WeightsType::Default:
@@ -134,6 +144,16 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
+
       const void* negative_slope_data = w.data();
       if (weights_type() == WeightsType::FP32) {
         negative_slope_data = w_as_float.data();
@@ -146,7 +166,7 @@ class PReLUOperatorTester {
         xnn_create_prelu_nc_f16(
           channels(), x_stride(), y_stride(),
           negative_slope_data,
-          flags, &prelu_op));
+          flags, &caches, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
 
       // Smart pointer to automatically delete prelu_op.
@@ -162,15 +182,48 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(prelu_op, nullptr /* thread pool */));
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-              fp16_ieee_to_fp32_value(y[i * y_stride() + c]),
-              y_ref[i * channels() + c],
-              std::max(1.0e-4f, std::abs(y_ref[i * channels() + c]) * 1.0e-3f))
+      VerifyF16(y, y_ref);
+
+      if (use_weights_cache()) {
+        xnn_operator_t prelu_op2 = nullptr;
+        const size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_prelu_nc_f16(
+                      channels(), x_stride(), y_stride(),
+                      negative_slope_data,
+                      flags, &caches, &prelu_op2));
+        ASSERT_NE(nullptr, prelu_op2);
+
+        // Smart pointer to automatically delete prelu_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
+
+        std::vector<uint16_t> y2(y.size(), UINT16_C(0x7E00) /* NaN */);
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nc_f16(
+                      prelu_op2,
+                      batch_size(),
+                      x.data(), y2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(prelu_op2, nullptr /* thread pool */));
+
+        VerifyF16(y2, y_ref);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyF16(const std::vector<uint16_t>& y, const std::vector<float>& y_ref) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_NEAR(
+            fp16_ieee_to_fp32_value(y[i * y_stride() + c]),
+            y_ref[i * channels() + c],
+            std::max(1.0e-4f, std::abs(y_ref[i * channels() + c]) * 1.0e-3f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-        }
       }
     }
   }
@@ -203,11 +256,21 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
+
       ASSERT_EQ(xnn_status_success,
         xnn_create_prelu_nc_f32(
           channels(), x_stride(), y_stride(),
           w.data(),
-          0, &prelu_op));
+          0, &caches, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
 
       // Smart pointer to automatically delete prelu_op.
@@ -223,18 +286,57 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(prelu_op, nullptr /* thread pool */));
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
-              y[i * y_stride() + c],
-              y_ref[i * channels() + c],
-              std::max(1.0e-6f, std::abs(y_ref[i * channels() + c]) * 1.0e-6f))
-            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-        }
+      VerifyF32(y, y_ref);
+
+      if (use_weights_cache()) {
+        xnn_operator_t prelu_op2 = nullptr;
+        const size_t old_weights_cache_size = weights_cache.cache.weights.size;
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_prelu_nc_f32(
+                      channels(), x_stride(), y_stride(),
+                      w.data(),
+                      0, &caches, &prelu_op2));
+        ASSERT_NE(nullptr, prelu_op2);
+
+        // Smart pointer to automatically delete prelu_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
+        std::vector<float> y2(y.size(), nanf(""));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nc_f32(
+                      prelu_op2,
+                      batch_size(),
+                      x.data(), y2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(prelu_op2, nullptr /* thread pool */));
+
+        VerifyF32(y, y_ref);
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
+
+  void VerifyF32(const std::vector<float>& y, const std::vector<float>& y_ref) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t c = 0; c < channels(); c++) {
+        ASSERT_NEAR(
+            y[i * y_stride() + c],
+            y_ref[i * channels() + c],
+            std::max(1.0e-6f, std::abs(y_ref[i * channels() + c]) * 1.0e-6f))
+          << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+      }
+    }
+  }
+
+  void VerifyWeightsCache(const xnn_weights_cache& weights_cache, size_t old_size) const {
+    ASSERT_EQ(weights_cache.cache.hits, 1);
+    // Ensure that we did not write more weights to the cache because it was a cache hit.
+    ASSERT_EQ(old_size, weights_cache.cache.weights.size);
+  };
 
  private:
   size_t batch_size_{1};
@@ -242,5 +344,6 @@ class PReLUOperatorTester {
   size_t x_stride_{0};
   size_t y_stride_{0};
   WeightsType weights_type_{WeightsType::Default};
+  bool use_weights_cache_{false};
   size_t iterations_{15};
 };

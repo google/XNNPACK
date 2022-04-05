@@ -1797,6 +1797,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
   size_t output_stride,
   const float* negative_slope,
   uint32_t flags,
+  xnn_caches_t caches,
   xnn_operator_t* prelu_op_out);
 
 enum xnn_status xnn_setup_prelu_nc_f32(
@@ -2322,6 +2323,7 @@ enum xnn_status xnn_create_prelu_nc_f16(
   size_t output_stride,
   const void* negative_slope,
   uint32_t flags,
+  xnn_caches_t caches,
   xnn_operator_t* prelu_op_out);
 
 enum xnn_status xnn_setup_prelu_nc_f16(

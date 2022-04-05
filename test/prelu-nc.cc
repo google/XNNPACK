@@ -131,6 +131,32 @@ TEST(PRELU_NC_F16, fp32_weights) {
   }
 }
 
+TEST(PRELU_NC_F16, weights_cache_unit_batch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .use_weights_cache(true)
+      .iterations(3)
+      .TestF16();
+  }
+}
+
+TEST(PRELU_NC_F16, weights_cache_fp32_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .channels(channels)
+      .x_stride(345)
+      .y_stride(347)
+      .weights_type(PReLUOperatorTester::WeightsType::FP32)
+      .use_weights_cache(true)
+      .iterations(1)
+      .TestF16();
+  }
+}
 
 TEST(PRELU_NC_F32, unit_batch) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -235,6 +261,18 @@ TEST(PRELU_NC_F32, large_batch_with_x_stride_and_y_stride) {
       .x_stride(337)
       .y_stride(347)
       .iterations(1)
+      .TestF32();
+  }
+}
+
+TEST(PRELU_NC_F32, weights_cache_unit_batch) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .use_weights_cache(true)
+      .iterations(3)
       .TestF32();
   }
 }
