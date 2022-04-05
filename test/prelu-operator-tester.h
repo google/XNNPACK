@@ -107,10 +107,8 @@ class PReLUOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-    auto f16irng = std::bind(fp16_ieee_from_fp32_value, f32irng);
-    auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
-    auto f16wrng = std::bind(fp16_ieee_from_fp32_value, f32wrng);
+    auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
+    auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
     std::vector<uint16_t> x((batch_size() - 1) * x_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> w(channels());
@@ -118,8 +116,8 @@ class PReLUOperatorTester {
     std::vector<uint16_t> y((batch_size() - 1) * y_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<float> y_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f16irng));
-      std::generate(w.begin(), w.end(), std::ref(f16wrng));
+      std::generate(x.begin(), x.end(), [&] { return fp16_ieee_from_fp32_value(f32irng(rng)); });
+      std::generate(w.begin(), w.end(), [&] { return fp16_ieee_from_fp32_value(f32wrng(rng)); });
       std::transform(w.cbegin(), w.cend(), w_as_float.begin(), fp16_ieee_to_fp32_value);
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -182,16 +180,16 @@ class PReLUOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), rng);
-    auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), rng);
+    auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
+    auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
     std::vector<float> x((batch_size() - 1) * x_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> w(channels());
     std::vector<float> y((batch_size() - 1) * y_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> y_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(f32irng));
-      std::generate(w.begin(), w.end(), std::ref(f32wrng));
+      std::generate(x.begin(), x.end(), [&] { return f32irng(rng);} );
+      std::generate(w.begin(), w.end(), [&] { return f32wrng(rng);} );
       std::fill(y.begin(), y.end(), nanf(""));
 
       // Compute reference results, without clamping.
