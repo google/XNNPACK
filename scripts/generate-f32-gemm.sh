@@ -251,6 +251,30 @@ tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=1 -D FMA
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-gemm/gen/6x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-gemm/gen-inc/6x8inc-minmax-wasmrelaxedsimd-fma-loadsplat.c &
 
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/1x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/3x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/4x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/5x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/6x8-relu-wasmsimd-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/1x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/3x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/4x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/5x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/6x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/1x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/3x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/4x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/5x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/6x8-wasmsimd-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/1x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/3x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/4x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/5x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/6x8-wasmrelaxedsimd-fma-loadsplat.c &
+
 ### LOAD4+DUPLICATE micro-kernels
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-gemm/gen/1x8-minmax-wasmsimd-arm-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-gemm/gen-inc/1x8inc-minmax-wasmsimd-arm-splat.c &
@@ -313,20 +337,28 @@ tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-gemm/gen-inc/6x8inc-minmax-wasmrelaxedsimd-fma-splat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/1x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/3x8-relu-wasmsimd-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/4x8-relu-wasmsimd-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/5x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/6x8-relu-wasmsimd-splat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/1x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/3x8-relu-wasmrelaxedsimd-fma-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/4x8-relu-wasmrelaxedsimd-fma-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/5x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/6x8-relu-wasmrelaxedsimd-fma-splat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/1x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/3x8-wasmsimd-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/4x8-wasmsimd-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/5x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/6x8-wasmsimd-splat.c &
 
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/1x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/3x8-wasmrelaxedsimd-fma-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/4x8-wasmrelaxedsimd-fma-splat.c &
 tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/5x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/6x8-wasmrelaxedsimd-fma-splat.c &
 
 ### LOAD4+PERMUTE micro-kernels
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-gemm/gen/1x8s4-minmax-wasmsimd-arm.c &
@@ -388,6 +420,30 @@ tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=1 -D FMA=1 -D A
 
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-gemm/gen/6x8s4-minmax-wasmrelaxedsimd-fma.c &
 tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-gemm/gen-inc/6x8s4inc-minmax-wasmrelaxedsimd-fma.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/1x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/3x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/4x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/5x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -o src/f32-gemm/gen/6x8s4-relu-wasmsimd.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/1x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/3x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/4x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/5x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -o src/f32-gemm/gen/6x8s4-relu-wasmrelaxedsimd-fma.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/1x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/3x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/4x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/5x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-gemm/gen/6x8s4-wasmsimd.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/1x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/3x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/4x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/5x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-gemm/gen/6x8s4-wasmrelaxedsimd-fma.c &
 
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-gemm/gen/4x2c4-minmax-wasmsimd-arm.c &
