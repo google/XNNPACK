@@ -13010,6 +13010,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "test/qu8-dwconv-minmax-fp32.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 
