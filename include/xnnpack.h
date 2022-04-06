@@ -1968,6 +1968,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   float output_min,
   float output_max,
   uint32_t flags,
+  xnn_caches_t caches,
   xnn_operator_t* convolution_op_out);
 
 enum xnn_status xnn_setup_convolution2d_nchw_f32(

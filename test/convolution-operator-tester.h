@@ -1719,7 +1719,7 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void TestNCHWxF32() const {
+  void TestNCHWxF32() {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
     std::random_device random_device;
@@ -1861,6 +1861,15 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
+      xnn_caches caches = {
+        .code_cache = NULL,
+        .weights_cache = NULL,
+      };
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
 
       xnn_status status = xnn_create_convolution2d_nchw_f32(
           padding_top(), padding_right(), padding_bottom(), padding_left(),
@@ -1872,6 +1881,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
+          &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_parameter) {
         GTEST_SKIP();
@@ -1892,22 +1902,68 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        for (size_t y = 0; y < output_height(); y++) {
-          for (size_t x = 0; x < output_width(); x++) {
-            for (size_t g = 0; g < groups(); g++) {
-              for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-                ASSERT_LE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-                ASSERT_NEAR(
-                    output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x],
-                    output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x],
-                    1.0e-4 * std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-              }
+      VerifyNCHWxF32(output, output_ref, output_min, output_max);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_create_convolution2d_nchw_f32(
+                padding_top(), padding_right(), padding_bottom(),
+                padding_left(), kernel_height(), kernel_width(),
+                subsampling_height(), subsampling_width(), dilation_height(),
+                dilation_width(), groups(), group_input_channels(),
+                group_output_channels(), input_channel_stride(),
+                output_channel_stride(), kernel.data(),
+                has_bias() ? bias.data() : nullptr, output_min, output_max,
+                (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
+                    (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
+                &caches, &convolution_op2));
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
+        std::vector<float> output2(output.size(), nanf(""));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nchw_f32(
+                      convolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        VerifyNCHWxF32(output2, output_ref, output_min, output_max);
+        if (IsSpmm()) {
+          VerifyWeightsCacheUnused(weights_cache);
+        } else {
+          VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        }
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNCHWxF32(const std::vector<float> &output,
+                      const std::vector<float> &output_ref,
+                      const float output_min, const float output_max) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              ASSERT_GE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
+              ASSERT_LE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
+              ASSERT_NEAR(
+                  output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x],
+                  output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x],
+                  1.0e-4 * std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
             }
           }
         }
@@ -3073,11 +3129,24 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void VerifyWeightsCache(const xnn_weights_cache& weights_cache, size_t old_size) const {
+  void VerifyWeightsCache(const xnn_weights_cache &weights_cache, size_t old_size) const {
     ASSERT_EQ(weights_cache.cache.hits, 1);
-    // Ensure that we did not write more weights to the cache because it was a cache hit.
+    // Ensure that we did not write more weights to the cache because it was a
+    // cache hit.
     ASSERT_EQ(old_size, weights_cache.cache.weights.size);
   };
+
+  void VerifyWeightsCacheUnused(const xnn_weights_cache &weights_cache) const {
+    ASSERT_EQ(weights_cache.cache.hits, 0);
+    ASSERT_EQ(0, weights_cache.cache.weights.size);
+  }
+
+  bool IsSpmm() const {
+    const bool is_1x1 = kernel_width() == 1 && kernel_height() == 1 &&
+        subsampling_height() == 1 && subsampling_width() == 1;
+    const bool any_padding = (padding_left() | padding_top() | padding_right() | padding_bottom()) != 0;
+    return is_1x1 && !any_padding && !force_nhwc_input() && groups() == 1;
+  }
 
  private:
   uint32_t padding_top_{0};

@@ -75,6 +75,7 @@ static enum xnn_status create_convolution_operator(
       node->activation.output_min,
       node->activation.output_max,
       node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
+      caches,
       &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);

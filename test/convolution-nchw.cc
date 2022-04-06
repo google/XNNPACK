@@ -126,6 +126,20 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_without_bias) {
     .TestNCHWxF32();
 }
 
+// Weights cache is not supported for SPMM microkernel, add a test here, but skip the assertions.
+TEST(CONVOLUTION_NCHW_F32, weights_cache_1x1) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .sparsity(0.5f)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
 /**************************** SPMM path, batched ****************************/
 
 TEST(CONVOLUTION_NCHW_F32, batched_1x1) {
@@ -385,6 +399,21 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_without_bias) {
     .TestNCHWxF32();
 }
 
+TEST(CONVOLUTION_NHWC2NCHW_OP_F32, weights_cache_3x3c3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .force_nhwc_input(true)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
 /**************************** DConv 3x3c3s2 HWC->CHW path, batched ****************************/
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2) {
@@ -513,6 +542,22 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_without_bias) {
     .TestNCHWxF32();
 }
 
+TEST(CONVOLUTION_NHWC2NCHW_OP_F32, weights_cache_batched_3x3c3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .force_nhwc_input(true)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
 /**************************** DWCONV 3x3 path ****************************/
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3) {
@@ -606,6 +651,18 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_without_bias) {
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(CONVOLUTION_NCHW_F32, weights_cache_depthwise_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNCHWxF32();
 }
@@ -735,6 +792,19 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_without_bias) {
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(CONVOLUTION_NCHW_F32, weights_cache_batched_depthwise_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNCHWxF32();
 }
@@ -1493,6 +1563,19 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3_without_bias) {
     .TestNCHWxF32();
 }
 
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, weights_cache_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
 /**************************** DWCONV 3x3 path, batched ****************************/
 
 TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3) {
@@ -1532,6 +1615,20 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3_without_bias) {
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
+    .iterations(3)
+    .TestNCHWxF32();
+}
+
+TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, weights_cache_batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .depthwise_layout(true)
+    .batch_size(2)
+    .input_size(27, 29)
+    .kernel_size(3, 3)
+    .padding(1)
+    .groups(19)
+    .use_weights_cache(true)
     .iterations(3)
     .TestNCHWxF32();
 }

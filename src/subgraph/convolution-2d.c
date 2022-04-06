@@ -74,6 +74,7 @@ static enum xnn_status create_convolution_operator(
       node->activation.output_min,
       node->activation.output_max,
       node->flags | (values[input_id].layout == xnn_layout_type_nhwc ? XNN_FLAG_INPUT_NHWC : 0),
+      caches,
       &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
