@@ -18,6 +18,10 @@
 #include <xnnpack/subgraph.h>
 
 
+#ifndef XNN_ENABLE_SPARSE
+  #error "XNN_ENABLE_SPARSE not defined"
+#endif
+
 enum xnn_status xnn_create_subgraph(
     uint32_t external_value_ids,
     uint32_t flags,
