@@ -10435,6 +10435,44 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "mutex",
+    srcs = [
+        "src/mutex.c",
+    ],
+    hdrs = [
+        "src/xnnpack/mutex.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "mutex_test_mode",
+    srcs = [
+        "src/mutex.c",
+    ],
+    hdrs = [
+        "src/xnnpack/mutex.h",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -13929,6 +13967,16 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK",
         ":cache",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "mutex_test",
+    srcs = ["test/mutex.cc"],
+    deps = [
+        ":common",
+        ":mutex_test_mode",
+        ":xnnpack_h",
     ],
 )
 
