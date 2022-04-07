@@ -26,10 +26,18 @@
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_f32_gemm_minmax_ukernel_function gemm,
-  xnn_f32_igemm_minmax_ukernel_function igemm,
-  xnn_f32_gemm_minmax_ukernel_function gemm1,
-  xnn_f32_igemm_minmax_ukernel_function igemm1,
+  xnn_f32_gemm_minmax_ukernel_function gemm_minmax,
+  xnn_f32_igemm_minmax_ukernel_function igemm_minmax,
+  xnn_f32_gemm_minmax_ukernel_function gemm1_minmax,
+  xnn_f32_igemm_minmax_ukernel_function igemm1_minmax,
+  xnn_f32_gemm_relu_ukernel_function gemm_relu,
+  xnn_f32_igemm_relu_ukernel_function igemm_relu,
+  xnn_f32_gemm_relu_ukernel_function gemm1_relu,
+  xnn_f32_igemm_relu_ukernel_function igemm1_relu,
+  xnn_f32_gemm_ukernel_function gemm,
+  xnn_f32_igemm_ukernel_function igemm,
+  xnn_f32_gemm_ukernel_function gemm1,
+  xnn_f32_igemm_ukernel_function igemm1,
   xnn_init_f32_minmax_params_fn init_params,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -46,10 +54,18 @@ static void GEMMEnd2EndBenchmark(
   // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
   std::memset(&xnn_params.f32.gemm, 0, sizeof(xnn_params.f32.gemm));
   std::memset(&xnn_params.f32.gemm2, 0, sizeof(xnn_params.f32.gemm2));
-  xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
-  xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
-  xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
-  xnn_params.f32.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
+  xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm_minmax));
+  xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm_minmax));
+  xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1_minmax));
+  xnn_params.f32.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1_minmax));
+  xnn_params.f32.gemm.relu.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm_relu));
+  xnn_params.f32.gemm.relu.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm_relu));
+  xnn_params.f32.gemm.relu.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1_relu));
+  xnn_params.f32.gemm.relu.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1_relu));
+  xnn_params.f32.gemm.linear.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
+  xnn_params.f32.gemm.linear.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
+  xnn_params.f32.gemm.linear.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
+  xnn_params.f32.gemm.linear.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
   xnn_params.f32.gemm.init.f32 = init_params;
   xnn_params.f32.gemm.mr = mr;
   xnn_params.f32.gemm.nr = nr;
@@ -153,6 +169,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
@@ -162,6 +180,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_prfm_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
@@ -171,6 +191,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
       xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
@@ -180,6 +202,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x12__aarch64_neonfma_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 12 /* nr */);
   }
@@ -189,6 +213,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -198,6 +224,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -207,6 +235,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a55,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -216,6 +246,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -225,6 +257,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -234,6 +268,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -243,6 +279,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -252,6 +290,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -261,6 +301,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -270,6 +312,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -279,6 +323,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -288,6 +334,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a55,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a53,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -297,6 +345,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a73,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -306,6 +356,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -315,6 +367,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
       xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -324,6 +378,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -333,6 +389,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 2 /* nr */);
   }
@@ -342,6 +400,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x2__neonfma_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_4x2__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_4x2__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */);
   }
@@ -351,6 +411,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x2__neonfma_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_6x2__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_6x2__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 2 /* nr */);
   }
@@ -360,6 +422,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -369,6 +433,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -378,6 +444,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -387,6 +455,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -456,6 +526,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -466,6 +538,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -476,6 +550,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -486,6 +562,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -496,6 +574,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -506,6 +586,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -516,6 +598,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a75,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -538,6 +622,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 2 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -549,6 +635,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_6x2__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 2 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -560,6 +648,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neon_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -571,6 +661,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neon_lane_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -582,6 +674,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neon_lane_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -593,6 +687,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neon_lane_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_lane_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -604,6 +700,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neon_dup_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -615,6 +713,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neon_dup_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -626,6 +726,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neon_dup_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -637,6 +739,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neon_dup_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neon_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neon_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEON);
@@ -648,6 +752,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_dup_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEONFMA);
@@ -659,6 +765,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__neonfma_dup_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEONFMA);
@@ -670,6 +778,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neonfma_dup_ld64,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEONFMA);
@@ -681,6 +791,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__neonfma_dup_ld128,
       xnn_f32_gemm_minmax_ukernel_1x8__neonfma_dup_ld64,
       xnn_f32_igemm_minmax_ukernel_1x8__neonfma_dup_ld64,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckNEONFMA);
@@ -692,6 +804,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__neon,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neon,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neon,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEON);
@@ -703,6 +817,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__neonfma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEONFMA);
@@ -714,6 +830,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__neon,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neon,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neon,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEON);
@@ -725,6 +843,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__neonfma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEONFMA);
@@ -736,6 +856,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_8x8s4__neon,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neon,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neon,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEON);
@@ -747,6 +869,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_8x8s4__neonfma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__neonfma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       8 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */,
       benchmark::utils::CheckNEONFMA);
@@ -787,6 +911,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x16__avx512f_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX512F);
@@ -797,6 +923,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x16__avx512f_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX512F);
@@ -807,6 +935,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x16__avx512f_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       6 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX512F);
@@ -817,6 +947,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_7x16__avx512f_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       7 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX512F);
@@ -827,6 +959,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_8x16__avx512f_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
       8 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX512F);
@@ -838,6 +972,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -848,6 +984,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -858,6 +996,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -868,6 +1008,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_7x8__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -878,6 +1020,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_8x8__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       8 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -888,6 +1032,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x16__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -898,6 +1044,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x16__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -908,6 +1056,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -918,6 +1068,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x16s4__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -928,6 +1080,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -938,6 +1092,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x16s4__fma3_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */,
       benchmark::utils::CheckFMA3);
@@ -949,6 +1105,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       4 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -959,6 +1117,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       5 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -969,6 +1129,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       6 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -979,6 +1141,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_7x8__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x8__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       7 /* mr */, 8 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -989,6 +1153,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x16__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       3 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -999,6 +1165,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x16__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       4 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -1009,6 +1177,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x16__avx_broadcast,
       xnn_f32_gemm_minmax_ukernel_1x16__avx_broadcast,
       xnn_f32_igemm_minmax_ukernel_1x16__avx_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_avx_params,
       5 /* mr */, 16 /* nr */, 0 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckAVX);
@@ -1020,6 +1190,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__sse2_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1029,6 +1201,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__sse2_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1038,6 +1212,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__sse2_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse2_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse2_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1048,6 +1224,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__sse_load1,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_load1,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_load1,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1057,6 +1235,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__sse_load1,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_load1,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_load1,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1066,6 +1246,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__sse_load1,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_load1,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_load1,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1075,6 +1257,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__sse_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1084,6 +1268,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__sse_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1093,6 +1279,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__sse_dup,
       xnn_f32_gemm_minmax_ukernel_1x8__sse_dup,
       xnn_f32_igemm_minmax_ukernel_1x8__sse_dup,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1102,6 +1290,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8s4__sse,
       xnn_f32_gemm_minmax_ukernel_1x8s4__sse,
       xnn_f32_igemm_minmax_ukernel_1x8s4__sse,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       3 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1111,6 +1301,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__sse,
       xnn_f32_gemm_minmax_ukernel_1x8s4__sse,
       xnn_f32_igemm_minmax_ukernel_1x8s4__sse,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1120,6 +1312,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8s4__sse,
       xnn_f32_gemm_minmax_ukernel_1x8s4__sse,
       xnn_f32_igemm_minmax_ukernel_1x8s4__sse,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_sse_params,
       5 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1176,6 +1370,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1185,6 +1381,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1194,6 +1392,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1203,6 +1403,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1212,6 +1414,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1221,6 +1425,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1230,6 +1436,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1239,6 +1447,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1248,6 +1458,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1257,6 +1469,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1266,6 +1480,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1275,6 +1491,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1284,6 +1502,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1293,6 +1513,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1302,6 +1524,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1311,6 +1535,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1320,6 +1546,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8s4__wasmrelaxedsimd,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1329,6 +1557,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__wasmrelaxedsimd,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1338,6 +1568,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8s4__wasmrelaxedsimd,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1347,6 +1579,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__wasmrelaxedsimd,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1356,6 +1590,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8s4__wasmrelaxedsimd_fma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1365,6 +1601,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__wasmrelaxedsimd_fma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1374,6 +1612,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8s4__wasmrelaxedsimd_fma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1383,6 +1623,8 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__wasmrelaxedsimd_fma,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmrelaxedsimd_fma,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1426,6 +1668,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_arm_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
+      xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1435,6 +1685,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_arm_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
+      xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1444,6 +1702,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
+      xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1453,6 +1719,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_arm_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat,
+      xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1462,6 +1736,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_x86_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
+      xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_3x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1471,6 +1753,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_x86_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
+      xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_4x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1480,6 +1770,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_x86_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
+      xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_5x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1489,6 +1787,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_x86_loadsplat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat,
+      xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_6x8__wasmsimd_loadsplat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_loadsplat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_loadsplat,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1498,6 +1804,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_arm_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
+      xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1507,6 +1821,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_arm_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
+      xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1516,6 +1838,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
+      xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1525,6 +1855,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_arm_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_splat,
+      xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1534,6 +1872,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8__wasmsimd_x86_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
+      xnn_f32_gemm_relu_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_3x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */);
   }
@@ -1543,6 +1889,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_x86_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
+      xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_4x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */);
   }
@@ -1552,6 +1906,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_x86_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
+      xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_5x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */);
   }
@@ -1561,6 +1923,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8__wasmsimd_x86_splat,
       xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
       xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_splat,
+      xnn_f32_gemm_relu_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_6x8__wasmsimd_splat,
+      xnn_f32_gemm_ukernel_1x8__wasmsimd_splat,
+      xnn_f32_igemm_ukernel_1x8__wasmsimd_splat,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */);
   }
@@ -1570,6 +1940,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8s4__wasmsimd_arm,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm,
+      xnn_f32_gemm_relu_ukernel_3x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_3x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_3x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_3x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1579,6 +1957,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__wasmsimd_arm,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm,
+      xnn_f32_gemm_relu_ukernel_4x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_4x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_4x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_4x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1588,6 +1974,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8s4__wasmsimd_arm,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm,
+      xnn_f32_gemm_relu_ukernel_5x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_5x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_5x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_5x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1597,6 +1991,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__wasmsimd_arm,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_arm,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_arm,
+      xnn_f32_gemm_relu_ukernel_6x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_6x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_6x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_6x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1606,6 +2008,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_3x8s4__wasmsimd_x86,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_x86,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_x86,
+      xnn_f32_gemm_relu_ukernel_3x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_3x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_3x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_3x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       3 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1615,6 +2025,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x8s4__wasmsimd_x86,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_x86,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_x86,
+      xnn_f32_gemm_relu_ukernel_4x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_4x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_4x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_4x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       4 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1624,6 +2042,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_5x8s4__wasmsimd_x86,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_x86,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_x86,
+      xnn_f32_gemm_relu_ukernel_5x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_5x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_5x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_5x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       5 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1633,6 +2059,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_6x8s4__wasmsimd_x86,
       xnn_f32_gemm_minmax_ukernel_1x8s4__wasmsimd_x86,
       xnn_f32_igemm_minmax_ukernel_1x8s4__wasmsimd_x86,
+      xnn_f32_gemm_relu_ukernel_6x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_6x8s4__wasmsimd,
+      xnn_f32_gemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_relu_ukernel_1x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_6x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_6x8s4__wasmsimd,
+      xnn_f32_gemm_ukernel_1x8s4__wasmsimd,
+      xnn_f32_igemm_ukernel_1x8s4__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
@@ -1676,6 +2110,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_2x4__wasm,
       xnn_f32_gemm_minmax_ukernel_1x4__wasm,
       xnn_f32_igemm_minmax_ukernel_1x4__wasm,
+      xnn_f32_gemm_relu_ukernel_2x4__wasm,
+      xnn_f32_igemm_relu_ukernel_2x4__wasm,
+      xnn_f32_gemm_relu_ukernel_1x4__wasm,
+      xnn_f32_igemm_relu_ukernel_1x4__wasm,
+      xnn_f32_gemm_ukernel_2x4__scalar,
+      xnn_f32_igemm_ukernel_2x4__scalar,
+      xnn_f32_gemm_ukernel_1x4__scalar,
+      xnn_f32_igemm_ukernel_1x4__scalar,
       xnn_init_f32_minmax_scalar_params,
       2 /* mr */, 4 /* nr */);
   }
@@ -1686,6 +2128,14 @@ static void GEMMEnd2EndBenchmark(
       xnn_f32_igemm_minmax_ukernel_4x4__wasm,
       xnn_f32_gemm_minmax_ukernel_1x4__wasm,
       xnn_f32_igemm_minmax_ukernel_1x4__wasm,
+      xnn_f32_gemm_relu_ukernel_4x4__wasm,
+      xnn_f32_igemm_relu_ukernel_4x4__wasm,
+      xnn_f32_gemm_relu_ukernel_1x4__wasm,
+      xnn_f32_igemm_relu_ukernel_1x4__wasm,
+      xnn_f32_gemm_ukernel_4x4__scalar,
+      xnn_f32_igemm_ukernel_4x4__scalar,
+      xnn_f32_gemm_ukernel_1x4__scalar,
+      xnn_f32_igemm_ukernel_1x4__scalar,
       xnn_init_f32_minmax_scalar_params,
       4 /* mr */, 4 /* nr */);
   }
@@ -1701,6 +2151,14 @@ static void f32_gemm_2x4__scalar(benchmark::State& state, models::ExecutionPlanF
     xnn_f32_igemm_minmax_ukernel_2x4__scalar,
     xnn_f32_gemm_minmax_ukernel_1x4__scalar,
     xnn_f32_igemm_minmax_ukernel_1x4__scalar,
+    xnn_f32_gemm_relu_ukernel_2x4__scalar,
+    xnn_f32_igemm_relu_ukernel_2x4__scalar,
+    xnn_f32_gemm_relu_ukernel_1x4__scalar,
+    xnn_f32_igemm_relu_ukernel_1x4__scalar,
+    xnn_f32_gemm_ukernel_2x4__scalar,
+    xnn_f32_igemm_ukernel_2x4__scalar,
+    xnn_f32_gemm_ukernel_1x4__scalar,
+    xnn_f32_igemm_ukernel_1x4__scalar,
     xnn_init_f32_minmax_scalar_params,
     2 /* mr */, 4 /* nr */);
 }
@@ -1711,6 +2169,14 @@ static void f32_gemm_4x4__scalar(benchmark::State& state, models::ExecutionPlanF
     xnn_f32_igemm_minmax_ukernel_4x4__scalar,
     xnn_f32_gemm_minmax_ukernel_1x4__scalar,
     xnn_f32_igemm_minmax_ukernel_1x4__scalar,
+    xnn_f32_gemm_relu_ukernel_4x4__scalar,
+    xnn_f32_igemm_relu_ukernel_4x4__scalar,
+    xnn_f32_gemm_relu_ukernel_1x4__scalar,
+    xnn_f32_igemm_relu_ukernel_1x4__scalar,
+    xnn_f32_gemm_ukernel_4x4__scalar,
+    xnn_f32_igemm_ukernel_4x4__scalar,
+    xnn_f32_gemm_ukernel_1x4__scalar,
+    xnn_f32_igemm_ukernel_1x4__scalar,
     xnn_init_f32_minmax_scalar_params,
     4 /* mr */, 4 /* nr */);
 }
