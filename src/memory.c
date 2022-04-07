@@ -23,8 +23,6 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 
-#define XNN_CODE_BUFFER_GROWTH_FACTOR 2
-
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 
 // Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
