@@ -49,10 +49,12 @@ void xnn_normalize_transpose_permutation(
       output_pos += 1;
     }
   }
-  for (size_t i = 0; i < num_dims; ++i) {
+  for (size_t i = 0; i < output_dims;) {
     if (normalized_shape[normalized_perm[i]] == 1) {
       output_dims--;
       remove_dimension(normalized_shape, normalized_perm, num_dims, i);
+    } else {
+      i += 1;
     }
   }
   size_t normalized_element_size = element_size;

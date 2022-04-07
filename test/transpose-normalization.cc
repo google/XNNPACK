@@ -225,3 +225,16 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_double_flatten_4D) {
       .expected_element_size(4)
       .Test();
 }
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_6D_flatten_ones) {
+    TransposeNormalizationTester()
+      .num_dims(6)
+      .element_size(4)
+      .perm({5,4,3,2,1,0})
+      .shape({23,1,1,1,17,13})
+      .expected_normalized_shape({23,17,13})
+      .expected_normalized_perm({2,1,0})
+      .expected_normalized_dims(3)
+      .expected_element_size(4)
+      .Test();
+}
