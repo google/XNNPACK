@@ -109,7 +109,9 @@ struct xnn_code_buffer {
 // Allocates a code region and associates it with `buf`.
 enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size);
 // Finalize buffer, users won't need to call this directly, called by Assembler.
+#if XNN_PLATFORM_JIT
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf);
+#endif
 // Ensure that buf has at least n bytes free (i.e. buf->capacity - buf->size >= n), grows if not.
 enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n);
 // Free all memory associated with `buf`.
@@ -131,6 +133,8 @@ enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size
 enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf);
 // Ensure that buf has at least n bytes free (i.e. buf->capacity - buf->size >= n), grows if not.
 enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n);
+// Releases unused memory in `buf`, should only be called after all the weights have been written.
+enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buf);
 
 #ifdef __cplusplus
 }  // extern "C"

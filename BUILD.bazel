@@ -14009,6 +14009,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK",
         ":cache",
+        ":common",
     ],
 )
 

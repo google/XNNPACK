@@ -7,6 +7,7 @@
 #include <cstring> // For memcpy.
 
 #include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/cache.h>
 
 #include <gtest/gtest.h>
@@ -128,6 +129,64 @@ TEST(WEIGHTS_MEMORY, grow) {
   ASSERT_GE(b.capacity, b.size + 4);
   // But size stays the same.
   ASSERT_EQ(old_size, b.size);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
+TEST(WEIGHTS_CACHE, finalize_empty) {
+  xnn_weights_buffer b;
+  const size_t initial_capacity = 1024 * 1024;  // 1MB.
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, initial_capacity));
+
+  ASSERT_EQ(0, b.size);
+  ASSERT_EQ(initial_capacity, b.capacity);
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  ASSERT_EQ(0, b.size);
+  ASSERT_EQ(0, b.capacity);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
+TEST(WEIGHTS_CACHE, finalize) {
+  xnn_weights_buffer b;
+  const size_t initial_capacity = 1024 * 1024;  // 1MB.
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, initial_capacity));
+
+  const std::string junk = "1234";
+  std::memcpy(b.start, junk.data(), junk.length());
+  b.size += junk.length();
+  ASSERT_EQ(4, b.size);
+  ASSERT_EQ(initial_capacity, b.capacity);
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  #if XNN_PLATFORM_WEB
+    // Web does not support partial unmapping.
+    ASSERT_EQ(initial_capacity, b.capacity);
+  #else
+    ASSERT_GT(initial_capacity, b.capacity);
+  #endif
+  // The actual capacity depends on page size, since it is aligned, just check that it shrunk.
+  ASSERT_EQ(4, b.size);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
+TEST(WEIGHTS_CACHE, finalize_twice) {
+  xnn_weights_buffer b;
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE));
+
+  const std::string junk = "1234";
+  std::memcpy(b.start, junk.data(), junk.length());
+  b.size += junk.length();
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  const size_t capacity = b.capacity;
+  // Finalizing twice does not error.
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  // Capacity does not change.
+  ASSERT_EQ(capacity, b.capacity);
+  ASSERT_EQ(4, b.size);
 
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
 }

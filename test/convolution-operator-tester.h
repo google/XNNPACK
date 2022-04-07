@@ -521,6 +521,7 @@ class ConvolutionOperatorTester {
     return this->iterations_;
   }
 
+#if XNN_PLATFORM_JIT
   inline ConvolutionOperatorTester& use_jit(bool use_jit) {
     this->use_jit_ = use_jit;
     return *this;
@@ -529,6 +530,7 @@ class ConvolutionOperatorTester {
   inline bool use_jit() const {
     return this->use_jit_;
   }
+#endif
 
   inline ConvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
     this->use_weights_cache_ = use_weights_cache;
@@ -1361,11 +1363,13 @@ class ConvolutionOperatorTester {
         .code_cache = NULL,
         .weights_cache = NULL,
       };
-      xnn_code_cache code_cache;
-      if (use_jit()) {
-        xnn_init_code_cache(&code_cache);
-        caches.code_cache = &code_cache;
-      }
+      #if XNN_PLATFORM_JIT
+        xnn_code_cache code_cache;
+        if (use_jit()) {
+          xnn_init_code_cache(&code_cache);
+          caches.code_cache = &code_cache;
+        }
+      #endif
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1394,9 +1398,11 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      if (use_jit()) {
-        xnn_finalize_code_memory(&code_cache.cache.code);
-      }
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          xnn_finalize_code_memory(&code_cache.cache.code);
+        }
+      #endif
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_convolution2d_nhwc_f32(
@@ -1448,9 +1454,11 @@ class ConvolutionOperatorTester {
         VerifyNHWCxF32(output2, output_ref, output_min, output_max);
       }
 
-      if (use_jit()) {
-        xnn_release_code_cache(&code_cache);
-      }
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          xnn_release_code_cache(&code_cache);
+        }
+      #endif
       if (use_weights_cache()) {
         xnn_release_weights_cache(&weights_cache);
       }
@@ -3179,6 +3187,8 @@ class ConvolutionOperatorTester {
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   size_t iterations_{1};
+#if XNN_PLATFORM_JIT
   bool use_jit_{false};
+#endif
   bool use_weights_cache_{false};
 };

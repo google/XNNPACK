@@ -10,7 +10,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(JitMemory, AllocateAndReleaseEmptyCode) {
+TEST(JIT_MEMORY, allocate_and_release_empty_code) {
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
 #if XNN_PLATFORM_JIT
@@ -19,7 +19,7 @@ TEST(JitMemory, AllocateAndReleaseEmptyCode) {
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
-TEST(JitMemory, AllocateAndReleaseJunkCode) {
+TEST(JIT_MEMORY, allocate_and_release_junk_code) {
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
   std::string junk = "1234";
@@ -27,6 +27,7 @@ TEST(JitMemory, AllocateAndReleaseJunkCode) {
   b.size = junk.length();
 #if XNN_PLATFORM_JIT
   ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&b));
+  ASSERT_GT(XNN_DEFAULT_CODE_BUFFER_SIZE, b.capacity);
 #endif  // XNN_PLATFORM_JIT
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
   ASSERT_EQ(nullptr, b.start);
@@ -34,13 +35,13 @@ TEST(JitMemory, AllocateAndReleaseJunkCode) {
   ASSERT_EQ(0, b.capacity);
 }
 
-TEST(JitMemory, AllocateAndReleaseCodeBufferWithNoCapacity) {
+TEST(JIT_MEMORY, allocate_and_release_code_buffer_with_no_capacity) {
   xnn_code_buffer b;
   b.capacity = 0;
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
-TEST(JitMemory, GrowMemory) {
+TEST(JIT_MEMORY, grow_memory) {
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, 8));
   std::string junk = "1234";
@@ -66,6 +67,29 @@ TEST(JitMemory, GrowMemory) {
   ASSERT_GE(b.capacity, b.size + 4);
   // But size stays the same.
   ASSERT_EQ(old_size, b.size);
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+TEST(JIT_MEMORY, finalize_twice) {
+  xnn_code_buffer b;
+  ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
+  const std::string junk = "1234";
+  std::memcpy(b.start, junk.data(), junk.length());
+  b.size += junk.length();
+  ASSERT_EQ(b.size, 4);
+
+#if XNN_PLATFORM_JIT
+  ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&b));
+#endif
+  const size_t capacity = b.capacity;
+  // Finalizing twice does not error.
+#if XNN_PLATFORM_JIT
+  ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&b));
+#endif
+  // Capacity does not change.
+  ASSERT_EQ(capacity, b.capacity);
+  ASSERT_EQ(4, b.size);
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
