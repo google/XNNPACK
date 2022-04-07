@@ -6877,6 +6877,7 @@ TARGET_LINK_LIBRARIES(XNNPACK PRIVATE
   fp16
   logging
   mutex
+  normalization
   operators
   params_init
   subgraph)
