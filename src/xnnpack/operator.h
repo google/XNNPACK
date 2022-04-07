@@ -286,6 +286,7 @@ struct xnn_operator {
     struct spmm_context spmm;
     struct subconv_context subconv;
     struct subgemm_context subgemm;
+    struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;
     struct univector_contiguous_context univector_contiguous;

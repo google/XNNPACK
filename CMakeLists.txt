@@ -197,6 +197,7 @@ SET(OPERATOR_SRCS
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/softmax-nc.c
+  src/operators/transpose-nd.c
   src/operators/unary-elementwise-nc.c
   src/operators/unpooling-nhwc.c)
 
@@ -7120,6 +7121,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(tanh-nc-test tanh-nc-test)
+
+  ADD_EXECUTABLE(transpose-nd-test test/transpose-nd.cc)
+  SET_TARGET_PROPERTIES(transpose-nd-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(transpose-nd-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(transpose-nd-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(transpose-nd-test transpose-nd-test)
 
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)

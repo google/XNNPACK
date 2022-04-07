@@ -61,6 +61,111 @@ struct compute_parameters {
   size_t tile[2];
 };
 
+struct transpose_context {
+  const void* x;
+  void* y;
+  union {
+    xnn_transposec_ukernel_function const_size_ukernel;
+    xnn_transposev_ukernel_function variable_size_ukernel;
+  };
+  union {
+    size_t element_size;
+    size_t log2_element_size;
+  };
+  size_t input_stride[XNN_MAX_TENSOR_DIMS];
+  size_t output_stride[XNN_MAX_TENSOR_DIMS];
+};
+
+XNN_PRIVATE void xnn_compute_transposec_2d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j);
+
+XNN_PRIVATE void xnn_compute_transposec_3d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t tile_j,
+    size_t tile_k);
+
+XNN_PRIVATE void xnn_compute_transposec_4d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l);
+
+XNN_PRIVATE void xnn_compute_transposec_5d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t m,
+    size_t tile_l,
+    size_t tile_m);
+
+XNN_PRIVATE void xnn_compute_transposec_6d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t m,
+    size_t n,
+    size_t tile_m,
+    size_t tile_n);
+
+XNN_PRIVATE void xnn_compute_transposev_2d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j);
+
+XNN_PRIVATE void xnn_compute_transposev_3d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t tile_j,
+    size_t tile_k);
+
+XNN_PRIVATE void xnn_compute_transposev_4d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l);
+
+XNN_PRIVATE void xnn_compute_transposev_5d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t m,
+    size_t tile_l,
+    size_t tile_m);
+
+XNN_PRIVATE void xnn_compute_transposev_6d(
+    const struct transpose_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t m,
+    size_t n,
+    size_t tile_m,
+    size_t tile_n);
+
 struct gemm_context {
   size_t k_scaled;
   const void* a;
