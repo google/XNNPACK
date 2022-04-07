@@ -9,6 +9,7 @@
 #include <stdint.h>            // For uint32_t.
 #include <xnnpack.h>           // For xnn_status.
 #include <xnnpack/allocator.h> // For xnn_code_buffer.
+#include <xnnpack/mutex.h>     // For xnn_mutex.
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,10 +73,18 @@ size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, siz
 // A cache for repacked weights.
 struct xnn_weights_cache {
   struct xnn_cache cache;
+  // Protects updates of `cache`, it has the same lifetime as `cache`, and so should be initialized/destroyed together
+  // with the `cache`.
+  struct xnn_mutex mutex;
 };
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
+// Ensures that cache has enough space for `n` bytes, locks the mutex to protect future updates. Mutex must be unlocked
+// using xnn_get_or_insert_weights_cache.
+void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t n);
+// Looks up packed weights at `ptr` in the cache. If it is found, reuse it. Otherwise, it is added to the cache. Mutex
+// must already be locked before calling this, it will be unlocked at the end of this function.
 size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size);
 
 struct xnn_caches {

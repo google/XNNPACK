@@ -13,6 +13,7 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/mutex.h"
 
 #define XNN_CACHE_HASH_SEED 7
 #define XNN_CACHE_INITIAL_BUCKETS 32
@@ -329,6 +330,11 @@ enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache
     goto error;
   }
 
+  status = xnn_mutex_init(&cache->mutex);
+  if (status != xnn_status_success) {
+    goto error;
+  }
+
   return xnn_status_success;
 
 error:
@@ -347,11 +353,35 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
     assert(cache->cache.type == xnn_cache_type_weights);
     xnn_release_weights_memory(&cache->cache.weights);
     xnn_release_memory(cache->cache.buckets);
+    const enum xnn_status status = xnn_mutex_destroy(&cache->mutex);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
   return xnn_status_success;
 }
 
+void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t n) {
+    enum xnn_status status = xnn_mutex_lock(&cache->mutex);
+    if (status != xnn_status_success) {
+      return NULL;
+    }
+
+    struct xnn_weights_buffer* buffer = &cache->cache.weights;
+    status = xnn_reserve_weights_memory(buffer, n);
+    if (status != xnn_status_success) {
+      xnn_mutex_unlock(&cache->mutex);
+      return NULL;
+    }
+
+    return (void*) ((uintptr_t) buffer->start + buffer->size);
+}
+
 size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size)
 {
-  return xnn_get_or_insert_cache(&cache->cache, ptr, size);
+  const size_t offset = xnn_get_or_insert_cache(&cache->cache, ptr, size);
+  const enum xnn_status status = xnn_mutex_unlock(&cache->mutex);
+  (void) status;
+  assert(status == xnn_status_success);
+  return offset;
 }

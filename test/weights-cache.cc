@@ -3,12 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cstdint> // For uintptr_t.
-#include <cstring> // For memcpy.
+#include <xnnpack/cache.h>
+
+#include <algorithm> // For std::rotate.
+#include <cstdint>   // For uintptr_t.
+#include <cstdint>   // For uintptr_t.
+#include <cstring>   // For memcpy.
+#include <cstring>   // For memcpy.
+#include <thread>   // For memcpy.
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
-#include <xnnpack/cache.h>
 
 #include <gtest/gtest.h>
 
@@ -17,7 +22,7 @@ static void* cache_end(const xnn_weights_cache* cache) {
 }
 
 static void write_weights(xnn_weights_cache* cache, const std::string& str) {
-  ASSERT_GE(cache->cache.weights.capacity - cache->cache.weights.size, str.length());
+  xnn_reserve_space_in_weights_cache(cache, str.length());
   std::memcpy(cache_end(cache), str.data(), str.length());
 };
 
@@ -189,4 +194,68 @@ TEST(WEIGHTS_CACHE, finalize_twice) {
   ASSERT_EQ(4, b.size);
 
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
+TEST(WEIGHTS_CACHE, write_many_cache_hits) {
+#if XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
+  GTEST_SKIP();
+#endif
+  xnn_initialize(/*allocator=*/nullptr);
+  struct xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  const std::string weights = "0123456789abcdefghij";
+  const size_t weights_size = weights.size();
+  auto write = [&] {
+    write_weights(&cache, weights);
+    xnn_get_or_insert_weights_cache(&cache, cache_end(&cache), weights_size);
+  };
+  constexpr size_t num_threads = 20;
+  std::vector<std::thread> threads;
+  threads.reserve(num_threads);
+
+  for (size_t i = 0; i < num_threads; i++) {
+    threads.emplace_back(write);
+  }
+  for (size_t i = 0; i < num_threads; i++) {
+    threads[i].join();
+  }
+
+  ASSERT_EQ(num_threads - 1, cache.cache.hits);
+  ASSERT_EQ(1, cache.cache.num_entries);
+  ASSERT_EQ(weights_size, cache.cache.weights.size);
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, write_many_cache_misses) {
+#if XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
+  GTEST_SKIP();
+#endif
+  xnn_initialize(/*allocator=*/nullptr);
+  struct xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  const std::string weights = "0123456789abcdefghij";
+  const size_t weights_size = weights.size();
+  auto write = [&](size_t i) {
+    std::string rotated_weights = weights;
+    std::rotate(rotated_weights.begin(), rotated_weights.begin() + i,
+                rotated_weights.end());
+    write_weights(&cache, rotated_weights);
+    xnn_get_or_insert_weights_cache(&cache, cache_end(&cache), weights_size);
+  };
+  constexpr size_t num_threads = 20;
+  ASSERT_LE(num_threads, weights_size);
+  std::vector<std::thread> threads;
+  threads.reserve(num_threads);
+
+  for (size_t i = 0; i < num_threads; i++) {
+    threads.emplace_back(write, i);
+  }
+  for (size_t i = 0; i < num_threads; i++) {
+    threads[i].join();
+  }
+
+  ASSERT_EQ(0, cache.cache.hits);
+  ASSERT_EQ(num_threads, cache.cache.num_entries);
+  ASSERT_EQ(weights_size * num_threads, cache.cache.weights.size);
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }

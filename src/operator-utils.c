@@ -5,6 +5,7 @@
 
 #include <xnnpack.h>           // For xnn_caches_t, xnn_operator_t.
 #include <xnnpack/allocator.h> // For XNN_ALLOCATION_ALIGNMENT.
+#include <xnnpack/cache.h>     // For xnn_caches.
 #include <xnnpack/operator.h>  // For xnn_operator definition.
 
 void* xnn_get_pointer_to_write_weights(
@@ -16,12 +17,10 @@ void* xnn_get_pointer_to_write_weights(
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
   void* weights_ptr = NULL;
   if (use_weights_cache(caches)) {
-    struct xnn_weights_buffer* buffer = &caches->weights_cache->cache.weights;
-    const enum xnn_status status = xnn_reserve_weights_memory(buffer, aligned_weights_size);
-    if (status != xnn_status_success) {
+    weights_ptr = xnn_reserve_space_in_weights_cache(caches->weights_cache, aligned_weights_size);
+    if (weights_ptr == NULL) {
       return NULL;
     }
-    weights_ptr = (void*) ((uintptr_t) buffer->start + buffer->size);
   } else {
     op->packed_weights.pointer = xnn_allocate_simd_memory(aligned_weights_size);
     if (op->packed_weights.pointer == NULL) {

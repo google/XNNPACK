@@ -10210,6 +10210,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":mutex",
         ":xnnpack_h",
     ],
 )
