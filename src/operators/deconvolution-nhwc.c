@@ -71,6 +71,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
     const struct gemm_parameters* gemm_parameters,
     const struct gemm_fused_ukernels* gemm_ukernels,
     enum xnn_operator_type operator_type,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   xnn_operator_t deconvolution_op = NULL;
@@ -156,6 +157,10 @@ static enum xnn_status create_deconvolution2d_nhwc(
     goto error;
   }
 
+  if (caches != NULL) {
+    deconvolution_op->weights_cache = caches->weights_cache;
+  }
+
   const uint32_t mr = gemm_parameters->mr;
   const uint32_t nr = gemm_parameters->nr;
   const uint32_t kr = UINT32_C(1) << gemm_parameters->log2_kr;
@@ -194,21 +199,23 @@ static enum xnn_status create_deconvolution2d_nhwc(
       }
     }
   }
-  deconvolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_group_weights_size * groups);
-  if (deconvolution_op->packed_weights.pointer == NULL) {
+
+  const size_t aligned_total_weights_size = round_up_po2(packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
+  void* weights_ptr = xnn_get_pointer_to_write_weights(
+      deconvolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+  if (weights_ptr == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
       packed_group_weights_size * groups, xnn_operator_type_to_string(operator_type));
     goto error;
   }
-  memset(deconvolution_op->packed_weights.pointer, packed_weights_padding_byte, packed_group_weights_size * groups);
 
   switch (ukernel_type) {
     case xnn_ukernel_type_igemm:
       pack_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights.pointer,
+        kernel, bias, weights_ptr,
         0 /* extra bytes */,
         packing_params);
       break;
@@ -217,11 +224,19 @@ static enum xnn_status create_deconvolution2d_nhwc(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
         nr, kr, sr,
-        kernel, bias, deconvolution_op->packed_weights.pointer, deconvolution_op->subconvolution_buffer,
+        kernel, bias, weights_ptr, deconvolution_op->subconvolution_buffer,
         packing_params);
+      // We assume that the first subconvolution param weights point to the start of the weights, this is used to check
+      // if the weights cache has moved.
+      assert(deconvolution_op->subconvolution_buffer->weights == weights_ptr);
       break;
     default:
       XNN_UNREACHABLE;
+  }
+
+  if (use_weights_cache(caches)) {
+    deconvolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+        caches->weights_cache, weights_ptr, aligned_total_weights_size);
   }
 
   const size_t zero_size = (k_stride << log2_input_element_size) + XNN_EXTRA_BYTES;
@@ -365,6 +380,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     &params, sizeof(params),
     &xnn_params.qs8.gemm, &xnn_params.qs8.gemm.minmax,
     xnn_operator_type_deconvolution_nhwc_qs8,
+    caches,
     deconvolution_op_out);
 }
 
@@ -462,6 +478,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     &params, sizeof(params),
     &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
     xnn_operator_type_deconvolution_nhwc_qu8,
+    caches,
     deconvolution_op_out);
 }
 
@@ -556,6 +573,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     &params, sizeof(params),
     gemm_parameters, gemm_ukernels,
     xnn_operator_type_deconvolution_nhwc_f16,
+    caches,
     deconvolution_op_out);
 }
 
@@ -638,6 +656,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     &params, sizeof(params),
     gemm_parameters, gemm_ukernels,
     xnn_operator_type_deconvolution_nhwc_f32,
+    caches,
     deconvolution_op_out);
 }
 
@@ -802,6 +821,21 @@ static enum xnn_status setup_subconv2d_path(
     input_width != deconvolution_op->last_input_width ||
     output_height != deconvolution_op->last_output_height ||
     output_width != deconvolution_op->last_output_width;
+
+  if (deconvolution_op->weights_cache != NULL) {
+    void* packed_weights_ptr = packed_weights(deconvolution_op);
+    struct subconvolution_params* subconvolution_params = deconvolution_op->subconvolution_buffer;
+    if (packed_weights_ptr != subconvolution_params->weights) {
+      // Weights cache moved, update all weights pointer.
+      const ptrdiff_t diff = (uintptr_t) packed_weights_ptr - (uintptr_t) subconvolution_params->weights;
+      for (size_t offset_y = 0; offset_y < stride_height; offset_y++) {
+        for (size_t offset_x = 0; offset_x < stride_width; offset_x++) {
+          subconvolution_params->weights = (void*) ((uintptr_t) subconvolution_params->weights + diff);
+          ++subconvolution_params;
+        }
+      }
+    }
+  }
 
   if (any_size_change || output != deconvolution_op->last_output) {
     // Initialize subconvolution parameters which depend on output dimensions or MR.

@@ -845,6 +845,19 @@ TEST(DECONVOLUTION_NHWC_QS8, 3x3_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** CONV path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, grouped_3x3) {
@@ -1154,6 +1167,20 @@ TEST(DECONVOLUTION_NHWC_QS8, grouped_3x3_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, batched_3x3) {
@@ -1459,6 +1486,20 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_3x3_without_bias) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQS8();
+}
+
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQS8();
 }
@@ -1792,6 +1833,21 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_grouped_3x3_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, 3x3_setup_changing_batch) {
@@ -2113,6 +2169,20 @@ TEST(DECONVOLUTION_NHWC_QS8, 3x3s2_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, grouped_3x3s2) {
@@ -2408,6 +2478,21 @@ TEST(DECONVOLUTION_NHWC_QS8, grouped_3x3s2_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, batched_3x3s2) {
@@ -2699,6 +2784,21 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQS8();
+}
+
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQS8();
 }
@@ -3016,6 +3116,22 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_grouped_3x3s2_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, 3x3s2_setup_changing_batch) {
@@ -3252,6 +3368,19 @@ TEST(DECONVOLUTION_NHWC_QS8, 2x2s2_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, grouped_2x2s2) {
@@ -3455,6 +3584,20 @@ TEST(DECONVOLUTION_NHWC_QS8, grouped_2x2s2_without_bias) {
     .TestQS8();
 }
 
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQS8();
+}
+
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QS8, batched_2x2s2) {
@@ -3654,6 +3797,20 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQS8();
+}
+
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQS8();
 }
@@ -3871,6 +4028,21 @@ TEST(DECONVOLUTION_NHWC_QS8, batched_grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQS8();
+}
+
+TEST(DECONVOLUTION_NHWC_QS8, weights_cache_batched_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qs8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQS8();
 }
@@ -4748,6 +4920,19 @@ TEST(DECONVOLUTION_NHWC_QU8, 3x3_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** CONV path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3) {
@@ -5057,6 +5242,20 @@ TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, batched_3x3) {
@@ -5362,6 +5561,20 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_3x3_without_bias) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQU8();
 }
@@ -5695,6 +5908,21 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, 3x3_setup_changing_batch) {
@@ -6016,6 +6244,20 @@ TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2) {
@@ -6311,6 +6553,21 @@ TEST(DECONVOLUTION_NHWC_QU8, grouped_3x3s2_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2) {
@@ -6602,6 +6859,21 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQU8();
 }
@@ -6919,6 +7191,22 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_3x3s2_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** SUBCONV2D/IGEMM path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, 3x3s2_setup_changing_batch) {
@@ -7155,6 +7443,19 @@ TEST(DECONVOLUTION_NHWC_QU8, 2x2s2_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2) {
@@ -7358,6 +7659,20 @@ TEST(DECONVOLUTION_NHWC_QU8, grouped_2x2s2_without_bias) {
     .TestQU8();
 }
 
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQU8();
+}
+
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2) {
@@ -7557,6 +7872,20 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQU8();
 }
@@ -7774,6 +8103,21 @@ TEST(DECONVOLUTION_NHWC_QU8, batched_grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestQU8();
+}
+
+TEST(DECONVOLUTION_NHWC_QU8, weights_cache_batched_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.qu8.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestQU8();
 }
@@ -8716,6 +9060,19 @@ TEST(DECONVOLUTION_NHWC_F16, 3x3_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** CONV path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_3x3) {
@@ -9039,6 +9396,20 @@ TEST(DECONVOLUTION_NHWC_F16, grouped_3x3_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, batched_3x3) {
@@ -9358,6 +9729,20 @@ TEST(DECONVOLUTION_NHWC_F16, batched_3x3_without_bias) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF16();
 }
@@ -9706,6 +10091,21 @@ TEST(DECONVOLUTION_NHWC_F16, batched_grouped_3x3_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, 3x3_setup_changing_batch) {
@@ -10041,6 +10441,20 @@ TEST(DECONVOLUTION_NHWC_F16, 3x3s2_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_3x3s2) {
@@ -10351,6 +10765,21 @@ TEST(DECONVOLUTION_NHWC_F16, grouped_3x3s2_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, batched_3x3s2) {
@@ -10657,6 +11086,21 @@ TEST(DECONVOLUTION_NHWC_F16, batched_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF16();
 }
@@ -10990,21 +11434,24 @@ TEST(DECONVOLUTION_NHWC_F16, batched_grouped_3x3s2_without_bias) {
     .TestF16();
 }
 
-/**************************** SUBCONV2D/IGEMM path, setup ****************************/
-
-TEST(DECONVOLUTION_NHWC_F16, 3x3s2_setup_changing_batch) {
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_grouped_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   DeconvolutionOperatorTester()
     .batch_size(2)
-    .next_batch_size(5)
     .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
     .kernel_size(3, 3)
     .stride(2)
     .groups(2)
-    .group_input_channels(15)
-    .group_output_channels(17)
-    .TestSetupF16();
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
 }
+
+/**************************** SUBCONV2D/IGEMM path, setup ****************************/
+
 
 TEST(DECONVOLUTION_NHWC_F16, 3x3s2_setup_changing_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -11236,6 +11683,19 @@ TEST(DECONVOLUTION_NHWC_F16, 2x2s2_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_2x2s2) {
@@ -11453,6 +11913,20 @@ TEST(DECONVOLUTION_NHWC_F16, grouped_2x2s2_without_bias) {
     .TestF16();
 }
 
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF16();
+}
+
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, batched_2x2s2) {
@@ -11666,6 +12140,20 @@ TEST(DECONVOLUTION_NHWC_F16, batched_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF16();
 }
@@ -11898,6 +12386,21 @@ TEST(DECONVOLUTION_NHWC_F16, batched_grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, weights_cache_batched_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF16();
 }
@@ -12775,6 +13278,19 @@ TEST(DECONVOLUTION_NHWC_F32, 3x3_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** CONV path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3) {
@@ -13080,6 +13596,20 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_without_bias) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF32();
 }
@@ -13392,6 +13922,21 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_without_bias) {
     .iterations(3)
     .TestF32();
 }
+
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 
 /**************************** CONV path, grouped, batched ****************************/
 
@@ -13722,6 +14267,21 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** CONV path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, 3x3_setup_changing_batch) {
@@ -14043,6 +14603,34 @@ TEST(DECONVOLUTION_NHWC_F32, 3x3s2_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(5, 5)
+    .stride(4)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .stress_weights_cache(true)
+    .iterations(60)  // Higher number of iterations to write more weights.
+    .TestF32();
+}
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2) {
@@ -14338,6 +14926,21 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2) {
@@ -14629,6 +15232,21 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF32();
 }
@@ -14946,6 +15564,22 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D/IGEMM path, setup ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, 3x3s2_setup_changing_batch) {
@@ -15179,6 +15813,19 @@ TEST(DECONVOLUTION_NHWC_F32, 2x2s2_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2) {
@@ -15382,6 +16029,20 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_without_bias) {
     .TestF32();
 }
 
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestF32();
+}
+
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2) {
@@ -15581,6 +16242,20 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF32();
 }
@@ -15798,6 +16473,21 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .groups(2)
+    .group_input_channels(17)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_weights_cache(true)
     .iterations(3)
     .TestF32();
 }
