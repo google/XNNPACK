@@ -68,6 +68,7 @@ OPERATOR_TEST_DEPS = [
     ":params",
     ":XNNPACK_test_mode",
     ":jit_test_mode",
+    ":normalization_test_mode",
     "@pthreadpool",
     "@FP16",
 ]
@@ -10273,6 +10274,7 @@ xnnpack_cc_library(
         ":jit",
         ":logging",
         ":math",
+        ":normalization",
         ":packing",
         ":params",
         ":params_init",
@@ -10309,6 +10311,7 @@ xnnpack_cc_library(
         ":jit_test_mode",
         ":logging",
         ":math",
+        ":normalization_test_mode",
         ":packing_test_mode",
         ":params",
         ":params_init",
@@ -10473,6 +10476,28 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "normalization",
+    srcs = ["src/normalization.c"],
+    hdrs = [
+        "src/xnnpack/normalization.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
+    name = "normalization_test_mode",
+    srcs = ["src/normalization.c"],
+    hdrs = ["src/xnnpack/normalization.h"],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
     name = "XNNPACK",
     srcs = [
         "src/init.c",
@@ -10510,6 +10535,7 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":operators",
+        ":normalization",
         ":params",
         ":params_init",
         ":prod_microkernels",
@@ -13769,6 +13795,15 @@ xnnpack_unit_test(
     srcs = [
         "test/negate-nc.cc",
         "test/negate-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "transpose_normalization_test",
+    srcs = [
+        "test/transpose-normalization.cc",
+        "test/transpose-normalization-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

@@ -6591,6 +6591,7 @@ ADD_LIBRARY(allocator OBJECT ${ALLOCATOR_SRCS})
 # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
 SET_TARGET_PROPERTIES(allocator PROPERTIES C_EXTENSIONS YES)
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
+ADD_LIBRARY(normalization OBJECT src/normalization.c)
 ADD_LIBRARY(packing OBJECT src/packing.c)
 ADD_LIBRARY(params_init OBJECT "src/params-init.c")
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
@@ -7060,6 +7061,15 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(negate-nc-test negate-nc-test)
+
+  ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
+  SET_TARGET_PROPERTIES(transpose-normalization-test PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+  TARGET_INCLUDE_DIRECTORIES(transpose-normalization-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE XNNPACK gtest gtest_main normalization)
+  ADD_TEST(transpose-normalization-test transpose-normalization-test)
 
   ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
