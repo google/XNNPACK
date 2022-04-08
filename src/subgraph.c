@@ -219,9 +219,11 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
 
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
   if (node->compute_type != xnn_compute_type_fp32) {
-    xnn_log_info(
-        "Node %s compute type %d is incompatible with sparse inference",
-        xnn_node_type_to_string(node->type), node->compute_type);
+    if (node->type != xnn_node_type_invalid) {
+      xnn_log_info(
+          "Node %s compute type %d is incompatible with sparse inference",
+          xnn_node_type_to_string(node->type), node->compute_type);
+    }
     return 0;
   }
 
