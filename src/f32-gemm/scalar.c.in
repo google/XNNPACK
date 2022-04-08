@@ -3,13 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$assert ACTIVATION != "LINEAR" or not WASM
 #include <assert.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
 
 
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 $KERNEL = "gemminc" if INC else "gemm"

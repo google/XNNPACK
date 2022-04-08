@@ -69,15 +69,6 @@
   k-block: 4
 - name: xnn_f32_igemm_ukernel_6x8s4__wasmrelaxedsimd_fma
   k-block: 4
-# WAsm
-- name: xnn_f32_igemm_ukernel_1x4__wasm
-  k-block: 1
-- name: xnn_f32_igemm_ukernel_2x4__wasm
-  k-block: 1
-- name: xnn_f32_igemm_ukernel_4x2__wasm
-  k-block: 1
-- name: xnn_f32_igemm_ukernel_4x4__wasm
-  k-block: 1
 # Scalar
 - name: xnn_f32_igemm_ukernel_1x4__scalar
   k-block: 1

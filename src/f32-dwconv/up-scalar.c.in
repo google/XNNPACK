@@ -7,6 +7,7 @@ $assert CHANNEL_TILE >= 1
 $assert KERNEL_TILE >= 2
 $assert ACCUMULATORS >= 1
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
+$assert ACTIVATION != "LINEAR" or not WASM
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
