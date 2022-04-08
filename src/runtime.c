@@ -6,7 +6,6 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h> // For snprintf.
 #include <stdlib.h>
 
 #include <xnnpack.h>
@@ -20,14 +19,6 @@
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
-#if defined(__EMSCRIPTEN__)
-#include <emscripten/emscripten.h>
-#elif XNN_PLATFORM_WINDOWS
-#include <windows.h>
-#else
-#include <errno.h>
-#include <time.h>
-#endif
 
 enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
 {
@@ -216,11 +207,6 @@ enum xnn_status xnn_create_runtime_v3(
       }
     }
   }
-
-  if (flags & XNN_FLAG_BASIC_PROFILING) {
-    runtime->profiling = true;
-  }
-
   xnn_release_value_allocation_tracker(&mem_alloc_tracker);
 
   runtime->threadpool = threadpool;
@@ -282,158 +268,9 @@ enum xnn_status xnn_setup_runtime(
   return xnn_status_success;
 }
 
-static xnn_timestamp xnn_read_timer() {
-  xnn_timestamp timestamp;
-#if defined(__MACH__)
-  timestamp = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-  if (timestamp == 0) {
-    xnn_log_warning("clock_gettime failed: error code %d", errno);
-  }
-#elif defined(__EMSCRIPTEN__)
-  timestamp = emscripten_get_now();
-#elif XNN_PLATFORM_WINDOWS
-  BOOL res = QueryPerformanceCounter(&timestamp);
-  if (!res) {
-    xnn_log_error("QueryPerformanceCounter failed: error code %u", GetLastError());
-    memset(&timestamp, 0, sizeof(timestamp));
-  }
-#else
-  int res = clock_gettime(CLOCK_MONOTONIC, &timestamp);
-  if (res != 0) {
-    xnn_log_error("clock_gettime failed: error code %d", errno);
-    memset(&timestamp, 0, sizeof(timestamp));
-  }
-#endif
-  return timestamp;
-}
-
-static inline uint64_t xnn_get_elapsed_time(const xnn_timestamp* start, const xnn_timestamp* end) {
-#if defined(__MACH__)
-  const uint64_t kMicrosInNanos = 1000;
-  return (end - start) / kMicrosInNanos;
-#elif defined(__EMSCRIPTEN__)
-  const double kMillisInMicros = 1.0e3;
-  return (uint64_t) ((*end - *start) * kMillisInMicros);
-#elif XNN_PLATFORM_WINDOWS
-  const uint64_t kMicrosInSec = 1000 * 1000;
-  LARGE_INTEGER frequency;
-  BOOL res = QueryPerformanceFrequency(&frequency);
-  if (!res) {
-    xnn_log_error("QueryPerformanceFrequency failed: error code %u", GetLastError());
-    return 0;
-  }
-  return ((end->QuadPart - start->QuadPart) * kMicrosInSec) / frequency.QuadPart;
-#else
-  const uint64_t kNanosInMicro = UINT64_C(1000);
-  const uint64_t kNanosInSec = UINT64_C(1000000000);
-  const uint64_t secs = (end->tv_sec - start->tv_sec) * kNanosInSec;
-  const uint64_t ns_secs = (end->tv_nsec - start->tv_nsec);
-  return (secs + ns_secs) / kNanosInMicro;
-#endif
-}
-
-enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
-                                               enum xnn_profile_info param_name,
-                                               size_t param_value_size,
-                                               void* param_value,
-                                               size_t* param_value_size_ret)
-{
-  if (!runtime->profiling) {
-    return xnn_status_invalid_state;
-  }
-  enum xnn_status status = xnn_status_success;
-  size_t required_size = 0;
-  const struct xnn_operator_data* opdata = runtime->opdata;
-  switch (param_name) {
-    case xnn_profile_info_num_operators:
-      required_size = sizeof(size_t);
-      if (param_value_size < required_size){
-        *param_value_size_ret = required_size;
-        status = xnn_status_out_of_memory;
-      } else {
-        size_t num_valid_ops = 0;
-        for (size_t i = 0; i < runtime->num_ops; ++i) {
-          if (opdata[i].operator_objects[0] != NULL) {
-            num_valid_ops += 1;
-          }
-        }
-        memcpy(param_value, &num_valid_ops, required_size);
-      }
-      break;
-    case xnn_profile_info_operator_name:
-      for (size_t i = 0; i < runtime->num_ops; ++i) {
-        if (opdata[i].operator_objects[0] != NULL) {
-          const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
-          size_t op_name_len = strlen(op_name) + 1;
-          if (opdata[i].operator_objects[0]->ukernel.type != xnn_ukernel_type_default ) {
-            op_name_len += strlen(xnn_ukernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type)) + 1;
-          }
-          required_size += op_name_len;
-        }
-      }
-      if (param_value_size < required_size) {
-        *param_value_size_ret = required_size;
-        status = xnn_status_out_of_memory;
-      } else {
-        char* name_out = (char*) param_value;
-        for (size_t i = 0; i < runtime->num_ops; ++i) {
-          if (opdata[i].operator_objects[0] != NULL) {
-            const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
-            size_t op_name_len = strlen(op_name) + 1;
-            if (opdata[i].operator_objects[0]->ukernel.type != xnn_ukernel_type_default ) {
-              const char* ukernel_type = xnn_ukernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type);
-              op_name_len += strlen(ukernel_type) + 1;
-              snprintf(name_out, op_name_len, "%s %s", op_name, ukernel_type);
-            } else {
-              snprintf(name_out, op_name_len, "%s", op_name);
-            }
-            name_out += op_name_len;
-          }
-        }
-      }
-      break;
-    case xnn_profile_info_operator_timing:
-    {
-      size_t num_valid_ops = 0;
-      for (size_t i = 0; i < runtime->num_ops; ++i) {
-        if (opdata[i].operator_objects[0] != NULL) {
-          num_valid_ops += 1;
-        }
-      }
-      required_size = num_valid_ops * sizeof(uint64_t);
-      if (param_value_size < required_size) {
-        *param_value_size_ret = required_size;
-        status = xnn_status_out_of_memory;
-      } else {
-        xnn_timestamp previous_ts = runtime->start_ts;
-        uint64_t* data = (uint64_t*) param_value;
-        for (size_t i = 0; i < runtime->num_ops; ++i) {
-          if (opdata[i].operator_objects[0] != NULL) {
-            uint64_t op_time = 0;
-            for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
-              if (opdata[i].operator_objects[j] != NULL) {
-                op_time += xnn_get_elapsed_time(&previous_ts, &opdata[i].end_ts[j]);
-                previous_ts = opdata[i].end_ts[j];
-              }
-            }
-            *data++ = op_time;
-          }
-        }
-      }
-      break;
-    }
-    default:
-      status = xnn_status_invalid_parameter;
-  }
-  return status;
-}
-
 enum xnn_status xnn_invoke_runtime(
   xnn_runtime_t runtime)
 {
-  if (runtime->profiling) {
-    runtime->start_ts = xnn_read_timer();
-  }
   for (size_t i = 0; i < runtime->num_ops; i++) {
     for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
       if (runtime->opdata[i].operator_objects[j] == NULL) {
@@ -445,10 +282,8 @@ enum xnn_status xnn_invoke_runtime(
       if (status != xnn_status_success) {
         return status;
       }
-      if (runtime->profiling) {
-        runtime->opdata[i].end_ts[j] = xnn_read_timer();
-      }
     }
+
   }
   return xnn_status_success;
 }
