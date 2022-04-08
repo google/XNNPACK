@@ -59,16 +59,55 @@ class TransposeOperatorTester {
 
   inline const std::vector<size_t>& perm() const { return this->perm_; }
 
+  void TestX16() const {
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output(count);
+    std::vector<size_t> input_stride(input.size(), 1);
+    std::vector<size_t> output_stride(input.size(), 1);
+    for (size_t i = num_dims() - 1; i > 0; --i) {
+      input_stride[i - 1] = input_stride[i] * shape_[i];
+      output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
+    }
+    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+    xnn_operator_t transpose_op = nullptr;
+    std::iota(input.begin(), input.end(), 0);
+    std::fill(output.begin(), output.end(), 0);
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_create_transpose_nd_x16(0, &transpose_op));
+    ASSERT_NE(nullptr, transpose_op);
+
+    // Smart pointer to automatically delete convert op.
+    std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_setup_transpose_nd_x16(
+                  transpose_op,
+                  input.data(), output.data(),
+                  num_dims(), shape_.data(), perm_.data(),
+                  nullptr /* thread pool */));
+
+    // Run operator.
+    ASSERT_EQ(xnn_status_success,
+              xnn_run_operator(transpose_op, nullptr /* thread pool */));
+
+    // Verify results.
+    for (size_t i = 0; i < count; ++i) {
+      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      ASSERT_EQ(input[in_idx], output[i]);
+    }
+  }
+
   void TestX32() const {
-    size_t count = 1;
-    for (size_t i = 0; i < num_dims(); ++i) count *= dims()[i];
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
     std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
-    for(size_t i = num_dims() - 1; i-- > 0;){
-      input_stride[i] = input_stride[i+1] * shape_[i + 1];
-      output_stride[i] = output_stride[i+1] * shape_[perm()[i+1]];
+    for (size_t i = num_dims() - 1; i > 0; --i) {
+      input_stride[i - 1] = input_stride[i] * shape_[i];
+      output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
@@ -95,7 +134,7 @@ class TransposeOperatorTester {
 
     // Verify results.
     for (size_t i = 0; i < count; ++i) {
-      size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
       ASSERT_EQ(input[in_idx], output[i]);
     }
   }

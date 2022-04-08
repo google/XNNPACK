@@ -269,10 +269,20 @@ enum xnn_status xnn_create_transpose_nd_x32(
     transpose_op_out);
 }
 
+enum xnn_status xnn_create_transpose_nd_x16(
+  uint32_t flags,
+  xnn_operator_t* transpose_op_out)
+{
+  return create_transpose_nd(
+    flags,
+    xnn_operator_type_transpose_nd_x16,
+    transpose_op_out);
+}
+
 enum xnn_status xnn_setup_transpose_nd_x32(
     xnn_operator_t transpose_op,
-    const uint32_t* input,
-    uint32_t* output,
+    const void* input,
+    void* output,
     size_t num_dims,
     const size_t* shape,
     const size_t* perm,
@@ -290,4 +300,27 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     input, output,
     num_dims, shape, perm,
     sizeof(uint32_t));
+}
+
+enum xnn_status xnn_setup_transpose_nd_x16(
+    xnn_operator_t transpose_op,
+    const void* input,
+    void* output,
+    size_t num_dims,
+    const size_t* shape,
+    const size_t* perm,
+    pthreadpool_t threadpool)
+{
+  if (transpose_op->type != xnn_operator_type_transpose_nd_x16) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x16),
+      xnn_operator_type_to_string(transpose_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_transpose(
+    transpose_op,
+    input, output,
+    num_dims, shape, perm,
+    sizeof(uint16_t));
 }

@@ -2114,8 +2114,8 @@ enum xnn_status xnn_create_transpose_nd_x32(
 
 enum xnn_status xnn_setup_transpose_nd_x32(
     xnn_operator_t transpose_op,
-    const uint32_t* input,
-    uint32_t* output,
+    const void* input,
+    void* output,
     const size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
@@ -2471,6 +2471,19 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x16(
   const void* input,
   void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_transpose_nd_x16(
+    uint32_t flags,
+    xnn_operator_t* transpose_op_out);
+
+enum xnn_status xnn_setup_transpose_nd_x16(
+    xnn_operator_t transpose_op,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    pthreadpool_t threadpool);
 
 #endif  // XNN_NO_X16_OPERATORS
 
