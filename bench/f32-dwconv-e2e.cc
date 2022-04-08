@@ -24,7 +24,7 @@
 static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv,
+  xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
   xnn_init_f32_minmax_params_fn init_params,
   uint8_t channel_tile, uint8_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -41,8 +41,10 @@ static void DWConvEnd2EndBenchmark(
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
     if (xnn_params.f32.dwconv[i].primary_tile == primary_tile) {
+      std::memset(&xnn_params.f32.dwconv[i], 0, sizeof(xnn_params.f32.dwconv[i]));
+
       // Note: do not directly assign to xnn_params.f32.dwconv[i] because it breaks older gcc.
-      xnn_params.f32.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_function(dwconv);
+      xnn_params.f32.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_function(dwconv_minmax);
       xnn_params.f32.dwconv[i].channel_tile = channel_tile;
       xnn_params.f32.dwconv[i].primary_tile = primary_tile;
       xnn_params.f32.dwconv[i].incremental_tile = 0;
