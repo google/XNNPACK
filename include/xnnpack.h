@@ -3290,6 +3290,19 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_transpose_nd_x8(
+    uint32_t flags,
+    xnn_operator_t* transpose_op_out);
+
+enum xnn_status xnn_setup_transpose_nd_x8(
+    xnn_operator_t transpose_op,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    pthreadpool_t threadpool);
+
 #endif  // XNN_NO_X8_OPERATORS
 
 #ifndef XNN_NO_CVT_OPERATORS
