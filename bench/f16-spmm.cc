@@ -28,14 +28,9 @@ static void SpMMBenchmark(benchmark::State& state,
   xnn_init_f16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
+  if (isa_check && !isa_check(state)) {
     return;
   }
-  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
-    return;
-  }
-
   const size_t mc = state.range(0);
   const size_t nc = state.range(1);
   const size_t kc = state.range(2);
