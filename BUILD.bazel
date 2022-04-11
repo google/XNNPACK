@@ -10495,19 +10495,6 @@ xnnpack_cc_library(
     }) + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
-    }) + select({
-        ":xnn_wasmsimd_version_m87": [
-            "-DXNN_WASMSIMD_VERSION=87",
-        ],
-        ":xnn_wasmsimd_version_m88": [
-            "-DXNN_WASMSIMD_VERSION=88",
-        ],
-        ":xnn_wasmsimd_version_m91": [
-            "-DXNN_WASMSIMD_VERSION=91",
-        ],
-        "//conditions:default": [
-            "-DXNN_WASMSIMD_VERSION=87",
-        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -10547,19 +10534,6 @@ xnnpack_cc_library(
     }) + select({
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
-    }) + select({
-        ":xnn_wasmsimd_version_m87": [
-            "-DXNN_WASMSIMD_VERSION=87",
-        ],
-        ":xnn_wasmsimd_version_m88": [
-            "-DXNN_WASMSIMD_VERSION=88",
-        ],
-        ":xnn_wasmsimd_version_m91": [
-            "-DXNN_WASMSIMD_VERSION=91",
-        ],
-        "//conditions:default": [
-            "-DXNN_WASMSIMD_VERSION=87",
-        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -10612,19 +10586,6 @@ xnnpack_cc_library(
             "XNN_NO_S8_OPERATORS",
         ],
         "//conditions:default": [],
-    }) + select({
-        ":xnn_wasmsimd_version_m87": [
-            "XNN_WASMSIMD_VERSION=87",
-        ],
-        ":xnn_wasmsimd_version_m88": [
-            "XNN_WASMSIMD_VERSION=88",
-        ],
-        ":xnn_wasmsimd_version_m91": [
-            "XNN_WASMSIMD_VERSION=91",
-        ],
-        "//conditions:default": [
-            "XNN_WASMSIMD_VERSION=87",
-        ],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -14087,24 +14048,6 @@ config_setting(
 config_setting(
     name = "xnn_enable_jit_explicit_false",
     define_values = {"xnn_enable_jit": "false"},
-)
-
-# Target Chrome M87 instructions in WAsm SIMD build
-config_setting(
-    name = "xnn_wasmsimd_version_m87",
-    define_values = {"xnn_wasmsimd_version": "m87"},
-)
-
-# Target Chrome M88 instructions in WAsm SIMD build
-config_setting(
-    name = "xnn_wasmsimd_version_m88",
-    define_values = {"xnn_wasmsimd_version": "m88"},
-)
-
-# Target Chrome M91 instructions in WAsm SIMD build
-config_setting(
-    name = "xnn_wasmsimd_version_m91",
-    define_values = {"xnn_wasmsimd_version": "m91"},
 )
 
 # Fully disable logging
