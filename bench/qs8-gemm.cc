@@ -1977,33 +1977,6 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_init_qs8_conv_minmax_fp32_wasmsimd_params, nullptr, true);
   }
 
-  static void qs8_gemm_2x4c8__wasmsimd_mul16_ld64(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul16_ld64, 2, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params);
-  }
-  static void qs8_gemm_3x4c8__wasmsimd_mul16_ld64(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_mul16_ld64, 3, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params);
-  }
-
-  static void qs8_gemm_2x4c8__wasmsimd_mul16_ld128(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x4c8__wasmsimd_mul16_ld128, 2, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params);
-  }
-  static void qs8_gemm_3x4c8__wasmsimd_mul16_ld128(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_mul16_ld128, 3, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params);
-  }
-
-  static void qs8_gemm_xw_2x4c8__wasmsimd_mul16(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_xw_minmax_fp32_ukernel_2x4c8__wasmsimd_mul16, 2, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params, nullptr, true);
-  }
-  static void qs8_gemm_xw_3x4c8__wasmsimd_mul16(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state, xnn_qs8_gemm_xw_minmax_fp32_ukernel_3x4c8__wasmsimd_mul16, 3, 4, 8, 1,
-      xnn_init_qs8_conv_minmax_fp32_wasmsimd_params, nullptr, true);
-  }
-
   BENCHMARK_GEMM(qs8_gemm_2x4c2__wasmsimd_dot16x2_ld64)
   BENCHMARK_GEMM(qs8_gemm_3x4c2__wasmsimd_dot16x2_ld64)
   BENCHMARK_GEMM(qs8_gemm_4x4c2__wasmsimd_dot16x2_ld64)
@@ -2030,13 +2003,6 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qs8_gemm_xw_2x4c8__wasmsimd_dot16x2)
   BENCHMARK_GEMM(qs8_gemm_xw_3x4c8__wasmsimd_dot16x2)
   BENCHMARK_GEMM(qs8_gemm_xw_4x4c8__wasmsimd_dot16x2)
-
-  BENCHMARK_GEMM(qs8_gemm_2x4c8__wasmsimd_mul16_ld64)
-  BENCHMARK_GEMM(qs8_gemm_3x4c8__wasmsimd_mul16_ld64)
-  BENCHMARK_GEMM(qs8_gemm_2x4c8__wasmsimd_mul16_ld128)
-  BENCHMARK_GEMM(qs8_gemm_3x4c8__wasmsimd_mul16_ld128)
-  BENCHMARK_GEMM(qs8_gemm_xw_2x4c8__wasmsimd_mul16)
-  BENCHMARK_GEMM(qs8_gemm_xw_3x4c8__wasmsimd_mul16)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
