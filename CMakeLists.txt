@@ -3224,6 +3224,7 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neonv8-ld128-x16.c)
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
@@ -3252,6 +3253,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
@@ -6328,9 +6330,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-ld128.S
   src/f32-gemm/gen-inc/6x8inc-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-ld64.S
+  src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-gemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-gemm/gen/1x12-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-gemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S
@@ -6354,7 +6356,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld128.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a75.S
+  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
   src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-cortex-a75.S
   src/f32-igemm/gen/4x2-minmax-aarch64-neonfma-ld64.S
@@ -6373,8 +6377,6 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-ld128.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
-  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-cortex-a53.S
-  src/f32-igemm/gen/1x8-minmax-aarch64-neonfma-prfm-cortex-a53.S
   src/f32-igemm/1x12-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/4x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-igemm/4x12-minmax-aarch64-neonfma-cortex-a53.S
