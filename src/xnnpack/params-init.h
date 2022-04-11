@@ -478,10 +478,6 @@ DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_para
   DECLARE_INIT_F32_RND_PARAMS_FUNCTION(xnn_init_f32_rnd_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_RND_PARAMS_FUNCTION(xnn_init_f32_rnd_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 
 #define DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                              \

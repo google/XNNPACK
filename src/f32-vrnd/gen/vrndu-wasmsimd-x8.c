@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vrnd/wasmsimd-native.c.in
+//   Template: src/f32-vrnd/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndu_ukernel__wasmsimd_native_x8(
+void xnn_f32_vrndu_ukernel__wasmsimd_x8(
     size_t n,
     const float* x,
     float* y,

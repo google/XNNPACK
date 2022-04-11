@@ -5361,19 +5361,19 @@ static void init(void) {
       .element_tile = 16,
     };
     xnn_params.f32.rndne = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__wasmsimd_native_x8,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndne_ukernel__wasmsimd_x8,
       .element_tile = 8,
     };
     xnn_params.f32.rndz = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__wasmsimd_native_x8,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndz_ukernel__wasmsimd_x8,
       .element_tile = 8,
     };
     xnn_params.f32.rndu = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__wasmsimd_native_x8,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndu_ukernel__wasmsimd_x8,
       .element_tile = 8,
     };
     xnn_params.f32.rndd = (struct vunary_parameters) {
-      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__wasmsimd_native_x8,
+      .ukernel = (xnn_univector_ukernel_function) xnn_f32_vrndd_ukernel__wasmsimd_x8,
       .element_tile = 8,
     };
     xnn_params.f32.sigmoid = (struct vunary_parameters) {

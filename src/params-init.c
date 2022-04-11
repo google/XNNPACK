@@ -2410,19 +2410,6 @@ void xnn_init_f32_rnd_avx_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-void xnn_init_f32_rnd_wasmsimd_params(
-  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)])
-{
-  params->wasmsimd.sign_mask[0] = -0.0f;
-  params->wasmsimd.sign_mask[1] = -0.0f;
-  params->wasmsimd.magic_bias[0] = 0x1.000000p+23f;
-  params->wasmsimd.magic_bias[1] = 0x1.000000p+23f;
-  params->wasmsimd.one[0] = 1.0f;
-  params->wasmsimd.one[1] = 1.0f;
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 void xnn_init_f32_elu_scalar_rr2_lut16_p3_params(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,

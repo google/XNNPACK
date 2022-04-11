@@ -20,30 +20,14 @@ tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=2 -o src/f32
 tools/xngen src/f32-vrnd/scalar-libm.c.in -D OP=RNDD  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-scalar-libm-x4.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-vrnd/vrndne-wasmsimd-addsub.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-wasmsimd-addsub-x4.c &
-tools/xngen src/f32-vrnd/vrndne-wasmsimd-addsub.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndne-wasmsimd-addsub-x8.c &
-tools/xngen src/f32-vrnd/vrndz-wasmsimd-addsub.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndz-wasmsimd-addsub-x4.c &
-tools/xngen src/f32-vrnd/vrndz-wasmsimd-addsub.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndz-wasmsimd-addsub-x8.c &
-tools/xngen src/f32-vrnd/vrndu-wasmsimd-addsub.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndu-wasmsimd-addsub-x4.c &
-tools/xngen src/f32-vrnd/vrndu-wasmsimd-addsub.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndu-wasmsimd-addsub-x8.c &
-tools/xngen src/f32-vrnd/vrndd-wasmsimd-addsub.c.in  -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-wasmsimd-addsub-x4.c &
-tools/xngen src/f32-vrnd/vrndd-wasmsimd-addsub.c.in  -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-wasmsimd-addsub-x8.c &
-
-tools/xngen src/f32-vrnd/vrndz-wasmsimd-cvt.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndz-wasmsimd-cvt-x4.c &
-tools/xngen src/f32-vrnd/vrndz-wasmsimd-cvt.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndz-wasmsimd-cvt-x8.c &
-tools/xngen src/f32-vrnd/vrndu-wasmsimd-cvt.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndu-wasmsimd-cvt-x4.c &
-tools/xngen src/f32-vrnd/vrndu-wasmsimd-cvt.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndu-wasmsimd-cvt-x8.c &
-tools/xngen src/f32-vrnd/vrndd-wasmsimd-cvt.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndd-wasmsimd-cvt-x4.c &
-tools/xngen src/f32-vrnd/vrndd-wasmsimd-cvt.c.in -D BATCH_TILE=8 -o src/f32-vrnd/gen/vrndd-wasmsimd-cvt-x8.c &
-
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=4 -D OP=RNDNE -o src/f32-vrnd/gen/vrndne-wasmsimd-native-x4.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=8 -D OP=RNDNE -o src/f32-vrnd/gen/vrndne-wasmsimd-native-x8.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=4 -D OP=RNDZ  -o src/f32-vrnd/gen/vrndz-wasmsimd-native-x4.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=8 -D OP=RNDZ  -o src/f32-vrnd/gen/vrndz-wasmsimd-native-x8.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=4 -D OP=RNDU  -o src/f32-vrnd/gen/vrndu-wasmsimd-native-x4.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=8 -D OP=RNDU  -o src/f32-vrnd/gen/vrndu-wasmsimd-native-x8.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=4 -D OP=RNDD  -o src/f32-vrnd/gen/vrndd-wasmsimd-native-x4.c &
-tools/xngen src/f32-vrnd/wasmsimd-native.c.in -D BATCH_TILE=8 -D OP=RNDD  -o src/f32-vrnd/gen/vrndd-wasmsimd-native-x8.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDNE -o src/f32-vrnd/gen/vrndne-wasmsimd-x4.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=8 -D OP=RNDNE -o src/f32-vrnd/gen/vrndne-wasmsimd-x8.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDZ  -o src/f32-vrnd/gen/vrndz-wasmsimd-x4.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=8 -D OP=RNDZ  -o src/f32-vrnd/gen/vrndz-wasmsimd-x8.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDU  -o src/f32-vrnd/gen/vrndu-wasmsimd-x4.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=8 -D OP=RNDU  -o src/f32-vrnd/gen/vrndu-wasmsimd-x8.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=4 -D OP=RNDD  -o src/f32-vrnd/gen/vrndd-wasmsimd-x4.c &
+tools/xngen src/f32-vrnd/wasmsimd.c.in -D BATCH_TILE=8 -D OP=RNDD  -o src/f32-vrnd/gen/vrndd-wasmsimd-x8.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vrnd/vrndne-neon.c.in -D BATCH_TILE=4 -o src/f32-vrnd/gen/vrndne-neon-x4.c &

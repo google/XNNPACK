@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vrnd/wasmsimd-native.c.in
+//   Template: src/f32-vrnd/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
@@ -16,7 +16,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vrndd_ukernel__wasmsimd_native_x8(
+void xnn_f32_vrndu_ukernel__wasmsimd_x4(
     size_t n,
     const float* x,
     float* y,
@@ -25,24 +25,16 @@ void xnn_f32_vrndd_ukernel__wasmsimd_native_x8(
   assert(n != 0);
   assert(n % sizeof(float) == 0);
 
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
     const v128_t vx0123 = wasm_v128_load(x); x += 4;
-    const v128_t vx4567 = wasm_v128_load(x); x += 4;
 
-    const v128_t vy0123 = wasm_f32x4_floor(vx0123);
-    const v128_t vy4567 = wasm_f32x4_floor(vx4567);
+    const v128_t vy0123 = wasm_f32x4_ceil(vx0123);
 
     wasm_v128_store(y, vy0123); y += 4;
-    wasm_v128_store(y, vy4567); y += 4;
-  }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x); x += 4;
-    const v128_t vy = wasm_f32x4_floor(vx);
-    wasm_v128_store(y, vy); y += 4;
   }
   if XNN_UNLIKELY(n != 0) {
     const v128_t vx = wasm_v128_load(x);
-    v128_t vy = wasm_f32x4_floor(vx);
+    v128_t vy = wasm_f32x4_ceil(vx);
 
     if (n & (2 * sizeof(float))) {
       *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
