@@ -84,3 +84,16 @@ enum xnn_status xnn_subgraph_check_output_node_id(enum xnn_node_type node_type, 
   return xnn_status_success;
 }
 
+enum xnn_status xnn_subgraph_check_output_type_dense(
+  enum xnn_node_type node_type,
+  uint32_t output_id,
+  const struct xnn_value* output_value)
+{
+  if (output_value->type != xnn_value_type_dense_tensor) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
+      xnn_node_type_to_string(node_type), output_id, output_value->type);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_status_success;
+}

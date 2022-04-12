@@ -212,11 +212,9 @@ enum xnn_status xnn_define_depth_to_space(
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  if (output_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_depth_to_space), output_id, output_value->type);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_depth_to_space, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
