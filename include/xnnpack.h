@@ -45,6 +45,9 @@ extern "C" {
 /// Warning: on x86 systems FP16 computations will be emulated at a substantial performance cost.
 #define XNN_FLAG_FORCE_FP16_INFERENCE 0x00000004
 
+/// Enable timing of each operator's runtime.
+#define XNN_FLAG_BASIC_PROFILING 0x00000008
+
 /// The convolution operator represents a depthwise convolution, and use HWGo layout for filters.
 #define XNN_FLAG_DEPTHWISE_CONVOLUTION 0x00000001
 
@@ -1323,6 +1326,32 @@ enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache);
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
+
+enum xnn_profile_info {
+  /// Returns a size_t containing the number of operators.
+  xnn_profile_info_num_operators,
+  /// Returns a char[] containing the null character separated names of all operators.
+  xnn_profile_info_operator_name,
+  /// Returns a uint64_t[] with the runtimes of all operators in the same order as xnn_profile_info_operator_name.
+  xnn_profile_info_operator_timing,
+};
+
+/// Return profile information for all operators.
+///
+/// @param runtime - a Runtime object created with @ref xnn_create_runtime, @ref xnn_create_runtime_v2 or
+///                  @ref xnn_create_runtime_v3.
+/// @param param_name - type of profile information required.
+/// @param param_value_size - the size in bytes of memory pointed to by param_value. If this is not sufficient then
+///                           param_value_size_ret will be set to the required size and xnn_status_out_of_memory will be
+///                           returned.
+/// @param param_value - a pointer to memory location where appropriate values for a given param_value will be written.
+/// @param param_value_size_ret - returns number of bytes required to write the result if param_value_size is not
+///                               sufficient.
+enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
+                                               enum xnn_profile_info param_name,
+                                               size_t param_value_size,
+                                               void* param_value,
+                                               size_t* param_value_size_ret);
 
 /// Create a Runtime object from a subgraph.
 ///
