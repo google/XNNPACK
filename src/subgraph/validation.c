@@ -72,3 +72,15 @@ enum xnn_status xnn_subgraph_check_nth_input_type_dense(
   }
   return xnn_status_success;
 }
+
+enum xnn_status xnn_subgraph_check_output_node_id(enum xnn_node_type node_type, uint32_t output_id, size_t num_values)
+{
+  if (output_id >= num_values) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
+      xnn_node_type_to_string(node_type), output_id);
+    return xnn_status_invalid_parameter;
+  }
+  return xnn_status_success;
+}
+

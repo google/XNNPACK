@@ -402,11 +402,11 @@ enum xnn_status check_output_value(
 {
   const struct xnn_value* input_value = &subgraph->values[input_id];
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  if (output_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with %s output ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(node_type), nth, output_id);
-    return xnn_status_invalid_parameter;
+  enum xnn_status status;
+
+  status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   if (output_value->type != xnn_value_type_dense_tensor) {

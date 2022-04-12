@@ -522,11 +522,9 @@ enum xnn_status xnn_define_concatenate_n(
     return status;
   }
 
-  if (output_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with output ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(node_type), output_id);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];

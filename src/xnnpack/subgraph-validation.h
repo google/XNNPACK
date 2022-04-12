@@ -28,6 +28,7 @@ enum xnn_status xnn_subgraph_check_nth_input_type_dense(
   uint32_t input_id,
   const struct xnn_value* input_value,
   size_t nth);
+enum xnn_status xnn_subgraph_check_output_node_id(enum xnn_node_type node_type, uint32_t output_id, size_t num_values);
 
 #ifdef __cplusplus
 }  // extern "C"
