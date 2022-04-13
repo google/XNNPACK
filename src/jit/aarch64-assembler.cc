@@ -49,6 +49,11 @@ inline uint32_t fp_sz(VRegister vn) { return vn.is_s() ? 0 : 1 << 22; }
 inline uint32_t postindex(MemOperand op) { return (op.mode == AddressingMode::kPostIndex) ? 0 : 1 << 24; }
 inline uint32_t wb(MemOperand op) { return op.mode == AddressingMode::kOffset ? 0 : 1 << 23; }
 
+inline uint32_t imm9(int32_t imm) {
+  assert(!(imm < kInt9Min || imm > kInt9Max));
+  return (imm & kImm9Mask) << 12;
+}
+
 inline bool is_same_shape(VRegister vt1, VRegister vt2) {
   return vt1.size == vt2.size && vt1.q == vt2.q;
 }
@@ -288,7 +293,7 @@ void Assembler::ldr(XRegister xt, MemOperand xn, int32_t imm) {
     return;
   }
 
-  emit32(0xF8400400 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt(xt));
+  emit32(0xF8400400 | imm9(imm) | rn(xn.base) | rt(xt));
 }
 
 void Assembler::mov(XRegister xd, XRegister xn) {
@@ -320,6 +325,25 @@ void Assembler::stp(XRegister xt1, XRegister xt2, MemOperand xn) {
 
   const uint32_t offset = (xn.offset >> 3) & kImm7Mask;
   emit32(0xA9000000 | wb(xn) | offset << 15 | rt2(xt2) | rn(xn.base) | rt(xt1));
+}
+
+void Assembler::str(XRegister xt1, MemOperand xn) {
+  const int32_t offset = xn.offset;
+  if (xn.mode == AddressingMode::kPreIndex) {
+    if (offset < kInt9Min || offset > kInt9Max) {
+      error_ = Error::kInvalidOperand;
+      return;
+    }
+    emit32(0xF8000C00 | imm9(offset) | rn(xn.base) | rt(xt1));
+  } else if (xn.mode == AddressingMode::kOffset) {
+    if (offset < 0 || offset > kImm12Max || offset % 8 != 0) {
+      error_ = Error::kInvalidOperand;
+      return;
+    }
+    emit32(0xF9000000 | offset >> 3 << 10 | rn(xn.base) | rt(xt1));
+  } else {
+    XNN_UNREACHABLE;
+  }
 }
 
 void Assembler::sub(XRegister xd, XRegister xn, XRegister xm) {
@@ -655,7 +679,7 @@ void Assembler::ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uin
     return;
   }
 
-  emit32(0x3C400400 | size << 30 | opc << 22 | (imm & kImm9Mask) << 12| rn(xn.base) | rt_code);
+  emit32(0x3C400400 | size << 30 | opc << 22 | imm9(imm) | rn(xn.base) | rt_code);
 }
 
 void Assembler::str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code) {
@@ -664,7 +688,7 @@ void Assembler::str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uin
     return;
   }
 
-  emit32(0x3C000400 | size << 30 | opc << 22 | (imm & kImm9Mask) << 12 | rn(xn.base) | rt_code);
+  emit32(0x3C000400 | size << 30 | opc << 22 | imm9(imm) | rn(xn.base) | rt_code);
 }
 
 void Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {

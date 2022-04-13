@@ -351,6 +351,7 @@ class Assembler : public AssemblerBase {
   void prfm(PrefetchOp prfop, MemOperand xn);
   void ret();
   void stp(XRegister xt1, XRegister xt2, MemOperand xn);
+  void str(XRegister xt1, MemOperand xn);
   void sub(XRegister xd, XRegister xn, XRegister xm);
   void subs(XRegister xd, XRegister xn, uint16_t imm12);
   void tbnz(XRegister xd, uint8_t bit, Label& l);

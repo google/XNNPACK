@@ -84,6 +84,17 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[sp, 512]));
   EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[sp, -520]));
 
+  CHECK_ENCODING(0xF80FFFF4, a.str(x20, mem[sp, 255]++));
+  CHECK_ENCODING(0xF81B0FF4, a.str(x20, mem[sp, -80]++));
+  CHECK_ENCODING(0xF8100FF4, a.str(x20, mem[sp, -256]++));
+  CHECK_ENCODING(0xF90003F4, a.str(x20, mem[sp, 0]));
+  CHECK_ENCODING(0xF93FFFF4, a.str(x20, mem[sp, 32760]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, -257]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 256]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 3]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, -1]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 32768]));
+
   CHECK_ENCODING(0xF1008040, a.subs(x0, x2, 32));
   CHECK_ENCODING(0xF13FFC40, a.subs(x0, x2, 4095));
   EXPECT_ERROR(Error::kInvalidOperand, a.subs(x0, x2, -32));
