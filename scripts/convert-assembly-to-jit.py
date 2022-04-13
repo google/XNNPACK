@@ -163,6 +163,11 @@ def fix_fn_name(name):
   return f'xnn_generate_{name}'
 
 
+def remove_prfm_from_fn_name(name):
+  assert('_prfm_' in name)
+  return name.replace('prfm_', '')
+
+
 def fix_regs(regs):
   # Vector registers with datatype need to be method calls.
   # e.g. v2.4s -> v2.v4s(), v2.s -> v2.s()
@@ -184,6 +189,10 @@ IGEMM = 'IGEMM'
 def main(input_file):
   arch = None
   kernel_type = GEMM
+  minmax = False
+  prfm = False
+  datatype = 'f32'
+  ctype = 'float'
 
   if 'aarch32' in input_file:
     arch = AARCH32
@@ -195,6 +204,10 @@ def main(input_file):
 
   if 'igemm' in input_file:
     kernel_type = IGEMM
+  if 'minmax' in input_file:
+    minmax = True
+  if 'prfm' in input_file:
+    prfm = True
 
   # Whether we are in the copyright section.
   in_copyright = False
@@ -226,10 +239,12 @@ def main(input_file):
           in_function = True
           fn_name = line.split()[1]
           prologue.append(f'// Converted from: {input_file[20:]}')
+          params = 'float min, float max' if minmax else 'void* params'
+          prefetch = 'bool prefetch, ' if prfm else ''
           if kernel_type == GEMM:
-            prologue.append('void Generator::generate(size_t nc, size_t kc, void* params) {')
+            prologue.append(f'void Generator::generate({prefetch}size_t nc_mod_nr, size_t kc, {params}) {{')
           else:
-            prologue.append('void Generator::generate(size_t nc, size_t kc, size_t ks, void* params) {')
+            prologue.append(f'void Generator::generate({prefetch}size_t nc_mod_nr, size_t kc, size_t ks, {params}) {{')
           continue
         elif 'Copyright ' in line:
           in_autogen = False
@@ -239,7 +254,9 @@ def main(input_file):
                      1).rstrip())
           continue
         elif '#include <xnnpack/assembly.h>' in line:
+          prologue.append(f'#include <cassert>')
           prologue.append(f'#include <cstddef>')
+          prologue.append(f'#include <limits>')
           prologue.append('')
           prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
           prologue.append('#include <xnnpack/allocator.h>')
@@ -254,10 +271,12 @@ def main(input_file):
           prologue.append('class Generator : public Assembler {')
           prologue.append('  using Assembler::Assembler;')
           prologue.append(' public:')
+          params = 'float min, float max' if minmax else 'void* params'
+          prefetch = 'bool prefetch, ' if prfm else ''
           if kernel_type == GEMM:
-            prologue.append('  void generate(size_t nc, size_t kc, void* params);')
+            prologue.append(f'  void generate({prefetch}size_t nc_mod_nr, size_t kc, {params});')
           else:
-            prologue.append('  void generate(size_t nc, size_t kc, size_t ks, void* params);')
+            prologue.append(f'  void generate({prefetch}size_t nc_mod_nr, size_t kc, size_t ks, {params});')
           prologue.append('};')
           continue
         elif any(re.fullmatch(p, line) for p in IGNORE_LINES):
@@ -465,8 +484,16 @@ def main(input_file):
     print(p)
 
   labels_str = ', '.join(f'l{l}' for l in labels)
+  # TODO(zhin): remove this hardcoded 8, base it on the tile size in file name.
+  print('  assert(nc_mod_nr < 8)')
+  print('  assert(kc != 0)')
+  print(f'  assert(kc % sizeof({ctype}) == 0)')
+  print()
   print(f'  Label {labels_str};')
   print()
+  if minmax:
+    print('  const bool clamp_min = min != -std::numeric_limits<float>::infinity();')
+    print('  const bool clamp_max = max != +std::numeric_limits<float>::infinity();')
 
   indent = '  '
   for i in instructions:
@@ -478,22 +505,40 @@ def main(input_file):
       print()
     else:
       print(indent + (i).rstrip())
+  print(indent + 'align(16, AlignInstruction::kHlt)')
 
   print('}')
   print('}  // namespace')
   print(f'}}  // {arch}')
   print('}  // xnnpack')
   print('')
-  if kernel_type == GEMM:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, const void* params) {{')
+  if prfm:
+    print_generator_definition(kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')
+    print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch='true, ')
   else:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc, size_t kc, size_t ks, const void* params) {{')
+    print_generator_definition(kernel_type, fn_name, arch, minmax)
+
+
+def print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch=''):
+  if kernel_type == GEMM:
+    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {{')
+  else:
+    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {{')
   print(f'  using namespace xnnpack::{arch};')
   print('  Generator g(code);')
+  if minmax:
+    print('  assert(params != nullptr);')
+    print('  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);')
   if kernel_type == GEMM:
-    print('  g.generate(nc, kc, nullptr);')
+    if minmax:
+      print(f'  g.generate({prefetch}nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);')
+    else:
+      print(f'  g.generate({prefetch}nc_mod_nr, kc, nullptr);')
   else:
-    print('  g.generate(nc, kc, ks, nullptr);')
+    if minmax:
+      print(f'  g.generate({prefetch}nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);')
+    else:
+      print(f'  g.generate({prefetch}nc_mod_nr, kc, ks, nullptr);')
   print('  g.finalize();')
   print('  if (g.error() != xnnpack::Error::kNoError) {')
   print('    return xnn_status_invalid_state;')
