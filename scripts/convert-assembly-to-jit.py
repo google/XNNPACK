@@ -68,8 +68,8 @@ INSTR_REG_IMM_RE = re.compile(INSTR + REG + COMMA + IMM + COMMENTS)
 INSTR_REG_MEMOP_RE = re.compile(INSTR + REG + COMMA + MEMOP + COMMENTS)
 # e.g. LDR q0, [x4], 16
 INSTR_REG_MEMOP_IMM_RE = re.compile(INSTR + REG + COMMA + MEMOP + COMMA + IMM + COMMENTS)
-# e.g. LDR r0, [sp, 112]
-INSTR_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA + MEMOP_OFFSET +
+# e.g. LDR r0, [sp, 112], STR x20, [sp, -80]!
+INSTR_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA + MEMOP_OFFSET_MAYBE_WB +
                                        COMMENTS)
 # e.g. LDRD r6, r7, [sp]
 INSTR_REG_REG_MEMOP_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
@@ -345,8 +345,12 @@ def main(input_file):
         continue
       m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
       if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
+        if m[5]: # wb
+          instructions.append(
+              f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}')
+        else: # no wb
+          instructions.append(
+              f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}')
         continue
       m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
       if m:
