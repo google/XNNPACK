@@ -286,6 +286,7 @@ def main(input_file):
         else:
           prologue.append(fix_comments(line.rstrip()))
           continue
+      # end if not in_function
 
       # We are now in the microkernel function body.
       # Don't keep the ifdefs.
@@ -473,7 +474,7 @@ def main(input_file):
         continue
 
       if line.startswith('END_FUNCTION'):
-        continue
+        break
 
       # All other lines are error.
       print(f'ERROR: {line}', file=sys.stderr)
@@ -485,9 +486,9 @@ def main(input_file):
 
   labels_str = ', '.join(f'l{l}' for l in labels)
   # TODO(zhin): remove this hardcoded 8, base it on the tile size in file name.
-  print('  assert(nc_mod_nr < 8)')
-  print('  assert(kc != 0)')
-  print(f'  assert(kc % sizeof({ctype}) == 0)')
+  print('  assert(nc_mod_nr < 8);')
+  print('  assert(kc != 0);')
+  print(f'  assert(kc % sizeof({ctype}) == 0);')
   print()
   print(f'  Label {labels_str};')
   print()
@@ -505,7 +506,7 @@ def main(input_file):
       print()
     else:
       print(indent + (i).rstrip())
-  print(indent + 'align(16, AlignInstruction::kHlt)')
+  print(indent + 'align(16, AlignInstruction::kHlt);')
 
   print('}')
   print('}  // namespace')
@@ -514,6 +515,7 @@ def main(input_file):
   print('')
   if prfm:
     print_generator_definition(kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')
+    print()
     print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch='true, ')
   else:
     print_generator_definition(kernel_type, fn_name, arch, minmax)
