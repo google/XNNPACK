@@ -33,6 +33,7 @@ static void reorder_array(
 }
 
 static enum xnn_status create_transpose_nd(
+    uint32_t flags,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     xnn_operator_t* transpose_op_out)
@@ -65,7 +66,7 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
-  transpose_op->flags = datatype_init_flags;
+  transpose_op->flags = flags;
   transpose_op->type = operator_type;
   *transpose_op_out = transpose_op;
 
@@ -265,6 +266,7 @@ enum xnn_status xnn_create_transpose_nd_x32(
 {
   return create_transpose_nd(
     flags,
+    XNN_INIT_FLAG_X32,
     xnn_operator_type_transpose_nd_x32,
     transpose_op_out);
 }
@@ -275,6 +277,7 @@ enum xnn_status xnn_create_transpose_nd_x16(
 {
   return create_transpose_nd(
     flags,
+    XNN_INIT_FLAG_X16,
     xnn_operator_type_transpose_nd_x16,
     transpose_op_out);
 }
@@ -285,6 +288,7 @@ enum xnn_status xnn_create_transpose_nd_x8(
 {
   return create_transpose_nd(
     flags,
+    XNN_INIT_FLAG_X8,
     xnn_operator_type_transpose_nd_x8,
     transpose_op_out);
 }
