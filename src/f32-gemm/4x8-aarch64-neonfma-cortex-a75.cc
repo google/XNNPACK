@@ -33,6 +33,7 @@ class Generator : public Assembler {
 //     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+// x13 used to store pointer to params->max if (!clamp_min && clamp_max).
 
 // A pointers
 // x3  a0
@@ -68,12 +69,21 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, float min, 
   assert(kc % sizeof(float) == 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
+  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
+  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
   // Load cn_stride, params pointer
   ldp(x14, x8, mem[sp]);
 
   // Load min/max values
-  ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
+  if (clamp_min && clamp_max) {
+    ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
+  } else if (clamp_min) {
+    ld1r({v4.v4s()}, mem[x8]);
+  } else if (clamp_max) {
+    add(x13, x8, 4);
+    ld1r({v5.v4s()}, mem[x13]);
+  }
 
   // Save d8-d15 on stack
   stp(d8, d9, mem[sp, -64]++);
@@ -299,7 +309,14 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, float min, 
   fmla(v27.v4s(), v15.v4s(), v5.s()[3]);
 
   // Load min/max values
-  ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
+  if (clamp_min && clamp_max) {
+    ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
+  } else if (clamp_min) {
+    ld1r({v4.v4s()}, mem[x8]);
+  } else if (clamp_max) {
+    add(x13, x8, 4);
+    ld1r({v5.v4s()}, mem[x13]);
+  }
 
   fmla(v28.v4s(), v14.v4s(), v6.s()[3]);
   fmla(v29.v4s(), v15.v4s(), v6.s()[3]);
@@ -398,23 +415,27 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, float min, 
 
   bind(l6);
   // Clamp
-  fmax(v24.v4s(), v24.v4s(), v4.v4s());
   subs(x1, x1, 8);
-  fmax(v25.v4s(), v25.v4s(), v4.v4s());
-  fmax(v26.v4s(), v26.v4s(), v4.v4s());
-  fmax(v27.v4s(), v27.v4s(), v4.v4s());
-  fmax(v28.v4s(), v28.v4s(), v4.v4s());
-  fmax(v29.v4s(), v29.v4s(), v4.v4s());
-  fmax(v30.v4s(), v30.v4s(), v4.v4s());
-  fmax(v31.v4s(), v31.v4s(), v4.v4s());
-  fmin(v24.v4s(), v24.v4s(), v5.v4s());
-  fmin(v25.v4s(), v25.v4s(), v5.v4s());
-  fmin(v26.v4s(), v26.v4s(), v5.v4s());
-  fmin(v27.v4s(), v27.v4s(), v5.v4s());
-  fmin(v28.v4s(), v28.v4s(), v5.v4s());
-  fmin(v29.v4s(), v29.v4s(), v5.v4s());
-  fmin(v30.v4s(), v30.v4s(), v5.v4s());
-  fmin(v31.v4s(), v31.v4s(), v5.v4s());
+  if (clamp_min) {
+    fmax(v24.v4s(), v24.v4s(), v4.v4s());
+    fmax(v25.v4s(), v25.v4s(), v4.v4s());
+    fmax(v26.v4s(), v26.v4s(), v4.v4s());
+    fmax(v27.v4s(), v27.v4s(), v4.v4s());
+    fmax(v28.v4s(), v28.v4s(), v4.v4s());
+    fmax(v29.v4s(), v29.v4s(), v4.v4s());
+    fmax(v30.v4s(), v30.v4s(), v4.v4s());
+    fmax(v31.v4s(), v31.v4s(), v4.v4s());
+  }
+  if (clamp_max) {
+    fmin(v24.v4s(), v24.v4s(), v5.v4s());
+    fmin(v25.v4s(), v25.v4s(), v5.v4s());
+    fmin(v26.v4s(), v26.v4s(), v5.v4s());
+    fmin(v27.v4s(), v27.v4s(), v5.v4s());
+    fmin(v28.v4s(), v28.v4s(), v5.v4s());
+    fmin(v29.v4s(), v29.v4s(), v5.v4s());
+    fmin(v30.v4s(), v30.v4s(), v5.v4s());
+    fmin(v31.v4s(), v31.v4s(), v5.v4s());
+  }
 
   // Store full 4 x 8
   b_lo(l7);
