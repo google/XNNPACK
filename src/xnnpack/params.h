@@ -966,10 +966,10 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
-    XNN_ALIGN(16) float multiplier;
-    XNN_ALIGN(16) float output_min;
-    XNN_ALIGN(16) float output_max;
     XNN_ALIGN(16) uint32_t mask[4];
+    float multiplier;
+    float output_min;
+    float output_max;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
