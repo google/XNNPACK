@@ -320,6 +320,17 @@ DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_a
 DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4)
 
 
+#define DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                              \
+      size_t elements,                                    \
+      size_t channels,                                    \
+      const void* input,                                  \
+      void* output,                                       \
+      const union xnn_f16_gavgpool_params* params);
+
+DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4)
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

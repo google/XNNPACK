@@ -306,6 +306,13 @@ XNN_INTERNAL void xnn_init_f32_gavgpool_params(
   float output_max,
   uint32_t width);
 
+XNN_INTERNAL void xnn_init_f16_gavgpool_params(
+  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t multiplier,
+  uint16_t output_min,
+  uint16_t output_max,
+  uint32_t width);
+
 XNN_INTERNAL void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params* params,
   float multiplier,

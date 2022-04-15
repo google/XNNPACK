@@ -1713,6 +1713,26 @@ void xnn_init_f32_gavgpool_params(
   #endif
 }
 
+void xnn_init_f16_gavgpool_params(
+  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t multiplier,
+  uint16_t output_min,
+  uint16_t output_max,
+  uint32_t width)
+{
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+    params->neonfp16arith.multiplier = multiplier;
+    params->neonfp16arith.output_min = output_min;
+    params->neonfp16arith.output_max = output_max;
+
+    const uint32_t w = (width - 1) & 3;
+    params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
+    params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
+    params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
+    params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
+  #endif
+}
+
 void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params* params,
   float multiplier,

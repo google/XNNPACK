@@ -4694,6 +4694,7 @@ PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c",
+    "src/f16-gavgpool-cw/neonfp16arith-x4.c",
     "src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c",
     "src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c",
     "src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c",
@@ -4717,6 +4718,7 @@ PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
 ]
 
 ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
+    "src/f16-gavgpool-cw/neonfp16arith-x4.c",
     "src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c",
     "src/f16-avgpool/9x-minmax-neonfp16arith-c8.c",
     "src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c",
@@ -11833,6 +11835,15 @@ xnnpack_unit_test(
         "test/f16-dwconv-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f16_gavgpool_cw_test",
+    srcs = [
+        "test/f16-gavgpool-cw.cc",
+        "test/gavgpool-cw-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
