@@ -992,17 +992,6 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
-union xnn_f16_gavgpool_params {
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    XNN_ALIGN(16) uint16_t mask[4];
-    uint16_t multiplier;
-    uint16_t output_min;
-    uint16_t output_max;
-  } neonfp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
-};
-
 union xnn_f16_hswish_params {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -2934,13 +2923,6 @@ typedef void (*xnn_f32_gavgpool_cw_ukernel_function)(
     float* output,
     const union xnn_f32_gavgpool_params* params);
 
-typedef void (*xnn_f16_gavgpool_cw_ukernel_function)(
-    size_t elements,
-    size_t channels,
-    const void* input,
-    void* output,
-    const union xnn_f16_gavgpool_params* params);
-
 typedef void (*xnn_avgpool_unipass_ukernel_function)(
     size_t output_pixels,
     size_t kernel_elements,
@@ -3731,13 +3713,6 @@ typedef void (*xnn_init_qu8_addsub_minmax_params_fn)(
   float b_output_scale,
   uint8_t output_min,
   uint8_t output_max);
-
-typedef void (*xnn_init_f16_gavgpool_params_fn)(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint16_t output_min,
-  uint16_t output_max,
-  uint32_t width);
 
 typedef void (*xnn_init_qs8_mul_minmax_params_fn)(
   union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
