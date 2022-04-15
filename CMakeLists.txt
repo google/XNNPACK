@@ -3250,7 +3250,10 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
-  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c)
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c
+  src/f16-vunary/gen/vabs-neonfp16arith-x16.c
+  src/f16-vunary/gen/vneg-neonfp16arith-x16.c
+  src/f16-vunary/gen/vsqr-neonfp16arith-x16.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
@@ -3768,6 +3771,8 @@ SET(ALL_SSE_MICROKERNEL_SRCS
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse2-int16-x32.c
+  src/f16-vunary/gen/vabs-sse2-x16.c
+  src/f16-vunary/gen/vneg-sse2-x16.c
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
@@ -5075,6 +5080,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f16-vlrelu/gen/vlrelu-f16c-x16.c
+  src/f16-vunary/gen/vsqr-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
 SET(ALL_F16C_MICROKERNEL_SRCS

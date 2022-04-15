@@ -2625,6 +2625,10 @@ static void init(void) {
         .row_tile = 2,
       };
 
+      xnn_params.f16.abs = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vabs_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
       xnn_params.f16.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vclamp_ukernel__neonfp16arith_x16,
         .init.f16_minmax = xnn_init_f16_minmax_neon_params,
@@ -2640,10 +2644,18 @@ static void init(void) {
         .init.f16_lrelu = xnn_init_f16_lrelu_neon_params,
         .element_tile = 16,
       };
+      xnn_params.f16.neg = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vneg_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
       xnn_params.f16.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40,
         .init.f16_sigmoid = xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params,
         .element_tile = 40,
+      };
+      xnn_params.f16.sqr = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsqr_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
       };
     }
   #endif  // XNN_NO_F16_OPERATORS
@@ -3938,6 +3950,11 @@ static void init(void) {
         .row_tile = 2,
       };
 
+      xnn_params.f16.abs = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vabs_ukernel__sse2_x16,
+        .init.f16_abs = xnn_init_f16_abs_sse_params,
+        .element_tile = 16,
+      };
       xnn_params.f16.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vclamp_ukernel__f16c_x16,
         .init.f16_minmax = xnn_init_f16_minmax_avx_params,
@@ -3953,10 +3970,19 @@ static void init(void) {
         .init.f16_lrelu = xnn_init_f16_lrelu_avx_params,
         .element_tile = 16,
       };
+      xnn_params.f16.neg = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vneg_ukernel__sse2_x16,
+        .init.f16_neg = xnn_init_f16_neg_sse_params,
+        .element_tile = 16,
+      };
       xnn_params.f16.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32,
         .init.f16_sigmoid = xnn_init_f16_sigmoid_avx2_rr1_p2_params,
         .element_tile = 32,
+      };
+      xnn_params.f16.sqr = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsqr_ukernel__f16c_x16,
+        .element_tile = 16,
       };
     }
   #endif  // XNN_NO_F16_OPERATORS

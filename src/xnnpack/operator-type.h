@@ -11,6 +11,7 @@
 
 enum xnn_operator_type {
   xnn_operator_type_invalid = 0,
+  xnn_operator_type_abs_nc_f16,
   xnn_operator_type_abs_nc_f32,
   xnn_operator_type_add_nd_f16,
   xnn_operator_type_add_nd_f32,
@@ -81,6 +82,7 @@ enum xnn_operator_type {
   xnn_operator_type_multiply_nd_f32,
   xnn_operator_type_multiply_nd_qs8,
   xnn_operator_type_multiply_nd_qu8,
+  xnn_operator_type_negate_nc_f16,
   xnn_operator_type_negate_nc_f32,
   xnn_operator_type_prelu_nc_f16,
   xnn_operator_type_prelu_nc_f32,
@@ -96,6 +98,7 @@ enum xnn_operator_type {
   xnn_operator_type_softmax_nc_f16,
   xnn_operator_type_softmax_nc_f32,
   xnn_operator_type_softmax_nc_qu8,
+  xnn_operator_type_square_nc_f16,
   xnn_operator_type_square_nc_f32,
   xnn_operator_type_square_root_nc_f32,
   xnn_operator_type_squared_difference_nd_f32,
