@@ -205,14 +205,13 @@ static enum xnn_status setup_max_pooling2d_nhwc(
   size_t params_size,
   size_t num_threads)
 {
-  max_pooling_op->state = xnn_run_state_invalid;
-
   if (max_pooling_op->type != expected_operator_type) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(max_pooling_op->type));
     return xnn_status_invalid_parameter;
   }
+  max_pooling_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
