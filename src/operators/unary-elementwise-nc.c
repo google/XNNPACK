@@ -88,6 +88,7 @@ static enum xnn_status create_unary_elementwise_nc(
 
 static enum xnn_status setup_unary_elementwise_nc(
     xnn_operator_t unary_elementwise_op,
+    enum xnn_operator_type expected_operator_type,
     size_t batch_size,
     const void* input,
     void* output,
@@ -97,6 +98,14 @@ static enum xnn_status setup_unary_elementwise_nc(
     size_t params_size,
     size_t num_threads)
 {
+  if (unary_elementwise_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(unary_elementwise_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  unary_elementwise_op->state = xnn_run_state_invalid;
+
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(unary_elementwise_op->type));
@@ -873,16 +882,8 @@ enum xnn_status xnn_setup_abs_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (abs_op->type != xnn_operator_type_abs_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_abs_nc_f32),
-      xnn_operator_type_to_string(abs_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  abs_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    abs_op,
+    abs_op, xnn_operator_type_abs_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -897,16 +898,8 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (rounding_op->type != xnn_operator_type_bankers_rounding_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_bankers_rounding_nc_f32),
-      xnn_operator_type_to_string(rounding_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  rounding_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    rounding_op,
+    rounding_op, xnn_operator_type_bankers_rounding_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -921,16 +914,8 @@ enum xnn_status xnn_setup_ceiling_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (ceiling_op->type != xnn_operator_type_ceiling_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_ceiling_nc_f32),
-      xnn_operator_type_to_string(ceiling_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  ceiling_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    ceiling_op,
+    ceiling_op, xnn_operator_type_ceiling_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -945,16 +930,8 @@ enum xnn_status xnn_setup_clamp_nc_f16(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (clamp_op->type != xnn_operator_type_clamp_nc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16),
-      xnn_operator_type_to_string(clamp_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  clamp_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    clamp_op,
+    clamp_op, xnn_operator_type_clamp_nc_f16,
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
@@ -969,16 +946,8 @@ enum xnn_status xnn_setup_clamp_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (clamp_op->type != xnn_operator_type_clamp_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32),
-      xnn_operator_type_to_string(clamp_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  clamp_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    clamp_op,
+    clamp_op, xnn_operator_type_clamp_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -993,16 +962,8 @@ enum xnn_status xnn_setup_clamp_nc_s8(
     int8_t* output,
     pthreadpool_t threadpool)
 {
-  if (clamp_op->type != xnn_operator_type_clamp_nc_s8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_s8),
-      xnn_operator_type_to_string(clamp_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  clamp_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    clamp_op,
+    clamp_op, xnn_operator_type_clamp_nc_s8,
     batch_size, input, output,
     0 /* log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(int8_t)) */,
@@ -1017,16 +978,8 @@ enum xnn_status xnn_setup_clamp_nc_u8(
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (clamp_op->type != xnn_operator_type_clamp_nc_u8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_u8),
-      xnn_operator_type_to_string(clamp_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  clamp_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    clamp_op,
+    clamp_op, xnn_operator_type_clamp_nc_u8,
     batch_size, input, output,
     0 /* log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(uint8_t)) */,
@@ -1041,16 +994,8 @@ enum xnn_status xnn_setup_convert_nc_f16_f32(
   float* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_f16_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_f32),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_f16_f32,
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     2 /* log2(sizeof(float)) */,
@@ -1065,16 +1010,8 @@ enum xnn_status xnn_setup_convert_nc_f32_f16(
   void* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_f32_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_f16),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_f32_f16,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     1 /* log2(sizeof(uint16_t)) */,
@@ -1089,16 +1026,8 @@ enum xnn_status xnn_setup_convert_nc_f32_qs8(
   int8_t* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_f32_qs8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_f32_qs8,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     0 /* log2(sizeof(int8_t)) */,
@@ -1113,16 +1042,8 @@ enum xnn_status xnn_setup_convert_nc_f32_qu8(
   uint8_t* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_f32_qu8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_f32_qu8,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     0 /* log2(sizeof(uint8_t)) */,
@@ -1137,16 +1058,8 @@ enum xnn_status xnn_setup_convert_nc_qs8_f32(
   float* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_qs8_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8_f32),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_qs8_f32,
     batch_size, input, output,
     0 /* log2(sizeof(int8_t)) */,
     2 /* log2(sizeof(float)) */,
@@ -1161,16 +1074,8 @@ enum xnn_status xnn_setup_convert_nc_qu8_f32(
   float* output,
   pthreadpool_t threadpool)
 {
-  if (convert_op->type != xnn_operator_type_convert_nc_qu8_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8_f32),
-      xnn_operator_type_to_string(convert_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  convert_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    convert_op,
+    convert_op, xnn_operator_type_convert_nc_qu8_f32,
     batch_size, input, output,
     0 /* log2(sizeof(uint8_t)) */,
     2 /* log2(sizeof(float)) */,
@@ -1185,16 +1090,8 @@ enum xnn_status xnn_setup_copy_nc_x8(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (copy_op->type != xnn_operator_type_copy_nc_x8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_copy_nc_x8),
-      xnn_operator_type_to_string(copy_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  copy_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    copy_op,
+    copy_op, xnn_operator_type_copy_nc_x8,
     batch_size, input, output,
     0 /* log2(sizeof(uint16_t)) */,
     0 /* log2(sizeof(uint16_t)) */,
@@ -1209,16 +1106,8 @@ enum xnn_status xnn_setup_copy_nc_x16(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (copy_op->type != xnn_operator_type_copy_nc_x16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_copy_nc_x16),
-      xnn_operator_type_to_string(copy_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  copy_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    copy_op,
+    copy_op, xnn_operator_type_copy_nc_x16,
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
@@ -1233,16 +1122,8 @@ enum xnn_status xnn_setup_copy_nc_x32(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (copy_op->type != xnn_operator_type_copy_nc_x32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_copy_nc_x32),
-      xnn_operator_type_to_string(copy_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  copy_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    copy_op,
+    copy_op, xnn_operator_type_copy_nc_x32,
     batch_size, input, output,
     2 /* log2(sizeof(uint32_t)) */,
     2 /* log2(sizeof(uint32_t)) */,
@@ -1257,16 +1138,8 @@ enum xnn_status xnn_setup_elu_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (elu_op->type != xnn_operator_type_elu_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32),
-      xnn_operator_type_to_string(elu_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  elu_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    elu_op,
+    elu_op, xnn_operator_type_elu_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1281,16 +1154,8 @@ enum xnn_status xnn_setup_floor_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (floor_op->type != xnn_operator_type_floor_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_floor_nc_f32),
-      xnn_operator_type_to_string(floor_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  floor_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    floor_op,
+    floor_op, xnn_operator_type_floor_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1305,16 +1170,8 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (hardswish_op->type != xnn_operator_type_hardswish_nc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f16),
-      xnn_operator_type_to_string(hardswish_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  hardswish_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    hardswish_op,
+    hardswish_op, xnn_operator_type_hardswish_nc_f16,
     batch_size, input, output,
     1 /* log2(sizeof(half)) */,
     1 /* log2(sizeof(half)) */,
@@ -1329,16 +1186,8 @@ enum xnn_status xnn_setup_hardswish_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (hardswish_op->type != xnn_operator_type_hardswish_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_hardswish_nc_f32),
-      xnn_operator_type_to_string(hardswish_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  hardswish_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    hardswish_op,
+    hardswish_op, xnn_operator_type_hardswish_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1353,16 +1202,8 @@ enum xnn_status xnn_setup_leaky_relu_nc_f16(
   void* output,
   pthreadpool_t threadpool)
 {
-  if (leaky_relu_op->type != xnn_operator_type_leaky_relu_nc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f16),
-      xnn_operator_type_to_string(leaky_relu_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  leaky_relu_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    leaky_relu_op,
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_f16,
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
@@ -1377,16 +1218,8 @@ enum xnn_status xnn_setup_leaky_relu_nc_f32(
   float* output,
   pthreadpool_t threadpool)
 {
-  if (leaky_relu_op->type != xnn_operator_type_leaky_relu_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
-      xnn_operator_type_to_string(leaky_relu_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  leaky_relu_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    leaky_relu_op,
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1401,16 +1234,8 @@ enum xnn_status xnn_setup_negate_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (negate_op->type != xnn_operator_type_negate_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_negate_nc_f32),
-      xnn_operator_type_to_string(negate_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  negate_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    negate_op,
+    negate_op, xnn_operator_type_negate_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1425,16 +1250,8 @@ enum xnn_status xnn_setup_sigmoid_nc_f16(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (sigmoid_op->type != xnn_operator_type_sigmoid_nc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f16),
-      xnn_operator_type_to_string(sigmoid_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  sigmoid_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    sigmoid_op,
+    sigmoid_op, xnn_operator_type_sigmoid_nc_f16,
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
@@ -1449,16 +1266,8 @@ enum xnn_status xnn_setup_sigmoid_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (sigmoid_op->type != xnn_operator_type_sigmoid_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f32),
-      xnn_operator_type_to_string(sigmoid_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  sigmoid_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    sigmoid_op,
+    sigmoid_op, xnn_operator_type_sigmoid_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1473,16 +1282,8 @@ enum xnn_status xnn_setup_square_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (square_op->type != xnn_operator_type_square_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_square_nc_f32),
-      xnn_operator_type_to_string(square_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  square_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    square_op,
+    square_op, xnn_operator_type_square_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1497,16 +1298,8 @@ enum xnn_status xnn_setup_square_root_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (sqrt_op->type != xnn_operator_type_square_root_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_square_root_nc_f32),
-      xnn_operator_type_to_string(sqrt_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  sqrt_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    sqrt_op,
+    sqrt_op, xnn_operator_type_square_root_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
@@ -1521,16 +1314,8 @@ enum xnn_status xnn_setup_truncation_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (truncation_op->type != xnn_operator_type_truncation_nc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_truncation_nc_f32),
-      xnn_operator_type_to_string(truncation_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  truncation_op->state = xnn_run_state_invalid;
-
   return setup_unary_elementwise_nc(
-    truncation_op,
+    truncation_op, xnn_operator_type_truncation_nc_f32,
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
