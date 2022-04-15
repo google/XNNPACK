@@ -4873,6 +4873,12 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x48.c",
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x56.c",
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x64.c",
+    "src/f16-vunary/gen/vabs-neonfp16arith-x8.c",
+    "src/f16-vunary/gen/vabs-neonfp16arith-x16.c",
+    "src/f16-vunary/gen/vneg-neonfp16arith-x8.c",
+    "src/f16-vunary/gen/vneg-neonfp16arith-x16.c",
+    "src/f16-vunary/gen/vsqr-neonfp16arith-x8.c",
+    "src/f16-vunary/gen/vsqr-neonfp16arith-x16.c",
     "src/math/exp-f16-neonfp16arith-rr2-p3.c",
     "src/math/expminus-f16-neonfp16arith-rr1-p2.c",
     "src/math/expminus-f16-neonfp16arith-rr1-p3.c",
@@ -5311,6 +5317,10 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-sse2-int32-x16.c",
     "src/f16-f32-vcvt/gen/vcvt-sse2-int32-x24.c",
     "src/f16-f32-vcvt/gen/vcvt-sse2-int32-x32.c",
+    "src/f16-vunary/gen/vabs-sse2-x8.c",
+    "src/f16-vunary/gen/vabs-sse2-x16.c",
+    "src/f16-vunary/gen/vneg-sse2-x8.c",
+    "src/f16-vunary/gen/vneg-sse2-x16.c",
     "src/f32-argmaxpool/4x-sse2-c4.c",
     "src/f32-argmaxpool/9p8x-sse2-c4.c",
     "src/f32-argmaxpool/9x-sse2-c4.c",
@@ -6598,6 +6608,8 @@ ALL_F16C_MICROKERNEL_SRCS = [
     "src/f16-vhswish/gen/vhswish-f16c-x16.c",
     "src/f16-vlrelu/gen/vlrelu-f16c-x8.c",
     "src/f16-vlrelu/gen/vlrelu-f16c-x16.c",
+    "src/f16-vunary/gen/vsqr-f16c-x8.c",
+    "src/f16-vunary/gen/vsqr-f16c-x16.c",
     "src/f32-f16-vcvt/gen/vcvt-f16c-x8.c",
     "src/f32-f16-vcvt/gen/vcvt-f16c-x16.c",
     "src/math/cvt-f16-f32-f16c.c",
@@ -11898,6 +11910,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_vabs_test",
+    srcs = [
+        "test/f16-vabs.cc",
+        "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_vadd_minmax_test",
     srcs = [
         "test/f16-vadd-minmax.cc",
@@ -12033,6 +12054,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_vneg_test",
+    srcs = [
+        "test/f16-vneg.cc",
+        "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_raddstoreexpminusmax_test",
     srcs = [
         "test/f16-raddstoreexpminusmax.cc",
@@ -12054,6 +12084,15 @@ xnnpack_unit_test(
     name = "f16_vsigmoid_test",
     srcs = [
         "test/f16-vsigmoid.cc",
+        "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vsqr_test",
+    srcs = [
+        "test/f16-vsqr.cc",
         "test/vunary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

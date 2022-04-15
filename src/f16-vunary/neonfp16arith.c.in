@@ -1,0 +1,74 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ABS", "NEG", "SQR"]
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+$VOPQ_F16 = {
+$  "ABS": lambda x: "vabsq_f16(%s)" % x,
+$  "NEG": lambda x: "vnegq_f16(%s)" % x,
+$  "SQR": lambda x: "vmulq_f16(%s, %s)" % (x, x),
+$}[OP]
+$PARAMS = {
+$  "ABS": "xnn_f16_abs_params",
+$  "NEG": "xnn_f16_neg_params",
+$  "SQR": "xnn_f16_default_params",
+$}[OP]
+void xnn_f16_v${OP.lower()}_ukernel__neonfp16arith_x${BATCH_TILE}(
+    size_t n,
+    const void* input,
+    void* output,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(n != 0);
+  assert(n % sizeof(__fp16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const __fp16* i = (const __fp16*) input;
+  __fp16* o = (__fp16*) output;
+  $if SIMD_TILE > 8:
+    for (; n >= ${BATCH_TILE} * sizeof(__fp16); n -= ${BATCH_TILE} * sizeof(__fp16)) {
+      $for N in range(SIMD_TILE):
+        float16x8_t vacc${ABC[N]} = vld1q_f16(i); i += 8;
+
+      $for N in range(SIMD_TILE):
+        vacc${ABC[N]} = ${VOPQ_F16("vacc" + ABC[N])};
+
+      $for N in range(SIMD_TILE):
+        vst1q_f16(o, vacc${ABC[N]}); o += 8;
+    }
+  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
+    float16x8_t vacc = vld1q_f16(i); i += 8;
+    vacc = ${VOPQ_F16("vacc")};
+    vst1q_f16(o, vacc); o += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    float16x8_t vacc = vld1q_f16(i);
+    vacc = ${VOPQ_F16("vacc")};
+    float16x4_t vacc_lo = vget_low_f16(vacc);
+    if (n & (4 * sizeof(__fp16))) {
+      vst1_f16(o, vacc_lo); o += 4;
+      vacc_lo = vget_high_f16(vacc);
+    }
+    if (n & (2 * sizeof(__fp16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_f16(vacc_lo), 0); o += 2;
+      vacc_lo = vext_f16(vacc_lo, vacc_lo, 2);
+    }
+    if (n & (1 * sizeof(__fp16))) {
+      vst1_lane_f16(o, vacc_lo, 0);
+    }
+  }
+}

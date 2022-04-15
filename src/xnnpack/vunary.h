@@ -16,6 +16,20 @@ extern "C" {
 #endif
 
 
+#define DECLARE_F16_VABS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const void* x,                               \
+      void* y,                                     \
+      const union xnn_f16_abs_params* params);
+
+DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__neonfp16arith_x8)
+DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__sse2_x8)
+DECLARE_F16_VABS_UKERNEL_FUNCTION(xnn_f16_vabs_ukernel__sse2_x16)
+
+
 #define DECLARE_F16_VCLAMP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
       size_t n,                                      \
@@ -42,6 +56,21 @@ DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__neonfp16arith_x16)
 
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x8)
 DECLARE_F16_VHSWISH_UKERNEL_FUNCTION(xnn_f16_vhswish_ukernel__f16c_x16)
+
+
+#define DECLARE_F16_VNEG_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const void* x,                               \
+      void* y,                                     \
+      const union xnn_f16_neg_params* params);
+
+
+DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__neonfp16arith_x8)
+DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_x8)
+DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_x16)
 
 
 #define DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(fn_name) \
@@ -95,6 +124,20 @@ DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr
 DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x48)
 DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x56)
 DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x64)
+
+
+#define DECLARE_F16_VSQR_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const void* x,                               \
+      void* y,                                     \
+      const union xnn_f16_default_params* params);
+
+DECLARE_F16_VSQR_UKERNEL_FUNCTION(xnn_f16_vsqr_ukernel__neonfp16arith_x8)
+DECLARE_F16_VSQR_UKERNEL_FUNCTION(xnn_f16_vsqr_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VSQR_UKERNEL_FUNCTION(xnn_f16_vsqr_ukernel__f16c_x8)
+DECLARE_F16_VSQR_UKERNEL_FUNCTION(xnn_f16_vsqr_ukernel__f16c_x16)
 
 
 #define DECLARE_F32_VABS_UKERNEL_FUNCTION(fn_name) \

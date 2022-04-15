@@ -2311,6 +2311,16 @@ void xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_abs_sse_params(
+  union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse.nonsign_mask[i] = UINT16_C(0x7FFF);
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f32_abs_sse_params(
   union xnn_f32_abs_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -2348,6 +2358,16 @@ void xnn_init_f32_abs_wasmsimd_params(
   params->wasmsimd.nonsign_mask[1] = math_nonsign_mask_f32();
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_neg_sse_params(
+  union xnn_f16_neg_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse.sign_mask[i] = UINT16_C(0x8000);
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f32_neg_sse_params(

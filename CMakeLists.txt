@@ -3409,6 +3409,12 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x48.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x56.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x64.c
+  src/f16-vunary/gen/vabs-neonfp16arith-x8.c
+  src/f16-vunary/gen/vabs-neonfp16arith-x16.c
+  src/f16-vunary/gen/vneg-neonfp16arith-x8.c
+  src/f16-vunary/gen/vneg-neonfp16arith-x16.c
+  src/f16-vunary/gen/vsqr-neonfp16arith-x8.c
+  src/f16-vunary/gen/vsqr-neonfp16arith-x16.c
   src/math/exp-f16-neonfp16arith-rr2-p3.c
   src/math/expminus-f16-neonfp16arith-rr1-p2.c
   src/math/expminus-f16-neonfp16arith-rr1-p3.c
@@ -3841,6 +3847,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse2-int32-x16.c
   src/f16-f32-vcvt/gen/vcvt-sse2-int32-x24.c
   src/f16-f32-vcvt/gen/vcvt-sse2-int32-x32.c
+  src/f16-vunary/gen/vabs-sse2-x8.c
+  src/f16-vunary/gen/vabs-sse2-x16.c
+  src/f16-vunary/gen/vneg-sse2-x8.c
+  src/f16-vunary/gen/vneg-sse2-x16.c
   src/f32-argmaxpool/4x-sse2-c4.c
   src/f32-argmaxpool/9p8x-sse2-c4.c
   src/f32-argmaxpool/9x-sse2-c4.c
@@ -5118,6 +5128,8 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f16-vlrelu/gen/vlrelu-f16c-x8.c
   src/f16-vlrelu/gen/vlrelu-f16c-x16.c
+  src/f16-vunary/gen/vsqr-f16c-x8.c
+  src/f16-vunary/gen/vsqr-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c
   src/math/cvt-f16-f32-f16c.c
@@ -7203,6 +7215,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-spmm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(f16-spmm-minmax-test f16-spmm-minmax-test)
 
+  ADD_EXECUTABLE(f16-vabs-test test/f16-vabs.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vabs-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vabs-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vabs-test f16-vabs-test)
+
   ADD_EXECUTABLE(f16-vadd-minmax-test test/f16-vadd-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vadd-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-vadd-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
@@ -7278,6 +7295,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-vmulcaddc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(f16-vmulcaddc-minmax-test f16-vmulcaddc-minmax-test)
 
+  ADD_EXECUTABLE(f16-vneg-test test/f16-vneg.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vneg-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vneg-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vneg-test f16-vneg-test)
+
   ADD_EXECUTABLE(f16-pavgpool-minmax-test test/f16-pavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-pavgpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-pavgpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
@@ -7297,6 +7319,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-vsigmoid-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(f16-vsigmoid-test f16-vsigmoid-test)
+
+  ADD_EXECUTABLE(f16-vsqr-test test/f16-vsqr.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsqr-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vsqr-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vsqr-test f16-vsqr-test)
 
   ADD_EXECUTABLE(f16-vsub-minmax-test test/f16-vsub-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vsub-minmax-test PRIVATE include src test)
