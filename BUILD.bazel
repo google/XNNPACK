@@ -4747,6 +4747,7 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/up32x9-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up32x25-minmax-neonfp16arith-acc2.c",
     "src/f16-dwconv/gen/up32x25-minmax-neonfp16arith.c",
+    "src/f16-gavgpool-cw/neonfp16arith-x4.c",
     "src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c",
     "src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c16.c",
     "src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c24.c",
@@ -8058,8 +8059,8 @@ JIT_AARCH32_SRCS = [
 
 JIT_AARCH64_SRCS = [
     "src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.cc",
-    "src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-gemm/4x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.cc",
@@ -11839,6 +11840,15 @@ xnnpack_unit_test(
         "test/f16-dwconv-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f16_gavgpool_cw_test",
+    srcs = [
+        "test/f16-gavgpool-cw.cc",
+        "test/gavgpool-cw-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
