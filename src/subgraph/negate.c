@@ -10,6 +10,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
@@ -22,8 +23,6 @@ static enum xnn_status create_negate_operator(
   struct xnn_operator_data* opdata,
   const struct xnn_caches* caches)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -37,10 +36,25 @@ static enum xnn_status create_negate_operator(
   const size_t num_input_dims = values[input_id].shape.num_dims;
   const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
-  const enum xnn_status status = xnn_create_negate_nc_f32(
-    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-    node->flags,
-    &opdata->operator_objects[0]);
+  enum xnn_status status;
+  switch (node->compute_type) {
+    case xnn_compute_type_fp32:
+      status = xnn_create_negate_nc_f32(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_negate_nc_f16(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
   if (status == xnn_status_success) {
     opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
     opdata->inputs[0] = input_id;
@@ -71,12 +85,26 @@ static enum xnn_status setup_negate_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  return xnn_setup_negate_nc_f32(
-    opdata->operator_objects[0],
-    opdata->batch_size,
-    input_data,
-    output_data,
-    threadpool);
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_negate_nc_f32:
+      return xnn_setup_negate_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_negate_nc_f16:
+      return xnn_setup_negate_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    default:
+      XNN_UNREACHABLE;
+  }
 }
 
 enum xnn_status xnn_define_negate(
