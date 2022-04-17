@@ -3244,8 +3244,20 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-rmax/neonfp16arith.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmaxc-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vmin-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vminc-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmul-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vmulc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsqrdiff-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsqrdiffc-neonfp16arith-x16.c
   src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
@@ -3381,6 +3393,10 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vsub-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsqrdiff-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vsqrdiff-neonfp16arith-x16.c
+  src/f16-vbinary/gen/vsqrdiffc-neonfp16arith-x8.c
+  src/f16-vbinary/gen/vsqrdiffc-neonfp16arith-x16.c
   src/f16-vclamp/gen/vclamp-neonfp16arith-x8.c
   src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c
@@ -5076,8 +5092,20 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-rmax/f16c.c
   src/f16-vbinary/gen/vadd-minmax-f16c-x16.c
   src/f16-vbinary/gen/vaddc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vdiv-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vdivc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vmax-f16c-x16.c
+  src/f16-vbinary/gen/vmaxc-f16c-x16.c
+  src/f16-vbinary/gen/vmin-f16c-x16.c
+  src/f16-vbinary/gen/vminc-f16c-x16.c
   src/f16-vbinary/gen/vmul-minmax-f16c-x16.c
   src/f16-vbinary/gen/vmulc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vrdivc-minmax-f16c-x8.c
+  src/f16-vbinary/gen/vrsubc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsub-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsubc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsqrdiff-f16c-x16.c
+  src/f16-vbinary/gen/vsqrdiffc-f16c-x16.c
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f16-vlrelu/gen/vlrelu-f16c-x16.c
@@ -5129,6 +5157,10 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vsub-minmax-f16c-x16.c
   src/f16-vbinary/gen/vsubc-minmax-f16c-x8.c
   src/f16-vbinary/gen/vsubc-minmax-f16c-x16.c
+  src/f16-vbinary/gen/vsqrdiff-f16c-x8.c
+  src/f16-vbinary/gen/vsqrdiff-f16c-x16.c
+  src/f16-vbinary/gen/vsqrdiffc-f16c-x8.c
+  src/f16-vbinary/gen/vsqrdiffc-f16c-x16.c
   src/f16-vclamp/gen/vclamp-f16c-x8.c
   src/f16-vclamp/gen/vclamp-f16c-x16.c
   src/f16-vhswish/gen/vhswish-f16c-x8.c

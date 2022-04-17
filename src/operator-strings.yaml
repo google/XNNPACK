@@ -91,6 +91,8 @@
   string: "Depth To Space (NHWC, X16)"
 - name: xnn_operator_type_depth_to_space_nhwc_x32
   string: "Depth To Space (NHWC, X32)"
+- name: xnn_operator_type_divide_nd_f16
+  string: "Divide (ND, F16)"
 - name: xnn_operator_type_divide_nd_f32
   string: "Divide (ND, F32)"
 - name: xnn_operator_type_elu_nc_f32
@@ -135,8 +137,12 @@
   string: "Max Pooling (NHWC, S8)"
 - name: xnn_operator_type_max_pooling_nhwc_u8
   string: "Max Pooling (NHWC, U8)"
+- name: xnn_operator_type_maximum_nd_f16
+  string: "Maximum (ND, F16)"
 - name: xnn_operator_type_maximum_nd_f32
   string: "Maximum (ND, F32)"
+- name: xnn_operator_type_minimum_nd_f16
+  string: "Minimum (ND, F16)"
 - name: xnn_operator_type_minimum_nd_f32
   string: "Minimum (ND, F32)"
 - name: xnn_operator_type_multiply_nd_f16
@@ -185,8 +191,12 @@
   string: "Square (NC, F32)"
 - name: xnn_operator_type_square_root_nc_f32
   string: "Square Root (NC, F32)"
+- name: xnn_operator_type_squared_difference_nd_f16
+  string: "Squared Difference (NC, F16)"
 - name: xnn_operator_type_squared_difference_nd_f32
   string: "Squared Difference (NC, F32)"
+- name: xnn_operator_type_subtract_nd_f16
+  string: "Subtract (ND, F16)"
 - name: xnn_operator_type_subtract_nd_f32
   string: "Subtract (ND, F32)"
 - name: xnn_operator_type_subtract_nd_qs8

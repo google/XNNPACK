@@ -4412,7 +4412,12 @@ struct xnn_parameters {
     struct vunary_parameters sqr;
     struct prelu_parameters prelu;
     struct vbinary_parameters vadd;
+    struct vbinary_parameters vdiv;
+    struct vbinary_parameters vmax;
+    struct vbinary_parameters vmin;
     struct vbinary_parameters vmul;
+    struct vbinary_parameters vsub;
+    struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_function rmax;

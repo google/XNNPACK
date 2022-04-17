@@ -565,7 +565,7 @@ class BinaryElementwiseOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist;
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -646,8 +646,23 @@ class BinaryElementwiseOperatorTester {
         case OperationType::Add:
           status = xnn_create_add_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
           break;
+        case OperationType::Divide:
+          status = xnn_create_divide_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
+          break;
+        case OperationType::Maximum:
+          status = xnn_create_maximum_nd_f16(0, &binary_elementwise_op);
+          break;
+        case OperationType::Minimum:
+          status = xnn_create_minimum_nd_f16(0, &binary_elementwise_op);
+          break;
         case OperationType::Multiply:
           status = xnn_create_multiply_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
+          break;
+        case OperationType::SquaredDifference:
+          status = xnn_create_squared_difference_nd_f16(0, &binary_elementwise_op);
+          break;
+        case OperationType::Subtract:
+          status = xnn_create_subtract_nd_f16(output_min, output_max, 0, &binary_elementwise_op);
           break;
         default:
           FAIL() << "Unsupported operation type";
@@ -673,9 +688,64 @@ class BinaryElementwiseOperatorTester {
               input1.data(), input2.data(), output.data(),
               nullptr /* thread pool */));
           break;
+        case OperationType::Divide:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_divide_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Maximum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_maximum_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Minimum:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_minimum_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
             xnn_setup_multiply_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::SquaredDifference:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_squared_difference_nd_f16(
+              binary_elementwise_op,
+              num_input1_dims(),
+              input1_shape().data(),
+              num_input2_dims(),
+              input2_shape().data(),
+              input1.data(), input2.data(), output.data(),
+              nullptr /* thread pool */));
+          break;
+        case OperationType::Subtract:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_subtract_nd_f16(
               binary_elementwise_op,
               num_input1_dims(),
               input1_shape().data(),

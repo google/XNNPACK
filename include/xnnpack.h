@@ -2263,6 +2263,23 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_divide_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* divide_op_out);
+
+enum xnn_status xnn_setup_divide_nd_f16(
+  xnn_operator_t divide_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_fully_connected_nc_f16(
   size_t input_channels,
   size_t output_channels,
@@ -2354,6 +2371,36 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
   size_t input_height,
   size_t input_width,
   const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_maximum_nd_f16(
+  uint32_t flags,
+  xnn_operator_t* maximum_op_out);
+
+enum xnn_status xnn_setup_maximum_nd_f16(
+  xnn_operator_t maximum_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_minimum_nd_f16(
+  uint32_t flags,
+  xnn_operator_t* minimum_op_out);
+
+enum xnn_status xnn_setup_minimum_nd_f16(
+  xnn_operator_t minimum_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
   void* output,
   pthreadpool_t threadpool);
 
@@ -2461,6 +2508,38 @@ enum xnn_status xnn_setup_square_nc_f16(
   xnn_operator_t square_op,
   size_t batch_size,
   const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_squared_difference_nd_f16(
+  uint32_t flags,
+  xnn_operator_t* squared_difference_op_out);
+
+enum xnn_status xnn_setup_squared_difference_nd_f16(
+  xnn_operator_t squared_difference_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_subtract_nd_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* subtract_op_out);
+
+enum xnn_status xnn_setup_subtract_nd_f16(
+  xnn_operator_t subtract_op,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const void* input1,
+  const void* input2,
   void* output,
   pthreadpool_t threadpool);
 

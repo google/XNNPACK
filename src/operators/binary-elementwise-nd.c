@@ -352,6 +352,21 @@ enum xnn_status xnn_create_add_nd_f32(
     add_op_out);
 }
 
+enum xnn_status xnn_create_divide_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* divide_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_divide_nd_f16,
+    &xnn_params.f16.vdiv,
+    divide_op_out);
+}
+
 enum xnn_status xnn_create_divide_nd_f32(
     float output_min,
     float output_max,
@@ -365,6 +380,20 @@ enum xnn_status xnn_create_divide_nd_f32(
     xnn_operator_type_divide_nd_f32,
     &xnn_params.f32.vdiv,
     divide_op_out);
+}
+
+enum xnn_status xnn_create_maximum_nd_f16(
+    uint32_t flags,
+    xnn_operator_t* maximum_op_out)
+{
+  return create_binary_elementwise_nd(
+    flags,
+    NULL,
+    0,
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_maximum_nd_f16,
+    &xnn_params.f16.vmax.minmax,
+    maximum_op_out);
 }
 
 enum xnn_status xnn_create_maximum_nd_f32(
@@ -385,6 +414,20 @@ enum xnn_status xnn_create_maximum_nd_f32(
     maximum_op_out);
 }
 
+enum xnn_status xnn_create_minimum_nd_f16(
+    uint32_t flags,
+    xnn_operator_t* minimum_op_out)
+{
+  return create_binary_elementwise_nd(
+    flags,
+    NULL,
+    0,
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_minimum_nd_f16,
+    &xnn_params.f16.vmin.minmax,
+    minimum_op_out);
+}
+
 enum xnn_status xnn_create_minimum_nd_f32(
     uint32_t flags,
     xnn_operator_t* minimum_op_out)
@@ -401,6 +444,36 @@ enum xnn_status xnn_create_minimum_nd_f32(
     xnn_operator_type_minimum_nd_f32,
     &xnn_params.f32.vmin.minmax,
     minimum_op_out);
+}
+
+enum xnn_status xnn_create_multiply_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_multiply_nd_f16,
+    &xnn_params.f16.vmul,
+    multiply_op_out);
+}
+
+enum xnn_status xnn_create_multiply_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* multiply_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_multiply_nd_f32,
+    &xnn_params.f32.vmul,
+    multiply_op_out);
 }
 
 enum xnn_status xnn_create_multiply_nd_qs8(
@@ -545,34 +618,18 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     multiply_op_out);
 }
 
-enum xnn_status xnn_create_multiply_nd_f16(
-    float output_min,
-    float output_max,
+enum xnn_status xnn_create_squared_difference_nd_f16(
     uint32_t flags,
-    xnn_operator_t* multiply_op_out)
+    xnn_operator_t* squared_difference_op_out)
 {
-  return create_binary_elementwise_nd_f16(
-    output_min,
-    output_max,
+  return create_binary_elementwise_nd(
     flags,
-    xnn_operator_type_multiply_nd_f16,
-    &xnn_params.f16.vmul,
-    multiply_op_out);
-}
-
-enum xnn_status xnn_create_multiply_nd_f32(
-    float output_min,
-    float output_max,
-    uint32_t flags,
-    xnn_operator_t* multiply_op_out)
-{
-  return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
-    flags,
-    xnn_operator_type_multiply_nd_f32,
-    &xnn_params.f32.vmul,
-    multiply_op_out);
+    NULL,
+    0,
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_squared_difference_nd_f16,
+    &xnn_params.f16.vsqrdiff.minmax,
+    squared_difference_op_out);
 }
 
 enum xnn_status xnn_create_squared_difference_nd_f32(
@@ -591,6 +648,36 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     xnn_operator_type_squared_difference_nd_f32,
     &xnn_params.f32.vsqrdiff.minmax,
     squared_difference_op_out);
+}
+
+enum xnn_status xnn_create_subtract_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* subtract_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_subtract_nd_f16,
+    &xnn_params.f16.vsub,
+    subtract_op_out);
+}
+
+enum xnn_status xnn_create_subtract_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* subtract_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_subtract_nd_f32,
+    &xnn_params.f32.vsub,
+    subtract_op_out);
 }
 
 enum xnn_status xnn_create_subtract_nd_qs8(
@@ -749,21 +836,6 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     subtract_op_out);
 }
 
-enum xnn_status xnn_create_subtract_nd_f32(
-    float output_min,
-    float output_max,
-    uint32_t flags,
-    xnn_operator_t* subtract_op_out)
-{
-  return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
-    flags,
-    xnn_operator_type_subtract_nd_f32,
-    &xnn_params.f32.vsub,
-    subtract_op_out);
-}
-
 static enum xnn_status setup_binary_elementwise_nd(
     xnn_operator_t binary_elementwise_op,
     enum xnn_operator_type expected_operator_type,
@@ -774,7 +846,6 @@ static enum xnn_status setup_binary_elementwise_nd(
     const void* input1,
     const void* input2,
     void* output,
-    uint32_t datatype_init_flags,
     uint32_t log2_element_size,
     const void* params,
     size_t params_size,
@@ -783,25 +854,18 @@ static enum xnn_status setup_binary_elementwise_nd(
     const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
+  if (binary_elementwise_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(binary_elementwise_op->type));
+    return xnn_status_invalid_parameter;
+  }
   binary_elementwise_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(binary_elementwise_op->type));
     return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to setup %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(binary_elementwise_op->type));
-    return xnn_status_unsupported_hardware;
-  }
-
-  if (binary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(binary_elementwise_op->type));
-    return xnn_status_invalid_parameter;
   }
 
   if (max(num_input1_dims, num_input2_dims) > XNN_MAX_TENSOR_DIMS) {
@@ -977,7 +1041,6 @@ static enum xnn_status setup_binary_elementwise_nd_f16(
     input1,
     input2,
     output,
-    XNN_INIT_FLAG_F16,
     1 /* log2(sizeof(half)) */,
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
@@ -1003,60 +1066,11 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(float)) */,
     &binary_elementwise_op->params.f32_minmax, sizeof(binary_elementwise_op->params.f32_minmax),
     &binary_elementwise_op->params.f32_minmax, sizeof(binary_elementwise_op->params.f32_minmax),
     vbinary,
     num_threads);
-}
-
-enum xnn_status xnn_setup_add_nd_qs8(
-    xnn_operator_t add_op,
-    size_t num_input1_dims,
-    const size_t* input1_shape,
-    size_t num_input2_dims,
-    const size_t* input2_shape,
-    const int8_t* input1,
-    const int8_t* input2,
-    int8_t* output,
-    pthreadpool_t threadpool)
-{
-  return setup_binary_elementwise_nd(
-    add_op, xnn_operator_type_add_nd_qs8,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    XNN_INIT_FLAG_QS8,
-    0 /* log2(sizeof(int8_t))) */,
-    &add_op->params.qs8_addsub, sizeof(add_op->params.qs8_addsub),
-    &add_op->params.qs8_raddsub, sizeof(add_op->params.qs8_raddsub),
-    &xnn_params.qs8.vadd,
-    pthreadpool_get_threads_count(threadpool));
-}
-
-enum xnn_status xnn_setup_add_nd_qu8(
-    xnn_operator_t add_op,
-    size_t num_input1_dims,
-    const size_t* input1_shape,
-    size_t num_input2_dims,
-    const size_t* input2_shape,
-    const uint8_t* input1,
-    const uint8_t* input2,
-    uint8_t* output,
-    pthreadpool_t threadpool)
-{
-  return setup_binary_elementwise_nd(
-    add_op, xnn_operator_type_add_nd_qu8,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    XNN_INIT_FLAG_QU8,
-    0 /* log2(sizeof(uint8_t))) */,
-    &add_op->params.qu8_addsub, sizeof(add_op->params.qu8_addsub),
-    &add_op->params.qu8_raddsub, sizeof(add_op->params.qu8_raddsub),
-    &xnn_params.qu8.vadd,
-    pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_setup_add_nd_f16(
@@ -1099,6 +1113,72 @@ enum xnn_status xnn_setup_add_nd_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_add_nd_qs8(
+    xnn_operator_t add_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const int8_t* input1,
+    const int8_t* input2,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd(
+    add_op, xnn_operator_type_add_nd_qs8,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    0 /* log2(sizeof(int8_t))) */,
+    &add_op->params.qs8_addsub, sizeof(add_op->params.qs8_addsub),
+    &add_op->params.qs8_raddsub, sizeof(add_op->params.qs8_raddsub),
+    &xnn_params.qs8.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_add_nd_qu8(
+    xnn_operator_t add_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const uint8_t* input1,
+    const uint8_t* input2,
+    uint8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd(
+    add_op, xnn_operator_type_add_nd_qu8,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    0 /* log2(sizeof(uint8_t))) */,
+    &add_op->params.qu8_addsub, sizeof(add_op->params.qu8_addsub),
+    &add_op->params.qu8_raddsub, sizeof(add_op->params.qu8_raddsub),
+    &xnn_params.qu8.vadd,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_divide_nd_f16(
+    xnn_operator_t divide_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    divide_op, xnn_operator_type_divide_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vdiv,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_divide_nd_f32(
     xnn_operator_t divide_op,
     size_t num_input1_dims,
@@ -1116,6 +1196,26 @@ enum xnn_status xnn_setup_divide_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     &xnn_params.f32.vdiv,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_maximum_nd_f16(
+    xnn_operator_t maximum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    maximum_op, xnn_operator_type_maximum_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vmax,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -1139,6 +1239,26 @@ enum xnn_status xnn_setup_maximum_nd_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_minimum_nd_f16(
+    xnn_operator_t minimum_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    minimum_op, xnn_operator_type_minimum_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vmin,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_minimum_nd_f32(
     xnn_operator_t minimum_op,
     size_t num_input1_dims,
@@ -1156,54 +1276,6 @@ enum xnn_status xnn_setup_minimum_nd_f32(
     num_input2_dims, input2_shape,
     input1, input2, output,
     &xnn_params.f32.vmin,
-    pthreadpool_get_threads_count(threadpool));
-}
-
-enum xnn_status xnn_setup_multiply_nd_qs8(
-    xnn_operator_t multiply_op,
-    size_t num_input1_dims,
-    const size_t* input1_shape,
-    size_t num_input2_dims,
-    const size_t* input2_shape,
-    const int8_t* input1,
-    const int8_t* input2,
-    int8_t* output,
-    pthreadpool_t threadpool)
-{
-  return setup_binary_elementwise_nd(
-    multiply_op, xnn_operator_type_multiply_nd_qs8,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    XNN_INIT_FLAG_QS8,
-    0 /* log2(sizeof(int8_t))) */,
-    &multiply_op->params.qs8_mul, sizeof(multiply_op->params.qs8_mul),
-    &multiply_op->params.qs8_rmul, sizeof(multiply_op->params.qs8_rmul),
-    &xnn_params.qs8.vmul,
-    pthreadpool_get_threads_count(threadpool));
-}
-
-enum xnn_status xnn_setup_multiply_nd_qu8(
-    xnn_operator_t multiply_op,
-    size_t num_input1_dims,
-    const size_t* input1_shape,
-    size_t num_input2_dims,
-    const size_t* input2_shape,
-    const uint8_t* input1,
-    const uint8_t* input2,
-    uint8_t* output,
-    pthreadpool_t threadpool)
-{
-  return setup_binary_elementwise_nd(
-    multiply_op, xnn_operator_type_multiply_nd_qu8,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    XNN_INIT_FLAG_QU8,
-    0 /* log2(sizeof(uint8_t))) */,
-    &multiply_op->params.qu8_mul, sizeof(multiply_op->params.qu8_mul),
-    &multiply_op->params.qu8_rmul, sizeof(multiply_op->params.qu8_rmul),
-    &xnn_params.qu8.vmul,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -1247,6 +1319,72 @@ enum xnn_status xnn_setup_multiply_nd_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_multiply_nd_qs8(
+    xnn_operator_t multiply_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const int8_t* input1,
+    const int8_t* input2,
+    int8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd(
+    multiply_op, xnn_operator_type_multiply_nd_qs8,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    0 /* log2(sizeof(int8_t))) */,
+    &multiply_op->params.qs8_mul, sizeof(multiply_op->params.qs8_mul),
+    &multiply_op->params.qs8_rmul, sizeof(multiply_op->params.qs8_rmul),
+    &xnn_params.qs8.vmul,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_multiply_nd_qu8(
+    xnn_operator_t multiply_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const uint8_t* input1,
+    const uint8_t* input2,
+    uint8_t* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd(
+    multiply_op, xnn_operator_type_multiply_nd_qu8,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    0 /* log2(sizeof(uint8_t))) */,
+    &multiply_op->params.qu8_mul, sizeof(multiply_op->params.qu8_mul),
+    &multiply_op->params.qu8_rmul, sizeof(multiply_op->params.qu8_rmul),
+    &xnn_params.qu8.vmul,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_squared_difference_nd_f16(
+    xnn_operator_t squared_difference_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    squared_difference_op, xnn_operator_type_squared_difference_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vsqrdiff,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_squared_difference_nd_f32(
     xnn_operator_t squared_difference_op,
     size_t num_input1_dims,
@@ -1267,6 +1405,46 @@ enum xnn_status xnn_setup_squared_difference_nd_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_subtract_nd_f16(
+    xnn_operator_t subtract_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const void* input1,
+    const void* input2,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f16(
+    subtract_op, xnn_operator_type_subtract_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f16.vsub,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_subtract_nd_f32(
+    xnn_operator_t subtract_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    const float* input1,
+    const float* input2,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_binary_elementwise_nd_f32(
+    subtract_op, xnn_operator_type_subtract_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    &xnn_params.f32.vsub,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_subtract_nd_qs8(
     xnn_operator_t subtract_op,
     size_t num_input1_dims,
@@ -1283,7 +1461,6 @@ enum xnn_status xnn_setup_subtract_nd_qs8(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    XNN_INIT_FLAG_QS8,
     0 /* log2(sizeof(int8_t))) */,
     &subtract_op->params.qs8_addsub, sizeof(subtract_op->params.qs8_addsub),
     &subtract_op->params.qs8_raddsub, sizeof(subtract_op->params.qs8_raddsub),
@@ -1307,30 +1484,9 @@ enum xnn_status xnn_setup_subtract_nd_qu8(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    XNN_INIT_FLAG_QU8,
     0 /* log2(sizeof(uint8_t))) */,
     &subtract_op->params.qu8_addsub, sizeof(subtract_op->params.qu8_addsub),
     &subtract_op->params.qu8_raddsub, sizeof(subtract_op->params.qu8_raddsub),
     &xnn_params.qu8.vadd,
-    pthreadpool_get_threads_count(threadpool));
-}
-
-enum xnn_status xnn_setup_subtract_nd_f32(
-    xnn_operator_t subtract_op,
-    size_t num_input1_dims,
-    const size_t* input1_shape,
-    size_t num_input2_dims,
-    const size_t* input2_shape,
-    const float* input1,
-    const float* input2,
-    float* output,
-    pthreadpool_t threadpool)
-{
-  return setup_binary_elementwise_nd_f32(
-    subtract_op, xnn_operator_type_subtract_nd_f32,
-    num_input1_dims, input1_shape,
-    num_input2_dims, input2_shape,
-    input1, input2, output,
-    &xnn_params.f32.vsub,
     pthreadpool_get_threads_count(threadpool));
 }
