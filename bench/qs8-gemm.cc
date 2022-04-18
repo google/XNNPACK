@@ -222,7 +222,7 @@ static void ruy_st(benchmark::State& state, const char* net)
     xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
     const size_t nc = state.range(1);
     const size_t kc = state.range(2);
-    generator(&code_buffer, nc % nr, kc, nullptr);
+    generator(&code_buffer, mr, nc % nr, kc, nullptr);
     xnn_finalize_code_memory(&code_buffer);
     GEMMBenchmark(
         state,
