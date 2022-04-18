@@ -6973,7 +6973,7 @@ IF(XNNPACK_BUILD_TESTS)
   # ---[ Build operator-level unit tests
   ADD_EXECUTABLE(abs-nc-test test/abs-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(abs-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(abs-nc-test abs-nc-test)
 
   ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
@@ -7117,7 +7117,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(negate-nc-test negate-nc-test)
 
   ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
@@ -7156,7 +7156,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(square-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(square-nc-test square-nc-test)
 
   ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
