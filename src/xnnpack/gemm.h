@@ -1923,6 +1923,19 @@ DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(xnn_generate_f32_gemm_ukernel_6x8__aarch6
 
 #undef DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION
 
+#define DECLARE_GENERATE_MR_GEMM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL enum xnn_status fn_name(                    \
+      struct xnn_code_buffer* code,                        \
+      size_t mr,                                           \
+      size_t nc_mod_nr,                                    \
+      size_t kc,                                           \
+      const void* params);
+
+DECLARE_GENERATE_MR_GEMM_UKERNEL_FUNCTION(xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75)
+DECLARE_GENERATE_MR_GEMM_UKERNEL_FUNCTION(xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_prfm_cortex_a75)
+
+#undef DECLARE_GENERATE_MR_GEMM_UKERNEL_FUNCTION
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

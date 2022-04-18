@@ -8094,9 +8094,11 @@ JIT_AARCH64_SRCS = [
     "src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-gemm/4x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-gemm/upto6x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.cc",
     "src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-igemm/upto6x8-aarch64-neonfma-cortex-a75.cc",
 ]
 
 INTERNAL_MICROKERNEL_HDRS = [
@@ -12238,7 +12240,7 @@ xnnpack_unit_test(
         "test/f32-igemm-minmax.cc",
         "test/f32-igemm-minmax-2.cc",
     ],
-    shard_count = 5,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
         ":jit_test_mode",
@@ -12355,7 +12357,7 @@ xnnpack_unit_test(
         "test/f32-gemm-minmax.cc",
         "test/f32-gemm-minmax-2.cc",
     ],
-    shard_count = 5,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
         ":jit_test_mode",
