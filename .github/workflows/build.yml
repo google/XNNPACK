@@ -7,7 +7,22 @@ jobs:
   build-xnnpack-cmake:
     strategy:
       matrix:
-        script: [build-local.sh, build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
+        os: [ubuntu-latest, windows-latest]
+        script: [build-local.sh]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install ninja
+        run: sudo apt-get install ninja-build
+        if: matrix.os != 'windows-latest'
+      - name: Configure CMake and build
+        run: scripts/${{ matrix.script }}
+        working-directory: ${{ github.workspace }}
+  build-xnnpack-cmake-android:
+    strategy:
+      matrix:
+        script: [build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
