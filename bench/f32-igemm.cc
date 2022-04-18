@@ -262,6 +262,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
   generator(&code_buffer,
+            mr,
             group_output_channels % nr,
             group_input_channels * sizeof(float),
             kernel_size * mr * sizeof(void *),

@@ -1894,6 +1894,7 @@ DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_4x4__s
 #define DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL enum xnn_status fn_name(                 \
       struct xnn_code_buffer* code,                     \
+      size_t max_mr,                                    \
       size_t nc_mod_nr,                                 \
       size_t kc,                                        \
       const void* params);

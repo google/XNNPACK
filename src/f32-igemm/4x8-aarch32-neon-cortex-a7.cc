@@ -16,7 +16,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(size_t nc_mod_nr, size_t kc, const void* params);
+  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params);
 };
 
 
@@ -54,7 +54,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
-void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params)
+void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   assert(nc_mod_nr < 8);
   assert(kc != 0);
@@ -281,11 +281,11 @@ void Generator::generate(size_t nc_mod_nr, size_t kc, const void* params)
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
+xnn_status xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(nc_mod_nr, kc, nullptr);
+  g.generate(max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

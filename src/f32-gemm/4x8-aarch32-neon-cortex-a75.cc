@@ -16,7 +16,7 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(bool prefetch, size_t nc_mod_nr, size_t kc, const void* params);
+  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params);
 };
 
 
@@ -52,7 +52,7 @@ class Generator : public Assembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, const void* params)
+void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   assert(nc_mod_nr < 8);
   assert(kc != 0);
@@ -386,11 +386,11 @@ void Generator::generate(bool prefetch, size_t nc_mod_nr, size_t kc, const void*
 }  // aarch32
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(false, nc_mod_nr, kc, nullptr);
+  g.generate(false, max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -398,11 +398,11 @@ xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_b
   return xnn_status_success;
 }
 
-xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(xnn_code_buffer* code, size_t nc_mod_nr, size_t kc, const void* params) {
+xnn_status xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(true, nc_mod_nr, kc, nullptr);
+  g.generate(true, max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

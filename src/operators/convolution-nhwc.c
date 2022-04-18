@@ -65,6 +65,7 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
 size_t get_generated_gemm(
     struct xnn_hmp_gemm_codegen generators,
     struct jit_gemm_params *jit_gemm_params,
+    size_t mr,
     size_t group_output_channels,
     size_t nr,
     size_t group_input_channels,
@@ -87,7 +88,7 @@ size_t get_generated_gemm(
 
   const size_t old_size = code_cache->cache.code.size;
   void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
-  status = generator(&code_cache->cache.code, group_output_channels % nr,
+  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
                      jit_gemm_params);
 
@@ -129,7 +130,7 @@ size_t get_generated_igemm(
 
   const size_t old_size = code_cache->cache.code.size;
   void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
-  status = generator(&code_cache->cache.code, group_output_channels % nr,
+  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
                      group_input_channels << log2_input_element_size,
                      kernel_size * mr * sizeof(void*), jit_gemm_params);
   if (status != xnn_status_success) {
@@ -471,12 +472,16 @@ static enum xnn_status create_convolution2d_nhwc(
               convolution_op->code_cache = caches->code_cache;
               convolution_op->ukernel.gemm.general_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_gemm(
-                      gemm_parameters->generator.gemm, jit_gemm_params, group_output_channels, nr,
-                      group_input_channels, log2_input_element_size, caches->code_cache);
+                      gemm_parameters->generator.gemm, jit_gemm_params,
+                      gemm_parameters->mr, group_output_channels, nr,
+                      group_input_channels, log2_input_element_size,
+                      caches->code_cache);
               convolution_op->ukernel.gemm.mr1_case.generated_code_offset[XNN_UARCH_DEFAULT] =
                   get_generated_gemm(
-                      gemm_parameters->generator.gemm1, jit_gemm_params, group_output_channels, nr,
-                      group_input_channels, log2_input_element_size, caches->code_cache);
+                      gemm_parameters->generator.gemm1, jit_gemm_params,
+                      gemm_parameters->mr, group_output_channels, nr,
+                      group_input_channels, log2_input_element_size,
+                      caches->code_cache);
             }
           #endif  // XNN_PLATFORM_JIT
 
