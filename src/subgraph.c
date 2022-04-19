@@ -729,10 +729,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     switch (node->type) {
       case xnn_node_type_abs:
       case xnn_node_type_add2:
+      case xnn_node_type_divide:
+      case xnn_node_type_maximum2:
+      case xnn_node_type_minimum2:
       case xnn_node_type_multiply2:
       case xnn_node_type_concatenate2:
       case xnn_node_type_concatenate3:
       case xnn_node_type_concatenate4:
+      case xnn_node_type_squared_difference:
+      case xnn_node_type_subtract:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
           if (subgraph->values[node->inputs[i]].data != NULL) {
             xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",

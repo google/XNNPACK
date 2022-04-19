@@ -39,6 +39,15 @@ static enum xnn_status create_subtract_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_subtract_nd_f16(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_subtract_nd_f32(
         node->activation.output_min,
@@ -150,6 +159,17 @@ static enum xnn_status setup_subtract_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_subtract_nd_f16:
+      return xnn_setup_subtract_nd_f16(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_subtract_nd_f32:
       return xnn_setup_subtract_nd_f32(
         opdata->operator_objects[0],
@@ -159,7 +179,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-      break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_subtract_nd_qs8:
       return xnn_setup_subtract_nd_qs8(
@@ -170,7 +189,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-      break;
 #endif  // !defined(XNN_NO_QS8_OPERATORS)
 #ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_subtract_nd_qu8:
@@ -182,7 +200,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-      break;
 #endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;

@@ -11,6 +11,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
@@ -38,11 +39,27 @@ static enum xnn_status create_divide_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const enum xnn_status status = xnn_create_divide_nd_f32(
-    node->activation.output_min,
-    node->activation.output_max,
-    node->flags,
-    &opdata->operator_objects[0]);
+  enum xnn_status status;
+  switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_divide_nd_f16(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    case xnn_compute_type_fp32:
+      status = xnn_create_divide_nd_f32(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
   if (status == xnn_status_success) {
     opdata->shape1.num_dims = values[input1_id].shape.num_dims;
     opdata->shape2.num_dims = values[input2_id].shape.num_dims;
@@ -103,14 +120,30 @@ static enum xnn_status setup_divide_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  return xnn_setup_divide_nd_f32(
-    opdata->operator_objects[0],
-    opdata->shape1.num_dims,
-    opdata->shape1.dim,
-    opdata->shape2.num_dims,
-    opdata->shape2.dim,
-    input1_data, input2_data, output_data,
-    threadpool);
+  switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_divide_nd_f16:
+      return xnn_setup_divide_nd_f16(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    case xnn_operator_type_divide_nd_f32:
+      return xnn_setup_divide_nd_f32(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        input1_data, input2_data, output_data,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
 }
 
 enum xnn_status xnn_define_divide(
