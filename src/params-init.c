@@ -552,8 +552,8 @@ void xnn_init_qs8_minmax_scalar_lrintf_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->scalar_lrintf.output_min_less_zero_point = (long) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_lrintf.output_max_less_zero_point = (long) ((int32_t) output_max - (int32_t) output_zero_point);
+  params->scalar_lrintf.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
+  params->scalar_lrintf.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->scalar_lrintf.output_zero_point = (int32_t) output_zero_point;
 }
 
