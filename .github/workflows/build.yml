@@ -5,19 +5,25 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-xnnpack-cmake:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        script: [build-local.sh]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
       - name: Install ninja
         run: sudo apt-get install ninja-build
-        if: matrix.os != 'windows-latest'
       - name: Configure CMake and build
-        run: scripts/${{ matrix.script }}
+        run: scripts/build-local.sh
+        working-directory: ${{ github.workspace }}
+  build-xnnpack-cmake-windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install ninja
+        run: choco install ninja
+      - name: Configure CMake and build
+        run: scripts/build-windows.sh
+        shell: bash  # Specify bash so we can reuse the build script on Windows (runs on Git bash)
         working-directory: ${{ github.workspace }}
   build-xnnpack-cmake-android:
     strategy:
