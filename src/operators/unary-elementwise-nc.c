@@ -715,7 +715,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f16(
 {
   const uint16_t negative_slope_as_half = fp16_ieee_from_fp32_value(negative_slope);
   negative_slope = fp16_ieee_to_fp32_value(negative_slope_as_half);
-  if (!isfinite(fp16_ieee_to_fp32_value(negative_slope))) {
+  if (!isfinite(negative_slope)) {
     xnn_log_error(
       "failed to create %s operator with %f negative slope: finite number expected",
       xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
