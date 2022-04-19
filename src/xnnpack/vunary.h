@@ -73,6 +73,34 @@ DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_x8)
 DECLARE_F16_VNEG_UKERNEL_FUNCTION(xnn_f16_vneg_ukernel__sse2_x16)
 
 
+#define DECLARE_F16_VRND_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const void* x,                               \
+      void* y,                                     \
+      const union xnn_f16_rnd_params* params);
+
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndne_ukernel__f16c_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndne_ukernel__f16c_x16)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndne_ukernel__neonfp16arith_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndne_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndz_ukernel__f16c_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndz_ukernel__f16c_x16)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndz_ukernel__neonfp16arith_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndz_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndu_ukernel__f16c_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndu_ukernel__f16c_x16)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndu_ukernel__neonfp16arith_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndu_ukernel__neonfp16arith_x16)
+
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndd_ukernel__f16c_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndd_ukernel__f16c_x16)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndd_ukernel__neonfp16arith_x8)
+DECLARE_F16_VRND_UKERNEL_FUNCTION(xnn_f16_vrndd_ukernel__neonfp16arith_x16)
+
+
 #define DECLARE_F16_VSIGMOID_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t batch,                                    \

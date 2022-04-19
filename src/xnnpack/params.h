@@ -157,6 +157,10 @@ union xnn_f16_neg_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_f16_rnd_params {
+  char _; // Dummy member variable to comply with the C standard
+};
+
 union xnn_f32_rnd_params {
   char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3311,6 +3315,12 @@ typedef void (*xnn_f32_vneg_ukernel_function)(
     float* y,
     const union xnn_f32_neg_params* params);
 
+typedef void (*xnn_f16_vround_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const union xnn_f16_rnd_params* params);
+
 typedef void (*xnn_f32_vround_ukernel_function)(
     size_t n,
     const float* x,
@@ -3822,6 +3832,9 @@ typedef void (*xnn_init_f16_neg_params_fn)(
 
 typedef void (*xnn_init_f32_neg_params_fn)(
   union xnn_f32_neg_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f16_rnd_params_fn)(
+  union xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_f32_rnd_params_fn)(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);

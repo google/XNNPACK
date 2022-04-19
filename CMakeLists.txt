@@ -3406,6 +3406,14 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x16.c
   src/f16-vmulcaddc/gen/c8-minmax-neonfp16arith-2x.c
   src/f16-vmulcaddc/gen/c16-minmax-neonfp16arith-2x.c
+  src/f16-vrnd/gen/vrndd-neonfp16arith-x8.c
+  src/f16-vrnd/gen/vrndd-neonfp16arith-x16.c
+  src/f16-vrnd/gen/vrndne-neonfp16arith-x8.c
+  src/f16-vrnd/gen/vrndne-neonfp16arith-x16.c
+  src/f16-vrnd/gen/vrndu-neonfp16arith-x8.c
+  src/f16-vrnd/gen/vrndu-neonfp16arith-x16.c
+  src/f16-vrnd/gen/vrndz-neonfp16arith-x8.c
+  src/f16-vrnd/gen/vrndz-neonfp16arith-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-div-x24.c
@@ -5168,6 +5176,14 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vhswish/gen/vhswish-f16c-x16.c
   src/f16-vlrelu/gen/vlrelu-f16c-x8.c
   src/f16-vlrelu/gen/vlrelu-f16c-x16.c
+  src/f16-vrnd/gen/vrndd-f16c-x8.c
+  src/f16-vrnd/gen/vrndd-f16c-x16.c
+  src/f16-vrnd/gen/vrndne-f16c-x8.c
+  src/f16-vrnd/gen/vrndne-f16c-x16.c
+  src/f16-vrnd/gen/vrndu-f16c-x8.c
+  src/f16-vrnd/gen/vrndu-f16c-x16.c
+  src/f16-vrnd/gen/vrndz-f16c-x8.c
+  src/f16-vrnd/gen/vrndz-f16c-x16.c
   src/f16-vunary/gen/vsqr-f16c-x8.c
   src/f16-vunary/gen/vsqr-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
@@ -8375,6 +8391,26 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f16-raddstoreexpminusmax-bench bench/f16-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
+
+  ADD_EXECUTABLE(f16-vrndne-test test/f16-vrndne.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrndne-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vrndne-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vrndne-test f16-vrndne-test)
+
+  ADD_EXECUTABLE(f16-vrndz-test test/f16-vrndz.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrndz-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vrndz-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vrndz-test f16-vrndz-test)
+
+  ADD_EXECUTABLE(f16-vrndu-test test/f16-vrndu.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrndu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vrndu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vrndu-test f16-vrndu-test)
+
+  ADD_EXECUTABLE(f16-vrndd-test test/f16-vrndd.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vrndd-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vrndd-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vrndd-test f16-vrndd-test)
 
   ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-bench PRIVATE . include src)
