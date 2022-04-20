@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 
