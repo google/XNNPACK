@@ -7020,12 +7020,12 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(bankers-rounding-nc-test test/bankers-rounding-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(bankers-rounding-nc-test bankers-rounding-nc-test)
 
   ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(ceiling-nc-test ceiling-nc-test)
 
   ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
@@ -7099,7 +7099,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(floor-nc-test test/floor-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(floor-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(floor-nc-test floor-nc-test)
 
   ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
@@ -7217,7 +7217,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(truncation-nc-test truncation-nc-test)
 
   ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
