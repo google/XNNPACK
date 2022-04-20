@@ -22,7 +22,7 @@ static void* cache_end(const xnn_weights_cache* cache) {
 }
 
 static void write_weights(xnn_weights_cache* cache, const std::string& str) {
-  xnn_reserve_space_in_weights_cache(cache, str.length());
+  ASSERT_NE(nullptr, xnn_reserve_space_in_weights_cache(cache, str.length()));
   std::memcpy(cache_end(cache), str.data(), str.length());
 };
 
@@ -257,5 +257,22 @@ TEST(WEIGHTS_CACHE, write_many_cache_misses) {
   ASSERT_EQ(0, cache.cache.hits);
   ASSERT_EQ(num_threads, cache.cache.num_entries);
   ASSERT_EQ(weights_size * num_threads, cache.cache.weights.size);
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, operations_on_finalized_cache) {
+  xnn_initialize(/*allocator=*/nullptr);
+  struct xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  write_weights(&cache, "1234");
+  ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache));
+
+  // Finalizing a finalized cache is an error.
+  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache));
+  // So is reserving more space.
+  ASSERT_EQ(NULL, xnn_reserve_space_in_weights_cache(&cache, 4));
+  // Or trying to insert into the cache.
+  ASSERT_EQ(XNN_CACHE_NOT_FOUND, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }

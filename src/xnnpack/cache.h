@@ -76,9 +76,12 @@ struct xnn_weights_cache {
   // Protects updates of `cache`, it has the same lifetime as `cache`, and so should be initialized/destroyed together
   // with the `cache`.
   struct xnn_mutex mutex;
+  bool is_finalized;
 };
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
+// Finalizes the weights cache, so that we cannot insert any more entries into the cache.
+enum xnn_status xnn_finalize_weights_cache(struct xnn_weights_cache* cache);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
 // Ensures that cache has enough space for `n` bytes, locks the mutex to protect future updates. Mutex must be unlocked
 // using xnn_get_or_insert_weights_cache.
