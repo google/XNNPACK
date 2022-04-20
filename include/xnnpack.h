@@ -2179,6 +2179,34 @@ enum xnn_status xnn_setup_add_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_bankers_rounding_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* rounding_op_out);
+
+enum xnn_status xnn_setup_bankers_rounding_nc_f16(
+  xnn_operator_t rounding_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_ceiling_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* ceiling_op_out);
+
+enum xnn_status xnn_setup_ceiling_nc_f16(
+  xnn_operator_t ceiling_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_clamp_nc_f16(
   size_t channels,
   size_t input_stride,
@@ -2277,6 +2305,20 @@ enum xnn_status xnn_setup_divide_nd_f16(
   const size_t* input2_shape,
   const void* input1,
   const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_floor_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* floor_op_out);
+
+enum xnn_status xnn_setup_floor_nc_f16(
+  xnn_operator_t floor_op,
+  size_t batch_size,
+  const void* input,
   void* output,
   pthreadpool_t threadpool);
 
@@ -2540,6 +2582,20 @@ enum xnn_status xnn_setup_subtract_nd_f16(
   const size_t* input2_shape,
   const void* input1,
   const void* input2,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_truncation_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* truncation_op_out);
+
+enum xnn_status xnn_setup_truncation_nc_f16(
+  xnn_operator_t truncation_op,
+  size_t batch_size,
+  const void* input,
   void* output,
   pthreadpool_t threadpool);
 

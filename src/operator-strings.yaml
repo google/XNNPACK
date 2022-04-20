@@ -23,8 +23,12 @@
   string: "Average Pooling (NHWC, F32)"
 - name: xnn_operator_type_average_pooling_nhwc_qu8
   string: "Average Pooling (NHWC, QU8)"
+- name: xnn_operator_type_bankers_rounding_nc_f16
+  string: "Bankers Rounding (NC, F16)"
 - name: xnn_operator_type_bankers_rounding_nc_f32
   string: "Bankers Rounding (NC, F32)"
+- name: xnn_operator_type_ceiling_nc_f16
+  string: "Ceiling (NC, F16)"
 - name: xnn_operator_type_ceiling_nc_f32
   string: "Ceiling (NC, F32)"
 - name: xnn_operator_type_channel_shuffle_nc_x8
@@ -99,6 +103,8 @@
   string: "ELU (NC, F32)"
 - name: xnn_operator_type_elu_nc_qs8
   string: "ELU (NC, QS8)"
+- name: xnn_operator_type_floor_nc_f16
+  string: "Floor (NC, F16)"
 - name: xnn_operator_type_floor_nc_f32
   string: "Floor (NC, F32)"
 - name: xnn_operator_type_fully_connected_nc_f16
@@ -207,6 +213,8 @@
   string: "Tanh (NC, QS8)"
 - name: xnn_operator_type_tanh_nc_qu8
   string: "Tanh (NC, QU8)"
+- name: xnn_operator_type_truncation_nc_f16
+  string: "Truncation (NC, F16)"
 - name: xnn_operator_type_truncation_nc_f32
   string: "Truncation (NC, F32)"
 - name: xnn_operator_type_transpose_nd_x8

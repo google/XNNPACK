@@ -370,6 +370,21 @@ enum xnn_status xnn_create_abs_nc_f32(
     abs_op_out);
 }
 
+enum xnn_status xnn_create_bankers_rounding_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* rounding_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0, XNN_INIT_FLAG_F16,
+    xnn_operator_type_bankers_rounding_nc_f16,
+    xnn_params.f16.rndne.ukernel,
+    rounding_op_out);
+}
+
 enum xnn_status xnn_create_bankers_rounding_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -387,6 +402,21 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
     xnn_operator_type_bankers_rounding_nc_f32,
     xnn_params.f32.rndne.ukernel,
     rounding_op_out);
+}
+
+enum xnn_status xnn_create_ceiling_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* ceiling_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0, XNN_INIT_FLAG_F16,
+    xnn_operator_type_ceiling_nc_f16,
+    xnn_params.f16.rndu.ukernel,
+    ceiling_op_out);
 }
 
 enum xnn_status xnn_create_ceiling_nc_f32(
@@ -648,6 +678,21 @@ enum xnn_status xnn_create_elu_nc_f32(
     elu_op_out);
 }
 
+enum xnn_status xnn_create_floor_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* floor_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0, XNN_INIT_FLAG_F16,
+    xnn_operator_type_floor_nc_f16,
+    xnn_params.f16.rndd.ukernel,
+    floor_op_out);
+}
+
 enum xnn_status xnn_create_floor_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -898,6 +943,21 @@ enum xnn_status xnn_create_square_root_nc_f32(
     sqrt_op_out);
 }
 
+enum xnn_status xnn_create_truncation_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* truncation_op_out)
+{
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0, XNN_INIT_FLAG_F16,
+    xnn_operator_type_truncation_nc_f16,
+    xnn_params.f16.rndz.ukernel,
+    truncation_op_out);
+}
+
 enum xnn_status xnn_create_truncation_nc_f32(
     size_t channels,
     size_t input_stride,
@@ -949,6 +1009,22 @@ enum xnn_status xnn_setup_abs_nc_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_bankers_rounding_nc_f16(
+    xnn_operator_t rounding_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    rounding_op, xnn_operator_type_bankers_rounding_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(half)) */,
+    NULL, 0,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_bankers_rounding_nc_f32(
     xnn_operator_t rounding_op,
     size_t batch_size,
@@ -962,6 +1038,22 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &rounding_op->params.f32_rnd, sizeof(rounding_op->params.f32_rnd),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_ceiling_nc_f16(
+    xnn_operator_t ceiling_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    ceiling_op, xnn_operator_type_ceiling_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(half)) */,
+    NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -1205,6 +1297,22 @@ enum xnn_status xnn_setup_elu_nc_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_floor_nc_f16(
+    xnn_operator_t floor_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    floor_op, xnn_operator_type_floor_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(half)) */,
+    NULL, 0,
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_floor_nc_f32(
     xnn_operator_t floor_op,
     size_t batch_size,
@@ -1394,6 +1502,22 @@ enum xnn_status xnn_setup_square_root_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &sqrt_op->params.f32_sqrt, sizeof(sqrt_op->params.f32_sqrt),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_truncation_nc_f16(
+    xnn_operator_t truncation_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    truncation_op, xnn_operator_type_truncation_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(half)) */,
+    NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 

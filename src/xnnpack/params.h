@@ -4421,6 +4421,10 @@ struct xnn_parameters {
     struct vunary_parameters hswish;
     struct vunary_parameters lrelu;
     struct vunary_parameters neg;
+    struct vunary_parameters rndne;
+    struct vunary_parameters rndz;
+    struct vunary_parameters rndu;
+    struct vunary_parameters rndd;
     struct vunary_parameters sigmoid;
     struct vunary_parameters sqr;
     struct prelu_parameters prelu;

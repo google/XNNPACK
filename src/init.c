@@ -2682,6 +2682,22 @@ static void init(void) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vneg_ukernel__neonfp16arith_x16,
         .element_tile = 16,
       };
+      xnn_params.f16.rndne = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndne_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndz = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndz_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndu_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndd = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndd_ukernel__neonfp16arith_x16,
+        .element_tile = 16,
+      };
       xnn_params.f16.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40,
         .init.f16_sigmoid = xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params,
@@ -4041,6 +4057,22 @@ static void init(void) {
       xnn_params.f16.neg = (struct vunary_parameters) {
         .ukernel = (xnn_univector_ukernel_function) xnn_f16_vneg_ukernel__sse2_x16,
         .init.f16_neg = xnn_init_f16_neg_sse_params,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndne = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndne_ukernel__f16c_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndz = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndz_ukernel__f16c_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndu_ukernel__f16c_x16,
+        .element_tile = 16,
+      };
+      xnn_params.f16.rndd = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_f16_vrndd_ukernel__f16c_x16,
         .element_tile = 16,
       };
       xnn_params.f16.sigmoid = (struct vunary_parameters) {
