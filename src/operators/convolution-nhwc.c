@@ -1167,6 +1167,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
 
 static enum xnn_status setup_convolution2d_nhwc(
   xnn_operator_t convolution_op,
+  enum xnn_operator_type expected_operator_type,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
@@ -1179,6 +1180,12 @@ static enum xnn_status setup_convolution2d_nhwc(
   uint32_t log2_output_element_size,
   size_t num_threads)
 {
+  if (convolution_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
   convolution_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -1617,15 +1624,8 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     uint8_t* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qu8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qu8),
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
   return setup_convolution2d_nhwc(
-    convolution_op,
+    convolution_op, xnn_operator_type_convolution_nhwc_qu8,
     batch_size, input_height, input_width,
     input, output,
     XNN_INIT_FLAG_QU8,
@@ -1645,15 +1645,8 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     int8_t* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qs8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qs8),
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
   return setup_convolution2d_nhwc(
-    convolution_op,
+    convolution_op, xnn_operator_type_convolution_nhwc_qs8,
     batch_size, input_height, input_width,
     input, output,
     XNN_INIT_FLAG_QS8,
@@ -1673,15 +1666,8 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
     int8_t* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_qc8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
   return setup_convolution2d_nhwc(
-    convolution_op,
+    convolution_op, xnn_operator_type_convolution_nhwc_qc8,
     batch_size, input_height, input_width,
     input, output,
     XNN_INIT_FLAG_QC8,
@@ -1701,15 +1687,8 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
     void* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16),
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
   return setup_convolution2d_nhwc(
-    convolution_op,
+    convolution_op, xnn_operator_type_convolution_nhwc_f16,
     batch_size, input_height, input_width,
     input, output,
     XNN_INIT_FLAG_F16,
@@ -1729,15 +1708,8 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  if (convolution_op->type != xnn_operator_type_convolution_nhwc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32),
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
   return setup_convolution2d_nhwc(
-    convolution_op,
+    convolution_op, xnn_operator_type_convolution_nhwc_f32,
     batch_size, input_height, input_width,
     input, output,
     XNN_INIT_FLAG_F32,
