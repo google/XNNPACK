@@ -47,6 +47,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_fulltile) {
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -58,6 +61,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_fulltile_with_input_offse
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
     .input_offset(${next_prime(CHANNEL_TILE+1)})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -68,7 +74,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_fulltile_with_qmin) {
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
-    .qmin(192)
+    .qmin(${QMIN})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -79,7 +87,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_fulltile_with_qmax) {
     .pooling_elements(${PRIMARY_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
-    .qmax(192)
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+    .qmax(${QMAX})
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -91,6 +101,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -104,6 +117,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_unipass_subtile_with_input_offset
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .input_offset(${next_prime(CHANNEL_TILE+1)})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -117,6 +133,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -130,6 +149,9 @@ $if CHANNEL_TILE > 1:
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*8)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -142,7 +164,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmin(192)
+        .qmin(${QMIN})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -155,7 +179,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmax(192)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -169,6 +195,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -184,6 +213,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*8)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -197,6 +229,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -210,6 +245,9 @@ $if CHANNEL_TILE > 1:
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -222,7 +260,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmin(192)
+        .qmin(${QMIN})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -235,7 +275,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmax(192)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -249,6 +291,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -264,6 +309,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -277,6 +325,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_fulltile) {
       .pooling_elements(${PRIMARY_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -290,6 +341,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_fulltile_with_input_offse
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
       .input_offset(${next_prime(CHANNEL_TILE*2)})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -302,7 +356,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_fulltile_with_qmin) {
       .pooling_elements(${PRIMARY_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
-      .qmin(192)
+      .qmin(${QMIN})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -315,7 +371,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_fulltile_with_qmax) {
       .pooling_elements(${PRIMARY_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
-      .qmax(192)
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(${QMAX})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -329,6 +387,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -344,6 +405,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_unipass_subtile_with_input_offset
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*2)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -356,6 +420,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_fulltile) {
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -367,6 +434,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_fulltile_with_input_offse
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
     .input_offset(${next_prime(CHANNEL_TILE+1)})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -377,7 +447,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_fulltile_with_qmin) {
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
-    .qmin(192)
+    .qmin(${QMIN})
+    $if DATATYPE in ["s8", "u8"]:
+      .qmax(std::numeric_limits<${CTYPE}>::max())
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -388,7 +460,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_fulltile_with_qmax) {
     .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
     .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
     .channels(${CHANNEL_TILE})
-    .qmax(192)
+    $if DATATYPE in ["s8", "u8"]:
+      .qmin(std::numeric_limits<${CTYPE}>::min())
+    .qmax(${QMAX})
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -400,6 +474,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -413,6 +490,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_twopass_subtile_with_input_offset
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .input_offset(${next_prime(CHANNEL_TILE+1)})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -426,6 +506,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -439,6 +522,9 @@ $if CHANNEL_TILE > 1:
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*5)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -451,7 +537,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmin(192)
+        .qmin(${QMIN})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -464,7 +552,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmax(192)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -478,6 +568,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -493,6 +586,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*8)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -506,6 +602,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -519,6 +618,9 @@ $if CHANNEL_TILE > 1:
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -531,7 +633,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmin(192)
+        .qmin(${QMIN})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -544,7 +648,9 @@ $if CHANNEL_TILE > 1:
         .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmax(192)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -558,6 +664,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -573,6 +682,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -586,6 +698,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_fulltile) {
       .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -599,6 +714,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_fulltile_with_input_offse
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
       .input_offset(${next_prime(CHANNEL_TILE*2)})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -611,7 +729,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_fulltile_with_qmin) {
       .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
-      .qmin(192)
+      .qmin(${QMIN})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -624,7 +744,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_fulltile_with_qmax) {
       .pooling_elements(${PRIMARY_TILE+INCREMENTAL_TILE})
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(channels)
-      .qmax(192)
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(${QMAX})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -638,6 +760,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -653,6 +778,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_twopass_subtile_with_input_offset
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*2)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -666,6 +794,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass) {
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -679,6 +810,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_input_offset) {
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
       .input_offset(${next_prime(CHANNEL_TILE+1)})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -691,7 +825,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_qmin) {
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
-      .qmin(192)
+      .qmin(${QMIN})
+      $if DATATYPE in ["s8", "u8"]:
+        .qmax(std::numeric_limits<${CTYPE}>::max())
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -704,7 +840,9 @@ TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_with_qmax) {
       .pooling_elements(pooling_elements)
       .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
       .channels(${CHANNEL_TILE})
-      .qmax(192)
+      $if DATATYPE in ["s8", "u8"]:
+        .qmin(std::numeric_limits<${CTYPE}>::min())
+      .qmax(${QMAX})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -719,6 +857,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -734,6 +875,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*8)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -748,7 +892,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmin(192)
+          .qmin(${QMIN})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -763,7 +909,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmax(192)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(${QMAX})
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -778,6 +926,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -793,6 +944,9 @@ $if CHANNEL_TILE > 1:
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${CHANNEL_TILE})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -807,7 +961,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmin(192)
+          .qmin(${QMIN})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -822,7 +978,9 @@ $if CHANNEL_TILE > 1:
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmax(192)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(${QMAX})
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -837,6 +995,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass) {
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -852,6 +1013,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_input_offset) {
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
         .input_offset(${next_prime(CHANNEL_TILE*2)})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -866,7 +1030,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_qmin) {
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmin(192)
+        .qmin(${QMIN})
+        $if DATATYPE in ["s8", "u8"]:
+          .qmax(std::numeric_limits<${CTYPE}>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -881,7 +1047,9 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_with_qmax) {
         .pooling_elements(pooling_elements)
         .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
         .channels(channels)
-        .qmax(192)
+        $if DATATYPE in ["s8", "u8"]:
+          .qmin(std::numeric_limits<${CTYPE}>::min())
+        .qmax(${QMAX})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -898,6 +1066,9 @@ TEST(${TEST_NAME}, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -916,6 +1087,9 @@ TEST(${TEST_NAME}, few_output_pixels_with_input_offset) {
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .input_offset(${next_prime(CHANNEL_TILE*5+1)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -933,7 +1107,9 @@ TEST(${TEST_NAME}, few_output_pixels_with_qmin) {
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmin(192)
+          .qmin(${QMIN})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -951,7 +1127,9 @@ TEST(${TEST_NAME}, few_output_pixels_with_qmax) {
           .pooling_elements(pooling_elements)
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
-          .qmax(192)
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+          .qmax(${QMAX})
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -970,6 +1148,9 @@ TEST(${TEST_NAME}, few_output_pixels_with_output_stride) {
           .pooling_tile(${PRIMARY_TILE}, ${INCREMENTAL_TILE})
           .channels(channels)
           .output_stride(${next_prime(CHANNEL_TILE*5+1)})
+          $if DATATYPE in ["s8", "u8"]:
+            .qmin(std::numeric_limits<${CTYPE}>::min())
+            .qmax(std::numeric_limits<${CTYPE}>::max())
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -990,6 +1171,9 @@ TEST(${TEST_NAME}, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(${next_prime(CHANNEL_TILE*5+1)})
+            $if DATATYPE in ["s8", "u8"]:
+              .qmin(std::numeric_limits<${CTYPE}>::min())
+              .qmax(std::numeric_limits<${CTYPE}>::max())
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -1025,6 +1209,9 @@ def generate_test_cases(ukernel, init_fn, primary_tile, incremental_tile,
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "DATATYPE": datatype,
+      "CTYPE": {"s8": "int8_t", "u8": "uint8_t", "f16": "uint16_t", "f32": "int16_t"}[datatype],
+      "QMIN": {"s8": -64, "u8": 64}.get(datatype, -16384),
+      "QMAX": {"s8": 64, "u8": 192}.get(datatype, 16384),
       "PRIMARY_TILE": primary_tile,
       "INCREMENTAL_TILE": incremental_tile,
       "CHANNEL_TILE": channel_tile,
