@@ -12242,6 +12242,7 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
@@ -12359,6 +12360,7 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
@@ -12974,6 +12976,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
@@ -12989,6 +12992,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
@@ -13065,6 +13069,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
@@ -13079,6 +13084,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
     ],
 )
@@ -13093,6 +13099,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
@@ -13248,6 +13255,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
         ":gemm_microkernel_tester",
     ],
 )

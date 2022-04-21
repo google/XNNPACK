@@ -28,7 +28,7 @@ static void write_weights(xnn_weights_cache* cache, const std::string& str) {
 
 TEST(WEIGHTS_CACHE, init_and_release)
 {
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
@@ -41,7 +41,7 @@ TEST(WEIGHTS_CACHE, release_null)
 
 TEST(WEIGHTS_CACHE, get_or_insert)
 {
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
 
@@ -72,7 +72,7 @@ TEST(WEIGHTS_CACHE, get_or_insert)
 }
 
 TEST(WEIGHTS_CACHE, grow) {
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
   size_t old_num_buckets = cache.cache.num_buckets;
@@ -110,6 +110,8 @@ TEST(WEIGHTS_MEMORY, allocate_and_release) {
 TEST(WEIGHTS_MEMORY, grow) {
   xnn_weights_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, 8));
+  // Allocations rounded to page size, so it might not be 8.
+  size_t old_capacity = b.capacity;
 
   std::string junk = "1234";
   std::memcpy(b.start, junk.data(), junk.length());
@@ -121,15 +123,14 @@ TEST(WEIGHTS_MEMORY, grow) {
   ASSERT_EQ(xnn_status_success, xnn_reserve_weights_memory(&b, 4));
   ASSERT_EQ(old_weights, reinterpret_cast<uintptr_t>(b.start));
 
-  // Copy 4 more bytes, now we are full.
-  memcpy(b.start, junk.data(), junk.length());
-  b.size += junk.length();
+  // Simulate copying bytes until we are full.
+  b.size += (old_capacity - b.size);
 
   const size_t old_size = b.size;
   ASSERT_EQ(xnn_status_success, xnn_reserve_weights_memory(&b, 4));
 
   // After growing, the new capacity should be bigger than the old one.
-  ASSERT_EQ(12, b.capacity);
+  ASSERT_LT(old_capacity, b.capacity);
   // At least 4 bytes free.
   ASSERT_GE(b.capacity, b.size + 4);
   // But size stays the same.
@@ -196,11 +197,24 @@ TEST(WEIGHTS_CACHE, finalize_twice) {
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
 }
 
+TEST(WEIGHTS_CACHE, finalize_capacity_smaller_than_page_aligned_size) {
+  xnn_weights_buffer b;
+  // Small capacity that is smaller than page sizes on all platforms.
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, 8));
+
+  const std::string junk = "1234";
+  std::memcpy(b.start, junk.data(), junk.length());
+  b.size += junk.length();
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
+  ASSERT_EQ(4, b.size);
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
+}
+
 TEST(WEIGHTS_CACHE, write_many_cache_hits) {
 #if XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
   GTEST_SKIP();
 #endif
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
   const std::string weights = "0123456789abcdefghij";
@@ -230,7 +244,7 @@ TEST(WEIGHTS_CACHE, write_many_cache_misses) {
 #if XNN_PLATFORM_WEB && !defined(__EMSCRIPTEN_PTHREADS__)
   GTEST_SKIP();
 #endif
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
   const std::string weights = "0123456789abcdefghij";
@@ -261,7 +275,7 @@ TEST(WEIGHTS_CACHE, write_many_cache_misses) {
 }
 
 TEST(WEIGHTS_CACHE, operations_on_finalized_cache) {
-  xnn_initialize(/*allocator=*/nullptr);
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
   write_weights(&cache, "1234");

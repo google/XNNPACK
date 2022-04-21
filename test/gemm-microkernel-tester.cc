@@ -1645,6 +1645,7 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     jit_gemm_params p = (jit_gemm_params) {
@@ -1778,6 +1779,7 @@ void GemmMicrokernelTester::Test(
 
     const float* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     jit_gemm_params p = (jit_gemm_params) {
@@ -1912,6 +1914,7 @@ void GemmMicrokernelTester::Test(
     init_params(&minmax_params,
       c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k(), nullptr));
@@ -2057,6 +2060,7 @@ void GemmMicrokernelTester::Test(
 
     const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer, mr(), n() % nr(), k(), ks() * mr() * sizeof(void *), nullptr));
@@ -2165,6 +2169,7 @@ void GemmMicrokernelTester::Test(
     init_params(&quantization_params,
       requantization_scale, c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k(), nullptr));
@@ -2299,6 +2304,7 @@ void GemmMicrokernelTester::Test(
 
     const int8_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
 
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     ASSERT_EQ(xnn_status_success, igemm_generator(&code_buffer, mr(), n() % nr(), k(), ks() * mr() * sizeof(void *), nullptr));

@@ -22,11 +22,13 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/params.h"
 
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
 
 // Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
-void* allocate_buffer(size_t size) {
+static void* allocate_buffer(size_t size) {
+  assert(size == round_up_po2(size, xnn_params.page_size));
 #if XNN_PLATFORM_WINDOWS
   void* p = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (p == NULL) {
@@ -63,36 +65,24 @@ static enum xnn_status release_memory(void* start, size_t capacity) {
 
 enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size) {
   memset(buf, 0, sizeof(struct xnn_code_buffer));
-  buf->start = allocate_buffer(size);
+  size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
+  buf->start = allocate_buffer(page_aligned_size);
   if (buf->start == NULL) {
     return xnn_status_out_of_memory;
   }
 
   buf->size = 0;
-  buf->capacity = size;
+  buf->capacity = page_aligned_size;
   return xnn_status_success;
 }
 
 // Releases unused memory. Will write the new capacity to `capacity`.
 static enum xnn_status release_unused_memory(size_t size, void* start, size_t* capacity) {
-  // Get page size.
-  #if XNN_PLATFORM_WINDOWS
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    const size_t page_size = sysinfo.dwPageSize;
-  #else
-    const long res = sysconf(_SC_PAGESIZE);
-    if (res == -1) {
-      xnn_log_error("failed to get page size, error code: %d", errno);
-      return xnn_status_invalid_state;
-    }
-    const size_t page_size = res;
-  #endif
-
   // Release all unused pages.
-  const size_t page_aligned_size = round_up_po2(size, page_size);
+  const size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
   const uint8_t* mem_start = (uint8_t*) start;
   const uint8_t* unused_start = mem_start + page_aligned_size;
+  assert(*capacity >= page_aligned_size);
   const size_t unused_capacity = *capacity - page_aligned_size;
 
   xnn_log_debug("releasing memory, start %p, used: %zu, capacity: %zu, unused %zu", mem_start, size, *capacity,
@@ -249,13 +239,14 @@ enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n) {
 
 enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size_t size) {
   memset(buf, 0, sizeof(struct xnn_weights_buffer));
-  buf->start = allocate_buffer(size);
+  size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
+  buf->start = allocate_buffer(page_aligned_size);
   if (buf->start == NULL) {
     return xnn_status_out_of_memory;
   }
 
   buf->size = 0;
-  buf->capacity = size;
+  buf->capacity = page_aligned_size;
   return xnn_status_success;
 }
 
