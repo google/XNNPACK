@@ -50,7 +50,7 @@ static void GEMMBenchmark(benchmark::State& state,
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
   auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
 
-  std::vector<uint16_t> a(mc * kc);
+  std::vector<uint16_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::generate(a.begin(), a.end(), std::ref(f16rng));
   std::vector<uint16_t> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f16rng));

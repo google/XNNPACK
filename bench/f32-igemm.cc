@@ -64,14 +64,14 @@ static void IGEMMBenchmark(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
   const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
-  std::vector<float> a(input_height * input_width * input_pixel_stride);
+  std::vector<float> a(input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
   std::vector<float> b(group_output_channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  std::vector<float> z(group_input_channels);
+  std::vector<float> z(group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t w_elements = kernel_size * kc_stride * nc_stride + nc_stride;
   const size_t i_elements = mc_stride * kernel_size;
@@ -194,14 +194,14 @@ static void IGEMMBenchmark(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
   const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
-  std::vector<float> a(input_height * input_width * input_pixel_stride);
+  std::vector<float> a(input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
   std::vector<float> b(group_output_channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  std::vector<float> z(group_input_channels);
+  std::vector<float> z(group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t w_elements = kernel_size * kc_stride * nc_stride + nc_stride;
   const size_t i_elements = mc_stride * kernel_size;
@@ -711,6 +711,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_4x8__neonfma_dup_ld64)
   BENCHMARK_CONV(f32_igemm_6x8__neonfma_dup_ld64)
   BENCHMARK_CONV(f32_igemm_6x8__neonfma_dup_ld128)
+
   BENCHMARK_CONV(f32_igemm_1x8s4__neon)
   BENCHMARK_CONV(f32_igemm_4x8s4__neon)
   BENCHMARK_CONV(f32_igemm_6x8s4__neon)

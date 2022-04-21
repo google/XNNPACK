@@ -57,7 +57,7 @@ static void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc);
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -132,7 +132,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc);
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -211,7 +211,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc);
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -286,7 +286,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (nc * (mc + kc + 1)));
 
-  std::vector<float> a(mc * kc);
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(num_buffers * nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -381,7 +381,7 @@ static void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc);
+  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
@@ -783,7 +783,6 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_6x8__neonfma_dup_ld64)
   BENCHMARK_GEMM(f32_gemm_6x8__neonfma_dup_ld128)
 
-#if INCLUDE_BROKEN_BENCHMARKS
   BENCHMARK_GEMM(f32_gemm_1x8s4__neon)
   BENCHMARK_GEMM(f32_gemm_4x8s4__neon)
   BENCHMARK_GEMM(f32_gemm_6x8s4__neon)
@@ -793,7 +792,6 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_4x8s4__neonfma)
   BENCHMARK_GEMM(f32_gemm_6x8s4__neonfma)
   BENCHMARK_GEMM(f32_gemm_8x8s4__neonfma)
-#endif
 
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__neonfma)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__neonfma)
