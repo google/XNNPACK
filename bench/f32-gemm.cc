@@ -32,6 +32,9 @@
 #include <xnnpack/params.h>
 #include <xnnpack/ppmm.h>
 
+// These benchmarks crash on Pixel 6 and Samsung S22
+#undef INCLUDE_BROKEN_BENCHMARKS
+
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_function gemm,
@@ -780,6 +783,7 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_6x8__neonfma_dup_ld64)
   BENCHMARK_GEMM(f32_gemm_6x8__neonfma_dup_ld128)
 
+#if INCLUDE_BROKEN_BENCHMARKS
   BENCHMARK_GEMM(f32_gemm_1x8s4__neon)
   BENCHMARK_GEMM(f32_gemm_4x8s4__neon)
   BENCHMARK_GEMM(f32_gemm_6x8s4__neon)
@@ -789,6 +793,7 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_4x8s4__neonfma)
   BENCHMARK_GEMM(f32_gemm_6x8s4__neonfma)
   BENCHMARK_GEMM(f32_gemm_8x8s4__neonfma)
+#endif
 
   BENCHMARK_GEMM(f32_ppmm_4x8_unipass__neonfma)
   BENCHMARK_GEMM(f32_ppmm_4x8_twopass__neonfma)
