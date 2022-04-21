@@ -7,6 +7,7 @@
 
 .syntax unified
 
+# LINT.IfChange
 // void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
@@ -417,6 +418,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         BX      lr
 
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
+# LINT.ThenChange(4x8-aarch32-neon-cortex-a55.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

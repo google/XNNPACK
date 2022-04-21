@@ -55,7 +55,7 @@ class Generator : public Assembler {
 
 // Clamp (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a53.S
+// Converted from: src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a53.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   assert(nc_mod_nr < 8);

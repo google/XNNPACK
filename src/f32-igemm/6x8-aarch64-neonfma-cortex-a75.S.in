@@ -5,6 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
+# LINT.IfChange
 # void xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
@@ -687,6 +688,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma${"_prfm" if PRE
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
+# LINT.ThenChange(6x8-aarch64-neonfma-cortex-a75.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
