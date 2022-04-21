@@ -72,10 +72,6 @@
 
 static const struct xnn_allocator* volatile init_allocator = NULL;
 
-struct xnn_parameters xnn_params = {
-  .init_flags = 0
-};
-
 static void init(void) {
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   // Unlike most other architectures, on x86/x86-64 when floating-point instructions

@@ -252,7 +252,8 @@ SET(LOGGING_SRCS
   src/ukernel-strings.c)
 
 SET(COLD_SRCS
-  src/init.c)
+  src/init.c
+  src/params.c)
 
 SET(HOT_SRCS
   src/indirection.c
