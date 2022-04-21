@@ -109,6 +109,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a
         PRFM    PLDL1KEEP, [x5, 64]
         PRFM    PLDL1KEEP, [x5, 128]
         PRFM    PLDL1KEEP, [x5, 192]
+        PRFM    PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 320]
         PRFM    PLDL1KEEP,  [x3]        // Prefetch A
         PRFM    PLDL1KEEP,  [x9]
         PRFM    PLDL1KEEP, [x10]
@@ -137,6 +139,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a
 
         # Main loop - 8 floats of A (32 bytes)
         # 96 FMA + 6 LDP A + 8 LDP B
+        # 64 float weights = 256 bytes
 1:
         # First group of 4 A.  48 FMA.
         FMLA    v20.4s, v12.4s,  v0.s[0]
@@ -145,21 +148,24 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a
         FMLA    v24.4s, v12.4s,  v2.s[0]
         FMLA    v26.4s, v12.4s,  v3.s[0]
         FMLA    v28.4s, v12.4s,  v4.s[0]
+        PRFM    PLDL1KEEP, [x5, 256]      // Prefetch B
         FMLA    v30.4s, v12.4s,  v5.s[0]
+
         FMLA    v21.4s, v13.4s,  v0.s[0]
         FMLA    v23.4s, v13.4s,  v1.s[0]
         FMLA    v25.4s, v13.4s,  v2.s[0]
+        PRFM    PLDL1KEEP, [x5, 320]
         FMLA    v27.4s, v13.4s,  v3.s[0]
         FMLA    v29.4s, v13.4s,  v4.s[0]
-
         FMLA    v31.4s, v13.4s,  v5.s[0]
+
         FMLA    v20.4s, v14.4s,  v0.s[1]
-        PRFM    PLDL1KEEP, [x5, 128]      // Prefetch B
+        PRFM    PLDL1KEEP, [x5, 384]
         FMLA    v22.4s, v14.4s,  v1.s[1]
         FMLA    v24.4s, v14.4s,  v2.s[1]
         FMLA    v26.4s, v14.4s,  v3.s[1]
         FMLA    v28.4s, v14.4s,  v4.s[1]
-        PRFM    PLDL1KEEP, [x5, 256]
+        PRFM    PLDL1KEEP, [x5, 448]
         FMLA    v30.4s, v14.4s,  v5.s[1]
         FMLA    v21.4s, v15.4s,  v0.s[1]
         FMLA    v23.4s, v15.4s,  v1.s[1]

@@ -99,8 +99,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
 0:
         # Load initial bias from w into accumulators
         LDP     q20, q21, [x5], 32
-        MOV     v22.16b, v20.16b
         MOV     v23.16b, v21.16b
+        MOV     v22.16b, v20.16b
         MOV     v24.16b, v20.16b
         MOV     v25.16b, v21.16b
         MOV     v26.16b, v20.16b
@@ -131,6 +131,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
 
         # Main loop - 8 floats of A (32 bytes)
         # 96 FMA + 6 LDP A + 8 LDP B
+        # 64 float weights = 256 bytes
 1:
         # First group of 4 A.  48 FMA.
         FMLA    v20.4s, v12.4s,  v0.s[0]
@@ -140,13 +141,14 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         FMLA    v26.4s, v12.4s,  v3.s[0]
         FMLA    v28.4s, v12.4s,  v4.s[0]
         FMLA    v30.4s, v12.4s,  v5.s[0]
+
         FMLA    v21.4s, v13.4s,  v0.s[0]
         FMLA    v23.4s, v13.4s,  v1.s[0]
         FMLA    v25.4s, v13.4s,  v2.s[0]
         FMLA    v27.4s, v13.4s,  v3.s[0]
         FMLA    v29.4s, v13.4s,  v4.s[0]
-
         FMLA    v31.4s, v13.4s,  v5.s[0]
+
         FMLA    v20.4s, v14.4s,  v0.s[1]
         FMLA    v22.4s, v14.4s,  v1.s[1]
         FMLA    v24.4s, v14.4s,  v2.s[1]
