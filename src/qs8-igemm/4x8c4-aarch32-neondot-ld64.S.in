@@ -13,6 +13,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 .syntax unified
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+# LINT.IfChange
 // void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64(
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
@@ -342,6 +343,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64
+# LINT.ThenChange(4x8c4-rndnu-aarch32-neondot-ld64.cc)
 #endif  // __APPLE__
 
 #ifdef __ELF__
