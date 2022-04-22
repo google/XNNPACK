@@ -133,7 +133,8 @@ enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size
 enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf);
 // Ensure that buf has at least n bytes free (i.e. buf->capacity - buf->size >= n), grows if not.
 enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n);
-// Releases unused memory in `buf`, should only be called after all the weights have been written.
+// Releases unused memory in `buf`, and sets used memory to read-only. The address of allocated memory (`buf->start`)
+// is fixed after this call. This should only be called after all the weights have been written.
 enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buf);
 
 #ifdef __cplusplus

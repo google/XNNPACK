@@ -70,18 +70,42 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
 // reuse the same section of the buffer.
 size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, size_t size);
 
+// The state of weights cache finalization.
+enum xnn_cache_state {
+  // Not finalized.
+  xnn_cache_state_not_finalized,
+  // The underlying memory is trimmed to be as compact as possible.
+  xnn_cache_state_hard_finalized,
+  // The underlying memory has some extra space at the end.
+  xnn_cache_state_soft_finalized,
+};
+
+// Weights cache can be finalized in these ways:
+enum xnn_cache_finalization_kind {
+  // Weights cache is finalized, no operations that can change the weights cache is allowed, cache is read-only.
+  // Weights cache memory will also be trimmed to page boundary and set to read-only (to prevent writes).
+  xnn_cache_finalization_kind_compact,
+  // Weights cache will be finalized with some extra space at the end, this allows for "inserting" into the cache only
+  // if the weights are already in the cache, and errors on inserting uncached weights. There is memory overhead.
+  xnn_cache_finalization_kind_allow_duplicates,
+};
+
 // A cache for repacked weights.
 struct xnn_weights_cache {
   struct xnn_cache cache;
   // Protects updates of `cache`, it has the same lifetime as `cache`, and so should be initialized/destroyed together
   // with the `cache`.
   struct xnn_mutex mutex;
-  bool is_finalized;
+  // Maximum size of packed weights that have been inserted into the cache.
+  size_t max_weights_size;
+  enum xnn_cache_state finalization_state;
 };
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
 // Finalizes the weights cache, so that we cannot insert any more entries into the cache.
-enum xnn_status xnn_finalize_weights_cache(struct xnn_weights_cache* cache);
+enum xnn_status xnn_finalize_weights_cache(
+  struct xnn_weights_cache* cache,
+  enum xnn_cache_finalization_kind finalization_kind);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
 // Ensures that cache has enough space for `n` bytes, locks the mutex to protect future updates. Mutex must be unlocked
 // using xnn_get_or_insert_weights_cache.

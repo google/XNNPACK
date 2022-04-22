@@ -36,7 +36,7 @@ TEST(WEIGHTS_CACHE, init_and_release)
 
 TEST(WEIGHTS_CACHE, release_null)
 {
-  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(NULL));
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(nullptr));
 }
 
 TEST(WEIGHTS_CACHE, get_or_insert)
@@ -158,21 +158,21 @@ TEST(WEIGHTS_CACHE, finalize) {
   xnn_weights_buffer b;
   const size_t initial_capacity = 1024 * 1024;  // 1MB.
   ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, initial_capacity));
+  const size_t actual_capacity = b.capacity;
 
   const std::string junk = "1234";
   std::memcpy(b.start, junk.data(), junk.length());
   b.size += junk.length();
   ASSERT_EQ(4, b.size);
-  ASSERT_EQ(initial_capacity, b.capacity);
 
   ASSERT_EQ(xnn_status_success, xnn_finalize_weights_memory(&b));
   #if XNN_PLATFORM_WEB
     // Web does not support partial unmapping.
-    ASSERT_EQ(initial_capacity, b.capacity);
+    ASSERT_EQ(actual_capacity, b.capacity);
   #else
-    ASSERT_GT(initial_capacity, b.capacity);
+    // The actual capacity depends on page size, since it is aligned, just check that it shrunk.
+    ASSERT_GE(actual_capacity, b.capacity);
   #endif
-  // The actual capacity depends on page size, since it is aligned, just check that it shrunk.
   ASSERT_EQ(4, b.size);
 
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
@@ -274,19 +274,62 @@ TEST(WEIGHTS_CACHE, write_many_cache_misses) {
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
-TEST(WEIGHTS_CACHE, operations_on_finalized_cache) {
+TEST(WEIGHTS_CACHE, operations_on_finalized_cache_compact) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
-  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+  ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_compact));
+  // Finalizing a finalized cache is an error.
+  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_compact));
+  // Trying to reserve is an error.
+  ASSERT_EQ(nullptr, xnn_reserve_space_in_weights_cache(&cache, 1));
+
+  // We should not be able to insert into the weights cache, and also this shouldn't timeout by unlocking a mutex which
+  // has not been locked (since xnn_reserve_space_in_weights_cache above failed).
+  ASSERT_EQ(XNN_CACHE_NOT_FOUND, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, operations_on_finalized_cache_allow_duplicates) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_weights_cache cache;
+  ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
+  // Finalizing a finalized cache is an error.
+  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
+  // Trying to reserve too much is an error.
+  ASSERT_EQ(nullptr, xnn_reserve_space_in_weights_cache(&cache, cache.cache.weights.capacity + 1));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
+TEST(WEIGHTS_CACHE, insert_into_finalized_cache_allow_duplicates) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_weights_cache cache;
+  ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
+
   write_weights(&cache, "1234");
   ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
-  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
 
-  // Finalizing a finalized cache is an error.
-  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache));
-  // So is reserving more space.
-  ASSERT_EQ(NULL, xnn_reserve_space_in_weights_cache(&cache, 4));
-  // Or trying to insert into the cache.
-  ASSERT_EQ(XNN_CACHE_NOT_FOUND, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
-  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+  // Inserting into a finalized cache is okay as long as cache memory has space and it is a cache hit.
+  ASSERT_LT(cache.cache.weights.size + 4, cache.cache.weights.capacity);
+  write_weights(&cache, "1234");
+  void* cached_weights = cache_end(&cache);
+  ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, cached_weights, 4));
+  ASSERT_EQ(4, cache.cache.weights.size);
+
+  // Sufficient space, but Cache miss.
+  write_weights(&cache, "4567");
+  ASSERT_EQ(XNN_CACHE_NOT_FOUND, xnn_get_or_insert_weights_cache(&cache, cached_weights, 4));
+
+  // Not enough space in the finalized weights cache.
+  std::string big_string(cache.cache.weights.capacity, '5');
+  // Don't use write_weights here as it asserts xnn_reserve_space_in_weights_cache does not return nullptr.
+  ASSERT_EQ(nullptr, xnn_reserve_space_in_weights_cache(&cache, big_string.length()));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }

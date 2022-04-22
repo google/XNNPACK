@@ -347,21 +347,43 @@ enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
   return xnn_init_weights_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
 }
 
-enum xnn_status xnn_finalize_weights_cache(struct xnn_weights_cache* cache)
+enum xnn_status xnn_finalize_weights_cache(
+  struct xnn_weights_cache* cache,
+  enum xnn_cache_finalization_kind finalization_kind)
 {
-  if (cache->is_finalized) {
-    xnn_log_error("failed to finalize an already final weights cache");
-    return xnn_status_invalid_state;
-  }
+  switch (cache->finalization_state) {
+    case xnn_cache_state_hard_finalized:
+    case xnn_cache_state_soft_finalized:
+      xnn_log_error("failed to finalize an already final weights cache");
+      return xnn_status_invalid_state;
+    case xnn_cache_state_not_finalized: {
+      enum xnn_status status;
+      enum xnn_cache_state finalized_state;
 
-  enum xnn_status status = xnn_finalize_weights_memory(&cache->cache.weights);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to finalize weights cache memory");
-    return xnn_status_invalid_state;
-  }
+      if (finalization_kind == xnn_cache_finalization_kind_compact) {
+        status = xnn_finalize_weights_memory(&cache->cache.weights);
+        // Also release the memory used by hash table (but not the weights memory).
+        xnn_release_memory(cache->cache.buckets);
+        cache->cache.buckets = NULL;
+        finalized_state = xnn_cache_state_hard_finalized;
+      } else {
+        assert(finalization_kind == xnn_cache_finalization_kind_allow_duplicates);
+        // Finalize weights cache by reserving sufficient space for the insertion of the largest cached weights. This
+        // ensures that we have space to write packed weights to check for cache hits without growing and moving the
+        // memory. This has some memory overhead, which can be as large as the size of the largest cached weights,
+        // rounded up to page size.
+        status = xnn_reserve_weights_memory(&cache->cache.weights, cache->max_weights_size);
+        finalized_state = xnn_cache_state_soft_finalized;
+      }
+      if (status != xnn_status_success) {
+        xnn_log_error("failed to finalize weights cache memory");
+        return xnn_status_invalid_state;
+      }
 
-  cache->is_finalized = true;
-  return status;
+      cache->finalization_state = finalized_state;
+      return xnn_status_success;
+    }
+  }
 }
 
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
@@ -369,7 +391,9 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
   if XNN_LIKELY(cache != NULL) {
     assert(cache->cache.type == xnn_cache_type_weights);
     xnn_release_weights_memory(&cache->cache.weights);
-    xnn_release_memory(cache->cache.buckets);
+    if (cache->cache.buckets != NULL) {
+      xnn_release_memory(cache->cache.buckets);
+    }
     const enum xnn_status status = xnn_mutex_destroy(&cache->mutex);
     if (status != xnn_status_success) {
       return status;
@@ -378,10 +402,27 @@ enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache)
   return xnn_status_success;
 }
 
+static inline bool cache_has_space(struct xnn_weights_cache* cache, size_t n)
+{
+  const struct xnn_weights_buffer buf = cache->cache.weights;
+  return buf.size + n <= buf.capacity;
+}
+
 void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t n) {
-  if (cache->is_finalized) {
-    xnn_log_error("Cannot reserve space in a finalized weights cache");
-    return NULL;
+  switch (cache->finalization_state) {
+    case xnn_cache_state_hard_finalized:
+      xnn_log_error("cannot reserve additional space in a finalized compact weights cache");
+      return NULL;
+    case xnn_cache_state_soft_finalized:
+      if (!cache_has_space(cache, n)) {
+        xnn_log_error("cannot reserve additional space in a finalized weights cache");
+        return NULL;
+      }
+      // If the cache is finalized, and has space for `n` bytes, we still want to lock the mutex, because we can have
+      // multiple writers attempting to write to this space.
+      break;
+    default:
+      break;
   }
 
   enum xnn_status status = xnn_mutex_lock(&cache->mutex);
@@ -401,12 +442,45 @@ void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t
 
 size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size)
 {
-  if (cache->is_finalized) {
-    xnn_log_error("Cannot reserve space in a finalized weights cache");
-    return XNN_CACHE_NOT_FOUND;
+  size_t offset = XNN_CACHE_NOT_FOUND;
+
+  switch (cache->finalization_state) {
+    case xnn_cache_state_hard_finalized: {
+      xnn_log_error("cannot insert into a finalized compact weights cache");
+      return XNN_CACHE_NOT_FOUND;
+    }
+    case xnn_cache_state_soft_finalized: {
+      // Inserting into a finalized weights cache is okay as long as:
+      // 1. there is sufficient space in the memory (to write the incoming packed weights), or
+      // 2. incoming packed weights is already in cache
+      if (!cache_has_space(cache, size)) {
+        xnn_log_error("insufficient extra space in finalized weights cache buffer");
+        return XNN_CACHE_NOT_FOUND;
+      }
+
+      // We need to release the mutex from this point onwards, because xnn_reserve_space_in_weights would have returned
+      // non-NULL (which means that it locked the mutex).
+      const size_t found_offset = lookup_cache(&cache->cache, ptr, size);
+      if (found_offset == XNN_CACHE_NOT_FOUND) {
+        xnn_log_error("packed weights not found in finalized weights cache");
+      }
+
+      offset = found_offset;
+      break;
+    }
+    case xnn_cache_state_not_finalized: {
+      offset = xnn_get_or_insert_cache(&cache->cache, ptr, size);
+      if (offset != XNN_CACHE_NOT_FOUND) {
+        // Found or inserted packed weights, update the largest size seen so far, this will be used when finalizing the
+        // weights cache, to ensure there is an extra space at the end for future cache checks.
+        cache->max_weights_size = max(size, cache->max_weights_size);
+      }
+      break;
+    }
   }
 
-  const size_t offset = xnn_get_or_insert_cache(&cache->cache, ptr, size);
+  // Mutex is locked in xnn_reserve_space_in_weights_cache when it returns non-NULL, i.e. when cache is not finalized,
+  // or if it is xnn_cache_state_soft_finalized and has sufficient space.
   const enum xnn_status status = xnn_mutex_unlock(&cache->mutex);
   (void) status;
   assert(status == xnn_status_success);
