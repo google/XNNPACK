@@ -75,6 +75,9 @@ def preprocess(input_text, input_globals, input_path="codegen"):
     if input_line == "":
       blank_lines += 1
       continue
+    # Skip lint markers.
+    if 'LINT' in input_line:
+      continue
 
     input_indent = extract_leading_whitespace(input_line)
     if python_block_start:
