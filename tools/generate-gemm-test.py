@@ -36,6 +36,8 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   xw = "gemm_xw_" in common_name
   param_spec = common_parts[-1]
+  if param_spec.startswith('upto'):
+    param_spec = param_spec[len('upto'):]
   if "s" in param_spec:
     param_spec, sr = param_spec.split("s", 1)
     sr = int(sr)
@@ -843,6 +845,28 @@ $if DATATYPE == "qu8":
         .a_zero_point(0)
         .b_zero_point(0)
         .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+$if TEST_NAME.startswith('GENERATE') and 'UPTO' in TEST_NAME:
+  TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m_upto_mr) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (uint32_t max_mr = 1; max_mr <= ${MR}; max_mr++) {
+      for (uint32_t m = 1; m <= max_mr; m++) {
+        GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
+          .mr(max_mr)
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .m(m)
+          .n(${NR})
+          .k(${KBLOCK})
+          .iterations(1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
     }
   }
 """

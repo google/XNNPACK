@@ -38280,6 +38280,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_FMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, k_eq_1) {
   GemmMicrokernelTester()
     .mr(1)
@@ -38697,6 +38698,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X2__SCALAR_LRINTF, no_zero_point) {
       .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
   }
 }
+
 
 TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, k_eq_1) {
   GemmMicrokernelTester()
@@ -39116,6 +39118,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_FMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, k_eq_1) {
   GemmMicrokernelTester()
     .mr(1)
@@ -39533,6 +39536,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_1X4__SCALAR_LRINTF, no_zero_point) {
       .Test(xnn_qu8_igemm_minmax_fp32_ukernel_1x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
   }
 }
+
 
 TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, k_eq_1) {
   GemmMicrokernelTester()
@@ -39952,6 +39956,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_FMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, k_eq_1) {
   GemmMicrokernelTester()
     .mr(2)
@@ -40369,6 +40374,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X2__SCALAR_LRINTF, no_zero_point) {
       .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
   }
 }
+
 
 TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, k_eq_1) {
   GemmMicrokernelTester()
@@ -40788,6 +40794,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_FMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, k_eq_1) {
   GemmMicrokernelTester()
     .mr(2)
@@ -41205,6 +41212,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_2X4__SCALAR_LRINTF, no_zero_point) {
       .Test(xnn_qu8_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf, xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params, xnn_qu8_requantize_fp32);
   }
 }
+
 
 TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, k_eq_1) {
   GemmMicrokernelTester()
@@ -41624,6 +41632,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X2__SCALAR_IMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, k_eq_1) {
   GemmMicrokernelTester()
     .mr(3)
@@ -42042,6 +42051,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_3X4__SCALAR_IMAGIC, no_zero_point) {
   }
 }
 
+
 TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, k_eq_1) {
   GemmMicrokernelTester()
     .mr(4)
@@ -42459,6 +42469,7 @@ TEST(QU8_IGEMM_MINMAX_FP32_4X2__SCALAR_IMAGIC, no_zero_point) {
       .Test(xnn_qu8_igemm_minmax_fp32_ukernel_4x2__scalar_imagic, xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params, xnn_qu8_requantize_fp32);
   }
 }
+
 
 TEST(QU8_IGEMM_MINMAX_FP32_4X4__SCALAR_IMAGIC, k_eq_1) {
   GemmMicrokernelTester()
