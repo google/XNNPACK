@@ -274,14 +274,14 @@ TEST(WEIGHTS_CACHE, write_many_cache_misses) {
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
-TEST(WEIGHTS_CACHE, operations_on_finalized_cache_compact) {
+TEST(WEIGHTS_CACHE, operations_on_finalized_cache_hard) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
 
-  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_compact));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_weights_cache_finalization_kind_hard));
   // Finalizing a finalized cache is an error.
-  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_compact));
+  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_weights_cache_finalization_kind_hard));
   // Trying to reserve is an error.
   ASSERT_EQ(nullptr, xnn_reserve_space_in_weights_cache(&cache, 1));
 
@@ -292,28 +292,28 @@ TEST(WEIGHTS_CACHE, operations_on_finalized_cache_compact) {
   ASSERT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
-TEST(WEIGHTS_CACHE, operations_on_finalized_cache_allow_duplicates) {
+TEST(WEIGHTS_CACHE, operations_on_finalized_cache_soft) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
 
-  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_weights_cache_finalization_kind_soft));
   // Finalizing a finalized cache is an error.
-  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
+  ASSERT_NE(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_weights_cache_finalization_kind_soft));
   // Trying to reserve too much is an error.
   ASSERT_EQ(nullptr, xnn_reserve_space_in_weights_cache(&cache, cache.cache.weights.capacity + 1));
 
   ASSERT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
-TEST(WEIGHTS_CACHE, insert_into_finalized_cache_allow_duplicates) {
+TEST(WEIGHTS_CACHE, insert_into_finalized_cache_soft) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   struct xnn_weights_cache cache;
   ASSERT_EQ(xnn_status_success, xnn_init_weights_cache(&cache));
 
   write_weights(&cache, "1234");
   ASSERT_EQ(0, xnn_get_or_insert_weights_cache(&cache, cache.cache.weights.start, 4));
-  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_cache_finalization_kind_allow_duplicates));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_weights_cache(&cache, xnn_weights_cache_finalization_kind_soft));
 
   // Inserting into a finalized cache is okay as long as cache memory has space and it is a cache hit.
   ASSERT_LT(cache.cache.weights.size + 4, cache.cache.weights.capacity);

@@ -1320,6 +1320,24 @@ typedef struct xnn_weights_cache* xnn_weights_cache_t;
 enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out);
 
 
+/// Weights cache can be finalized in these ways:
+enum xnn_weights_cache_finalization_kind {
+  /// Weights cache is finalized, no insert operations into the weights cache is allowed, even if the "inserted"
+  /// weights already exist in thee cache. Weights cache memory will also be trimmed to page boundary and set to
+  /// read-only (to prevent writes).
+  xnn_weights_cache_finalization_kind_hard,
+  /// Weights cache will be finalized with some extra space at the end, this allows for "inserting" into the cache only
+  /// if the weights are already in the cache, and errors on inserting uncached weights. There is memory overhead.
+  xnn_weights_cache_finalization_kind_soft,
+};
+
+/// Finalizes the weights cache. The kind of finalization is specified by `finalization_kind`.
+/// @param weights_cache - the weights cache object to finalize.
+/// @param finalization_kind - the kind of finalization.
+enum xnn_status xnn_finalize_weights_cache(
+  xnn_weights_cache_t weights_cache,
+  enum xnn_weights_cache_finalization_kind finalization_kind);
+
 /// Destroy a weights cache object, as well as memory used for the cache.
 /// @param weights_cache - the weights cache object to destroy.
 enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache);

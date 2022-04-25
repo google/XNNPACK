@@ -353,7 +353,7 @@ enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
 
 enum xnn_status xnn_finalize_weights_cache(
   struct xnn_weights_cache* cache,
-  enum xnn_cache_finalization_kind finalization_kind)
+  enum xnn_weights_cache_finalization_kind finalization_kind)
 {
   switch (cache->finalization_state) {
     case xnn_cache_state_hard_finalized:
@@ -364,14 +364,14 @@ enum xnn_status xnn_finalize_weights_cache(
       enum xnn_status status;
       enum xnn_cache_state finalized_state;
 
-      if (finalization_kind == xnn_cache_finalization_kind_compact) {
+      if (finalization_kind == xnn_weights_cache_finalization_kind_hard) {
         status = xnn_finalize_weights_memory(&cache->cache.weights);
         // Also release the memory used by hash table (but not the weights memory).
         xnn_release_memory(cache->cache.buckets);
         cache->cache.buckets = NULL;
         finalized_state = xnn_cache_state_hard_finalized;
       } else {
-        assert(finalization_kind == xnn_cache_finalization_kind_allow_duplicates);
+        assert(finalization_kind == xnn_weights_cache_finalization_kind_soft);
         // Finalize weights cache by reserving sufficient space for the insertion of the largest cached weights. This
         // ensures that we have space to write packed weights to check for cache hits without growing and moving the
         // memory. This has some memory overhead, which can be as large as the size of the largest cached weights,
@@ -489,4 +489,8 @@ size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* pt
   (void) status;
   assert(status == xnn_status_success);
   return offset;
+}
+
+bool xnn_weights_cache_is_finalized(struct xnn_weights_cache* cache) {
+  return cache->finalization_state != xnn_cache_state_not_finalized;
 }

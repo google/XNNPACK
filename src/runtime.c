@@ -275,6 +275,13 @@ enum xnn_status xnn_setup_runtime(
       continue;
     }
 
+    // Ensure that weights cache is finalized.
+    struct xnn_weights_cache* weights_cache = opdata->operator_objects[0]->weights_cache;
+    if (weights_cache != NULL && !xnn_weights_cache_is_finalized(weights_cache)) {
+      xnn_log_error("weights cache needs to be finalized before setup/infer");
+      return xnn_status_invalid_state;
+    }
+
     assert(opdata->setup != NULL);
     const enum xnn_status status = opdata->setup(opdata, runtime->blobs, runtime->num_blobs, runtime->threadpool);
     if (status != xnn_status_success) {

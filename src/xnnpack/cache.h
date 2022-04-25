@@ -80,16 +80,6 @@ enum xnn_cache_state {
   xnn_cache_state_soft_finalized,
 };
 
-// Weights cache can be finalized in these ways:
-enum xnn_cache_finalization_kind {
-  // Weights cache is finalized, no operations that can change the weights cache is allowed, cache is read-only.
-  // Weights cache memory will also be trimmed to page boundary and set to read-only (to prevent writes).
-  xnn_cache_finalization_kind_compact,
-  // Weights cache will be finalized with some extra space at the end, this allows for "inserting" into the cache only
-  // if the weights are already in the cache, and errors on inserting uncached weights. There is memory overhead.
-  xnn_cache_finalization_kind_allow_duplicates,
-};
-
 // A cache for repacked weights.
 struct xnn_weights_cache {
   struct xnn_cache cache;
@@ -105,7 +95,7 @@ enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
 // Finalizes the weights cache, so that we cannot insert any more entries into the cache.
 enum xnn_status xnn_finalize_weights_cache(
   struct xnn_weights_cache* cache,
-  enum xnn_cache_finalization_kind finalization_kind);
+  enum xnn_weights_cache_finalization_kind finalization_kind);
 enum xnn_status xnn_release_weights_cache(struct xnn_weights_cache* cache);
 // Ensures that cache has enough space for `n` bytes, locks the mutex to protect future updates. Mutex must be unlocked
 // using xnn_get_or_insert_weights_cache.
@@ -113,6 +103,7 @@ void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t
 // Looks up packed weights at `ptr` in the cache. If it is found, reuse it. Otherwise, it is added to the cache. Mutex
 // must already be locked before calling this, it will be unlocked at the end of this function.
 size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size);
+bool xnn_weights_cache_is_finalized(struct xnn_weights_cache* cache);
 
 struct xnn_caches {
   struct xnn_code_cache *code_cache;
