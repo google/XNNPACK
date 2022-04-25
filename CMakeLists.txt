@@ -400,7 +400,6 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f32-vunary/gen/vabs-scalar-x4.c
   src/f32-vunary/gen/vneg-scalar-x4.c
   src/f32-vunary/gen/vsqr-scalar-x4.c
-  src/qc8-dwconv/gen/up2x3-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up2x9-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up2x25-minmax-fp32-scalar-fmagic.c
   src/qc8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
