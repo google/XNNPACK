@@ -10,17 +10,17 @@
 #include <xnnpack/assembly.h>
 
 # void xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75(
-#     size_t mr,                x0
-#     size_t nc,                x1
-#     size_t kc,                x2 / x0
-#     const uint8_t*restrict a, x3
-#     size_t a_stride,          x4
-#     const void*restrict w,    x5
-#     uint8_t*restrict c,       x6
-#     size_t cm_stride,         x7
-#     size_t cn_stride,         [sp] -> (x0)
-#     const float*restrict acc,  [sp + 8] -> x15
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> x8
+#     size_t mr,                         x0
+#     size_t nc,                         x1
+#     size_t kc,                         x2 / x0
+#     const uint8_t* a,                  x3
+#     size_t a_stride,                   x4
+#     const void* w,                     x5
+#     uint8_t* c,                        x6
+#     size_t cm_stride,                  x7
+#     size_t cn_stride,                  [sp] -> (x0)
+#     const float* acc,                  [sp + 8] -> x15
+#     const xnn_f32_minmax_params params [sp + 16] -> x8
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -137,14 +137,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         FMLA    v26.4s, v12.4s,  v3.s[0]
         FMLA    v28.4s, v12.4s,  v4.s[0]
         FMLA    v30.4s, v12.4s,  v5.s[0]
-
         FMLA    v21.4s, v13.4s,  v0.s[0]
         FMLA    v23.4s, v13.4s,  v1.s[0]
         FMLA    v25.4s, v13.4s,  v2.s[0]
         FMLA    v27.4s, v13.4s,  v3.s[0]
         FMLA    v29.4s, v13.4s,  v4.s[0]
         FMLA    v31.4s, v13.4s,  v5.s[0]
-
         FMLA    v20.4s, v14.4s,  v0.s[1]
         FMLA    v22.4s, v14.4s,  v1.s[1]
         FMLA    v24.4s, v14.4s,  v2.s[1]
@@ -275,7 +273,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         FMLA    v25.4s, v13.4s,  v2.s[0]
         FMLA    v27.4s, v13.4s,  v3.s[0]
         FMLA    v29.4s, v13.4s,  v4.s[0]
-
         FMLA    v31.4s, v13.4s,  v5.s[0]
         FMLA    v20.4s, v14.4s,  v0.s[1]
         FMLA    v22.4s, v14.4s,  v1.s[1]
