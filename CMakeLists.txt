@@ -3452,6 +3452,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x48.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x56.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x64.c
+  src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c
+  src/f16-vsqrt/gen/neonfp16arith-sqrt-x16.c
   src/f16-vunary/gen/vabs-neonfp16arith-x8.c
   src/f16-vunary/gen/vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/vneg-neonfp16arith-x8.c
@@ -5208,6 +5210,8 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-vrnd/gen/vrndu-f16c-x16.c
   src/f16-vrnd/gen/vrndz-f16c-x8.c
   src/f16-vrnd/gen/vrndz-f16c-x16.c
+  src/f16-vsqrt/gen/f16c-sqrt-x8.c
+  src/f16-vsqrt/gen/f16c-sqrt-x16.c
   src/f16-vunary/gen/vsqr-f16c-x8.c
   src/f16-vunary/gen/vsqr-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x8.c
@@ -7417,6 +7421,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-vsqr-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-vsqr-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(f16-vsqr-test f16-vsqr-test)
+
+  ADD_EXECUTABLE(f16-vsqrt-test test/f16-vsqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsqrt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-vsqrt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-vsqrt-test f16-vsqrt-test)
 
   ADD_EXECUTABLE(f16-vsub-minmax-test test/f16-vsub-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vsub-minmax-test PRIVATE include src test)

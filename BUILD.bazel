@@ -4916,6 +4916,8 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x48.c",
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x56.c",
     "src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x64.c",
+    "src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c",
+    "src/f16-vsqrt/gen/neonfp16arith-sqrt-x16.c",
     "src/f16-vunary/gen/vabs-neonfp16arith-x8.c",
     "src/f16-vunary/gen/vabs-neonfp16arith-x16.c",
     "src/f16-vunary/gen/vneg-neonfp16arith-x8.c",
@@ -6688,6 +6690,8 @@ ALL_F16C_MICROKERNEL_SRCS = [
     "src/f16-vrnd/gen/vrndu-f16c-x16.c",
     "src/f16-vrnd/gen/vrndz-f16c-x8.c",
     "src/f16-vrnd/gen/vrndz-f16c-x16.c",
+    "src/f16-vsqrt/gen/f16c-sqrt-x8.c",
+    "src/f16-vsqrt/gen/f16c-sqrt-x16.c",
     "src/f16-vunary/gen/vsqr-f16c-x8.c",
     "src/f16-vunary/gen/vsqr-f16c-x16.c",
     "src/f32-f16-vcvt/gen/vcvt-f16c-x8.c",
@@ -12132,6 +12136,15 @@ xnnpack_unit_test(
     name = "f16_vrndd_test",
     srcs = [
         "test/f16-vrndd.cc",
+        "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vsqrt_test",
+    srcs = [
+        "test/f16-vsqrt.cc",
         "test/vunary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
