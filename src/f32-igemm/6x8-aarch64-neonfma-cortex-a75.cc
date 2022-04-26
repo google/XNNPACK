@@ -143,7 +143,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   mov(v30.v16b(), v20.v16b());
   mov(v31.v16b(), v21.v16b());
-
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[x5, 320]);
+  }
   mov(x9, x3); // p = ks
 
   bind(l1);
@@ -201,24 +204,29 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v26.v4s(), v12.v4s(), v3.s()[0]);
   fmla(v28.v4s(), v12.v4s(), v4.s()[0]);
   fmla(v30.v4s(), v12.v4s(), v5.s()[0]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 256]); // Prefetch B
+  }
   fmla(v21.v4s(), v13.v4s(), v0.s()[0]);
   fmla(v23.v4s(), v13.v4s(), v1.s()[0]);
   fmla(v25.v4s(), v13.v4s(), v2.s()[0]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 320]);
+  }
   fmla(v27.v4s(), v13.v4s(), v3.s()[0]);
   fmla(v29.v4s(), v13.v4s(), v4.s()[0]);
-
   fmla(v31.v4s(), v13.v4s(), v5.s()[0]);
-  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[x5, 384]);
   }
+  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   fmla(v22.v4s(), v14.v4s(), v1.s()[1]);
   fmla(v24.v4s(), v14.v4s(), v2.s()[1]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 448]);
+  }
   fmla(v26.v4s(), v14.v4s(), v3.s()[1]);
   fmla(v28.v4s(), v14.v4s(), v4.s()[1]);
-  if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
-  }
   fmla(v30.v4s(), v14.v4s(), v5.s()[1]);
   fmla(v21.v4s(), v15.v4s(), v0.s()[1]);
   fmla(v23.v4s(), v15.v4s(), v1.s()[1]);
@@ -339,24 +347,29 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v26.v4s(), v12.v4s(), v3.s()[0]);
   fmla(v28.v4s(), v12.v4s(), v4.s()[0]);
   fmla(v30.v4s(), v12.v4s(), v5.s()[0]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 256]); // Prefetch B
+  }
   fmla(v21.v4s(), v13.v4s(), v0.s()[0]);
   fmla(v23.v4s(), v13.v4s(), v1.s()[0]);
   fmla(v25.v4s(), v13.v4s(), v2.s()[0]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 320]);
+  }
   fmla(v27.v4s(), v13.v4s(), v3.s()[0]);
   fmla(v29.v4s(), v13.v4s(), v4.s()[0]);
-
   fmla(v31.v4s(), v13.v4s(), v5.s()[0]);
-  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[x5, 384]);
   }
+  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   fmla(v22.v4s(), v14.v4s(), v1.s()[1]);
   fmla(v24.v4s(), v14.v4s(), v2.s()[1]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 448]);
+  }
   fmla(v26.v4s(), v14.v4s(), v3.s()[1]);
   fmla(v28.v4s(), v14.v4s(), v4.s()[1]);
-  if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
-  }
   fmla(v30.v4s(), v14.v4s(), v5.s()[1]);
   fmla(v21.v4s(), v15.v4s(), v0.s()[1]);
   fmla(v23.v4s(), v15.v4s(), v1.s()[1]);
