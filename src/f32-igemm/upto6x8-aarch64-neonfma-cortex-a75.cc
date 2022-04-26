@@ -235,6 +235,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // Prologue - loads for main loop of 96 FMA
   ldr(q0, mem[x14], 16);
+  ldp(q12, q13, mem[x5], 32); // Fetch 3 B (4th deferred)
   if (max_mr > 1) {
     ldr(q1, mem[x15], 16);
   }
@@ -250,7 +251,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     ldr(q5, mem[x23], 16);
   }
-  ldp(q12, q13, mem[x5], 32); // Fetch 3 B (4th deferred)
   ldp(q14, q15, mem[x5], 32);
   ldp(q16, q17, mem[x5], 32);
 
@@ -856,24 +856,22 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v30.v4s(), v18.v4s(), v11.s()[3]);
   }
+  // Is there a remainder?- 4 floats of A (16 bytes) or less
+  tst(x0, 31);
   fmla(v21.v4s(), v19.v4s(), v6.s()[3]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
   }
-
+  if (max_mr > 2) {
+    fmla(v25.v4s(), v19.v4s(), v8.s()[3]);
+  }
   // Load min/max values
   if (clamp_min || clamp_max) {
     ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
   }
-
-  if (max_mr > 2) {
-    fmla(v25.v4s(), v19.v4s(), v8.s()[3]);
-  }
   if (max_mr > 3) {
     fmla(v27.v4s(), v19.v4s(), v9.s()[3]);
   }
-  // Is there a remainder?- 4 floats of A (16 bytes) or less
-  tst(x0, 31);
   if (max_mr > 4) {
     fmla(v29.v4s(), v19.v4s(), v10.s()[3]);
   }
