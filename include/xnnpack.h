@@ -2571,6 +2571,20 @@ enum xnn_status xnn_setup_square_nc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_square_root_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  uint32_t flags,
+  xnn_operator_t* sqrt_op_out);
+
+enum xnn_status xnn_setup_square_root_nc_f16(
+  xnn_operator_t sqrt_op,
+  size_t batch_size,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_squared_difference_nd_f16(
   uint32_t flags,
   xnn_operator_t* squared_difference_op_out);

@@ -3280,6 +3280,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/vrndu-neonfp16arith-x16.c
   src/f16-vrnd/gen/vrndz-neonfp16arith-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c
+  src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c
   src/f16-vunary/gen/vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/vneg-neonfp16arith-x16.c
   src/f16-vunary/gen/vsqr-neonfp16arith-x16.c)
@@ -5147,6 +5148,7 @@ SET(PROD_F16C_MICROKERNEL_SRCS
   src/f16-vrnd/gen/vrndne-f16c-x16.c
   src/f16-vrnd/gen/vrndu-f16c-x16.c
   src/f16-vrnd/gen/vrndz-f16c-x16.c
+  src/f16-vsqrt/gen/f16c-sqrt-x8.c
   src/f16-vunary/gen/vsqr-f16c-x16.c
   src/f32-f16-vcvt/gen/vcvt-f16c-x16.c)
 
@@ -7217,7 +7219,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(square-root-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(square-root-nc-test square-root-nc-test)
 
   ADD_EXECUTABLE(squared-difference-nd-test test/squared-difference-nd.cc)
