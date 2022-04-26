@@ -26,10 +26,10 @@ from itertools import chain
 parser = argparse.ArgumentParser(description='Dump output of JIT')
 parser.add_argument("input", metavar="FILE", nargs=1,
           help="Input file")
-parser.add_argument("prefetch", action="store_true")
-parser.add_argument("clamp_min", action="store_true")
-parser.add_argument("clamp_max", action="store_true")
-parser.add_argument("--max_mr", type=int)
+parser.add_argument("--prefetch", action="store_true")
+parser.add_argument("--clamp_min", action="store_true")
+parser.add_argument("--clamp_max", action="store_true")
+parser.add_argument("--max_mr", type=int, required=True)
 parser.add_argument("-o", "--output",
           help='Output file')
 parser.set_defaults(defines=list())
