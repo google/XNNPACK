@@ -79,7 +79,7 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
   }
 
   std::vector<uint16_t> output(output_elements * num_buffers);
-  std::fill(output.begin(), output.end(), std::nanf(""));
+  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
   xnn_f16_minmax_params params;
   init_params(&params, 0x7C00 /* inf */, 0xFC00 /* -inf */);

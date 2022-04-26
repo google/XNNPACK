@@ -119,7 +119,7 @@ static void IGEMMBenchmark(benchmark::State& state,
   }
 
   std::vector<uint16_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
