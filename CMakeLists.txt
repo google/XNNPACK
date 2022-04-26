@@ -7212,7 +7212,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
   ADD_TEST(sigmoid-nc-test sigmoid-nc-test)
 
   ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
