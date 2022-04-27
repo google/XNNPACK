@@ -7088,15 +7088,13 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(convert-nc-test convert-nc-test)
 
   ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
-  SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-nhwc-test PRIVATE XNNPACK cache fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(convolution-nhwc-test convolution-nhwc-test)
 
   ADD_EXECUTABLE(convolution-nchw-test test/convolution-nchw.cc)
-  SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(convolution-nchw-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-nchw-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(convolution-nchw-test convolution-nchw-test)
@@ -7187,10 +7185,6 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(negate-nc-test negate-nc-test)
 
   ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
-  SET_TARGET_PROPERTIES(transpose-normalization-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(transpose-normalization-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE XNNPACK gtest gtest_main normalization)
   ADD_TEST(transpose-normalization-test transpose-normalization-test)
@@ -7246,10 +7240,6 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(tanh-nc-test tanh-nc-test)
 
   ADD_EXECUTABLE(transpose-nd-test test/transpose-nd.cc)
-  SET_TARGET_PROPERTIES(transpose-nd-test PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO)
   TARGET_INCLUDE_DIRECTORIES(transpose-nd-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(transpose-nd-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(transpose-nd-test transpose-nd-test)
@@ -7935,8 +7925,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(qs8-igemm-minmax-rndnu-test qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-requantization-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qs8-requantization-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-requantization-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qs8-requantization-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qs8-requantization-test qs8-requantization-test)
@@ -7952,15 +7941,13 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(qs8-vaddc-minmax-test qs8-vaddc-minmax-test)
 
   ADD_EXECUTABLE(qs8-vmul-minmax-fp32-test test/qs8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vmul-minmax-fp32-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qs8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-vmul-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qs8-vmul-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qs8-vmul-minmax-fp32-test qs8-vmul-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-vmulc-minmax-fp32-test test/qs8-vmulc-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-vmulc-minmax-fp32-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qs8-vmulc-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qs8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qs8-vmulc-minmax-fp32-test qs8-vmulc-minmax-fp32-test)
@@ -8016,8 +8003,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(qu8-igemm-minmax-rndnu-test qu8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qu8-requantization-test test/qu8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-requantization-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-requantization-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-requantization-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-requantization-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(qu8-requantization-test qu8-requantization-test)
@@ -8033,29 +8019,25 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(qu8-vaddc-minmax-test qu8-vaddc-minmax-test)
 
   ADD_EXECUTABLE(qu8-vmul-minmax-fp32-test test/qu8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmul-minmax-fp32-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vmul-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qu8-vmul-minmax-fp32-test qu8-vmul-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-vmul-minmax-rndnu-test test/qu8-vmul-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmul-minmax-rndnu-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-vmul-minmax-rndnu-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-rndnu-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vmul-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qu8-vmul-minmax-rndnu-test qu8-vmul-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qu8-vmulc-minmax-fp32-test test/qu8-vmulc-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-fp32-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qu8-vmulc-minmax-fp32-test qu8-vmulc-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-vmulc-minmax-rndnu-test test/qu8-vmulc-minmax-rndnu.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-rndnu-test PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-rndnu-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-rndnu-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(qu8-vmulc-minmax-rndnu-test qu8-vmulc-minmax-rndnu-test)
@@ -8231,8 +8213,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
   TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
@@ -8309,8 +8290,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     models/fp32-sparse-mobilenet-v2.cc
     models/fp32-sparse-mobilenet-v3-large.cc
     models/fp32-sparse-mobilenet-v3-small.cc)
-  SET_TARGET_PROPERTIES(bench-models PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(bench-models PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
   TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK fp16 benchmark bench-utils)
 
@@ -8561,8 +8541,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool jit params_init)
 
   ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
@@ -8591,8 +8570,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
   ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES
-    CXX_EXTENSIONS YES)
+  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
