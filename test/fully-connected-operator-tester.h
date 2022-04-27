@@ -258,6 +258,10 @@ class FullyConnectedOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
@@ -435,6 +439,10 @@ class FullyConnectedOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
@@ -598,6 +606,10 @@ class FullyConnectedOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
@@ -782,6 +794,10 @@ class FullyConnectedOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);

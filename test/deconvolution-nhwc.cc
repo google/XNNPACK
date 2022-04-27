@@ -14626,9 +14626,8 @@ TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
     .stride(4)
     .group_input_channels(15)
     .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
-    .stress_weights_cache(true)
     .iterations(60)  // Higher number of iterations to write more weights.
-    .TestF32();
+    .StressWeightsCacheTestF32();
 }
 
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/

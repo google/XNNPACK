@@ -213,6 +213,13 @@ static enum xnn_status setup_fully_connected_nc(
     return xnn_status_success;
   }
 
+  if (fully_connected_op->weights_cache != NULL &&
+      !xnn_weights_cache_is_finalized(fully_connected_op->weights_cache)) {
+    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_invalid_state;
+  }
+
   fully_connected_op->batch_size = 1;
   fully_connected_op->input_height = batch_size;
   fully_connected_op->input_width = 1;

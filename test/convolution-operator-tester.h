@@ -708,6 +708,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
@@ -934,6 +938,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
@@ -1165,6 +1173,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
@@ -1394,6 +1406,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
@@ -1651,6 +1667,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
@@ -1896,6 +1916,10 @@ class ConvolutionOperatorTester {
       }
       ASSERT_EQ(xnn_status_success, status);
       ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);

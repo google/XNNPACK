@@ -168,6 +168,10 @@ class PReLUOperatorTester {
           negative_slope_data,
           flags, &caches, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete prelu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
@@ -272,6 +276,10 @@ class PReLUOperatorTester {
           w.data(),
           0, &caches, &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
 
       // Smart pointer to automatically delete prelu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
