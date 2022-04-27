@@ -369,7 +369,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
     goto error;
   }
 
-  const size_t zero_bytes = channels * sizeof(float) + XNN_EXTRA_BYTES;
+  const size_t zero_bytes = channels * sizeof(uint16_t) + XNN_EXTRA_BYTES;
   void* zero_buffer = xnn_allocate_zero_simd_memory(zero_bytes);
   if (zero_buffer == NULL) {
     xnn_log_error(
