@@ -4214,6 +4214,7 @@ struct avgpool_parameters {
   xnn_avgpool_unipass_ukernel_function unipass;
   xnn_avgpool_multipass_ukernel_function multipass;
   union {
+    xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
     xnn_init_qu8_avgpool_minmax_params_fn qu8;
   } init;
@@ -4234,6 +4235,7 @@ struct pavgpool_parameters {
   xnn_pavgpool_unipass_ukernel_function unipass;
   xnn_pavgpool_multipass_ukernel_function multipass;
   union {
+    xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of rows in a primary tile.
@@ -4424,13 +4426,15 @@ struct xnn_parameters {
     struct transpose_parameters transpose;
   } x16;
   struct {
-    struct gavgpool_parameters gavgpool;
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
+    struct avgpool_parameters avgpool;
+    struct pavgpool_parameters pavgpool;
+    struct gavgpool_parameters gavgpool;
+    struct maxpool_parameters maxpool;
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
-    struct maxpool_parameters maxpool;
     struct vunary_parameters abs;
     struct vunary_parameters clamp;
     struct vunary_parameters hswish;

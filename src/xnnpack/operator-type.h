@@ -18,6 +18,7 @@ enum xnn_operator_type {
   xnn_operator_type_add_nd_qs8,
   xnn_operator_type_add_nd_qu8,
   xnn_operator_type_argmax_pooling_nhwc_f32,
+  xnn_operator_type_average_pooling_nhwc_f16,
   xnn_operator_type_average_pooling_nhwc_f32,
   xnn_operator_type_average_pooling_nhwc_qu8,
   xnn_operator_type_bankers_rounding_nc_f16,

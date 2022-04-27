@@ -2581,6 +2581,22 @@ static void init(void) {
       xnn_params.f16.dwconv[3].channel_tile = 8;
       xnn_params.f16.dwconv[3].primary_tile = 25;
 
+      xnn_params.f16.avgpool = (struct avgpool_parameters) {
+        .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9x__neonfp16arith_c8,
+        .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8,
+        .init.f16 = xnn_init_f16_scaleminmax_neon_params,
+        .primary_tile = 9,
+        .incremental_tile = 8,
+        .channel_tile = 8,
+      };
+      xnn_params.f16.pavgpool = (struct pavgpool_parameters) {
+        .unipass = (xnn_pavgpool_unipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8,
+        .multipass = (xnn_pavgpool_multipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8,
+        .init.f16 = xnn_init_f16_minmax_neon_params,
+        .primary_tile = 9,
+        .incremental_tile = 8,
+        .channel_tile = 8,
+      };
       xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
         .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
@@ -3979,6 +3995,22 @@ static void init(void) {
       xnn_params.f16.dwconv[3].channel_tile = 8;
       xnn_params.f16.dwconv[3].primary_tile = 25;
 
+      xnn_params.f16.avgpool = (struct avgpool_parameters) {
+        .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8,
+        .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9p8x__f16c_c8,
+        .init.f16 = xnn_init_f16_scaleminmax_avx_params,
+        .primary_tile = 9,
+        .incremental_tile = 8,
+        .channel_tile = 8,
+      };
+      xnn_params.f16.pavgpool = (struct pavgpool_parameters) {
+        .unipass = (xnn_pavgpool_unipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8,
+        .multipass = (xnn_pavgpool_multipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8,
+        .init.f16 = xnn_init_f16_minmax_avx_params,
+        .primary_tile = 9,
+        .incremental_tile = 8,
+        .channel_tile = 8,
+      };
       xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c8,
         .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8,

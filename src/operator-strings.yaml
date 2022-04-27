@@ -19,6 +19,8 @@
   string: "Add (ND, QU8)"
 - name: xnn_operator_type_argmax_pooling_nhwc_f32
   string: "ArgMax Pooling (NHWC, F32)"
+- name: xnn_operator_type_average_pooling_nhwc_f16
+  string: "Average Pooling (NHWC, F16)"
 - name: xnn_operator_type_average_pooling_nhwc_f32
   string: "Average Pooling (NHWC, F32)"
 - name: xnn_operator_type_average_pooling_nhwc_qu8

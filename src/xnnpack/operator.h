@@ -210,8 +210,12 @@ struct xnn_operator {
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f32_gavgpool_params f32_gavgpool;
     union xnn_f32_hswish_params f32_hswish;
-    union xnn_f16_minmax_params f16_minmax;
-    union xnn_f16_scaleminmax_params f16_scaleminmax;
+    // Pixelwise Average Pooling normally use f16_minmax_params, but also initialize
+    // f16_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
+    struct {
+      union xnn_f16_minmax_params f16_minmax;
+      union xnn_f16_scaleminmax_params f16_scaleminmax;
+    };
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {

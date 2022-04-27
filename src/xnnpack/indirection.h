@@ -124,6 +124,19 @@ typedef void (*xnn_indirection_init_pavgpool2d_fn)(
   size_t padding_left,
   void* pixelwise_buffer);
 
+XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f16(
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  size_t pooling_height,
+  size_t pooling_width,
+  size_t stride_height,
+  size_t stride_width,
+  size_t padding_top,
+  size_t padding_left,
+  uint16_t* pixelwise_buffer);
+
 XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f32(
   size_t input_height,
   size_t input_width,

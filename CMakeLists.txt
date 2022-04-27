@@ -3239,6 +3239,8 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neonv8-ld128-x16.c)
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
+  src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
+  src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
@@ -3252,6 +3254,8 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-maxpool/9p8x-minmax-neonfp16arith-c8.c
+  src/f16-pavgpool/9p8x-minmax-neonfp16arith-c8.c
+  src/f16-pavgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
   src/f16-rmax/neonfp16arith.c
@@ -5119,6 +5123,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx-x64.c)
 
 SET(PROD_F16C_MICROKERNEL_SRCS
+  src/f16-avgpool/9p8x-minmax-f16c-c8.c
+  src/f16-avgpool/9x-minmax-f16c-c8.c
   src/f16-f32-vcvt/gen/vcvt-f16c-x16.c
   src/f16-gavgpool/gen/7p7x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/7x-minmax-f16c-c8.c
@@ -5559,6 +5565,8 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-gemm/gen/4x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/1x16-minmax-avx2-broadcast.c
   src/f16-igemm/gen/4x16-minmax-avx2-broadcast.c
+  src/f16-pavgpool/9p8x-minmax-avx2-c8.c
+  src/f16-pavgpool/9x-minmax-avx2-c8.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x40.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-rcp-x32.c
   src/f32-qs8-vcvt/gen/vcvt-avx2-x64.c
@@ -7046,7 +7054,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(average-pooling-nhwc-test test/average-pooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(average-pooling-nhwc-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main params_init logging operators)
+  TARGET_LINK_LIBRARIES(average-pooling-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main params_init logging operators)
   ADD_TEST(average-pooling-nhwc-test average-pooling-nhwc-test)
 
   ADD_EXECUTABLE(bankers-rounding-nc-test test/bankers-rounding-nc.cc)
