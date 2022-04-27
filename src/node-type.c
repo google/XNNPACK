@@ -44,58 +44,58 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Convolution 2D";
     case xnn_node_type_deconvolution_2d:
       return "Deconvolution 2D";
-    case xnn_node_type_depthwise_convolution_2d:
-      return "Depthwise Convolution 2D";
     case xnn_node_type_depth_to_space:
       return "Depth To Space";
+    case xnn_node_type_depthwise_convolution_2d:
+      return "Depthwise Convolution 2D";
     case xnn_node_type_divide:
       return "Divide";
     case xnn_node_type_elu:
       return "ELU";
-    case xnn_node_type_fully_connected:
-      return "Fully Connected";
-    case xnn_node_type_floor:
-      return "Floor";
-    case xnn_node_type_global_average_pooling_2d:
-      return "Global Average Pooling 2D";
-    case xnn_node_type_hardswish:
-      return "HardSwish";
-    case xnn_node_type_leaky_relu:
-      return "Leaky ReLU";
-    case xnn_node_type_maximum2:
-      return "Maximum2";
-    case xnn_node_type_minimum2:
-      return "Minimum2";
-    case xnn_node_type_multiply2:
-      return "Multiply2";
-    case xnn_node_type_max_pooling_2d:
-      return "Max Pooling 2D";
-    case xnn_node_type_negate:
-      return "Negate";
-    case xnn_node_type_prelu:
-      return "PReLU";
-    case xnn_node_type_sigmoid:
-      return "Sigmoid";
     case xnn_node_type_even_split2:
       return "Even Split2";
     case xnn_node_type_even_split3:
       return "Even Split3";
     case xnn_node_type_even_split4:
       return "Even Split4";
+    case xnn_node_type_floor:
+      return "Floor";
+    case xnn_node_type_fully_connected:
+      return "Fully Connected";
+    case xnn_node_type_global_average_pooling_2d:
+      return "Global Average Pooling 2D";
+    case xnn_node_type_hardswish:
+      return "HardSwish";
+    case xnn_node_type_leaky_relu:
+      return "Leaky ReLU";
+    case xnn_node_type_max_pooling_2d:
+      return "Max Pooling 2D";
+    case xnn_node_type_maximum2:
+      return "Maximum2";
+    case xnn_node_type_minimum2:
+      return "Minimum2";
+    case xnn_node_type_multiply2:
+      return "Multiply2";
+    case xnn_node_type_negate:
+      return "Negate";
+    case xnn_node_type_prelu:
+      return "PReLU";
+    case xnn_node_type_sigmoid:
+      return "Sigmoid";
     case xnn_node_type_softmax:
       return "Softmax";
-    case xnn_node_type_static_constant_pad:
-      return "Static Constant Pad";
-    case xnn_node_type_static_reshape:
-      return "Static Reshape";
-    case xnn_node_type_static_resize_bilinear_2d:
-      return "Static Resize Bilinear 2D";
     case xnn_node_type_square:
       return "Square";
     case xnn_node_type_square_root:
       return "Square Root";
     case xnn_node_type_squared_difference:
       return "Squared Difference";
+    case xnn_node_type_static_constant_pad:
+      return "Static Constant Pad";
+    case xnn_node_type_static_reshape:
+      return "Static Reshape";
+    case xnn_node_type_static_resize_bilinear_2d:
+      return "Static Resize Bilinear 2D";
     case xnn_node_type_subtract:
       return "Subtract";
     case xnn_node_type_unpooling_2d:
