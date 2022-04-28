@@ -270,13 +270,18 @@ static enum xnn_status create_deconvolution2d_nhwc(
   deconvolution_op->type = operator_type;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-    .general_case = gemm_ukernels->igemm,
     .gemm_case = gemm_ukernels->gemm,
     .mr = mr,
     .nr = nr,
     .kr = kr,
     .sr = sr,
   };
+
+  assert(XNN_MAX_MR >= mr);
+  deconvolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm1;
+  for (size_t i = 1; i < mr; i++) {
+    deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm;
+  }
 
   deconvolution_op->state = xnn_run_state_invalid;
 
@@ -687,10 +692,10 @@ static enum xnn_status setup_conv_path(
   const size_t output_size = output_height * output_width;
   size_t mr = deconvolution_op->ukernel.igemm.mr;
 
-  struct xnn_hmp_igemm_ukernel igemm_ukernel = deconvolution_op->ukernel.igemm.general_case;
-  if (output_size == 1 && deconvolution_op->ukernel.igemm.mr1_case.function[XNN_UARCH_DEFAULT] != NULL) {
+  struct xnn_hmp_igemm_ukernel igemm_ukernel = deconvolution_op->ukernel.igemm.igemm_cases[mr-1];
+  if (output_size == 1 && deconvolution_op->ukernel.igemm.igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
     mr = 1;
-    igemm_ukernel = deconvolution_op->ukernel.igemm.mr1_case;
+    igemm_ukernel = deconvolution_op->ukernel.igemm.igemm_cases[0];
   }
 
   const size_t tiled_output_size = round_up(output_size, mr);
@@ -973,7 +978,7 @@ static enum xnn_status setup_subconv2d_path(
         .ba_stride = input_height * input_width * input_pixel_stride,
         .bc_stride = output_size * output_pixel_stride,
         .log2_csize = log2_output_element_size,
-        .ukernel = deconvolution_op->ukernel.igemm.general_case,
+        .ukernel = deconvolution_op->ukernel.igemm.igemm_cases[mr-1],
     };
     memcpy(&deconvolution_op->context.subconv.params, params, params_size);
   }
