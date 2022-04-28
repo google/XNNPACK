@@ -241,7 +241,7 @@ def split_ukernel_name(name):
 
 
 def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
-  padding, isa, height_tile, width_tile):
+  init_fn, padding, isa, height_tile, width_tile):
   """Generates all tests cases for a DWCONV2D CHW micro-kernel.
 
   Args:
@@ -251,6 +251,7 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
     subsampling: convolution subsampling (stride) assumed by the micro-kernel.
                  The same subsampling factor is assumed for both horizontal and
                  vertical directions.
+    init_fn: C name of the function to initialize microkernel parameters.
     padding: convolution padding value assumed by the micro-kernel for right,
              bottom, and left padding. If convolution stride is 1, the same
              padding value is assumed for the top padding. If convolution stride
@@ -269,6 +270,8 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
+  if init_fn:
+    test_args.append(init_fn)
   if not isa:
     test_args.append("DWConv2DMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(TEST_TEMPLATE, {
@@ -317,6 +320,7 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
       kernel_height, kernel_width, subsampling, padding, arch, isa, \
@@ -326,7 +330,7 @@ def main(args):
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(name, kernel_height, kernel_width, \
-                                      subsampling, padding, isa, \
+                                      subsampling, init_fn, padding, isa, \
                                       height_tile, width_tile)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
