@@ -102,6 +102,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         SUBS    x0, x2, 32              // k = kc - 32
         MOV     v22.16b, v20.16b
         MOV     v23.16b, v21.16b
+        MOV     v24.16b, v20.16b
         MOV     v25.16b, v21.16b
         MOV     v26.16b, v20.16b
         MOV     v27.16b, v21.16b
@@ -109,7 +110,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75
         MOV     v29.16b, v21.16b
         MOV     v30.16b, v20.16b
         MOV     v31.16b, v21.16b
-        MOV     v24.16b, v20.16b
         B.LO    4f
 
         # Prologue - loads for main loop of 96 FMA

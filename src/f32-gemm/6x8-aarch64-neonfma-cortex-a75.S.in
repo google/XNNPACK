@@ -138,28 +138,28 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_6x8__aarch64_n
           MOV     v23.16b, v21.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x5, 192]
-          MOV     v25.16b, v21.16b
+          MOV     v24.16b, v20.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x5, 256]
-          MOV     v26.16b, v20.16b
+          MOV     v25.16b, v21.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x5, 320]
-          MOV     v27.16b, v21.16b
+          MOV     v26.16b, v20.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP,  [x3]        // Prefetch A
-          MOV     v28.16b, v20.16b
+          MOV     v27.16b, v21.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP,  [x9]
-          MOV     v29.16b, v21.16b
+          MOV     v28.16b, v20.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x10]
-          MOV     v30.16b, v20.16b
+          MOV     v29.16b, v21.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x11]
-          MOV     v31.16b, v21.16b
+          MOV     v30.16b, v20.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP, [x12]
-          MOV     v24.16b, v20.16b
+          MOV     v31.16b, v21.16b
           $if PREFETCH:
             PRFM    PLDL1KEEP,  [x4]
         B.LO    4f

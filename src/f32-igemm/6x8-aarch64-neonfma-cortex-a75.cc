@@ -122,32 +122,34 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Load initial bias from w into accumulators
   ldp(q20, q21, mem[x5], 32);
   mov(v22.v16b(), v20.v16b());
-  mov(v23.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
   }
+  mov(v23.v16b(), v21.v16b());
   mov(v24.v16b(), v20.v16b());
-  mov(v25.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 64]);
   }
+  mov(v25.v16b(), v21.v16b());
   mov(v26.v16b(), v20.v16b());
-  mov(v27.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 128]);
   }
+  mov(v27.v16b(), v21.v16b());
   mov(v28.v16b(), v20.v16b());
-  mov(v29.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 192]);
   }
+  mov(v29.v16b(), v21.v16b());
   mov(v30.v16b(), v20.v16b());
-  mov(v31.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 256]);
+  }
+  mov(v31.v16b(), v21.v16b());
+  mov(x9, x3); // p = ks
+  if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 320]);
   }
-  mov(x9, x3); // p = ks
 
   bind(l1);
   // Load next 6 A pointers
@@ -464,7 +466,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   tst(x0, 31);
   fmla(v21.v4s(), v19.v4s(), v6.s()[3]);
   fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
-
   fmla(v25.v4s(), v19.v4s(), v8.s()[3]);
   // Load min/max values
   if (clamp_min || clamp_max) {

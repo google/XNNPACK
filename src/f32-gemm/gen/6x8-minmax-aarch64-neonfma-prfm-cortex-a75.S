@@ -106,21 +106,21 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
         PRFM    PLDL1KEEP, [x5, 128]
         MOV     v23.16b, v21.16b
         PRFM    PLDL1KEEP, [x5, 192]
-        MOV     v25.16b, v21.16b
-        PRFM    PLDL1KEEP, [x5, 256]
-        MOV     v26.16b, v20.16b
-        PRFM    PLDL1KEEP, [x5, 320]
-        MOV     v27.16b, v21.16b
-        PRFM    PLDL1KEEP,  [x3]        // Prefetch A
-        MOV     v28.16b, v20.16b
-        PRFM    PLDL1KEEP,  [x9]
-        MOV     v29.16b, v21.16b
-        PRFM    PLDL1KEEP, [x10]
-        MOV     v30.16b, v20.16b
-        PRFM    PLDL1KEEP, [x11]
-        MOV     v31.16b, v21.16b
-        PRFM    PLDL1KEEP, [x12]
         MOV     v24.16b, v20.16b
+        PRFM    PLDL1KEEP, [x5, 256]
+        MOV     v25.16b, v21.16b
+        PRFM    PLDL1KEEP, [x5, 320]
+        MOV     v26.16b, v20.16b
+        PRFM    PLDL1KEEP,  [x3]        // Prefetch A
+        MOV     v27.16b, v21.16b
+        PRFM    PLDL1KEEP,  [x9]
+        MOV     v28.16b, v20.16b
+        PRFM    PLDL1KEEP, [x10]
+        MOV     v29.16b, v21.16b
+        PRFM    PLDL1KEEP, [x11]
+        MOV     v30.16b, v20.16b
+        PRFM    PLDL1KEEP, [x12]
+        MOV     v31.16b, v21.16b
         PRFM    PLDL1KEEP,  [x4]
         B.LO    4f
 
