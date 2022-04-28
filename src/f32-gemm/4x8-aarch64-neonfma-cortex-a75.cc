@@ -167,16 +167,24 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldr(q7, mem[x4], 16);
   fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
   fmla(v24.v4s(), v20.v4s(), v0.s()[2]);
-  prfm(kPLDL1KEEP, mem[x5, 128]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 128]);
+  }
   fmla(v25.v4s(), v21.v4s(), v0.s()[2]);
   fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
-  prfm(kPLDL1KEEP, mem[x5, 192]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 192]);
+  }
   fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
   fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
-  prfm(kPLDL1KEEP, mem[x5, 256]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 256]);
+  }
   fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
   fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
-  prfm(kPLDL1KEEP, mem[x5, 320]);
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 320]);
+  }
   fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
   fmla(v24.v4s(), v22.v4s(), v0.s()[3]);
   fmla(v25.v4s(), v23.v4s(), v0.s()[3]);
