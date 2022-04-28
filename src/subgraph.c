@@ -746,6 +746,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           }
         }
         break;
+      case xnn_node_type_average_pooling_2d:
       case xnn_node_type_bankers_rounding:
       case xnn_node_type_ceiling:
       case xnn_node_type_clamp:

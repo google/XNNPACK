@@ -10,6 +10,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
@@ -22,8 +23,6 @@ static enum xnn_status create_average_pooling_operator(
   struct xnn_operator_data* opdata,
   const struct xnn_caches* caches)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -37,20 +36,45 @@ static enum xnn_status create_average_pooling_operator(
   const size_t channel_dim = values[input_id].shape.dim[3];
   assert(channel_dim == values[output_id].shape.dim[3]);
 
-  const enum xnn_status status = xnn_create_average_pooling2d_nhwc_f32(
-    node->params.pooling_2d.padding_top,
-    node->params.pooling_2d.padding_right,
-    node->params.pooling_2d.padding_bottom,
-    node->params.pooling_2d.padding_left,
-    node->params.pooling_2d.pooling_height,
-    node->params.pooling_2d.pooling_width,
-    node->params.pooling_2d.stride_height,
-    node->params.pooling_2d.stride_width,
-    channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-    node->activation.output_min,
-    node->activation.output_max,
-    node->flags,
-    &opdata->operator_objects[0]);
+  enum xnn_status status;
+  switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_average_pooling2d_nhwc_f16(
+        node->params.pooling_2d.padding_top,
+        node->params.pooling_2d.padding_right,
+        node->params.pooling_2d.padding_bottom,
+        node->params.pooling_2d.padding_left,
+        node->params.pooling_2d.pooling_height,
+        node->params.pooling_2d.pooling_width,
+        node->params.pooling_2d.stride_height,
+        node->params.pooling_2d.stride_width,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    case xnn_compute_type_fp32:
+      status = xnn_create_average_pooling2d_nhwc_f32(
+        node->params.pooling_2d.padding_top,
+        node->params.pooling_2d.padding_right,
+        node->params.pooling_2d.padding_bottom,
+        node->params.pooling_2d.padding_left,
+        node->params.pooling_2d.pooling_height,
+        node->params.pooling_2d.pooling_width,
+        node->params.pooling_2d.stride_height,
+        node->params.pooling_2d.stride_width,
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
   if (status == xnn_status_success) {
     opdata->batch_size = values[input_id].shape.dim[0];
     opdata->input_height = values[input_id].shape.dim[1];
@@ -83,14 +107,30 @@ static enum xnn_status setup_average_pooling_operator(
   void* output_data = output_blob->data;
   assert(output_data != NULL);
 
-  return xnn_setup_average_pooling2d_nhwc_f32(
-    opdata->operator_objects[0],
-    opdata->batch_size,
-    opdata->input_height,
-    opdata->input_width,
-    input_data,
-    output_data,
-    threadpool);
+  switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_average_pooling_nhwc_f16:
+      return xnn_setup_average_pooling2d_nhwc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+    case xnn_operator_type_average_pooling_nhwc_f32:
+      return xnn_setup_average_pooling2d_nhwc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
 }
 
 enum xnn_status xnn_define_average_pooling_2d(
