@@ -10967,6 +10967,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_dwconv2d_chw_bench",
+    srcs = [
+        "bench/dwconv.h",
+        "bench/f16-dwconv2d-chw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
+        ":indirection",
+        ":packing",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_f16_vcvt_bench",
     srcs = [
         "bench/f32-f16-vcvt.cc",
