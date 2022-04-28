@@ -2747,15 +2747,6 @@ static void init(void) {
 
     #if XNN_ENABLE_ASSEMBLY && !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       switch (cpuinfo_get_core(0)->uarch) {
-        case cpuinfo_uarch_cortex_a57:
-          xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75);
-          xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_cortex_a75);
-          xnn_params.f32.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75);
-          xnn_params.f32.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75);
-          xnn_params.f32.gemm.init.f32 = xnn_init_f32_minmax_scalar_params;
-          xnn_params.f32.gemm.mr = 6;
-          xnn_params.f32.gemm.nr = 8;
-          break;
         case cpuinfo_uarch_cortex_a72:
           xnn_params.f32.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75);
           xnn_params.f32.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75);
@@ -2765,6 +2756,7 @@ static void init(void) {
           xnn_params.f32.gemm.mr = 4;
           xnn_params.f32.gemm.nr = 8;
           break;
+        case cpuinfo_uarch_cortex_a57:
         case cpuinfo_uarch_cortex_a75:
         case cpuinfo_uarch_cortex_a76:
         case cpuinfo_uarch_exynos_m3:
