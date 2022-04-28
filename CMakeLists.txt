@@ -3318,6 +3318,16 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up32x9-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up32x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up32x25-minmax-neonfp16arith.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc2.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc3.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4-acc2.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-3x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-4x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-5x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-6x4.c
   src/f16-gavgpool-cw/neonfp16arith-x4.c
   src/f16-gavgpool-cw/neonfp16arith-x8.c
   src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c
@@ -7285,6 +7295,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(f16-dwconv-minmax-test f16-dwconv-minmax-test)
+
+  ADD_EXECUTABLE(f16-dwconv2d-chw-test test/f16-dwconv2d-chw.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  TARGET_INCLUDE_DIRECTORIES(f16-dwconv2d-chw-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-dwconv2d-chw-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(f16-dwconv2d-chw-test f16-dwconv2d-chw-test)
 
   ADD_EXECUTABLE(f16-gavgpool-minmax-test test/f16-gavgpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-minmax-test PRIVATE include src test)

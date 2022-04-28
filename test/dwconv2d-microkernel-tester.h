@@ -18,6 +18,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
@@ -239,6 +241,78 @@ class DWConv2DMicrokernelTester {
               output_ref[y * output_width() + x],
               output[y * output_width() + x],
               std::abs(output_ref[y * output_width() + x]) * 1.0e-5)
+            << "x = " << x << ", y = " << y;
+        }
+      }
+    }
+  }
+
+  void Test(xnn_f16_dwconv2d_chw_ukernel_function dwconv, xnn_init_f16_chw_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist;
+
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
+    std::vector<uint16_t> zero(input_width() + 2 * XNN_EXTRA_BYTES);
+    std::vector<uint16_t> packed_weights(kernel_size() + 1);
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> output(output_height() * output_width());
+    std::vector<float> output_ref(output_height() * output_width());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      for (size_t oy = 0; oy < output_height(); oy++) {
+        for (size_t ox = 0; ox < output_width(); ox++) {
+          float acc = fp16_ieee_to_fp32_value(packed_weights[0]);
+          for (size_t ky = 0; ky < kernel_height(); ky++) {
+            const size_t iy = oy * subsampling() + ky - padding_top();
+            for (size_t kx = 0; kx < kernel_width(); kx++) {
+              const size_t ix = ox * subsampling() + kx - padding_left();
+              if (ix < input_width() && iy < input_height()) {
+                const float input_val = fp16_ieee_to_fp32_value(input[iy * input_width() + ix]);
+                const float kernel_val = fp16_ieee_to_fp32_value(packed_weights[1 + ky * kernel_width() + kx]);
+                acc += input_val * kernel_val;
+              }
+            }
+          }
+          output_ref[oy * output_width() + ox] = acc;
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+
+      // Prepare parameters.
+      xnn_f16_chw_params chw_params;
+      init_params(&chw_params, input_width(),
+        fp16_ieee_from_fp32_value(output_min),
+        fp16_ieee_from_fp32_value(output_max));
+
+      // Clamp reference results.
+      for (float& output_val : output_ref) {
+        output_val = std::max(std::min(output_val, output_max), output_min);
+      }
+
+      // Call optimized micro-kernel.
+      dwconv(
+        input_height(), input_width() * sizeof(uint16_t),
+        input.data(), packed_weights.data(), zero.data(), output.data(),
+        padding_top(),
+        &chw_params);
+
+      // Verify results.
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          ASSERT_NEAR(
+              output_ref[y * output_width() + x],
+              fp16_ieee_to_fp32_value(output[y * output_width() + x]),
+              std::abs(output_ref[y * output_width() + x]) * 1.0e-2f)
             << "x = " << x << ", y = " << y;
         }
       }

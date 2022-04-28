@@ -4779,6 +4779,16 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/up32x9-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up32x25-minmax-neonfp16arith-acc2.c",
     "src/f16-dwconv/gen/up32x25-minmax-neonfp16arith.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc2.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc3.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4-acc2.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-3x4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-4x4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-5x4.c",
+    "src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-6x4.c",
     "src/f16-gavgpool-cw/neonfp16arith-x4.c",
     "src/f16-gavgpool-cw/neonfp16arith-x8.c",
     "src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c",
@@ -12339,6 +12349,15 @@ xnnpack_unit_test(
         "test/f32-dwconv-minmax.cc",
     ],
     shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [":packing"],
+)
+
+xnnpack_unit_test(
+    name = "f16_dwconv2d_chw_test",
+    srcs = [
+        "test/dwconv2d-microkernel-tester.h",
+        "test/f16-dwconv2d-chw.cc",
+    ],
     deps = MICROKERNEL_TEST_DEPS + [":packing"],
 )
 

@@ -634,6 +634,12 @@ XNN_INTERNAL void xnn_init_f32_chw_params(
   float output_min,
   float output_max);
 
+XNN_INTERNAL void xnn_init_f16_chw_params(
+  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t width,
+  uint16_t output_min,
+  uint16_t output_max);
+
 XNN_INTERNAL void xnn_update_f32_chw_params(
   union xnn_f32_chw_params* params,
   uint32_t width);
