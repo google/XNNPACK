@@ -770,6 +770,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_constant_pad:
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_resize_bilinear_2d:
+      case xnn_node_type_static_transpose:
       case xnn_node_type_square:
       case xnn_node_type_square_root:
         break;

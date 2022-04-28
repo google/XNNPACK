@@ -49,6 +49,7 @@ XNNPACK implements the following neural network operators:
 - Sigmoid
 - Softmax
 - Square
+- Transpose
 - Truncation (rounding to integer towards zero)
 - PReLU
 

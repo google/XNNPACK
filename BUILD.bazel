@@ -140,6 +140,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/static-constant-pad.c",
     "src/subgraph/static-reshape.c",
     "src/subgraph/static-resize-bilinear-2d.c",
+    "src/subgraph/static-transpose.c",
     "src/subgraph/subtract.c",
     "src/subgraph/unpooling-2d.c",
     "src/subgraph/validation.c",

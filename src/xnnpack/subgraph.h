@@ -236,6 +236,10 @@ struct xnn_node {
     struct {
       size_t axis;
     } even_split;
+    struct {
+      size_t perm[XNN_MAX_TENSOR_DIMS];
+      size_t num_dims;
+    } transpose;
   } params;
   struct {
     float output_min;
