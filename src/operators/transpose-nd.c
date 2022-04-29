@@ -129,12 +129,13 @@ static enum xnn_status setup_transpose(
   size_t normalized_dims;
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_perm[XNN_MAX_TENSOR_DIMS];
+  size_t normalized_element_size;
   xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, &normalized_dims,
-                                      &context->element_size, normalized_perm, normalized_shape);
+                                      &normalized_element_size, normalized_perm, normalized_shape);
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
-  context->input_stride[normalized_dims - 1] = context->element_size;
-  context->output_stride[normalized_perm[normalized_dims - 1]] = context->element_size;
+  context->input_stride[normalized_dims - 1] = normalized_element_size;
+  context->output_stride[normalized_perm[normalized_dims - 1]] = normalized_element_size;
   for(size_t i = normalized_dims - 1; i-- > 0;) {
     context->input_stride[i] = context->input_stride[i + 1] * normalized_shape[i + 1];
     context->output_stride[normalized_perm[i]] = context->output_stride[normalized_perm[i + 1]] * normalized_shape[normalized_perm[i + 1]];
@@ -162,7 +163,7 @@ static enum xnn_status setup_transpose(
   reorder_array(normalized_dims, loop_order, transpose_op->compute.range);
 
   bool variable_size_ukernel = false;
-  switch (context->element_size) {
+  switch (normalized_element_size) {
     case 1:
       context->log2_element_size = 0;
       context->const_size_ukernel = xnn_params.x8.transpose.const_size_ukernel;
@@ -182,6 +183,7 @@ static enum xnn_status setup_transpose(
       context->const_size_ukernel = xnn_params.x32.transpose.const_size_ukernel;
       break;
     default:
+      context->element_size = normalized_element_size;
       transpose_op->compute.tile[0] = xnn_params.xx.transpose.tile_size;
       transpose_op->compute.tile[1] = xnn_params.xx.transpose.tile_size;
       context->variable_size_ukernel = xnn_params.xx.transpose.variable_size_ukernel;
@@ -193,7 +195,7 @@ static enum xnn_status setup_transpose(
     case 1:
       transpose_op->compute.type = xnn_parallelization_type_1d_tile_1d;
       transpose_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_univector_contiguous;
-      transpose_op->compute.range[0] = context->element_size;
+      transpose_op->compute.range[0] = normalized_element_size;
       univector_context->ukernel = xnn_params.xx.copy;
       univector_context->log2_xsize = 0;
       univector_context->log2_ysize = 0;
