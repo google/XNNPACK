@@ -392,7 +392,7 @@ static void GEMMEnd2EndBenchmark(
       nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
       nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
       xnn_init_f32_minmax_scalar_params,
-      6 /* mr */, 2 /* nr */);
+      6 /* mr */, 8 /* nr */);
   }
   static void f32_gemm_4x2__neonfma_lane_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
