@@ -48,7 +48,8 @@ struct xnn_ukernel_dwconv2d {
 };
 
 // Largest GEMM/IGEMM MR used in init.c is 7 (x86 AVX512).
-#define XNN_MAX_MR 7
+// Largest non-Prod MR microkernels are MR=8
+#define XNN_MAX_MR 8
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
