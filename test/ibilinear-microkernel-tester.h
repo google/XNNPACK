@@ -96,7 +96,7 @@ class IBilinearMicrokernelTester {
   void Test(xnn_f16_ibilinear_ukernel_function ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<const uint16_t*> indirection(pixels() * 4);
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + indirection.size() * channels());
