@@ -11956,6 +11956,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-igemm-minmax.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
