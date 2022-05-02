@@ -14015,6 +14015,7 @@ xnnpack_unit_test(
         "test/transpose-nd.cc",
         "test/transpose-operator-tester.h",
     ],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
