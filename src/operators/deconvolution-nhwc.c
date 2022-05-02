@@ -270,7 +270,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
   deconvolution_op->type = operator_type;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-    .gemm_case = gemm_ukernels->gemm,
+    .gemm_case = gemm_ukernels->gemm[mr-1],
     .mr = mr,
     .nr = nr,
     .kr = kr,
@@ -278,9 +278,9 @@ static enum xnn_status create_deconvolution2d_nhwc(
   };
 
   assert(XNN_MAX_MR >= mr);
-  deconvolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm1;
+  deconvolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm[0];
   for (size_t i = 1; i < mr; i++) {
-    deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm;
+    deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
   }
 
   deconvolution_op->state = xnn_run_state_invalid;
@@ -545,7 +545,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
   const struct gemm_parameters* gemm_parameters = &xnn_params.f16.gemm;
   const struct gemm_fused_ukernels* gemm_ukernels = &gemm_parameters->minmax;
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  if (linear_activation && gemm_parameters->linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+  if (linear_activation && gemm_parameters->linear.gemm[gemm_parameters->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
     gemm_ukernels = &gemm_parameters->linear;
   }
 
@@ -630,13 +630,13 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   const struct gemm_parameters* gemm_parameters = &xnn_params.f32.gemm;
   if (gemm_parameters->nr > group_output_channels) {
     // Default micro-kernel is suboptimal. Try to find a better micro-kernel.
-    if (xnn_params.f32.gemm2.minmax.igemm.function[XNN_UARCH_DEFAULT] != NULL) {
+    if (xnn_params.f32.gemm2.minmax.igemm[gemm_parameters->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
       gemm_parameters = &xnn_params.f32.gemm2;
     }
   }
   const struct gemm_fused_ukernels* gemm_ukernels = &gemm_parameters->minmax;
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  if (linear_activation && gemm_parameters->linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+  if (linear_activation && gemm_parameters->linear.gemm[gemm_parameters->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
     gemm_ukernels = &gemm_parameters->linear;
   }
 

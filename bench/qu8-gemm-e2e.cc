@@ -45,10 +45,10 @@ static void GEMMEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   // Note: do not directly assign to xnn_params.qu8.gemm because it breaks older gcc.
   std::memset(&xnn_params.qu8.gemm, 0, sizeof(xnn_params.qu8.gemm));
-  xnn_params.qu8.gemm.minmax.gemm = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
-  xnn_params.qu8.gemm.minmax.igemm = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
-  xnn_params.qu8.gemm.minmax.gemm1 = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
-  xnn_params.qu8.gemm.minmax.igemm1 = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
+  xnn_params.qu8.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
+  xnn_params.qu8.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
+  xnn_params.qu8.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
+  xnn_params.qu8.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
   xnn_params.qu8.gemm.init.qu8 = init_params;
   xnn_params.qu8.gemm.mr = mr;
   xnn_params.qu8.gemm.nr = nr;

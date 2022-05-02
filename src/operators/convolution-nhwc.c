@@ -497,9 +497,10 @@ static enum xnn_status create_convolution2d_nhwc(
       memcpy(&convolution_op->params, gemm_params, gemm_params_size);
 
       const struct gemm_fused_ukernels* gemm_ukernels = &gemm_parameters->minmax;
-      if (linear_activation && gemm_parameters->linear.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+      const uint32_t mr = gemm_parameters->mr;
+      if (linear_activation && gemm_parameters->linear.gemm[mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
         gemm_ukernels = &gemm_parameters->linear;
-      } else if (relu_activation && gemm_parameters->relu.gemm.function[XNN_UARCH_DEFAULT] != NULL) {
+      } else if (relu_activation && gemm_parameters->relu.gemm[mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
         gemm_ukernels = &gemm_parameters->relu;
       }
       switch (ukernel_type) {
@@ -509,23 +510,27 @@ static enum xnn_status create_convolution2d_nhwc(
                 nr, kr, sr,
                 kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
           convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
-            .mr = gemm_parameters->mr,
+            .mr = mr,
             .nr = nr,
             .kr = kr,
             .sr = sr,
           };
 
-          assert(XNN_MAX_MR >= gemm_parameters->mr);
-          convolution_op->ukernel.gemm.gemm_cases[0] = gemm_ukernels->gemm1;
-          for (size_t i = 1; i < gemm_parameters->mr; i++) {
-            convolution_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm;
+          assert(XNN_MAX_MR >= mr);
+          // Set only mr=1 and mr=gemm.mr because we might not have optimized microkernels for other mr values.
+          convolution_op->ukernel.gemm.gemm_cases[0] = gemm_ukernels->gemm[0];
+          convolution_op->ukernel.gemm.gemm_cases[mr-1] = gemm_ukernels->gemm[mr-1];
+          for (size_t i = 1; i < mr; i++) {
+            if (gemm_ukernels->gemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
+              convolution_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+            }
           }
 
           #if XNN_PLATFORM_JIT
             if (caches != NULL && caches->code_cache != NULL) {
               convolution_op->code_cache = caches->code_cache;
               generate_gemms_up_to_max_mr(
-                  gemm_parameters->mr,
+                  mr,
                   gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
                   group_input_channels, log2_input_element_size, caches->code_cache, convolution_op);
             }
@@ -545,23 +550,27 @@ static enum xnn_status create_convolution2d_nhwc(
               kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
           }
           convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-            .mr = gemm_parameters->mr,
+            .mr = mr,
             .nr = nr,
             .kr = kr,
             .sr = sr,
           };
 
-          assert(XNN_MAX_MR >= gemm_parameters->mr);
-          convolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm1;
-          for (size_t i = 1; i < gemm_parameters->mr; i++) {
-            convolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm;
+          assert(XNN_MAX_MR >= mr);
+          // Set only mr=1 and mr=gemm.mr because we might not have optimized microkernels for other mr values.
+          convolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm[0];
+          convolution_op->ukernel.igemm.igemm_cases[mr-1] = gemm_ukernels->igemm[mr-1];
+          for (size_t i = 1; i < mr; i++) {
+            if (gemm_ukernels->igemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
+              convolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
+            }
           }
 
           #if XNN_PLATFORM_JIT
             if (caches != NULL && caches->code_cache != NULL) {
               convolution_op->code_cache = caches->code_cache;
               generate_igemms_up_to_max_mr(
-                  gemm_parameters->mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
+                  mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
                   group_input_channels, log2_input_element_size, kernel_size,  caches->code_cache, convolution_op);
             }
           #endif  // XNN_PLATFORM_JIT
@@ -1318,33 +1327,35 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       uint32_t mr = convolution_op->ukernel.gemm.mr;
       const uint32_t nr = convolution_op->ukernel.gemm.nr;
-      struct xnn_hmp_gemm_ukernel gemm_ukernel = convolution_op->ukernel.gemm.gemm_cases[mr-1];
+      struct xnn_hmp_gemm_ukernel *gemm_cases = convolution_op->ukernel.gemm.gemm_cases;
+      struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
 
       const uint32_t heuristic_mr = get_heuristic_mr(batch_output_size, mr);
-      (void) heuristic_mr;  // Silence lint warnings when !XNN_PLATFORM_JIT, will be used by non-JIT in the future.
+      if (heuristic_mr != mr && gemm_cases[heuristic_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+        mr = heuristic_mr;
+        gemm_ukernel = gemm_cases[heuristic_mr-1];
+      }
 
       #if XNN_PLATFORM_JIT
         if (convolution_op->code_cache != NULL) {
-          const size_t jit_code_offset =
-            convolution_op->ukernel.gemm.gemm_cases[heuristic_mr-1].generated_code_offset[XNN_UARCH_DEFAULT];
+          const size_t jit_code_offset = gemm_cases[heuristic_mr-1].generated_code_offset[XNN_UARCH_DEFAULT];
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             mr = heuristic_mr;
             gemm_ukernel.function[XNN_UARCH_DEFAULT] =
                 (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->code_cache->cache.code.start +
                                              jit_code_offset);
           }
-          const size_t mr1_code_offset =
-            convolution_op->ukernel.gemm.gemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT];
+          const size_t mr1_code_offset = gemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT];
           if (mr1_code_offset != XNN_CACHE_NOT_FOUND) {
-            convolution_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] =
+            gemm_cases[0].function[XNN_UARCH_DEFAULT] =
               (xnn_gemm_ukernel_function) ((uintptr_t) convolution_op->code_cache->cache.code.start + mr1_code_offset);
           }
         }
       #endif  // XNN_PLATFORM_JIT
 
-      if (batch_output_size == 1 && convolution_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+      if (batch_output_size == 1 && gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
         mr = 1;
-        gemm_ukernel = convolution_op->ukernel.gemm.gemm_cases[0];
+        gemm_ukernel = gemm_cases[0];
       }
 
       convolution_op->context.gemm = (struct gemm_context) {
@@ -1424,34 +1435,37 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       uint32_t mr = convolution_op->ukernel.igemm.mr;
       const uint32_t nr = convolution_op->ukernel.igemm.nr;
-      struct xnn_hmp_igemm_ukernel igemm_ukernel = convolution_op->ukernel.igemm.igemm_cases[mr-1];
+      struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
+      struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr-1];
 
       const uint32_t heuristic_mr = get_heuristic_mr(output_size, mr);
-      (void) heuristic_mr;  // Silence lint warnings when !XNN_PLATFORM_JIT, will be used by non-JIT in the future.
+
+      if (heuristic_mr != mr && igemm_cases[heuristic_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+        mr = heuristic_mr;
+        igemm_ukernel = igemm_cases[heuristic_mr-1];
+      }
 
       #if XNN_PLATFORM_JIT
         if (convolution_op->code_cache != NULL) {
-          const size_t jit_code_offset =
-            convolution_op->ukernel.igemm.igemm_cases[heuristic_mr-1].generated_code_offset[XNN_UARCH_DEFAULT];
+          const size_t jit_code_offset = igemm_cases[heuristic_mr-1].generated_code_offset[XNN_UARCH_DEFAULT];
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             mr = heuristic_mr;
             igemm_ukernel.function[XNN_UARCH_DEFAULT] =
                 (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->code_cache->cache.code.start +
                                               jit_code_offset);
           }
-          const size_t mr1_code_offset =
-            convolution_op->ukernel.igemm.igemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT];
+          const size_t mr1_code_offset = igemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT];
           if (mr1_code_offset != XNN_CACHE_NOT_FOUND) {
-            convolution_op->ukernel.igemm.igemm_cases[0].function[XNN_UARCH_DEFAULT] =
+            igemm_cases[0].function[XNN_UARCH_DEFAULT] =
                 (xnn_igemm_ukernel_function) ((uintptr_t) convolution_op->code_cache->cache.code.start +
                                               mr1_code_offset);
           }
         }
       #endif  // XNN_PLATFORM_JIT
 
-      if (output_size == 1 && convolution_op->ukernel.igemm.igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+      if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
         mr = 1;
-        igemm_ukernel = convolution_op->ukernel.igemm.igemm_cases[0];
+        igemm_ukernel = igemm_cases[0];
       }
 
       const size_t tiled_output_size = round_up(output_size, mr);
