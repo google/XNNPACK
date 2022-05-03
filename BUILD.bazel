@@ -12935,6 +12935,7 @@ xnnpack_unit_test(
         "test/f32-vsigmoid.cc",
         "test/vunary-microkernel-tester.h",
     ],
+    shard_count = 3,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
