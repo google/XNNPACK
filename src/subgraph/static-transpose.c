@@ -129,7 +129,7 @@ static enum xnn_status setup_transpose_operator(
       XNN_UNREACHABLE;
   }
 
-  return xnn_status_success;
+  return status;
 }
 
 enum xnn_status xnn_define_static_transpose(
