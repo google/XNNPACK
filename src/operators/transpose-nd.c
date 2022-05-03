@@ -133,13 +133,11 @@ static enum xnn_status setup_transpose(
                                       &context->element_size, normalized_perm, normalized_shape);
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
-  size_t n = normalized_shape[normalized_dims - 1];
   context->input_stride[normalized_dims - 1] = context->element_size;
   context->output_stride[normalized_perm[normalized_dims - 1]] = context->element_size;
   for(size_t i = normalized_dims - 1; i-- > 0;) {
     context->input_stride[i] = context->input_stride[i + 1] * normalized_shape[i + 1];
     context->output_stride[normalized_perm[i]] = context->output_stride[normalized_perm[i + 1]] * normalized_shape[normalized_perm[i + 1]];
-    n *= normalized_shape[i];
   }
 
   memcpy(loop_order, normalized_perm, sizeof(size_t) * normalized_dims);
