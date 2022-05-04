@@ -60,12 +60,6 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
   return NULL;
 }
 
-uint32_t get_heuristic_mr(size_t batch_size, size_t gemm_mr)
-{
-  // Dummy mr heuristic to be improved later.
-  return gemm_mr;
-}
-
 #if XNN_PLATFORM_JIT
 size_t get_generated_gemm(
     struct xnn_hmp_gemm_codegen generators,
@@ -1330,7 +1324,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       struct xnn_hmp_gemm_ukernel *gemm_cases = convolution_op->ukernel.gemm.gemm_cases;
       struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
 
-      const uint32_t heuristic_mr = get_heuristic_mr(batch_output_size, mr);
+      const uint32_t heuristic_mr = xnn_get_heuristic_mr_gemm(batch_output_size, mr, nr, gemm_cases);
       if (heuristic_mr != mr && gemm_cases[heuristic_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
         mr = heuristic_mr;
         gemm_ukernel = gemm_cases[heuristic_mr-1];
@@ -1438,7 +1432,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
       struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr-1];
 
-      const uint32_t heuristic_mr = get_heuristic_mr(output_size, mr);
+      const uint32_t heuristic_mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases);
 
       if (heuristic_mr != mr && igemm_cases[heuristic_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
         mr = heuristic_mr;

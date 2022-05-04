@@ -318,8 +318,25 @@ static inline bool use_weights_cache(xnn_caches_t caches) {
 
 // Get a pointer to a region to pack weights into. If weights cache is available, use it, returning to a pointer to the
 // cache's buffer, otherwise, allocate and return a pointer to a new region. Returns NULL on error.
-void* xnn_get_pointer_to_write_weights(
+XNN_INTERNAL void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
   xnn_caches_t caches,
   size_t aligned_weights_size,
   int padding_byte);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+XNN_INTERNAL uint32_t xnn_get_heuristic_mr_gemm(
+  size_t batch_size,
+  uint32_t max_mr,
+  uint32_t nr,
+  struct xnn_hmp_gemm_ukernel *gemm_cases);
+XNN_INTERNAL uint32_t xnn_get_heuristic_mr_igemm(
+  size_t batch_size,
+  uint32_t max_mr,
+  uint32_t nr,
+  struct xnn_hmp_igemm_ukernel *igemm_cases);
+#ifdef __cplusplus
+}
+#endif

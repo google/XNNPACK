@@ -8205,6 +8205,10 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(mutex-test test/mutex.cc)
   TARGET_INCLUDE_DIRECTORIES(mutex-test PRIVATE include src)
   TARGET_LINK_LIBRARIES(mutex-test PRIVATE gtest gtest_main mutex pthreadpool)
+
+  ADD_EXECUTABLE(operator-utils-test test/operator-utils.cc)
+  TARGET_INCLUDE_DIRECTORIES(operator-utils-test PRIVATE include src)
+  TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE gtest gtest_main operators pthreadpool)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks

@@ -14141,6 +14141,16 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "operators_util_test",
+    srcs = ["test/operator-utils.cc"],
+    deps = [
+        ":common",
+        ":operators_test_mode",
+        ":params",
+    ],
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of assembly kernels.
