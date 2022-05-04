@@ -8,7 +8,23 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc2
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc3
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x4_acc2
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
@@ -28,35 +44,7 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc2
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc3
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4_acc4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x4_acc2
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x4
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
@@ -72,27 +60,23 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x4_acc2
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x4
-  init: xnn_init_f16_chw_params
-  arch:
-    - aarch64
-- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
@@ -112,6 +96,10 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x4_acc2
   init: xnn_init_f16_chw_params
   arch:
@@ -120,7 +108,15 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
 - name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x4_acc2
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64
+- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x4
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
@@ -128,4 +124,7 @@
   init: xnn_init_f16_chw_params
   arch:
     - aarch64
-
+- name: xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4
+  init: xnn_init_f16_chw_params
+  arch:
+    - aarch64

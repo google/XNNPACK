@@ -4,22 +4,22 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_x32_transposec_ukernel__1x2_scalar_int
-- name: xnn_x32_transposec_ukernel__1x4_scalar_int
-- name: xnn_x32_transposec_ukernel__2x1_scalar_int
-- name: xnn_x32_transposec_ukernel__2x2_scalar_int
-- name: xnn_x32_transposec_ukernel__2x4_scalar_int
-- name: xnn_x32_transposec_ukernel__4x1_scalar_int
-- name: xnn_x32_transposec_ukernel__4x2_scalar_int
-- name: xnn_x32_transposec_ukernel__4x4_scalar_int
 - name: xnn_x32_transposec_ukernel__1x2_scalar_float
+- name: xnn_x32_transposec_ukernel__1x2_scalar_int
 - name: xnn_x32_transposec_ukernel__1x4_scalar_float
+- name: xnn_x32_transposec_ukernel__1x4_scalar_int
 - name: xnn_x32_transposec_ukernel__2x1_scalar_float
+- name: xnn_x32_transposec_ukernel__2x1_scalar_int
 - name: xnn_x32_transposec_ukernel__2x2_scalar_float
+- name: xnn_x32_transposec_ukernel__2x2_scalar_int
 - name: xnn_x32_transposec_ukernel__2x4_scalar_float
+- name: xnn_x32_transposec_ukernel__2x4_scalar_int
 - name: xnn_x32_transposec_ukernel__4x1_scalar_float
+- name: xnn_x32_transposec_ukernel__4x1_scalar_int
 - name: xnn_x32_transposec_ukernel__4x2_scalar_float
+- name: xnn_x32_transposec_ukernel__4x2_scalar_int
 - name: xnn_x32_transposec_ukernel__4x4_scalar_float
+- name: xnn_x32_transposec_ukernel__4x4_scalar_int
 # AArch64 assembly
 - name: xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl
 # x86 SSE

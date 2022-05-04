@@ -4,22 +4,6 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8
-  init: xnn_init_f16_scaleminmax_neon_params
-  arch:
-    - aarch64
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c16
-  init: xnn_init_f16_scaleminmax_neon_params
-  arch:
-    - aarch64
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c24
-  init: xnn_init_f16_scaleminmax_neon_params
-  arch:
-    - aarch64
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c32
-  init: xnn_init_f16_scaleminmax_neon_params
-  arch:
-    - aarch64
 - name: xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8
   init: xnn_init_f16_scaleminmax_neon_params
   arch:
@@ -36,15 +20,23 @@
   init: xnn_init_f16_scaleminmax_neon_params
   arch:
     - aarch64
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8
+  init: xnn_init_f16_scaleminmax_neon_params
+  arch:
+    - aarch64
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c16
+  init: xnn_init_f16_scaleminmax_neon_params
+  arch:
+    - aarch64
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c24
+  init: xnn_init_f16_scaleminmax_neon_params
+  arch:
+    - aarch64
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c32
+  init: xnn_init_f16_scaleminmax_neon_params
+  arch:
+    - aarch64
 # x86 F16C
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c8
-  init: xnn_init_f16_scaleminmax_avx_params
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c16
-  init: xnn_init_f16_scaleminmax_avx_params
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c24
-  init: xnn_init_f16_scaleminmax_avx_params
-- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c32
-  init: xnn_init_f16_scaleminmax_avx_params
 - name: xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8
   init: xnn_init_f16_scaleminmax_avx_params
 - name: xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16
@@ -52,4 +44,12 @@
 - name: xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24
   init: xnn_init_f16_scaleminmax_avx_params
 - name: xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c32
+  init: xnn_init_f16_scaleminmax_avx_params
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c8
+  init: xnn_init_f16_scaleminmax_avx_params
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c16
+  init: xnn_init_f16_scaleminmax_avx_params
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c24
+  init: xnn_init_f16_scaleminmax_avx_params
+- name: xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c32
   init: xnn_init_f16_scaleminmax_avx_params

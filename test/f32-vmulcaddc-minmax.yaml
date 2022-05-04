@@ -4,13 +4,13 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__neonfma_2x
-  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__neon_2x
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__neonfma_2x
   init: xnn_init_f32_minmax_scalar_params
 # x86 SSE
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x
@@ -20,20 +20,20 @@
 # WAsm SIMD
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmsimd_arm_2x
-  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmsimd_arm_2x
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmsimd_x86_2x
   init: xnn_init_f32_minmax_wasmsimd_params
 # WAsm Relaxed SIMD
-- name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_2x
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x
-  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_fma_2x
   init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_2x
+  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_fma_2x
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x
   init: xnn_init_f32_minmax_wasmsimd_params
 # WAsm
 - name: xnn_f32_vmulcaddc_minmax_ukernel_c1__wasm_2x

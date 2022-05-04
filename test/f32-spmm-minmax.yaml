@@ -13,39 +13,15 @@
 - name: xnn_f32_spmm_minmax_ukernel_4x1__neon_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_8x1__neon
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_pipelined
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_x2
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_12x1__neon
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__neon
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_pipelined
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_x2
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_32x1__neon
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_pipelined
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_x2
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_4x2__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -56,15 +32,24 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_pipelined
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_x2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neon_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_8x2__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -75,12 +60,9 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_pipelined
+- name: xnn_f32_spmm_minmax_ukernel_12x1__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_x2
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_12x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -94,9 +76,24 @@
   k-block: 1
   arch:
   - aarch64
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neon_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_16x2__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -107,15 +104,24 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_pipelined
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neon_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma_x2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_spmm_minmax_ukernel_32x2__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
@@ -126,12 +132,6 @@
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma_x2
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 # x86 SSE
 - name: xnn_f32_spmm_minmax_ukernel_4x1__sse
   init: xnn_init_f32_minmax_sse_params
@@ -149,123 +149,123 @@
 - name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_x2
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_x4
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 4
 - name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined
-  init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_pipelined_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined_x2
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined_x2
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_arm_x4
   init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined_x2
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86
   init: xnn_init_f32_minmax_wasmsimd_params
-  k-block: 2
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_pipelined_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_pipelined_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_x86_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_pipelined_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_arm_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_pipelined_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_16x1__wasmsimd_x86_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_pipelined_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_arm_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 1
 - name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_pipelined_x2
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_x2
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 2
+- name: xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86_x4
+  init: xnn_init_f32_minmax_wasmsimd_params
+  k-block: 4
 # Scalar
 - name: xnn_f32_spmm_minmax_ukernel_1x1__scalar
   init: xnn_init_f32_minmax_scalar_params

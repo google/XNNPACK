@@ -28,15 +28,15 @@
   init: xnn_init_f32_minmax_wasmsimd_params
   k-block: 1
 # Scalar
-- name: xnn_f32_ppmm_minmax_ukernel_4x2__scalar
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 1
 - name: xnn_f32_ppmm_minmax_ukernel_2x4__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_ppmm_minmax_ukernel_4x4__scalar
+- name: xnn_f32_ppmm_minmax_ukernel_3x3__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_ppmm_minmax_ukernel_3x3__scalar
+- name: xnn_f32_ppmm_minmax_ukernel_4x2__scalar
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_ppmm_minmax_ukernel_4x4__scalar
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1

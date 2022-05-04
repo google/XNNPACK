@@ -23,8 +23,8 @@
 - name: xnn_x8_transposec_ukernel__8x8_multi_mov_zip_neon
 - name: xnn_x8_transposec_ukernel__8x8_multi_switch_zip_neon
 - name: xnn_x8_transposec_ukernel__8x8_reuse_dec_zip_neon
-- name: xnn_x8_transposec_ukernel__8x8_reuse_multi_zip_neon
 - name: xnn_x8_transposec_ukernel__8x8_reuse_mov_zip_neon
+- name: xnn_x8_transposec_ukernel__8x8_reuse_multi_zip_neon
 - name: xnn_x8_transposec_ukernel__8x8_reuse_switch_zip_neon
 - name: xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon
 - name: xnn_x8_transposec_ukernel__16x16_reuse_mov_zip_neon
