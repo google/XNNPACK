@@ -89,15 +89,15 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x4(
       i8 = zero;
     }
 
-    float16x4_t vi0x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi1x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi2x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi3x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi4x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi5x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi6x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi7x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi8x1357 = vmov_n_f16(0.0f);
+    float16x4_t vi0x1357 = vmov_n_f16(0);
+    float16x4_t vi1x1357 = vmov_n_f16(0);
+    float16x4_t vi2x1357 = vmov_n_f16(0);
+    float16x4_t vi3x1357 = vmov_n_f16(0);
+    float16x4_t vi4x1357 = vmov_n_f16(0);
+    float16x4_t vi5x1357 = vmov_n_f16(0);
+    float16x4_t vi6x1357 = vmov_n_f16(0);
+    float16x4_t vi7x1357 = vmov_n_f16(0);
+    float16x4_t vi8x1357 = vmov_n_f16(0);
 
     size_t w = input_width;
     for (; w >= 8 * sizeof(__fp16); w -= 8 * sizeof(__fp16)) {

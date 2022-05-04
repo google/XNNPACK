@@ -58,9 +58,9 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x4_acc3(
       i2 = zero;
     }
 
-    float16x4_t vi0x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi1x1357 = vmov_n_f16(0.0f);
-    float16x4_t vi2x1357 = vmov_n_f16(0.0f);
+    float16x4_t vi0x1357 = vmov_n_f16(0);
+    float16x4_t vi1x1357 = vmov_n_f16(0);
+    float16x4_t vi2x1357 = vmov_n_f16(0);
 
     size_t w = input_width;
     for (; w >= 8 * sizeof(__fp16); w -= 8 * sizeof(__fp16)) {
