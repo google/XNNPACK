@@ -218,6 +218,7 @@ static void ruy_st(benchmark::State& state, const char* net)
     xnn_init_qs8_conv_minmax_params_fn  init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
   {
+    xnn_initialize(/*allocator=*/nullptr);
     xnn_code_buffer code_buffer;
     xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
     const size_t nc = state.range(1);
