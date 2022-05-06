@@ -270,7 +270,6 @@ static enum xnn_status create_deconvolution2d_nhwc(
   deconvolution_op->type = operator_type;
   deconvolution_op->ukernel.type = ukernel_type;
   deconvolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
-    .gemm_case = gemm_ukernels->gemm[mr-1],
     .mr = mr,
     .nr = nr,
     .kr = kr,
@@ -278,8 +277,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
   };
 
   assert(XNN_MAX_MR >= mr);
-  deconvolution_op->ukernel.igemm.igemm_cases[0] = gemm_ukernels->igemm[0];
-  for (size_t i = 1; i < mr; i++) {
+  for (size_t i = 0; i < mr; i++) {
+    deconvolution_op->ukernel.igemm.gemm_cases[i] = gemm_ukernels->gemm[i];
     deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
   }
 
@@ -960,7 +959,7 @@ static enum xnn_status setup_subconv2d_path(
         .ba_stride = input_height * input_width * input_pixel_stride,
         .bc_stride = output_size * output_pixel_stride,
         .log2_csize = log2_output_element_size,
-        .ukernel = deconvolution_op->ukernel.igemm.gemm_case,
+        .ukernel = deconvolution_op->ukernel.igemm.gemm_cases[mr-1],
     };
     memcpy(&deconvolution_op->context.subgemm.params, params, params_size);
   } else {
@@ -1109,12 +1108,13 @@ static enum xnn_status setup_deconvolution2d_nhwc(
         params, params_size, num_threads);
     case xnn_ukernel_type_subconv2d:
     {
+      const size_t mr = deconvolution_op->ukernel.igemm.mr;
       const bool no_padding = (deconvolution_op->padding_top | deconvolution_op->padding_right | deconvolution_op->padding_bottom | deconvolution_op->padding_left) == 0;
       const bool no_adjustment = (adjustment_height | adjustment_width) == 0;
       const bool use_gemm = no_padding && no_adjustment &&
         deconvolution_op->kernel_height == deconvolution_op->stride_height &&
         deconvolution_op->kernel_width == deconvolution_op->stride_width &&
-        deconvolution_op->ukernel.igemm.gemm_case.function[XNN_UARCH_DEFAULT] != NULL;
+        deconvolution_op->ukernel.igemm.gemm_cases[mr-1].function[XNN_UARCH_DEFAULT] != NULL;
       return setup_subconv2d_path(
         deconvolution_op,
         batch_size,

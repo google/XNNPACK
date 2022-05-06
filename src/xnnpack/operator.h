@@ -57,7 +57,7 @@ struct xnn_ukernel_gemm {
 
 struct xnn_ukernel_igemm {
   struct xnn_hmp_igemm_ukernel igemm_cases[XNN_MAX_MR];
-  struct xnn_hmp_gemm_ukernel gemm_case;
+  struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
