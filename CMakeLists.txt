@@ -8218,7 +8218,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(operator-utils-test test/operator-utils.cc)
   TARGET_INCLUDE_DIRECTORIES(operator-utils-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE gtest gtest_main operators pthreadpool)
+  TARGET_LINK_LIBRARIES(operator-utils-test PRIVATE XNNPACK gtest gtest_main operators pthreadpool)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
