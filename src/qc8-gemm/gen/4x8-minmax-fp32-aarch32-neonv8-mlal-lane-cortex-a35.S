@@ -1,36 +1,28 @@
+// Auto-generated file. Do not edit!
+//   Template: src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
-$assert DATATYPE in ["QC8", "QS8", "QU8"]
-$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
 .syntax unified
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$ISA = "neonv8" if ARMV8 else "neon"
-$CPU = "a35" if ARMV8 else "a7"
-$XMIN = "VMIN.U8" if DATATYPE == "QU8" else "VMIN.S8"
-$XMAX = "VMAX.U8" if DATATYPE == "QU8" else "VMAX.S8"
-$XXTL = "VMOVL.U8" if DATATYPE == "QU8" else "VMOVL.S8"
-$SQXTXN = "VQMOVUN.S16" if DATATYPE == "QU8" else "VQMOVN.S16"
-$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-// void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}(
+// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a35(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            (r2) -> sp + 56 -> r5
-//     const ${XINT8_T}*restrict a,              r3
+//     const int8_t*restrict a,              r3
 //     size_t a_stride,           sp + 96 -> (r7)
 //     const void*restrict w,     sp + 100 -> r9
-//     ${XINT8_T}*restrict c,         sp + 104 -> r11
+//     int8_t*restrict c,         sp + 104 -> r11
 //     size_t cm_stride,          sp + 108 -> (r6)
 //     size_t cn_stride,          sp + 112 -> r7
-//     ${PARAMS_UNION} params)  sp + 116 -> (r5)
+//     xnn_qs8_minmax_params params)  sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -51,52 +43,18 @@ $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 
 // Unused d15
 
-$if REQUANTIZATION == "RNDNU" and DATATYPE != "QU8":
-  // params structure is 16 bytes
-  //  struct {
-  //    int32_t right_pre_shift;    d12[0]
-  //    int32_t multiplier;         d12[1]
-  //    int32_t right_post_shift;   d13[0]
-  //    int16_t output_zero_point;  d13[2]
-  //    int8_t output_min;          d13[6]
-  //    int8_t output_max;          d13[7]
-  //  } rndnu_neon;
-$elif REQUANTIZATION == "RNDNU" and DATATYPE == "QU8":
-  # params structure is 20 bytes
-  #  struct {
-  #    uint8_t kernel_zero_point[4];  d14
-  #    int32_t right_pre_shift;       d12[0]
-  #    int32_t multiplier;            d12[1]
-  #    int32_t right_post_shift;      d13[0]
-  #    int16_t output_zero_point;     d13[2]
-  #    uint8_t output_min;            d13[6]
-  #    uint8_t output_max;            d13[7]
-  #  } rndnu_neon;
-$elif DATATYPE == "QC8" and not ARMV8:
-  // params structure is 10 bytes
-  // struct {
-  //   float magic_bias;                           d12[0]
-  //   int32_t magic_bias_less_output_zero_point;  d12[1]
-  //   int8_t output_min;                          d13[6]
-  //   int8_t output_max;                          d13[7]
-  // } xnn_qs8_minmax_params.neon;
-$else:
-  // params structure is 4 bytes
-  //  struct {
-  //    int16_t output_zero_point;  d13[2]
-  //    int8_t output_min;          d13[6]
-  //    int8_t output_max;          d13[7]
-  //  } xnn_qs8_minmax_params.neonv8;
+// params structure is 4 bytes
+//  struct {
+//    int16_t output_zero_point;  d13[2]
+//    int8_t output_min;          d13[6]
+//    int8_t output_max;          d13[7]
+//  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}
+BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a35
         # Push 96 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        $if DATATYPE == "QU8":
-          SUB     sp, sp, 8                           // +8
-          VPUSH   {d8-d14}                            // +56 = 96
-        $else:
-          SUB     sp, sp, 16                          // +16
-          VPUSH   {d8-d13}                            // +48 = 96
+        SUB     sp, sp, 16                          // +16
+        VPUSH   {d8-d13}                            // +48 = 96
 
         LDR     r7, [sp, 96]            // a_stride
         LDR     r11, [sp, 104]          // c
@@ -123,24 +81,9 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         MOVLO   r6, r8                  // c3
 
         # Load params values
-        $if DATATYPE == "QU8":
-          VLD1.32 {d14[]}, [r5]!          // QU8 kernel_zero_point
-        $if REQUANTIZATION == "RNDNU":
-          VLDM    r5, {d12-d13}           // RNDNU params
-        $elif DATATYPE == "QC8" and ARMV8:
-          VLD1.32 {d13[]}, [r5]           // QC8 neonv8 params
-        $elif DATATYPE == "QC8" and not ARMV8:
-          VLDM    r5!, {d12}              // QC8 neon params
-          VLD1.16 {d13[]}, [r5]           // output_min/max
+        VLD1.32 {d13[]}, [r5]           // QC8 neonv8 params
         LDR     r7, [sp, 112]            // cn_stride
 
-        $if PREFETCH:
-          PLD     [r9,  64]               // Prefetch B
-          PLD     [r9, 128]
-          PLD     [r9, 192]
-          PLD     [r9, 256]
-          PLD     [r9, 320]
-          PLD     [r9, 384]
 
         .p2align 3
 0:
@@ -148,24 +91,12 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VLDM    r9!, {d16-d19}          // Bias
         SUBS    r5, r2, 8               // k = kc - 8
 
-        $if PREFETCH:
-          VMOV    q10, q8
-          PLD     [r3,  64]               // Prefetch A
-          VMOV    q11, q9
-          PLD     [r12, 64]
-          VMOV    q12, q8
-          PLD     [r10, 64]
-          VMOV    q13, q9
-          PLD     [r0,  64]
-          VMOV    q14, q8
-          VMOV    q15, q9
-        $else:
-          VMOV    q10, q8
-          VMOV    q11, q9
-          VMOV    q12, q8
-          VMOV    q13, q9
-          VMOV    q14, q8
-          VMOV    q15, q9
+        VMOV    q10, q8
+        VMOV    q11, q9
+        VMOV    q12, q8
+        VMOV    q13, q9
+        VMOV    q14, q8
+        VMOV    q15, q9
         BLO     4f                      // less than 8 channels?
 
         // Prologue - load 4A's and B0
@@ -187,16 +118,11 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         .p2align 3
 1:
         // Extend - 5 cycles
-        ${XXTL} q0, d0
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
-        $if PREFETCH:
-          PLD     [r9, 448]
-        ${XXTL} q1, d2
-        ${XXTL} q2, d4
-        ${XXTL} q3, d6
+        VMOVL.S8 q0, d0
+        VMOVL.S8 q4, d8
+        VMOVL.S8 q1, d2
+        VMOVL.S8 q2, d4
+        VMOVL.S8 q3, d6
 
         // BLOCK 0 - 10 cycles
         VLD1.8  {d10},  [r9]!           // B1
@@ -204,10 +130,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
         VMLAL.S16 q11, d9, d2[0]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d4[0]
         VMLAL.S16 q13, d9, d4[0]
         VMLAL.S16 q14, d8, d6[0]
@@ -219,10 +142,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d11, d0[1]
         VMLAL.S16 q10, d10, d2[1]
         VMLAL.S16 q11, d11, d2[1]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d4[1]
         VMLAL.S16 q13, d11, d4[1]
         VMLAL.S16 q14, d10, d6[1]
@@ -234,10 +154,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d9, d0[2]
         VMLAL.S16 q10, d8, d2[2]
         VMLAL.S16 q11, d9, d2[2]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d4[2]
         VMLAL.S16 q13, d9, d4[2]
         VMLAL.S16 q14, d8, d6[2]
@@ -250,10 +167,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q10, d10, d2[3]
         VMLAL.S16 q11, d11, d2[3]
         VLD1.8  {d0},  [r3]!            // A0
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d4[3]
         VMLAL.S16 q13, d11, d4[3]
         VMLAL.S16 q14, d10, d6[3]
@@ -266,10 +180,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q10, d8, d3[0]
         VMLAL.S16 q11, d9, d3[0]
         VLD1.8  {d2}, [r12]!            // A1
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d5[0]
         VMLAL.S16 q13, d9, d5[0]
         VMLAL.S16 q14, d8, d7[0]
@@ -282,10 +193,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q10, d10, d3[1]
         VMLAL.S16 q11, d11, d3[1]
         VLD1.8  {d4}, [r10]!            // A2
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d5[1]
         VMLAL.S16 q13, d11, d5[1]
         VMLAL.S16 q14, d10, d7[1]
@@ -298,10 +206,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q10, d8, d3[2]
         VMLAL.S16 q11, d9, d3[2]
         VLD1.8  {d6},  [r0]!            // A3
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d5[2]
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
@@ -324,24 +229,18 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
 
         .p2align 3
 2:
-        ${XXTL} q0, d0
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
-        ${XXTL} q1, d2
-        ${XXTL} q2, d4
-        ${XXTL} q3, d6
+        VMOVL.S8 q0, d0
+        VMOVL.S8 q4, d8
+        VMOVL.S8 q1, d2
+        VMOVL.S8 q2, d4
+        VMOVL.S8 q3, d6
 
         VLD1.8  {d10},  [r9]!           // B1
         VMLAL.S16 q8, d8, d0[0]
         VMLAL.S16 q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
         VMLAL.S16 q11, d9, d2[0]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d4[0]
         VMLAL.S16 q13, d9, d4[0]
         VMLAL.S16 q14, d8, d6[0]
@@ -352,10 +251,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d11, d0[1]
         VMLAL.S16 q10, d10, d2[1]
         VMLAL.S16 q11, d11, d2[1]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d4[1]
         VMLAL.S16 q13, d11, d4[1]
         VMLAL.S16 q14, d10, d6[1]
@@ -366,10 +262,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d9, d0[2]
         VMLAL.S16 q10, d8, d2[2]
         VMLAL.S16 q11, d9, d2[2]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d4[2]
         VMLAL.S16 q13, d9, d4[2]
         VMLAL.S16 q14, d8, d6[2]
@@ -380,10 +273,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d11, d0[3]
         VMLAL.S16 q10, d10, d2[3]
         VMLAL.S16 q11, d11, d2[3]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d4[3]
         VMLAL.S16 q13, d11, d4[3]
         VMLAL.S16 q14, d10, d6[3]
@@ -394,10 +284,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d9, d1[0]
         VMLAL.S16 q10, d8, d3[0]
         VMLAL.S16 q11, d9, d3[0]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d5[0]
         VMLAL.S16 q13, d9, d5[0]
         VMLAL.S16 q14, d8, d7[0]
@@ -408,10 +295,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d11, d1[1]
         VMLAL.S16 q10, d10, d3[1]
         VMLAL.S16 q11, d11, d3[1]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q12, d10, d5[1]
         VMLAL.S16 q13, d11, d5[1]
         VMLAL.S16 q14, d10, d7[1]
@@ -422,10 +306,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VMLAL.S16 q9, d9, d1[2]
         VMLAL.S16 q10, d8, d3[2]
         VMLAL.S16 q11, d9, d3[2]
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q5, d10, d14
-        $else:
-          VMOVL.S8 q5, d10
+        VMOVL.S8 q5, d10
         VMLAL.S16 q12, d8, d5[2]
         VMLAL.S16 q13, d9, d5[2]
         VMLAL.S16 q14, d8, d7[2]
@@ -445,113 +326,37 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BNE     4f
 
 3:
-        $if REQUANTIZATION == "RNDNU":
-          # RNDNU quantization
-          VDUP.32 q0, d12[0]              // right_pre_shift
+        # QC8 FP32 quantization
+        VLD1.8  {q0-q1},  [r9]!
 
-          VQSHL.S32 q8,  q8, q0
-          VQSHL.S32 q9,  q9, q0
-          VQSHL.S32 q10, q10, q0
-          VQSHL.S32 q11, q11, q0
-          VQSHL.S32 q12, q12, q0
-          VQSHL.S32 q13, q13, q0
-          VQSHL.S32 q14, q14, q0
-          VQSHL.S32 q15, q15, q0
+        VCVT.F32.S32 q8,  q8
+        VCVT.F32.S32 q9,  q9
+        VCVT.F32.S32 q10, q10
+        VCVT.F32.S32 q11, q11
+        VCVT.F32.S32 q12, q12
+        VCVT.F32.S32 q13, q13
+        VCVT.F32.S32 q14, q14
+        VCVT.F32.S32 q15, q15
 
-          VDUP.32 q2, d13[0]              // right_post_shift
+        VMUL.F32 q8,  q8, q0            // multiplier
+        VMUL.F32 q9,  q9, q1
+        VMUL.F32 q10, q10, q0
+        VMUL.F32 q11, q11, q1
+        VMUL.F32 q12, q12, q0
+        VMUL.F32 q13, q13, q1
+        VMUL.F32 q14, q14, q0
+        VMUL.F32 q15, q15, q1
 
-          VQDMULH.S32 q8,  q8, d12[1]     // multiplier
-          VQDMULH.S32 q9,  q9, d12[1]
-          VQDMULH.S32 q10, q10, d12[1]
-          VQDMULH.S32 q11, q11, d12[1]
-          VQDMULH.S32 q12, q12, d12[1]
-          VQDMULH.S32 q13, q13, d12[1]
-          VQDMULH.S32 q14, q14, d12[1]
-          VQDMULH.S32 q15, q15, d12[1]
+        VCVTN.S32.F32 q8,  q8
+        VCVTN.S32.F32 q9,  q9
+        VCVTN.S32.F32 q10, q10
+        VCVTN.S32.F32 q11, q11
+        VCVTN.S32.F32 q12, q12
+        VCVTN.S32.F32 q13, q13
+        VCVTN.S32.F32 q14, q14
+        VCVTN.S32.F32 q15, q15
 
-          VRSHL.S32 q8,  q8, q2
-          VRSHL.S32 q9,  q9, q2
-          VRSHL.S32 q10, q10, q2
-          VRSHL.S32 q11, q11, q2
-          VRSHL.S32 q12, q12, q2
-          VRSHL.S32 q13, q13, q2
-          VRSHL.S32 q14, q14, q2
-          VRSHL.S32 q15, q15, q2
-        $elif DATATYPE == "QC8" and ARMV8:
-          # QC8 FP32 quantization
-          VLD1.8  {q0-q1},  [r9]!
-
-          VCVT.F32.S32 q8,  q8
-          VCVT.F32.S32 q9,  q9
-          VCVT.F32.S32 q10, q10
-          VCVT.F32.S32 q11, q11
-          VCVT.F32.S32 q12, q12
-          VCVT.F32.S32 q13, q13
-          VCVT.F32.S32 q14, q14
-          VCVT.F32.S32 q15, q15
-
-          VMUL.F32 q8,  q8, q0            // multiplier
-          VMUL.F32 q9,  q9, q1
-          VMUL.F32 q10, q10, q0
-          VMUL.F32 q11, q11, q1
-          VMUL.F32 q12, q12, q0
-          VMUL.F32 q13, q13, q1
-          VMUL.F32 q14, q14, q0
-          VMUL.F32 q15, q15, q1
-
-          VCVTN.S32.F32 q8,  q8
-          VCVTN.S32.F32 q9,  q9
-          VCVTN.S32.F32 q10, q10
-          VCVTN.S32.F32 q11, q11
-          VCVTN.S32.F32 q12, q12
-          VCVTN.S32.F32 q13, q13
-          VCVTN.S32.F32 q14, q14
-          VCVTN.S32.F32 q15, q15
-        $elif DATATYPE == "QC8" and not ARMV8:
-          # QC8 FP32 quantization
-          VLD1.8  {q0-q1},  [r9]!
-
-          VDUP.32 q2, d12[0]              // magic_bias
-          VDUP.32 q3, d12[1]              // magic_bias_less_output_zero_point
-
-          VCVT.F32.S32 q8,  q8
-          VCVT.F32.S32 q9,  q9
-          VCVT.F32.S32 q10, q10
-          VCVT.F32.S32 q11, q11
-          VCVT.F32.S32 q12, q12
-          VCVT.F32.S32 q13, q13
-          VCVT.F32.S32 q14, q14
-          VCVT.F32.S32 q15, q15
-
-          VMUL.F32 q8,  q8, q0            // multiplier
-          VMUL.F32 q9,  q9, q1
-          VMUL.F32 q10, q10, q0
-          VMUL.F32 q11, q11, q1
-          VMUL.F32 q12, q12, q0
-          VMUL.F32 q13, q13, q1
-          VMUL.F32 q14, q14, q0
-          VMUL.F32 q15, q15, q1
-
-          VADD.F32 q8,  q8, q2            // magic_bias
-          VADD.F32 q9,  q9, q2
-          VADD.F32 q10, q10, q2
-          VADD.F32 q11, q11, q2
-          VADD.F32 q12, q12, q2
-          VADD.F32 q13, q13, q2
-          VADD.F32 q14, q14, q2
-          VADD.F32 q15, q15, q2
-
-          VQSUB.S32 q8,  q8, q3           // magic_bias_less_output_zero_point
-          VQSUB.S32 q9,  q9, q3
-          VQSUB.S32 q10, q10, q3
-          VQSUB.S32 q11, q11, q3
-          VQSUB.S32 q12, q12, q3
-          VQSUB.S32 q13, q13, q3
-          VQSUB.S32 q14, q14, q3
-          VQSUB.S32 q15, q15, q3
-
-        $if DATATYPE != "QC8" or ARMV8:
-          VDUP.16 q0, d13[2]              // output_zero_point
+        VDUP.16 q0, d13[2]              // output_zero_point
 
         VQMOVN.S32 d16, q8
         VQMOVN.S32 d17, q9
@@ -562,28 +367,27 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VQMOVN.S32 d22, q14
         VQMOVN.S32 d23, q15
 
-        $if DATATYPE != "QC8" or ARMV8:
-          VQADD.S16 q8,  q8, q0
-          VQADD.S16 q9,  q9, q0
-          VQADD.S16 q10, q10, q0
-          VQADD.S16 q11, q11, q0
+        VQADD.S16 q8,  q8, q0
+        VQADD.S16 q9,  q9, q0
+        VQADD.S16 q10, q10, q0
+        VQADD.S16 q11, q11, q0
 
         VDUP.8  q12, d13[6]             // output_min
 
-        ${SQXTXN} d0,  q8
-        ${SQXTXN} d1,  q9
-        ${SQXTXN} d2, q10
-        ${SQXTXN} d3, q11
+        VQMOVN.S16 d0,  q8
+        VQMOVN.S16 d1,  q9
+        VQMOVN.S16 d2, q10
+        VQMOVN.S16 d3, q11
 
         VDUP.8  q13, d13[7]             // output_min
 
-        ${XMAX} q0, q0, q12
-        ${XMAX} q1, q1, q12
+        VMAX.S8 q0, q0, q12
+        VMAX.S8 q1, q1, q12
 
         SUBS    r1, r1, 8
 
-        ${XMIN} q0, q0, q13
-        ${XMIN} q1, q1, q13
+        VMIN.S8 q0, q0, q13
+        VMIN.S8 q1, q1, q13
 
         # Store full 4 x 8
         BLO     5f
@@ -597,12 +401,8 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         SUB     r0, r0, r2
         BHI     0b
 
-        $if DATATYPE == "QU8":
-          VPOP    {d8-d14}
-          ADD     sp, sp, 8               // skip pad of 8
-        $else:
-          VPOP    {d8-d13}
-          ADD     sp, sp, 16              // skip pad of 8 + d14
+        VPOP    {d8-d13}
+        ADD     sp, sp, 16              // skip pad of 8 + d14
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
@@ -617,14 +417,11 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VLD1.8  {d4}, [r10], r5
         VLD1.8  {d6},  [r0], r5
 
-        ${XXTL} q0, d0
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
-        ${XXTL} q1, d2
-        ${XXTL} q2, d4
-        ${XXTL} q3, d6
+        VMOVL.S8 q0, d0
+        VMOVL.S8 q4, d8
+        VMOVL.S8 q1, d2
+        VMOVL.S8 q2, d4
+        VMOVL.S8 q3, d6
         VMLAL.S16 q8, d8, d0[0]
         VMLAL.S16 q9, d9, d0[0]
         VMLAL.S16 q10, d8, d2[0]
@@ -637,10 +434,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BLO     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d0[1]
         VMLAL.S16 q9, d9, d0[1]
         VMLAL.S16 q10, d8, d2[1]
@@ -652,10 +446,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BEQ     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d0[2]
         VMLAL.S16 q9, d9, d0[2]
         VMLAL.S16 q10, d8, d2[2]
@@ -668,10 +459,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BLO     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d0[3]
         VMLAL.S16 q9, d9, d0[3]
         VMLAL.S16 q10, d8, d2[3]
@@ -683,10 +471,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BEQ     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d1[0]
         VMLAL.S16 q9, d9, d1[0]
         VMLAL.S16 q10, d8, d3[0]
@@ -699,10 +484,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BLO     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d1[1]
         VMLAL.S16 q9, d9, d1[1]
         VMLAL.S16 q10, d8, d3[1]
@@ -714,10 +496,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BEQ     3b
 
         VLD1.8  {d8},  [r9]!
-        $if DATATYPE == "QU8":
-          VSUBL.U8 q4, d8, d14
-        $else:
-          VMOVL.S8 q4, d8
+        VMOVL.S8 q4, d8
         VMLAL.S16 q8, d8, d1[2]
         VMLAL.S16 q9, d9, d1[2]
         VMLAL.S16 q10, d8, d3[2]
@@ -758,16 +537,12 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         VST1.8  {d3[0]}, [r6]
 
 8:
-        $if DATATYPE == "QU8":
-          VPOP    {d8-d14}
-          ADD     sp, sp, 8               // skip pad of 8
-        $else:
-          VPOP    {d8-d13}
-          ADD     sp, sp, 16              // skip pad of 8 + d14
+        VPOP    {d8-d13}
+        ADD     sp, sp, 16              // skip pad of 8 + d14
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
-END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}
+END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a35
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
