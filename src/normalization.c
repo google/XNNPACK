@@ -38,23 +38,32 @@ void xnn_normalize_transpose_permutation(
   size_t output_dims = num_dims;
   memcpy(normalized_perm, perm, num_dims * sizeof(size_t));
   normalized_shape[normalized_perm[0]] = shape[perm[0]];
-  size_t output_pos = 1;
-  for (size_t input_pos = 1; input_pos < num_dims; ++input_pos) {
-    if (normalized_perm[output_pos] == normalized_perm[output_pos - 1] + 1) {
-      normalized_shape[normalized_perm[output_pos - 1]] *= shape[perm[input_pos]];
-      remove_dimension(normalized_shape, normalized_perm, num_dims, output_pos);
-      output_dims--;
+  size_t output_pos = 0;
+  for (size_t input_pos = 0; input_pos < num_dims; ++input_pos) {
+    if (shape[perm[input_pos]] == 1) {
+      remove_dimension(normalized_shape, normalized_perm, output_dims, input_pos);
+      output_dims -= 1;
     } else {
       normalized_shape[normalized_perm[output_pos]] = shape[perm[input_pos]];
       output_pos += 1;
     }
   }
-  for (size_t i = 0; i < output_dims;) {
-    if (normalized_shape[normalized_perm[i]] == 1) {
-      output_dims--;
-      remove_dimension(normalized_shape, normalized_perm, num_dims, i);
+  if (output_pos == 0) {
+    *normalized_num_dims = 1;
+    *normalized_element_size_out = element_size;
+    normalized_perm[0] = 0;
+    normalized_shape[0] = 1;
+    return;
+  }
+  output_pos = 1;
+  for (size_t input_pos = 1; input_pos < output_dims;) {
+    if (normalized_perm[output_pos] == normalized_perm[output_pos - 1] + 1) {
+      normalized_shape[normalized_perm[output_pos - 1]] *= normalized_shape[normalized_perm[output_pos]];
+      remove_dimension(normalized_shape, normalized_perm, num_dims, output_pos);
+      output_dims -= 1;
     } else {
-      i += 1;
+      input_pos += 1;
+      output_pos += 1;
     }
   }
   size_t normalized_element_size = element_size;
@@ -62,7 +71,7 @@ void xnn_normalize_transpose_permutation(
     normalized_element_size = element_size * normalized_shape[output_dims - 1];
     normalized_shape[output_dims - 1] = 1;
     if (output_dims > 1) {
-      --output_dims;
+      output_dims -= 1;
     }
   }
   *normalized_element_size_out = normalized_element_size;

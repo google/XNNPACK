@@ -44,6 +44,32 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_2D_flatten_2D) {
       .Test();
 }
 
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_redundant_dim) {
+    TransposeNormalizationTester()
+      .num_dims(3)
+      .element_size(4)
+      .perm({0,2,1})
+      .shape({2,1,3})
+      .expected_normalized_shape({1})
+      .expected_normalized_perm({0})
+      .expected_normalized_dims(1)
+      .expected_element_size(24)
+      .Test();
+}
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_all_ones) {
+    TransposeNormalizationTester()
+      .num_dims(3)
+      .element_size(4)
+      .perm({2,1,0})
+      .shape({1,1,1})
+      .expected_normalized_shape({1})
+      .expected_normalized_perm({0})
+      .expected_normalized_dims(1)
+      .expected_element_size(4)
+      .Test();
+}
+
 TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_flatten_1D) {
     TransposeNormalizationTester()
       .num_dims(3)

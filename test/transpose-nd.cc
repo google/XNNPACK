@@ -138,6 +138,14 @@ TEST(TRANSPOSE_ND_X32, 1D) {
       .TestX32();
 }
 
+TEST(TRANSPOSE_ND_X32, 2D_all_dimensions_redundant) {
+  TransposeOperatorTester()
+      .num_dims(2)
+      .shape({1, 1})
+      .perm({1, 0})
+      .TestX32();
+}
+
 TEST(TRANSPOSE_ND_X32, 2D) {
   std::vector<size_t> perm{0,1};
   do {
@@ -147,6 +155,14 @@ TEST(TRANSPOSE_ND_X32, 2D) {
         .perm(perm)
         .TestX32();
   } while (std::next_permutation(perm.begin(), perm.end()));
+}
+
+TEST(TRANSPOSE_ND_X32, 3D_redundant_dimension) {
+  TransposeOperatorTester()
+      .num_dims(3)
+      .shape({2, 1, 3})
+      .perm({0, 2, 1})
+      .TestX32();
 }
 
 TEST(TRANSPOSE_ND_X32, 3D) {
