@@ -233,7 +233,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   vqmovn_s16(d2, q10);
   vqmovn_s16(d3, q11);
 
-  vdup_8(q13, d13[7]); // output_min
+  vdup_8(q13, d13[7]); // output_max
 
   vmax_s8(q0, q0, q12);
   vmax_s8(q1, q1, q12);
