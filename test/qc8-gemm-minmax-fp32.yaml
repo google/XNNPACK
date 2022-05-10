@@ -4,6 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch32 assembly
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x8__aarch32_neon_mlal_lane_cortex_a7
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 8
+  assembly: true
 - name: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_cortex_a7
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
@@ -13,6 +17,10 @@
   k-block: 8
   assembly: true
 - name: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
+  init: xnn_init_qs8_minmax_neon_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x8__aarch32_neon_mlal_lane_prfm_cortex_a7
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
   assembly: true
@@ -28,6 +36,10 @@
   init: xnn_init_qs8_minmax_neon_params
   k-block: 8
   assembly: true
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x8__aarch32_neonv8_mlal_lane_cortex_a35
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
 - name: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_cortex_a35
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
@@ -37,6 +49,10 @@
   k-block: 8
   assembly: true
 - name: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+  k-block: 8
+  assembly: true
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x8__aarch32_neonv8_mlal_lane_prfm_cortex_a35
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 8
   assembly: true
