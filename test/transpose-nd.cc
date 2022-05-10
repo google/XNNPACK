@@ -34,6 +34,14 @@ TEST(TRANSPOSE_ND_X8, 3D) {
   } while (std::next_permutation(perm.begin(), perm.end()));
 }
 
+TEST(TRANSPOSE_ND_X32, 4D_copy) {
+  TransposeOperatorTester()
+      .num_dims(4)
+      .shape({2,2,1,1})
+      .perm({0,2,3,1})
+      .TestX32();
+}
+
 TEST(TRANSPOSE_ND_X8, 4D) {
   std::vector<size_t> perm{0,1,2,3};
   do {

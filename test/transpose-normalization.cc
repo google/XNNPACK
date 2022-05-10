@@ -135,6 +135,19 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_3D_redundant_dim_first) {
       .Test();
 }
 
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_4D_to_1D) {
+    TransposeNormalizationTester()
+      .num_dims(4)
+      .element_size(4)
+      .perm({0, 2, 3, 1})
+      .shape({2, 2, 1, 1})
+      .expected_normalized_shape({1})
+      .expected_normalized_perm({0})
+      .expected_normalized_dims(1)
+      .expected_element_size(16)
+      .Test();
+}
+
 TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_4D_flatten_element_size_2D) {
     TransposeNormalizationTester()
       .num_dims(4)
