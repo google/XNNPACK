@@ -395,7 +395,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d13[7]             // output_min
+        VDUP.8  q13, d13[7]             // output_max
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12

@@ -189,7 +189,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_ld64
         VQMOVN.S16 d2, q10
         VQMOVN.S16 d3, q11
 
-        VDUP.8  q13, d13[7]             // output_min
+        VDUP.8  q13, d13[7]             // output_max
 
         VMAX.S8 q0, q0, q12
         VMAX.S8 q1, q1, q12
