@@ -896,8 +896,8 @@ static void init(void) {
         xnn_params.f32.gemm.mr = 4;
         xnn_params.f32.gemm.nr = 8;
       #endif  // XNN_ENABLE_ASSEMBLY
-      xnn_params.f32.gemm2.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64);
-      xnn_params.f32.gemm2.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64);
+      xnn_params.f32.gemm2.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64);
+      xnn_params.f32.gemm2.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64);
       xnn_params.f32.gemm2.init.f32 = xnn_init_f32_minmax_scalar_params;
       xnn_params.f32.gemm2.mr = 4;
       xnn_params.f32.gemm2.nr = 2;
