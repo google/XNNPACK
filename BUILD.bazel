@@ -11019,6 +11019,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "xx_transpose_bench",
+    srcs = [
+        "bench/xx-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x8_transpose_bench",
     srcs = [
         "bench/x8-transpose.cc",
