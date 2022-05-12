@@ -511,10 +511,7 @@ static enum xnn_status create_convolution2d_nhwc(
           };
 
           assert(XNN_MAX_MR >= mr);
-          // Set only mr=1 and mr=gemm.mr because we might not have optimized microkernels for other mr values.
-          convolution_op->ukernel.gemm.gemm_cases[0] = gemm_ukernels->gemm[0];
-          convolution_op->ukernel.gemm.gemm_cases[mr-1] = gemm_ukernels->gemm[mr-1];
-          for (size_t i = 1; i < mr; i++) {
+          for (size_t i = 0; i < mr; i++) {
             if (gemm_ukernels->gemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
               convolution_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
             }

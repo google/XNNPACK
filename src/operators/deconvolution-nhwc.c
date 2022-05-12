@@ -278,8 +278,12 @@ static enum xnn_status create_deconvolution2d_nhwc(
 
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
-    deconvolution_op->ukernel.igemm.gemm_cases[i] = gemm_ukernels->gemm[i];
-    deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
+    if (gemm_ukernels->gemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
+      deconvolution_op->ukernel.igemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+    }
+    if (gemm_ukernels->igemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
+      deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
+    }
   }
 
   deconvolution_op->state = xnn_run_state_invalid;
@@ -863,10 +867,18 @@ static enum xnn_status setup_subconv2d_path(
   const size_t kernel_size = kernel_height * kernel_width;
   const size_t stride_height = deconvolution_op->stride_height;
   const size_t stride_width = deconvolution_op->stride_width;
+  const size_t output_height_positions = divide_round_up(output_height, stride_height);
+  const size_t output_width_positions = divide_round_up(output_width, stride_width);
 
   const size_t groups = deconvolution_op->groups;
   const size_t output_size = output_height * output_width;
-  const size_t mr = deconvolution_op->ukernel.igemm.mr;
+  uint32_t mr = deconvolution_op->ukernel.igemm.mr;
+  const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
+  struct xnn_hmp_igemm_ukernel* igemm_cases = deconvolution_op->ukernel.igemm.igemm_cases;
+  struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr-1];
+  const uint32_t heuristic_mr = xnn_get_heuristic_mr_igemm(output_width_positions, mr, nr, igemm_cases);
+  mr = heuristic_mr;
+  igemm_ukernel = igemm_cases[heuristic_mr-1];
 
   const size_t input_pixel_stride = deconvolution_op->input_pixel_stride << log2_input_element_size;
   const size_t output_pixel_stride = deconvolution_op->output_pixel_stride << log2_output_element_size;
@@ -938,7 +950,6 @@ static enum xnn_status setup_subconv2d_path(
 
   const size_t group_input_channels = deconvolution_op->group_input_channels;
   const size_t group_output_channels = deconvolution_op->group_output_channels;
-  const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
   const uint32_t kr = deconvolution_op->ukernel.igemm.kr;
   const uint32_t sr = deconvolution_op->ukernel.igemm.sr;
   const size_t w_stride = stride_height * stride_width * bias_element_size +
@@ -982,9 +993,6 @@ static enum xnn_status setup_subconv2d_path(
     memcpy(&deconvolution_op->context.subconv.params, params, params_size);
   }
 
-  const size_t output_height_positions = divide_round_up(output_height, stride_height);
-  const size_t output_width_positions = divide_round_up(output_width, stride_width);
-
   size_t nc = group_output_channels;
   if (num_threads > 1) {
     const size_t num_other_tiles = groups * stride_height * stride_width *
@@ -1002,8 +1010,8 @@ static enum xnn_status setup_subconv2d_path(
       (pthreadpool_task_5d_tile_2d_t) xnn_compute_subgemm2d : (pthreadpool_task_5d_tile_2d_t) xnn_compute_subconv2d;
     deconvolution_op->compute.range[0] = batch_size;
     deconvolution_op->compute.range[1] = stride_height * stride_width;
-    deconvolution_op->compute.range[2] = divide_round_up(output_height, stride_height);
-    deconvolution_op->compute.range[3] = divide_round_up(output_width, stride_width);
+    deconvolution_op->compute.range[2] = output_height_positions;
+    deconvolution_op->compute.range[3] = output_width_positions;
     deconvolution_op->compute.range[4] = group_output_channels;
     deconvolution_op->compute.tile[0] = mr;
     deconvolution_op->compute.tile[1] = nc;
@@ -1014,8 +1022,8 @@ static enum xnn_status setup_subconv2d_path(
     deconvolution_op->compute.range[0] = batch_size;
     deconvolution_op->compute.range[1] = groups;
     deconvolution_op->compute.range[2] = stride_height * stride_width;
-    deconvolution_op->compute.range[3] = divide_round_up(output_height, stride_height);
-    deconvolution_op->compute.range[4] = divide_round_up(output_width, stride_width);
+    deconvolution_op->compute.range[3] = output_height_positions;
+    deconvolution_op->compute.range[4] = output_width_positions;
     deconvolution_op->compute.range[5] = group_output_channels;
     deconvolution_op->compute.tile[0] = mr;
     deconvolution_op->compute.tile[1] = nc;
