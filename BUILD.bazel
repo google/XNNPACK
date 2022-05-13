@@ -10240,6 +10240,15 @@ cc_library(
     }),
 )
 
+cc_library(
+    name = "enable_gemm_m_specialization",
+    defines = select({
+        ":xnn_enable_gemm_m_specialization_explicit_true": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
+        ":xnn_enable_gemm_m_specialization_explicit_false": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
+        "//conditions:default": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
+    }),
+)
+
 xnnpack_cc_library(
     name = "cache",
     srcs = ["src/cache.c"],
@@ -10313,6 +10322,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":enable_gemm_m_specialization",
         ":indirection",
         ":jit",
         ":logging",
@@ -10350,6 +10360,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":enable_gemm_m_specialization",
         ":indirection_test_mode",
         ":jit_test_mode",
         ":logging",
@@ -10560,6 +10571,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
@@ -10599,6 +10611,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
@@ -10651,6 +10664,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
@@ -10696,6 +10710,7 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
@@ -14257,6 +14272,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_jit_explicit_false",
     define_values = {"xnn_enable_jit": "false"},
+)
+
+# Enables usage of mr heuristic to select microkernels.
+config_setting(
+    name = "xnn_enable_gemm_m_specialization_explicit_true",
+    define_values = {"xnn_enable_gemm_m_specialization": "true"},
+)
+
+# Disables usage of mr heuristic to select microkernels.
+config_setting(
+    name = "xnn_enable_gemm_m_specialization_explicit_false",
+    define_values = {"xnn_enable_gemm_m_specialization": "false"},
 )
 
 # Fully disable logging
