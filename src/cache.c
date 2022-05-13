@@ -120,9 +120,6 @@ enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buc
 
   cache->type = cache_type;
   cache->num_buckets = num_buckets;
-  cache->num_entries = 0;
-  cache->hits = 0;
-  cache->misses = 0;
   return xnn_status_success;
 }
 
@@ -157,22 +154,10 @@ enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache
 
 static bool cache_buckets_grow(struct xnn_cache* cache)
 {
-  struct xnn_cache* tmp_cache = NULL;
   const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
-  struct xnn_code_cache tmp_code_cache;
-  struct xnn_weights_cache tmp_weights_cache;
   assert(is_po2(new_num_buckets));
-  if (cache->type == xnn_cache_type_code) {
-    if (xnn_init_code_cache_with_size(&tmp_code_cache, new_num_buckets) != xnn_status_success) {
-      return false;
-    }
-    tmp_cache = &tmp_code_cache.cache;
-  } else {
-    if (xnn_init_weights_cache_with_size(&tmp_weights_cache, new_num_buckets) != xnn_status_success) {
-      return false;
-    }
-    tmp_cache = &tmp_weights_cache.cache;
-  }
+  struct xnn_cache tmp_cache;
+  xnn_init_cache_with_size(&tmp_cache, new_num_buckets, cache->type);
 
   for (size_t i = 0; i < cache->num_buckets; i++) {
     struct xnn_cache_bucket b = cache->buckets[i];
@@ -183,20 +168,20 @@ static bool cache_buckets_grow(struct xnn_cache* cache)
     // Find the first empty slot by linear probing to insert. No need to check
     // hashes since we are not looking up anything, just moving things around
     // into a bigger hash table.
-    const size_t mask = tmp_cache->num_buckets - 1;
+    const size_t mask = tmp_cache.num_buckets - 1;
     size_t idx = b.hash & mask;
-    while (tmp_cache->buckets[idx].size != 0) {
+    while (tmp_cache.buckets[idx].size != 0) {
       idx = (idx + 1) & mask;
     }
-    tmp_cache->buckets[idx].hash = b.hash;
-    tmp_cache->buckets[idx].size = b.size;
-    tmp_cache->buckets[idx].offset = b.offset;
+    tmp_cache.buckets[idx].hash = b.hash;
+    tmp_cache.buckets[idx].size = b.size;
+    tmp_cache.buckets[idx].offset = b.offset;
   }
 
   xnn_release_memory(cache->buckets);
 
-  cache->buckets = tmp_cache->buckets;
-  cache->num_buckets = tmp_cache->num_buckets;
+  cache->buckets = tmp_cache.buckets;
+  cache->num_buckets = tmp_cache.num_buckets;
   return true;
 }
 
@@ -241,8 +226,10 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
       cache->num_buckets * XNN_CACHE_MAX_LOAD_BUCKETS_MULTIPLIER) {
     if (!cache_buckets_grow(cache)) {
       // Can't grow hash table anymore.
+      xnn_log_error("failed to grow cache buckets");
       return false;
     }
+    xnn_log_debug("successfully grew cache buckets");
 
     // If the cache grew, idx is stale, since that is based on the old cache's num_buckets.
     const bool found_in_grown_cache = lookup(cache, ptr, size, hash, &idx);

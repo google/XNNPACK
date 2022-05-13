@@ -28,6 +28,7 @@
 
 // Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
 static void* allocate_buffer(size_t size) {
+  xnn_log_debug("allocating buffer of size %zu", size);
   assert(size == round_up_po2(size, xnn_params.page_size));
 #if XNN_PLATFORM_WINDOWS
   void* p = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
@@ -216,6 +217,7 @@ enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n) {
   if (buf->size + n <= buf->capacity) {
     return xnn_status_success;
   }
+  xnn_log_debug("reserving code memory of size %zu", n);
 
   // TODO(zhin): use mremap
   size_t size = buf->size;
@@ -267,6 +269,7 @@ enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_
     return xnn_status_success;
   }
 
+  xnn_log_debug("reserving weights memory of size %zu", n);
   // TODO(zhin): use mremap
   size_t size = buf->size;
   struct xnn_weights_buffer new_weights_buffer;
