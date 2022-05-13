@@ -220,25 +220,9 @@ enum xnn_status xnn_define_subtract(
     return status;
   }
 
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to define %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_node_type_to_string(xnn_node_type_subtract));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to define %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_node_type_to_string(xnn_node_type_subtract));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to define %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_node_type_to_string(xnn_node_type_subtract), output_min, output_max);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_output_min_max(xnn_node_type_subtract, output_min, output_max);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   if ((status = xnn_subgraph_check_nth_input_node_id(

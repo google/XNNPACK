@@ -33,6 +33,7 @@ enum xnn_status xnn_subgraph_check_output_type_dense(
   enum xnn_node_type node_type,
   uint32_t output_id,
   const struct xnn_value* output_value);
+enum xnn_status xnn_subgraph_check_output_min_max(enum xnn_node_type node_type, float output_min, float output_max);
 
 #ifdef __cplusplus
 }  // extern "C"
