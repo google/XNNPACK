@@ -33,6 +33,20 @@ enum xnn_status xnn_subgraph_check_output_type_dense(
   enum xnn_node_type node_type,
   uint32_t output_id,
   const struct xnn_value* output_value);
+enum xnn_status xnn_subgraph_check_datatype_matches(
+  enum xnn_node_type node_type,
+  uint32_t input_id,
+  const struct xnn_value* input_value,
+  uint32_t output_id,
+  const struct xnn_value* output_value);
+enum xnn_status xnn_subgraph_check_datatype_matches_two_inputs(
+  enum xnn_node_type node_type,
+  uint32_t input1_id,
+  const struct xnn_value* input1_value,
+  uint32_t input2_id,
+  const struct xnn_value* input2_value,
+  uint32_t output_id,
+  const struct xnn_value* output_value);
 enum xnn_status xnn_subgraph_check_output_min_max(enum xnn_node_type node_type, float output_min, float output_max);
 
 #ifdef __cplusplus

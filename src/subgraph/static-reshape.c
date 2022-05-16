@@ -207,14 +207,9 @@ enum xnn_status xnn_define_static_reshape(
       return xnn_status_invalid_parameter;
   }
 
-  if (input_value->datatype != output_value->datatype) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-      ": mismatching datatypes across input (%s) and output (%s)",
-      xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id,
-      xnn_datatype_to_string(input_value->datatype),
-      xnn_datatype_to_string(output_value->datatype));
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_datatype_matches(xnn_node_type_static_reshape, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
   }
 
 #if !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
