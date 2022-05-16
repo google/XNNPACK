@@ -33,6 +33,10 @@
 #include <time.h>
 #endif
 
+#ifndef XNN_ENABLE_JIT
+  #error "XNN_ENABLE_JIT is not defined"
+#endif
+
 enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
 {
   struct xnn_weights_cache* weights_cache = NULL;
@@ -139,7 +143,7 @@ enum xnn_status xnn_create_runtime_v3(
   }
 
   struct xnn_code_cache* code_cache = NULL;
-#if XNN_PLATFORM_JIT
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   code_cache = &runtime->code_cache;
   status = xnn_init_code_cache(code_cache);
   if (status != xnn_status_success) {
@@ -166,7 +170,7 @@ enum xnn_status xnn_create_runtime_v3(
     }
   }
 
-#if XNN_PLATFORM_JIT
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   xnn_finalize_code_memory(&code_cache->cache.code);
 #endif
 
@@ -479,7 +483,7 @@ enum xnn_status xnn_delete_runtime(
       xnn_release_memory(runtime->blobs);
       xnn_release_simd_memory(runtime->workspace);
     }
-#if XNN_PLATFORM_JIT
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
     xnn_release_code_cache(&runtime->code_cache);
 #endif
     xnn_release_memory(runtime);
