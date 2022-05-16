@@ -3995,7 +3995,8 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
 }
 
 // Largest GEMM/IGEMM MR used in init.c is 7 (x86 AVX512).
-#define XNN_MAX_MR 7
+// Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
+#define XNN_MAX_MR 8
 
 struct gemm_fused_ukernels {
   struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
