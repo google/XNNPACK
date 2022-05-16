@@ -166,6 +166,7 @@ static enum xnn_status create_fully_connected_nc(
     .mr = mr,
     .nr = nr,
     .kr = kr,
+    .sr = sr,
   };
 
   assert(XNN_MAX_MR >= mr);
@@ -248,7 +249,8 @@ static enum xnn_status setup_fully_connected_nc(
 
   fully_connected_op->context.gemm = (struct gemm_context) {
     .k_scaled = input_channels << log2_input_element_size,
-    .w_stride = (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr) << log2_input_element_size) + bias_element_size,
+    .w_stride = bias_element_size +
+        (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr * fully_connected_op->ukernel.gemm.sr) << log2_input_element_size),
     .a = input,
     .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,
     .packed_w = packed_weights(fully_connected_op),
