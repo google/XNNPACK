@@ -15,14 +15,14 @@
 // void xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
-//     size_t kc,                            (r2) -> sp + 56 -> r5
+//     size_t kc,                            (r2) -> r5
 //     const uint8_t*restrict a,              r3
-//     size_t a_stride,           sp + 96 -> (r7)
-//     const void*restrict w,     sp + 100 -> r9
-//     uint8_t*restrict c,         sp + 104 -> r11
-//     size_t cm_stride,          sp + 108 -> (r6)
-//     size_t cn_stride,          sp + 112 -> r7
-//     xnn_qs8_conv_minmax_params params)  sp + 116 -> (r5)
+//     size_t a_stride,           sp + 88 -> (r7)
+//     const void*restrict w,     sp + 92 -> r9
+//     uint8_t*restrict c,         sp + 96 -> r11
+//     size_t cm_stride,          sp + 100 -> (r6)
+//     size_t cn_stride,          sp + 104 -> r7
+//     xnn_qs8_conv_minmax_params params)  sp + 108 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -55,16 +55,15 @@
 #  } rndnu_neon;
 
 BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_cortex_a7
-        # Push 96 bytes
+        # Push 88 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
-        SUB     sp, sp, 8                           // +8
-        VPUSH   {d8-d14}                            // +56 = 96
+        VPUSH   {d8-d14}                            // +56 = 88
 
-        LDR     r7, [sp, 96]            // a_stride
-        LDR     r11, [sp, 104]          // c
-        LDR     r6, [sp, 108]           // cm_stride
-        LDR     r9, [sp, 100]           // w
-        LDR     r5, [sp, 116]           // params
+        LDR     r7, [sp, 88]            // a_stride
+        LDR     r11, [sp, 96]           // c
+        LDR     r6, [sp, 100]           // cm_stride
+        LDR     r9, [sp, 92]            // w
+        LDR     r5, [sp, 108]           // params
 
         # Clamp A and C pointers
         CMP     r0, 2                   // if mr >= 2
@@ -87,7 +86,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         # Load params values
         VLD1.32 {d14[]}, [r5]!          // QU8 kernel_zero_point
         VLDM    r5, {d12-d13}           // RNDNU params
-        LDR     r7, [sp, 112]            // cn_stride
+        LDR     r7, [sp, 104]            // cn_stride
 
         PLD     [r9,  64]               // Prefetch B
         PLD     [r9, 128]
@@ -420,7 +419,6 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
         BHI     0b
 
         VPOP    {d8-d14}
-        ADD     sp, sp, 8               // skip pad of 8
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
@@ -556,7 +554,6 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
 
 8:
         VPOP    {d8-d14}
-        ADD     sp, sp, 8               // skip pad of 8
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
