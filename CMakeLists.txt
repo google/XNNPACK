@@ -1355,6 +1355,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x16-transposec/gen/4x1-scalar-int.c
   src/x16-transposec/gen/4x2-scalar-int.c
   src/x16-transposec/gen/4x4-scalar-int.c
+  src/x24-transposec/gen/1x2-scalar.c
+  src/x24-transposec/gen/1x4-scalar.c
+  src/x24-transposec/gen/2x1-scalar.c
+  src/x24-transposec/gen/2x2-scalar.c
+  src/x24-transposec/gen/2x4-scalar.c
+  src/x24-transposec/gen/4x1-scalar.c
+  src/x24-transposec/gen/4x2-scalar.c
+  src/x24-transposec/gen/4x4-scalar.c
   src/x32-depthtospace2d-chw2hwc/scalar.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
@@ -8154,6 +8162,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x16-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(x16-transpose-test x16-transpose-test)
 
+  ADD_EXECUTABLE(x24-transpose-test test/x24-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(x24-transpose-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x24-transpose-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(x24-transpose-test x24-transpose-test)
+
   ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -8679,6 +8692,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(x16-transpose-bench bench/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(x16-transpose-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x16-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(x24-transpose-bench bench/x16-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(x24-transpose-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x24-transpose-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(x32-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(x32-transpose-bench PRIVATE . include src)

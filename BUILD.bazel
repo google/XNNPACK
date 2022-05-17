@@ -1340,6 +1340,14 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x16-transposec/gen/4x1-scalar-int.c",
     "src/x16-transposec/gen/4x2-scalar-int.c",
     "src/x16-transposec/gen/4x4-scalar-int.c",
+    "src/x24-transposec/gen/1x2-scalar.c",
+    "src/x24-transposec/gen/1x4-scalar.c",
+    "src/x24-transposec/gen/2x1-scalar.c",
+    "src/x24-transposec/gen/2x2-scalar.c",
+    "src/x24-transposec/gen/2x4-scalar.c",
+    "src/x24-transposec/gen/4x1-scalar.c",
+    "src/x24-transposec/gen/4x2-scalar.c",
+    "src/x24-transposec/gen/4x4-scalar.c",
     "src/x32-depthtospace2d-chw2hwc/scalar.c",
     "src/x32-packx/x2-scalar.c",
     "src/x32-packx/x3-scalar.c",
@@ -11068,6 +11076,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "x24_transpose_bench",
+    srcs = [
+        "bench/x24-transpose.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x32_transpose_bench",
     srcs = [
         "bench/x32-transpose.cc",
@@ -13603,6 +13619,15 @@ xnnpack_unit_test(
     srcs = [
         "test/transpose-microkernel-tester.h",
         "test/x16-transpose.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "x24_transpose_test",
+    srcs = [
+        "test/transpose-microkernel-tester.h",
+        "test/x24-transpose.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

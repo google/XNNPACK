@@ -21,6 +21,14 @@ tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=2 TILE_WIDTH=4 TYPE=in
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=1 TYPE=int16_t SIZE=16 -o src/x16-transposec/gen/4x1-scalar-int.c &
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=2 TYPE=int16_t SIZE=16 -o src/x16-transposec/gen/4x2-scalar-int.c &
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=4 TYPE=int16_t SIZE=16 -o src/x16-transposec/gen/4x4-scalar-int.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=1 TILE_WIDTH=2 -o src/x24-transposec/gen/1x2-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=1 TILE_WIDTH=4 -o src/x24-transposec/gen/1x4-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=2 TILE_WIDTH=1 -o src/x24-transposec/gen/2x1-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=2 TILE_WIDTH=2 -o src/x24-transposec/gen/2x2-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=2 TILE_WIDTH=4 -o src/x24-transposec/gen/2x4-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=1 -o src/x24-transposec/gen/4x1-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=2 -o src/x24-transposec/gen/4x2-scalar.c &
+tools/xngen src/x24-transposec/scalar.c.in -D TILE_HEIGHT=4 TILE_WIDTH=4 -o src/x24-transposec/gen/4x4-scalar.c &
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=1 TILE_WIDTH=2 TYPE=int SIZE=32 -o src/x32-transposec/gen/1x2-scalar-int.c &
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=1 TILE_WIDTH=4 TYPE=int SIZE=32 -o src/x32-transposec/gen/1x4-scalar-int.c &
 tools/xngen src/x32-transposec/scalar.c.in -D TILE_HEIGHT=2 TILE_WIDTH=1 TYPE=int SIZE=32 -o src/x32-transposec/gen/2x1-scalar-int.c &
@@ -133,6 +141,7 @@ tools/xngen src/x32-transposec/wasmsimd.c.in -D IN_PTRS=MULTI OUT_PTRS=MOV SIZE=
 ################################## Unit tests #################################
 tools/generate-transpose-test.py --spec test/x8-transpose.yaml --output=test/x8-transpose.cc &
 tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output=test/x16-transpose.cc &
+tools/generate-transpose-test.py --spec test/x24-transpose.yaml --output=test/x24-transpose.cc &
 tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output=test/x32-transpose.cc &
 tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output=test/x64-transpose.cc &
 tools/generate-transpose-test.py --spec test/xx-transpose.yaml --output=test/xx-transpose.cc &

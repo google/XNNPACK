@@ -52,10 +52,11 @@ void transpose(
 static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 {
   b->ArgNames({"height", "width", "element_size"});
-  b->Args({32, 32, 3});
-  b->Args({64, 64, 3});
-  b->Args({117, 117, 3});
-  b->Args({1024, 1024, 3});
+  //b->Args({32, 32, 3});
+  //b->Args({64, 64, 3});
+  //b->Args({117, 117, 3});
+  //b->Args({1024, 1024, 3});
+  b->Args({49153, 8, 128});
 }
 
 BENCHMARK_CAPTURE(transpose, 1x1_mmemcpy, xnn_xx_transposev_ukernel__1x1_memcpy)
