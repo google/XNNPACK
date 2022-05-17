@@ -6392,6 +6392,14 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-gemm/4x4-aarch32-vfp-ld64.S
   src/f32-gemm/4x4-minmax-aarch32-vfp-ld64.S
   src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a55.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-cortex-a7.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neon-mlal-lane-prfm-cortex-a7.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-cortex-a35.S
+  src/qc8-igemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-cortex-a35.S
+  src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-cortex-a7.S
+  src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
+  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-cortex-a7.S
+  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-igemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
