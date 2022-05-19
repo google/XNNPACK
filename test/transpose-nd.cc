@@ -224,3 +224,14 @@ TEST(TRANSPOSE_ND_X32, 6D) {
         .TestX32();
   } while (std::next_permutation(perm.begin(), perm.end()));
 }
+
+TEST(TRANSPOSE_ND_X32, 6D_DIMS_1) {
+  std::vector<size_t> perm{0,1,2,3,4,5};
+  do {
+    TransposeOperatorTester()
+        .num_dims(6)
+        .shape({1,1,1,2,3,4})
+        .perm(perm)
+        .TestX32();
+  } while (std::next_permutation(perm.begin(), perm.end()));
+}

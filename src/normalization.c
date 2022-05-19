@@ -41,7 +41,7 @@ void xnn_normalize_transpose_permutation(
   size_t output_pos = 0;
   for (size_t input_pos = 0; input_pos < num_dims; ++input_pos) {
     if (shape[perm[input_pos]] == 1) {
-      remove_dimension(normalized_shape, normalized_perm, output_dims, input_pos);
+      remove_dimension(normalized_shape, normalized_perm, output_dims, output_pos);
       output_dims -= 1;
     } else {
       normalized_shape[normalized_perm[output_pos]] = shape[perm[input_pos]];

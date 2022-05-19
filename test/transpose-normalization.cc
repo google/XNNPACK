@@ -5,6 +5,19 @@
 
 #include "transpose-normalization-tester.h"
 
+TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_adjacent_1_dims) {
+    TransposeNormalizationTester()
+      .num_dims(4)
+      .element_size(4)
+      .perm({0,1,3,2})
+      .shape({1,1,60,2400})
+      .expected_normalized_shape({60,2400})
+      .expected_normalized_perm({1,0})
+      .expected_normalized_dims(2)
+      .expected_element_size(4)
+      .Test();
+}
+
 TEST(TRANSPOSE_NORMALIZATION_TEST, normalize_1D) {
     TransposeNormalizationTester()
       .num_dims(1)
