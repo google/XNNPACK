@@ -1357,15 +1357,19 @@ static enum xnn_status setup_convolution2d_nhwc(
       };
       memcpy(&convolution_op->context.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.params));
 
-      size_t nc = group_output_channels;
-      if (num_threads > 1) {
-        const size_t num_other_tiles = groups * divide_round_up(batch_output_size, mr);
-        const size_t target_tiles_per_thread = 5;
-        const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-        if (max_nc < nc) {
-          nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      #if XNN_TEST_MODE
+        const size_t nc = nr;
+      #else
+        size_t nc = group_output_channels;
+        if (num_threads > 1) {
+          const size_t num_other_tiles = groups * divide_round_up(batch_output_size, mr);
+          const size_t target_tiles_per_thread = 5;
+          const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+          if (max_nc < nc) {
+            nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+          }
         }
-      }
+      #endif
       if (groups == 1) {
         #if XNN_MAX_UARCH_TYPES > 1
           if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
@@ -1486,15 +1490,19 @@ static enum xnn_status setup_convolution2d_nhwc(
       };
       memcpy(&convolution_op->context.igemm.params, &convolution_op->params, sizeof(convolution_op->context.igemm.params));
 
-      size_t nc = group_output_channels;
-      if (num_threads > 1) {
-        const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
-        const size_t target_tiles_per_thread = 5;
-        const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-        if (max_nc < nc) {
-          nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      #if XNN_TEST_MODE
+        const size_t nc = nr;
+      #else
+        size_t nc = group_output_channels;
+        if (num_threads > 1) {
+          const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
+          const size_t target_tiles_per_thread = 5;
+          const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+          if (max_nc < nc) {
+            nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+          }
         }
-      }
+      #endif
       if (groups == 1) {
         #if XNN_MAX_UARCH_TYPES > 1
           if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
@@ -1648,15 +1656,19 @@ static enum xnn_status setup_convolution2d_nhwc(
       };
       memcpy(&convolution_op->context.vmulcaddc.params, &convolution_op->params, sizeof(convolution_op->context.vmulcaddc.params));
 
-      size_t mc = batch_output_size;
-      if (num_threads > 1) {
-        const size_t target_tiles_per_thread = 5;
-        const size_t max_mc = divide_round_up(batch_output_size, num_threads * target_tiles_per_thread);
-        if (max_mc < mc) {
-          const uint32_t mr = convolution_op->ukernel.vmulcaddc.mr;
-          mc = min(mc, divide_round_up(mc, max_mc * mr) * mr);
+      #if XNN_TEST_MODE
+        const size_t mc = convolution_op->ukernel.vmulcaddc.mr;
+      #else
+        size_t mc = batch_output_size;
+        if (num_threads > 1) {
+          const size_t target_tiles_per_thread = 5;
+          const size_t max_mc = divide_round_up(batch_output_size, num_threads * target_tiles_per_thread);
+          if (max_mc < mc) {
+            const uint32_t mr = convolution_op->ukernel.vmulcaddc.mr;
+            mc = min(mc, divide_round_up(mc, max_mc * mr) * mr);
+          }
         }
-      }
+      #endif
       convolution_op->compute.type = xnn_parallelization_type_1d_tile_1d;
       convolution_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_vmulcaddc;
       convolution_op->compute.range[0] = batch_output_size;

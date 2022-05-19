@@ -634,14 +634,18 @@ static enum xnn_status setup_convolution2d_nchw(
       memcpy(&convolution_op->context.spmm.params, params, sizeof(convolution_op->context.spmm.params));
 
       const size_t mr = convolution_op->ukernel.spmm.mr;
-      size_t mc = input_size;
-      if (num_threads > 1) {
-        const size_t target_tiles_per_thread = 5;
-        const size_t max_mc = divide_round_up(input_size, num_threads * target_tiles_per_thread);
-        if (max_mc < mc) {
-          mc = min(mc, divide_round_up(mc, max_mc * mr) * mr);
+      #if XNN_TEST_MODE
+        const size_t mc = mr;
+      #else
+        size_t mc = input_size;
+        if (num_threads > 1) {
+          const size_t target_tiles_per_thread = 5;
+          const size_t max_mc = divide_round_up(input_size, num_threads * target_tiles_per_thread);
+          if (max_mc < mc) {
+            mc = min(mc, divide_round_up(mc, max_mc * mr) * mr);
+          }
         }
-      }
+      #endif
       convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
       convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_spmm;
       convolution_op->compute.range[0] = batch_size;
@@ -681,16 +685,20 @@ static enum xnn_status setup_convolution2d_nchw(
       };
       memcpy(&convolution_op->context.conv2d.params, params, sizeof(convolution_op->context.conv2d.params));
 
-      size_t output_height_slice = output_height;
       const size_t output_height_tile = convolution_op->ukernel.conv2d.output_height_tile;
-      if (num_threads > 1) {
-        const size_t target_tiles_per_thread = 5;
-        const size_t max_output_height_slice = divide_round_up(output_height, num_threads * target_tiles_per_thread);
-        if (max_output_height_slice < output_height_slice) {
-          output_height_slice = min(output_height_slice,
-            divide_round_up(output_height_slice, max_output_height_slice * output_height_tile) * output_height_tile);
+      #if XNN_TEST_MODE
+        size_t output_height_slice = output_height_tile;
+      #else
+        size_t output_height_slice = output_height;
+        if (num_threads > 1) {
+          const size_t target_tiles_per_thread = 5;
+          const size_t max_output_height_slice = divide_round_up(output_height, num_threads * target_tiles_per_thread);
+          if (max_output_height_slice < output_height_slice) {
+            output_height_slice = min(output_height_slice,
+              divide_round_up(output_height_slice, max_output_height_slice * output_height_tile) * output_height_tile);
+          }
         }
-      }
+      #endif
       convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
       convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_conv2d_hwc2chw;
       convolution_op->compute.range[0] = batch_size;

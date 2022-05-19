@@ -293,17 +293,21 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
   };
 
   const size_t output_size = output_height * output_width;
-  size_t output_size_tile = output_size;
-  if (num_threads > 1) {
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_output_size_tile = divide_round_up(output_size, num_threads * target_tiles_per_thread);
-    if (max_output_size_tile < output_size_tile) {
-      const uint32_t output_size_subtile = ibilinear->pixel_tile;
-      output_size_tile =
-        min(output_size_tile,
-          divide_round_up(output_size_tile, max_output_size_tile * output_size_subtile) * output_size_subtile);
+  #if XNN_TEST_MODE
+    const size_t output_size_tile = ibilinear->pixel_tile;
+  #else
+    size_t output_size_tile = output_size;
+    if (num_threads > 1) {
+      const size_t target_tiles_per_thread = 5;
+      const size_t max_output_size_tile = divide_round_up(output_size, num_threads * target_tiles_per_thread);
+      if (max_output_size_tile < output_size_tile) {
+        const uint32_t output_size_subtile = ibilinear->pixel_tile;
+        output_size_tile =
+          min(output_size_tile,
+            divide_round_up(output_size_tile, max_output_size_tile * output_size_subtile) * output_size_subtile);
+      }
     }
-  }
+  #endif
   resize_op->compute.type = xnn_parallelization_type_2d_tile_1d;
   resize_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_resize_bilinear;
   resize_op->compute.range[0] = batch_size;

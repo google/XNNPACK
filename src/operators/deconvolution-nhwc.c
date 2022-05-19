@@ -755,15 +755,19 @@ static enum xnn_status setup_conv_path(
   };
   memcpy(&deconvolution_op->context.igemm.params, params, params_size);
 
-  size_t nc = group_output_channels;
-  if (num_threads > 1) {
-    const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+  #if XNN_TEST_MODE
+    const size_t nc = nr;
+  #else
+    size_t nc = group_output_channels;
+    if (num_threads > 1) {
+      const size_t num_other_tiles = groups * batch_size * divide_round_up(output_size, mr);
+      const size_t target_tiles_per_thread = 5;
+      const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+      if (max_nc < nc) {
+        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      }
     }
-  }
+  #endif
   if (groups == 1) {
     #if XNN_MAX_UARCH_TYPES > 1
       if (xnn_is_hmp_igemm_ukernel(igemm_ukernel)) {
@@ -997,16 +1001,20 @@ static enum xnn_status setup_subconv2d_path(
     memcpy(&deconvolution_op->context.subconv.params, params, params_size);
   }
 
-  size_t nc = group_output_channels;
-  if (num_threads > 1) {
-    const size_t num_other_tiles = groups * stride_height * stride_width *
-      output_height_positions * divide_round_up(output_width_positions, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+  #if XNN_TEST_MODE
+    const size_t nc = nr;
+  #else
+    size_t nc = group_output_channels;
+    if (num_threads > 1) {
+      const size_t num_other_tiles = groups * stride_height * stride_width *
+        output_height_positions * divide_round_up(output_width_positions, mr);
+      const size_t target_tiles_per_thread = 5;
+      const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+      if (max_nc < nc) {
+        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      }
     }
-  }
+  #endif
 
   if (groups == 1) {
     deconvolution_op->compute.type = xnn_parallelization_type_5d_tile_2d;
