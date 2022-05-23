@@ -14126,6 +14126,20 @@ xnnpack_unit_test(
     deps = OPERATOR_TEST_DEPS,
 )
 
+########################### Unit tests for subgraph ###########################
+
+xnnpack_unit_test(
+    name = "hardswish_test",
+    srcs = [
+        "test/hardswish.cc",
+    ],
+    deps = [
+        "operators_test_mode",
+        "subgraph_test_mode",
+        ":XNNPACK_test_mode",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(

@@ -7339,6 +7339,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main params_init logging subgraph operators)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
+  # ---[ Build subgraph-level unit tests
+  ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
+  TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  ADD_TEST(hardswish-test hardswish-test)
+
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
