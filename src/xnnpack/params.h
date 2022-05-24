@@ -4496,6 +4496,20 @@ struct xnn_parameters {
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_function rmax;
+    // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
+    struct spmm_parameters spmm;
+    // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
+    struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
+    // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
+    struct dwconv2d_chw_parameters dwconv2d_chw_3x3;
+    // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
+    struct dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
+    // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
+    struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
+    // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
+    struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
+    // Global Average Pooling in CW layout.
+    struct gavgpool_cw_parameters gavgpool_cw;
   } f16;
   struct {
     struct gemm_parameters gemm;
