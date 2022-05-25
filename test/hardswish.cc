@@ -56,10 +56,10 @@ TEST(HARD_SWISH, matches_operator_api)
 {
   std::random_device random_device;
   std::mt19937 rng(random_device());
-  std::uniform_real_distribution<> num_dims_dist(0, XNN_MAX_TENSOR_DIMS);
+  std::uniform_int_distribution<> num_dims_dist(0, XNN_MAX_TENSOR_DIMS);
   const size_t num_dims = num_dims_dist(rng);
   std::vector<size_t> dims(num_dims, 0);
-  std::uniform_real_distribution<> dim_size_dist(1, 9);
+  std::uniform_int_distribution<> dim_size_dist(1, 9);
   std::generate(dims.begin(), dims.end(), [&] { return dim_size_dist(rng); });
 
   const size_t channels = num_dims == 0 ? 1 : dims.back();
