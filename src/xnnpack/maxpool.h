@@ -85,8 +85,8 @@ DECLARE_U8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_u8_maxpool_minmax_ukernel_9p8x__w
       size_t output_increment,                              \
       const union xnn_s8_minmax_params* params);
 
+DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_2p2x__neon_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_4p3x__neon_c16)
-
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1)
 DECLARE_S8_MAXPOOL_MINMAX_UKERNEL_FUNCTION(xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16)

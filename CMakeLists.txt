@@ -1515,7 +1515,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-rndnu-neon-ld64-x16.c
   src/s8-ibilinear/gen/neon-c8.c
   src/s8-ibilinear/gen/neon-c16.c
-  src/s8-maxpool/4p3x-minmax-neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
   src/s8-vclamp/neon-x64.c
   src/u8-ibilinear/gen/neon-c8.c
@@ -2553,6 +2552,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-rndnu-neon-ld128-x16.c
   src/s8-ibilinear/gen/neon-c8.c
   src/s8-ibilinear/gen/neon-c16.c
+  src/s8-maxpool/2p2x-minmax-neon-c16.c
   src/s8-maxpool/4p3x-minmax-neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
   src/s8-vclamp/neon-x64.c
@@ -3255,13 +3255,6 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/minmax-fp32-neonv8-ld128-x16.c)
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c
-  src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4.c
-  src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-1x4.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4.c
-  src/f16-gavgpool-cw/neonfp16arith-x4.c
-  src/f16-spmm/gen/32x1-minmax-neonfp16arith.c
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
@@ -3269,6 +3262,11 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c
+  src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4.c
+  src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-1x4.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4.c
+  src/f16-gavgpool-cw/neonfp16arith-x4.c
   src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c
   src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c
   src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c
@@ -3282,6 +3280,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-prelu/gen/neonfp16arith-2x16.c
   src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
   src/f16-rmax/neonfp16arith.c
+  src/f16-spmm/gen/32x1-minmax-neonfp16arith.c
   src/f16-vbinary/gen/vadd-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
