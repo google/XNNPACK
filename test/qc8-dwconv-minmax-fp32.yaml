@@ -28,9 +28,17 @@
   init: xnn_init_qs8_minmax_neonv8_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__neonv8_mul16
   init: xnn_init_qs8_minmax_neonv8_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__neon_mla8_ld64
+  init: xnn_init_qs8_minmax_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__neon_mla8_ld64
   init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__neon_mla8_ld128
+  init: xnn_init_qs8_minmax_neon_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__neonv8_mla8_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__neonv8_mla8_ld64
+  init: xnn_init_qs8_minmax_neonv8_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__neonv8_mla8_ld128
   init: xnn_init_qs8_minmax_neonv8_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mla8_ld64
   init: xnn_init_qs8_minmax_neon_params
