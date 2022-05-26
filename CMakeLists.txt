@@ -1465,7 +1465,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-neon-x8.c
   src/f32-vunary/gen/vsqr-neon-x8.c
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neon-mla8-ld64.c
-  src/qc8-dwconv/gen/up16x3-minmax-fp32-neon-mla8-ld64.c
+  src/qc8-dwconv/gen/up16x3-minmax-fp32-neon-mla8-ld128.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neon-mla8-ld64.c
   src/qc8-gemm/gen/1x8c2s4-minmax-fp32-neon-mlal.c
@@ -3019,7 +3019,7 @@ SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/f32-vrnd/gen/vrndu-neonv8-x8.c
   src/f32-vrnd/gen/vrndz-neonv8-x8.c
   src/qc8-dwconv/gen/up8x25-minmax-fp32-neonv8-mla8-ld64.c
-  src/qc8-dwconv/gen/up16x3-minmax-fp32-neonv8-mla8-ld64.c
+  src/qc8-dwconv/gen/up16x3-minmax-fp32-neonv8-mla8-ld128.c
   src/qc8-dwconv/gen/up16x9-minmax-fp32-neonv8-mla8-ld64.c
   src/qc8-dwconv/gen/up16x25-minmax-fp32-neonv8-mla8-ld64.c
   src/qc8-gemm/gen/1x8-minmax-fp32-neonv8-mlal-lane-prfm.c
