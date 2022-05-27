@@ -300,7 +300,7 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
 
       if (cpuinfo_has_arm_neon_v8()) {
-        xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__neonv8_mla8_ld128;
+        xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__aarch32_neonv8_mla8_cortex_a35;
         xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_neonv8_params;
         xnn_params.qc8.dwconv[0].channel_tile = 16;
         xnn_params.qc8.dwconv[0].primary_tile = 3;
