@@ -6395,6 +6395,8 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx512skx-vpshufb-x256.c)
 
 SET(AARCH32_ASM_MICROKERNEL_SRCS
+  src/qc8-dwconv/up8x3-minmax-fp32-aarch32-neonv8-mla8-cortex-a35.S
+  src/qc8-dwconv/up16x3-minmax-fp32-aarch32-neonv8-mla8-cortex-a35.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
