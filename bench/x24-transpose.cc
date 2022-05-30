@@ -76,6 +76,11 @@ BENCHMARK_CAPTURE(transpose, 4x2_scalar, xnn_x24_transposec_ukernel__4x2_scalar)
 BENCHMARK_CAPTURE(transpose, 4x4_scalar, xnn_x24_transposec_ukernel__4x4_scalar)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
+#if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(transpose, 4x4_aarch64_neon_tbl, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_ARM64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

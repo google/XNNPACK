@@ -12,3 +12,6 @@
 - name: xnn_x24_transposec_ukernel__4x1_scalar
 - name: xnn_x24_transposec_ukernel__4x2_scalar
 - name: xnn_x24_transposec_ukernel__4x4_scalar
+
+# AArch64
+- name: xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl
