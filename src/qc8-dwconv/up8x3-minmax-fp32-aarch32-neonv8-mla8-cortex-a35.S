@@ -57,6 +57,7 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cor
         VDUP.8  d19, d20[3]              // output_max
         VDUP.16 q10, d20[0]              // output_zero_point
 
+        .p2align 3
 0:
         LDMIB   r2, {r5, r6}             // i0, i1
         LDR     r8, [r2]                 // i2
@@ -68,7 +69,7 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cor
         ADDNE   r8, r8, r7               // i2 += input_offset
 
         MOV     lr, r3
-        MOV     r11, r0  // channel count as is, fall into loop
+        MOV     r11, r0                 // channel count as is, fall into loop
 
 // Main loop - 8 channels
 // lr weights.  r3 reset
@@ -83,19 +84,20 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cor
 //   32 quant scale - 8 int
 //   88 bytes total
 
+        .p2align 3
 1:
-        VLD1.8  {q12, q13}, [lr]!  // load bias
+        VLD1.8  {q12, q13}, [lr]!       // load bias
 
-        VLD1.8  {d4}, [r8]!        // i2
-        VLD1.8  {d7}, [lr]!        // w0
-        VLD1.8  {d5}, [r5]!        // i0
-        VLD1.8  {d16}, [lr]!       // w1
-        VLD1.8  {d6}, [r6]!        // i1
-        VLD1.8  {d17}, [lr]!       // w2
+        VLD1.8  {d4}, [r8]!             // i2
+        VLD1.8  {d7}, [lr]!             // w0
+        VLD1.8  {d5}, [r5]!             // i0
+        VLD1.8  {d16}, [lr]!            // w1
+        VLD1.8  {d6}, [r6]!             // i1
+        VLD1.8  {d17}, [lr]!            // w2
 
-        VMULL.S8 q1, d4, d7        // i2 * w0
-        VMLAL.S8 q1, d5, d16       // i0 * w1
-        VMULL.S8 q0, d6, d17       // i1 * w2
+        VMULL.S8 q1, d4, d7             // i2 * w0
+        VMLAL.S8 q1, d5, d16            // i0 * w1
+        VMULL.S8 q0, d6, d17            // i1 * w2
 
 
         VADDW.S16 q12, q12, d0
@@ -103,7 +105,7 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cor
         VADDW.S16 q12, q12, d2
         VADDW.S16 q13, q13, d3
 
-        VLD1.32 {q0, q1}, [lr]!    // quant per channel scale values
+        VLD1.32 {q0, q1}, [lr]!         // quant per channel scale values
 
         // QC8 FP32 quantization
 
@@ -118,27 +120,28 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cor
 
         VQMOVN.S32 d24, q12
         VQMOVN.S32 d25, q13
-        SUBS    r11, r11, 8     // 8 channels per loop
+        SUBS    r11, r11, 8             // 8 channels per loop
 
         VQADD.S16 q12, q12, q10
         VQMOVN.S16 d24, q12
         VMIN.S8 d24, d24, d19
         VMAX.S8 d24, d24, d18
 
-        BLO     3f              // less than 8?
+        BLO     3f                      // less than 8?
 
         VST1.8  {d24}, [r10]!
-        BHI     1b              // at least 1, continue loop
+        BHI     1b                      // at least 1, continue loop
 
 2:
-        SUBS    r1, r1, 1         // output_width
-        ADD     r10, r10, r12     // output += output_increment
-        ADD     r2, r2, r9        // input += input_stride
+        SUBS    r1, r1, 1               // output_width
+        ADD     r10, r10, r12           // output += output_increment
+        ADD     r2, r2, r9              // input += input_stride
         BNE     0b
 
         ADD     sp, sp, 4
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
+        .p2align 3
         // Store 4
 3:
         TST     r11, 4
