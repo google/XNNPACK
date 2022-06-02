@@ -127,12 +127,12 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_p
 
         // Prologue - load 4A's and B0
         VLD1.8  {d0},  [r3]!            // A0
+        VLD1.8  {d8},  [r9]!            // B0
+        SUBS    r5, r5, 8               // k = k - 8
         VLD1.8  {d2}, [r12]!            // A1
         VLD1.8  {d4}, [r10]!            // A2
         VLD1.8  {d6},  [r0]!            // A3
-        VLD1.8  {d8},  [r9]!            // B0
 
-        SUBS    r5, r5, 8               // k = k - 8
         BLO     3f                      // less than 8 channels?
 
         // Main loop - 8 bytes
@@ -547,8 +547,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_p
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d0[0]}, [r11]!
-        VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
+        VEXT.8  q0, q0, q0, 4
 8:
         TST     r1, 2
         BEQ     9f
@@ -556,8 +556,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_p
         VST1.16 {d2[0]}, [r8]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d0[0]}, [r11]!
-        VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
+        VEXT.8  q0, q0, q0, 2
 
 9:
         TST     r1, 1

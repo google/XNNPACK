@@ -83,9 +83,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__aarch32_neon_mlal_lane_prf
 
         // Prologue - load A0 and B0
         VLD1.8  {d0},  [r3]!            // A0
-        VLD1.8  {d8},  [r9]!            // B0
-
         SUBS    r5, r5, 8               // k = k - 8
+        VLD1.8  {d8},  [r9]!            // B0
         BLO     2f                      // less than 8 channels?
 
         // Main loop - 8 bytes
@@ -189,10 +188,10 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__aarch32_neon_mlal_lane_prf
         VMLAL.S16 q8, d8, d1[2]
         VMLAL.S16 q9, d9, d1[2]
         VSUBL.U8 q5, d10, d14
+        ADDS    r5, r5, 8
 
         VMLAL.S16 q2, d10, d1[3]
         VMLAL.S16 q3, d11, d1[3]
-        ADDS    r5, r5, 8
 
         # Is there a remainder?- 1-7 bytes of A
         BNE     4f

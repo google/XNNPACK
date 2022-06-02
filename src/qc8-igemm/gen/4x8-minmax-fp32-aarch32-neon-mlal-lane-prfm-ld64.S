@@ -444,8 +444,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VST1.32 {d2[0]}, [r8]!
         VST1.32 {d1[0]}, [r4]!
         VST1.32 {d0[0]}, [r11]!
-        VEXT.8  q0, q0, q0, 4
         VEXT.8  q1, q1, q1, 4
+        VEXT.8  q0, q0, q0, 4
 6:
         TST     r1, 2
         BEQ     7f
@@ -453,8 +453,8 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_prf
         VST1.16 {d2[0]}, [r8]!
         VST1.16 {d1[0]}, [r4]!
         VST1.16 {d0[0]}, [r11]!
-        VEXT.8  q0, q0, q0, 2
         VEXT.8  q1, q1, q1, 2
+        VEXT.8  q0, q0, q0, 2
 
 7:
         TST     r1, 1

@@ -466,8 +466,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vst1_32({d2[0]}, mem[r8]++);
   vst1_32({d1[0]}, mem[r4]++);
   vst1_32({d0[0]}, mem[r11]++);
-  vext_8(q0, q0, q0, 4);
   vext_8(q1, q1, q1, 4);
+  vext_8(q0, q0, q0, 4);
   bind(l6);
   tst(r1, 2);
   beq(l7);
@@ -475,8 +475,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vst1_16({d2[0]}, mem[r8]++);
   vst1_16({d1[0]}, mem[r4]++);
   vst1_16({d0[0]}, mem[r11]++);
-  vext_8(q0, q0, q0, 2);
   vext_8(q1, q1, q1, 2);
+  vext_8(q0, q0, q0, 2);
 
   bind(l7);
   tst(r1, 1);
