@@ -327,6 +327,11 @@ XNN_INTERNAL void* xnn_get_pointer_to_write_weights(
 #ifdef __cplusplus
 extern "C" {
 #endif
+XNN_INTERNAL size_t xnn_compute_convolution_output_dimension(
+  size_t padded_input_dimension,
+  size_t kernel_dimension,
+  size_t dilation_dimension,
+  size_t subsampling_dimension);
 XNN_INTERNAL uint32_t xnn_get_heuristic_mr_gemm(
   size_t batch_size,
   uint32_t max_mr,

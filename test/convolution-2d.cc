@@ -54,8 +54,8 @@ protected:
     group_output_channels = input_size_dist(rng);
     output_min = -std::numeric_limits<float>::infinity();
     output_max = std::numeric_limits<float>::infinity();
-    output_height = doz(input_height, (kernel_height - 1) * dilation_height + 1) / subsampling_height + 1;
-    output_width = doz(input_width, (kernel_width - 1) * dilation_width + 1) / subsampling_width + 1;
+    output_height = xnn_compute_convolution_output_dimension(input_height, kernel_height, dilation_height, subsampling_height);
+    output_width = xnn_compute_convolution_output_dimension(input_width, kernel_width, dilation_width, subsampling_width);
 
     input_dims = {{batch_size, input_height, input_width, group_input_channels}};
     filter_dims = {{groups * group_output_channels, kernel_height, kernel_width, group_input_channels}};

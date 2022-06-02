@@ -1289,12 +1289,12 @@ static enum xnn_status setup_convolution2d_nhwc(
     convolution_op->padding_bottom = total_padding_height - convolution_op->padding_top;
     convolution_op->padding_right = total_padding_width - convolution_op->padding_left;
   } else {
-    convolution_op->output_height = compute_output_dimension(
+    convolution_op->output_height = xnn_compute_convolution_output_dimension(
         convolution_op->padding_top + input_height + convolution_op->padding_bottom,
         convolution_op->kernel_height,
         convolution_op->dilation_height,
         convolution_op->stride_height);
-    convolution_op->output_width = compute_output_dimension(
+    convolution_op->output_width = xnn_compute_convolution_output_dimension(
         convolution_op->padding_left + input_width + convolution_op->padding_right,
         convolution_op->kernel_width,
         convolution_op->dilation_width,

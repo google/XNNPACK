@@ -27,14 +27,6 @@
 #include <xnnpack/indirection.h>
 
 
-static inline size_t compute_output_dimension(
-    size_t padded_input_dimension,
-    size_t pooling_dimension,
-    size_t stride_dimension)
-{
-  return (padded_input_dimension - pooling_dimension) / stride_dimension + 1;
-}
-
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension,
     size_t stride_dimension)
@@ -640,13 +632,15 @@ static enum xnn_status setup_average_pooling2d(
     average_pooling_op->padding_bottom = total_padding_height - average_pooling_op->padding_top;
     average_pooling_op->padding_right = total_padding_width - average_pooling_op->padding_left;
   } else {
-    average_pooling_op->output_height = compute_output_dimension(
+    average_pooling_op->output_height = xnn_compute_convolution_output_dimension(
         average_pooling_op->padding_top + input_height + average_pooling_op->padding_bottom,
         average_pooling_op->kernel_height,
+        1,
         average_pooling_op->stride_height);
-    average_pooling_op->output_width = compute_output_dimension(
+    average_pooling_op->output_width = xnn_compute_convolution_output_dimension(
         average_pooling_op->padding_left + input_width + average_pooling_op->padding_right,
         average_pooling_op->kernel_width,
+        1,
         average_pooling_op->stride_width);
   }
   average_pooling_op->output = output;

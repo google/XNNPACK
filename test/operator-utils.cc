@@ -8,6 +8,12 @@
 #include <xnnpack/params.h>
 #include <gtest/gtest.h>
 
+TEST(COMPUTE_CONVOLUTION_OUTPUT_DMENSION, compute) {
+  ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 1), 3);
+  ASSERT_EQ(xnn_compute_convolution_output_dimension(10, 3, 2, 1), 6);
+  ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 2), 2);
+}
+
 namespace {
 // A dummy, nop microkernel for testing.
 void dummy_gemm(size_t mr, size_t nr, size_t k, const void *a, size_t a_stride,

@@ -24,16 +24,6 @@
 #include <xnnpack/params.h>
 
 
-static inline size_t compute_output_dimension(
-    size_t padded_input_dimension,
-    size_t kernel_dimension,
-    size_t dilation_dimension,
-    size_t subsampling_dimension)
-{
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
-  return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
-}
-
 enum xnn_status xnn_create_convolution2d_nchw_f32(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -577,12 +567,12 @@ static enum xnn_status setup_convolution2d_nchw(
   convolution_op->input = input;
   convolution_op->output = output;
 
-  const size_t output_height = compute_output_dimension(
+  const size_t output_height = xnn_compute_convolution_output_dimension(
       convolution_op->padding_top + input_height + convolution_op->padding_bottom,
       convolution_op->kernel_height,
       convolution_op->dilation_height,
       convolution_op->stride_height);
-  const size_t output_width = compute_output_dimension(
+  const size_t output_width = xnn_compute_convolution_output_dimension(
       convolution_op->padding_left + input_width + convolution_op->padding_right,
       convolution_op->kernel_width,
       convolution_op->dilation_width,
