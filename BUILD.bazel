@@ -14150,6 +14150,18 @@ xnnpack_unit_test(
 ########################### Unit tests for subgraph ###########################
 
 xnnpack_unit_test(
+    name = "convolution_2d_test",
+    srcs = [
+        "test/convolution-2d.cc",
+    ],
+    deps = [
+        "operators_test_mode",
+        "subgraph_test_mode",
+        ":XNNPACK_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "hardswish_test",
     srcs = [
         "test/hardswish.cc",
