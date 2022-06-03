@@ -237,3 +237,13 @@ static inline int8_t xnn_qs8_quantize_add(
   acc = math_min_s32(acc, params.scalar.output_max_less_zero_point);
   return (int8_t) ((int32_t) acc + params.scalar.output_zero_point);
 }
+
+inline static int8_t xnn_qs8_quantize(float val, float scale, int32_t zero_point)
+{
+  return (int8_t) lrintf(fminf(fmaxf(val / scale + (float) zero_point, -128.0f), 127.0f));
+}
+
+inline static uint8_t xnn_qu8_quantize(float val, float scale, int32_t zero_point)
+{
+  return (uint8_t) lrintf(fminf(fmaxf(val / scale + (float) zero_point, 0.0f), 255.0f));
+}

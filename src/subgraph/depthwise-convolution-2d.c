@@ -12,6 +12,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/params.h>
+#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
 
@@ -138,10 +139,8 @@ static enum xnn_status create_convolution_operator(
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
-        const int8_t output_min =
-          (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
-        const int8_t output_max =
-          (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+        const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
+        const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
         status = xnn_create_convolution2d_nhwc_qs8(
           node->params.depthwise_convolution_2d.input_padding_top,
           node->params.depthwise_convolution_2d.input_padding_right,
@@ -174,10 +173,8 @@ static enum xnn_status create_convolution_operator(
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
-        const int8_t output_min =
-          (int8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, -128.0f), 127.0f));
-        const int8_t output_max =
-          (int8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, -128.0f), 127.0f));
+        const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
+        const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
         status = xnn_create_convolution2d_nhwc_qc8(
           node->params.depthwise_convolution_2d.input_padding_top,
           node->params.depthwise_convolution_2d.input_padding_right,
@@ -212,10 +209,8 @@ static enum xnn_status create_convolution_operator(
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
-        const uint8_t output_min =
-          (uint8_t) lrintf(fminf(fmaxf(node->activation.output_min / output_scale + (float) output_zero_point, 0.0f), 255.0f));
-        const uint8_t output_max =
-          (uint8_t) lrintf(fminf(fmaxf(node->activation.output_max / output_scale + (float) output_zero_point, 0.0f), 255.0f));
+        const uint8_t output_min = xnn_qu8_quantize(node->activation.output_min, output_scale, output_zero_point);
+        const uint8_t output_max = xnn_qu8_quantize(node->activation.output_max, output_scale, output_zero_point);
         status = xnn_create_convolution2d_nhwc_qu8(
           node->params.depthwise_convolution_2d.input_padding_top,
           node->params.depthwise_convolution_2d.input_padding_right,

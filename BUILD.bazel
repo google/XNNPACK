@@ -10493,6 +10493,7 @@ xnnpack_cc_library(
         ":math",
         ":operators",
         ":params",
+        ":requantization",
         ":xnnpack_h",
         "@FP16",
     ],
@@ -10527,6 +10528,7 @@ xnnpack_cc_library(
         ":math",
         ":operators",
         ":params",
+        ":requantization",
         ":xnnpack_h",
         "@FP16",
     ],
@@ -14148,6 +14150,20 @@ xnnpack_unit_test(
 )
 
 ########################### Unit tests for subgraph ###########################
+
+xnnpack_unit_test(
+    name = "add2_test",
+    srcs = [
+        "test/add2.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
 
 xnnpack_unit_test(
     name = "convolution_2d_test",

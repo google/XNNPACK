@@ -7361,16 +7361,21 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
   # ---[ Build subgraph-level unit tests
-  ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
-  ADD_TEST(hardswish-test hardswish-test)
+  ADD_EXECUTABLE(add2-test test/add2.cc)
+  TARGET_INCLUDE_DIRECTORIES(add2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(add2-test add2-test)
 
   ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
   SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK gtest gtest_main subgraph)
   ADD_TEST(convolution-2d-test convolution-2d-test)
+
+  ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
+  TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  ADD_TEST(hardswish-test hardswish-test)
 
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
