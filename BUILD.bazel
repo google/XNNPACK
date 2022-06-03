@@ -14186,9 +14186,9 @@ xnnpack_unit_test(
         "test/convolution-2d.cc",
     ],
     deps = [
-        "operators_test_mode",
-        "subgraph_test_mode",
         ":XNNPACK_test_mode",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
     ],
 )
 
@@ -14198,9 +14198,9 @@ xnnpack_unit_test(
         "test/hardswish.cc",
     ],
     deps = [
-        "operators_test_mode",
-        "subgraph_test_mode",
         ":XNNPACK_test_mode",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
     ],
 )
 
