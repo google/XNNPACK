@@ -14221,6 +14221,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "maximum2_test",
+    srcs = [
+        "test/maximum2.cc",
+        "test/subgraph-binary-tester.h",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "multiply2_test",
     srcs = [
         "test/multiply2.cc",
