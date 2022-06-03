@@ -14220,6 +14220,21 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "subtract2_test",
+    srcs = [
+        "test/subgraph-binary-tester.h",
+        "test/subtract2.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(

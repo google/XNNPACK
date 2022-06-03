@@ -7387,6 +7387,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
   ADD_TEST(hardswish-test hardswish-test)
 
+  ADD_EXECUTABLE(subtract2-test test/subtract2.cc)
+  TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(subtract2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(subtract2-test subtract2-test)
+
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
