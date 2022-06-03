@@ -7387,6 +7387,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
   ADD_TEST(hardswish-test hardswish-test)
 
+  ADD_EXECUTABLE(multiply2-test test/multiply2.cc)
+  TARGET_INCLUDE_DIRECTORIES(multiply2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(multiply2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(multiply2-test multiply2-test)
+
   ADD_EXECUTABLE(subtract2-test test/subtract2.cc)
   TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(subtract2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
