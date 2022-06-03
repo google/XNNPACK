@@ -6,8 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
 #include <stddef.h>
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -159,7 +159,7 @@ void xnn_compute_transposev_2d(
   const size_t ld_output = context->output_stride[0];
   const void* x = (const void*) ((uintptr_t) context->x +
                                  i * context->input_stride[0] + j * ld_input);
-  void* y = (void*) ((uintptr_t) context->y + element_size * j + i * context->output_stride[0]);
+  void* y = (void*) ((uintptr_t) context->y + context->output_stride[1] * j + i * context->output_stride[0]);
 
   context->variable_size_ukernel(
       x,
@@ -167,6 +167,8 @@ void xnn_compute_transposev_2d(
       ld_input,
       ld_output,
       element_size,
+      context->input_stride[0],
+      context->output_stride[1],
       tile_i,
       tile_j);
 }
@@ -185,7 +187,7 @@ void xnn_compute_transposev_3d(
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
                                  k * ld_input);
   void* y = (void*)((uintptr_t)context->y + i * context->output_stride[0] + j * context->output_stride[1] +
-                     k * element_size);
+                     k * context->output_stride[2]);
 
   context->variable_size_ukernel(
       x,
@@ -193,6 +195,8 @@ void xnn_compute_transposev_3d(
       ld_input,
       ld_output,
       element_size,
+      context->input_stride[1],
+      context->output_stride[2],
       tile_j,
       tile_k);
 }
@@ -211,7 +215,7 @@ void xnn_compute_transposev_4d(
   const size_t ld_output = context->output_stride[2];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
                                  k * context->input_stride[2] + l * ld_input);
-  void* y = (void*)((uintptr_t)context->y + element_size * l + i * context->output_stride[0] +
+  void* y = (void*)((uintptr_t)context->y + context->output_stride[3] * l + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2]);
 
   context->variable_size_ukernel(
@@ -220,6 +224,8 @@ void xnn_compute_transposev_4d(
       ld_input,
       ld_output,
       element_size,
+      context->input_stride[2],
+      context->output_stride[3],
       tile_k,
       tile_l);
 }
@@ -239,7 +245,7 @@ void xnn_compute_transposev_5d(
   const size_t ld_output = context->output_stride[3];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
                                  k * context->input_stride[2] + l * context->input_stride[3] + m * ld_input);
-  void* y = (void*)((uintptr_t)context->y + element_size * m + i * context->output_stride[0] +
+  void* y = (void*)((uintptr_t)context->y + context->output_stride[4] * m + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2] + l * context->output_stride[3]);
 
   context->variable_size_ukernel(
@@ -248,6 +254,8 @@ void xnn_compute_transposev_5d(
       ld_input,
       ld_output,
       element_size,
+      context->input_stride[3],
+      context->output_stride[4],
       tile_l,
       tile_m);
 }
@@ -269,7 +277,7 @@ void xnn_compute_transposev_6d(
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
                                  k * context->input_stride[2] + l * context->input_stride[3] +
                                  m * context->input_stride[4] + n * ld_input);
-  void* y = (void*)((uintptr_t)context->y + element_size * n + i * context->output_stride[0] +
+  void* y = (void*)((uintptr_t)context->y + context->output_stride[5] * n + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2] + l * context->output_stride[3] +
                      m * context->output_stride[4]);
 
@@ -279,6 +287,8 @@ void xnn_compute_transposev_6d(
       ld_input,
       ld_output,
       element_size,
+      context->input_stride[4],
+      context->output_stride[4],
       tile_m,
       tile_n);
 }
@@ -660,62 +670,6 @@ void xnn_compute_dwconv2d_chw(
     (void*) ((uintptr_t) context->output + channel * context->output_channel_stride + batch_index * context->output_batch_stride),
     context->input_padding_top,
     &context->params);
-}
-
-void xnn_compute_depthtospace2d_hwc_contiguous(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y)
-{
-  const size_t input_width = context->input_width;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    (batch_input_y * input_width + input_x) * context->input_width_stride + block_y * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    ((batch_input_y * context->block_size + block_y) * input_width + input_x) * elements);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
-void xnn_compute_depthtospace2d_hwc_strided(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y,
-    size_t block_x)
-{
-  const size_t block_size = context->block_size;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    batch_input_y * context->input_height_stride + input_x * context->input_width_stride + (block_y * block_size + block_x) * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    (batch_input_y * block_size + block_y) * context->output_height_stride +
-    (input_x * block_size + block_x) * context->output_width_stride);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
-void xnn_compute_depthtospace2d_chw2hwc(
-    const struct depthtospace2d_chw2hwc_context* context,
-    size_t batch_index)
-{
-  context->ukernel(
-    context->output_channels,
-    context->input_height,
-    context->input_width,
-    context->block_size,
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride),
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride),
-    context->output_channel_stride);
 }
 
 void xnn_compute_argmax_pooling_unipass(

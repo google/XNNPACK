@@ -20,6 +20,8 @@ extern "C" {
                             size_t input_stride,        \
                             size_t output_stride,       \
                             size_t element_size,        \
+                            size_t input_inner_size,    \
+                            size_t output_inner_size,   \
                             size_t block_width,         \
                             size_t block_height);
 

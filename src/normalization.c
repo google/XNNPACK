@@ -30,6 +30,7 @@ void xnn_normalize_transpose_permutation(
     const size_t element_size,
     const size_t* perm,
     const size_t* shape,
+    int remove_dimensions,
     size_t* normalized_num_dims,
     size_t* normalized_element_size_out,
     size_t* normalized_perm,
@@ -39,32 +40,36 @@ void xnn_normalize_transpose_permutation(
   memcpy(normalized_perm, perm, num_dims * sizeof(size_t));
   normalized_shape[normalized_perm[0]] = shape[perm[0]];
   size_t output_pos = 0;
-  for (size_t input_pos = 0; input_pos < num_dims; ++input_pos) {
-    if (shape[perm[input_pos]] == 1) {
-      remove_dimension(normalized_shape, normalized_perm, output_dims, output_pos);
-      output_dims -= 1;
-    } else {
-      normalized_shape[normalized_perm[output_pos]] = shape[perm[input_pos]];
-      output_pos += 1;
+  if (remove_dimensions) {
+    for (size_t input_pos = 0; input_pos < num_dims; ++input_pos) {
+      if (shape[perm[input_pos]] == 1) {
+        remove_dimension(normalized_shape, normalized_perm, output_dims, output_pos);
+        output_dims -= 1;
+      } else {
+        normalized_shape[normalized_perm[output_pos]] = shape[perm[input_pos]];
+        output_pos += 1;
+      }
     }
-  }
-  if (output_pos == 0) {
-    *normalized_num_dims = 1;
-    *normalized_element_size_out = element_size;
-    normalized_perm[0] = 0;
-    normalized_shape[0] = 1;
-    return;
-  }
-  output_pos = 1;
-  for (size_t input_pos = 1; input_pos < output_dims;) {
-    if (normalized_perm[output_pos] == normalized_perm[output_pos - 1] + 1) {
-      normalized_shape[normalized_perm[output_pos - 1]] *= normalized_shape[normalized_perm[output_pos]];
-      remove_dimension(normalized_shape, normalized_perm, num_dims, output_pos);
-      output_dims -= 1;
-    } else {
-      input_pos += 1;
-      output_pos += 1;
+    if (output_pos == 0) {
+      *normalized_num_dims = 1;
+      *normalized_element_size_out = element_size;
+      normalized_perm[0] = 0;
+      normalized_shape[0] = 1;
+      return;
     }
+    output_pos = 1;
+    for (size_t input_pos = 1; input_pos < output_dims;) {
+      if (normalized_perm[output_pos] == normalized_perm[output_pos - 1] + 1) {
+        normalized_shape[normalized_perm[output_pos - 1]] *= normalized_shape[normalized_perm[output_pos]];
+        remove_dimension(normalized_shape, normalized_perm, num_dims, output_pos);
+        output_dims -= 1;
+      } else {
+        input_pos += 1;
+        output_pos += 1;
+      }
+    }
+  } else {
+    memcpy(normalized_shape, shape, sizeof(size_t) * num_dims);
   }
   size_t normalized_element_size = element_size;
   if (normalized_perm[output_dims - 1] == output_dims - 1) {

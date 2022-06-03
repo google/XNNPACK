@@ -77,6 +77,8 @@ class TransposeMicrokernelTester {
               input_stride() * element_size(),
               output_stride() * element_size(),
               element_size(),
+              element_size(),
+              element_size(),
               block_width(),
               block_height());
 

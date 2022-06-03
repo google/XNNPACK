@@ -73,8 +73,8 @@ class TransposeNormalizationTester {
     std::vector<size_t> actual_normalized_shape(num_dims());
     std::vector<size_t> actual_normalized_perm(num_dims());
 
-    xnn_normalize_transpose_permutation(num_dims(), element_size(), perm_.data(),
-                                        shape_.data(), &actual_normalized_dims, &actual_element_size,
+    xnn_normalize_transpose_permutation(num_dims(), element_size(), perm_.data(), shape_.data(),
+                                        true, &actual_normalized_dims, &actual_element_size,
                                         actual_normalized_perm.data(), actual_normalized_shape.data());
     EXPECT_EQ(expected_element_size(), actual_element_size);
     EXPECT_EQ(expected_normalized_dims(), actual_normalized_dims);

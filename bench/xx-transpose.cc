@@ -39,8 +39,8 @@ void transpose(
   std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
-    transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, element_size, width,
-              height);
+    transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, element_size,
+              element_size, element_size, width, height);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
