@@ -7366,6 +7366,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(add2-test add2-test)
 
+  ADD_EXECUTABLE(clamp-test test/clamp.cc)
+  TARGET_INCLUDE_DIRECTORIES(clamp-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(clamp-test clamp-test)
+
   ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
   SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)

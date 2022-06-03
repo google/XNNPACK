@@ -14166,6 +14166,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "clamp_test",
+    srcs = [
+        "test/clamp.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":logging",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = [
         "test/convolution-2d.cc",
