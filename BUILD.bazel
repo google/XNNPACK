@@ -14155,6 +14155,7 @@ xnnpack_unit_test(
     name = "add2_test",
     srcs = [
         "test/add2.cc",
+        "test/subgraph-binary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
@@ -14188,6 +14189,21 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "divide2_test",
+    srcs = [
+        "test/divide2.cc",
+        "test/subgraph-binary-tester.h",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
         ":subgraph_test_mode",
     ],
 )

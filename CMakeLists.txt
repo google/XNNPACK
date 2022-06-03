@@ -7377,6 +7377,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK gtest gtest_main subgraph)
   ADD_TEST(convolution-2d-test convolution-2d-test)
 
+  ADD_EXECUTABLE(divide2-test test/divide2.cc)
+  TARGET_INCLUDE_DIRECTORIES(divide2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(divide2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(divide2-test divide2-test)
+
   ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
