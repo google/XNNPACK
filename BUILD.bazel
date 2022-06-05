@@ -9916,6 +9916,7 @@ xnnpack_cc_library(
     name = "logging",
     srcs = [
         "src/datatype-strings.c",
+        "src/log.c",
         "src/node-type.c",
         "src/operator-strings.c",
         "src/ukernel-strings.c",
@@ -9951,7 +9952,6 @@ xnnpack_cc_library(
         ":node_type",
         ":xnnpack_h",
         ":common",
-        "@clog",
     ],
 )
 
