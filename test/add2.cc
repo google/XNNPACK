@@ -178,8 +178,8 @@ TEST_F(Add2TestQS8, matches_operator_api)
 {
   std::generate(input1.begin(), input1.end(), [&]() { return i8dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), 0xAA);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), 0xAA);
+  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
   const int32_t input1_zero_point = i8dist(rng);
   const float input1_scale = scale_dist(rng);
@@ -259,8 +259,8 @@ TEST_F(Add2TestQU8, matches_operator_api)
 {
   std::generate(input1.begin(), input1.end(), [&]() { return u8dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), 0xAA);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), 0xAA);
+  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   const int32_t input1_zero_point = u8dist(rng);
   const float input1_scale = scale_dist(rng);
