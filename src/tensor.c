@@ -251,6 +251,26 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
   return xnn_status_success;
 }
 
+size_t xnn_shape_multiply_all_dims(
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i < shape->num_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
+size_t xnn_shape_multiply_non_channel_dims(
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i + 1 < shape->num_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,
   uint32_t value_id)
@@ -282,29 +302,5 @@ size_t xnn_tensor_get_size(
       XNN_UNREACHABLE;
   }
 
-  for (size_t i = 0; i < value->shape.num_dims; i++) {
-    size *= value->shape.dim[i];
-  }
-
-  return size;
-}
-
-size_t xnn_shape_multiply_all_dims(
-  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
-{
-  size_t batch_size = 1;
-  for (size_t i = 0; i < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
-  }
-  return batch_size;
-}
-
-size_t xnn_shape_multiply_non_channel_dims(
-  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
-{
-  size_t batch_size = 1;
-  for (size_t i = 0; i + 1 < shape->num_dims; i++) {
-    batch_size *= shape->dim[i];
-  }
-  return batch_size;
+  return size * xnn_shape_multiply_all_dims(&value->shape);
 }
