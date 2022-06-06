@@ -7377,7 +7377,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(hardswish-test hardswish-test)
 
   ADD_EXECUTABLE(maximum2-test test/maximum2.cc)
@@ -7389,6 +7389,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(multiply2-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(multiply2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(multiply2-test multiply2-test)
+
+  ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
+  SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
+  TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(sigmoid-test sigmoid-test)
 
   ADD_EXECUTABLE(subtract2-test test/subtract2.cc)
   TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)

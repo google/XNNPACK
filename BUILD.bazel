@@ -14170,6 +14170,7 @@ xnnpack_unit_test(
     name = "clamp_test",
     srcs = [
         "test/clamp.cc",
+        "test/subgraph-unary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
@@ -14243,6 +14244,22 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "sigmoid_test",
+    srcs = [
+        "test/sigmoid.cc",
+        "test/subgraph-unary-tester.h",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":logging",
         ":node_type",
         ":operators_test_mode",
         ":requantization",
