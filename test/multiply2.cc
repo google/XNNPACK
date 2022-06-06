@@ -13,7 +13,6 @@
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
 #include "subgraph-binary-tester.h"

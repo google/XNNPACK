@@ -14151,17 +14151,48 @@ xnnpack_unit_test(
 
 ########################### Unit tests for subgraph ###########################
 
+xnnpack_cc_library(
+    name = "subgraph_unary_tester",
+    testonly = True,
+    hdrs = [
+        "test/subgraph-unary-tester.h",
+    ],
+    deps = [
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+        ":xnnpack_h",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "subgraph_binary_tester",
+    testonly = True,
+    hdrs = [
+        "test/subgraph-binary-tester.h",
+    ],
+    deps = [
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+        ":xnnpack_h",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 xnnpack_unit_test(
     name = "add2_test",
     srcs = [
         "test/add2.cc",
-        "test/subgraph-binary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
+        ":subgraph_binary_tester",
         ":subgraph_test_mode",
     ],
 )
@@ -14170,15 +14201,13 @@ xnnpack_unit_test(
     name = "clamp_test",
     srcs = [
         "test/clamp.cc",
-        "test/subgraph-unary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
-        ":logging",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
         ":subgraph_test_mode",
+        ":subgraph_unary_tester",
     ],
 )
 
@@ -14198,13 +14227,12 @@ xnnpack_unit_test(
     name = "divide2_test",
     srcs = [
         "test/divide2.cc",
-        "test/subgraph-binary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
+        ":subgraph_binary_tester",
         ":subgraph_test_mode",
     ],
 )
@@ -14216,8 +14244,10 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":node_type",
         ":operators_test_mode",
         ":subgraph_test_mode",
+        ":subgraph_unary_tester",
     ],
 )
 
@@ -14225,13 +14255,12 @@ xnnpack_unit_test(
     name = "maximum2_test",
     srcs = [
         "test/maximum2.cc",
-        "test/subgraph-binary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
+        ":subgraph_binary_tester",
         ":subgraph_test_mode",
     ],
 )
@@ -14240,13 +14269,12 @@ xnnpack_unit_test(
     name = "multiply2_test",
     srcs = [
         "test/multiply2.cc",
-        "test/subgraph-binary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
+        ":subgraph_binary_tester",
         ":subgraph_test_mode",
     ],
 )
@@ -14255,29 +14283,26 @@ xnnpack_unit_test(
     name = "sigmoid_test",
     srcs = [
         "test/sigmoid.cc",
-        "test/subgraph-unary-tester.h",
     ],
     deps = [
         ":XNNPACK_test_mode",
-        ":logging",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
         ":subgraph_test_mode",
+        ":subgraph_unary_tester",
     ],
 )
 
 xnnpack_unit_test(
     name = "subtract2_test",
     srcs = [
-        "test/subgraph-binary-tester.h",
         "test/subtract2.cc",
     ],
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
-        ":requantization",
+        ":subgraph_binary_tester",
         ":subgraph_test_mode",
     ],
 )

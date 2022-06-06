@@ -12,12 +12,16 @@
 #include <vector>      // For std::vector.
 
 #include <xnnpack.h>
+#include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
+#include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
-TEST(HARD_SWISH, define)
+using HardSwishTestF32 = UnaryTest<float>;
+
+TEST_F(HardSwishTestF32, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -52,24 +56,8 @@ TEST(HARD_SWISH, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST(HARD_SWISH, matches_operator_api)
+TEST_F(HardSwishTestF32, matches_operator_api)
 {
-  std::random_device random_device;
-  std::mt19937 rng(random_device());
-  std::uniform_int_distribution<> num_dims_dist(0, XNN_MAX_TENSOR_DIMS);
-  const size_t num_dims = num_dims_dist(rng);
-  std::vector<size_t> dims(num_dims, 0);
-  std::uniform_int_distribution<> dim_size_dist(1, 9);
-  std::generate(dims.begin(), dims.end(), [&] { return dim_size_dist(rng); });
-
-  const size_t channels = num_dims == 0 ? 1 : dims.back();
-  xnn_shape shape = {
-    .num_dims = dims.size(),
-  };
-  memcpy(shape.dim, dims.data(), dims.size() * sizeof(size_t));
-  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&shape);
-  const size_t num_output_elements = batch_size * channels;
-
   std::vector<float> input(num_output_elements + XNN_EXTRA_BYTES / sizeof(float), std::nanf(""));
   std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
