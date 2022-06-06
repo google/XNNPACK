@@ -31,6 +31,7 @@ protected:
     u8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
     scale_dist = std::uniform_real_distribution<float>(0.1f, 10.0f);
+    f32dist = std::uniform_real_distribution<float>(0.01f, 1.0f);
     dims = RandomShape();
     channels = dims.empty() ? 1 : dims.back();
     xnn_shape shape = {
@@ -51,6 +52,11 @@ protected:
     return dims;
   }
 
+  size_t NumElements(std::vector<size_t>& dims)
+  {
+    return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
+  }
+
   std::unique_ptr<std::random_device> random_device;
   std::mt19937 rng;
   std::uniform_int_distribution<size_t> shape_dist;
@@ -58,6 +64,7 @@ protected:
   std::uniform_real_distribution<float> scale_dist;
   std::uniform_int_distribution<int32_t> i8dist;
   std::uniform_int_distribution<int32_t> u8dist;
+  std::uniform_real_distribution<float> f32dist;
 
   std::vector<size_t> dims;
 

@@ -143,11 +143,9 @@ enum xnn_status xnn_define_static_reshape(
     return status;
   }
 
-  if (input_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_static_reshape), input_id);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_input_node_id(xnn_node_type_static_reshape, input_id, subgraph->num_values);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
@@ -182,6 +180,18 @@ enum xnn_status xnn_define_static_reshape(
   status = xnn_subgraph_check_output_type_dense(xnn_node_type_static_reshape, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(&input_value->shape);
+  const size_t num_output_elements = xnn_shape_multiply_all_dims(&output_value->shape);
+
+  if (num_input_elements != num_output_elements) {
+    xnn_log_error(
+        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
+        ": number of input elements, %zu, does not match number of output elements %zu",
+        xnn_node_type_to_string(xnn_node_type_static_reshape), input_id, output_id, num_input_elements,
+        num_output_elements);
+      return xnn_status_invalid_parameter;
   }
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
