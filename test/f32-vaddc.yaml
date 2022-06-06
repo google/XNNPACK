@@ -12,3 +12,7 @@
 - name: xnn_f32_vaddc_ukernel__scalar_x2
 - name: xnn_f32_vaddc_ukernel__scalar_x4
 - name: xnn_f32_vaddc_ukernel__scalar_x8
+# AArch64
+- name: xnn_f32_vaddc_ukernel__aarch64_x4
+- name: xnn_f32_vaddc_ukernel__aarch64_x12
+- name: xnn_f32_vaddc_ukernel__aarch64_x16

@@ -6596,6 +6596,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-igemm/4x12-minmax-aarch64-neonfma-cortex-a53.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a55.S
   src/f32-igemm/6x8-minmax-aarch64-neonfma-cortex-a73.S
+  src/f32-vbinary/vaddc-aarch64-x4.S
+  src/f32-vbinary/vaddc-aarch64-x12.S
+  src/f32-vbinary/vaddc-aarch64-x16.S
   src/qc8-gemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-cortex-a53.S
   src/qc8-gemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-prfm-cortex-a53.S
   src/qc8-gemm/gen/1x8c8-minmax-fp32-aarch64-neon-mlal-prfm.S
