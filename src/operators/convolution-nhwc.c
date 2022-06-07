@@ -1159,9 +1159,18 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
 
+  const struct gemm_parameters* gemm_parameters = &xnn_params.f32.gemm;
+  if (gemm_parameters->nr > group_output_channels) {
+    // Default micro-kernel is suboptimal. Try to find a better micro-kernel.
+
+    if (xnn_params.f32.gemm2.minmax.igemm[gemm_parameters->mr].function[XNN_UARCH_DEFAULT] != NULL) {
+      gemm_parameters = &xnn_params.f32.gemm2;
+    }
+  }
+
   union xnn_f32_minmax_params gemm_params;
-  if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
-    xnn_params.f32.gemm.init.f32(&gemm_params, output_min, output_max);
+  if XNN_LIKELY(gemm_parameters->init.f32 != NULL) {
+    gemm_parameters->init.f32(&gemm_params, output_min, output_max);
   }
 
   struct jit_gemm_params jit_gemm_params = {
@@ -1205,7 +1214,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     &gemm_params, sizeof(gemm_params),
     &dwconv_params, sizeof(dwconv_params),
     &vmulcaddc_params, sizeof(vmulcaddc_params),
-    &xnn_params.f32.gemm, dwconv_ukernel, &xnn_params.f32.vmulcaddc,
+    gemm_parameters, dwconv_ukernel, &xnn_params.f32.vmulcaddc,
     &jit_gemm_params,
     linear_activation, relu_activation, XNN_INIT_FLAG_F32,
     xnn_operator_type_convolution_nhwc_f32,
