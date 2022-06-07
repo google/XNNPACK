@@ -35,7 +35,7 @@ protected:
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     u8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    scale_dist = std::uniform_real_distribution<float>(0.1f, 10.0f);
+    scale_dist = std::uniform_real_distribution<float>(0.1f, 5.0f);
   }
 
   void SetUp() override
