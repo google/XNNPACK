@@ -76,10 +76,10 @@ void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl(
       vst1_u8(o2, vget_low_u8(vres2)); o2 += 8;
       vst1_u8(o1, vget_low_u8(vres1)); o1 += 8;
       vst1_u8(o0, vget_low_u8(vres0)); o0 += 8;
-      vst1q_lane_u32((void*) o3, vreinterpretq_u8_u32(vres3), 2); o3 = (uint8_t*) ((uintptr_t) o3 + tile_wbytes_minus_8);
-      vst1q_lane_u32((void*) o2, vreinterpretq_u8_u32(vres2), 2); o2 = (uint8_t*) ((uintptr_t) o2 + tile_wbytes_minus_8);
-      vst1q_lane_u32((void*) o1, vreinterpretq_u8_u32(vres1), 2); o1 = (uint8_t*) ((uintptr_t) o1 + tile_wbytes_minus_8);
-      vst1q_lane_u32((void*) o0, vreinterpretq_u8_u32(vres0), 2); o0 = (uint8_t*) ((uintptr_t) o0 + tile_wbytes_minus_8);
+      vst1q_lane_u32((void*) o3, vreinterpretq_u32_u8(vres3), 2); o3 = (uint8_t*) ((uintptr_t) o3 + tile_wbytes_minus_8);
+      vst1q_lane_u32((void*) o2, vreinterpretq_u32_u8(vres2), 2); o2 = (uint8_t*) ((uintptr_t) o2 + tile_wbytes_minus_8);
+      vst1q_lane_u32((void*) o1, vreinterpretq_u32_u8(vres1), 2); o1 = (uint8_t*) ((uintptr_t) o1 + tile_wbytes_minus_8);
+      vst1q_lane_u32((void*) o0, vreinterpretq_u32_u8(vres0), 2); o0 = (uint8_t*) ((uintptr_t) o0 + tile_wbytes_minus_8);
     }
 
     if (bh != 0) {
@@ -105,14 +105,14 @@ void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl(
       uint8x8_t vres3_lo = vget_low_u8(vres3);
 
       if (bh & 2) {
-        vst1_lane_u32(o3, vres3_lo, 0); o3 += 4;
-        vst1_lane_u32(o2, vres2_lo, 0); o2 += 4;
-        vst1_lane_u32(o1, vres1_lo, 0); o1 += 4;
-        vst1_lane_u32(o0, vres0_lo, 0); o0 += 4;
-        vst1_lane_u16(o3, vres3_lo, 2); o3 += 2;
-        vst1_lane_u16(o2, vres2_lo, 2); o2 += 2;
-        vst1_lane_u16(o1, vres1_lo, 2); o1 += 2;
-        vst1_lane_u16(o0, vres0_lo, 2); o0 += 2;
+        vst1_lane_u32(o3, vreinterpret_u32_u8(vres3_lo), 0); o3 += 4;
+        vst1_lane_u32(o2, vreinterpret_u32_u8(vres2_lo), 0); o2 += 4;
+        vst1_lane_u32(o1, vreinterpret_u32_u8(vres1_lo), 0); o1 += 4;
+        vst1_lane_u32(o0, vreinterpret_u32_u8(vres0_lo), 0); o0 += 4;
+        vst1_lane_u16(o3, vreinterpret_u32_u8(vres3_lo), 2); o3 += 2;
+        vst1_lane_u16(o2, vreinterpret_u32_u8(vres2_lo), 2); o2 += 2;
+        vst1_lane_u16(o1, vreinterpret_u32_u8(vres1_lo), 2); o1 += 2;
+        vst1_lane_u16(o0, vreinterpret_u32_u8(vres0_lo), 2); o0 += 2;
         vres0_lo = vget_low_u8(vextq_u8(vres0, vres0, 6));
         vres1_lo = vget_low_u8(vextq_u8(vres1, vres1, 6));
         vres2_lo = vget_low_u8(vextq_u8(vres2, vres2, 6));
@@ -123,10 +123,10 @@ void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl(
         vst1_lane_u16((void*) o2, vreinterpret_u16_u8(vres2_lo), 0); o2 += 2;
         vst1_lane_u16((void*) o1, vreinterpret_u16_u8(vres1_lo), 0); o1 += 2;
         vst1_lane_u16((void*) o0, vreinterpret_u16_u8(vres0_lo), 0); o0 += 2;
-        vst1_lane_u8((void*) o3, vreinterpret_u16_u8(vres3_lo), 2); o3 += 1;
-        vst1_lane_u8((void*) o2, vreinterpret_u16_u8(vres2_lo), 2); o2 += 1;
-        vst1_lane_u8((void*) o1, vreinterpret_u16_u8(vres1_lo), 2); o1 += 1;
-        vst1_lane_u8((void*) o0, vreinterpret_u16_u8(vres0_lo), 2); o0 += 1;
+        vst1_lane_u8(o3, vres3_lo, 2); o3 += 1;
+        vst1_lane_u8(o2, vres2_lo, 2); o2 += 1;
+        vst1_lane_u8(o1, vres1_lo, 2); o1 += 1;
+        vst1_lane_u8(o0, vres0_lo, 2); o0 += 1;
       }
     }
     i0 = (const uint8_t*) ((uintptr_t) i0 + input_reset);
