@@ -19,7 +19,7 @@
 namespace models {
 
 ExecutionPlan QU8MobileNetV1(pthreadpool_t threadpool) {
-  alignas(16) static std::array<uint8_t, 150528> v0;
+  alignas(16) static std::array<uint8_t, 150528 + XNN_EXTRA_BYTES / sizeof(uint8_t)> v0;
   alignas(16) static std::array<uint8_t, 401408> v1;
   alignas(16) static std::array<uint8_t, 401408> v2;
   alignas(16) static std::array<uint8_t, 802816> v3;
