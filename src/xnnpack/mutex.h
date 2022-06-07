@@ -9,7 +9,9 @@
 #include <xnnpack/common.h>
 
 #if XNN_PLATFORM_WINDOWS
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #elif XNN_PLATFORM_MACOS || XNN_PLATFORM_IOS
 #include <dispatch/dispatch.h>
