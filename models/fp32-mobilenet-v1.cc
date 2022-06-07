@@ -19,7 +19,7 @@
 namespace models {
 
 ExecutionPlan FP32MobileNetV1(pthreadpool_t threadpool) {
-  alignas(16) static std::array<float, 150528> v0;
+  alignas(16) static std::array<float, 150528 + XNN_EXTRA_BYTES / sizeof(float)> v0;
   alignas(16) static std::array<float, 401408> v1;
   alignas(16) static std::array<float, 401408> v2;
   alignas(16) static std::array<float, 802816> v3;

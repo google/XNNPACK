@@ -21,7 +21,7 @@
 namespace models {
 
 ExecutionPlan FP16MobileNetV3Small(pthreadpool_t threadpool) {
-  alignas(16) static std::array<uint16_t, 150528> v0;
+  alignas(16) static std::array<uint16_t, 150528 + XNN_EXTRA_BYTES / sizeof(uint16_t)> v0;
   alignas(16) static std::array<uint16_t, 200704> v1;
   alignas(16) static std::array<uint16_t, 200704> v2;
   alignas(16) static std::array<uint16_t, 50176> v3;
