@@ -7396,7 +7396,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(sigmoid-test sigmoid-test)
 
-  ADD_EXECUTABLE(static-reshape-test test/static_reshape.cc)
+  ADD_EXECUTABLE(static-reshape-test test/static-reshape.cc)
   TARGET_INCLUDE_DIRECTORIES(static-reshape-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(static-reshape-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(static-reshape-test static-reshape-test)
