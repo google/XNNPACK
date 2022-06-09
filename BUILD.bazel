@@ -14184,6 +14184,20 @@ xnnpack_cc_library(
 )
 
 xnnpack_unit_test(
+    name = "abs_test",
+    srcs = [
+        "test/abs.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "add2_test",
     srcs = [
         "test/add2.cc",
