@@ -105,14 +105,14 @@ void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl(
       uint8x8_t vres3_lo = vget_low_u8(vres3);
 
       if (bh & 2) {
-        vst1_lane_u32(o3, vreinterpret_u32_u8(vres3_lo), 0); o3 += 4;
-        vst1_lane_u32(o2, vreinterpret_u32_u8(vres2_lo), 0); o2 += 4;
-        vst1_lane_u32(o1, vreinterpret_u32_u8(vres1_lo), 0); o1 += 4;
-        vst1_lane_u32(o0, vreinterpret_u32_u8(vres0_lo), 0); o0 += 4;
-        vst1_lane_u16(o3, vreinterpret_u32_u8(vres3_lo), 2); o3 += 2;
-        vst1_lane_u16(o2, vreinterpret_u32_u8(vres2_lo), 2); o2 += 2;
-        vst1_lane_u16(o1, vreinterpret_u32_u8(vres1_lo), 2); o1 += 2;
-        vst1_lane_u16(o0, vreinterpret_u32_u8(vres0_lo), 2); o0 += 2;
+        vst1_lane_u32((void*) o3, vreinterpret_u32_u8(vres3_lo), 0); o3 += 4;
+        vst1_lane_u32((void*) o2, vreinterpret_u32_u8(vres2_lo), 0); o2 += 4;
+        vst1_lane_u32((void*) o1, vreinterpret_u32_u8(vres1_lo), 0); o1 += 4;
+        vst1_lane_u32((void*) o0, vreinterpret_u32_u8(vres0_lo), 0); o0 += 4;
+        vst1_lane_u16((void*) o3, vreinterpret_u16_u8(vres3_lo), 2); o3 += 2;
+        vst1_lane_u16((void*) o2, vreinterpret_u16_u8(vres2_lo), 2); o2 += 2;
+        vst1_lane_u16((void*) o1, vreinterpret_u16_u8(vres1_lo), 2); o1 += 2;
+        vst1_lane_u16((void*) o0, vreinterpret_u16_u8(vres0_lo), 2); o0 += 2;
         vres0_lo = vget_low_u8(vextq_u8(vres0, vres0, 6));
         vres1_lo = vget_low_u8(vextq_u8(vres1, vres1, 6));
         vres2_lo = vget_low_u8(vextq_u8(vres2, vres2, 6));
