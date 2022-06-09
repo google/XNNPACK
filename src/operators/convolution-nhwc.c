@@ -33,16 +33,6 @@
 #error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
 #endif
 
-static inline size_t compute_output_dimension(
-    size_t padded_input_dimension,
-    size_t kernel_dimension,
-    size_t dilation_dimension,
-    size_t subsampling_dimension)
-{
-  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
-  return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
-}
-
 static inline size_t compute_output_dimension_with_tf_same_padding(
     size_t input_dimension,
     size_t subsampling_dimension)
