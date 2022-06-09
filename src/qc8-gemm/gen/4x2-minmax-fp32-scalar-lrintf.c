@@ -12,6 +12,7 @@
 
 #include <xnnpack/math.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qc8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
@@ -53,8 +54,8 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
   }
 
   do {
-    int32_t vacc0x0 = ((const int32_t*) w)[0];
-    int32_t vacc0x1 = ((const int32_t*) w)[1];
+    int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
+    int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
     int32_t vacc1x0 = vacc0x0;
     int32_t vacc1x1 = vacc0x1;
     int32_t vacc2x0 = vacc0x0;
@@ -95,13 +96,12 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
     float vfpacc3x0 = (float) vacc3x0;
     float vfpacc3x1 = (float) vacc3x1;
 
-    typedef XNN_UNALIGNED float unaligned_float;
-    const float vscale0 = ((const unaligned_float*) w)[0];
+    const float vscale0 = unaligned_indexed_load_f32(w, 0);
     vfpacc0x0 *= vscale0;
     vfpacc1x0 *= vscale0;
     vfpacc2x0 *= vscale0;
     vfpacc3x0 *= vscale0;
-    const float vscale1 = ((const unaligned_float*) w)[1];
+    const float vscale1 = unaligned_indexed_load_f32(w, 1);
     vfpacc0x1 *= vscale1;
     vfpacc1x1 *= vscale1;
     vfpacc2x1 *= vscale1;

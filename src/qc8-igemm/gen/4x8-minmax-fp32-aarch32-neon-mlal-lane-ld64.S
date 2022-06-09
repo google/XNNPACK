@@ -455,7 +455,6 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld6
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neon_mlal_lane_ld64
-
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif

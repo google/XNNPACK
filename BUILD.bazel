@@ -8338,6 +8338,16 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "unaligned",
+    hdrs = ["src/xnnpack/unaligned.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+    ],
+)
+
+xnnpack_cc_library(
     name = "params_init",
     srcs = ["src/params-init.c"],
     hdrs = ["src/xnnpack/params-init.h"],
@@ -8347,6 +8357,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":params",
+        ":unaligned",
         ":xnnpack_h",
         "@FP16",
     ],
@@ -8472,6 +8483,7 @@ xnnpack_cc_library(
         ":params",
         ":params_init",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -8498,6 +8510,7 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -8524,6 +8537,7 @@ xnnpack_cc_library(
         ":params",
         ":params_init",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -8546,6 +8560,7 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -8568,6 +8583,7 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -8594,6 +8610,7 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":tables",
+        ":unaligned",
         "@FP16",
         "@FXdiv",
         "@pthreadpool",
@@ -10230,6 +10247,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":operator_h",
+        ":unaligned",
         "@FP16",
     ],
 )
@@ -10248,6 +10266,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":operator_h",
+        ":unaligned",
         "@FP16",
     ],
 )

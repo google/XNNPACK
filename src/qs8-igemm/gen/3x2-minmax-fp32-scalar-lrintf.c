@@ -12,6 +12,7 @@
 
 #include <xnnpack/math.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qs8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf(
@@ -49,8 +50,8 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x2__scalar_lrintf(
   }
 
   do {
-    int32_t vacc0x0 = ((const int32_t*) w)[0];
-    int32_t vacc0x1 = ((const int32_t*) w)[1];
+    int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
+    int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
     int32_t vacc1x0 = vacc0x0;
     int32_t vacc1x1 = vacc0x1;
     int32_t vacc2x0 = vacc0x0;
