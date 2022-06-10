@@ -7113,12 +7113,12 @@ IF(XNNPACK_BUILD_TESTS)
       "${CMAKE_BINARY_DIR}/googletest")
   ENDIF()
 
+  # Helper libraries
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE . include src test)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE cpuinfo fp16 pthreadpool gtest jit packing)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest jit packing)
 
   # ---[ Build size tests
-
   ADD_EXECUTABLE(operator-size-test test/operator-size.c)
   TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK cache params_init logging operators)
 
