@@ -14203,6 +14203,17 @@ xnnpack_cc_library(
 )
 
 xnnpack_unit_test(
+    name = "workspace_test",
+    srcs = [
+        "test/workspace.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "abs_test",
     srcs = [
         "test/abs.cc",
