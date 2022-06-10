@@ -15,6 +15,7 @@ constexpr size_t kDim5 = 6;
 constexpr size_t kDim6 = 7;
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(SQUARED_DIFFERENCE_ND_F16, 0d_x_0d) {
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::SquaredDifference)
@@ -1152,6 +1153,7 @@ TEST(SQUARED_DIFFERENCE_ND_F16, 6d_x_6d) {
     }
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 TEST(SQUARED_DIFFERENCE_ND_F32, 0d_x_0d) {
   BinaryElementwiseOperatorTester()

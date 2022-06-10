@@ -2663,6 +2663,7 @@ TEST(MULTIPLY_ND_QU8, output_zero_point) {
   }
 }
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(MULTIPLY_ND_F16, 0d_x_0d) {
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
@@ -3800,6 +3801,7 @@ TEST(MULTIPLY_ND_F16, 6d_x_6d) {
     }
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 TEST(MULTIPLY_ND_F32, 0d_x_0d) {
   BinaryElementwiseOperatorTester()

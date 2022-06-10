@@ -1647,6 +1647,7 @@ TEST(MAX_POOLING_NHWC_U8, setup_swap_height_and_width) {
 }
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(MAX_POOLING_NHWC_F16, unit_batch_small_1xM_pool) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 100; channels += 15) {
@@ -2462,6 +2463,7 @@ TEST(MAX_POOLING_NHWC_F16, setup_swap_height_and_width) {
     .channels(24)
     .TestSetupF16();
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 
 TEST(MAX_POOLING_NHWC_F32, unit_batch_small_1xM_pool) {
