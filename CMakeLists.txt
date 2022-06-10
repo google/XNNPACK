@@ -7356,7 +7356,7 @@ IF(XNNPACK_BUILD_TESTS)
   # ---[ Build subgraph-level unit tests
   ADD_EXECUTABLE(workspace-test test/workspace.cc)
   TARGET_INCLUDE_DIRECTORIES(workspace-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(workspace-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  TARGET_LINK_LIBRARIES(workspace-test PRIVATE XNNPACK fp16 gmock gtest gtest_main subgraph)
   ADD_TEST(workspace-test workspace-test)
 
   ADD_EXECUTABLE(abs-test test/abs.cc)

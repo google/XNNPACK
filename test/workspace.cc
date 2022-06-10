@@ -145,7 +145,7 @@ TEST(WORKSPACE, workspace_grow)
 
   std::array<size_t, 4> dims2 = dims1;
   // Create the same graph but with larger tensors, this will require a larger workspace.
-  std::transform(dims2.begin(), dims2.end(), dims2.begin(), [](auto i) { return i * 2; });
+  std::transform(dims2.begin(), dims2.end(), dims2.begin(), [](size_t i) { return i * 2; });
   xnn_subgraph_t subgraph2 = nullptr;
   DefineGraph(&subgraph2, dims2);
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph2(subgraph2, xnn_delete_subgraph);
