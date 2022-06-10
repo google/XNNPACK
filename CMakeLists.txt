@@ -7354,11 +7354,6 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(subgraph-nchw-test subgraph-nchw-test)
 
   # ---[ Build subgraph-level unit tests
-  ADD_EXECUTABLE(workspace-test test/workspace.cc)
-  TARGET_INCLUDE_DIRECTORIES(workspace-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(workspace-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
-  ADD_TEST(workspace-test workspace-test)
-
   ADD_EXECUTABLE(abs-test test/abs.cc)
   TARGET_INCLUDE_DIRECTORIES(abs-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(abs-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

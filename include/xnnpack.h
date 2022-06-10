@@ -1363,17 +1363,6 @@ enum xnn_status xnn_finalize_weights_cache(
 /// @param weights_cache - the weights cache object to destroy.
 enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache);
 
-typedef struct xnn_workspace* xnn_workspace_t;
-
-/// Create a workspace object.
-/// @param workspace_out - pointer to the variable that will be initialized to a handle to the workspace object upon
-///                        successful return. Once created, the workspace can be shared between different Runtime
-///                        objects.
-enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out);
-/// Destroy a workspace object, as well as memory used by the workspace.
-/// @param workspace - the workspace object to destroy.
-enum xnn_status xnn_delete_workspace(xnn_workspace_t workspace);
-
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;
 
@@ -1409,9 +1398,6 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 ///                   Nodes can be added to the runtime once it is constructed.
 /// @param weights_cache - a cache for packed weights. The runtime will look up and reuse packed weights in this cache,
 ///                        this will reduce memory allocated for packed weights.
-/// @param workspace - a workspace to hold internal tensors. The runtime will allocate space used for internal tensors
-///                    and track them using workspace. Workspace can be shared and reused across different runtimes. If
-///                    workspace is NULL, there will be no sharing: each runtime has its own workspace.
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
 /// @param flags - binary features of the runtime. The only currently supported values are
@@ -1421,14 +1407,6 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.
-enum xnn_status xnn_create_runtime_v4(
-  xnn_subgraph_t subgraph,
-  xnn_weights_cache_t weights_cache,
-  xnn_workspace_t workspace,
-  pthreadpool_t threadpool,
-  uint32_t flags,
-  xnn_runtime_t* runtime_out);
-
 enum xnn_status xnn_create_runtime_v3(
   xnn_subgraph_t subgraph,
   xnn_weights_cache_t weights_cache,
