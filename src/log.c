@@ -16,6 +16,17 @@
 #else
   #include <unistd.h>
 #endif
+#if defined(__ANDROID__)
+  #include <android/log.h>
+#endif
+
+#ifndef XNN_LOG_TO_STDIO
+  #if defined(__ANDROID__)
+    #define XNN_LOG_TO_STDIO 0
+  #else
+    #define XNN_LOG_TO_STDIO 1
+  #endif
+#endif
 
 #include <xnnpack/log.h>
 
@@ -35,6 +46,7 @@
   #define XNN_LOG_STDOUT STDOUT_FILENO
 #endif
 
+#if XNN_LOG_TO_STDIO
 static void xnn_vlog(int output_handle, const char* prefix, size_t prefix_length, const char* format, va_list args) {
   char stack_buffer[XNN_LOG_STACK_BUFFER_SIZE];
   char* heap_buffer = NULL;
@@ -98,48 +110,81 @@ cleanup:
   #endif
   va_end(args_copy);
 }
+#elif defined(__ANDROID__)
+  static const char xnnpack_module[] = "XNNPACK";
+#endif
 
 #if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
   void xnn_vlog_debug(const char* format, va_list args) {
-    static const char debug_prefix[17] = {
-      'D', 'e', 'b', 'u', 'g', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
-    };
-    xnn_vlog(XNN_LOG_STDOUT, debug_prefix, 17, format, args);
+    #if XNN_LOG_TO_STDIO
+      static const char debug_prefix[17] = {
+        'D', 'e', 'b', 'u', 'g', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
+      };
+      xnn_vlog(XNN_LOG_STDOUT, debug_prefix, 17, format, args);
+    #elif defined(__ANDROID__)
+      __android_log_vprint(ANDROID_LOG_DEBUG, xnnpack_module, format, args);
+    #else
+      #error "Platform-specific implementation required"
+    #endif
   }
 #endif
 
 #if XNN_LOG_LEVEL >= XNN_LOG_INFO
   void xnn_vlog_info(const char* format, va_list args) {
-    static const char info_prefix[16] = {
-      'N', 'o', 't', 'e', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
-    };
-    xnn_vlog(XNN_LOG_STDOUT, info_prefix, 16, format, args);
+    #if XNN_LOG_TO_STDIO
+      static const char info_prefix[16] = {
+        'N', 'o', 't', 'e', ' ', '(', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ')', ':', ' '
+      };
+      xnn_vlog(XNN_LOG_STDOUT, info_prefix, 16, format, args);
+    #elif defined(__ANDROID__)
+      __android_log_vprint(ANDROID_LOG_INFO, xnnpack_module, format, args);
+    #else
+      #error "Platform-specific implementation required"
+    #endif
   }
 #endif
 
 #if XNN_LOG_LEVEL >= XNN_LOG_WARNING
   void xnn_vlog_warning(const char* format, va_list args) {
-    static const char warning_prefix[20] = {
-      'W', 'a', 'r', 'n', 'i', 'n', 'g', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
-    };
-    xnn_vlog(XNN_LOG_STDERR, warning_prefix, 20, format, args);
+    #if XNN_LOG_TO_STDIO
+      static const char warning_prefix[20] = {
+        'W', 'a', 'r', 'n', 'i', 'n', 'g', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
+      };
+      xnn_vlog(XNN_LOG_STDERR, warning_prefix, 20, format, args);
+    #elif defined(__ANDROID__)
+      __android_log_vprint(ANDROID_LOG_WARN, xnnpack_module, format, args);
+    #else
+      #error "Platform-specific implementation required"
+    #endif
   }
 #endif
 
 #if XNN_LOG_LEVEL >= XNN_LOG_ERROR
   void xnn_vlog_error(const char* format, va_list args) {
-    static const char error_prefix[18] = {
-      'E', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
-    };
-    xnn_vlog(XNN_LOG_STDERR, error_prefix, 18, format, args);
+    #if XNN_LOG_TO_STDIO
+      static const char error_prefix[18] = {
+        'E', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
+      };
+      xnn_vlog(XNN_LOG_STDERR, error_prefix, 18, format, args);
+    #elif defined(__ANDROID__)
+      __android_log_vprint(ANDROID_LOG_ERROR, xnnpack_module, format, args);
+    #else
+      #error "Platform-specific implementation required"
+    #endif
   }
 #endif
 
 #if XNN_LOG_LEVEL >= XNN_LOG_FATAL
   void xnn_vlog_fatal(const char* format, va_list args) {
-    static const char fatal_prefix[24] = {
-      'F', 'a', 't', 'a', 'l', ' ', 'e', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
-    };
-    xnn_vlog(XNN_LOG_STDERR, fatal_prefix, 24, format, args);
+    #if XNN_LOG_TO_STDIO
+      static const char fatal_prefix[24] = {
+        'F', 'a', 't', 'a', 'l', ' ', 'e', 'r', 'r', 'o', 'r', ' ', 'i', 'n', ' ', 'X', 'N', 'N', 'P', 'A', 'C', 'K', ':', ' '
+      };
+      xnn_vlog(XNN_LOG_STDERR, fatal_prefix, 24, format, args);
+    #elif defined(__ANDROID__)
+      __android_log_vprint(ANDROID_LOG_FATAL, xnnpack_module, format, args);
+    #else
+      #error "Platform-specific implementation required"
+    #endif
   }
 #endif

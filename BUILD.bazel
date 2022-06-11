@@ -9942,6 +9942,9 @@ xnnpack_cc_library(
     copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
+    }) + select({
+        ":xnn_log_to_stdio_explicit_true": ["-DXNN_LOG_TO_STDIO=1"],
+        "//conditions:default": [],
     }),
     defines = select({
         ":xnn_log_level_explicit_none": ["XNN_LOG_LEVEL=0"],
@@ -14549,6 +14552,12 @@ config_setting(
 config_setting(
     name = "xnn_enable_gemm_m_specialization_explicit_false",
     define_values = {"xnn_enable_gemm_m_specialization": "false"},
+)
+
+# Force logging to stderr/stdout
+config_setting(
+    name = "xnn_log_to_stdio_explicit_true",
+    define_values = {"xnn_log_to_stdio": "true"},
 )
 
 # Fully disable logging
