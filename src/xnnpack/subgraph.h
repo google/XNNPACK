@@ -321,7 +321,9 @@ struct xnn_runtime {
   struct xnn_blob* blobs;
   size_t num_blobs;
 
-  void* workspace;
+  bool owns_workspace;
+  struct xnn_workspace* workspace;
+  struct xnn_runtime* next_workspace_user;
 
 #if XNN_PLATFORM_JIT
   struct xnn_code_cache code_cache;
@@ -367,6 +369,12 @@ void xnn_init_convert_node(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
+
+struct xnn_workspace {
+  void* data;
+  size_t size;
+  struct xnn_runtime* first_user;
+};
 
 #ifdef __cplusplus
 }  // extern "C"
