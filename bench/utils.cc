@@ -175,6 +175,14 @@ bool CheckVFP(benchmark::State& state) {
   return true;
 }
 
+bool CheckARMV6(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_v6()) {
+    state.SkipWithError("no ARMv6 extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckNEON(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
     state.SkipWithError("no NEON extension");

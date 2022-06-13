@@ -1101,6 +1101,16 @@ union xnn_qu8_conv_minmax_params {
     float output_max_less_zero_point;
     int32_t output_zero_point;
   } fp32_scalar_lrintf;
+#if XNN_ARCH_ARM
+  struct {
+    float scale;
+    float magic_bias;
+    uint32_t minus_kernel_zero_point;
+    int32_t magic_bias_less_zero_point;
+    uint32_t output_min;
+    uint32_t output_max;
+  } fp32_armv6simd;
+#endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint8_t kernel_zero_point[4];
@@ -1180,6 +1190,14 @@ union xnn_qs8_minmax_params {
     float output_max_less_zero_point;
     int32_t output_zero_point;
   } scalar_lrintf;
+#if XNN_ARCH_ARM
+  struct {
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+    uint32_t output_min;
+    uint32_t output_max;
+  } armv6simd;
+#endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float magic_bias;
@@ -1246,6 +1264,15 @@ union xnn_qs8_conv_minmax_params {
     float output_max_less_zero_point;
     int32_t output_zero_point;
   } fp32_scalar_lrintf;
+#if XNN_ARCH_ARM
+  struct {
+    float scale;
+    float magic_bias;
+    int32_t magic_bias_less_zero_point;
+    uint32_t output_min;
+    uint32_t output_max;
+  } fp32_armv6simd;
+#endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     float scale;

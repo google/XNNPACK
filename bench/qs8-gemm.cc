@@ -1323,6 +1323,31 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
+#if XNN_ARCH_ARM
+  static void qs8_gemm_1x1c4__armv6simd(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd, 1, 1, 4, 1,
+      xnn_init_qs8_conv_minmax_fp32_armv6simd_params, benchmark::utils::CheckARMV6);
+  }
+  static void qs8_gemm_2x1c4__armv6simd(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd, 2, 1, 4, 1,
+      xnn_init_qs8_conv_minmax_fp32_armv6simd_params, benchmark::utils::CheckARMV6);
+  }
+  static void qs8_gemm_1x2c4__armv6simd(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd, 1, 2, 4, 1,
+      xnn_init_qs8_conv_minmax_fp32_armv6simd_params, benchmark::utils::CheckARMV6);
+  }
+  static void qs8_gemm_2x2c4__armv6simd(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd, 2, 2, 4, 1,
+      xnn_init_qs8_conv_minmax_fp32_armv6simd_params, benchmark::utils::CheckARMV6);
+  }
+
+  BENCHMARK_GEMM(qs8_gemm_1x1c4__armv6simd)
+  BENCHMARK_GEMM(qs8_gemm_2x1c4__armv6simd)
+  BENCHMARK_GEMM(qs8_gemm_1x2c4__armv6simd)
+  BENCHMARK_GEMM(qs8_gemm_2x2c4__armv6simd)
+#endif  // XNN_ARCH_ARM
+
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void qs8_gemm_2x16c8__avx512skx(benchmark::State& state, const char* net) {
     GEMMBenchmark(state, xnn_qs8_gemm_minmax_fp32_ukernel_2x16c8__avx512skx, 2, 16, 8, 1,

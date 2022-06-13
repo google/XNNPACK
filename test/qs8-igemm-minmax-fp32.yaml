@@ -3,6 +3,20 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# ARMv6 SIMD
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd
+  init: xnn_init_qs8_conv_minmax_fp32_armv6simd_params
+  k-block: 4
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_1x2c4__armv6simd
+  init: xnn_init_qs8_conv_minmax_fp32_armv6simd_params
+  k-block: 4
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x1c4__armv6simd
+  init: xnn_init_qs8_conv_minmax_fp32_armv6simd_params
+  k-block: 4
+- name: xnn_qs8_igemm_minmax_fp32_ukernel_2x2c4__armv6simd
+  init: xnn_init_qs8_conv_minmax_fp32_armv6simd_params
+  k-block: 4
+
 # ARM NEON
 - name: xnn_qs8_igemm_minmax_fp32_ukernel_1x8c2__neon_mlal_dup
   init: xnn_init_qs8_conv_minmax_fp32_neon_params

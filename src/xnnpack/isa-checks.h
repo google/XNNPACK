@@ -90,6 +90,13 @@
     } \
   } while (0)
 
+#define TEST_REQUIRES_ARM_V6_SIMD \
+  do { \
+    if (!cpuinfo_initialize() || !cpuinfo_has_arm_v6()) { \
+      GTEST_SKIP(); \
+    } \
+  } while (0)
+
 #define TEST_REQUIRES_ARM_NEON \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) { \

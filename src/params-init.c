@@ -150,6 +150,28 @@ void xnn_init_qu8_conv_minmax_fp32_avx512_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_ARM
+void xnn_init_qu8_conv_minmax_fp32_armv6simd_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  const int32_t minus_kernel_zero_point = -(int32_t) kernel_zero_point;
+  params->fp32_armv6simd.scale = scale;
+  params->fp32_armv6simd.magic_bias = 12582912.0f;
+  params->fp32_armv6simd.minus_kernel_zero_point = (uint32_t) (uint16_t) minus_kernel_zero_point * UINT32_C(0x00010001);
+  params->fp32_armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_armv6simd.output_min = (uint32_t) output_min * UINT32_C(0x01010101);
+  params->fp32_armv6simd.output_max = (uint32_t) output_max * UINT32_C(0x01010101);
+}
+#endif  // XNN_ARCH_ARM
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_qu8_conv_minmax_fp32_neon_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -409,6 +431,25 @@ void xnn_init_qs8_conv_minmax_fp32_avx512_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_ARM
+void xnn_init_qs8_conv_minmax_fp32_armv6simd_params(
+  union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  params->fp32_armv6simd.scale = scale;
+  params->fp32_armv6simd.magic_bias = 12582912.0f;
+  params->fp32_armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_armv6simd.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
+  params->fp32_armv6simd.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
+}
+#endif  // XNN_ARCH_ARM
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_qs8_conv_minmax_fp32_neon_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -629,6 +670,20 @@ void xnn_init_qs8_minmax_avx512_params(
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_ARM
+void xnn_init_qs8_minmax_armv6simd_params(
+  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max)
+{
+  params->armv6simd.magic_bias = 12582912.0f;
+  params->armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->armv6simd.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
+  params->armv6simd.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
+}
+#endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_qs8_minmax_neon_params(

@@ -131,6 +131,17 @@ __m512i _mm512_set_epi8(
 
 #endif  // __AVX512F__
 
+#if XNN_ARCH_ARM
+
+// AArch32 GCC 10+ implements arm_acle.h header, but lacks __ror intrinsic
+#if defined(__GNUC__) && !defined(__clang__)
+static XNN_INTRINSIC uint32_t __ror(uint32_t x, uint32_t y) {
+   return (x >> y) | (x << (32 - y));
+}
+#endif  // AArch32 GCC
+
+#endif  // ARM
+
 #if XNN_ARCH_ARM && (defined(__ARM_NEON) || defined(__ARM_NEON__))
 #include <arm_neon.h>
 

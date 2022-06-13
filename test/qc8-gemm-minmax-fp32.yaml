@@ -157,6 +157,21 @@
   init: xnn_init_qs8_minmax_neonv8_params
   k-block: 16
   assembly: true
+
+# ARMv6 SIMD
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd
+  init: xnn_init_qs8_minmax_armv6simd_params
+  k-block: 4
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd
+  init: xnn_init_qs8_minmax_armv6simd_params
+  k-block: 4
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_2x1c4__armv6simd
+  init: xnn_init_qs8_minmax_armv6simd_params
+  k-block: 4
+- name: xnn_qc8_gemm_minmax_fp32_ukernel_2x2c4__armv6simd
+  init: xnn_init_qs8_minmax_armv6simd_params
+  k-block: 4
+
 # ARM NEON
 - name: xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neon_mlal_lane
   init: xnn_init_qs8_minmax_neon_params
