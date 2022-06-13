@@ -7364,6 +7364,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(add2-test add2-test)
 
+  ADD_EXECUTABLE(bankers-rounding-test test/bankers-rounding.cc)
+  TARGET_INCLUDE_DIRECTORIES(bankers-rounding-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(bankers-rounding-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(bankers-rounding-test bankers-rounding-test)
+
   ADD_EXECUTABLE(clamp-test test/clamp.cc)
   TARGET_INCLUDE_DIRECTORIES(clamp-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
