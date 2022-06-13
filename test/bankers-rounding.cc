@@ -19,9 +19,9 @@
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
-using BankersRoundingTestF32 = UnaryTest<float>;
+using DISABLED_BankersRoundingTestF32 = UnaryTest<float>;
 
-TEST_F(BankersRoundingTestF32, define)
+TEST_F(DISABLED_BankersRoundingTestF32, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -56,7 +56,7 @@ TEST_F(BankersRoundingTestF32, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(BankersRoundingTestF32, matches_operator_api)
+TEST_F(DISABLED_BankersRoundingTestF32, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
