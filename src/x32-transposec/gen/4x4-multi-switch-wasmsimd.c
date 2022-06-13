@@ -142,7 +142,6 @@ void xnn_x32_transposec_ukernel__4x4_multi_switch_wasmsimd(
             *((float*) oN) = wasm_f32x4_extract_lane(v0_1, 0);
           case 0:
             *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
-            o += 1;
             break;
           default:
             XNN_UNREACHABLE;
