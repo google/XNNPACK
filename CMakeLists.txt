@@ -7477,6 +7477,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(sigmoid-test sigmoid-test)
 
+  ADD_EXECUTABLE(softmax-test test/softmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(softmax-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(softmax-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(softmax-test softmax-test)
+
   ADD_EXECUTABLE(static-reshape-test test/static-reshape.cc)
   TARGET_INCLUDE_DIRECTORIES(static-reshape-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(static-reshape-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

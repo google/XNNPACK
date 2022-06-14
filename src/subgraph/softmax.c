@@ -34,7 +34,8 @@ static enum xnn_status create_softmax_operator(
   assert(output_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
+  assert(num_input_dims > 0);
+  const size_t channel_dim = values[input_id].shape.dim[num_input_dims - 1];
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -127,6 +128,13 @@ enum xnn_status xnn_define_softmax(
   status = xnn_subgraph_check_input_type_dense(xnn_node_type_softmax, input_id, input_value);
   if (status != xnn_status_success) {
     return status;
+  }
+
+  if (input_value->shape.num_dims < 1) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": number of dimensions must be at least 1",
+      xnn_node_type_to_string(xnn_node_type_softmax), input_id);
+    return xnn_status_invalid_parameter;
   }
 
   switch (input_value->datatype) {

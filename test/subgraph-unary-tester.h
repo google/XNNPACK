@@ -18,13 +18,13 @@
 
 #include <gtest/gtest.h>
 
-template <typename T> class UnaryTest : public ::testing::Test {
+template <typename T, size_t min_dim = 0> class UnaryTest : public ::testing::Test {
 protected:
   UnaryTest()
   {
     random_device = std::unique_ptr<std::random_device>(new std::random_device());
     rng = std::mt19937((*random_device)());
-    shape_dist = std::uniform_int_distribution<size_t>(0, XNN_MAX_TENSOR_DIMS);
+    shape_dist = std::uniform_int_distribution<size_t>(min_dim, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     i8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
