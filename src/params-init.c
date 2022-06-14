@@ -3730,7 +3730,9 @@ void xnn_init_qu8_add_minmax_sse4_params(
     params->sse4.bias[i] = bias;
     params->sse4.a_multiplier[i] = a_multiplier;
     params->sse4.b_multiplier[i] = b_multiplier;
-    params->sse4.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 2; i++) {
+    params->sse4.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse4.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
@@ -3786,7 +3788,9 @@ void xnn_init_qu8_add_minmax_avx2_params(
     params->avx2.bias[i] = bias;
     params->avx2.a_multiplier[i] = a_multiplier;
     params->avx2.b_multiplier[i] = b_multiplier;
-    params->avx2.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->avx2.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
@@ -3840,7 +3844,9 @@ void xnn_init_qu8_add_minmax_avx512_params(
     params->avx512.bias[i] = bias;
     params->avx512.a_multiplier[i] = a_multiplier;
     params->avx512.b_multiplier[i] = b_multiplier;
-    params->avx512.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx512.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->avx512.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
@@ -4182,7 +4188,9 @@ void xnn_init_qs8_add_minmax_sse4_mul32_params(
     params->sse4_mul32.bias[i] = bias;
     params->sse4_mul32.a_multiplier[i] = a_multiplier;
     params->sse4_mul32.b_multiplier[i] = b_multiplier;
-    params->sse4_mul32.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 2; i++) {
+    params->sse4_mul32.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse4_mul32.output_zero_point[i] = (int16_t) output_zero_point;
@@ -4238,7 +4246,9 @@ void xnn_init_qs8_add_minmax_avx2_params(
     params->avx2.bias[i] = bias;
     params->avx2.a_multiplier[i] = a_multiplier;
     params->avx2.b_multiplier[i] = b_multiplier;
-    params->avx2.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->avx2.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
@@ -4292,7 +4302,9 @@ void xnn_init_qs8_add_minmax_avx512_params(
     params->avx512.bias[i] = bias;
     params->avx512.a_multiplier[i] = a_multiplier;
     params->avx512.b_multiplier[i] = b_multiplier;
-    params->avx512.shift[i] = shift;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx512.shift[i] = (uint64_t) shift;
   }
   for (uint32_t i = 0; i < 32; i++) {
     params->avx512.output_zero_point[i] = (int16_t) output_zero_point;

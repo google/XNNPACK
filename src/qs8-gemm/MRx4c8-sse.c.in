@@ -79,11 +79,11 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__$
 
   do {
     $for N in range(4):
-      __m128i vacc0x${N} = _mm_cvtsi32_si128((int) ((const int32_t*) w)[${N}]);
+      __m128i vacc0x${N} = _mm_cvtsi32_si128(((const int*) w)[${N}]);
     $for M in range(1, MR):
       $for N in range(4):
         __m128i vacc${M}x${N} = vacc0x${N};
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = 0;
     $if DATATYPE == "QU8":

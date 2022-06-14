@@ -71,16 +71,16 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
         $for C in range(0, CHANNEL_TILE, 4):
           $if DATATYPE == "QU8":
             $if C == 0:
-              const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepu8_epi32(_mm_loadu_si32(i${K}));
+              const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K})));
             $else:
-              const __m128i vi${K}x${ABC[C:C+4]} = _mm_cvtepu8_epi32(_mm_loadu_si32(i${K} + ${C}));
-            const __m128i vk${K}x${ABC[C:C+4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_loadu_si32((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(${XINT8_T})))), vk_zero_point);
+              const __m128i vi${K}x${ABC[C:C+4]} = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K} + ${C})));
+            const __m128i vk${K}x${ABC[C:C+4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((const int*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(${XINT8_T}))))), vk_zero_point);
           $else:
             $if C == 0:
-              const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_loadu_si32(i${K}));
+              const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K})));
             $else:
-              const __m128i vi${K}x${ABC[C:C+4]} = _mm_cvtepi8_epi32(_mm_loadu_si32(i${K} + ${C}));
-            const __m128i vk${K}x${ABC[C:C+4]} = _mm_cvtepi8_epi32(_mm_loadu_si32((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(${XINT8_T}))));
+              const __m128i vi${K}x${ABC[C:C+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K} + ${C})));
+            const __m128i vk${K}x${ABC[C:C+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128(*((const int*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE + C} * sizeof(${XINT8_T})))));
         i${K} += ${CHANNEL_TILE};
 
         $for C in range(0, CHANNEL_TILE, 4):
@@ -154,23 +154,23 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
 
         $for K in range(KERNEL_TILE):
           $if DATATYPE == "QU8":
-            const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepu8_epi32(_mm_loadu_si32(i${K}));
+            const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K})));
             $if CHANNEL_TILE > 4:
               $if K == 0:
-                const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_loadu_si32(k)), vk_zero_point);
+                const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((const int*) k))), vk_zero_point);
               $else:
-                const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_loadu_si32((const void*) (k + ${K * CHANNEL_TILE}))), vk_zero_point);
+                const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((const int*) (k + ${K * CHANNEL_TILE})))), vk_zero_point);
             $else:
-              const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_loadu_si32((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(${XINT8_T})))), vk_zero_point);
+              const __m128i vk${K}x${ABC[0:4]} = _mm_sub_epi32(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*((const int*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(${XINT8_T}))))), vk_zero_point);
           $else:
-            const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_loadu_si32(i${K}));
+            const __m128i vi${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(i${K})));
             $if CHANNEL_TILE > 4:
               $if K == 0:
-                const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_loadu_si32(k));
+                const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128(*((const int*) k)));
               $else:
-                const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_loadu_si32((const void*) (k + ${K * CHANNEL_TILE})));
+                const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128(*((const int*) (k + ${K * CHANNEL_TILE}))));
             $else:
-              const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_loadu_si32((const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(${XINT8_T}))));
+              const __m128i vk${K}x${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128(*((const int*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${K * CHANNEL_TILE} * sizeof(${XINT8_T})))));
           $if CHANNEL_TILE > 4:
             i${K} += 4;
 

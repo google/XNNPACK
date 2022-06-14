@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -30,10 +30,10 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_x16(
   const __m128i vminus_zero_point = _mm_load_si128((const __m128i*) params->sse4.minus_zero_point);
   const __m128 vscale = _mm_load_ps(params->sse4.scale);
   for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    __m128i vx0123 = _mm_cvtepu8_epi32(_mm_loadu_si32(x));
-    __m128i vx4567 = _mm_cvtepu8_epi32(_mm_loadu_si32(x + 4));
-    __m128i vx89AB = _mm_cvtepu8_epi32(_mm_loadu_si32(x + 8));
-    __m128i vxCDEF = _mm_cvtepu8_epi32(_mm_loadu_si32(x + 12));
+    __m128i vx0123 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
+    __m128i vx4567 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 4)));
+    __m128i vx89AB = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 8)));
+    __m128i vxCDEF = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 12)));
     x += 16;
 
     vx0123 = _mm_add_epi32(vx0123, vminus_zero_point);
@@ -58,7 +58,7 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_x16(
     y += 16;
   }
   for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    __m128i vx = _mm_cvtepu8_epi32(_mm_loadu_si32(x));
+    __m128i vx = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
     x += 4;
 
@@ -72,7 +72,7 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_x16(
     assert(n >= 1 * sizeof(uint8_t));
     assert(n <= 3 * sizeof(uint8_t));
 
-    __m128i vx = _mm_cvtepu8_epi32(_mm_loadu_si32(x));
+    __m128i vx = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
 
     __m128 vy = _mm_cvtepi32_ps(vx);

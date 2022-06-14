@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -30,12 +30,12 @@ void xnn_qs8_f32_vcvt_ukernel__sse41_x24(
   const __m128i vminus_zero_point = _mm_load_si128((const __m128i*) params->sse4.minus_zero_point);
   const __m128 vscale = _mm_load_ps(params->sse4.scale);
   for (; n >= 24 * sizeof(int8_t); n -= 24 * sizeof(int8_t)) {
-    __m128i vx0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(x));
-    __m128i vx4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(x + 4));
-    __m128i vx89AB = _mm_cvtepi8_epi32(_mm_loadu_si32(x + 8));
-    __m128i vxCDEF = _mm_cvtepi8_epi32(_mm_loadu_si32(x + 12));
-    __m128i vxGHIJ = _mm_cvtepi8_epi32(_mm_loadu_si32(x + 16));
-    __m128i vxKLMN = _mm_cvtepi8_epi32(_mm_loadu_si32(x + 20));
+    __m128i vx0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
+    __m128i vx4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 4)));
+    __m128i vx89AB = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 8)));
+    __m128i vxCDEF = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 12)));
+    __m128i vxGHIJ = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 16)));
+    __m128i vxKLMN = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x + 20)));
     x += 24;
 
     vx0123 = _mm_add_epi32(vx0123, vminus_zero_point);
@@ -68,7 +68,7 @@ void xnn_qs8_f32_vcvt_ukernel__sse41_x24(
     y += 24;
   }
   for (; n >= 4 * sizeof(int8_t); n -= 4 * sizeof(int8_t)) {
-    __m128i vx = _mm_cvtepi8_epi32(_mm_loadu_si32(x));
+    __m128i vx = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
     x += 4;
 
@@ -82,7 +82,7 @@ void xnn_qs8_f32_vcvt_ukernel__sse41_x24(
     assert(n >= 1 * sizeof(int8_t));
     assert(n <= 3 * sizeof(int8_t));
 
-    __m128i vx = _mm_cvtepi8_epi32(_mm_loadu_si32(x));
+    __m128i vx = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
 
     __m128 vy = _mm_cvtepi32_ps(vx);

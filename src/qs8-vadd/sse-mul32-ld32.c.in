@@ -43,17 +43,17 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TIL
   const __m128i vbias = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.bias);
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier);
   const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.b_multiplier);
-  const __m128i vshift = _mm_loadu_si32(params->${PARAMS_STRUCT}.shift);
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
 
   for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
-    const __m128i va${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_a));
-    const __m128i vb${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_b));
+    const __m128i va${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));
+    const __m128i vb${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b)));
     $for N in range(4, BATCH_TILE, 4):
-      const __m128i va${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_a + ${N}));
-      const __m128i vb${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_b + ${N}));
+      const __m128i va${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a + ${N})));
+      const __m128i vb${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b + ${N})));
     input_a += ${BATCH_TILE};
     input_b += ${BATCH_TILE};
 
@@ -107,10 +107,10 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TIL
   }
   if XNN_UNLIKELY(n != 0) {
     ${"do " if BATCH_TILE > 8 else ""}{
-      const __m128i va${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_a));
-      const __m128i vb${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_b));
-      const __m128i va${ABC[4:8]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_a + 4));
-      const __m128i vb${ABC[4:8]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(input_b + 4));
+      const __m128i va${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));
+      const __m128i vb${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b)));
+      const __m128i va${ABC[4:8]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a + 4)));
+      const __m128i vb${ABC[4:8]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b + 4)));
       $if BATCH_TILE > 8:
         input_a += 8;
         input_b += 8;

@@ -31,16 +31,16 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4_mul32.bias);
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.a_multiplier);
   const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.b_multiplier);
-  const __m128i vshift = _mm_loadu_si32(params->sse4_mul32.shift);
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse4_mul32.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4_mul32.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4_mul32.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse4_mul32.output_max);
 
   for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
-    const __m128i va0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_a));
-    const __m128i vb0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_b));
-    const __m128i va4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_a + 4));
-    const __m128i vb4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_b + 4));
+    const __m128i va0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));
+    const __m128i vb0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b)));
+    const __m128i va4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a + 4)));
+    const __m128i vb4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b + 4)));
     input_a += 8;
     input_b += 8;
 
@@ -66,10 +66,10 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
   }
   if XNN_UNLIKELY(n != 0) {
     {
-      const __m128i va0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_a));
-      const __m128i vb0123 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_b));
-      const __m128i va4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_a + 4));
-      const __m128i vb4567 = _mm_cvtepi8_epi32(_mm_loadu_si32(input_b + 4));
+      const __m128i va0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));
+      const __m128i vb0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b)));
+      const __m128i va4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a + 4)));
+      const __m128i vb4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_b + 4)));
 
       __m128i vacc0123 = _mm_macc_epi32(va0123, va_multiplier, vbias);
       __m128i vacc4567 = _mm_macc_epi32(va4567, va_multiplier, vbias);

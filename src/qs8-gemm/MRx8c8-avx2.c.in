@@ -65,17 +65,14 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x8c8__a
       }
 
   do {
-    const __m128i vbias0x0 = _mm_loadu_si32(w);
-    const __m128i vbias0x1 = _mm_loadu_si32((const int32_t*) w + 1);
-    __m256i vacc0x01 = _mm256_inserti128_si256(_mm256_castsi128_si256(vbias0x0), vbias0x1, 1);
-    $for N in range(2, 8, 2):
-      const __m128i vbias0x${N} = _mm_loadu_si32((const int32_t*) w + ${N});
-      const __m128i vbias0x${N+1} = _mm_loadu_si32((const int32_t*) w + ${N+1});
+    $for N in range(0, 8, 2):
+      const __m128i vbias0x${N} = _mm_cvtsi32_si128(((const int*) w)[${N}]);
+      const __m128i vbias0x${N+1} = _mm_cvtsi32_si128(((const int*) w)[${N+1}]);
       __m256i vacc0x${N}${N+1} = _mm256_inserti128_si256(_mm256_castsi128_si256(vbias0x${N}), vbias0x${N+1}, 1);
     $for M in range(1, MR):
       $for N in range(0, 8, 2):
         __m256i vacc${M}x${N}${N+1} = vacc0x${N}${N+1};
-    w = (const void*) ((const int32_t*) w + 8);
+    w = (const int32_t*) w + 8;
 
     size_t k = 0;
     $if DATATYPE == "QU8":

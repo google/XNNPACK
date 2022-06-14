@@ -25,7 +25,7 @@ void xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
   const __m512i vbias = _mm512_load_si512(params->avx512.bias);
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
-  const __m128i vshift = _mm_loadu_si32(params->avx512.shift);
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);

@@ -20,11 +20,6 @@
     (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 
 static XNN_INTRINSIC
-__m128i _mm_loadu_si32(const void* address) {
-  return _mm_cvtsi32_si128((int) unaligned_load_u32(address));
-}
-
-static XNN_INTRINSIC
 void _mm_storeu_si32(const void* address, __m128i v) {
   unaligned_store_u32(address, (uint32_t) _mm_cvtsi128_si32(v));
 }

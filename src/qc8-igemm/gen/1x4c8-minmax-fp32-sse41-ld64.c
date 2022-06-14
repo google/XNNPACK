@@ -45,11 +45,11 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4c8__sse41_ld64(
   int8_t* c0 = c;
 
   do {
-    __m128i vacc0x0 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[0]);
-    __m128i vacc0x1 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[1]);
-    __m128i vacc0x2 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[2]);
-    __m128i vacc0x3 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[3]);
-    w = (const void*) ((const int32_t*) w + 4);
+    __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
+    __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
+    __m128i vacc0x2 = _mm_cvtsi32_si128(((const int*) w)[2]);
+    __m128i vacc0x3 = _mm_cvtsi32_si128(((const int*) w)[3]);
+    w = (const int32_t*) w + 4;
 
     size_t p = ks;
     do {

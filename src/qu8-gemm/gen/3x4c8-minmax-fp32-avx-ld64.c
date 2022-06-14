@@ -54,10 +54,10 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__avx_ld64(
   }
 
   do {
-    __m128i vacc0x0 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[0]);
-    __m128i vacc0x1 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[1]);
-    __m128i vacc0x2 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[2]);
-    __m128i vacc0x3 = _mm_cvtsi32_si128((int) ((const int32_t*) w)[3]);
+    __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
+    __m128i vacc0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
+    __m128i vacc0x2 = _mm_cvtsi32_si128(((const int*) w)[2]);
+    __m128i vacc0x3 = _mm_cvtsi32_si128(((const int*) w)[3]);
     __m128i vacc1x0 = vacc0x0;
     __m128i vacc1x1 = vacc0x1;
     __m128i vacc1x2 = vacc0x2;
@@ -66,7 +66,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__avx_ld64(
     __m128i vacc2x1 = vacc0x1;
     __m128i vacc2x2 = vacc0x2;
     __m128i vacc2x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = 0;
     const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.kernel_zero_point);

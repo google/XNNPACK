@@ -23,7 +23,7 @@ void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x8(
     const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
-  const __m128i vshift = _mm_loadu_si32(params->avx2.shift);
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);

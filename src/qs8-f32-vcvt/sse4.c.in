@@ -11,7 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -32,9 +32,9 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse41_x${BATCH_TILE}(
   const __m128 vscale = _mm_load_ps(params->sse4.scale);
   $if BATCH_TILE > 4:
     for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
-      __m128i vx${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(x));
+      __m128i vx${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
       $for N in range(4, BATCH_TILE, 4):
-        __m128i vx${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(x + ${N}));
+        __m128i vx${ABC[N:N+4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(x + ${N})));
       x += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
@@ -52,7 +52,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse41_x${BATCH_TILE}(
       y += ${BATCH_TILE};
     }
   for (; n >= 4 * sizeof(${XINT8_T}); n -= 4 * sizeof(${XINT8_T})) {
-    __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(x));
+    __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
     x += 4;
 
@@ -66,7 +66,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse41_x${BATCH_TILE}(
     assert(n >= 1 * sizeof(${XINT8_T}));
     assert(n <= 3 * sizeof(${XINT8_T}));
 
-    __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_loadu_si32(x));
+    __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(x)));
     vx = _mm_add_epi32(vx, vminus_zero_point);
 
     __m128 vy = _mm_cvtepi32_ps(vx);

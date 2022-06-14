@@ -25,7 +25,7 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x32(
   const __m256i vbias = _mm256_load_si256((const __m256i*) params->avx2.bias);
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vb_multiplier = _mm256_load_si256((const __m256i*) params->avx2.b_multiplier);
-  const __m128i vshift = _mm_loadu_si32(params->avx2.shift);
+  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx2.output_max);
