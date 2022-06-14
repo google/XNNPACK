@@ -16,6 +16,25 @@
 #include <gtest/gtest.h>
 
 namespace {
+void DefineGraphWithoutInternalTensors(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)
+{
+  xnn_create_subgraph(/*external_value_ids=*/0, /*flags=*/0, subgraph);
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  xnn_define_tensor_value(
+    *subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID,
+    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
+  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  xnn_define_tensor_value(
+    *subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID,
+    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  ASSERT_EQ(xnn_status_success, xnn_define_abs(*subgraph, input_id, output_id, /*flags=*/0));
+
+}
+
 // Helper function to create a subgraph with 1 input, 1 output, and 1 intermediate tensor.
 // input -> (abs) -> intermediate -> (hard swish) -> output
 // The size of the tensors are all the same, specified by `dims`.
@@ -307,4 +326,26 @@ TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
 
   xnn_delete_runtime(auto_runtime1.release());
   ASSERT_EQ(workspace->first_user, nullptr);
+}
+
+TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors)
+{
+  xnn_initialize(/*allocator=*/nullptr);
+  xnn_workspace_t workspace = nullptr;
+  xnn_create_workspace(&workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+
+  std::array<size_t, 4> dims = {2, 20, 20, 3};
+
+  xnn_subgraph_t subgraph = nullptr;
+  DefineGraphWithoutInternalTensors(&subgraph, dims);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v4(subgraph, nullptr, workspace, nullptr, 0, &runtime));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  ASSERT_EQ(0, workspace->size);
+  ASSERT_EQ(nullptr, workspace->data);
+  ASSERT_EQ(std::vector<xnn_runtime_t>({runtime}), workspace_user_to_list(workspace));
 }

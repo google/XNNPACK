@@ -134,6 +134,7 @@ static enum xnn_status initialize_workspace_blobs(
     struct xnn_value_allocation_tracker* mem_alloc_tracker)
 {
   assert(runtime->workspace != NULL);
+
   size_t mem_arena_size = mem_alloc_tracker->mem_arena_size;
   if (mem_arena_size == 0) {
     return xnn_status_success;
@@ -181,6 +182,10 @@ static enum xnn_status initialize_workspace_blobs(
     // Adjust the blob pointers of all runtimes that share this workspace.
     if (workspace_data_delta != 0) {
       for (struct xnn_runtime* rt = runtime->workspace->first_user; rt != NULL; rt = rt->next_workspace_user) {
+        // The current runtime already has the correct offset.
+        if (rt == runtime) {
+          continue;
+        }
         for (size_t i = 0; i < rt->num_blobs; i++) {
           struct xnn_blob* blob = &rt->blobs[i];
           if (blob->data != NULL && !blob->external) {
@@ -189,12 +194,7 @@ static enum xnn_status initialize_workspace_blobs(
         }
       }
     }
-
-    // Add this runtime to list of runtimes using the shared workspace.
-    runtime->next_workspace_user = runtime->workspace->first_user;
-    runtime->workspace->first_user = runtime;
   }
-
 
   return xnn_status_success;
 }
@@ -323,6 +323,9 @@ enum xnn_status xnn_create_runtime_v4(
     runtime->owns_workspace = false;
     runtime->workspace = workspace;
   }
+
+  runtime->next_workspace_user = runtime->workspace->first_user;
+  runtime->workspace->first_user = runtime;
 
   status = initialize_workspace_blobs(subgraph, runtime, &mem_alloc_tracker);
   if (status != xnn_status_success) {
@@ -589,7 +592,6 @@ enum xnn_status xnn_delete_runtime(
       xnn_release_memory(runtime->opdata);
 
       xnn_release_memory(runtime->blobs);
-      // Workspace can be null if the graph does not require any internal tensors.
       if (runtime->workspace != NULL) {
         // If the workspace is shared, caller will free memory.
         if (runtime->owns_workspace) {
@@ -611,6 +613,7 @@ enum xnn_status xnn_delete_runtime(
           }
         }
       }
+
     }
 #if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
     xnn_release_code_cache(&runtime->code_cache);
