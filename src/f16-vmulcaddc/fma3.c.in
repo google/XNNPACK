@@ -11,6 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vmulcaddc.h>
 
@@ -145,7 +146,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(
       }
       if (c & (2 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):
-          *((uint32_t*) o${M}) = (uint32_t) _mm_cvtsi128_si32(vh${M});
+          _mm_storeu_si32(o${M}, vh${M});
 
         $for M in range(ROW_TILE):
           vh${M} = _mm_srli_epi64(vh${M}, 32);

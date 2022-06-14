@@ -6,6 +6,7 @@
 #pragma once
 
 #include <xnnpack/common.h>
+#include <xnnpack/unaligned.h>
 
 
 #if defined(__SSE2__)
@@ -20,12 +21,12 @@
 
 static XNN_INTRINSIC
 __m128i _mm_loadu_si32(const void* address) {
-  return _mm_cvtsi32_si128(*((const int*) address));
+  return _mm_cvtsi32_si128((int) unaligned_load_u32(address));
 }
 
 static XNN_INTRINSIC
 void _mm_storeu_si32(const void* address, __m128i v) {
-  *((int*) address) = _mm_cvtsi128_si32(v);
+  unaligned_store_u32(address, (uint32_t) _mm_cvtsi128_si32(v));
 }
 #endif  // GCC pre-11, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
 #endif  // SSE2

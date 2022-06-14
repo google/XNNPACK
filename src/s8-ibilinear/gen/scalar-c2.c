@@ -58,16 +58,16 @@ void xnn_s8_ibilinear_ukernel__scalar_c2(
       const int32_t vtd1 = vtr1 - vtl1;
       const int32_t vbd1 = vbr1 - vbl1;
 
-      const int32_t vt0 = (vtl0 << 11) + vtd0 * valphah;
-      const int32_t vb0 = (vbl0 << 11) + vbd0 * valphah;
-      const int32_t vt1 = (vtl1 << 11) + vtd1 * valphah;
-      const int32_t vb1 = (vbl1 << 11) + vbd1 * valphah;
+      const int32_t vt0 = (int32_t) ((uint32_t) vtl0 << 11) + vtd0 * valphah;
+      const int32_t vb0 = (int32_t) ((uint32_t) vbl0 << 11) + vbd0 * valphah;
+      const int32_t vt1 = (int32_t) ((uint32_t) vtl1 << 11) + vtd1 * valphah;
+      const int32_t vb1 = (int32_t) ((uint32_t) vbl1 << 11) + vbd1 * valphah;
 
       const int32_t vd0 = vb0 - vt0;
       const int32_t vd1 = vb1 - vt1;
 
-      const int32_t vacc0 = (vt0 << 11) + vd0 * valphav;
-      const int32_t vacc1 = (vt1 << 11) + vd1 * valphav;
+      const int32_t vacc0 = (int32_t) ((uint32_t) vt0 << 11) + vd0 * valphav;
+      const int32_t vacc1 = (int32_t) ((uint32_t) vt1 << 11) + vd1 * valphav;
 
       const int32_t vo0 = asr_s32(vacc0 + vrounding, 22);
       const int32_t vo1 = asr_s32(vacc1 + vrounding, 22);
@@ -85,12 +85,12 @@ void xnn_s8_ibilinear_ukernel__scalar_c2(
       const int32_t vtd = vtr - vtl;
       const int32_t vbd = vbr - vbl;
 
-      const int32_t vt = (vtl << 11) + vtd * valphah;
-      const int32_t vb = (vbl << 11) + vbd * valphah;
+      const int32_t vt = (int32_t) ((uint32_t) vtl << 11) + vtd * valphah;
+      const int32_t vb = (int32_t) ((uint32_t) vbl << 11) + vbd * valphah;
 
       const int32_t vd = vb - vt;
 
-      const int32_t vacc = (vt << 11) + vd * valphav;
+      const int32_t vacc = (int32_t) ((uint32_t) vt << 11) + vd * valphav;
 
       const int32_t vo = asr_s32(vacc + vrounding, 22);
 

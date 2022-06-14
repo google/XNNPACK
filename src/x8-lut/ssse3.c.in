@@ -14,10 +14,12 @@ $if AVX:
 $else:
   #include <tmmintrin.h>
 
+#include <xnnpack/common.h>
 $if AVX:
   #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/lut.h>
-#include <xnnpack/common.h>
+$if not AVX:
+  #include <xnnpack/unaligned.h>
 
 
 void xnn_x8_lut_ukernel__${"avx" if AVX else "ssse3"}_x${BATCH_TILE}(
@@ -107,13 +109,13 @@ void xnn_x8_lut_ukernel__${"avx" if AVX else "ssse3"}_x${BATCH_TILE}(
       $if AVX:
         _mm_storeu_si32(y, vy);
       $else:
-        *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+        unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
       vy = _mm_srli_epi64(vy, 32);
       y += 4;
     }
     $if AVX:
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+        _mm_storeu_si16(y, vy);
         vy = _mm_srli_epi32(vy, 16);
         y += 2;
       }
@@ -123,7 +125,7 @@ void xnn_x8_lut_ukernel__${"avx" if AVX else "ssse3"}_x${BATCH_TILE}(
     $else:
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) y) = (uint16_t) vy_lo;
+        unaligned_store_u16(y, (uint16_t) vy_lo);
         vy_lo >>= 16;
         y += 2;
       }

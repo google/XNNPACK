@@ -13,6 +13,7 @@
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 
@@ -220,10 +221,10 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x4c2__sse41_ld64(
     vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->sse4.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
-      *((uint32_t*) c1) = (uint32_t) _mm_extract_epi32(vout, 1);
-      *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout, 2);
-      *((uint32_t*) c3) = (uint32_t) _mm_extract_epi32(vout, 3);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
+      unaligned_store_u32(c1, (uint32_t) _mm_extract_epi32(vout, 1));
+      unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout, 2));
+      unaligned_store_u32(c3, (uint32_t) _mm_extract_epi32(vout, 3));
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -238,13 +239,13 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x4c2__sse41_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
-        *((uint16_t*) c3) = (uint16_t) _mm_extract_epi16(vout, 6);
+        unaligned_store_u16(c3, (uint16_t) _mm_extract_epi16(vout, 6));
         c3 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }

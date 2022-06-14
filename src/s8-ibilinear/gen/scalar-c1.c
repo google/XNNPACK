@@ -48,12 +48,12 @@ void xnn_s8_ibilinear_ukernel__scalar_c1(
       const int32_t vtd = vtr - vtl;
       const int32_t vbd = vbr - vbl;
 
-      const int32_t vt = (vtl << 11) + vtd * valphah;
-      const int32_t vb = (vbl << 11) + vbd * valphah;
+      const int32_t vt = (int32_t) ((uint32_t) vtl << 11) + vtd * valphah;
+      const int32_t vb = (int32_t) ((uint32_t) vbl << 11) + vbd * valphah;
 
       const int32_t vd = vb - vt;
 
-      const int32_t vacc = (vt << 11) + vd * valphav;
+      const int32_t vacc = (int32_t) ((uint32_t) vt << 11) + vd * valphav;
 
       const int32_t vo = asr_s32(vacc + vrounding, 22);
 

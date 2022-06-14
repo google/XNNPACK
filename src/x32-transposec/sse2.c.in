@@ -16,6 +16,8 @@ $NUM_ITERS = int(math.log2(TILE_SIZE))
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_sse2(
     const uint${SIZE}_t* input,
@@ -264,12 +266,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             switch (rem) {
               $for N in reversed(range(2, TILE_SIZE)):
                 case ${N}:
-                  *((int*) oN) = _mm_cvtsi128_si32(v0_${N});
+                  unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_${N}));
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
               case 1:
-                *((int*) oN) = _mm_cvtsi128_si32(v0_1);
+                unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_1));
               case 0:
-                *((int*) o) = _mm_cvtsi128_si32(v0_0);
+                unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
                 break;
               default:
                 XNN_UNREACHABLE;
@@ -278,28 +280,28 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               o += ${TILE_SIZE>>2};
           $elif OUT_PTRS == "MOV":
             o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-            *((int*) o) = _mm_cvtsi128_si32(v0_${TILE_SIZE-1});
+            unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_${TILE_SIZE-1}));
             uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             $for N in reversed(range(2, TILE_SIZE, 2)):
               if XNN_UNPREDICTABLE(block_width > ${N+1}) {
                 o = oN;
               }
-              *((int*) o) = _mm_cvtsi128_si32(v0_${N});
+              unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_${N}));
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
                 o = oN;
               }
-              *((int*) o) = _mm_cvtsi128_si32(v0_${N-1});
+              unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_${N-1}));
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width > 1) {
               o = oN;
             }
-            *((int*) o) = _mm_cvtsi128_si32(v0_0);
+            unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
             $if NUM_ITERS > 2:
               o += ${TILE_SIZE>>2};
           $else:
             $for N in reversed(range(TILE_SIZE)):
-              *((int*) o${N}) = _mm_cvtsi128_si32(v0_${N});
+              unaligned_store_u32(o${N}, (uint32_t) _mm_cvtsi128_si32(v0_${N}));
               $if NUM_ITERS>2:
                 o${N} += ${TILE_SIZE>>2};
           $if NUM_ITERS > 2:
@@ -313,12 +315,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             switch (rem) {
               $for N in reversed(range(2, TILE_SIZE)):
                 case ${N}:
-                  *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_${N});
+                  unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_${N}));
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
               case 1:
-                *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_1);
+                unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_1));
               case 0:
-                *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+                unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0));
                 break;
               default:
                 XNN_UNREACHABLE;
@@ -327,28 +329,28 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               o += ${TILE_SIZE>>3};
           $elif OUT_PTRS == "MOV":
             o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-            *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_${TILE_SIZE-1});
+            unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_${TILE_SIZE-1}));
             uint${SIZE}_t* oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             $for N in reversed(range(2, TILE_SIZE, 2)):
               if XNN_UNPREDICTABLE(block_width > ${N+1}) {
                 o = oN;
               }
-              *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_${N});
+              unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_${N}));
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
                 o = oN;
               }
-              *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_${N-1});
+              unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_${N-1}));
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width > 1) {
               o = oN;
             }
-            *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+            unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0));
             $if NUM_ITERS > 3:
               o += ${TILE_SIZE>>3};
           $else:
             $for N in reversed(range(TILE_SIZE)):
-              *((uint16_t*) o${N}) = (uint16_t) _mm_cvtsi128_si32(v0_${N});
+              unaligned_store_u16(o${N}, (uint16_t) _mm_cvtsi128_si32(v0_${N}));
               $if NUM_ITERS>3:
                 o${N} += ${TILE_SIZE>>3};
           $if NUM_ITERS>3:

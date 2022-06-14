@@ -14,6 +14,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
     const uint16_t* input,
@@ -219,21 +221,21 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
       }
 
       if (bh & 2) {
-        *((int*) o7) = _mm_cvtsi128_si32(v0_7);
+        unaligned_store_u32(o7, (uint32_t) _mm_cvtsi128_si32(v0_7));
         o7 += 2;
-        *((int*) o6) = _mm_cvtsi128_si32(v0_6);
+        unaligned_store_u32(o6, (uint32_t) _mm_cvtsi128_si32(v0_6));
         o6 += 2;
-        *((int*) o5) = _mm_cvtsi128_si32(v0_5);
+        unaligned_store_u32(o5, (uint32_t) _mm_cvtsi128_si32(v0_5));
         o5 += 2;
-        *((int*) o4) = _mm_cvtsi128_si32(v0_4);
+        unaligned_store_u32(o4, (uint32_t) _mm_cvtsi128_si32(v0_4));
         o4 += 2;
-        *((int*) o3) = _mm_cvtsi128_si32(v0_3);
+        unaligned_store_u32(o3, (uint32_t) _mm_cvtsi128_si32(v0_3));
         o3 += 2;
-        *((int*) o2) = _mm_cvtsi128_si32(v0_2);
+        unaligned_store_u32(o2, (uint32_t) _mm_cvtsi128_si32(v0_2));
         o2 += 2;
-        *((int*) o1) = _mm_cvtsi128_si32(v0_1);
+        unaligned_store_u32(o1, (uint32_t) _mm_cvtsi128_si32(v0_1));
         o1 += 2;
-        *((int*) o0) = _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u32(o0, (uint32_t) _mm_cvtsi128_si32(v0_0));
         o0 += 2;
         v0_0 = _mm_srli_epi64(v0_0, 32);
         v0_1 = _mm_srli_epi64(v0_1, 32);
@@ -245,14 +247,14 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
         v0_7 = _mm_srli_epi64(v0_7, 32);
       }
       if (bh & 1) {
-        *((uint16_t*) o7) = (uint16_t) _mm_cvtsi128_si32(v0_7);
-        *((uint16_t*) o6) = (uint16_t) _mm_cvtsi128_si32(v0_6);
-        *((uint16_t*) o5) = (uint16_t) _mm_cvtsi128_si32(v0_5);
-        *((uint16_t*) o4) = (uint16_t) _mm_cvtsi128_si32(v0_4);
-        *((uint16_t*) o3) = (uint16_t) _mm_cvtsi128_si32(v0_3);
-        *((uint16_t*) o2) = (uint16_t) _mm_cvtsi128_si32(v0_2);
-        *((uint16_t*) o1) = (uint16_t) _mm_cvtsi128_si32(v0_1);
-        *((uint16_t*) o0) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u16(o7, (uint16_t) _mm_cvtsi128_si32(v0_7));
+        unaligned_store_u16(o6, (uint16_t) _mm_cvtsi128_si32(v0_6));
+        unaligned_store_u16(o5, (uint16_t) _mm_cvtsi128_si32(v0_5));
+        unaligned_store_u16(o4, (uint16_t) _mm_cvtsi128_si32(v0_4));
+        unaligned_store_u16(o3, (uint16_t) _mm_cvtsi128_si32(v0_3));
+        unaligned_store_u16(o2, (uint16_t) _mm_cvtsi128_si32(v0_2));
+        unaligned_store_u16(o1, (uint16_t) _mm_cvtsi128_si32(v0_1));
+        unaligned_store_u16(o0, (uint16_t) _mm_cvtsi128_si32(v0_0));
       }
     }
 

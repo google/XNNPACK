@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #include <xnnpack/pad.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_xx_pad_ukernel__scalar(
@@ -28,11 +29,11 @@ void xnn_xx_pad_ukernel__scalar(
     if XNN_LIKELY(l != 0) {
       uint32_t vfill_pattern = fill_pattern;
       for (; l >= 4 * sizeof(uint8_t); l -= 4 * sizeof(uint8_t)) {
-        *((uint32_t*) output) = vfill_pattern;
+        unaligned_store_u32(output, vfill_pattern);
         output = (uint8_t*) output + 4;
       }
       if XNN_LIKELY(l & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_pattern;
+        unaligned_store_u16(output, (uint16_t) vfill_pattern);
         vfill_pattern >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -45,30 +46,30 @@ void xnn_xx_pad_ukernel__scalar(
     // Copy input channels.
     size_t c = channels;
     for (; c >= 16 * sizeof(uint8_t); c -= 16 * sizeof(uint8_t)) {
-      const uint32_t vdata0 = ((const uint32_t*) input)[0];
-      const uint32_t vdata1 = ((const uint32_t*) input)[1];
-      const uint32_t vdata2 = ((const uint32_t*) input)[2];
-      const uint32_t vdata3 = ((const uint32_t*) input)[3];
+      const uint32_t vdata0 = unaligned_indexed_load_u32(input, 0);
+      const uint32_t vdata1 = unaligned_indexed_load_u32(input, 1);
+      const uint32_t vdata2 = unaligned_indexed_load_u32(input, 2);
+      const uint32_t vdata3 = unaligned_indexed_load_u32(input, 3);
       input = (const uint8_t*) input + 16;
 
-      ((uint32_t*) output)[0] = vdata0;
-      ((uint32_t*) output)[1] = vdata1;
-      ((uint32_t*) output)[2] = vdata2;
-      ((uint32_t*) output)[3] = vdata3;
+      unaligned_indexed_store_u32(output, 0, vdata0);
+      unaligned_indexed_store_u32(output, 1, vdata1);
+      unaligned_indexed_store_u32(output, 2, vdata2);
+      unaligned_indexed_store_u32(output, 3, vdata3);
       output = (uint8_t*) output + 16;
     }
     if XNN_UNLIKELY(c != 0) {
       for (; c >= 4 * sizeof(uint8_t); c -= 4 * sizeof(uint8_t)) {
-        *((uint32_t*) output) = *((const uint32_t*) input);
+        unaligned_store_u32(output, unaligned_load_u32(input));
         input = (const uint8_t*) input + 4;
         output = (uint8_t*) output + 4;
       }
       if XNN_UNLIKELY(c != 0) {
-        uint32_t vdata = *((const uint32_t*) input);
+        uint32_t vdata = unaligned_load_u32(input);
         input = (const void*) ((uintptr_t) input + c);
 
         if XNN_LIKELY(c & (2 * sizeof(uint8_t))) {
-          *((uint16_t*) output) = (uint16_t) vdata;
+          unaligned_store_u16(output, vdata);
           vdata >>= 16;
           output = (uint8_t*) output + 2;
         }
@@ -84,11 +85,11 @@ void xnn_xx_pad_ukernel__scalar(
     if XNN_LIKELY(r != 0) {
       uint32_t vfill_pattern = fill_pattern;
       for (; r >= 4 * sizeof(uint8_t); r -= 4 * sizeof(uint8_t)) {
-        *((uint32_t*) output) = vfill_pattern;
+        unaligned_store_u32(output, vfill_pattern);
         output = (uint8_t*) output + 4;
       }
       if XNN_LIKELY(r & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_pattern;
+        unaligned_store_u16(output, vfill_pattern);
         vfill_pattern >>= 16;
         output = (uint8_t*) output + 2;
       }

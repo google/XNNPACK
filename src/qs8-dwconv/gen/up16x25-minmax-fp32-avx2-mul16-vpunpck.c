@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul16_vpunpck(
@@ -715,12 +716,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul16_vpunpck(
           output += 8;
         }
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456789ABCDEF);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456789ABCDEF));
           vout0123456789ABCDEF = _mm_srli_epi64(vout0123456789ABCDEF, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456789ABCDEF, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456789ABCDEF, 0));
           vout0123456789ABCDEF = _mm_srli_epi32(vout0123456789ABCDEF, 16);
           output += 2;
         }

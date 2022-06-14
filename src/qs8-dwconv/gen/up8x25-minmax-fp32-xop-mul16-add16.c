@@ -17,6 +17,7 @@
 #endif
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__xop_mul16_add16(
@@ -755,12 +756,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__xop_mul16_add16(
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }

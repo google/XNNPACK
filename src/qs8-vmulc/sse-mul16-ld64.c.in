@@ -15,6 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <${SSE_HEADER}>
 
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vmul.h>
 
 
@@ -172,15 +173,15 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
           n -= 8 * sizeof(${XINT8_T});
         } else {
           if (n & (4 * sizeof(${XINT8_T}))) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
           if (n & (2 * sizeof(${XINT8_T}))) {
             $if SSE == 4:
-              *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
+              unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0));
             $else:
-              *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+              unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
             output += 2;
           }
@@ -194,15 +195,15 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
         }
       $else:
         if (n & (4 * sizeof(${XINT8_T}))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
           vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
         if (n & (2 * sizeof(${XINT8_T}))) {
           $if SSE == 4:
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0));
           $else:
-            *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
+            unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
           vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
           output += 2;
         }

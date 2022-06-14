@@ -14,6 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
@@ -132,7 +133,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 

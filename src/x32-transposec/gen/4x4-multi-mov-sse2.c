@@ -14,6 +14,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x32_transposec_ukernel__4x4_multi_mov_sse2(
     const uint32_t* input,
@@ -138,22 +140,22 @@ void xnn_x32_transposec_ukernel__4x4_multi_mov_sse2(
 
       if (bh & 1) {
         o = (uint32_t*) ((uintptr_t) o + oN_stride);
-        *((int*) o) = _mm_cvtsi128_si32(v0_3);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_3));
         uint32_t *oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_2);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_2));
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_1);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_1));
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
       }
     }
 

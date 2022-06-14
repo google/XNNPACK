@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
 
@@ -60,7 +61,7 @@ void xnn_f16_vrndd_ukernel__f16c_x16(
       o += 4;
     }
     if (n & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }

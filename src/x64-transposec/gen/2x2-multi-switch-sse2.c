@@ -14,6 +14,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x64_transposec_ukernel__2x2_multi_switch_sse2(
     const uint64_t* input,

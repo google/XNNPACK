@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/ibilinear.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_ibilinear_ukernel__fma3_c8(
@@ -90,12 +91,12 @@ void xnn_f16_ibilinear_ukernel__fma3_c8(
         o += 4;
       }
       if (c & (2 * sizeof(uint16_t))) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vo);
+        _mm_storeu_si32(o, vo);
         vo = _mm_srli_epi64(vo, 32);
         o += 2;
       }
       if (c & (1 * sizeof(uint16_t))) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vo, 0);
+        *o = (uint16_t) _mm_extract_epi16(vo, 0);
         o += 1;
       }
     }

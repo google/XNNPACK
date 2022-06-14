@@ -25,6 +25,7 @@ $else:
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 
@@ -218,13 +219,13 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4_
         vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       $for M in range(1, MR):
         $if SSE == 4:
-          *((uint32_t*) c${M}) = (uint32_t) _mm_extract_epi32(vout, ${M});
+          unaligned_store_u32(c${M}, (uint32_t) _mm_extract_epi32(vout, ${M}));
         $else:
           vout = _mm_shuffle_epi32(vout, _MM_SHUFFLE(0, 3, 2, 1));
-          *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(c${M}, (uint32_t) _mm_cvtsi128_si32(vout));
 
       $for M in range(MR):
         c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
@@ -236,7 +237,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4_
     } else {
       if (nc & 2) {
         $for M in range(MR):
-          *((uint16_t*) c${M}) = (uint16_t) _mm_extract_epi16(vout, ${M * 2});
+          unaligned_store_u16(c${M}, (uint16_t) _mm_extract_epi16(vout, ${M * 2}));
           c${M} += 2;
         vout = _mm_srli_epi32(vout, 16);
       }

@@ -122,8 +122,8 @@ void xnn_f16_prelu_ukernel__f16c_2x16(
         o1 += 4;
       }
       if (c & (2 * sizeof(uint16_t))) {
-        *((uint32_t*) o0) = (uint32_t) _mm_cvtsi128_si32(vh0x01234567);
-        *((uint32_t*) o1) = (uint32_t) _mm_cvtsi128_si32(vh1x01234567);
+        _mm_storeu_si32(o0, vh0x01234567);
+        _mm_storeu_si32(o1, vh1x01234567);
 
         vh0x01234567 = _mm_srli_epi64(vh0x01234567, 32);
         vh1x01234567 = _mm_srli_epi64(vh1x01234567, 32);

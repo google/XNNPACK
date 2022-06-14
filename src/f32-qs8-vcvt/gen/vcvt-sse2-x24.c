@@ -12,6 +12,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -123,14 +124,14 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x24(
     vy = _mm_packs_epi16(vy, vy);
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     {
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
       if (n & (2 * sizeof(float))) {
-        *((uint16_t*) y) = (uint16_t) vy_lo;
+        unaligned_store_u16(y, (uint16_t) vy_lo);
         y += 2;
         vy_lo >>= 16;
       }

@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vaddsub.h>
 
 
@@ -81,12 +82,12 @@ void xnn_qs8_vadd_minmax_ukernel__sse41_mul32_ld32_x8(
       vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+        unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }

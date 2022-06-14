@@ -9,6 +9,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/zip.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_x8_zip_xm_ukernel__sse2(
@@ -51,52 +52,52 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw2 = _mm_unpacklo_epi16(vxy_hi, vzw_hi);
         __m128i vxyzw3 = _mm_unpackhi_epi16(vxy_hi, vzw_hi);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_unpackhi_epi64(vxyzw1, vxyzw1);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_shufflelo_epi16(vxyzw2, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_unpackhi_epi64(vxyzw2, vxyzw2);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_shufflelo_epi16(vxyzw2, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_shufflelo_epi16(vxyzw3, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_unpackhi_epi64(vxyzw3, vxyzw3);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_shufflelo_epi16(vxyzw3, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         k -= 16;
       };
@@ -114,28 +115,28 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw0 = _mm_unpacklo_epi16(vxy, vzw);
         __m128i vxyzw1 = _mm_unpackhi_epi16(vxy, vzw);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_unpackhi_epi64(vxyzw1, vxyzw1);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         k -= 8;
       }
@@ -158,30 +159,30 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw1 = _mm_unpackhi_epi16(vxy, vzw);
 
         if (k & 4) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = vxyzw1;
         }
 
         if (k & 2) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
         }
         if (k & 1) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
         }
       }

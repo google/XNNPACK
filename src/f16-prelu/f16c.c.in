@@ -11,6 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/prelu.h>
 
@@ -124,7 +125,7 @@ void xnn_f16_prelu_ukernel__f16c_${ROW_TILE}x${CHANNEL_TILE}(
       }
       if (c & (2 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):
-          *((uint32_t*) o${M}) = (uint32_t) _mm_cvtsi128_si32(vh${M}x01234567);
+          _mm_storeu_si32(o${M}, vh${M}x01234567);
 
         $for M in range(ROW_TILE):
           vh${M}x01234567 = _mm_srli_epi64(vh${M}x01234567, 32);

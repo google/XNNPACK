@@ -10,6 +10,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x16_transposec_ukernel__4x8_sse2(
     const uint16_t* input,
@@ -127,21 +129,21 @@ void xnn_x16_transposec_ukernel__4x8_sse2(
       __m128i v3 = _mm_unpackhi_epi16(vtmp2, vtmp3);
 
       if (bh & 2) {
-        *((int*) o7) = _mm_cvtsi128_si32(_mm_shuffle_epi32(v3, 0xE));
+        unaligned_store_u32(o7, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(v3, 0xE)));
         o7 += 2;
-        *((int*) o6) = _mm_cvtsi128_si32(v3);
+        unaligned_store_u32(o6, (uint32_t) _mm_cvtsi128_si32(v3));
         o6 += 2;
-        *((int*) o5) = _mm_cvtsi128_si32(_mm_shuffle_epi32(v1, 0xE));
+        unaligned_store_u32(o5, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(v1, 0xE)));
         o5 += 2;
-        *((int*) o4) = _mm_cvtsi128_si32(v1);
+        unaligned_store_u32(o4, (uint32_t) _mm_cvtsi128_si32(v1));
         o4 += 2;
-        *((int*) o3) = _mm_cvtsi128_si32(_mm_shuffle_epi32(v2, 0xE));
+        unaligned_store_u32(o3, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(v2, 0xE)));
         o3 += 2;
-        *((int*) o2) = _mm_cvtsi128_si32(v2);
+        unaligned_store_u32(o2, (uint32_t) _mm_cvtsi128_si32(v2));
         o2 += 2;
-        *((int*) o1) = _mm_cvtsi128_si32(_mm_shuffle_epi32(v0, 0xE));
+        unaligned_store_u32(o1, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(v0, 0xE)));
         o1 += 2;
-        *((int*) o0) = _mm_cvtsi128_si32(v0);
+        unaligned_store_u32(o0, (uint32_t) _mm_cvtsi128_si32(v0));
         o0 += 2;
         v0 = _mm_srli_epi64(v0, 32);
         v1 = _mm_srli_epi64(v1, 32);

@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vunary.h>
 
 
@@ -58,7 +59,7 @@ void xnn_f16_vabs_ukernel__sse2_x16(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vacc));
       o += 2;
       vacc = _mm_srli_epi64(vacc, 32);
     }

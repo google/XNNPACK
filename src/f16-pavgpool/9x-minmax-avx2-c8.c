@@ -7,6 +7,7 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/pavgpool.h>
 
 
@@ -31,6 +32,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
   const __m256 voutput_min = _mm256_load_ps(params->avx.min);
   const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
+  uint16_t* o = (uint16_t*) output;
   do {
     const uint16_t* i0 = (const uint16_t*) input[0];
     assert(i0 != NULL);
@@ -140,8 +142,8 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
       vout = _mm256_max_ps(vout, voutput_min);
       vout = _mm256_min_ps(vout, voutput_max);
 
-      _mm_storeu_si128(output, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
-      output = (uint16_t*) output + 8;
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
+      o += 8;
 
       c -= 8;
     }
@@ -171,20 +173,20 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
 
       __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC);
       if (c & 4) {
-        _mm_storel_epi64((__m128i*) output, vh);
+        _mm_storel_epi64((__m128i*) o, vh);
         vh = _mm_unpackhi_epi64(vh, vh);
-        output = (uint16_t*) output + 4;
+        o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vh);
+        _mm_storeu_si32(o, vh);
         vh = _mm_srli_epi64(vh, 32);
-        output = (uint16_t*) output + 2;
+        o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vh, 0);
-        output = (uint16_t*) output + 1;
+        *o = (uint16_t) _mm_extract_epi16(vh, 0);
+        o += 1;
       }
     }
-    output = (void*) ((uintptr_t) output + output_increment);
+    o = (uint16_t*) ((uintptr_t) o + output_increment);
   } while (--output_pixels != 0);
 }

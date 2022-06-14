@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/ibilinear.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_s8_ibilinear_ukernel__sse2_c16(
@@ -190,13 +191,13 @@ void xnn_s8_ibilinear_ukernel__sse2_c16(
       __m128i vo01234567 = _mm_packs_epi16(vacc01234567, vacc01234567);
 
       if (c & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vo01234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vo01234567));
         output += 4;
         vo01234567 = _mm_srli_epi64(vo01234567, 32);
       }
       uint32_t vo0123 = (uint32_t) _mm_cvtsi128_si32(vo01234567);
       if (c & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) vo0123;
+        unaligned_store_u16(output, (uint16_t) vo0123);
         output += 2;
         vo0123 >>= 16;
       }

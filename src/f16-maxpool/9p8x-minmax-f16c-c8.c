@@ -7,6 +7,7 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/maxpool.h>
 
 
@@ -144,7 +145,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
           o += 4;
         }
         if (c & 2) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+          _mm_storeu_si32(o, vh);
           vh = _mm_srli_epi64(vh, 32);
           o += 2;
         }
@@ -256,7 +257,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
           o += 4;
         }
         if (c & 2) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+          _mm_storeu_si32(o, vh);
           vh = _mm_srli_epi64(vh, 32);
           o += 2;
         }

@@ -16,6 +16,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/raddstoreexpminusmax.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vaddsub.h>
 #include <xnnpack/vcvt.h>
 #include <xnnpack/vunary.h>
@@ -630,6 +631,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8(
   const __m256 voutput_min = _mm256_load_ps(params->avx.min);
   const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
+  uint16_t* o = (uint16_t*) output;
   do {
     {
       const uint16_t* i0 = (const uint16_t*) *input++;
@@ -892,8 +894,8 @@ void xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8(
         vout = _mm256_max_ps(vout, voutput_min);
         vout = _mm256_min_ps(vout, voutput_max);
 
-        _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
-        output = (uint16_t*) output + 8;
+        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
+        o += 8;
 
         c -= 8;
       }
@@ -923,22 +925,22 @@ void xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8(
 
         __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC);
         if (c & 4) {
-          _mm_storel_epi64((__m128i*) output, vh);
+          _mm_storel_epi64((__m128i*) o, vh);
           vh = _mm_unpackhi_epi64(vh, vh);
-          output = (uint16_t*) output + 4;
+          o += 4;
         }
         if (c & 2) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vh);
+          _mm_storeu_si32(o, vh);
           vh = _mm_srli_epi64(vh, 32);
-          output = (uint16_t*) output + 2;
+          o += 2;
         }
         if (c & 1) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vh, 0);
-          output = (uint16_t*) output + 1;
+          *o = (uint16_t) _mm_extract_epi16(vh, 0);
+          o += 1;
         }
       }
     }
-    output = (uint16_t*) ((uintptr_t) output + output_increment);
+    o = (uint16_t*) ((uintptr_t) o + output_increment);
   } while (--output_pixels != 0);
 }
 
@@ -963,6 +965,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
   const __m256 voutput_min = _mm256_load_ps(params->avx.min);
   const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
+  uint16_t* o = (uint16_t*) output;
   do {
     const uint16_t* i0 = (const uint16_t*) input[0];
     assert(i0 != NULL);
@@ -1072,8 +1075,8 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
       vout = _mm256_max_ps(vout, voutput_min);
       vout = _mm256_min_ps(vout, voutput_max);
 
-      _mm_storeu_si128(output, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
-      output = (uint16_t*) output + 8;
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
+      o += 8;
 
       c -= 8;
     }
@@ -1103,21 +1106,21 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
 
       __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC);
       if (c & 4) {
-        _mm_storel_epi64((__m128i*) output, vh);
+        _mm_storel_epi64((__m128i*) o, vh);
         vh = _mm_unpackhi_epi64(vh, vh);
-        output = (uint16_t*) output + 4;
+        o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vh);
+        _mm_storeu_si32(o, vh);
         vh = _mm_srli_epi64(vh, 32);
-        output = (uint16_t*) output + 2;
+        o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vh, 0);
-        output = (uint16_t*) output + 1;
+        *o = (uint16_t) _mm_extract_epi16(vh, 0);
+        o += 1;
       }
     }
-    output = (void*) ((uintptr_t) output + output_increment);
+    o = (uint16_t*) ((uintptr_t) o + output_increment);
   } while (--output_pixels != 0);
 }
 
@@ -1275,7 +1278,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40(
       o += 4;
     }
     if (batch & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       vacc_lo = _mm_blend_ps(_mm_add_ps(vacc_lo, vf_lo), vacc_lo, 0xC);
       vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
@@ -1446,7 +1449,7 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32(
       o += 4;
     }
     if (batch & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
@@ -1567,12 +1570,12 @@ void xnn_f32_qs8_vcvt_ukernel__avx2_x64(
     vy = _mm_max_epi8(vy, _mm256_castsi256_si128(voutput_min));
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      _mm_storeu_si32(y, vy);
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     if (n & (2 * sizeof(float))) {
-      *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+      _mm_storeu_si16(y, vy);
       y += 2;
       vy = _mm_srli_epi32(vy, 16);
     }
@@ -1693,12 +1696,12 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_x64(
     vy = _mm_max_epu8(vy, _mm256_castsi256_si128(voutput_min));
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      _mm_storeu_si32(y, vy);
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     if (n & (2 * sizeof(float))) {
-      *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+      _mm_storeu_si16(y, vy);
       y += 2;
       vy = _mm_srli_epi32(vy, 16);
     }
@@ -2728,12 +2731,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -2894,12 +2897,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -3180,12 +3183,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -3318,7 +3321,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -3502,7 +3505,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       if (nc & 4) {
         _mm_storeu_si32(c0, vout_lo);
         _mm_storeu_si32(c1, vout_hi);
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
 
         c0 += 4;
         c1 += 4;
@@ -3512,9 +3515,9 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
 
         c0 += 2;
         c1 += 2;
@@ -3663,7 +3666,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -3860,7 +3863,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
       nc -= 8;
     } else {
       if (nc & 4) {
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
         _mm_storeu_si32(c1, vout_hi);
         _mm_storeu_si32(c0, vout_lo);
 
@@ -3872,9 +3875,9 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c2 += 2;
         c1 += 2;
@@ -4475,12 +4478,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -4758,12 +4761,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -4964,7 +4967,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -5147,7 +5150,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       if (nc & 4) {
         _mm_storeu_si32(c0, vout_lo);
         _mm_storeu_si32(c1, vout_hi);
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
 
         c0 += 4;
         c1 += 4;
@@ -5157,9 +5160,9 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
 
         c0 += 2;
         c1 += 2;
@@ -5307,7 +5310,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -5503,7 +5506,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
       nc -= 8;
     } else {
       if (nc & 4) {
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
         _mm_storeu_si32(c1, vout_hi);
         _mm_storeu_si32(c0, vout_lo);
 
@@ -5515,9 +5518,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c2 += 2;
         c1 += 2;
@@ -5604,12 +5607,12 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
         n -= 8 * sizeof(int8_t);
       } else {
         if (n & (4 * sizeof(int8_t))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          _mm_storeu_si32(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (n & (2 * sizeof(int8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          _mm_storeu_si16(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -5680,12 +5683,12 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
         n -= 8 * sizeof(int8_t);
       } else {
         if (n & (4 * sizeof(int8_t))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          _mm_storeu_si32(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (n & (2 * sizeof(int8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          _mm_storeu_si16(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -6280,12 +6283,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -6564,12 +6567,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
           c -= 8;
         } else {
           if (c & 4) {
-            *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+            unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
             vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
             output += 4;
           }
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
             vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
             output += 2;
           }
@@ -6771,7 +6774,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -6955,7 +6958,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       if (nc & 4) {
         _mm_storeu_si32(c0, vout_lo);
         _mm_storeu_si32(c1, vout_hi);
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
 
         c0 += 4;
         c1 += 4;
@@ -6965,9 +6968,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
 
         c0 += 2;
         c1 += 2;
@@ -7116,7 +7119,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c0 += 2;
 
@@ -7313,7 +7316,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
       nc -= 8;
     } else {
       if (nc & 4) {
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
         _mm_storeu_si32(c1, vout_hi);
         _mm_storeu_si32(c0, vout_lo);
 
@@ -7325,9 +7328,9 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c2 += 2;
         c1 += 2;
@@ -7414,12 +7417,12 @@ void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
         n -= 8 * sizeof(uint8_t);
       } else {
         if (n & (4 * sizeof(uint8_t))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          _mm_storeu_si32(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (n & (2 * sizeof(uint8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          _mm_storeu_si16(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -7490,12 +7493,12 @@ void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
         n -= 8 * sizeof(uint8_t);
       } else {
         if (n & (4 * sizeof(uint8_t))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          _mm_storeu_si32(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (n & (2 * sizeof(uint8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          _mm_storeu_si16(output, vout0123456701234567);
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -7782,7 +7785,7 @@ void xnn_x8_lut_ukernel__avx2_x128(
       y += 4;
     }
     if (n & (2 * sizeof(uint8_t))) {
-      *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+      _mm_storeu_si16(y, vy);
       vy = _mm_srli_epi32(vy, 16);
       y += 2;
     }

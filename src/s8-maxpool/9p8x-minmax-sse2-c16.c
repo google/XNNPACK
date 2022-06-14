@@ -8,6 +8,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/maxpool.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
@@ -139,12 +140,12 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
@@ -259,17 +260,17 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *((int8_t*) o) = (int8_t) _mm_cvtsi128_si32(vout);
+          *o = (int8_t) _mm_cvtsi128_si32(vout);
           o += 1;
         }
       }

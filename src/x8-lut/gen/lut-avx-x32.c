@@ -11,9 +11,9 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/lut.h>
-#include <xnnpack/common.h>
 
 
 void xnn_x8_lut_ukernel__avx_x32(
@@ -224,7 +224,7 @@ void xnn_x8_lut_ukernel__avx_x32(
       y += 4;
     }
     if (n & (2 * sizeof(uint8_t))) {
-      *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+      _mm_storeu_si16(y, vy);
       vy = _mm_srli_epi32(vy, 16);
       y += 2;
     }

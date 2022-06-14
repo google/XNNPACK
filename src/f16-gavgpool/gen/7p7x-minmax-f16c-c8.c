@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/gavgpool.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 
@@ -118,6 +119,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8(
   if XNN_UNPREDICTABLE(rows <= 6) {
     i6 = (const uint16_t*) zero;
   }
+  uint16_t* o = (uint16_t*) output;
 
   const __m256 vscale = _mm256_load_ps(params->avx.scale);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
@@ -147,8 +149,8 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8(
 
     vout01234567 = _mm256_min_ps(vout01234567, vmax);
 
-    _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC));
-    output = (uint16_t*) output + 8;
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC));
+    o += 8;
   }
   if XNN_UNLIKELY(channels != 0) {
     {
@@ -175,17 +177,17 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c8(
 
       __m128i vh01234567 = _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC);
       if (channels & 4) {
-        _mm_storel_epi64((__m128i*) output, vh01234567);
-        output = (uint16_t*) output + 4;
+        _mm_storel_epi64((__m128i*) o, vh01234567);
+        o += 4;
         vh01234567 = _mm_unpackhi_epi64(vh01234567, vh01234567);
       }
       if (channels & 2) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
-        output = (uint16_t*) output + 2;
+        _mm_storeu_si32(o, vh01234567);
+        o += 2;
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
       }
       if (channels & 1) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
       }
     }
   }

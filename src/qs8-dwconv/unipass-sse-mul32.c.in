@@ -26,6 +26,7 @@ $else:
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
@@ -210,7 +211,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
             c -= 4;
           } else {
             if (c & 2) {
-              *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:4]}, 0);
+              unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:4]}, 0));
               vout${ABC[0:4]} = _mm_srli_epi32(vout${ABC[0:4]}, 16);
               output += 2;
             }
@@ -222,7 +223,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up$
           }
         $else:
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout${ABC[0:4]}, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:4]}, 0));
             vout${ABC[0:4]} = _mm_srli_epi32(vout${ABC[0:4]}, 16);
             output += 2;
           }

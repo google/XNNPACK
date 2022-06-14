@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vmulcaddc.h>
 
@@ -142,8 +143,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
         o1 += 4;
       }
       if (c & (2 * sizeof(uint16_t))) {
-        *((uint32_t*) o0) = (uint32_t) _mm_cvtsi128_si32(vh0);
-        *((uint32_t*) o1) = (uint32_t) _mm_cvtsi128_si32(vh1);
+        _mm_storeu_si32(o0, vh0);
+        _mm_storeu_si32(o1, vh1);
 
         vh0 = _mm_srli_epi64(vh0, 32);
         vh1 = _mm_srli_epi64(vh1, 32);

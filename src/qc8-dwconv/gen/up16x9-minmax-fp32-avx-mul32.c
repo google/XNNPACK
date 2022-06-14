@@ -13,6 +13,7 @@
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul32(
@@ -334,7 +335,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul32(
           c -= 4;
         } else {
           if (c & 2) {
-            *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123, 0);
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123, 0));
             vout0123 = _mm_srli_epi32(vout0123, 16);
             output += 2;
           }

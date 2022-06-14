@@ -8,6 +8,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/pad.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_xx_pad_ukernel__sse2(
@@ -39,11 +40,11 @@ void xnn_xx_pad_ukernel__sse2(
       }
       uint32_t vfill_subpattern = fill_pattern;
       if (l & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, vfill_subpattern);
         output = (uint8_t*) output + 4;
       }
       if (l & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -71,13 +72,13 @@ void xnn_xx_pad_ukernel__sse2(
         output = (uint8_t*) output + 8;
       }
       if (c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vdata);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vdata));
         vdata = _mm_srli_epi64(vdata, 32);
         output = (uint8_t*) output + 4;
       }
       uint32_t vsubdata = (uint32_t) _mm_cvtsi128_si32(vdata);
       if (c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vsubdata;
+        unaligned_store_u16(output, (uint16_t) vsubdata);
         vsubdata >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -100,11 +101,11 @@ void xnn_xx_pad_ukernel__sse2(
       }
       uint32_t vfill_subpattern = fill_pattern;
       if (r & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, vfill_subpattern);
         output = (uint8_t*) output + 4;
       }
       if (r & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }

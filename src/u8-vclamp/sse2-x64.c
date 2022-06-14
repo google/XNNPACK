@@ -7,6 +7,7 @@
 
 #include <emmintrin.h>
 
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vunary.h>
 
 
@@ -65,12 +66,12 @@ void xnn_u8_vclamp_ukernel__sse2_x64(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & 4) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vacc));
       y += 4;
       vacc = _mm_srli_epi64(vacc, 32);
     }
     if (n & 2) {
-      *((uint16_t*) y) = (uint16_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u16(y, (uint16_t) _mm_cvtsi128_si32(vacc));
       y += 2;
       vacc = _mm_srli_epi32(vacc, 16);
     }

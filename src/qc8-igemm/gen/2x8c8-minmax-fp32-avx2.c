@@ -14,6 +14,7 @@
 #include <xnnpack/igemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__avx2(
@@ -176,8 +177,8 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
 
         c1 += 2;
         c0 += 2;

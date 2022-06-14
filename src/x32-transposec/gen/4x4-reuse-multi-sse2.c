@@ -14,6 +14,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x32_transposec_ukernel__4x4_reuse_multi_sse2(
     const uint32_t* input,
@@ -123,10 +125,10 @@ void xnn_x32_transposec_ukernel__4x4_reuse_multi_sse2(
       }
 
       if (bh & 1) {
-        *((int*) o3) = _mm_cvtsi128_si32(v0_3);
-        *((int*) o2) = _mm_cvtsi128_si32(v0_2);
-        *((int*) o1) = _mm_cvtsi128_si32(v0_1);
-        *((int*) o0) = _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u32(o3, (uint32_t) _mm_cvtsi128_si32(v0_3));
+        unaligned_store_u32(o2, (uint32_t) _mm_cvtsi128_si32(v0_2));
+        unaligned_store_u32(o1, (uint32_t) _mm_cvtsi128_si32(v0_1));
+        unaligned_store_u32(o0, (uint32_t) _mm_cvtsi128_si32(v0_0));
       }
     }
 

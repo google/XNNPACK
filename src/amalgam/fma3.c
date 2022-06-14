@@ -12,6 +12,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/ibilinear.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
@@ -162,12 +163,12 @@ void xnn_f16_dwconv_minmax_ukernel_up16x3__fma3(
         o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
+        _mm_storeu_si32(o, vh01234567);
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
         o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
         o += 1;
       }
     }
@@ -346,12 +347,12 @@ void xnn_f16_dwconv_minmax_ukernel_up16x4__fma3(
         o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
+        _mm_storeu_si32(o, vh01234567);
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
         o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
         o += 1;
       }
     }
@@ -655,12 +656,12 @@ void xnn_f16_dwconv_minmax_ukernel_up16x9__fma3(
         o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
+        _mm_storeu_si32(o, vh01234567);
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
         o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
         o += 1;
       }
     }
@@ -1127,12 +1128,12 @@ void xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2(
         o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
+        _mm_storeu_si32(o, vh01234567);
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
         o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
         o += 1;
       }
     }
@@ -1216,12 +1217,12 @@ void xnn_f16_ibilinear_ukernel__fma3_c8(
         o += 4;
       }
       if (c & (2 * sizeof(uint16_t))) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vo);
+        _mm_storeu_si32(o, vo);
         vo = _mm_srli_epi64(vo, 32);
         o += 2;
       }
       if (c & (1 * sizeof(uint16_t))) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vo, 0);
+        *o = (uint16_t) _mm_extract_epi16(vo, 0);
         o += 1;
       }
     }
@@ -1320,8 +1321,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
         o1 += 4;
       }
       if (c & (2 * sizeof(uint16_t))) {
-        *((uint32_t*) o0) = (uint32_t) _mm_cvtsi128_si32(vh0);
-        *((uint32_t*) o1) = (uint32_t) _mm_cvtsi128_si32(vh1);
+        _mm_storeu_si32(o0, vh0);
+        _mm_storeu_si32(o1, vh1);
 
         vh0 = _mm_srli_epi64(vh0, 32);
         vh1 = _mm_srli_epi64(vh1, 32);

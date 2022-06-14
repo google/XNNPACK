@@ -56,14 +56,14 @@ void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if P
           const int32_t vbd${ABC[C]} = vbr${ABC[C]} - vbl${ABC[C]};
 
         $for C in range(CHANNEL_TILE):
-          const int32_t vt${ABC[C]} = (vtl${ABC[C]} << 11) + vtd${ABC[C]} * valphah;
-          const int32_t vb${ABC[C]} = (vbl${ABC[C]} << 11) + vbd${ABC[C]} * valphah;
+          const int32_t vt${ABC[C]} = (int32_t) ((uint32_t) vtl${ABC[C]} << 11) + vtd${ABC[C]} * valphah;
+          const int32_t vb${ABC[C]} = (int32_t) ((uint32_t) vbl${ABC[C]} << 11) + vbd${ABC[C]} * valphah;
 
         $for C in range(CHANNEL_TILE):
           const int32_t vd${ABC[C]} = vb${ABC[C]} - vt${ABC[C]};
 
         $for C in range(CHANNEL_TILE):
-          const int32_t vacc${ABC[C]} = (vt${ABC[C]} << 11) + vd${ABC[C]} * valphav;
+          const int32_t vacc${ABC[C]} = (int32_t) ((uint32_t) vt${ABC[C]} << 11) + vd${ABC[C]} * valphav;
 
         $for C in range(CHANNEL_TILE):
           const int32_t vo${ABC[C]} = asr_s32(vacc${ABC[C]} + vrounding, 22);
@@ -81,12 +81,12 @@ void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if P
         const int32_t vtd = vtr - vtl;
         const int32_t vbd = vbr - vbl;
 
-        const int32_t vt = (vtl << 11) + vtd * valphah;
-        const int32_t vb = (vbl << 11) + vbd * valphah;
+        const int32_t vt = (int32_t) ((uint32_t) vtl << 11) + vtd * valphah;
+        const int32_t vb = (int32_t) ((uint32_t) vbl << 11) + vbd * valphah;
 
         const int32_t vd = vb - vt;
 
-        const int32_t vacc = (vt << 11) + vd * valphav;
+        const int32_t vacc = (int32_t) ((uint32_t) vt << 11) + vd * valphav;
 
         const int32_t vo = asr_s32(vacc + vrounding, 22);
 
@@ -102,12 +102,12 @@ void xnn_${DATATYPE.lower()}_ibilinear_ukernel__scalar_c${CHANNEL_TILE}${"" if P
         const int32_t vtd = vtr - vtl;
         const int32_t vbd = vbr - vbl;
 
-        const int32_t vt = (vtl << 11) + vtd * valphah;
-        const int32_t vb = (vbl << 11) + vbd * valphah;
+        const int32_t vt = (int32_t) ((uint32_t) vtl << 11) + vtd * valphah;
+        const int32_t vb = (int32_t) ((uint32_t) vbl << 11) + vbd * valphah;
 
         const int32_t vd = vb - vt;
 
-        const int32_t vacc = (vt << 11) + vd * valphav;
+        const int32_t vacc = (int32_t) ((uint32_t) vt << 11) + vd * valphav;
 
         const int32_t vo = asr_s32(vacc + vrounding, 22);
 

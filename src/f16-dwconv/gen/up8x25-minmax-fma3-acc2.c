@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2(
@@ -472,12 +473,12 @@ void xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2(
         o += 4;
       }
       if (c & 2) {
-        *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh01234567);
+        _mm_storeu_si32(o, vh01234567);
         vh01234567 = _mm_srli_epi64(vh01234567, 32);
         o += 2;
       }
       if (c & 1) {
-        *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+        *o = (uint16_t) _mm_extract_epi16(vh01234567, 0);
         o += 1;
       }
     }

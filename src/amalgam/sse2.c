@@ -24,6 +24,7 @@
 #include <xnnpack/raddstoreexpminusmax.h>
 #include <xnnpack/rmax.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
 #include <xnnpack/unpool.h>
 #include <xnnpack/vaddsub.h>
 #include <xnnpack/vcvt.h>
@@ -250,7 +251,7 @@ void xnn_f16_vabs_ukernel__sse2_x16(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vacc));
       o += 2;
       vacc = _mm_srli_epi64(vacc, 32);
     }
@@ -302,7 +303,7 @@ void xnn_f16_vneg_ukernel__sse2_x16(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & (2 * sizeof(uint16_t))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vacc));
       o += 2;
       vacc = _mm_srli_epi64(vacc, 32);
     }
@@ -1209,7 +1210,7 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x16(
       o += 4;
     }
     if (n & (2 * sizeof(float))) {
-      *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vh);
+      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vh));
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
@@ -1465,14 +1466,14 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
     vy = _mm_packs_epi16(vy, vy);
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     {
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
       if (n & (2 * sizeof(float))) {
-        *((uint16_t*) y) = (uint16_t) vy_lo;
+        unaligned_store_u16(y, (uint16_t) vy_lo);
         y += 2;
         vy_lo >>= 16;
       }
@@ -1600,14 +1601,14 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x32(
     vy = _mm_max_epu8(vy, voutput_min);
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     {
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
       if (n & (2 * sizeof(float))) {
-        *((uint16_t*) y) = (uint16_t) vy_lo;
+        unaligned_store_u16(y, (uint16_t) vy_lo);
         y += 2;
         vy_lo >>= 16;
       }
@@ -3520,12 +3521,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
 
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -3717,12 +3718,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__sse2_mul16(
 
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -4094,12 +4095,12 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16(
 
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -4199,7 +4200,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
@@ -4208,7 +4209,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -4356,11 +4357,11 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -4373,11 +4374,11 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -4490,7 +4491,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
@@ -4498,7 +4499,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -4663,11 +4664,11 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2)));
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2))));
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1)));
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1))));
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
@@ -4675,11 +4676,11 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -5456,12 +5457,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
 
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -5806,12 +5807,12 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16_add16(
 
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -6246,13 +6247,13 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (channels & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
       if (channels & 2) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
+        unaligned_store_u16(output, (uint16_t) vout0123);
         vout0123 >>= 16;
         output += 2;
       }
@@ -6439,13 +6440,13 @@ void xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (channels & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
       if (channels & 2) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
+        unaligned_store_u16(output, (uint16_t) vout0123);
         vout0123 >>= 16;
         output += 2;
       }
@@ -6540,7 +6541,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
@@ -6549,7 +6550,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -6696,11 +6697,11 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -6713,11 +6714,11 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -6829,7 +6830,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
@@ -6837,7 +6838,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -7001,11 +7002,11 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
 
 
     if (nc >= 4) {
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2)));
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2))));
       c2 = (int8_t*) ((uintptr_t) c2 + cn_stride);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1)));
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1))));
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
@@ -7013,11 +7014,11 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -7125,12 +7126,12 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (n & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -7215,12 +7216,12 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (n & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -7318,12 +7319,12 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (n & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -7416,12 +7417,12 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
       if (n & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -7839,17 +7840,17 @@ void xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8(
         vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) &params->sse2.output_min));
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout));
           output += 4;
           vout = _mm_srli_epi64(vout, 32);
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
           output += 2;
           vout = _mm_srli_epi32(vout, 16);
         }
         if (c & 1) {
-          *((uint8_t*) output) = (uint8_t) _mm_cvtsi128_si32(vout);
+          *output = (uint8_t) _mm_cvtsi128_si32(vout);
           output += 1;
         }
       }
@@ -8100,17 +8101,17 @@ void xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8(
       vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) &params->sse2.output_min));
 
       if (c & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout));
         output += 4;
         vout = _mm_srli_epi64(vout, 32);
       }
       if (c & 2) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
         output += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
       if (c & 1) {
-        *((uint8_t*) output) = (uint8_t) _mm_cvtsi128_si32(vout);
+        *output = (uint8_t) _mm_cvtsi128_si32(vout);
         output += 1;
       }
     }
@@ -8953,12 +8954,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
         vout0123456701234567 = _mm_max_epu8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -9328,12 +9329,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16(
         vout0123456701234567 = _mm_max_epu8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
         if (c & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
@@ -9758,13 +9759,13 @@ void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c8(
       vout0123456701234567 = _mm_max_epu8(vout0123456701234567, voutput_min);
 
       if (channels & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
       if (channels & 2) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
+        unaligned_store_u16(output, (uint16_t) vout0123);
         vout0123 >>= 16;
         output += 2;
       }
@@ -9950,13 +9951,13 @@ void xnn_qu8_gavgpool_minmax_fp32_ukernel_7x__sse2_c8(
       vout0123456701234567 = _mm_max_epu8(vout0123456701234567, voutput_min);
 
       if (channels & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
       if (channels & 2) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
+        unaligned_store_u16(output, (uint16_t) vout0123);
         vout0123 >>= 16;
         output += 2;
       }
@@ -10051,7 +10052,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
     vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
 
@@ -10060,7 +10061,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -10206,11 +10207,11 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
     vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(vout));
       vout = _mm_srli_si128(vout, 4);
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(vout));
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);
@@ -10223,11 +10224,11 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -10339,7 +10340,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
     vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const uint8_t**restrict) ((uintptr_t) a - ks);
@@ -10347,7 +10348,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -10510,11 +10511,11 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
     vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->fp32_sse2.output_min));
 
     if (nc >= 4) {
-      *((uint32_t*) c2) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2)));
+      unaligned_store_u32(c2, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(2, 2, 2, 2))));
       c2 = (uint8_t*) ((uintptr_t) c2 + cn_stride);
-      *((uint32_t*) c1) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1)));
+      unaligned_store_u32(c1, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(1, 1, 1, 1))));
       c1 = (uint8_t*) ((uintptr_t) c1 + cn_stride);
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const uint8_t**restrict) ((uintptr_t) a - ks);
@@ -10522,11 +10523,11 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout, 4);
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout, 4));
         c2 += 2;
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout, 2);
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout, 2));
         c1 += 2;
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout, 0));
         c0 += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
@@ -10632,12 +10633,12 @@ void xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
       vout0123456701234567 = _mm_min_epu8(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -10721,12 +10722,12 @@ void xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
       vout0123456701234567 = _mm_min_epu8(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -10826,12 +10827,12 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
       vout0123456701234567 = _mm_min_epu8(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -10926,12 +10927,12 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
       vout0123456701234567 = _mm_min_epu8(vout0123456701234567, voutput_max);
 
       if (n & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
         output += 4;
       }
       if (n & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) _mm_cvtsi128_si32(vout0123456701234567);
+        unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
         vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
         output += 2;
       }
@@ -11052,13 +11053,13 @@ void xnn_s8_ibilinear_ukernel__sse2_c8(
       __m128i vo01234567 = _mm_packs_epi16(vacc01234567, vacc01234567);
 
       if (c & (4 * sizeof(int8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vo01234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vo01234567));
         output += 4;
         vo01234567 = _mm_srli_epi64(vo01234567, 32);
       }
       uint32_t vo0123 = (uint32_t) _mm_cvtsi128_si32(vo01234567);
       if (c & (2 * sizeof(int8_t))) {
-        *((uint16_t*) output) = (uint16_t) vo0123;
+        unaligned_store_u16(output, (uint16_t) vo0123);
         output += 2;
         vo0123 >>= 16;
       }
@@ -11200,12 +11201,12 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
@@ -11320,17 +11321,17 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *((int8_t*) o) = (int8_t) _mm_cvtsi128_si32(vout);
+          *o = (int8_t) _mm_cvtsi128_si32(vout);
           o += 1;
         }
       }
@@ -11410,12 +11411,12 @@ void xnn_s8_vclamp_ukernel__sse2_x64(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & 4) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vacc));
       y += 4;
       vacc = _mm_srli_epi64(vacc, 32);
     }
     if (n & 2) {
-      *((uint16_t*) y) = (uint16_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u16(y, (uint16_t) _mm_cvtsi128_si32(vacc));
       y += 2;
       vacc = _mm_srli_epi32(vacc, 16);
     }
@@ -11537,13 +11538,13 @@ void xnn_u8_ibilinear_ukernel__sse2_c8(
       __m128i vo01234567 = _mm_packus_epi16(vacc01234567, vacc01234567);
 
       if (c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vo01234567);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vo01234567));
         output += 4;
         vo01234567 = _mm_srli_epi64(vo01234567, 32);
       }
       uint32_t vo0123 = (uint32_t) _mm_cvtsi128_si32(vo01234567);
       if (c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vo0123;
+        unaligned_store_u16(output, (uint16_t) vo0123);
         output += 2;
         vo0123 >>= 16;
       }
@@ -11673,17 +11674,17 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *((uint8_t*) o) = (uint8_t) _mm_cvtsi128_si32(vout);
+          *o = (uint8_t) _mm_cvtsi128_si32(vout);
           o += 1;
         }
       }
@@ -11783,17 +11784,17 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16(
           o += 8;
         }
         if (c & 4) {
-          *((uint32_t*) o) = (uint32_t) _mm_cvtsi128_si32(vout);
+          unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vout));
           vout = _mm_srli_epi64(vout, 32);
           o += 4;
         }
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(vout, 0);
+          unaligned_store_u16(o, (uint16_t) _mm_extract_epi16(vout, 0));
           vout = _mm_srli_epi32(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *((uint8_t*) o) = (uint8_t) _mm_cvtsi128_si32(vout);
+          *o = (uint8_t) _mm_cvtsi128_si32(vout);
           o += 1;
         }
       }
@@ -11894,12 +11895,12 @@ void xnn_u8_vclamp_ukernel__sse2_x64(
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
     if (n & 4) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vacc));
       y += 4;
       vacc = _mm_srli_epi64(vacc, 32);
     }
     if (n & 2) {
-      *((uint16_t*) y) = (uint16_t) _mm_cvtsi128_si32(vacc);
+      unaligned_store_u16(y, (uint16_t) _mm_cvtsi128_si32(vacc));
       y += 2;
       vacc = _mm_srli_epi32(vacc, 16);
     }
@@ -12113,21 +12114,21 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
       }
 
       if (bh & 2) {
-        *((int*) o7) = _mm_cvtsi128_si32(v0_7);
+        unaligned_store_u32(o7, (uint32_t) _mm_cvtsi128_si32(v0_7));
         o7 += 2;
-        *((int*) o6) = _mm_cvtsi128_si32(v0_6);
+        unaligned_store_u32(o6, (uint32_t) _mm_cvtsi128_si32(v0_6));
         o6 += 2;
-        *((int*) o5) = _mm_cvtsi128_si32(v0_5);
+        unaligned_store_u32(o5, (uint32_t) _mm_cvtsi128_si32(v0_5));
         o5 += 2;
-        *((int*) o4) = _mm_cvtsi128_si32(v0_4);
+        unaligned_store_u32(o4, (uint32_t) _mm_cvtsi128_si32(v0_4));
         o4 += 2;
-        *((int*) o3) = _mm_cvtsi128_si32(v0_3);
+        unaligned_store_u32(o3, (uint32_t) _mm_cvtsi128_si32(v0_3));
         o3 += 2;
-        *((int*) o2) = _mm_cvtsi128_si32(v0_2);
+        unaligned_store_u32(o2, (uint32_t) _mm_cvtsi128_si32(v0_2));
         o2 += 2;
-        *((int*) o1) = _mm_cvtsi128_si32(v0_1);
+        unaligned_store_u32(o1, (uint32_t) _mm_cvtsi128_si32(v0_1));
         o1 += 2;
-        *((int*) o0) = _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u32(o0, (uint32_t) _mm_cvtsi128_si32(v0_0));
         o0 += 2;
         v0_0 = _mm_srli_epi64(v0_0, 32);
         v0_1 = _mm_srli_epi64(v0_1, 32);
@@ -12139,14 +12140,14 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
         v0_7 = _mm_srli_epi64(v0_7, 32);
       }
       if (bh & 1) {
-        *((uint16_t*) o7) = (uint16_t) _mm_cvtsi128_si32(v0_7);
-        *((uint16_t*) o6) = (uint16_t) _mm_cvtsi128_si32(v0_6);
-        *((uint16_t*) o5) = (uint16_t) _mm_cvtsi128_si32(v0_5);
-        *((uint16_t*) o4) = (uint16_t) _mm_cvtsi128_si32(v0_4);
-        *((uint16_t*) o3) = (uint16_t) _mm_cvtsi128_si32(v0_3);
-        *((uint16_t*) o2) = (uint16_t) _mm_cvtsi128_si32(v0_2);
-        *((uint16_t*) o1) = (uint16_t) _mm_cvtsi128_si32(v0_1);
-        *((uint16_t*) o0) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u16(o7, (uint16_t) _mm_cvtsi128_si32(v0_7));
+        unaligned_store_u16(o6, (uint16_t) _mm_cvtsi128_si32(v0_6));
+        unaligned_store_u16(o5, (uint16_t) _mm_cvtsi128_si32(v0_5));
+        unaligned_store_u16(o4, (uint16_t) _mm_cvtsi128_si32(v0_4));
+        unaligned_store_u16(o3, (uint16_t) _mm_cvtsi128_si32(v0_3));
+        unaligned_store_u16(o2, (uint16_t) _mm_cvtsi128_si32(v0_2));
+        unaligned_store_u16(o1, (uint16_t) _mm_cvtsi128_si32(v0_1));
+        unaligned_store_u16(o0, (uint16_t) _mm_cvtsi128_si32(v0_0));
       }
     }
 
@@ -12950,82 +12951,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2(
 
       if (bh & 4) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *((int*) o) = _mm_cvtsi128_si32(v0_15);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_15));
         uint8_t *oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_14);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_14));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_13);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_13));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_12);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_12));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_11);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_11));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_10);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_10));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_9);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_9));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_8);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_8));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_7);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_7));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_6);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_6));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_5);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_5));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_4);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_4));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_3);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_3));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_2);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_2));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_1);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_1));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((int*) o) = _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
         o += 4;
         v0_0 = _mm_srli_epi64(v0_0, 32);
         v0_1 = _mm_srli_epi64(v0_1, 32);
@@ -13046,82 +13047,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2(
       }
       if (bh & 2) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_15);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_15));
         uint8_t* oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_14);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_14));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_13);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_13));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_12);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_12));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_11);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_11));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_10);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_10));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_9);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_9));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_8);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_8));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_7);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_7));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_6);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_6));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_5);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_5));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_4);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_4));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_3);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_3));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_2);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_2));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_1);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_1));
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+        unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0));
         o += 2;
         v0_0 = _mm_srli_epi32(v0_0, 16);
         v0_1 = _mm_srli_epi32(v0_1, 16);
@@ -13506,52 +13507,52 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw2 = _mm_unpacklo_epi16(vxy_hi, vzw_hi);
         __m128i vxyzw3 = _mm_unpackhi_epi16(vxy_hi, vzw_hi);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_unpackhi_epi64(vxyzw1, vxyzw1);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_shufflelo_epi16(vxyzw2, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_unpackhi_epi64(vxyzw2, vxyzw2);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw2 = _mm_shufflelo_epi16(vxyzw2, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw2);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw2));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_shufflelo_epi16(vxyzw3, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_unpackhi_epi64(vxyzw3, vxyzw3);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw3 = _mm_shufflelo_epi16(vxyzw3, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw3);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw3));
         output = (uint8_t*) ((uintptr_t) output + m);
         k -= 16;
       };
@@ -13569,28 +13570,28 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw0 = _mm_unpacklo_epi16(vxy, vzw);
         __m128i vxyzw1 = _mm_unpackhi_epi16(vxy, vzw);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
         output = (uint8_t*) ((uintptr_t) output + m);
 
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_unpackhi_epi64(vxyzw1, vxyzw1);
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         vxyzw1 = _mm_shufflelo_epi16(vxyzw1, _MM_SHUFFLE(3, 2, 3, 2));
-        *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw1);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw1));
         output = (uint8_t*) ((uintptr_t) output + m);
         k -= 8;
       }
@@ -13613,30 +13614,30 @@ void xnn_x8_zip_xm_ukernel__sse2(
         __m128i vxyzw1 = _mm_unpackhi_epi16(vxy, vzw);
 
         if (k & 4) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = vxyzw1;
         }
 
         if (k & 2) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_shufflelo_epi16(vxyzw0, _MM_SHUFFLE(3, 2, 3, 2));
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
           vxyzw0 = _mm_unpackhi_epi64(vxyzw0, vxyzw0);
         }
         if (k & 1) {
-          *((uint32_t*) output) = _mm_cvtsi128_si32(vxyzw0);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vxyzw0));
           output = (uint8_t*) ((uintptr_t) output + m);
         }
       }
@@ -13692,12 +13693,12 @@ void xnn_xx_fill_ukernel__sse2_x64(
         output = ((uint8_t*) output + 8);
       }
       if XNN_LIKELY(c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = fill_pattern;
+        unaligned_store_u32(output, fill_pattern);
         output = ((uint8_t*) output + 4);
       }
       uint32_t vfill_subpattern = fill_pattern;
       if XNN_LIKELY(c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = ((uint8_t*) output + 2);
       }
@@ -13739,11 +13740,11 @@ void xnn_xx_pad_ukernel__sse2(
       }
       uint32_t vfill_subpattern = fill_pattern;
       if (l & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, vfill_subpattern);
         output = (uint8_t*) output + 4;
       }
       if (l & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -13771,13 +13772,13 @@ void xnn_xx_pad_ukernel__sse2(
         output = (uint8_t*) output + 8;
       }
       if (c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vdata);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vdata));
         vdata = _mm_srli_epi64(vdata, 32);
         output = (uint8_t*) output + 4;
       }
       uint32_t vsubdata = (uint32_t) _mm_cvtsi128_si32(vdata);
       if (c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vsubdata;
+        unaligned_store_u16(output, (uint16_t) vsubdata);
         vsubdata >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -13800,11 +13801,11 @@ void xnn_xx_pad_ukernel__sse2(
       }
       uint32_t vfill_subpattern = fill_pattern;
       if (r & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, vfill_subpattern);
         output = (uint8_t*) output + 4;
       }
       if (r & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }

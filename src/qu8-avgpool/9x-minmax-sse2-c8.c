@@ -11,6 +11,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/avgpool.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8(
@@ -255,17 +256,17 @@ void xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8(
       vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) &params->sse2.output_min));
 
       if (c & 4) {
-        *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout);
+        unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout));
         output += 4;
         vout = _mm_srli_epi64(vout, 32);
       }
       if (c & 2) {
-        *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout, 0);
+        unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout, 0));
         output += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
       if (c & 1) {
-        *((uint8_t*) output) = (uint8_t) _mm_cvtsi128_si32(vout);
+        *output = (uint8_t) _mm_cvtsi128_si32(vout);
         output += 1;
       }
     }

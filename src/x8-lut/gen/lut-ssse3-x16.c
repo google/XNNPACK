@@ -11,8 +11,9 @@
 
 #include <tmmintrin.h>
 
-#include <xnnpack/lut.h>
 #include <xnnpack/common.h>
+#include <xnnpack/lut.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_x8_lut_ukernel__ssse3_x16(
@@ -144,13 +145,13 @@ void xnn_x8_lut_ukernel__ssse3_x16(
       y += 8;
     }
     if (n & (4 * sizeof(uint8_t))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
       vy = _mm_srli_epi64(vy, 32);
       y += 4;
     }
     uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (n & (2 * sizeof(uint8_t))) {
-      *((uint16_t*) y) = (uint16_t) vy_lo;
+      unaligned_store_u16(y, (uint16_t) vy_lo);
       vy_lo >>= 16;
       y += 2;
     }

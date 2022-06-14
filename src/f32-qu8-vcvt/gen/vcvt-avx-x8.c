@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -64,12 +65,12 @@ void xnn_f32_qu8_vcvt_ukernel__avx_x8(
     vy = _mm_max_epu8(vy, voutput_min);
 
     if (n & (4 * sizeof(float))) {
-      *((uint32_t*) y) = (uint32_t) _mm_cvtsi128_si32(vy);
+      _mm_storeu_si32(y, vy);
       y += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     if (n & (2 * sizeof(float))) {
-      *((uint16_t*) y) = (uint16_t) _mm_extract_epi16(vy, 0);
+      _mm_storeu_si16(y, vy);
       y += 2;
       vy = _mm_srli_epi32(vy, 16);
     }

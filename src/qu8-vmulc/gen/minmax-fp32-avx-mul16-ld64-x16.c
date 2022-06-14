@@ -11,6 +11,7 @@
 
 #include <smmintrin.h>
 
+#include <xnnpack/unaligned.h>
 #include <xnnpack/vmul.h>
 
 
@@ -113,12 +114,12 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
         n -= 8 * sizeof(uint8_t);
       } else {
         if (n & (4 * sizeof(uint8_t))) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         if (n & (2 * sizeof(uint8_t))) {
-          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vout0123456701234567, 0);
+          unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }

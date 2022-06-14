@@ -13,6 +13,7 @@
 
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c16(
@@ -403,13 +404,13 @@ void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__sse2_c16(
         channels -= 8;
       } else {
         if (channels & 4) {
-          *((uint32_t*) output) = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
+          unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
         uint32_t vout0123 = (uint32_t) _mm_cvtsi128_si32(vout0123456701234567);
         if (channels & 2) {
-          *((uint16_t*) output) = (uint16_t) vout0123;
+          unaligned_store_u16(output, (uint16_t) vout0123);
           vout0123 >>= 16;
           output += 2;
         }

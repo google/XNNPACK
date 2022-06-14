@@ -14,6 +14,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
@@ -183,7 +184,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
       if (nc & 4) {
         _mm_storeu_si32(c0, vout_lo);
         _mm_storeu_si32(c1, vout_hi);
-        *((uint32_t*) c2) = (uint32_t) _mm_extract_epi32(vout_lo, 2);
+        unaligned_store_u32(c2, (uint32_t) _mm_extract_epi32(vout_lo, 2));
 
         c0 += 4;
         c1 += 4;
@@ -193,9 +194,9 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
         vout_hi = _mm_srli_epi64(vout_hi, 32);
       }
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) _mm_extract_epi16(vout_lo, 0);
-        *((uint16_t*) c1) = (uint16_t) _mm_extract_epi16(vout_hi, 0);
-        *((uint16_t*) c2) = (uint16_t) _mm_extract_epi16(vout_lo, 4);
+        unaligned_store_u16(c0, (uint16_t) _mm_extract_epi16(vout_lo, 0));
+        unaligned_store_u16(c1, (uint16_t) _mm_extract_epi16(vout_hi, 0));
+        unaligned_store_u16(c2, (uint16_t) _mm_extract_epi16(vout_lo, 4));
 
         c0 += 2;
         c1 += 2;

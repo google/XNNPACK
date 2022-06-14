@@ -8,6 +8,7 @@
 #include <emmintrin.h>
 
 #include <xnnpack/fill.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_xx_fill_ukernel__sse2_x64(
@@ -42,12 +43,12 @@ void xnn_xx_fill_ukernel__sse2_x64(
         output = ((uint8_t*) output + 8);
       }
       if XNN_LIKELY(c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = fill_pattern;
+        unaligned_store_u32(output, fill_pattern);
         output = ((uint8_t*) output + 4);
       }
       uint32_t vfill_subpattern = fill_pattern;
       if XNN_LIKELY(c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = ((uint8_t*) output + 2);
       }

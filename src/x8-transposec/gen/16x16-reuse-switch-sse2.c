@@ -14,6 +14,8 @@
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
 
 void xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2(
     const uint8_t* input,
@@ -415,51 +417,51 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2(
         uint8_t* oN = (uint8_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           case 15:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_15);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_15));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 14:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_14);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_14));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 13:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_13);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_13));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 12:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_12);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_12));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 11:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_11);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_11));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 10:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_10);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_10));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 9:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_9);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_9));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 8:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_8);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_8));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 7:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_7);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_7));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 6:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_6);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_6));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 5:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_5);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_5));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 4:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_4);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_4));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 3:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_3);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_3));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_2);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_2));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
-            *((int*) oN) = _mm_cvtsi128_si32(v0_1);
+            unaligned_store_u32(oN, (uint32_t) _mm_cvtsi128_si32(v0_1));
           case 0:
-            *((int*) o) = _mm_cvtsi128_si32(v0_0);
+            unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(v0_0));
             break;
           default:
             XNN_UNREACHABLE;
@@ -486,51 +488,51 @@ void xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2(
         uint8_t* oN = (uint8_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           case 15:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_15);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_15));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 14:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_14);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_14));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 13:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_13);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_13));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 12:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_12);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_12));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 11:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_11);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_11));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 10:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_10);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_10));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 9:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_9);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_9));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 8:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_8);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_8));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 7:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_7);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_7));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 6:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_6);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_6));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 5:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_5);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_5));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 4:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_4);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_4));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 3:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_3);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_3));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_2);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_2));
             oN = (uint8_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
-            *((uint16_t*) oN) = (uint16_t) _mm_cvtsi128_si32(v0_1);
+            unaligned_store_u16(oN, (uint16_t) _mm_cvtsi128_si32(v0_1));
           case 0:
-            *((uint16_t*) o) = (uint16_t) _mm_cvtsi128_si32(v0_0);
+            unaligned_store_u16(o, (uint16_t) _mm_cvtsi128_si32(v0_0));
             break;
           default:
             XNN_UNREACHABLE;

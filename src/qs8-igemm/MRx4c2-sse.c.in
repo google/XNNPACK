@@ -25,6 +25,7 @@ $else:
 
 #include <xnnpack/igemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/unaligned.h>
 
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
@@ -301,11 +302,11 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIA
     if (nc >= 4) {
       $for M in reversed(range(1, MR)):
         $if SSE == 4:
-          *((uint32_t*) c${M}) = (uint32_t) _mm_extract_epi32(vout, ${M});
+          unaligned_store_u32(c${M}, (uint32_t) _mm_extract_epi32(vout, ${M}));
         $else:
-          *((uint32_t*) c${M}) = (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(${M}, ${M}, ${M}, ${M})));
+          unaligned_store_u32(c${M}, (uint32_t) _mm_cvtsi128_si32(_mm_shuffle_epi32(vout, _MM_SHUFFLE(${M}, ${M}, ${M}, ${M}))));
         c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
-      *((uint32_t*) c0) = (uint32_t) _mm_cvtsi128_si32(vout);
+      unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));
       c0 = (${XINT8_T}*) ((uintptr_t) c0 + cn_stride);
 
       a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
@@ -314,7 +315,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIA
     } else {
       if (nc & 2) {
         $for M in reversed(range(MR)):
-          *((uint16_t*) c${M}) = (uint16_t) _mm_extract_epi16(vout, ${M * 2});
+          unaligned_store_u16(c${M}, (uint16_t) _mm_extract_epi16(vout, ${M * 2}));
           c${M} += 2;
         vout = _mm_srli_epi32(vout, 16);
       }
