@@ -7466,6 +7466,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(negate-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(negate-test negate-test)
 
+  ADD_EXECUTABLE(prelu-test test/prelu.cc)
+  TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(prelu-test prelu-test)
+
   ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
   SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
