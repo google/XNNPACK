@@ -184,7 +184,7 @@ static enum xnn_status initialize_workspace_blobs(
         for (size_t i = 0; i < rt->num_blobs; i++) {
           struct xnn_blob* blob = &rt->blobs[i];
           if (blob->data != NULL && !blob->external) {
-            blob->data += workspace_data_delta;
+            blob->data = (void*) ((uintptr_t) blob->data + workspace_data_delta);
           }
         }
       }
