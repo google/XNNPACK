@@ -14538,6 +14538,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "negate_test",
+    srcs = [
+        "test/negate.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "sigmoid_test",
     srcs = [
         "test/sigmoid.cc",
