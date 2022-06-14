@@ -7426,6 +7426,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(divide2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(divide2-test divide2-test)
 
+  ADD_EXECUTABLE(elu-test test/elu.cc)
+  TARGET_INCLUDE_DIRECTORIES(elu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(elu-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(elu-test elu-test)
+
   ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
