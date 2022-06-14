@@ -7451,6 +7451,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(maximum2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(maximum2-test maximum2-test)
 
+  ADD_EXECUTABLE(minimum2-test test/minimum2.cc)
+  TARGET_INCLUDE_DIRECTORIES(minimum2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(minimum2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(minimum2-test minimum2-test)
+
   ADD_EXECUTABLE(multiply2-test test/multiply2.cc)
   TARGET_INCLUDE_DIRECTORIES(multiply2-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(multiply2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

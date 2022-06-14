@@ -14510,6 +14510,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "minimum2_test",
+    srcs = [
+        "test/minimum2.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_binary_tester",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "multiply2_test",
     srcs = [
         "test/multiply2.cc",
