@@ -7441,6 +7441,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(hardswish-test hardswish-test)
 
+  ADD_EXECUTABLE(leaky-relu-test test/leaky-relu.cc)
+  TARGET_INCLUDE_DIRECTORIES(leaky-relu-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(leaky-relu-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(leaky-relu-test leaky-relu-test)
+
   ADD_EXECUTABLE(maximum2-test test/maximum2.cc)
   TARGET_INCLUDE_DIRECTORIES(maximum2-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(maximum2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

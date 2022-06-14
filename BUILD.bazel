@@ -14482,6 +14482,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "leaky_relu_test",
+    srcs = [
+        "test/leaky-relu.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "maximum2_test",
     srcs = [
         "test/maximum2.cc",
