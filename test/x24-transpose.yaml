@@ -15,3 +15,6 @@
 
 # AArch64
 - name: xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl
+
+# SSSE3
+- name: xnn_x24_transposec_ukernel__4x4_ssse3

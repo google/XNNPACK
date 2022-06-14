@@ -4388,7 +4388,8 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qu8-requantization/gemmlowp-ssse3.c
   src/qu8-requantization/rndna-ssse3.c
   src/x8-lut/gen/lut-ssse3-x16.c
-  src/x8-lut/gen/lut-ssse3-x32.c)
+  src/x8-lut/gen/lut-ssse3-x32.c
+  src/x24-transposec/4x4-ssse3.c)
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-sse41-int16-x16.c

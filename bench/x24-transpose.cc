@@ -59,8 +59,6 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 
 BENCHMARK_CAPTURE(transpose, 1x2_scalar, xnn_x24_transposec_ukernel__1x2_scalar)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(transpose, 1x2_scalar, xnn_x24_transposec_ukernel__1x2_scalar)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(transpose, 1x4_scalar, xnn_x24_transposec_ukernel__1x4_scalar)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(transpose, 2x1_scalar, xnn_x24_transposec_ukernel__2x1_scalar)
@@ -80,6 +78,11 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar, xnn_x24_transposec_ukernel__4x4_scalar)
   BENCHMARK_CAPTURE(transpose, 4x4_aarch64_neon_tbl, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+BENCHMARK_CAPTURE(transpose, 4x4_ssse3, xnn_x24_transposec_ukernel__4x4_ssse3, benchmark::utils::CheckSSSE3)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

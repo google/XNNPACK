@@ -122,6 +122,7 @@ DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x1_scalar)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x2_scalar)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_scalar)
+DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_ssse3)
 
 #define DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(const uint16_t* input,      \
