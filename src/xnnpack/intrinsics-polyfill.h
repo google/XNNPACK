@@ -20,12 +20,12 @@
     (defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 
 static XNN_INTRINSIC
-void _mm_storeu_si32(const void* address, __m128i v) {
+void _mm_storeu_si32(void* address, __m128i v) {
   unaligned_store_u32(address, (uint32_t) _mm_cvtsi128_si32(v));
 }
 
 static XNN_INTRINSIC
-void _mm_storeu_si16(const void* address, __m128i v) {
+void _mm_storeu_si16(void* address, __m128i v) {
   unaligned_store_u16(address, (uint16_t) _mm_extract_epi16(v, 0));
 }
 #endif  // GCC pre-11, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
