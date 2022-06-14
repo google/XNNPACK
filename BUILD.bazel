@@ -14678,6 +14678,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "squared_difference_test",
+    srcs = [
+        "test/squared-difference.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_binary_tester",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "static_reshape_test",
     srcs = [
         "test/static-reshape.cc",
