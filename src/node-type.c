@@ -62,6 +62,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Floor";
     case xnn_node_type_fully_connected:
       return "Fully Connected";
+    case xnn_node_type_global_average_pooling_1d:
+      return "Global Average Pooling 1D";
     case xnn_node_type_global_average_pooling_2d:
       return "Global Average Pooling 2D";
     case xnn_node_type_hardswish:

@@ -233,7 +233,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/even-split.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
-  src/subgraph/global-average-pooling-2d.c
+  src/subgraph/global-average-pooling.c
   src/subgraph/hardswish.c
   src/subgraph/leaky-relu.c
   src/subgraph/max-pooling-2d.c

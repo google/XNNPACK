@@ -261,6 +261,17 @@ size_t xnn_shape_multiply_all_dims(
   return batch_size;
 }
 
+size_t xnn_shape_multiply_batch_dims(
+  const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)],
+  size_t num_nonbatch_dims)
+{
+  size_t batch_size = 1;
+  for (size_t i = 0; i + num_nonbatch_dims < shape->num_dims; i++) {
+    batch_size *= shape->dim[i];
+  }
+  return batch_size;
+}
+
 size_t xnn_shape_multiply_non_channel_dims(
   const struct xnn_shape shape[restrict XNN_MIN_ELEMENTS(1)])
 {

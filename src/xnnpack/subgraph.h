@@ -350,6 +350,10 @@ size_t xnn_tensor_get_size(
 size_t xnn_shape_multiply_all_dims(
   const struct xnn_shape shape[1]);
 
+// Product of all shape dimensions, except for the specified number of the last dimensions
+size_t xnn_shape_multiply_batch_dims(
+  const struct xnn_shape shape[1], size_t num_nonbatch_dims);
+
 // Product of all shape dimensions, except for the last (channel) one
 size_t xnn_shape_multiply_non_channel_dims(
   const struct xnn_shape shape[1]);
