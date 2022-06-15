@@ -35,10 +35,10 @@ void xnn_x8_zip_x4_ukernel__neon(
     if (n != 0) {
       const size_t address_increment = n - 8;
       uint8x8x4_t vxyzw;
-      vxyzw.val[0] = vld1_u8(x + address_increment);
-      vxyzw.val[1] = vld1_u8(y + address_increment);
-      vxyzw.val[2] = vld1_u8(z + address_increment);
-      vxyzw.val[3] = vld1_u8(w + address_increment);
+      vxyzw.val[0] = vld1_u8((const uint8_t*) ((uintptr_t) x + address_increment));
+      vxyzw.val[1] = vld1_u8((const uint8_t*) ((uintptr_t) y + address_increment));
+      vxyzw.val[2] = vld1_u8((const uint8_t*) ((uintptr_t) z + address_increment));
+      vxyzw.val[3] = vld1_u8((const uint8_t*) ((uintptr_t) w + address_increment));
       vst4_u8((uint8_t*) ((uintptr_t) o + address_increment * 4), vxyzw);
     }
   } else {
