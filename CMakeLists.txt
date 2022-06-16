@@ -7400,6 +7400,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(add2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME add2-test COMMAND add2-test)
 
+  ADD_EXECUTABLE(argmax-pooling-2d-test test/argmax-pooling-2d.cc)
+  TARGET_INCLUDE_DIRECTORIES(argmax-pooling-2d-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(argmax-pooling-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME argmax-pooling-2d-test COMMAND argmax-pooling-2d-test)
+
   ADD_EXECUTABLE(bankers-rounding-test test/bankers-rounding.cc)
   TARGET_INCLUDE_DIRECTORIES(bankers-rounding-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(bankers-rounding-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
