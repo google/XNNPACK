@@ -14498,6 +14498,45 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "concatenate2_test",
+    srcs = [
+        "test/concatenate2.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "concatenate3_test",
+    srcs = [
+        "test/concatenate3.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "concatenate4_test",
+    srcs = [
+        "test/concatenate4.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "convolution_2d_test",
     srcs = [
         "test/convolution-2d.cc",

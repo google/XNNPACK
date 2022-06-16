@@ -7425,6 +7425,21 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME clamp-test COMMAND clamp-test)
 
+  ADD_EXECUTABLE(concatenate2-test test/concatenate2.cc)
+  TARGET_INCLUDE_DIRECTORIES(concatenate2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  ADD_TEST(concatenate2-test concatenate2-test)
+
+  ADD_EXECUTABLE(concatenate3-test test/concatenate3.cc)
+  TARGET_INCLUDE_DIRECTORIES(concatenate3-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(concatenate3-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  ADD_TEST(concatenate3-test concatenate3-test)
+
+  ADD_EXECUTABLE(concatenate4-test test/concatenate4.cc)
+  TARGET_INCLUDE_DIRECTORIES(concatenate4-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(concatenate4-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  ADD_TEST(concatenate4-test concatenate4-test)
+
   ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
   SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)
