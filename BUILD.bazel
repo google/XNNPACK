@@ -14443,6 +14443,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "average_pooling_2d_test",
+    srcs = [
+        "test/average-pooling-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "bankers_rounding_test",
     srcs = [
         "test/bankers-rounding.cc",
