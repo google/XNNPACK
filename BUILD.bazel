@@ -14526,6 +14526,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "fully_connected_test",
+    srcs = [
+        "test/fully-connected.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "hardswish_test",
     srcs = [
         "test/hardswish.cc",

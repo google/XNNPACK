@@ -7436,6 +7436,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(floor-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME floor-test COMMAND floor-test)
 
+  ADD_EXECUTABLE(fully-connected-test test/fully-connected.cc)
+  TARGET_INCLUDE_DIRECTORIES(fully-connected-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME fully-connected-test COMMAND fully-connected-test)
+
   ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
