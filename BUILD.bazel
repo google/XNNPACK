@@ -14539,6 +14539,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "global_average_pooling_2d_test",
+    srcs = [
+        "test/global-average-pooling-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "hardswish_test",
     srcs = [
         "test/hardswish.cc",

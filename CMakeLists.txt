@@ -7441,6 +7441,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(fully-connected-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME fully-connected-test COMMAND fully-connected-test)
 
+  ADD_EXECUTABLE(global-average-pooling-2d-test test/global-average-pooling-2d.cc)
+  TARGET_INCLUDE_DIRECTORIES(global-average-pooling-2d-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(global-average-pooling-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME global-average-pooling-2d-test COMMAND global-average-pooling-2d-test)
+
   ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
   TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(hardswish-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
