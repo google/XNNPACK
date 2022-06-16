@@ -21,7 +21,7 @@ void xnn_x8_transposec_ukernel__8x8_reuse_mov_zip_neon(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height)
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * sizeof(uint8_t));
   assert(input_stride >= block_width * sizeof(uint8_t));

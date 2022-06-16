@@ -22,7 +22,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_scalar_${SUFF
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height)
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * sizeof(${TYPE}));
   assert(input_stride >= block_width * sizeof(${TYPE}));

@@ -28,7 +28,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height)
+    size_t block_height) XNN_OOB_READS
 {
   assert(output_stride >= block_height * sizeof(uint${SIZE}_t));
   assert(input_stride >= block_width * sizeof(uint${SIZE}_t));
