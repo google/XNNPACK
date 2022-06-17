@@ -37,7 +37,7 @@ void xnn_x24_transposec_ukernel__4x4_ssse3(
   const size_t tile_width = 4;
   const size_t tile_wbytes = tile_width * 3;
   const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
-  const size_t output_reset = (tile_height - 1) * output_stride;
+  const size_t output_reset = tile_width * output_stride - block_height * 3;
   const size_t tile_stride = tile_height * input_stride;
 
   const uint8_t* i0 = (const uint8_t*) input;

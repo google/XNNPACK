@@ -53,8 +53,8 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   TransposeMicrokernelTester()
-    .input_stride(${TILE_WIDTH})
-    .output_stride(${TILE_HEIGHT})
+    .input_stride(${TILE_WIDTH * 2})
+    .output_stride(${TILE_HEIGHT * 2})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT})
     .element_size(${ELEMENT_SIZE})
@@ -68,8 +68,8 @@ TEST(${TEST_NAME}, bh_1_${TILE_HEIGHT * 2}_bw_1_${TILE_WIDTH * 2}) {
   for(size_t i = 1; i <= ${TILE_HEIGHT * 2}; ++i){
     for(size_t j = 1; j <= ${TILE_WIDTH * 2}; ++j){
       TransposeMicrokernelTester()
-        .input_stride(j)
-        .output_stride(i)
+        .input_stride(j * 3)
+        .output_stride(i * 7)
         .block_width(j)
         .block_height(i)
         .element_size(${ELEMENT_SIZE})
@@ -98,7 +98,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH + 1}_${TILE_WIDTH * 2}) {
   for(size_t i = ${TILE_WIDTH + 1}; i < ${TILE_WIDTH * 2}; ++i){
     TransposeMicrokernelTester()
       .input_stride(i)
-      .output_stride(${TILE_HEIGHT})
+      .output_stride(${TILE_HEIGHT * 2})
       .block_width(i)
       .block_height(${TILE_HEIGHT})
       .element_size(${ELEMENT_SIZE})
@@ -127,7 +127,7 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}) {
     ${ISA_CHECK};
   TransposeMicrokernelTester()
     .input_stride(${TILE_WIDTH})
-    .output_stride(${TILE_HEIGHT * 2})
+    .output_stride(${TILE_HEIGHT * 3 + 4})
     .block_width(${TILE_WIDTH})
     .block_height(${TILE_HEIGHT * 2})
     .element_size(${ELEMENT_SIZE})
@@ -140,9 +140,9 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT + 1}_${TILE_HEIGHT * 2}_bw_${TILE_WIDTH}){
     ${ISA_CHECK};
   for(size_t i = ${TILE_HEIGHT + 1}; i < ${TILE_HEIGHT * 2}; ++i){
     TransposeMicrokernelTester()
-      .input_stride(${TILE_WIDTH})
+      .input_stride(${TILE_WIDTH + 17})
       .output_stride(i)
-      .block_width(${TILE_WIDTH})
+      .block_width(${TILE_WIDTH + 3})
       .block_height(i)
       .element_size(${ELEMENT_SIZE})
       .iterations(1)

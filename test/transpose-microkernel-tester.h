@@ -67,7 +67,7 @@ class TransposeMicrokernelTester {
 
   void Test(xnn_transposev_ukernel_function transpose) const {
     std::vector<uint8_t> input(input_stride() * block_height() * element_size() + XNN_EXTRA_BYTES);
-    std::vector<uint8_t> output(input_stride() * block_height() * element_size());
+    std::vector<uint8_t> output(output_stride() * block_width() * element_size());
     std::iota(input.begin(), input.end(), 0);
     std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 

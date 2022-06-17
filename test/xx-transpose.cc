@@ -19,8 +19,8 @@
 
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_1_bw_1) {
   TransposeMicrokernelTester()
-    .input_stride(1)
-    .output_stride(1)
+    .input_stride(2)
+    .output_stride(2)
     .block_width(1)
     .block_height(1)
     .element_size(1)
@@ -32,8 +32,8 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_1_2_bw_1_2) {
   for(size_t i = 1; i <= 2; ++i){
     for(size_t j = 1; j <= 2; ++j){
       TransposeMicrokernelTester()
-        .input_stride(j)
-        .output_stride(i)
+        .input_stride(j * 3)
+        .output_stride(i * 7)
         .block_width(j)
         .block_height(i)
         .element_size(1)
@@ -58,7 +58,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_1_bw_2_2) {
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
       .input_stride(i)
-      .output_stride(1)
+      .output_stride(2)
       .block_width(i)
       .block_height(1)
       .element_size(1)
@@ -83,7 +83,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_2_bw_2_2) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_2_bw_1) {
   TransposeMicrokernelTester()
     .input_stride(1)
-    .output_stride(2)
+    .output_stride(7)
     .block_width(1)
     .block_height(2)
     .element_size(1)
@@ -94,9 +94,9 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_2_bw_1) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_2_2_bw_1){
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
-      .input_stride(1)
+      .input_stride(18)
       .output_stride(i)
-      .block_width(1)
+      .block_width(4)
       .block_height(i)
       .element_size(1)
       .iterations(1)
@@ -166,8 +166,8 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_1_bw_1_is_2_os_2) {
 }
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_bw_1) {
   TransposeMicrokernelTester()
-    .input_stride(1)
-    .output_stride(1)
+    .input_stride(2)
+    .output_stride(2)
     .block_width(1)
     .block_height(1)
     .element_size(3)
@@ -179,8 +179,8 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_2_bw_1_2) {
   for(size_t i = 1; i <= 2; ++i){
     for(size_t j = 1; j <= 2; ++j){
       TransposeMicrokernelTester()
-        .input_stride(j)
-        .output_stride(i)
+        .input_stride(j * 3)
+        .output_stride(i * 7)
         .block_width(j)
         .block_height(i)
         .element_size(3)
@@ -205,7 +205,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_bw_2_2) {
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
       .input_stride(i)
-      .output_stride(1)
+      .output_stride(2)
       .block_width(i)
       .block_height(1)
       .element_size(3)
@@ -230,7 +230,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_2_bw_2_2) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_2_bw_1) {
   TransposeMicrokernelTester()
     .input_stride(1)
-    .output_stride(2)
+    .output_stride(7)
     .block_width(1)
     .block_height(2)
     .element_size(3)
@@ -241,9 +241,9 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_2_bw_1) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_2_2_bw_1){
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
-      .input_stride(1)
+      .input_stride(18)
       .output_stride(i)
-      .block_width(1)
+      .block_width(4)
       .block_height(i)
       .element_size(3)
       .iterations(1)
@@ -313,8 +313,8 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_bw_1_is_2_os_2) {
 }
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_1_bw_1) {
   TransposeMicrokernelTester()
-    .input_stride(1)
-    .output_stride(1)
+    .input_stride(2)
+    .output_stride(2)
     .block_width(1)
     .block_height(1)
     .element_size(5)
@@ -326,8 +326,8 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_1_2_bw_1_2) {
   for(size_t i = 1; i <= 2; ++i){
     for(size_t j = 1; j <= 2; ++j){
       TransposeMicrokernelTester()
-        .input_stride(j)
-        .output_stride(i)
+        .input_stride(j * 3)
+        .output_stride(i * 7)
         .block_width(j)
         .block_height(i)
         .element_size(5)
@@ -352,7 +352,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_1_bw_2_2) {
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
       .input_stride(i)
-      .output_stride(1)
+      .output_stride(2)
       .block_width(i)
       .block_height(1)
       .element_size(5)
@@ -377,7 +377,7 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_2_bw_2_2) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_2_bw_1) {
   TransposeMicrokernelTester()
     .input_stride(1)
-    .output_stride(2)
+    .output_stride(7)
     .block_width(1)
     .block_height(2)
     .element_size(5)
@@ -388,9 +388,9 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_2_bw_1) {
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_2_2_bw_1){
   for(size_t i = 2; i < 2; ++i){
     TransposeMicrokernelTester()
-      .input_stride(1)
+      .input_stride(18)
       .output_stride(i)
-      .block_width(1)
+      .block_width(4)
       .block_height(i)
       .element_size(5)
       .iterations(1)

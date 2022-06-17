@@ -26,7 +26,7 @@ void xnn_x24_transposec_ukernel__4x1_scalar(
   assert(input_stride >= block_width * 3);
 
   const size_t input_reset = 3 - round_down_po2(block_height, 4) * input_stride;
-  const size_t output_reset = 0 * output_stride;
+  const size_t output_reset = 1 * output_stride - block_height * 3;
   const size_t input_offset = 4 * input_stride;
 
   const uint8_t* i0 = (const uint8_t*) input;

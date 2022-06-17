@@ -30,7 +30,7 @@ void xnn_x24_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_scalar(
     const size_t output_reset = ${TILE_WIDTH} * output_stride - block_height * 3;
   $else:
     const size_t input_reset = ${TILE_WIDTH * 3} - round_down_po2(block_height, ${TILE_HEIGHT}) * input_stride;
-    const size_t output_reset = ${TILE_WIDTH - 1} * output_stride;
+    const size_t output_reset = ${TILE_WIDTH} * output_stride - block_height * 3;
   const size_t input_offset = ${TILE_HEIGHT} * input_stride;
 
   const uint8_t* i0 = (const uint8_t*) input;
