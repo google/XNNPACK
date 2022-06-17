@@ -332,11 +332,26 @@ XNN_INTERNAL size_t xnn_compute_convolution_output_dimension(
   size_t kernel_dimension,
   size_t dilation_dimension,
   size_t subsampling_dimension);
+
+XNN_INTERNAL size_t xnn_compute_deconvolution_output_dimension(
+  size_t input_dimension,
+  size_t output_padding_dimension,
+  size_t adjustment_dimension,
+  size_t kernel_dimension,
+  size_t dilation_dimension,
+  size_t stride_dimension);
+
+XNN_INTERNAL size_t xnn_compute_unpooling_output_dimension(
+  size_t input_dimension,
+  size_t input_padding_dimension,
+  size_t kernel_dimension);
+
 XNN_INTERNAL uint32_t xnn_get_heuristic_mr_gemm(
   size_t batch_size,
   uint32_t max_mr,
   uint32_t nr,
   struct xnn_hmp_gemm_ukernel *gemm_cases);
+
 XNN_INTERNAL uint32_t xnn_get_heuristic_mr_igemm(
   size_t batch_size,
   uint32_t max_mr,

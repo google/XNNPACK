@@ -21,14 +21,6 @@
 #include <xnnpack/indirection.h>
 
 
-static inline size_t compute_output_dimension(
-    size_t input_dimension,
-    size_t input_padding_dimension,
-    size_t kernel_dimension)
-{
-  return doz(kernel_dimension * input_dimension, input_padding_dimension);
-}
-
 enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -167,10 +159,10 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   unpooling_op->input_width = input_width;
   unpooling_op->input = input;
 
-  unpooling_op->output_height = compute_output_dimension(
+  unpooling_op->output_height = xnn_compute_unpooling_output_dimension(
     input_height, unpooling_op->padding_top + unpooling_op->padding_bottom,
     unpooling_op->kernel_height);
-  unpooling_op->output_width = compute_output_dimension(
+  unpooling_op->output_width = xnn_compute_unpooling_output_dimension(
     input_width, unpooling_op->padding_left + unpooling_op->padding_right,
     unpooling_op->kernel_width);
   unpooling_op->output = output;

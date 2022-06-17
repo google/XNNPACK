@@ -42,6 +42,30 @@ size_t xnn_compute_convolution_output_dimension(
   return doz(padded_input_dimension, effective_kernel_dimension) / subsampling_dimension + 1;
 }
 
+size_t xnn_compute_deconvolution_output_dimension(
+  size_t input_dimension,
+  size_t output_padding_dimension,
+  size_t adjustment_dimension,
+  size_t kernel_dimension,
+  size_t dilation_dimension,
+  size_t stride_dimension)
+{
+  const size_t effective_kernel_dimension = (kernel_dimension - 1) * dilation_dimension + 1;
+  return doz(
+    stride_dimension * (input_dimension - 1) + adjustment_dimension + effective_kernel_dimension,
+    output_padding_dimension);
+}
+
+size_t xnn_compute_unpooling_output_dimension(
+    size_t input_dimension,
+    size_t input_padding_dimension,
+    size_t kernel_dimension)
+{
+  return xnn_compute_deconvolution_output_dimension(
+      input_dimension, input_padding_dimension, /*adjustment_dimension=*/0,
+      kernel_dimension, /*dilation_dimension=*/1, /*stride_dimension=*/kernel_dimension);
+}
+
 // Calculate how much work a microkernel does.
 // A MxN microkernel does M+N (scalar) loads and M*N (scalar) FMAs.
 // So, given batch_size, the microkernel does:
