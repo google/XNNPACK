@@ -14562,6 +14562,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "depth_to_space_test",
+    srcs = [
+        "test/depth-to-space.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "divide2_test",
     srcs = [
         "test/divide2.cc",
