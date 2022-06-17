@@ -106,12 +106,19 @@ struct xnn_value {
   uint32_t fp32_id;
 };
 
+enum xnn_allocation_type {
+  xnn_allocation_type_invalid = 0,
+  xnn_allocation_type_static,
+  xnn_allocation_type_workspace,
+  xnn_allocation_type_external,
+};
+
 struct xnn_blob {
   /// Size in bytes.
   size_t size;
   /// Data pointer.
   void* data;
-  bool external;
+  enum xnn_allocation_type allocation_type;
 };
 
 struct xnn_node;

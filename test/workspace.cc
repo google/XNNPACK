@@ -7,6 +7,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 
 #include <xnnpack.h>
@@ -32,7 +33,6 @@ void DefineGraphWithoutInternalTensors(xnn_subgraph_t* subgraph, std::array<size
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
   ASSERT_EQ(xnn_status_success, xnn_define_abs(*subgraph, input_id, output_id, /*flags=*/0));
-
 }
 
 // Helper function to create a subgraph with 1 input, 1 output, and 1 intermediate tensor.
@@ -63,6 +63,33 @@ void DefineGraph(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)
   ASSERT_EQ(xnn_status_success, xnn_define_hardswish(*subgraph, intermediate_id, output_id, /*flags=*/0));
 }
 
+void DefineGraphWithStaticData(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims, const std::vector<float>* static_value)
+{
+  xnn_create_subgraph(/*external_value_ids=*/0, /*flags=*/0, subgraph);
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  xnn_define_tensor_value(
+    *subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID,
+    XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id);
+  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t static_value_id = XNN_INVALID_VALUE_ID;
+  xnn_define_tensor_value(
+    *subgraph, xnn_datatype_fp32, dims.size(), dims.data(), static_value->data(), XNN_INVALID_VALUE_ID, /*flags=*/0,
+    &static_value_id);
+  ASSERT_NE(static_value_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  xnn_define_tensor_value(
+    *subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, XNN_INVALID_VALUE_ID,
+    XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_add2(*subgraph, -std::numeric_limits<float>::infinity(),
+                            std::numeric_limits<float>::infinity(), input_id,
+                            static_value_id, output_id, /*flags=*/0));
+}
+
 using testing::PrintToString;
 
 MATCHER_P(
@@ -86,6 +113,65 @@ std::vector<xnn_runtime_t> workspace_user_to_list(xnn_workspace_t workspace)
   return users;
 }
 }  // namespace
+
+TEST(WORKSPACE, static_data_not_moved_does_not_segv)
+{
+  std::array<size_t, 4> dims = {2, 20, 20, 3};
+  size_t num_elements = dims[0] * dims[1] * dims[2] * dims[3];
+
+  xnn_initialize(/*allocator=*/nullptr);
+  xnn_workspace_t workspace = nullptr;
+  xnn_create_workspace(&workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
+
+  // Create a graph that with static data.
+  xnn_subgraph_t subgraph1 = nullptr;
+  std::vector<float> static_data = std::vector<float>(num_elements, 1.0f);
+  DefineGraphWithStaticData(&subgraph1, dims, &static_data);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph1(subgraph1, xnn_delete_subgraph);
+  xnn_runtime_t runtime1 = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v4(subgraph1, nullptr, workspace, nullptr, 0, &runtime1));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime1(runtime1, xnn_delete_runtime);
+
+  // The workspace remains at size 0, without any memory allocated, since we don't have any internal tensors.
+  size_t old_workspace_size = workspace->size;
+  ASSERT_EQ(old_workspace_size, 0);
+  void* old_runtime_workspace = runtime1->workspace->data;
+  ASSERT_EQ(old_runtime_workspace, nullptr);
+
+  // Then create a graph that has internal tensors, we will need to resize the workspace.
+  xnn_subgraph_t subgraph2 = nullptr;
+  DefineGraph(&subgraph2, dims);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph2(subgraph2, xnn_delete_subgraph);
+  xnn_runtime_t runtime2 = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v4(subgraph2, nullptr, workspace, nullptr, 0, &runtime2));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime2(runtime2, xnn_delete_runtime);
+
+  // Check that the workspace grew.
+  ASSERT_GE(workspace->size, num_elements * sizeof(float));
+  ASSERT_NE(runtime2->workspace->data, nullptr);
+
+  // Try to access all the blobs and ensure that we don't segfault.
+  for (size_t i = 0; i < runtime1->num_blobs; i++) {
+    xnn_blob* blob = &runtime1->blobs[i];
+    if (blob->allocation_type == xnn_allocation_type_external) {
+      continue;
+    }
+    ASSERT_GT(blob->size, 0);
+    char access = *((char *)blob->data);
+    (void) access;
+  }
+
+  for (size_t i = 0; i < runtime2->num_blobs; i++) {
+    xnn_blob* blob = &runtime2->blobs[i];
+    if (blob->allocation_type == xnn_allocation_type_external) {
+      continue;
+    }
+    ASSERT_GT(blob->size, 0);
+    char access = *((char *)blob->data);
+    (void) access;
+  }
+}
 
 TEST(WORKSPACE, workspace_no_growth)
 {
@@ -126,7 +212,7 @@ TEST(WORKSPACE, workspace_no_growth)
   ASSERT_EQ(runtime1->num_blobs, runtime2->num_blobs);
   for (size_t i = 0; i < runtime1->num_blobs; i++) {
     xnn_blob* blob1 = &runtime1->blobs[i];
-    if (blob1->external) {
+    if (blob1->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
     ASSERT_THAT(blob1, IsInWorkspace(runtime1->workspace));
@@ -185,14 +271,14 @@ TEST(WORKSPACE, workspace_grow)
   // Check that both runtime's blob pointers are within range.
   for (size_t i = 0; i < runtime1->num_blobs; i++) {
     xnn_blob* blob = &runtime1->blobs[i];
-    if (blob->external) {
+    if (blob->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
     ASSERT_THAT(blob, IsInWorkspace(runtime1->workspace));
   }
   for (size_t i = 0; i < runtime2->num_blobs; i++) {
     xnn_blob* blob = &runtime2->blobs[i];
-    if (blob->external) {
+    if (blob->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
     ASSERT_THAT(blob, IsInWorkspace(runtime2->workspace));

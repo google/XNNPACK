@@ -174,7 +174,9 @@ static enum xnn_status initialize_workspace_blobs(
     runtime->workspace->data = new_workspace_data;
     runtime->workspace->size = mem_arena_size;
     // Keep track of how much the workspace data moved.
-    workspace_data_delta = (uintptr_t) new_workspace_data - (uintptr_t) old_workspace_data;
+    if (old_workspace_data != NULL) {
+      workspace_data_delta = (uintptr_t) new_workspace_data - (uintptr_t) old_workspace_data;
+    }
   }
 
   assert(runtime->workspace->size >= mem_arena_size);
@@ -184,7 +186,7 @@ static enum xnn_status initialize_workspace_blobs(
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
-      if (value->data == NULL && !blob->external) {
+      if (blob->allocation_type == xnn_allocation_type_workspace) {
         // Value is purely internal to the runtime, allocate it in the workspace.
         blob->data = (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset);
       }
@@ -200,7 +202,8 @@ static enum xnn_status initialize_workspace_blobs(
       }
       for (size_t i = 0; i < rt->num_blobs; i++) {
         struct xnn_blob* blob = &rt->blobs[i];
-        if (blob->data != NULL && !blob->external) {
+        if (blob->allocation_type == xnn_allocation_type_workspace) {
+          assert(blob->data != NULL);
           blob->data = (void*) ((uintptr_t) blob->data + workspace_data_delta);
         }
       }
@@ -321,10 +324,13 @@ enum xnn_status xnn_create_runtime_v4(
         if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
           // Value is purely internal to the runtime, and must be allocated in its workspace.
           xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
+          blob->allocation_type = xnn_allocation_type_workspace;
         } else {
           // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
-          blob->external = true;
+          blob->allocation_type = xnn_allocation_type_external;
         }
+      } else {
+        blob->allocation_type = xnn_allocation_type_static;
       }
     }
   }
@@ -374,7 +380,7 @@ enum xnn_status xnn_setup_runtime(
     }
 
     const struct xnn_blob* blob = &runtime->blobs[value_id];
-    if (!blob->external) {
+    if (blob->allocation_type != xnn_allocation_type_external) {
       xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external", value_id);
       return xnn_status_invalid_parameter;
     }
