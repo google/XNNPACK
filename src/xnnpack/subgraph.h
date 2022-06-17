@@ -321,7 +321,6 @@ struct xnn_runtime {
   struct xnn_blob* blobs;
   size_t num_blobs;
 
-  bool owns_workspace;
   struct xnn_workspace* workspace;
   struct xnn_runtime* next_workspace_user;
 
@@ -378,6 +377,8 @@ struct xnn_workspace {
   void* data;
   size_t size;
   struct xnn_runtime* first_user;
+  // Workspace will be destroyed in xnn_delete_runtime or xnn_delete_workspace if num_users reaches 0.
+  size_t ref_count;
 };
 
 #ifdef __cplusplus

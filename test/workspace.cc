@@ -92,7 +92,7 @@ TEST(WORKSPACE, workspace_no_growth)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   xnn_create_workspace(&workspace);
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
 
@@ -138,6 +138,7 @@ TEST(WORKSPACE, workspace_no_growth)
   ASSERT_EQ(workspace_users.size(), 2);
   ASSERT_THAT(workspace_users, ::testing::Contains(runtime1));
   ASSERT_THAT(workspace_users, ::testing::Contains(runtime2));
+  ASSERT_EQ(workspace->ref_count, 3);
 }
 
 TEST(WORKSPACE, workspace_grow)
@@ -145,7 +146,7 @@ TEST(WORKSPACE, workspace_grow)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims1 = {2, 20, 20, 3};
 
@@ -201,6 +202,7 @@ TEST(WORKSPACE, workspace_grow)
   ASSERT_EQ(workspace_users.size(), 2);
   ASSERT_THAT(workspace_users, ::testing::Contains(runtime1));
   ASSERT_THAT(workspace_users, ::testing::Contains(runtime2));
+  ASSERT_EQ(workspace->ref_count, 3);
 }
 
 TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first)
@@ -208,7 +210,7 @@ TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   const std::array<size_t, 4> dims = {2, 20, 20, 3};
 
@@ -232,11 +234,15 @@ TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first)
   ASSERT_EQ(runtime2->next_workspace_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
 
+  ASSERT_EQ(workspace->ref_count, 3);
   xnn_delete_runtime(auto_runtime2.release());
   ASSERT_EQ(workspace->first_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 2);
 
   xnn_delete_runtime(auto_runtime1.release());
+  ASSERT_EQ(workspace->first_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 1);
 }
 
 TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first)
@@ -244,7 +250,7 @@ TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
 
@@ -268,12 +274,16 @@ TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first)
   ASSERT_EQ(runtime2->next_workspace_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
 
+  ASSERT_EQ(workspace->ref_count, 3);
   xnn_delete_runtime(auto_runtime1.release());
 
   ASSERT_EQ(workspace->first_user, runtime2);
   ASSERT_EQ(runtime2->next_workspace_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 2);
 
   xnn_delete_runtime(auto_runtime2.release());
+  ASSERT_EQ(workspace->first_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 1);
 }
 
 TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
@@ -281,7 +291,7 @@ TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
 
@@ -314,18 +324,22 @@ TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
   ASSERT_EQ(runtime2->next_workspace_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
 
+  ASSERT_EQ(workspace->ref_count, 4);
   xnn_delete_runtime(auto_runtime2.release());
 
   ASSERT_EQ(workspace->first_user, runtime3);
   ASSERT_EQ(runtime3->next_workspace_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 3);
 
   xnn_delete_runtime(auto_runtime3.release());
   ASSERT_EQ(workspace->first_user, runtime1);
   ASSERT_EQ(runtime1->next_workspace_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 2);
 
   xnn_delete_runtime(auto_runtime1.release());
   ASSERT_EQ(workspace->first_user, nullptr);
+  ASSERT_EQ(workspace->ref_count, 1);
 }
 
 TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors)
@@ -333,7 +347,7 @@ TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors)
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
   xnn_create_workspace(&workspace);
-  std::unique_ptr<xnn_workspace, decltype(&xnn_delete_workspace)> auto_workspace(workspace, xnn_delete_workspace);
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
 
   std::array<size_t, 4> dims = {2, 20, 20, 3};
 
@@ -348,4 +362,5 @@ TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors)
   ASSERT_EQ(0, workspace->size);
   ASSERT_EQ(nullptr, workspace->data);
   ASSERT_EQ(std::vector<xnn_runtime_t>({runtime}), workspace_user_to_list(workspace));
+  ASSERT_EQ(workspace->ref_count, 2);
 }
