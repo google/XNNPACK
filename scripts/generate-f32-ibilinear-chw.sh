@@ -14,11 +14,13 @@ tools/xngen src/f32-ibilinear-chw/wasmsimd.c.in -D PIXEL_TILE=4 -o src/f32-ibili
 tools/xngen src/f32-ibilinear-chw/wasmsimd.c.in -D PIXEL_TILE=8 -o src/f32-ibilinear-chw/gen/wasmsimd-p8.c &
 
 ############################### ARM NEON ##############################
-tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=4 -D FMA=0 -o src/f32-ibilinear-chw/gen/neon-p4.c &
-tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=8 -D FMA=0 -o src/f32-ibilinear-chw/gen/neon-p8.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=4  -D FMA=0 -o src/f32-ibilinear-chw/gen/neon-p4.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=8  -D FMA=0 -o src/f32-ibilinear-chw/gen/neon-p8.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=16 -D FMA=0 -o src/f32-ibilinear-chw/gen/neon-p16.c &
 
-tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=4 -D FMA=1 -o src/f32-ibilinear-chw/gen/neonfma-p4.c &
-tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=8 -D FMA=1 -o src/f32-ibilinear-chw/gen/neonfma-p8.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=4  -D FMA=1 -o src/f32-ibilinear-chw/gen/neonfma-p4.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=8  -D FMA=1 -o src/f32-ibilinear-chw/gen/neonfma-p8.c &
+tools/xngen src/f32-ibilinear-chw/neon.c.in -D PIXEL_TILE=16 -D FMA=1 -o src/f32-ibilinear-chw/gen/neonfma-p16.c &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ibilinear-chw/sse.c.in -D PIXEL_TILE=4 -o src/f32-ibilinear-chw/gen/sse-p4.c &

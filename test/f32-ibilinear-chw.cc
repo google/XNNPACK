@@ -577,6 +577,95 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_IBILINEAR_CHW__NEON_P16, pixels_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    IBilinearMicrokernelTester()
+      .pixels(16)
+      .channels(1)
+      .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, pixels_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 32; pixels < 160; pixels += 16) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, pixels_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 1; pixels < 16; pixels++) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, pixels_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 17; pixels < 32; pixels++) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, channels_eq_1) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 1; pixels <= 80; pixels += 15) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, channels_gt_1) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t channels = 2; channels < 3; channels++) {
+      for (size_t pixels = 1; pixels <= 80; pixels += 15) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, input_offset) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 1; pixels < 80; pixels += 15) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(7)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEON_P16, input_stride) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t pixels = 1; pixels < 80; pixels += 15) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_stride(331)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neon_p16);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(F32_IBILINEAR_CHW__NEONFMA_P4, pixels_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     IBilinearMicrokernelTester()
@@ -748,6 +837,95 @@ TEST(F32_IBILINEAR_CHW__SCALAR_P4, input_stride) {
           .channels(channels)
           .input_stride(163)
           .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p8);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, pixels_eq_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    IBilinearMicrokernelTester()
+      .pixels(16)
+      .channels(1)
+      .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, pixels_div_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 32; pixels < 160; pixels += 16) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, pixels_lt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 1; pixels < 16; pixels++) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, pixels_gt_16) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 17; pixels < 32; pixels++) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, channels_eq_1) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 1; pixels <= 80; pixels += 15) {
+      IBilinearMicrokernelTester()
+        .pixels(pixels)
+        .channels(1)
+        .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, channels_gt_1) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t channels = 2; channels < 3; channels++) {
+      for (size_t pixels = 1; pixels <= 80; pixels += 15) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, input_offset) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 1; pixels < 80; pixels += 15) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_offset(7)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
+      }
+    }
+  }
+
+  TEST(F32_IBILINEAR_CHW__NEONFMA_P16, input_stride) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (size_t pixels = 1; pixels < 80; pixels += 15) {
+      for (size_t channels = 1; channels <= 5; channels += 1) {
+        IBilinearMicrokernelTester()
+          .pixels(pixels)
+          .channels(channels)
+          .input_stride(331)
+          .TestCHW(xnn_f32_ibilinear_chw_ukernel__neonfma_p16);
       }
     }
   }

@@ -1697,6 +1697,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-gemm/gen/8x8s4-minmax-neon.c
   src/f32-ibilinear-chw/gen/neon-p4.c
   src/f32-ibilinear-chw/gen/neon-p8.c
+  src/f32-ibilinear-chw/gen/neon-p16.c
   src/f32-ibilinear/gen/neon-c4.c
   src/f32-ibilinear/gen/neon-c8.c
   src/f32-igemm/gen/1x8-minmax-neon-dup-ld64.c
@@ -2744,6 +2745,7 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemm/gen/8x8s4-minmax-neonfma.c
   src/f32-ibilinear-chw/gen/neonfma-p4.c
   src/f32-ibilinear-chw/gen/neonfma-p8.c
+  src/f32-ibilinear-chw/gen/neonfma-p16.c
   src/f32-ibilinear/gen/neonfma-c4.c
   src/f32-ibilinear/gen/neonfma-c8.c
   src/f32-igemm/gen/1x8-minmax-neonfma-dup-ld64.c
@@ -3717,6 +3719,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-gemm/gen/4x2c4-minmax-sse.c
   src/f32-gemm/gen/4x8-minmax-sse-load1.c
   src/f32-ibilinear-chw/gen/sse-p8.c
+  src/f32-ibilinear-chw/gen/sse-p16.c
   src/f32-ibilinear/gen/sse-c8.c
   src/f32-igemm/gen/1x8-minmax-sse-load1.c
   src/f32-igemm/gen/4x2c4-minmax-sse.c
