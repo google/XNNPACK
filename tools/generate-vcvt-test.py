@@ -27,15 +27,18 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32|qs8|qu8)_(f16|f32|qs8|qu8)_vcvt_ukernel__(.+)_x(\d+)$", name)
+  match = re.match(r"^xnn_(f16|f32|qs8|qu8)(_(f16|f32|qs8|qu8))?_vcvt_ukernel__(.+)_x(\d+)$", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
   input_datatype = match.group(1)
-  output_datatype = match.group(2)
-  batch_tile = int(match.group(4))
+  if match.group(2):
+    output_datatype = match.group(3)
+  else:
+    output_datatype = input_datatype
+  batch_tile = int(match.group(5))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(4))
   return input_datatype, output_datatype, batch_tile, arch, isa
 
 
@@ -103,7 +106,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if (INPUT_DATATYPE, OUTPUT_DATATYPE) in [("F32", "QS8"), ("F32", "QU8"), ("QS8", "F32"), ("QU8", "F32")]:
+$if INPUT_DATATYPE.startswith("Q") or OUTPUT_DATATYPE.startswith("Q"):
   TEST(${TEST_NAME}, scale) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -115,21 +118,42 @@ $if (INPUT_DATATYPE, OUTPUT_DATATYPE) in [("F32", "QS8"), ("F32", "QU8"), ("QS8"
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
         $elif OUTPUT_DATATYPE == "QU8":
-          .zero_point(100)
+          .output_zero_point(100)
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, zero_point) {
+$if INPUT_DATATYPE in ["QS8", "QU8"]:
+  TEST(${TEST_NAME}, input_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (int16_t zero_point = 0; zero_point < 5; zero_point += 2) {
+    for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VCvtMicrokernelTester()
           .batch_size(batch_size)
-          .zero_point(zero_point)
+          .input_zero_point(input_zero_point)
+          $if OUTPUT_DATATYPE == "QS8":
+            .qmin(std::numeric_limits<int8_t>::min())
+            .qmax(std::numeric_limits<int8_t>::max())
+          $elif OUTPUT_DATATYPE == "QU8":
+            .qmin(std::numeric_limits<uint8_t>::min())
+            .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+$if OUTPUT_DATATYPE in ["QS8", "QU8"]:
+  TEST(${TEST_NAME}, output_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .output_zero_point(output_zero_point)
           $if OUTPUT_DATATYPE == "QS8":
             .qmin(std::numeric_limits<int8_t>::min())
             .qmax(std::numeric_limits<int8_t>::max())
@@ -153,7 +177,7 @@ $if (INPUT_DATATYPE, OUTPUT_DATATYPE) in [("F32", "QS8"), ("F32", "QU8"), ("QS8"
             .qmin(std::numeric_limits<int8_t>::min())
             .qmax(std::numeric_limits<int8_t>::max())
           $elif OUTPUT_DATATYPE == "QU8":
-            .zero_point(128)
+            .output_zero_point(128)
             .qmin(std::numeric_limits<uint8_t>::min())
             .qmax(std::numeric_limits<uint8_t>::max())
           .Test(${", ".join(TEST_ARGS)});
@@ -177,7 +201,7 @@ $if (INPUT_DATATYPE, OUTPUT_DATATYPE) in [("F32", "QS8"), ("F32", "QU8"), ("QS8"
       }
     }
 
-$if OUTPUT_DATATYPE == "QS8":
+$if INPUT_DATATYPE == "F32" and OUTPUT_DATATYPE == "QS8":
   TEST(${TEST_NAME}, qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -208,7 +232,7 @@ $if OUTPUT_DATATYPE == "QS8":
     }
   }
 
-$if OUTPUT_DATATYPE == "QU8":
+$if INPUT_DATATYPE == "F32" and OUTPUT_DATATYPE == "QU8":
   TEST(${TEST_NAME}, qmin) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -217,7 +241,7 @@ $if OUTPUT_DATATYPE == "QU8":
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .scale(500)
-          .zero_point(128)
+          .output_zero_point(128)
           .qmin(qmin)
           .qmax(std::numeric_limits<uint8_t>::max())
           .Test(${", ".join(TEST_ARGS)});
@@ -233,7 +257,7 @@ $if OUTPUT_DATATYPE == "QU8":
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .scale(500)
-          .zero_point(128)
+          .output_zero_point(128)
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(qmax)
           .Test(${", ".join(TEST_ARGS)});

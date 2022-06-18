@@ -1200,6 +1200,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-scalar-x1.c
   src/qs8-vaddc/gen/minmax-scalar-x2.c
   src/qs8-vaddc/gen/minmax-scalar-x4.c
+  src/qs8-vcvt/gen/vcvt-scalar-x1.c
+  src/qs8-vcvt/gen/vcvt-scalar-x2.c
+  src/qs8-vcvt/gen/vcvt-scalar-x4.c
   src/qs8-vmul/gen/minmax-fp32-scalar-x1.c
   src/qs8-vmul/gen/minmax-fp32-scalar-x2.c
   src/qs8-vmul/gen/minmax-fp32-scalar-x4.c
@@ -1308,6 +1311,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-scalar-x1.c
   src/qu8-vaddc/gen/minmax-scalar-x2.c
   src/qu8-vaddc/gen/minmax-scalar-x4.c
+  src/qu8-vcvt/gen/vcvt-scalar-x1.c
+  src/qu8-vcvt/gen/vcvt-scalar-x2.c
+  src/qu8-vcvt/gen/vcvt-scalar-x4.c
   src/qu8-vmul/gen/minmax-fp32-scalar-x1.c
   src/qu8-vmul/gen/minmax-fp32-scalar-x2.c
   src/qu8-vmul/gen/minmax-fp32-scalar-x4.c
@@ -1418,6 +1424,8 @@ SET(ALL_ARMV6SIMD_MICROKERNEL_SRCS
   src/qs8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c
   src/qs8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c
   src/qs8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c
+  src/qs8-vcvt/gen/vcvt-armv6simd-x4.c
+  src/qs8-vcvt/gen/vcvt-armv6simd-x8.c
   src/qu8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c
   src/qu8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c
   src/qu8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c
@@ -1425,7 +1433,9 @@ SET(ALL_ARMV6SIMD_MICROKERNEL_SRCS
   src/qu8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c
   src/qu8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c
   src/qu8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c)
+  src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c
+  src/qu8-vcvt/gen/vcvt-armv6simd-x4.c
+  src/qu8-vcvt/gen/vcvt-armv6simd-x8.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
@@ -2471,6 +2481,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qs8-vaddc/gen/minmax-neon-ld128-x16.c
   src/qs8-vaddc/gen/minmax-neon-ld128-x32.c
+  src/qs8-vcvt/gen/vcvt-neon-x8.c
+  src/qs8-vcvt/gen/vcvt-neon-x16.c
+  src/qs8-vcvt/gen/vcvt-neon-x32.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld64-x8.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qs8-vmul/gen/minmax-fp32-neon-ld128-x16.c
@@ -2568,6 +2581,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-neon-ld64-x16.c
   src/qu8-vaddc/gen/minmax-neon-ld64-x32.c
   src/qu8-vaddc/gen/minmax-neon-ld128-x16.c
+  src/qu8-vcvt/gen/vcvt-neon-x8.c
+  src/qu8-vcvt/gen/vcvt-neon-x16.c
+  src/qu8-vcvt/gen/vcvt-neon-x32.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c
   src/qu8-vmul/gen/minmax-fp32-neon-ld128-x16.c
@@ -4237,6 +4253,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x24.c
   src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x32.c
+  src/qs8-vcvt/gen/vcvt-sse2-x16.c
+  src/qs8-vcvt/gen/vcvt-sse2-x32.c
   src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/qs8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
@@ -4308,6 +4326,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-sse2-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x8.c
   src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c
+  src/qu8-vcvt/gen/vcvt-sse2-x16.c
+  src/qu8-vcvt/gen/vcvt-sse2-x32.c
   src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c
@@ -4384,8 +4404,12 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qs8-igemm/gen/3x4c8-minmax-fp32-ssse3-ld128.c
   src/qs8-requantization/gemmlowp-ssse3.c
   src/qs8-requantization/rndna-ssse3.c
+  src/qs8-vcvt/gen/vcvt-ssse3-x16.c
+  src/qs8-vcvt/gen/vcvt-ssse3-x32.c
   src/qu8-requantization/gemmlowp-ssse3.c
   src/qu8-requantization/rndna-ssse3.c
+  src/qu8-vcvt/gen/vcvt-ssse3-x16.c
+  src/qu8-vcvt/gen/vcvt-ssse3-x32.c
   src/x8-lut/gen/lut-ssse3-x16.c
   src/x8-lut/gen/lut-ssse3-x32.c
   src/x24-transposec/4x4-ssse3.c)
@@ -4662,6 +4686,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-sse41-mul32-ld32-x32.c
+  src/qs8-vcvt/gen/vcvt-sse41-x8.c
+  src/qs8-vcvt/gen/vcvt-sse41-x16.c
+  src/qs8-vcvt/gen/vcvt-sse41-x32.c
   src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c
   src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qs8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
@@ -4738,6 +4765,9 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-sse41-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x8.c
   src/qu8-vaddc/gen/minmax-sse41-mul32-ld32-x16.c
+  src/qu8-vcvt/gen/vcvt-sse41-x8.c
+  src/qu8-vcvt/gen/vcvt-sse41-x16.c
+  src/qu8-vcvt/gen/vcvt-sse41-x32.c
   src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c
@@ -5142,6 +5172,9 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x24.c
   src/qs8-vaddc/gen/minmax-avx-mul32-ld32-x32.c
+  src/qs8-vcvt/gen/vcvt-avx-x8.c
+  src/qs8-vcvt/gen/vcvt-avx-x16.c
+  src/qs8-vcvt/gen/vcvt-avx-x32.c
   src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c
   src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
   src/qs8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c
@@ -5210,6 +5243,9 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/minmax-avx-mul16-ld64-x16.c
   src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x8.c
   src/qu8-vaddc/gen/minmax-avx-mul32-ld32-x16.c
+  src/qu8-vcvt/gen/vcvt-avx-x8.c
+  src/qu8-vcvt/gen/vcvt-avx-x16.c
+  src/qu8-vcvt/gen/vcvt-avx-x32.c
   src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c
   src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c
   src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c
@@ -7779,12 +7815,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME f32-f16-vcvt-test COMMAND f32-f16-vcvt-test)
 
-  ADD_EXECUTABLE(f32-qs8-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  ADD_EXECUTABLE(f32-qs8-vcvt-test test/f32-qs8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-qs8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME f32-qs8-vcvt-test COMMAND f32-qs8-vcvt-test)
 
-  ADD_EXECUTABLE(f32-qu8-vcvt-test test/f32-f16-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  ADD_EXECUTABLE(f32-qu8-vcvt-test test/f32-qu8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-qu8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME f32-qu8-vcvt-test COMMAND f32-qu8-vcvt-test)
@@ -8234,6 +8270,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-vaddc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME qs8-vaddc-minmax-test COMMAND qs8-vaddc-minmax-test)
 
+  ADD_EXECUTABLE(qs8-vcvt-test test/qs8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qs8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(NAME qs8-vcvt-test COMMAND qs8-vcvt-test)
+
   ADD_EXECUTABLE(qs8-vmul-minmax-fp32-test test/qs8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qs8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(qs8-vmul-minmax-fp32-test PRIVATE include src test)
@@ -8311,6 +8352,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-vaddc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME qu8-vaddc-minmax-test COMMAND qu8-vaddc-minmax-test)
+
+  ADD_EXECUTABLE(qu8-vcvt-test test/qu8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vcvt-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(NAME qu8-vcvt-test COMMAND qu8-vcvt-test)
 
   ADD_EXECUTABLE(qu8-vmul-minmax-fp32-test test/qu8-vmul-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(qu8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
@@ -8860,6 +8906,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-vaddc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
+  ADD_EXECUTABLE(qs8-vcvt-bench bench/qs8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(qs8-vcvt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
+
   ADD_EXECUTABLE(qs8-vmul-bench bench/qs8-vmul.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qs8-vmul-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qs8-vmul-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
@@ -8888,6 +8938,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(qu8-vaddc-bench bench/qu8-vaddc.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qu8-vaddc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
+
+  ADD_EXECUTABLE(qu8-vcvt-bench bench/qu8-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(qu8-vcvt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
   ADD_EXECUTABLE(qu8-vmul-bench bench/qu8-vmul.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmul-bench PRIVATE . include src)

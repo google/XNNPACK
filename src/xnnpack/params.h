@@ -2102,6 +2102,43 @@ union xnn_f32_qu8_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs8_cvt_params {
+  struct {
+    int32_t bias;
+    int32_t multiplier;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint32_t minus_input_zero_point;
+    int32_t multiplier;
+    int32_t bias;
+  } armv6simd;
+  struct {
+    int16_t input_zero_point;
+    int16_t multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t multiplier[8];
+    XNN_ALIGN(16) int32_t bias[4];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t multiplier[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } ssse3;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) int16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t multiplier[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
 union xnn_qs8_f32_cvt_params {
   struct {
     int32_t zero_point;
@@ -2137,6 +2174,43 @@ union xnn_qs8_f32_cvt_params {
   struct {
     XNN_ALIGN(8) int16_t minus_zero_point[4];
     XNN_ALIGN(8) float scale[2];
+  } wasmsimd;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
+union xnn_qu8_cvt_params {
+  struct {
+    int32_t bias;
+    int32_t multiplier;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint32_t minus_input_zero_point;
+    int32_t multiplier;
+    int32_t bias;
+  } armv6simd;
+  struct {
+    uint16_t input_zero_point;
+    int16_t multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) uint16_t multiplier[8];
+    XNN_ALIGN(16) int32_t bias[4];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) uint16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t multiplier[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } ssse3;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) uint16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t multiplier[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
@@ -3589,11 +3663,23 @@ typedef void (*xnn_f32_qu8_vcvt_ukernel_function)(
     uint8_t* output,
     const union xnn_f32_qu8_cvt_params* params);
 
+typedef void (*xnn_qs8_vcvt_ukernel_function)(
+    size_t n,
+    const int8_t* input,
+    int8_t* output,
+    const union xnn_qs8_cvt_params* params);
+
 typedef void (*xnn_qs8_f32_vcvt_ukernel_function)(
     size_t n,
     const int8_t* input,
     float* output,
     const union xnn_qs8_f32_cvt_params* params);
+
+typedef void (*xnn_qu8_vcvt_ukernel_function)(
+    size_t n,
+    const uint8_t* input,
+    uint8_t* output,
+    const union xnn_qu8_cvt_params* params);
 
 typedef void (*xnn_qu8_f32_vcvt_ukernel_function)(
     size_t n,
@@ -3735,10 +3821,22 @@ typedef void (*xnn_init_f32_qu8_cvt_params_fn)(
   uint8_t output_min,
   uint8_t output_max);
 
+typedef void (*xnn_init_qs8_cvt_params_fn)(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point);
+
 typedef void (*xnn_init_qs8_f32_cvt_params_fn)(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t zero_point);
+
+typedef void (*xnn_init_qu8_cvt_params_fn)(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point);
 
 typedef void (*xnn_init_qu8_f32_cvt_params_fn)(
   union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],

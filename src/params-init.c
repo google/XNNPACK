@@ -5531,6 +5531,124 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+XNN_INTERNAL void xnn_init_qs8_cvt_scalar_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(256.0f * input_output_scale);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 32768L);
+  params->scalar.bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  params->scalar.multiplier = (int32_t) multiplier;
+}
+
+#if XNN_ARCH_ARM
+XNN_INTERNAL void xnn_init_qs8_cvt_armv6simd_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(131072.0f * input_output_scale);
+  assert(multiplier >= 512L);
+  assert(multiplier <= 16777216L);
+  const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
+  params->armv6simd.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
+  params->armv6simd.multiplier = (int32_t) multiplier;
+  params->armv6simd.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
+}
+#endif  // XNN_ARCH_ARM
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_init_qs8_cvt_neon_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  params->neon.input_zero_point = (int16_t) input_zero_point;
+  params->neon.multiplier = (int16_t) multiplier;
+  params->neon.output_zero_point = (int16_t) output_zero_point;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qs8_cvt_sse2_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  const int32_t bias = ((int32_t) output_zero_point << 8) + (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.multiplier[i] = (int16_t) multiplier;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.bias[i] = bias;
+  }
+}
+
+XNN_INTERNAL void xnn_init_qs8_cvt_ssse3_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->ssse3.input_zero_point[i] = (int16_t) input_zero_point;
+    params->ssse3.multiplier[i] = (int16_t) multiplier;
+    params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+XNN_INTERNAL void xnn_init_qs8_cvt_wasmsimd_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->wasmsimd.input_zero_point[i] = (int16_t) input_zero_point;
+    params->wasmsimd.multiplier[i] = (int16_t) multiplier;
+    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 XNN_INTERNAL void xnn_init_qs8_f32_cvt_scalar_params(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -5616,6 +5734,124 @@ XNN_INTERNAL void xnn_init_qs8_f32_cvt_wasmsimd_params(
   }
   for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd.scale[i] = scale;
+  }
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+XNN_INTERNAL void xnn_init_qu8_cvt_scalar_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(256.0f * input_output_scale);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 32768L);
+  params->scalar.bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  params->scalar.multiplier = (int32_t) multiplier;
+}
+
+#if XNN_ARCH_ARM
+XNN_INTERNAL void xnn_init_qu8_cvt_armv6simd_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(131072.0f * input_output_scale);
+  assert(multiplier >= 512L);
+  assert(multiplier <= 16777216L);
+  const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
+  params->armv6simd.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
+  params->armv6simd.multiplier = (int32_t) multiplier;
+  params->armv6simd.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
+}
+#endif  // XNN_ARCH_ARM
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_init_qu8_cvt_neon_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  params->neon.input_zero_point = (uint16_t) input_zero_point;
+  params->neon.multiplier = (int16_t) multiplier;
+  params->neon.output_zero_point = (int16_t) output_zero_point;
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+XNN_INTERNAL void xnn_init_qu8_cvt_sse2_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(256.0f * input_output_scale);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 32768L);
+  const int32_t bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse2.multiplier[i] = (uint16_t) multiplier;
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse2.bias[i] = bias;
+  }
+}
+
+XNN_INTERNAL void xnn_init_qu8_cvt_ssse3_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 8; i++) {
+    params->ssse3.input_zero_point[i] = (uint16_t) input_zero_point;
+    params->ssse3.multiplier[i] = (int16_t) multiplier;
+    params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+XNN_INTERNAL void xnn_init_qu8_cvt_wasmsimd_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->wasmsimd.input_zero_point[i] = (uint16_t) input_zero_point;
+    params->wasmsimd.multiplier[i] = (int16_t) multiplier;
+    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
   }
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

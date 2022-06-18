@@ -924,6 +924,33 @@ DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_lrintf_para
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#define DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                              \
+    union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    float input_output_scale,                             \
+    int8_t input_zero_point,                              \
+    int8_t output_zero_point);
+
+DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_scalar_params)
+
+#if XNN_ARCH_ARM
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_armv6simd_params)
+#endif  // XNN_ARCH_ARM
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_sse2_params)
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_ssse3_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 #define DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                                  \
     union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
@@ -945,6 +972,33 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                              \
+    union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    float input_output_scale,                             \
+    uint8_t input_zero_point,                             \
+    uint8_t output_zero_point);
+
+DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
+
+#if XNN_ARCH_ARM
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_armv6simd_params)
+#endif  // XNN_ARCH_ARM
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_sse2_params)
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_ssse3_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 

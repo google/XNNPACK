@@ -281,6 +281,43 @@ DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x3
 DECLARE_F32_QU8_VCVT_UKERNEL_FUNCTION(xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4)
 
 
+#define DECLARE_QS8_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const int8_t* input,                         \
+      int8_t* output,                              \
+      const union xnn_qs8_cvt_params* params);
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__neon_x8)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__neon_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__neon_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__sse2_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__sse2_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__ssse3_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__ssse3_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__sse41_x8)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__sse41_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__sse41_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__avx_x8)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__avx_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__avx_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__wasmsimd_x8)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__wasmsimd_x16)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__wasmsimd_x32)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__armv6simd_x4)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__armv6simd_x8)
+
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__scalar_x1)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__scalar_x2)
+DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__scalar_x4)
+
+
 #define DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
@@ -327,6 +364,43 @@ DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x1)
 DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x2)
 DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x3)
 DECLARE_QS8_F32_VCVT_UKERNEL_FUNCTION(xnn_qs8_f32_vcvt_ukernel__scalar_x4)
+
+
+#define DECLARE_QU8_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t n,                                    \
+      const uint8_t* input,                        \
+      uint8_t* output,                             \
+      const union xnn_qu8_cvt_params* params);
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__neon_x8)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__neon_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__neon_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__sse2_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__sse2_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__ssse3_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__ssse3_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__sse41_x8)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__sse41_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__sse41_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__avx_x8)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__avx_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__avx_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__wasmsimd_x8)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__wasmsimd_x16)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__wasmsimd_x32)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__armv6simd_x4)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__armv6simd_x8)
+
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__scalar_x1)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__scalar_x2)
+DECLARE_QU8_VCVT_UKERNEL_FUNCTION(xnn_qu8_vcvt_ukernel__scalar_x4)
 
 
 #define DECLARE_QU8_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
