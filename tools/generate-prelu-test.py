@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_prelu_ukernel__(.+)_(\d+)x(\d+)$", name)
+  match = re.fullmatch(r"xnn_(f16|f32)_prelu_ukernel__(.+)_(\d+)x(\d+)", name)
   assert match is not None
   row_tile = int(match.group(3))
   channel_tile = int(match.group(4))

@@ -222,7 +222,7 @@ $if SUBSAMPLING > 1:
 """
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_(f16|f32)_dwconv2d_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?$", name)
+  match = re.fullmatch(r"xnn_(f16|f32)_dwconv2d_chw_ukernel_(\d+)x(\d+)(s2)?p(\d+)__(.+)_(\d+)x(\d+)(_acc\d+)?", name)
   assert match is not None
   kernel_height, kernel_width = int(match.group(2)), int(match.group(3))
   if match.group(4):

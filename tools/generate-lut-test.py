@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"^xnn_x8_lut_ukernel__(.+)_x(\d+)$", name)
+  match = re.fullmatch(r"xnn_x8_lut_ukernel__(.+)_x(\d+)", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   batch_tile = int(match.group(2))
