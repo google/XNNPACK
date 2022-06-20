@@ -2129,6 +2129,11 @@ union xnn_qs8_cvt_params {
     XNN_ALIGN(16) int16_t multiplier[8];
     XNN_ALIGN(16) int16_t output_zero_point[8];
   } ssse3;
+  struct {
+    XNN_ALIGN(32) int16_t input_zero_point[16];
+    XNN_ALIGN(32) int16_t multiplier[16];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+  } avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
@@ -2205,6 +2210,11 @@ union xnn_qu8_cvt_params {
     XNN_ALIGN(16) int16_t multiplier[8];
     XNN_ALIGN(16) int16_t output_zero_point[8];
   } ssse3;
+  struct {
+    XNN_ALIGN(32) uint16_t input_zero_point[16];
+    XNN_ALIGN(32) int16_t multiplier[16];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+  } avx2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {

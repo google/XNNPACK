@@ -5626,6 +5626,25 @@ XNN_INTERNAL void xnn_init_qs8_cvt_ssse3_params(
     params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
   }
 }
+
+XNN_INTERNAL void xnn_init_qs8_cvt_avx2_params(
+  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx2.input_zero_point[i] = (int16_t) input_zero_point;
+    params->avx2.multiplier[i] = (int16_t) multiplier;
+    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -5831,6 +5850,25 @@ XNN_INTERNAL void xnn_init_qu8_cvt_ssse3_params(
     params->ssse3.input_zero_point[i] = (uint16_t) input_zero_point;
     params->ssse3.multiplier[i] = (int16_t) multiplier;
     params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
+  }
+}
+
+XNN_INTERNAL void xnn_init_qu8_cvt_avx2_params(
+  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-8);
+  assert(input_output_scale <= 0x1.0p+7);
+
+  const long multiplier = lrintf(-256.0f * input_output_scale);
+  assert(multiplier <= -1L);
+  assert(multiplier >= -32768L);
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx2.input_zero_point[i] = (uint16_t) input_zero_point;
+    params->avx2.multiplier[i] = (int16_t) multiplier;
+    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
   }
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

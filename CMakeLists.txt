@@ -6035,6 +6035,9 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x24.c
   src/qs8-vaddc/gen/minmax-avx2-mul32-ld64-x32.c
+  src/qs8-vcvt/gen/vcvt-avx2-x16.c
+  src/qs8-vcvt/gen/vcvt-avx2-x32.c
+  src/qs8-vcvt/gen/vcvt-avx2-x64.c
   src/qu8-dwconv/gen/up8x9-minmax-fp32-avx2-mul32.c
   src/qu8-dwconv/gen/up8x25-minmax-fp32-avx2-mul32.c
   src/qu8-dwconv/gen/up16x9-minmax-fp32-avx2-mul32.c
@@ -6055,6 +6058,9 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qu8-vadd/gen/minmax-avx2-mul32-ld64-x16.c
   src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x8.c
   src/qu8-vaddc/gen/minmax-avx2-mul32-ld64-x16.c
+  src/qu8-vcvt/gen/vcvt-avx2-x16.c
+  src/qu8-vcvt/gen/vcvt-avx2-x32.c
+  src/qu8-vcvt/gen/vcvt-avx2-x64.c
   src/x8-lut/gen/lut-avx2-x32.c
   src/x8-lut/gen/lut-avx2-x64.c
   src/x8-lut/gen/lut-avx2-x96.c

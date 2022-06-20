@@ -100,6 +100,25 @@ static void qu8_vcvt(
 #endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_vcvt, avx2_x16,
+                    xnn_qu8_vcvt_ukernel__avx2_x16,
+                    xnn_init_qu8_cvt_avx2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vcvt, avx2_x32,
+                    xnn_qu8_vcvt_ukernel__avx2_x32,
+                    xnn_init_qu8_cvt_avx2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vcvt, avx2_x64,
+                    xnn_qu8_vcvt_ukernel__avx2_x64,
+                    xnn_init_qu8_cvt_avx2_params,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(qu8_vcvt, avx_x8,
                     xnn_qu8_vcvt_ukernel__avx_x8,
                     xnn_init_qu8_cvt_ssse3_params,

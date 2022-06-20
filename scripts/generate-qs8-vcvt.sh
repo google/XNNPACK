@@ -44,6 +44,15 @@ tools/xngen src/qs8-vcvt/sse4.c.in -D BATCH_TILE=8  -D AVX=1 -D DATATYPE=QU8 -o 
 tools/xngen src/qs8-vcvt/sse4.c.in -D BATCH_TILE=16 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-avx-x16.c &
 tools/xngen src/qs8-vcvt/sse4.c.in -D BATCH_TILE=32 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-avx-x32.c &
 
+################################### x86 AVX2 ##################################
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-avx2-x16.c &
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=32 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-avx2-x32.c &
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-avx2-x64.c &
+
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-avx2-x16.c &
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-avx2-x32.c &
+tools/xngen src/qs8-vcvt/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-avx2-x64.c &
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-wasmsimd-x8.c &
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-wasmsimd-x16.c &
