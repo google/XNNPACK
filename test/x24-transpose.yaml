@@ -13,6 +13,9 @@
 - name: xnn_x24_transposec_ukernel__4x2_scalar
 - name: xnn_x24_transposec_ukernel__4x4_scalar
 
+# ARM NEON
+- name: xnn_x24_transposec_ukernel__2x2_neon_tbl
+
 # AArch64
 - name: xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl
 
