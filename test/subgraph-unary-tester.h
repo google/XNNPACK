@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-template <typename T, size_t min_dim = 0> class UnaryTest : public ::testing::Test {
+template <typename InputType, typename OutputType = InputType, size_t min_dim = 0> class UnaryTest : public ::testing::Test {
 protected:
   UnaryTest()
   {
@@ -40,10 +40,13 @@ protected:
     memcpy(shape.dim, dims.data(), dims.size() * sizeof(size_t));
     batch_size = xnn_shape_multiply_non_channel_dims(&shape);
     num_output_elements = batch_size * channels;
+    scale = scale_dist(rng);
+    signed_zero_point = i8dist(rng);
+    unsigned_zero_point = u8dist(rng);
 
-    input = std::vector<T>(num_output_elements + XNN_EXTRA_BYTES / sizeof(T));
-    operator_output = std::vector<T>(num_output_elements);
-    subgraph_output = std::vector<T>(num_output_elements);
+    input = std::vector<InputType>(num_output_elements + XNN_EXTRA_BYTES / sizeof(InputType));
+    operator_output = std::vector<OutputType>(num_output_elements);
+    subgraph_output = std::vector<OutputType>(num_output_elements);
   }
 
   std::vector<size_t> RandomShape() {
@@ -74,9 +77,12 @@ protected:
   size_t channels;
   size_t batch_size;
   size_t num_output_elements;
+  float scale;
+  int32_t signed_zero_point;
+  int32_t unsigned_zero_point;
 
-  std::vector<T> input;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  std::vector<InputType> input;
+  std::vector<OutputType> operator_output;
+  std::vector<OutputType> subgraph_output;
 };
 

@@ -19,7 +19,7 @@
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
-using SoftmaxTestF32 = UnaryTest<float, /*min_dim=*/1>;
+using SoftmaxTestF32 = UnaryTest<float, /*OutputType=*/float, /*min_dim=*/1>;
 
 TEST_F(SoftmaxTestF32, define)
 {
