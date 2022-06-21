@@ -15,17 +15,10 @@
 
 #include <xnnpack.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>
-
-namespace {
-template <typename T> T quantize(float val, float scale, float zero_point)
-{
-  return (T) std::lrintf(
-    fminf(fmaxf(val / scale + zero_point, std::numeric_limits<T>::min()), std::numeric_limits<T>::max()));
-}
-}  // namespace
 
 template <class T, class BiasType = T> class ConvolutionTestBase : public ::testing::Test {
 protected:
@@ -453,8 +446,8 @@ TEST_F(ConvolutionTestQC8, matches_operator_api)
   const int8_t output_zero_point = i8dist(rng);
   const float input_scale = scale_dist(rng);
   const float output_scale = scale_dist(rng);
-  const int8_t quantized_output_min = quantize<int8_t>(output_min, output_scale, output_zero_point);
-  const int8_t quantized_output_max = quantize<int8_t>(output_max, output_scale, output_zero_point);
+  const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
+  const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
 
   // Compute reference results, without renormalization.
   initialize_accumulators_from_bias();
@@ -651,8 +644,8 @@ TEST_F(ConvolutionTestQS8, matches_operator_api)
       lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
       long(std::numeric_limits<int8_t>::max())),
     long(std::numeric_limits<int8_t>::min())));
-  const int8_t quantized_output_min = quantize<int8_t>(output_min, output_scale, output_zero_point);
-  const int8_t quantized_output_max = quantize<int8_t>(output_max, output_scale, output_zero_point);
+  const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
+  const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_qs8(
@@ -791,8 +784,8 @@ TEST_F(ConvolutionTestQU8, matches_operator_api)
       lrint(127.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
       long(std::numeric_limits<uint8_t>::max())),
     long(std::numeric_limits<uint8_t>::min())));
-  const uint8_t quantized_output_min = quantize<uint8_t>(output_min, output_scale, output_zero_point);
-  const uint8_t quantized_output_max = quantize<uint8_t>(output_max, output_scale, output_zero_point);
+  const uint8_t quantized_output_min = xnn_qu8_quantize(output_min, output_scale, output_zero_point);
+  const uint8_t quantized_output_max = xnn_qu8_quantize(output_max, output_scale, output_zero_point);
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_qu8(

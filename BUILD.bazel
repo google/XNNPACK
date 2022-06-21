@@ -14629,6 +14629,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":operators_test_mode",
+        ":requantization",
         ":subgraph_test_mode",
     ],
 )

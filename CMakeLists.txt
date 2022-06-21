@@ -7488,7 +7488,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
   SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME convolution-2d-test COMMAND convolution-2d-test)
 
   ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
