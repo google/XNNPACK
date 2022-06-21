@@ -11783,6 +11783,19 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fp16_sparse_mobilenet_v1",
+    srcs = ["models/fp16-sparse-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "qc8_mobilenet_v1",
     srcs = ["models/qc8-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],

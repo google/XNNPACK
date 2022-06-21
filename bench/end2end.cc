@@ -108,6 +108,12 @@ static void FP16MobileNetV3Small(benchmark::State& state) {
   End2EndBenchmark(state, models::FP16MobileNetV3Small);
 }
 
+static void FP16Sparse80MobileNetV1(benchmark::State& state) {
+  End2EndBenchmark(state, [](pthreadpool_t threadpool) {
+    return models::FP16SparseMobileNetV1(0.8f, threadpool);
+  });
+}
+
 static void QC8MobileNetV1(benchmark::State& state) {
   End2EndBenchmark(state, models::QC8MobileNetV1);
 }

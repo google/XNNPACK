@@ -8654,6 +8654,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     models/fp32-mobilenet-v3-large.cc
     models/fp16-mobilenet-v3-small.cc
     models/fp32-mobilenet-v3-small.cc
+    models/fp16-sparse-mobilenet-v1.cc
     models/fp32-sparse-mobilenet-v1.cc
     models/fp32-sparse-mobilenet-v2.cc
     models/fp32-sparse-mobilenet-v3-large.cc
