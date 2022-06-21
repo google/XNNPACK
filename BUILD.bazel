@@ -14772,6 +14772,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "max_pooling_2d_test",
+    srcs = [
+        "test/max-pooling-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "maximum2_test",
     srcs = [
         "test/maximum2.cc",
