@@ -7487,7 +7487,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(convert-test test/convert.cc)
   TARGET_INCLUDE_DIRECTORIES(convert-test PRIVATE src test)
-  TARGET_LINK_LIBRARIES(convert-test PRIVATE XNNPACK gtest gtest_main subgraph)
+  TARGET_LINK_LIBRARIES(convert-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME convert-test COMMAND convert-test)
 
   ADD_EXECUTABLE(convolution-2d-test test/convolution-2d.cc)
