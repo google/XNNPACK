@@ -89,6 +89,20 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
     goto error;
   }
 
+  if (stride_height > pooling_height) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8), stride_height, pooling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (stride_width > pooling_width) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8), stride_width, pooling_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
@@ -291,6 +305,20 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
     goto error;
   }
 
+  if (stride_height > pooling_height) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16), stride_height, pooling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (stride_width > pooling_width) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16), stride_width, pooling_width);
+    return xnn_status_invalid_parameter;
+  }
+
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
@@ -455,6 +483,20 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), stride_width, stride_height);
     goto error;
+  }
+
+  if (stride_height > pooling_height) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), stride_height, pooling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (stride_width > pooling_width) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
+      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32), stride_width, pooling_width);
+    return xnn_status_invalid_parameter;
   }
 
   if (channels == 0) {

@@ -177,6 +177,20 @@ enum xnn_status xnn_define_average_pooling_2d(
     return xnn_status_invalid_parameter;
   }
 
+  if (stride_height > pooling_height) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), stride_height, pooling_height);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (stride_width > pooling_width) {
+    xnn_log_error(
+      "failed to define %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
+      xnn_node_type_to_string(xnn_node_type_max_pooling_2d), stride_width, pooling_width);
+    return xnn_status_invalid_parameter;
+  }
+
   status = xnn_subgraph_check_output_min_max(xnn_node_type_average_pooling_2d, output_min, output_max);
   if (status != xnn_status_success) {
     return status;
