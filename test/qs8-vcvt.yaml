@@ -24,17 +24,17 @@
   init: xnn_init_qs8_cvt_ssse3_params
 
 # x86 SSE4.1 / AVX
-- name: xnn_qs8_vcvt_ukernel__sse41_x8
-  init: xnn_init_qs8_cvt_ssse3_params
-- name: xnn_qs8_vcvt_ukernel__sse41_x16
-  init: xnn_init_qs8_cvt_ssse3_params
-- name: xnn_qs8_vcvt_ukernel__sse41_x32
-  init: xnn_init_qs8_cvt_ssse3_params
 - name: xnn_qs8_vcvt_ukernel__avx_x8
   init: xnn_init_qs8_cvt_ssse3_params
 - name: xnn_qs8_vcvt_ukernel__avx_x16
   init: xnn_init_qs8_cvt_ssse3_params
 - name: xnn_qs8_vcvt_ukernel__avx_x32
+  init: xnn_init_qs8_cvt_ssse3_params
+- name: xnn_qs8_vcvt_ukernel__sse41_x8
+  init: xnn_init_qs8_cvt_ssse3_params
+- name: xnn_qs8_vcvt_ukernel__sse41_x16
+  init: xnn_init_qs8_cvt_ssse3_params
+- name: xnn_qs8_vcvt_ukernel__sse41_x32
   init: xnn_init_qs8_cvt_ssse3_params
 
 # x86 AVX2

@@ -1205,8 +1205,8 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_4_bw_4_is_8_os_8) {
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_2_bw_2) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
-      .input_stride(2)
-      .output_stride(2)
+      .input_stride(4)
+      .output_stride(4)
       .block_width(2)
       .block_height(2)
       .element_size(3)
@@ -1219,8 +1219,8 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_4_bw_4_is_8_os_8) {
     for(size_t i = 1; i <= 4; ++i){
       for(size_t j = 1; j <= 4; ++j){
         TransposeMicrokernelTester()
-          .input_stride(j)
-          .output_stride(i)
+          .input_stride(j * 3)
+          .output_stride(i * 7)
           .block_width(j)
           .block_height(i)
           .element_size(3)
@@ -1247,7 +1247,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_4_bw_4_is_8_os_8) {
     for(size_t i = 3; i < 4; ++i){
       TransposeMicrokernelTester()
         .input_stride(i)
-        .output_stride(2)
+        .output_stride(4)
         .block_width(i)
         .block_height(2)
         .element_size(3)
@@ -1274,7 +1274,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_4_bw_4_is_8_os_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(2)
-      .output_stride(4)
+      .output_stride(10)
       .block_width(2)
       .block_height(4)
       .element_size(3)
@@ -1286,9 +1286,9 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_4_bw_4_is_8_os_8) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 3; i < 4; ++i){
       TransposeMicrokernelTester()
-        .input_stride(2)
+        .input_stride(19)
         .output_stride(i)
-        .block_width(2)
+        .block_width(5)
         .block_height(i)
         .element_size(3)
         .iterations(1)
