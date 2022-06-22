@@ -43,12 +43,12 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_x${BATCH_TILE}(
 
       $for N in range(SIMD_TILE):
         $if DATATYPE == "QU8":
-          __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vzero);
-          __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vzero);
+          const __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vzero);
+          const __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vzero);
         $else:
           const __m128i vm${ABC[N]} = _mm_cmpgt_epi8(_mm_setzero_si128(), vx${ABC[N]});
-          __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vm${ABC[N]});
-          __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vm${ABC[N]});
+          const __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vm${ABC[N]});
+          const __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vm${ABC[N]});
 
       $for N in range(2*SIMD_TILE):
         const __m128i vprodlo${ABC[N]} = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier);
@@ -83,12 +83,12 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_x${BATCH_TILE}(
     x += 16;
 
     $if DATATYPE == "QU8":
-      __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
-      __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+      const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
+      const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
     $else:
       const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
-      __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
-      __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
+      const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
+      const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
 
     const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
     const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
@@ -130,12 +130,12 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_x${BATCH_TILE}(
     const __m128i vx = _mm_loadu_si128((const __m128i*) x);
 
     $if DATATYPE == "QU8":
-      __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
-      __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+      const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
+      const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
     $else:
       const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
-      __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
-      __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
+      const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vm);
+      const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vm);
 
     const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
     const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);

@@ -90,7 +90,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
     assert(n >= 1 * sizeof(${XINT8_T}));
     assert(n <= 7 * sizeof(${XINT8_T}));
 
-    const ${XINT8X8_T} vx = ${VLD1_X8}(x); x += 8;
+    const ${XINT8X8_T} vx = ${VLD1_X8}(x);
     $if DATATYPE == "QU8":
       int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     $else:

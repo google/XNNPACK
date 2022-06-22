@@ -1630,6 +1630,132 @@ union xnn_qs8_mul_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs8_lrelu_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t positive_multiplier;
+    int32_t negative_multiplier;
+    int32_t bias;
+  } scalar_select;
+  struct {
+    int32_t input_zero_point;
+    int32_t multiplier_diff;
+    int32_t multiplier_base;
+    int32_t bias;
+  } scalar_andxor;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint32_t input_zero_point;
+    uint32_t positive_multiplier;
+    uint32_t negative_multiplier;
+    int32_t bias;
+  } armv6simd;
+  struct {
+    int16_t input_zero_point;
+    int16_t positive_multiplier;
+    int16_t negative_multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t multiplier_diff[8];
+    XNN_ALIGN(16) int16_t multiplier_base[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t positive_multiplier[8];
+    XNN_ALIGN(16) int16_t negative_multiplier[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } avx;
+  struct {
+    XNN_ALIGN(32) int16_t input_zero_point[16];
+    XNN_ALIGN(32) int16_t positive_multiplier[16];
+    XNN_ALIGN(32) int16_t negative_multiplier[16];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) int16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t positive_multiplier[4];
+    XNN_ALIGN(8) int16_t negative_multiplier[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
+  } wasmsimd_arm;
+  struct {
+    XNN_ALIGN(8) int16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t multiplier_diff[4];
+    XNN_ALIGN(8) int16_t multiplier_base[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
+  } wasmsimd_x86;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
+union xnn_qu8_lrelu_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t positive_multiplier;
+    int32_t negative_multiplier;
+    int32_t bias;
+  } scalar_select;
+  struct {
+    int32_t input_zero_point;
+    int32_t multiplier_base;
+    int32_t multiplier_diff;
+    int32_t bias;
+  } scalar_andxor;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    uint32_t input_zero_point;
+    uint32_t positive_multiplier;
+    uint32_t negative_multiplier;
+    int32_t bias;
+  } armv6simd;
+  struct {
+    uint16_t input_zero_point;
+    int16_t positive_multiplier;
+    int16_t negative_multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t multiplier_diff[8];
+    XNN_ALIGN(16) int16_t multiplier_base[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int16_t input_zero_point[8];
+    XNN_ALIGN(16) int16_t positive_multiplier[8];
+    XNN_ALIGN(16) int16_t negative_multiplier[8];
+    XNN_ALIGN(16) int16_t output_zero_point[8];
+  } avx;
+  struct {
+    XNN_ALIGN(32) int16_t input_zero_point[16];
+    XNN_ALIGN(32) int16_t positive_multiplier[16];
+    XNN_ALIGN(32) int16_t negative_multiplier[16];
+    XNN_ALIGN(32) int16_t output_zero_point[16];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) int16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t positive_multiplier[4];
+    XNN_ALIGN(8) int16_t negative_multiplier[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
+  } wasmsimd_arm;
+  struct {
+    XNN_ALIGN(8) int16_t input_zero_point[4];
+    XNN_ALIGN(8) int16_t multiplier_diff[4];
+    XNN_ALIGN(8) int16_t multiplier_base[4];
+    XNN_ALIGN(8) int16_t output_zero_point[4];
+  } wasmsimd_x86;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+};
+
 union xnn_qu8_avgpool_minmax_params {
   struct {
     int32_t init_bias;
@@ -3449,6 +3575,18 @@ typedef void (*xnn_f32_vlrelu_ukernel_function)(
     float* y,
     const union xnn_f32_lrelu_params* params);
 
+typedef void (*xnn_qs8_vlrelu_ukernel_function)(
+    size_t n,
+    const int8_t* x,
+    int8_t* y,
+    const union xnn_qs8_lrelu_params* params);
+
+typedef void (*xnn_qu8_vlrelu_ukernel_function)(
+    size_t n,
+    const uint8_t* x,
+    uint8_t* y,
+    const union xnn_qu8_lrelu_params* params);
+
 typedef void (*xnn_f16_vneg_ukernel_function)(
     size_t n,
     const void* x,
@@ -4003,6 +4141,20 @@ typedef void (*xnn_init_f16_lrelu_params_fn)(
 typedef void (*xnn_init_f32_lrelu_params_fn)(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
+
+typedef void (*xnn_init_qs8_lrelu_params_fn)(
+  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_slope,
+  float negative_slope,
+  int8_t input_zero_point,
+  int8_t output_zero_point);
+
+typedef void (*xnn_init_qu8_lrelu_params_fn)(
+  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_slope,
+  float negative_slope,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point);
 
 typedef void (*xnn_init_f32_minmax_params_fn)(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],

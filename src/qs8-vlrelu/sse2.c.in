@@ -1,0 +1,199 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 16
+$assert BATCH_TILE % 16 == 0
+$SIMD_TILE = BATCH_TILE // 16
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <emmintrin.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vlrelu.h>
+#include <xnnpack/unaligned.h>
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vlrelu_ukernel__sse2_x${BATCH_TILE}(
+    size_t n,
+    const ${XINT8_T}* x,
+    ${XINT8_T}* y,
+    const union xnn_${DATATYPE.lower()}_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(n != 0);
+  assert(n % sizeof(${XINT8_T}) == 0);
+  assert(x != NULL);
+  assert(y != NULL);
+
+  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->sse2.input_zero_point);
+  const __m128i vmultiplier_diff = _mm_load_si128((const __m128i*) params->sse2.multiplier_diff);
+  const __m128i vmultiplier_base = _mm_load_si128((const __m128i*) params->sse2.multiplier_base);
+  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+  const __m128i vzero = _mm_setzero_si128();
+  $if BATCH_TILE > 16:
+    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      const __m128i vx${ABC[0]} = _mm_loadu_si128((const __m128i*) x);
+      $for N in range(1, SIMD_TILE):
+        const __m128i vx${ABC[N]} = _mm_loadu_si128((const __m128i*) (x + ${N * 16}));
+      x += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        $if DATATYPE == "QU8":
+          __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vzero);
+          __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vzero);
+        $else:
+          const __m128i vm${ABC[N]} = _mm_cmpgt_epi8(_mm_setzero_si128(), vx${ABC[N]});
+          __m128i vextx${ABC[2*N]} = _mm_unpacklo_epi8(vx${ABC[N]}, vm${ABC[N]});
+          __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vm${ABC[N]});
+
+      $for N in range(2*SIMD_TILE):
+        __m128i vmultiplier${ABC[N]} = _mm_cmpgt_epi16(vextx${ABC[N]}, vinput_zero_point);
+        vextx${ABC[N]} = _mm_sub_epi16(vinput_zero_point, vextx${ABC[N]});
+
+      $for N in range(2*SIMD_TILE):
+        vmultiplier${ABC[N]} = _mm_and_si128(vmultiplier${ABC[N]}, vmultiplier_diff);
+
+      $for N in range(2*SIMD_TILE):
+        vmultiplier${ABC[N]} = _mm_xor_si128(vmultiplier${ABC[N]}, vmultiplier_base);
+
+      $for N in range(2*SIMD_TILE):
+        __m128i vprodlo${ABC[N]} = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier${ABC[N]});
+
+      $for N in range(2*SIMD_TILE):
+        vprodlo${ABC[N]} = _mm_srli_epi16(vprodlo${ABC[N]}, 7);
+        __m128i vprodhi${ABC[N]} = _mm_mulhi_epi16(vextx${ABC[N]}, vmultiplier${ABC[N]});
+
+      $for N in range(2*SIMD_TILE):
+        vprodhi${ABC[N]} = _mm_slli_epi16(vprodhi${ABC[N]}, 8);
+        vprodlo${ABC[N]} = _mm_avg_epu16(vprodlo${ABC[N]}, vzero);
+
+      $for N in range(2*SIMD_TILE):
+        __m128i vacc${ABC[N]} = _mm_add_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
+
+      $for N in range(2*SIMD_TILE):
+        vacc${ABC[N]} = _mm_adds_epi16(vacc${ABC[N]}, voutput_zero_point);
+
+      $for N in range(SIMD_TILE):
+        const __m128i vy${ABC[N]} = ${_MM_PACKXS_EPI16}(vacc${ABC[2*N]}, vacc${ABC[2*N+1]});
+
+      _mm_storeu_si128((__m128i*) y, vy${ABC[0]});
+      $for N in range(1, SIMD_TILE):
+        _mm_storeu_si128((__m128i*) (y + ${N * 16}), vy${ABC[N]});
+      y += ${BATCH_TILE};
+    }
+  for (; n >= 16 * sizeof(${XINT8_T}); n -= 16 * sizeof(${XINT8_T})) {
+    const __m128i vx = _mm_loadu_si128((const __m128i*) x);
+    x += 16;
+
+    $if DATATYPE == "QU8":
+      __m128i vextx0 = _mm_unpacklo_epi8(vx, vzero);
+      __m128i vextx1 = _mm_unpackhi_epi8(vx, vzero);
+    $else:
+      const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
+      __m128i vextx0 = _mm_unpacklo_epi8(vx, vm);
+      __m128i vextx1 = _mm_unpackhi_epi8(vx, vm);
+
+    __m128i vmultiplier0 = _mm_cmpgt_epi16(vextx0, vinput_zero_point);
+    __m128i vmultiplier1 = _mm_cmpgt_epi16(vextx1, vinput_zero_point);
+    vextx0 = _mm_sub_epi16(vinput_zero_point, vextx0);
+    vextx1 = _mm_sub_epi16(vinput_zero_point, vextx1);
+
+    vmultiplier0 = _mm_and_si128(vmultiplier0, vmultiplier_diff);
+    vmultiplier1 = _mm_and_si128(vmultiplier1, vmultiplier_diff);
+
+    vmultiplier0 = _mm_xor_si128(vmultiplier0, vmultiplier_base);
+    vmultiplier1 = _mm_xor_si128(vmultiplier1, vmultiplier_base);
+
+    __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier0);
+    __m128i vprodlo1 = _mm_mullo_epi16(vextx1, vmultiplier1);
+
+    vprodlo0 = _mm_srli_epi16(vprodlo0, 7);
+    vprodlo1 = _mm_srli_epi16(vprodlo1, 7);
+    __m128i vprodhi0 = _mm_mulhi_epi16(vextx0, vmultiplier0);
+    __m128i vprodhi1 = _mm_mulhi_epi16(vextx1, vmultiplier1);
+
+    vprodhi0 = _mm_slli_epi16(vprodhi0, 8);
+    vprodhi1 = _mm_slli_epi16(vprodhi1, 8);
+    vprodlo0 = _mm_avg_epu16(vprodlo0, vzero);
+    vprodlo1 = _mm_avg_epu16(vprodlo1, vzero);
+
+    __m128i vacc0 = _mm_add_epi16(vprodlo0, vprodhi0);
+    __m128i vacc1 = _mm_add_epi16(vprodlo1, vprodhi1);
+
+    vacc0 = _mm_adds_epi16(vacc0, voutput_zero_point);
+    vacc1 = _mm_adds_epi16(vacc1, voutput_zero_point);
+
+    const __m128i vy = ${_MM_PACKXS_EPI16}(vacc0, vacc1);
+    _mm_storeu_si128((__m128i*) y, vy);
+    y += 16;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    assert(n >= 1 * sizeof(${XINT8_T}));
+    assert(n <= 15 * sizeof(${XINT8_T}));
+
+    const __m128i vx = _mm_loadu_si128((const __m128i*) x);
+
+    $if DATATYPE == "QU8":
+      __m128i vextx0 = _mm_unpacklo_epi8(vx, vzero);
+      __m128i vextx1 = _mm_unpackhi_epi8(vx, vzero);
+    $else:
+      const __m128i vm = _mm_cmpgt_epi8(_mm_setzero_si128(), vx);
+      __m128i vextx0 = _mm_unpacklo_epi8(vx, vm);
+      __m128i vextx1 = _mm_unpackhi_epi8(vx, vm);
+
+    __m128i vmultiplier0 = _mm_cmpgt_epi16(vextx0, vinput_zero_point);
+    __m128i vmultiplier1 = _mm_cmpgt_epi16(vextx1, vinput_zero_point);
+    vextx0 = _mm_sub_epi16(vinput_zero_point, vextx0);
+    vextx1 = _mm_sub_epi16(vinput_zero_point, vextx1);
+
+    vmultiplier0 = _mm_and_si128(vmultiplier0, vmultiplier_diff);
+    vmultiplier1 = _mm_and_si128(vmultiplier1, vmultiplier_diff);
+
+    vmultiplier0 = _mm_xor_si128(vmultiplier0, vmultiplier_base);
+    vmultiplier1 = _mm_xor_si128(vmultiplier1, vmultiplier_base);
+
+    __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier0);
+    __m128i vprodlo1 = _mm_mullo_epi16(vextx1, vmultiplier1);
+
+    vprodlo0 = _mm_srli_epi16(vprodlo0, 7);
+    vprodlo1 = _mm_srli_epi16(vprodlo1, 7);
+    __m128i vprodhi0 = _mm_mulhi_epi16(vextx0, vmultiplier0);
+    __m128i vprodhi1 = _mm_mulhi_epi16(vextx1, vmultiplier1);
+
+    vprodhi0 = _mm_slli_epi16(vprodhi0, 8);
+    vprodhi1 = _mm_slli_epi16(vprodhi1, 8);
+    vprodlo0 = _mm_avg_epu16(vprodlo0, vzero);
+    vprodlo1 = _mm_avg_epu16(vprodlo1, vzero);
+
+    __m128i vacc0 = _mm_add_epi16(vprodlo0, vprodhi0);
+    __m128i vacc1 = _mm_add_epi16(vprodlo1, vprodhi1);
+
+    vacc0 = _mm_adds_epi16(vacc0, voutput_zero_point);
+    vacc1 = _mm_adds_epi16(vacc1, voutput_zero_point);
+
+    __m128i vy = ${_MM_PACKXS_EPI16}(vacc0, vacc1);
+    if (n & (8 * sizeof(${XINT8_T}))) {
+      _mm_storel_epi64((__m128i*) y, vy);
+      vy = _mm_unpackhi_epi64(vy, vy);
+      y += 8;
+    }
+    if (n & (4 * sizeof(${XINT8_T}))) {
+      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
+      vy = _mm_srli_epi64(vy, 32);
+      y += 4;
+    }
+    uint32_t vy0 = (uint32_t) _mm_cvtsi128_si32(vy);
+    if (n & (2 * sizeof(${XINT8_T}))) {
+      unaligned_store_u16(y, (uint16_t) vy0);
+      vy0 >>= 16;
+      y += 2;
+    }
+    if (n & (1 * sizeof(${XINT8_T}))) {
+      *y = (${XINT8_T}) vy0;
+    }
+  }
+}

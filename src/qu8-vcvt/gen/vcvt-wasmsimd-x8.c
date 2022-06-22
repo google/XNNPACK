@@ -50,7 +50,6 @@ void xnn_qu8_vcvt_ukernel__wasmsimd_x8(
     vacc = wasm_i16x8_shl(vacc, 7);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
-    x += 8;
 
     v128_t vy = wasm_u8x16_narrow_i16x8(vacc, vacc);
     if (n & (4 * sizeof(uint8_t))) {

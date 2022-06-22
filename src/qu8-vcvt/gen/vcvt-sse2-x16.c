@@ -34,8 +34,8 @@ void xnn_qu8_vcvt_ukernel__sse2_x16(
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) x);
     x += 16;
 
-    __m128i vextx0 = _mm_unpacklo_epi8(vx0, vzero);
-    __m128i vextx1 = _mm_unpackhi_epi8(vx0, vzero);
+    const __m128i vextx0 = _mm_unpacklo_epi8(vx0, vzero);
+    const __m128i vextx1 = _mm_unpackhi_epi8(vx0, vzero);
 
     const __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier);
     const __m128i vprodhi0 = _mm_mulhi_epu16(vextx0, vmultiplier);
@@ -69,8 +69,8 @@ void xnn_qu8_vcvt_ukernel__sse2_x16(
     const __m128i vx = _mm_loadu_si128((const __m128i*) x);
     x += 16;
 
-    __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
-    __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+    const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
+    const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
 
     const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
     const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);
@@ -105,8 +105,8 @@ void xnn_qu8_vcvt_ukernel__sse2_x16(
 
     const __m128i vx = _mm_loadu_si128((const __m128i*) x);
 
-    __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
-    __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
+    const __m128i vextx_lo = _mm_unpacklo_epi8(vx, vzero);
+    const __m128i vextx_hi = _mm_unpackhi_epi8(vx, vzero);
 
     const __m128i vprodlo_lo = _mm_mullo_epi16(vextx_lo, vmultiplier);
     const __m128i vprodlo_hi = _mm_mullo_epi16(vextx_hi, vmultiplier);

@@ -1188,6 +1188,12 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-scalar-x1.c",
     "src/qs8-vcvt/gen/vcvt-scalar-x2.c",
     "src/qs8-vcvt/gen/vcvt-scalar-x4.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-andxor-x1.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-andxor-x2.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-andxor-x4.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-select-x1.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-select-x2.c",
+    "src/qs8-vlrelu/gen/vlrelu-scalar-select-x4.c",
     "src/qs8-vmul/gen/minmax-fp32-scalar-x1.c",
     "src/qs8-vmul/gen/minmax-fp32-scalar-x2.c",
     "src/qs8-vmul/gen/minmax-fp32-scalar-x4.c",
@@ -1299,6 +1305,12 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-scalar-x1.c",
     "src/qu8-vcvt/gen/vcvt-scalar-x2.c",
     "src/qu8-vcvt/gen/vcvt-scalar-x4.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-andxor-x1.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-andxor-x2.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-andxor-x4.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-select-x1.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-select-x2.c",
+    "src/qu8-vlrelu/gen/vlrelu-scalar-select-x4.c",
     "src/qu8-vmul/gen/minmax-fp32-scalar-x1.c",
     "src/qu8-vmul/gen/minmax-fp32-scalar-x2.c",
     "src/qu8-vmul/gen/minmax-fp32-scalar-x4.c",
@@ -2524,6 +2536,11 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-wasmsimd-x8.c",
     "src/qs8-vcvt/gen/vcvt-wasmsimd-x16.c",
     "src/qs8-vcvt/gen/vcvt-wasmsimd-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmsimd-arm-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmsimd-arm-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmsimd-x86-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmsimd-x86-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmsimd-x86-x32.c",
     "src/qs8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
     "src/qs8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
     "src/qs8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
@@ -2605,6 +2622,11 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-wasmsimd-x8.c",
     "src/qu8-vcvt/gen/vcvt-wasmsimd-x16.c",
     "src/qu8-vcvt/gen/vcvt-wasmsimd-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmsimd-arm-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmsimd-arm-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmsimd-x86-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmsimd-x86-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmsimd-x86-x32.c",
     "src/qu8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-wasmsimd-mul32-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-wasmsimd-mul32-ld64-x8.c",
@@ -2875,6 +2897,8 @@ ALL_ARMV6SIMD_MICROKERNEL_SRCS = [
     "src/qs8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c",
     "src/qs8-vcvt/gen/vcvt-armv6simd-x4.c",
     "src/qs8-vcvt/gen/vcvt-armv6simd-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c",
+    "src/qs8-vlrelu/gen/vlrelu-armv6simd-x8.c",
     "src/qu8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c",
     "src/qu8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c",
     "src/qu8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c",
@@ -2885,6 +2909,8 @@ ALL_ARMV6SIMD_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c",
     "src/qu8-vcvt/gen/vcvt-armv6simd-x4.c",
     "src/qu8-vcvt/gen/vcvt-armv6simd-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c",
+    "src/qu8-vlrelu/gen/vlrelu-armv6simd-x8.c",
 ]
 
 PROD_NEON_MICROKERNEL_SRCS = [
@@ -3938,6 +3964,9 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-neon-x8.c",
     "src/qs8-vcvt/gen/vcvt-neon-x16.c",
     "src/qs8-vcvt/gen/vcvt-neon-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-neon-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-neon-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-neon-x32.c",
     "src/qs8-vmul/gen/minmax-fp32-neon-ld64-x8.c",
     "src/qs8-vmul/gen/minmax-fp32-neon-ld64-x16.c",
     "src/qs8-vmul/gen/minmax-fp32-neon-ld128-x16.c",
@@ -4038,6 +4067,9 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-neon-x8.c",
     "src/qu8-vcvt/gen/vcvt-neon-x16.c",
     "src/qu8-vcvt/gen/vcvt-neon-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-neon-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-neon-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-neon-x32.c",
     "src/qu8-vmul/gen/minmax-fp32-neon-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-neon-ld64-x16.c",
     "src/qu8-vmul/gen/minmax-fp32-neon-ld128-x16.c",
@@ -5727,6 +5759,8 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/qs8-vaddc/gen/minmax-sse2-mul16-ld64-x32.c",
     "src/qs8-vcvt/gen/vcvt-sse2-x16.c",
     "src/qs8-vcvt/gen/vcvt-sse2-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-sse2-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-sse2-x32.c",
     "src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
     "src/qs8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c",
     "src/qs8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
@@ -5800,6 +5834,8 @@ ALL_SSE2_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/minmax-sse2-mul16-ld64-x16.c",
     "src/qu8-vcvt/gen/vcvt-sse2-x16.c",
     "src/qu8-vcvt/gen/vcvt-sse2-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-sse2-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-sse2-x32.c",
     "src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-sse2-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse2-mul16-ld64-x8.c",
@@ -5880,10 +5916,14 @@ ALL_SSSE3_MICROKERNEL_SRCS = [
     "src/qs8-requantization/rndna-ssse3.c",
     "src/qs8-vcvt/gen/vcvt-ssse3-x16.c",
     "src/qs8-vcvt/gen/vcvt-ssse3-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-ssse3-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-ssse3-x32.c",
     "src/qu8-requantization/gemmlowp-ssse3.c",
     "src/qu8-requantization/rndna-ssse3.c",
     "src/qu8-vcvt/gen/vcvt-ssse3-x16.c",
     "src/qu8-vcvt/gen/vcvt-ssse3-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-ssse3-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-ssse3-x32.c",
     "src/x8-lut/gen/lut-ssse3-x16.c",
     "src/x8-lut/gen/lut-ssse3-x32.c",
     "src/x24-transposec/4x4-ssse3.c",
@@ -6165,6 +6205,9 @@ ALL_SSE41_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-sse41-x8.c",
     "src/qs8-vcvt/gen/vcvt-sse41-x16.c",
     "src/qs8-vcvt/gen/vcvt-sse41-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-sse41-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-sse41-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-sse41-x32.c",
     "src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c",
     "src/qs8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
     "src/qs8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c",
@@ -6244,6 +6287,9 @@ ALL_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-sse41-x8.c",
     "src/qu8-vcvt/gen/vcvt-sse41-x16.c",
     "src/qu8-vcvt/gen/vcvt-sse41-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-sse41-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-sse41-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-sse41-x32.c",
     "src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-sse41-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-sse41-mul16-ld64-x8.c",
@@ -6655,6 +6701,9 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-avx-x8.c",
     "src/qs8-vcvt/gen/vcvt-avx-x16.c",
     "src/qs8-vcvt/gen/vcvt-avx-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx-x32.c",
     "src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c",
     "src/qs8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c",
     "src/qs8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c",
@@ -6726,6 +6775,9 @@ ALL_AVX_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-avx-x8.c",
     "src/qu8-vcvt/gen/vcvt-avx-x16.c",
     "src/qu8-vcvt/gen/vcvt-avx-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx-x32.c",
     "src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x8.c",
     "src/qu8-vmul/gen/minmax-fp32-avx-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/minmax-fp32-avx-mul16-ld64-x8.c",
@@ -7520,6 +7572,9 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/qs8-vcvt/gen/vcvt-avx2-x16.c",
     "src/qs8-vcvt/gen/vcvt-avx2-x32.c",
     "src/qs8-vcvt/gen/vcvt-avx2-x64.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx2-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx2-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-avx2-x64.c",
     "src/qu8-dwconv/gen/up8x9-minmax-fp32-avx2-mul32.c",
     "src/qu8-dwconv/gen/up8x25-minmax-fp32-avx2-mul32.c",
     "src/qu8-dwconv/gen/up16x9-minmax-fp32-avx2-mul32.c",
@@ -7543,6 +7598,9 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/vcvt-avx2-x16.c",
     "src/qu8-vcvt/gen/vcvt-avx2-x32.c",
     "src/qu8-vcvt/gen/vcvt-avx2-x64.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx2-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx2-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-avx2-x64.c",
     "src/x8-lut/gen/lut-avx2-x32.c",
     "src/x8-lut/gen/lut-avx2-x64.c",
     "src/x8-lut/gen/lut-avx2-x96.c",
@@ -8363,6 +8421,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vaddsub.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
+    "src/xnnpack/vlrelu.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",
@@ -11110,6 +11169,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_vlrelu_bench",
+    srcs = [
+        "bench/qs8-vlrelu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_vmul_bench",
     srcs = [
         "bench/qs8-vmul.cc",
@@ -11174,6 +11241,14 @@ xnnpack_benchmark(
     name = "qu8_vcvt_bench",
     srcs = [
         "bench/qu8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vlrelu_bench",
+    srcs = [
+        "bench/qu8-vlrelu.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -13611,6 +13686,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_vlrelu_test",
+    srcs = [
+        "test/qs8-vlrelu.cc",
+        "test/vlrelu-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "qs8_vmul_minmax_fp32_test",
     srcs = [
         "test/qs8-vmul-minmax-fp32.cc",
@@ -13782,6 +13866,15 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "qu8_vlrelu_test",
+    srcs = [
+        "test/qu8-vlrelu.cc",
+        "test/vlrelu-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

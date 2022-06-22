@@ -72,7 +72,7 @@ void xnn_qs8_vcvt_ukernel__neon_x32(
     assert(n >= 1 * sizeof(int8_t));
     assert(n <= 7 * sizeof(int8_t));
 
-    const int8x8_t vx = vld1_s8(x); x += 8;
+    const int8x8_t vx = vld1_s8(x);
     int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
     vacc = vshlq_n_s16(vacc, 7);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);

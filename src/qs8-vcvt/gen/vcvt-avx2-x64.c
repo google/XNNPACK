@@ -89,7 +89,6 @@ void xnn_qs8_vcvt_ukernel__avx2_x64(
     vacc = _mm256_slli_epi16(vacc, 7);
     vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm256_adds_epi16(vacc, voutput_zero_point);
-    x += 16;
 
     const __m128i vacc_hi = _mm256_extracti128_si256(vacc, 1);
     __m128i vy = _mm_packs_epi16(_mm256_castsi256_si128(vacc), vacc_hi);
