@@ -15074,6 +15074,20 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "unpooling_2d_test",
+    srcs = [
+        "test/unpooling-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
