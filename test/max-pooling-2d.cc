@@ -28,8 +28,7 @@ protected:
     rng = std::mt19937((*random_device)());
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(2, 5);
-    stride_dist = std::uniform_int_distribution<uint32_t>(1, 2);
-    f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
+    f32dist = std::uniform_real_distribution<float>();
     scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
     i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
     dilation_dist = std::uniform_int_distribution<uint32_t>(1, 2);
@@ -41,36 +40,39 @@ protected:
     batch_size = input_size_dist(rng);
     input_height = input_size_dist(rng);
     input_width = input_size_dist(rng);
+    channels = input_size_dist(rng);
     pooling_height = kernel_size_dist(rng);
     pooling_width = kernel_size_dist(rng);
-    padding_top = std::uniform_int_distribution<uint32_t>(0, pooling_height)(rng);
-    padding_bottom = std::uniform_int_distribution<uint32_t>(0, pooling_height)(rng);
-    padding_left = std::uniform_int_distribution<uint32_t>(0, pooling_width)(rng);
-    padding_right = std::uniform_int_distribution<uint32_t>(0, pooling_width)(rng);
-    stride_height = stride_dist(rng);
-    stride_width = stride_height;
+    padding_top = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
+    padding_bottom = std::uniform_int_distribution<uint32_t>(0, pooling_height - 1)(rng);
+    padding_left = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
+    padding_right = std::uniform_int_distribution<uint32_t>(0, pooling_width - 1)(rng);
     dilation_height = dilation_dist(rng);
     dilation_width = dilation_height;
-    channels = input_size_dist(rng);
+    // stride dimension must be <= filter dimension
+    stride_height = std::uniform_int_distribution<uint32_t>(1, pooling_height)(rng);
+    stride_width = std::uniform_int_distribution<uint32_t>(1, pooling_width)(rng);
     output_min = -std::numeric_limits<float>::infinity();
     output_max = std::numeric_limits<float>::infinity();
-    output_height =
-      xnn_compute_convolution_output_dimension(padding_top + input_height + padding_bottom, pooling_height, dilation_height, stride_height);
-    output_width = xnn_compute_convolution_output_dimension(padding_left +  input_width + padding_right, pooling_width, dilation_width, stride_width);
+    output_height = xnn_compute_convolution_output_dimension(
+      padding_top + input_height + padding_bottom, pooling_height, dilation_height, stride_height);
+    output_width = xnn_compute_convolution_output_dimension(
+      padding_left + input_width + padding_right, pooling_width, dilation_width, stride_width);
 
     input_dims = {{batch_size, input_height, input_width, channels}};
     output_dims = {{batch_size, output_height, output_width, channels}};
 
     input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
-    operator_output = std::vector<T>(batch_size * output_height * output_width * channels);
-    subgraph_output = std::vector<T>(batch_size * output_height * output_width * channels);
+    operator_output =
+      std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * output_height * output_width * channels);
+    subgraph_output =
+      std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * output_height * output_width * channels);
   }
 
   std::unique_ptr<std::random_device> random_device;
   std::mt19937 rng;
   std::uniform_int_distribution<uint32_t> input_size_dist;
   std::uniform_int_distribution<uint32_t> kernel_size_dist;
-  std::uniform_int_distribution<uint32_t> stride_dist;
   std::uniform_int_distribution<int32_t> i32dist;
   std::uniform_real_distribution<float> f32dist;
   std::uniform_real_distribution<float> scale_dist;
@@ -330,7 +332,9 @@ TEST_F(MaxPooling2DTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+  }
 }
 
 TEST_F(MaxPooling2DTestQU8, matches_operator_api)
@@ -400,7 +404,9 @@ TEST_F(MaxPooling2DTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+  }
 }
 
 TEST_F(MaxPooling2DTestF32, matches_operator_api)
@@ -464,5 +470,7 @@ TEST_F(MaxPooling2DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < batch_size * output_height * output_width * channels; i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+  }
 }
