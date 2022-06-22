@@ -7646,6 +7646,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(squared-difference-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME squared-difference-test COMMAND squared-difference-test)
 
+  ADD_EXECUTABLE(static-constant-pad-test test/static-constant-pad.cc)
+  TARGET_INCLUDE_DIRECTORIES(static-constant-pad-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(static-constant-pad-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME static-constant-pad-test COMMAND static-constant-pad-test)
+
   ADD_EXECUTABLE(static-reshape-test test/static-reshape.cc)
   TARGET_INCLUDE_DIRECTORIES(static-reshape-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(static-reshape-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

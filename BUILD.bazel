@@ -15018,6 +15018,21 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "static_constant_pad_test",
+    srcs = [
+        "test/static-constant-pad.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+        "@FP16",
+    ],
+)
+
+xnnpack_unit_test(
     name = "static_reshape_test",
     srcs = [
         "test/static-reshape.cc",
