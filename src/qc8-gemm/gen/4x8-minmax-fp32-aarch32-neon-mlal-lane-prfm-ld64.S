@@ -24,7 +24,7 @@
 //     size_t cn_stride,          sp + 88 -> r7
 //     xnn_qs8_minmax_params params)  sp + 92 -> (r5)
 
-// d10-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
+// d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
 // A0   r3  d0-d1 q0
