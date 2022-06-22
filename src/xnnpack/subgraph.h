@@ -108,8 +108,11 @@ struct xnn_value {
 
 enum xnn_allocation_type {
   xnn_allocation_type_invalid = 0,
+  /// Static data that is provided by caller, needs to outlive the xnn_runtime.
   xnn_allocation_type_static,
+  /// Lives in XNNPACK-managed internal workspace.
   xnn_allocation_type_workspace,
+  /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
   xnn_allocation_type_external,
 };
 
