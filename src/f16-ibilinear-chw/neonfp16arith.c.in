@@ -1,0 +1,217 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert PIXEL_TILE >= 1
+$assert PIXEL_TILE % 4 == 0
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/ibilinear.h>
+
+
+void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
+    size_t output_pixels,
+    size_t channels,
+    const void**restrict input,
+    size_t input_offset,
+    const void*restrict weights,
+    void*restrict output,
+    size_t input_increment) XNN_OOB_READS
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+  assert(input_increment % sizeof(__fp16) == 0);
+
+  __fp16* o = (__fp16*) output;
+  do {
+    const __fp16** i = (const __fp16**)input;
+    const __fp16* w = weights;
+    size_t p = output_pixels;
+
+    $if PIXEL_TILE > 4:
+      for (; p >= ${PIXEL_TILE}; p -= ${PIXEL_TILE}) {
+        $for P in range(PIXEL_TILE):
+          const __fp16* itl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P}] + input_offset);
+          const __fp16* ibl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+        i += 2 * ${PIXEL_TILE};
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float16x4x2_t vw${ABC[P:P+4]} = vld2_f16(w + ${2 * P});
+        w += 2 * ${PIXEL_TILE};
+
+        $for P in range(0, PIXEL_TILE, 4):
+          float16x8_t vtltr${ABC[P:P+4]} = vmovq_n_f16(0);  // vmov for uninitialized var warning
+          float16x8_t vblbr${ABC[P:P+4]} = vmovq_n_f16(0);
+          $for L in range(0, 4):
+            vtltr${ABC[P:P+4]} = vreinterpretq_f16_u32(vld1q_lane_u32(itl${ABC[P+L]}, vreinterpretq_u32_f16(vtltr${ABC[P:P+4]}), ${L}));
+            vblbr${ABC[P:P+4]} = vreinterpretq_f16_u32(vld1q_lane_u32(ibl${ABC[P+L]}, vreinterpretq_u32_f16(vblbr${ABC[P:P+4]}), ${L}));
+
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8_t valphah${ABC[P:P+8]} = vcombine_f16(vw${ABC[P:P+4]}.val[0], vw${ABC[P+4:P+8]}.val[0]);
+          const float16x8_t valphav${ABC[P:P+8]} = vcombine_f16(vw${ABC[P:P+4]}.val[1], vw${ABC[P+4:P+8]}.val[1]);
+
+        $for P in range(0, PIXEL_TILE, 4):
+          const float16x8_t vldrd${ABC[P:P+4]} = vsubq_f16(vblbr${ABC[P:P+4]}, vtltr${ABC[P:P+4]});
+
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8x2_t vld_t${ABC[P:P+8]} = vuzpq_f16(vldrd${ABC[P:P+4]}, vldrd${ABC[P+4:P+8]});
+          const float16x8_t vld${ABC[P:P+8]} = vld_t${ABC[P:P+8]}.val[0];
+          const float16x8_t vrd${ABC[P:P+8]} = vld_t${ABC[P:P+8]}.val[1];
+
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8x2_t vtl_t${ABC[P:P+8]} = vuzpq_f16(vtltr${ABC[P:P+4]}, vtltr${ABC[P+4:P+8]});
+          const float16x8_t vtl${ABC[P:P+8]} = vtl_t${ABC[P:P+8]}.val[0];
+          const float16x8_t vtr${ABC[P:P+8]} = vtl_t${ABC[P:P+8]}.val[1];
+
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8_t vl${ABC[P:P+8]} = vfmaq_f16(vtl${ABC[P:P+8]}, vld${ABC[P:P+8]}, valphav${ABC[P:P+8]});
+          const float16x8_t vr${ABC[P:P+8]} = vfmaq_f16(vtr${ABC[P:P+8]}, vrd${ABC[P:P+8]}, valphav${ABC[P:P+8]});
+
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8_t vd${ABC[P:P+8]} = vsubq_f16(vr${ABC[P:P+8]}, vl${ABC[P:P+8]});
+        $for P in range(0, PIXEL_TILE, 8):
+          const float16x8_t vo${ABC[P:P+8]} = vfmaq_f16(vl${ABC[P:P+8]}, vd${ABC[P:P+8]}, valphah${ABC[P:P+8]});
+
+        $for P in range(0, PIXEL_TILE, 8):
+          vst1q_f16(o + ${P}, vo${ABC[P:P+8]});
+        o += ${PIXEL_TILE};
+      }
+
+    for (; p >= 4; p -= 4) {
+      $for P in range(4):
+        const __fp16* itl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P}] + input_offset);
+        const __fp16* ibl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+      i += 8;
+
+      const float16x4x2_t vw = vld2_f16(w);
+      w += 8;
+
+      float16x8_t vtltr = vmovq_n_f16(0);  // vmov for uninitialized var warning
+      float16x8_t vblbr = vmovq_n_f16(0);
+      $for P in range(0, 4):
+        vtltr = vreinterpretq_f16_u32(vld1q_lane_u32(itl${ABC[P]}, vreinterpretq_u32_f16(vtltr), ${P}));
+        vblbr = vreinterpretq_f16_u32(vld1q_lane_u32(ibl${ABC[P]}, vreinterpretq_u32_f16(vblbr), ${P}));
+
+      const float16x4_t valphah = vw.val[0];
+      const float16x4_t valphav = vw.val[1];
+
+      const float16x8_t vldrd = vsubq_f16(vblbr, vtltr);
+
+      const float16x4x2_t vld_t = vuzp_f16(vget_low_f16(vldrd), vget_high_f16(vldrd));
+      const float16x4_t vld = vld_t.val[0];
+      const float16x4_t vrd = vld_t.val[1];
+
+      const float16x4x2_t vtl_t = vuzp_f16(vget_low_f16(vtltr), vget_high_f16(vtltr));
+      const float16x4_t vtl = vtl_t.val[0];
+      const float16x4_t vtr = vtl_t.val[1];
+
+      const float16x4_t vl = vfma_f16(vtl, vld, valphav);
+      const float16x4_t vr = vfma_f16(vtr, vrd, valphav);
+
+      const float16x4_t vd = vsub_f16(vr, vl);
+      const float16x4_t vo = vfma_f16(vl, vd, valphah);
+
+      vst1_f16(o, vo);
+      o += 4;
+    }
+
+    if XNN_UNLIKELY(p != 0) {
+      if (p & 2) {
+        $for P in range(2):
+          const __fp16* itl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P}] + input_offset);
+          const __fp16* ibl${ABC[P]} = (const __fp16*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
+        i += 4;
+
+        const float16x4_t vw = vld1_f16(w);
+        w += 4;
+
+        const float16x4x2_t vwhv = vuzp_f16(vw, vw);
+        const float16x4_t valphah = vwhv.val[0];
+        const float16x4_t valphav = vwhv.val[1];
+
+        float16x4_t vtltr = vmov_n_f16(0);  // vmov for uninitialized var warning
+        float16x4_t vblbr = vmov_n_f16(0);
+
+        $for P in range(0, 2):
+          vtltr = vreinterpret_f16_u32(vld1_lane_u32((const void*)itl${ABC[P]}, vreinterpret_u32_f16(vtltr), ${P}));
+          vblbr = vreinterpret_f16_u32(vld1_lane_u32((const void*)ibl${ABC[P]}, vreinterpret_u32_f16(vblbr), ${P}));
+
+        const float16x4_t vldrd = vsub_f16(vblbr, vtltr);
+
+        const float16x4x2_t vld_t = vuzp_f16(vldrd, vldrd);
+        const float16x4_t vld = vld_t.val[0];
+        const float16x4_t vrd = vld_t.val[1];
+
+        const float16x4x2_t vtl_t = vuzp_f16(vtltr, vtltr);
+        const float16x4_t vtl = vtl_t.val[0];
+        const float16x4_t vtr = vtl_t.val[1];
+
+        const float16x4_t vl = vfma_f16(vtl, vld, valphav);
+        const float16x4_t vr = vfma_f16(vtr, vrd, valphav);
+
+        const float16x4_t vd = vsub_f16(vr, vl);
+        const float16x4_t vo = vfma_f16(vl, vd, valphah);
+
+        vst1_lane_u32((void*)o, vreinterpret_u32_f16(vo), 0);
+        o += 2;
+      }
+
+      if (p & 1) {
+        // We are computing the following formula:
+        //   result = (1 - alpha_h) * (1 - alpha_v) * top_left +
+        //                 alpha_h  * (1 - alpha_v) * top_right +
+        //            (1 - alpha_h) *      alpha_v  * bottom_left +
+        //                 alpha_h  *      alpha_v  * bottom_right.
+        //
+        // Rearranging gives
+        //   result =    left + alpha_h * (right        - left),
+        // where
+        //   left =  top_left + alpha_v * (bottom_left  - top_left),
+        //  right = top_right + alpha_v * (bottom_right - top_right).
+
+        const __fp16* itl = (const __fp16*) ((uintptr_t) i[0] + input_offset);
+        const __fp16* ibl = (const __fp16*) ((uintptr_t) i[1] + input_offset);
+        i += 2;
+
+        float16x4_t vw = vmov_n_f16(0);
+        vw = vreinterpret_f16_u32(vld1_lane_u32(w, vreinterpret_u32_f16(vw), 0));
+        w += 2;
+
+        const float16x4x2_t vwhv = vuzp_f16(vw, vw);
+        const float16x4_t valphah = vwhv.val[0];
+        const float16x4_t valphav = vwhv.val[1];
+
+        float16x4_t vtltr = vmov_n_f16(0);  // vmov for uninitialized var warning
+        float16x4_t vblbr = vmov_n_f16(0);
+
+        vtltr = vreinterpret_f16_u32(vld1_lane_u32(itl, vreinterpret_u32_f16(vtltr), 0));
+        vblbr = vreinterpret_f16_u32(vld1_lane_u32(ibl, vreinterpret_u32_f16(vblbr), 0));
+
+        const float16x4_t vldrd = vsub_f16(vblbr, vtltr);
+
+        const float16x4x2_t vld_t = vuzp_f16(vldrd, vldrd);
+        const float16x4_t vld = vld_t.val[0];
+        const float16x4_t vrd = vld_t.val[1];
+
+        const float16x4x2_t vtl_t = vuzp_f16(vtltr, vtltr);
+        const float16x4_t vtl = vtl_t.val[0];
+        const float16x4_t vtr = vtl_t.val[1];
+
+        const float16x4_t vl = vfma_f16(vtl, vld, valphav);
+        const float16x4_t vr = vfma_f16(vtr, vrd, valphav);
+
+        const float16x4_t vd = vsub_f16(vr, vl);
+        const float16x4_t vo = vfma_f16(vl, vd, valphah);
+
+        vst1_lane_f16(o, vo, 0);
+        o += 1;
+      }
+    }
+
+    input_offset += input_increment;
+  } while (--channels != 0);
+}

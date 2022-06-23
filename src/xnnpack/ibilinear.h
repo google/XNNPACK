@@ -147,6 +147,21 @@ DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__neonfm
 DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__sse_p4)
 DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__sse_p8)
 
+
+#define DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                \
+      size_t output_pixels,                                 \
+      size_t channels,                                      \
+      const void** input,                                   \
+      size_t input_offset,                                  \
+      const void* weights,                                  \
+      void* output,                                         \
+      size_t input_increment);
+
+DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4)
+DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8)
+DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16)
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
