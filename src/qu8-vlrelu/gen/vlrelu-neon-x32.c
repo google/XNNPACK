@@ -49,10 +49,10 @@ void xnn_qu8_vlrelu_ukernel__neon_x32(
     vacc2 = vshlq_n_s16(vacc2, 7);
     vacc3 = vshlq_n_s16(vacc3, 7);
 
-    const int16x8_t vmultiplier0 = vbslq_s16(vmask0, vnegative_multiplier, vpositive_multiplier);
-    const int16x8_t vmultiplier1 = vbslq_s16(vmask1, vnegative_multiplier, vpositive_multiplier);
-    const int16x8_t vmultiplier2 = vbslq_s16(vmask2, vnegative_multiplier, vpositive_multiplier);
-    const int16x8_t vmultiplier3 = vbslq_s16(vmask3, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier0 = vbslq_s16(vmask0, vpositive_multiplier, vnegative_multiplier);
+    const int16x8_t vmultiplier1 = vbslq_s16(vmask1, vpositive_multiplier, vnegative_multiplier);
+    const int16x8_t vmultiplier2 = vbslq_s16(vmask2, vpositive_multiplier, vnegative_multiplier);
+    const int16x8_t vmultiplier3 = vbslq_s16(vmask3, vpositive_multiplier, vnegative_multiplier);
 
     vacc0 = vqrdmulhq_s16(vacc0, vmultiplier0);
     vacc1 = vqrdmulhq_s16(vacc1, vmultiplier1);
@@ -75,7 +75,7 @@ void xnn_qu8_vlrelu_ukernel__neon_x32(
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     const uint8x8_t vy = vqmovun_s16(vacc);
@@ -89,7 +89,7 @@ void xnn_qu8_vlrelu_ukernel__neon_x32(
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     uint8x8_t vy = vqmovun_s16(vacc);

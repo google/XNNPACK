@@ -54,7 +54,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x${BATCH_TILE}(
 
       $for N in range(2*SIMD_TILE):
         $if AVX:
-          vmultiplier${ABC[N]} = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
+          vmultiplier${ABC[N]} = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier${ABC[N]});
         $else:
           vmultiplier${ABC[N]} = _mm_and_si128(vmultiplier${ABC[N]}, vmultiplier_diff);
         vacc${ABC[N]} = _mm_slli_epi16(vacc${ABC[N]}, 7);
@@ -80,7 +80,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x${BATCH_TILE}(
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
     $if AVX:
-      vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+      vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     $else:
       vmultiplier = _mm_and_si128(vmultiplier, vmultiplier_diff);
     vacc = _mm_slli_epi16(vacc, 7);
@@ -102,7 +102,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x${BATCH_TILE}(
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
     $if AVX:
-      vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+      vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     $else:
       vmultiplier = _mm_and_si128(vmultiplier, vmultiplier_diff);
     vacc = _mm_slli_epi16(vacc, 7);

@@ -67,7 +67,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__neon_x${BATCH_TILE}(
         vacc${ABC[N]} = vshlq_n_s16(vacc${ABC[N]}, 7);
 
       $for N in range(2*SIMD_TILE):
-        const int16x8_t vmultiplier${ABC[N]} = vbslq_s16(vmask${ABC[N]}, vnegative_multiplier, vpositive_multiplier);
+        const int16x8_t vmultiplier${ABC[N]} = vbslq_s16(vmask${ABC[N]}, vpositive_multiplier, vnegative_multiplier);
 
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = vqrdmulhq_s16(vacc${ABC[N]}, vmultiplier${ABC[N]});
@@ -89,7 +89,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__neon_x${BATCH_TILE}(
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     const ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
@@ -106,7 +106,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__neon_x${BATCH_TILE}(
       int16x8_t vacc = vsubw_s8(vinput_zero_point, vx);
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);

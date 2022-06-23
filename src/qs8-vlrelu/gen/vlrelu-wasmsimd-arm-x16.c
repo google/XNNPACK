@@ -40,9 +40,9 @@ void xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x16(
     v128_t vmultiplier1 = wasm_i16x8_shr(vacc1, 15);
 
     vacc0 = wasm_i16x8_shl(vacc0, 7);
-    vmultiplier0 = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier0);
+    vmultiplier0 = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier0);
     vacc1 = wasm_i16x8_shl(vacc1, 7);
-    vmultiplier1 = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier1);
+    vmultiplier1 = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier1);
 
     vacc0 = wasm_i16x8_q15mulr_sat(vacc0, vmultiplier0);
     vacc1 = wasm_i16x8_q15mulr_sat(vacc1, vmultiplier1);
@@ -60,7 +60,7 @@ void xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x16(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier);
+    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     x += 8;
@@ -77,7 +77,7 @@ void xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x16(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier);
+    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 

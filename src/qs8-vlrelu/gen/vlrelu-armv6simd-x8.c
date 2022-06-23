@@ -38,13 +38,13 @@ void xnn_qs8_vlrelu_ukernel__armv6simd_x8(
     int16x2_t vx57 = __sxtb16(__ror(vx4567, 8));
 
     vx02 = __ssub16(vinput_zero_point, vx02);
-    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx13 = __ssub16(vinput_zero_point, vx13);
-    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx46 = __ssub16(vinput_zero_point, vx46);
-    const int16x2_t vmultiplier46 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier46 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx57 = __ssub16(vinput_zero_point, vx57);
-    const int16x2_t vmultiplier57 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier57 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
     int32_t vacc0 = __smlabb(vmultiplier02, vx02, vbias);
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);
@@ -82,9 +82,9 @@ void xnn_qs8_vlrelu_ukernel__armv6simd_x8(
     int16x2_t vx13 = __sxtb16(__ror(vx0123, 8));
 
     vx02 = __ssub16(vinput_zero_point, vx02);
-    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx13 = __ssub16(vinput_zero_point, vx13);
-    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
     int32_t vacc0 = __smlabb(vmultiplier02, vx02, vbias);
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);
@@ -109,9 +109,9 @@ void xnn_qs8_vlrelu_ukernel__armv6simd_x8(
     int16x2_t vx13 = __sxtb16(__ror(vx0123, 8));
 
     vx02 = __ssub16(vinput_zero_point, vx02);
-    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx13 = __ssub16(vinput_zero_point, vx13);
-    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
     int32_t vacc0 = __smlabb(vmultiplier02, vx02, vbias);
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);

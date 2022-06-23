@@ -3311,7 +3311,7 @@ XNN_INTERNAL void xnn_init_qs8_lrelu_scalar_andxor_params(
   assert(negative_multiplier >= -32767L);
   assert(negative_multiplier != 0L);
   params->scalar_andxor.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_andxor.multiplier_base = (int32_t) negative_multiplier;
+  params->scalar_andxor.multiplier_base = (int32_t) positive_multiplier;
   params->scalar_andxor.multiplier_diff = (int32_t) negative_multiplier ^ (int32_t) positive_multiplier;
   params->scalar_andxor.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
 }
@@ -3393,7 +3393,7 @@ XNN_INTERNAL void xnn_init_qs8_lrelu_sse2_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) positive_multiplier;
+  const int16_t multiplier_base = (int16_t) negative_multiplier;
   const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.input_zero_point[i] = (int16_t) input_zero_point;
@@ -3509,7 +3509,7 @@ XNN_INTERNAL void xnn_init_qs8_lrelu_wasmsimd_x86_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) positive_multiplier;
+  const int16_t multiplier_base = (int16_t) negative_multiplier;
   const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd_x86.input_zero_point[i] = (int16_t) input_zero_point;
@@ -3567,7 +3567,7 @@ XNN_INTERNAL void xnn_init_qu8_lrelu_scalar_andxor_params(
   assert(negative_multiplier >= -32767L);
   assert(negative_multiplier != 0L);
   params->scalar_andxor.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_andxor.multiplier_base = (int32_t) negative_multiplier;
+  params->scalar_andxor.multiplier_base = (int32_t) positive_multiplier;
   params->scalar_andxor.multiplier_diff = (int32_t) negative_multiplier ^ (int32_t) positive_multiplier;
   params->scalar_andxor.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
 }
@@ -3649,7 +3649,7 @@ XNN_INTERNAL void xnn_init_qu8_lrelu_sse2_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) positive_multiplier;
+  const int16_t multiplier_base = (int16_t) negative_multiplier;
   const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
@@ -3765,7 +3765,7 @@ XNN_INTERNAL void xnn_init_qu8_lrelu_wasmsimd_x86_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) positive_multiplier;
+  const int16_t multiplier_base = (int16_t) negative_multiplier;
   const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd_x86.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;

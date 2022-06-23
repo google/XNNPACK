@@ -35,7 +35,7 @@ void xnn_qu8_vlrelu_ukernel__neon_x8(
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     const uint8x8_t vy = vqmovun_s16(vacc);
@@ -49,7 +49,7 @@ void xnn_qu8_vlrelu_ukernel__neon_x8(
     int16x8_t vacc = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vx));
     const uint16x8_t vmask = vcltq_s16(vacc, vmovq_n_s16(0));
     vacc = vshlq_n_s16(vacc, 7);
-    const int16x8_t vmultiplier = vbslq_s16(vmask, vnegative_multiplier, vpositive_multiplier);
+    const int16x8_t vmultiplier = vbslq_s16(vmask, vpositive_multiplier, vnegative_multiplier);
     vacc = vqrdmulhq_s16(vacc, vmultiplier);
     vacc = vqaddq_s16(vacc, voutput_zero_point);
     uint8x8_t vy = vqmovun_s16(vacc);

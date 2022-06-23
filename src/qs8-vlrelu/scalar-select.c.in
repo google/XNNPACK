@@ -28,7 +28,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
   $if BATCH_TILE == 1:
     do {
       int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-      const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vnegative_multiplier : vpositive_multiplier;
+      const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
       vacc = vbias + vacc * vmultiplier;
 
       int32_t vout = asr_s32(vacc, 8);
@@ -48,7 +48,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
         vacc${ABC[N]} -= vinput_zero_point;
 
       $for N in range(BATCH_TILE):
-        const int32_t vmultiplier${ABC[N]} = XNN_UNPREDICTABLE(vacc${ABC[N]} >= 0) ? vnegative_multiplier : vpositive_multiplier;
+        const int32_t vmultiplier${ABC[N]} = XNN_UNPREDICTABLE(vacc${ABC[N]} >= 0) ? vpositive_multiplier : vnegative_multiplier;
 
       $for N in range(BATCH_TILE):
         vacc${ABC[N]} = vbias + vacc${ABC[N]} * vmultiplier${ABC[N]};
@@ -69,7 +69,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
     if XNN_UNLIKELY(n != 0) {
       $if BATCH_TILE == 2:
         int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-        const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vnegative_multiplier : vpositive_multiplier;
+        const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
         vacc = vbias + vacc * vmultiplier;
 
         int32_t vout = asr_s32(vacc, 8);
@@ -79,7 +79,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
       $else:
         do {
           int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-          const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vnegative_multiplier : vpositive_multiplier;
+          const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
           vacc = vbias + vacc * vmultiplier;
 
           int32_t vout = asr_s32(vacc, 8);

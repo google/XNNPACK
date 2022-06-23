@@ -47,7 +47,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__avx2_x${BATCH_TILE}(
         vacc${ABC[N]} = _mm256_sub_epi16(vinput_zero_point, vacc${ABC[N]});
 
       $for N in range(2*SIMD_TILE):
-        vmultiplier${ABC[N]} = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
+        vmultiplier${ABC[N]} = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier${ABC[N]});
         vacc${ABC[N]} = _mm256_slli_epi16(vacc${ABC[N]}, 7);
 
       $for N in range(2*SIMD_TILE):
@@ -71,7 +71,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__avx2_x${BATCH_TILE}(
     __m256i vacc = ${_MM256_CVTEPX8_EPI16}(_mm_loadu_si128((const __m128i*) x));
     __m256i vmultiplier = _mm256_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm256_slli_epi16(vacc, 7);
     vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm256_adds_epi16(vacc, voutput_zero_point);
@@ -89,7 +89,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__avx2_x${BATCH_TILE}(
     __m256i vacc = ${_MM256_CVTEPX8_EPI16}(_mm_loadu_si128((const __m128i*) x));
     __m256i vmultiplier = _mm256_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm256_slli_epi16(vacc, 7);
     vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm256_adds_epi16(vacc, voutput_zero_point);

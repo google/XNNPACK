@@ -45,9 +45,9 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         vx${ABC[N]}${ABC[N+2]} = ${__XSUB16}(vinput_zero_point, vx${ABC[N]}${ABC[N+2]});
-        const int16x2_t vmultiplier${ABC[N]}${ABC[N+2]} = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+        const int16x2_t vmultiplier${ABC[N]}${ABC[N+2]} = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
         vx${ABC[N+1]}${ABC[N+3]} = ${__XSUB16}(vinput_zero_point, vx${ABC[N+1]}${ABC[N+3]});
-        const int16x2_t vmultiplier${ABC[N+1]}${ABC[N+3]} = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+        const int16x2_t vmultiplier${ABC[N+1]}${ABC[N+3]} = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
       $for N in range(0, BATCH_TILE, 4):
         int32_t vacc${ABC[N]} = __smlabb(vmultiplier${ABC[N]}${ABC[N+2]}, vx${ABC[N]}${ABC[N+2]}, vbias);
@@ -70,9 +70,9 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
     ${XINT16X2_T} vx13 = ${__XXTB16}(__ror(vx0123, 8));
 
     vx02 = ${__XSUB16}(vinput_zero_point, vx02);
-    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx13 = ${__XSUB16}(vinput_zero_point, vx13);
-    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
     int32_t vacc0 = __smlabb(vmultiplier02, vx02, vbias);
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);
@@ -97,9 +97,9 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
     ${XINT16X2_T} vx13 = ${__XXTB16}(__ror(vx0123, 8));
 
     vx02 = ${__XSUB16}(vinput_zero_point, vx02);
-    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier02 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
     vx13 = ${__XSUB16}(vinput_zero_point, vx13);
-    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vpositive_multiplier, (uint8x4_t) vnegative_multiplier);
+    const int16x2_t vmultiplier13 = (int16x2_t) __sel((uint8x4_t) vnegative_multiplier, (uint8x4_t) vpositive_multiplier);
 
     int32_t vacc0 = __smlabb(vmultiplier02, vx02, vbias);
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);

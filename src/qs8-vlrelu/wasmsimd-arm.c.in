@@ -49,7 +49,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_arm_x${BATCH_TILE}(
 
     $for N in range(2*SIMD_TILE):
       vacc${ABC[N]} = wasm_i16x8_shl(vacc${ABC[N]}, 7);
-      vmultiplier${ABC[N]} = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier${ABC[N]});
+      vmultiplier${ABC[N]} = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
 
     $for N in range(2*SIMD_TILE):
       vacc${ABC[N]} = wasm_i16x8_q15mulr_sat(vacc${ABC[N]}, vmultiplier${ABC[N]});
@@ -70,7 +70,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_arm_x${BATCH_TILE}(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier);
+    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     x += 8;
@@ -87,7 +87,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_arm_x${BATCH_TILE}(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vnegative_multiplier, vpositive_multiplier, vmultiplier);
+    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 

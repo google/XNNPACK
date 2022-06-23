@@ -25,7 +25,7 @@ void xnn_qu8_vlrelu_ukernel__scalar_select_x1(
   const int32_t vbias = params->scalar_select.bias;
   do {
     int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-    const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vnegative_multiplier : vpositive_multiplier;
+    const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
     vacc = vbias + vacc * vmultiplier;
 
     int32_t vout = asr_s32(vacc, 8);

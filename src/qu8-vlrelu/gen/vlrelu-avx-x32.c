@@ -47,13 +47,13 @@ void xnn_qu8_vlrelu_ukernel__avx_x32(
     __m128i vmultiplier3 = _mm_cmpgt_epi16(vacc3, vinput_zero_point);
     vacc3 = _mm_sub_epi16(vinput_zero_point, vacc3);
 
-    vmultiplier0 = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier0);
+    vmultiplier0 = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier0);
     vacc0 = _mm_slli_epi16(vacc0, 7);
-    vmultiplier1 = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier1);
+    vmultiplier1 = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier1);
     vacc1 = _mm_slli_epi16(vacc1, 7);
-    vmultiplier2 = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier2);
+    vmultiplier2 = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier2);
     vacc2 = _mm_slli_epi16(vacc2, 7);
-    vmultiplier3 = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier3);
+    vmultiplier3 = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier3);
     vacc3 = _mm_slli_epi16(vacc3, 7);
 
     vacc0 = _mm_mulhrs_epi16(vacc0, vmultiplier0);
@@ -77,7 +77,7 @@ void xnn_qu8_vlrelu_ukernel__avx_x32(
     __m128i vacc = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i*) x));
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
@@ -94,7 +94,7 @@ void xnn_qu8_vlrelu_ukernel__avx_x32(
     __m128i vacc = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i*) x));
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);

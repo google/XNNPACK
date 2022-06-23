@@ -41,9 +41,9 @@ void xnn_qu8_vlrelu_ukernel__avx2_x32(
     __m256i vmultiplier1 = _mm256_cmpgt_epi16(vacc1, vinput_zero_point);
     vacc1 = _mm256_sub_epi16(vinput_zero_point, vacc1);
 
-    vmultiplier0 = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier0);
+    vmultiplier0 = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier0);
     vacc0 = _mm256_slli_epi16(vacc0, 7);
-    vmultiplier1 = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier1);
+    vmultiplier1 = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier1);
     vacc1 = _mm256_slli_epi16(vacc1, 7);
 
     vacc0 = _mm256_mulhrs_epi16(vacc0, vmultiplier0);
@@ -63,7 +63,7 @@ void xnn_qu8_vlrelu_ukernel__avx2_x32(
     __m256i vacc = _mm256_cvtepu8_epi16(_mm_loadu_si128((const __m128i*) x));
     __m256i vmultiplier = _mm256_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm256_slli_epi16(vacc, 7);
     vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm256_adds_epi16(vacc, voutput_zero_point);
@@ -81,7 +81,7 @@ void xnn_qu8_vlrelu_ukernel__avx2_x32(
     __m256i vacc = _mm256_cvtepu8_epi16(_mm_loadu_si128((const __m128i*) x));
     __m256i vmultiplier = _mm256_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm256_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm256_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm256_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm256_slli_epi16(vacc, 7);
     vacc = _mm256_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm256_adds_epi16(vacc, voutput_zero_point);

@@ -31,8 +31,8 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_x2(
     vacc0 -= vinput_zero_point;
     vacc1 -= vinput_zero_point;
 
-    const int32_t vmultiplier0 = XNN_UNPREDICTABLE(vacc0 >= 0) ? vnegative_multiplier : vpositive_multiplier;
-    const int32_t vmultiplier1 = XNN_UNPREDICTABLE(vacc1 >= 0) ? vnegative_multiplier : vpositive_multiplier;
+    const int32_t vmultiplier0 = XNN_UNPREDICTABLE(vacc0 >= 0) ? vpositive_multiplier : vnegative_multiplier;
+    const int32_t vmultiplier1 = XNN_UNPREDICTABLE(vacc1 >= 0) ? vpositive_multiplier : vnegative_multiplier;
 
     vacc0 = vbias + vacc0 * vmultiplier0;
     vacc1 = vbias + vacc1 * vmultiplier1;
@@ -52,7 +52,7 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_x2(
   }
   if XNN_UNLIKELY(n != 0) {
     int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-    const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vnegative_multiplier : vpositive_multiplier;
+    const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
     vacc = vbias + vacc * vmultiplier;
 
     int32_t vout = asr_s32(vacc, 8);

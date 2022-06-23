@@ -35,7 +35,7 @@ void xnn_qs8_vlrelu_ukernel__avx_x8(
     __m128i vacc = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) x));
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
@@ -52,7 +52,7 @@ void xnn_qs8_vlrelu_ukernel__avx_x8(
     __m128i vacc = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) x));
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);
     vacc = _mm_sub_epi16(vinput_zero_point, vacc);
-    vmultiplier = _mm_blendv_epi8(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = _mm_blendv_epi8(vnegative_multiplier, vpositive_multiplier, vmultiplier);
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
