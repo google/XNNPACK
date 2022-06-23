@@ -145,6 +145,40 @@ enum xnn_status xnn_define_static_transpose(
     return status;
   }
 
+  if (num_dims == 0) {
+    xnn_log_error(
+      "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to create %s operator with %zu num_dims: num_dims must be <= %d",
+      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims, XNN_MAX_TENSOR_DIMS);
+    return xnn_status_invalid_parameter;
+  }
+
+  for (size_t i = 0; i < num_dims; ++i) {
+    if (perm[i] >= num_dims) {
+      xnn_log_error(
+          "failed to create %s operator with %zu perm and %zu num_dims: 0 <= perm < num_dims",
+          xnn_node_type_to_string(xnn_node_type_static_transpose), perm[i], num_dims);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  for (size_t i = 0; i < num_dims - 1; ++i) {
+    for (size_t j = i + 1; j < num_dims; ++j) {
+      if (perm[i] == perm[j]) {
+        xnn_log_error(
+            "failed to create %s operator with duplicate entries in perm",
+            xnn_node_type_to_string(xnn_node_type_static_transpose));
+        return xnn_status_invalid_parameter;
+      }
+    }
+  }
+
   if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_static_transpose, input_id, subgraph->num_values)) !=
       xnn_status_success) {
     return status;

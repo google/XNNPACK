@@ -15112,6 +15112,20 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "static_transpose_test",
+    srcs = [
+        "test/static-transpose.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "subtract2_test",
     srcs = [
         "test/subtract2.cc",

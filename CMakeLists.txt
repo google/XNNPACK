@@ -7679,6 +7679,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(static-resize-bilinear-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME static-resize-bilinear-2d-test COMMAND static-resize-bilinear-2d-test)
 
+  ADD_EXECUTABLE(static-transpose-test test/static-transpose.cc)
+  TARGET_INCLUDE_DIRECTORIES(static-transpose-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(static-transpose-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME static-transpose-test COMMAND static-transpose-test)
+
   ADD_EXECUTABLE(subtract2-test test/subtract2.cc)
   TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(subtract2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

@@ -87,4 +87,3 @@ protected:
   std::vector<OutputType> operator_output;
   std::vector<OutputType> subgraph_output;
 };
-
