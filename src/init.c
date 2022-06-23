@@ -2824,6 +2824,13 @@ static void init(void) {
         .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4,
         .channel_tile = 4,
       };
+      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
+        .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8,
+        .channel_tile = 1,
+        .pixel_tile = 8,
+      };
+
+
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F16_OPERATORS
 
