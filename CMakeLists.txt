@@ -7565,6 +7565,21 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(elu-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME elu-test COMMAND elu-test)
 
+  ADD_EXECUTABLE(even-split2-test test/even-split2.cc)
+  TARGET_INCLUDE_DIRECTORIES(even-split2-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(even-split2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME even-split2-test COMMAND even-split2-test)
+
+  ADD_EXECUTABLE(even-split3-test test/even-split3.cc)
+  TARGET_INCLUDE_DIRECTORIES(even-split3-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(even-split3-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME even-split3-test COMMAND even-split3-test)
+
+  ADD_EXECUTABLE(even-split4-test test/even-split4.cc)
+  TARGET_INCLUDE_DIRECTORIES(even-split4-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(even-split4-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME even-split4-test COMMAND even-split4-test)
+
   ADD_EXECUTABLE(floor-test test/floor.cc)
   TARGET_INCLUDE_DIRECTORIES(floor-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(floor-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)

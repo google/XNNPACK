@@ -589,7 +589,7 @@ enum xnn_status xnn_define_even_split_n(
   }
 
   node->params.even_split.axis = split_dim;
-  node->type = xnn_node_type_even_split2;
+  node->type = node_type;
   node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
