@@ -171,58 +171,6 @@ enum xnn_status xnn_create_elu_nc_qs8(
     xnn_operator_type_elu_nc_qs8, elu_op_out);
 }
 
-static float calculate_leaky_relu(float x, const float* negative_slope_ptr) {
-  const float negative_slope = *negative_slope_ptr;
-  return signbit(x) ? x * negative_slope : x;
-}
-
-enum xnn_status xnn_create_leaky_relu_nc_qu8(
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
-    float negative_slope,
-    uint8_t input_zero_point,
-    float input_scale,
-    uint8_t output_zero_point,
-    float output_scale,
-    uint8_t output_min,
-    uint8_t output_max,
-    uint32_t flags,
-    xnn_operator_t* leaky_relu_op_out)
-{
-  if (negative_slope <= 0.0f || !isnormal(negative_slope)) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g negative slope: slope must be finite, normalized, and positive",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), negative_slope);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (negative_slope > 1.0f) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g negative slope: slope must not exceed 1.0",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), negative_slope);
-    return xnn_status_invalid_parameter;
-  }
-
-  const float input_output_scale = input_scale / output_scale;
-  if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g input-to-output scale ratio: "
-      "scale ratio must be in [2**-8, 2**8) range",
-      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), input_output_scale);
-    return xnn_status_unsupported_parameter;
-  }
-
-  return create_lut_elementwise_nc(
-    channels, input_stride, output_stride,
-    (int32_t) (uint32_t) input_zero_point, input_scale, 0 /* input min */,
-    (long) (unsigned long) output_zero_point, output_scale,
-    (long) (unsigned long) output_min, (long) (unsigned long) output_max,
-    flags,
-    (xnn_lut_init_fn) &calculate_leaky_relu, &negative_slope,
-    xnn_operator_type_leaky_relu_nc_qu8, leaky_relu_op_out);
-}
-
 static float calculate_sigmoid(float x, const void* params) {
   return signbit(x) ? 1.0f / (1.0f + expf(-x)) : 1.0f - 1.0f / (1.0f + expf(x));
 }
@@ -452,18 +400,6 @@ enum xnn_status xnn_setup_elu_nc_qs8(
 {
   return setup_lut_elementwise_nc(
     sigmoid_op, xnn_operator_type_elu_nc_qs8,
-    batch_size, input, output);
-}
-
-enum xnn_status xnn_setup_leaky_relu_nc_qu8(
-    xnn_operator_t leaky_relu_op,
-    size_t batch_size,
-    const uint8_t* input,
-    uint8_t* output,
-    pthreadpool_t threadpool)
-{
-  return setup_lut_elementwise_nc(
-    leaky_relu_op, xnn_operator_type_leaky_relu_nc_qu8,
     batch_size, input, output);
 }
 

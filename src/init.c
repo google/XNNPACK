@@ -58,6 +58,7 @@
 #include <xnnpack/vaddsub.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
+#include <xnnpack/vlrelu.h>
 #include <xnnpack/vmul.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
@@ -99,6 +100,11 @@ static void init(void) {
       return;
     }
   #else
+    if (!cpuinfo_has_arm_v6()) {
+      xnn_log_error("XNNPACK initialization failed: ARMv6 instructions not supported");
+      return;
+    }
+
     if (!cpuinfo_has_arm_vfpv2() && !cpuinfo_has_arm_vfpv3()) {
       xnn_log_error("XNNPACK initialization failed: VFP is not supported");
       return;
@@ -531,6 +537,12 @@ static void init(void) {
         .init.qs8_mul = xnn_init_qs8_mul_minmax_rndnu_neon_params,
         .element_tile = 16,
       };
+
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__neon_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_neon_params,
+        .element_tile = 32,
+      };
     #endif  // XNN_NO_QS8_OPERATORS
 
     /*************************** QU8 AArch32 micro-kernels ***************************/
@@ -708,6 +720,12 @@ static void init(void) {
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_rndnu_ukernel__neon_ld64_x16,
         .init.qu8_mul = xnn_init_qu8_mul_minmax_rndnu_neon_params,
         .element_tile = 16,
+      };
+
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__neon_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_neon_params,
+        .element_tile = 32,
       };
     #endif  // XNN_NO_QU8_OPERATORS
 
@@ -1324,6 +1342,12 @@ static void init(void) {
         .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params,
         .element_tile = 4,
       };
+
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__armv6simd_x4,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_armv6simd_params,
+        .element_tile = 4,
+      };
     #endif  // XNN_NO_QS8_OPERATORS
 
     /*************************** QU8 AArch32 Pre-NEON micro-kernels ***************************/
@@ -1375,6 +1399,12 @@ static void init(void) {
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
         .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params,
+        .element_tile = 4,
+      };
+
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__armv6simd_x4,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_armv6simd_params,
         .element_tile = 4,
       };
     #endif  // XNN_NO_QU8_OPERATORS
@@ -2221,6 +2251,12 @@ static void init(void) {
       .init.qs8_mul = xnn_init_qs8_mul_minmax_rndnu_neon_params,
       .element_tile = 16,
     };
+
+    xnn_params.qs8.lrelu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__neon_x32,
+      .init.qs8_lrelu = xnn_init_qs8_lrelu_neon_params,
+      .element_tile = 32,
+    };
   #endif  // XNN_NO_QS8_OPERATORS
 
   /**************************** QU8 AArch64 micro-kernels ****************************/
@@ -2387,6 +2423,12 @@ static void init(void) {
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_rndnu_ukernel__neon_ld64_x16,
       .init.qu8_mul = xnn_init_qu8_mul_minmax_rndnu_neon_params,
       .element_tile = 16,
+    };
+
+    xnn_params.qu8.lrelu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__neon_x32,
+      .init.qu8_lrelu = xnn_init_qu8_lrelu_neon_params,
+      .element_tile = 32,
     };
   #endif  // XNN_NO_QU8_OPERATORS
 
@@ -3677,6 +3719,38 @@ static void init(void) {
         .element_tile = 8,
       };
     }
+
+    if (cpuinfo_has_x86_avx2()) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__avx2_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_avx2_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__avx_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_avx_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__sse41_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_sse2_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__ssse3_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_sse2_params,
+        .element_tile = 32,
+      };
+    } else {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__sse2_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_sse2_params,
+        .element_tile = 32,
+      };
+    }
   #endif  // XNN_NO_QS8_OPERATORS
 
   /**************************** QU8 x86 micro-kernels ****************************/
@@ -3887,6 +3961,38 @@ static void init(void) {
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8,
         .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_sse2_params,
         .element_tile = 8,
+      };
+    }
+
+    if (cpuinfo_has_x86_avx2()) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__avx2_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_avx2_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_avx()) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__avx_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_avx_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__sse41_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_sse2_params,
+        .element_tile = 32,
+      };
+    } else if (cpuinfo_has_x86_sse4_1()) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__ssse3_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_sse2_params,
+        .element_tile = 32,
+      };
+    } else {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__sse2_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_sse2_params,
+        .element_tile = 32,
       };
     }
   #endif  // XNN_NO_QU8_OPERATORS
@@ -5186,6 +5292,20 @@ static void init(void) {
       .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_wasmsimd_params,
       .element_tile = 8,
     };
+
+    if (is_wasm_x86) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__wasmsimd_x86_x16,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_wasmsimd_x86_params,
+        .element_tile = 16,
+      };
+    } else {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x32,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_wasmsimd_arm_params,
+        .element_tile = 32,
+      };
+    }
   #endif  // XNN_NO_QS8_OPERATORS
 
   /**************************** QU8 WAsm SIMD micro-kernels****************************/
@@ -5242,6 +5362,20 @@ static void init(void) {
       .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_wasmsimd_params,
       .element_tile = 8,
     };
+
+    if (is_wasm_x86) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_wasmsimd_x86_params,
+        .element_tile = 16,
+      };
+    } else {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__wasmsimd_arm_x32,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_wasmsimd_arm_params,
+        .element_tile = 32,
+      };
+    }
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** S8 WAsm SIMD micro-kernels****************************/
@@ -6092,6 +6226,20 @@ static void init(void) {
       .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params,
       .element_tile = 4,
     };
+
+    if (is_wasm_x86) {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__scalar_select_x4,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_select_params,
+        .element_tile = 4,
+      };
+    } else {
+      xnn_params.qs8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__scalar_andxor_x4,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_andxor_params,
+        .element_tile = 4,
+      };
+    }
   #endif  // XNN_NO_QS8_OPERATORS
 
   /**************************** QU8 WAsm micro-kernels****************************/
@@ -6167,6 +6315,20 @@ static void init(void) {
       .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params,
       .element_tile = 4,
     };
+
+    if (is_wasm_x86) {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__scalar_select_x4,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_select_params,
+        .element_tile = 4,
+      };
+    } else {
+      xnn_params.qu8.lrelu = (struct vunary_parameters) {
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__scalar_andxor_x4,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_andxor_params,
+        .element_tile = 4,
+      };
+    }
   #endif  // XNN_NO_QU8_OPERATORS
 
   /**************************** S8 WAsm micro-kernels****************************/
@@ -6737,6 +6899,12 @@ static void init(void) {
       .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params,
       .element_tile = 4,
     };
+
+    xnn_params.qs8.lrelu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__scalar_andxor_x4,
+      .init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_andxor_params,
+      .element_tile = 4,
+    };
   #endif  // XNN_NO_QS8_OPERATORS
 
   /************************** QU8 RISC-V micro-kernels **************************/
@@ -6789,6 +6957,12 @@ static void init(void) {
       .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4,
       .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params,
+      .element_tile = 4,
+    };
+
+    xnn_params.qu8.lrelu = (struct vunary_parameters) {
+      .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__scalar_andxor_x4,
+      .init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_andxor_params,
       .element_tile = 4,
     };
   #endif  // XNN_NO_QU8_OPERATORS

@@ -76,6 +76,7 @@ enum xnn_operator_type {
   xnn_operator_type_hardswish_nc_f32,
   xnn_operator_type_leaky_relu_nc_f16,
   xnn_operator_type_leaky_relu_nc_f32,
+  xnn_operator_type_leaky_relu_nc_qs8,
   xnn_operator_type_leaky_relu_nc_qu8,
   xnn_operator_type_max_pooling_nhwc_f16,
   xnn_operator_type_max_pooling_nhwc_f32,

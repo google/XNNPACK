@@ -3020,6 +3020,25 @@ enum xnn_status xnn_setup_multiply_nd_qs8(
   int8_t* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_leaky_relu_nc_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out);
+
+enum xnn_status xnn_setup_leaky_relu_nc_qs8(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_sigmoid_nc_qs8(
   size_t channels,
   size_t input_stride,
@@ -3276,8 +3295,6 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   float input_scale,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   xnn_operator_t* leaky_relu_op_out);
 

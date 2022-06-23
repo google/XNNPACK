@@ -4421,7 +4421,9 @@ struct vunary_parameters {
     xnn_init_f32_sigmoid_params_fn f32_sigmoid;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
+    xnn_init_qs8_lrelu_params_fn qs8_lrelu;
     xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
+    xnn_init_qu8_lrelu_params_fn qu8_lrelu;
     xnn_init_s8_minmax_params_fn s8_minmax;
     xnn_init_u8_minmax_params_fn u8_minmax;
   } init;
@@ -4728,6 +4730,7 @@ struct xnn_parameters {
     struct gavgpool_parameters gavgpool;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
+    struct vunary_parameters lrelu;
   } qs8;
   struct {
     struct gemm_parameters gemm;
@@ -4736,6 +4739,7 @@ struct xnn_parameters {
     struct gavgpool_parameters gavgpool;
     struct vbinary_parameters vadd;
     struct vbinary_parameters vmul;
+    struct vunary_parameters lrelu;
   } qu8;
   struct {
     struct vunary_parameters clamp;

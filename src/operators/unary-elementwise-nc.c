@@ -808,6 +808,144 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
     leaky_relu_op_out);
 }
 
+enum xnn_status xnn_create_leaky_relu_nc_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out)
+{
+  if (!isfinite(negative_slope)) {
+    xnn_log_error(
+      "failed to create %s operator with %f negative slope: finite number expected",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8),
+      negative_slope);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float positive_input_output_scale = input_scale / output_scale;
+  if (positive_input_output_scale < 0x1.0p-8f || positive_input_output_scale > 0x1.0p+7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g positive-input-to-output scale ratio: scale ratio must be in [2**-8, 2**7] range",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8), positive_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float negative_input_output_scale = positive_input_output_scale * negative_slope;
+  if (negative_input_output_scale < -0x1.FFFC00p+6f || negative_input_output_scale > 0x1.0p+7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be in (-2**7, 2**7] range and ",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8), negative_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (fabsf(negative_input_output_scale) < 0x1.0p-8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be at least 2**-8 in absolute value",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qs8), negative_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_qs8_lrelu_params params;
+  if (xnn_params.qs8.lrelu.init.qs8_lrelu != NULL) {
+    xnn_params.qs8.lrelu.init.qs8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params), XNN_INIT_FLAG_QS8,
+    xnn_operator_type_leaky_relu_nc_qs8,
+    xnn_params.qs8.lrelu.ukernel,
+    leaky_relu_op_out);
+}
+
+enum xnn_status xnn_create_leaky_relu_nc_qu8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float negative_slope,
+  uint8_t input_zero_point,
+  float input_scale,
+  uint8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_operator_t* leaky_relu_op_out)
+{
+  if (!isfinite(negative_slope)) {
+    xnn_log_error(
+      "failed to create %s operator with %f negative slope: finite number expected",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8),
+      negative_slope);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float positive_input_output_scale = input_scale / output_scale;
+  if (positive_input_output_scale < 0x1.0p-8f || positive_input_output_scale > 0x1.0p+7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g positive-input-to-output scale ratio: scale ratio must be in [2**-8, 2**7] range",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), positive_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float negative_input_output_scale = positive_input_output_scale * negative_slope;
+  if (negative_input_output_scale < -0x1.FFFC00p+6f || negative_input_output_scale > 0x1.0p+7f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be in (-2**7, 2**7] range and ",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), negative_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (fabsf(negative_input_output_scale) < 0x1.0p-8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be at least 2**-8 in absolute value",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_qu8), negative_input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_qu8_lrelu_params params;
+  if (xnn_params.qu8.lrelu.init.qu8_lrelu != NULL) {
+    xnn_params.qu8.lrelu.init.qu8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params), XNN_INIT_FLAG_QU8,
+    xnn_operator_type_leaky_relu_nc_qu8,
+    xnn_params.qu8.lrelu.ukernel,
+    leaky_relu_op_out);
+}
+
 enum xnn_status xnn_create_negate_nc_f16(
     size_t channels,
     size_t input_stride,
@@ -1405,6 +1543,38 @@ enum xnn_status xnn_setup_leaky_relu_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &leaky_relu_op->params.f32_lrelu, sizeof(leaky_relu_op->params.f32_lrelu),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_qs8(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const int8_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_qs8,
+    batch_size, input, output,
+    0 /* log2(sizeof(int8_t)) */,
+    0 /* log2(sizeof(int8_t)) */,
+    &leaky_relu_op->params.qs8_lrelu, sizeof(leaky_relu_op->params.qs8_lrelu),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_qu8(
+  xnn_operator_t leaky_relu_op,
+  size_t batch_size,
+  const uint8_t* input,
+  uint8_t* output,
+  pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_qu8,
+    batch_size, input, output,
+    0 /* log2(sizeof(uint8_t)) */,
+    0 /* log2(sizeof(uint8_t)) */,
+    &leaky_relu_op->params.qu8_lrelu, sizeof(leaky_relu_op->params.qu8_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 

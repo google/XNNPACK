@@ -975,7 +975,9 @@ struct univector_strided_context {
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_f32_cvt_params qu8_f32_cvt;
+    union xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
@@ -1011,7 +1013,9 @@ struct univector_contiguous_context {
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_f32_cvt_params qu8_f32_cvt;
+    union xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;

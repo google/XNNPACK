@@ -77,8 +77,7 @@ class LeakyReLUOperatorTester {
   }
 
   inline LeakyReLUOperatorTester& negative_slope(float negative_slope) {
-    assert(negative_slope > 0.0f);
-    assert(negative_slope < 1.0f);
+    assert(std::isnormal(negative_slope));
     this->negative_slope_ = negative_slope;
     return *this;
   }
@@ -98,12 +97,12 @@ class LeakyReLUOperatorTester {
     return this->input_scale_;
   }
 
-  inline LeakyReLUOperatorTester& input_zero_point(uint8_t input_zero_point) {
+  inline LeakyReLUOperatorTester& input_zero_point(int16_t input_zero_point) {
     this->input_zero_point_ = input_zero_point;
     return *this;
   }
 
-  inline uint8_t input_zero_point() const {
+  inline int16_t input_zero_point() const {
     return this->input_zero_point_;
   }
 
@@ -118,31 +117,13 @@ class LeakyReLUOperatorTester {
     return this->output_scale_;
   }
 
-  inline LeakyReLUOperatorTester& output_zero_point(uint8_t output_zero_point) {
+  inline LeakyReLUOperatorTester& output_zero_point(int16_t output_zero_point) {
     this->output_zero_point_ = output_zero_point;
     return *this;
   }
 
-  inline uint8_t output_zero_point() const {
+  inline int16_t output_zero_point() const {
     return this->output_zero_point_;
-  }
-
-  inline LeakyReLUOperatorTester& qmin(uint8_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  inline uint8_t qmin() const {
-    return this->qmin_;
-  }
-
-  inline LeakyReLUOperatorTester& qmax(uint8_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  inline uint8_t qmax() const {
-    return this->qmax_;
   }
 
   inline LeakyReLUOperatorTester& iterations(size_t iterations) {
@@ -210,7 +191,7 @@ class LeakyReLUOperatorTester {
           ASSERT_NEAR(
               fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
               output_ref[i * channels() + c],
-              std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-3f))
+              std::max(2.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-3f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -273,7 +254,81 @@ class LeakyReLUOperatorTester {
     }
   }
 
+  void TestQS8() const {
+    ASSERT_GE(input_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(input_zero_point(), std::numeric_limits<int8_t>::max());
+    ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + (batch_size() - 1) * input_stride() + channels());
+    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const float x = input_scale() * (int32_t(input[i * input_stride() + c]) - input_zero_point());
+          float y = (x < 0.0f ? x * negative_slope() : x) / output_scale() + float(output_zero_point());
+          y = std::max<float>(y, std::numeric_limits<int8_t>::min());
+          y = std::min<float>(y, std::numeric_limits<int8_t>::max());
+          output_ref[i * channels() + c] = y;
+        }
+      }
+
+      // Create, setup, run, and destroy Leaky ReLU operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t leaky_relu_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_leaky_relu_nc_qs8(
+          channels(), input_stride(), output_stride(),
+          negative_slope(),
+          input_zero_point(), input_scale(),
+          output_zero_point(), output_scale(),
+          0, &leaky_relu_op));
+      ASSERT_NE(nullptr, leaky_relu_op);
+
+      // Smart pointer to automatically delete leaky_relu_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_leaky_relu_op(leaky_relu_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_leaky_relu_nc_qs8(
+          leaky_relu_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(leaky_relu_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
+            << ", input " << int32_t(input[i * input_stride() + c])
+            << ", input zero point " << input_zero_point() << ", output zero point " << output_zero_point()
+            << ", positive input-to-output ratio " << (input_scale() / output_scale())
+            << ", negative input-to-output ratio " << (input_scale() / output_scale() * negative_slope());
+        }
+      }
+    }
+  }
+
   void TestQU8() const {
+    ASSERT_GE(input_zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(input_zero_point(), std::numeric_limits<uint8_t>::max());
+    ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(output_zero_point(), std::numeric_limits<uint8_t>::max());
+
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> u8dist(
@@ -289,11 +344,11 @@ class LeakyReLUOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          const float x = input_scale() * (int32_t(input[i * input_stride() + c]) - int32_t(input_zero_point()));
-          float y = (x < 0.0f ? x * negative_slope() : x) / output_scale();
-          y = std::min<float>(y, int32_t(qmax()) - int32_t(output_zero_point()));
-          y = std::max<float>(y, int32_t(qmin()) - int32_t(output_zero_point()));
-          output_ref[i * channels() + c] = y + float(int32_t(output_zero_point()));
+          const float x = input_scale() * (int32_t(input[i * input_stride() + c]) - input_zero_point());
+          float y = (x < 0.0f ? x * negative_slope() : x) / output_scale() + float(output_zero_point());
+          y = std::max<float>(y, std::numeric_limits<uint8_t>::min());
+          y = std::min<float>(y, std::numeric_limits<uint8_t>::max());
+          output_ref[i * channels() + c] = y;
         }
       }
 
@@ -307,7 +362,6 @@ class LeakyReLUOperatorTester {
           negative_slope(),
           input_zero_point(), input_scale(),
           output_zero_point(), output_scale(),
-          qmin(), qmax(),
           0, &leaky_relu_op));
       ASSERT_NE(nullptr, leaky_relu_op);
 
@@ -327,7 +381,12 @@ class LeakyReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.6f);
+          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
+            << ", input " << int32_t(input[i * input_stride() + c])
+            << ", input zero point " << input_zero_point() << ", output zero point " << output_zero_point()
+            << ", positive input-to-output ratio " << (input_scale() / output_scale())
+            << ", negative input-to-output ratio " << (input_scale() / output_scale() * negative_slope());
         }
       }
     }
@@ -338,12 +397,10 @@ class LeakyReLUOperatorTester {
   size_t channels_{1};
   size_t input_stride_{0};
   size_t output_stride_{0};
-  float negative_slope_{0.5f};
+  float negative_slope_{0.3f};
   float output_scale_{0.75f};
-  uint8_t output_zero_point_{133};
+  int16_t output_zero_point_{53};
   float input_scale_{1.25f};
-  uint8_t input_zero_point_{121};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
+  int16_t input_zero_point_{41};
   size_t iterations_{15};
 };
