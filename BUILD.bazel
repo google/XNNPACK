@@ -14802,6 +14802,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "depthwise_convolution_2d_test",
+    srcs = [
+        "test/depthwise-convolution-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":operators_test_mode",
+        ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "divide2_test",
     srcs = [
         "test/divide2.cc",
