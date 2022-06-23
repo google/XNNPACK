@@ -109,7 +109,7 @@ void xnn_f16_ibilinear_ukernel__neonfp16arith_c16(
         vo_lo = vget_high_f16(vo);
       }
       if (c & (2 * sizeof(__fp16))) {
-        vst1_lane_u32(o, vreinterpret_u32_f16(vo_lo), 0); o += 2;
+        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo_lo), 0); o += 2;
         vo_lo = vext_f16(vo_lo, vo_lo, 2);
       }
       if (c & (1 * sizeof(__fp16))) {

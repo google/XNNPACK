@@ -38,7 +38,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x4(
 
   const __fp16* w0 = (const __fp16*)weights;
   const float16x8_t vw01234567 = vld1q_f16(w0);
-  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_lane_u32((const uint32_t*)(w0 + 8), vmov_n_u32(0), 0));
+  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_lane_u32((const void*)(w0 + 8), vmov_n_u32(0), 0));
 
   const size_t input_decrement = round_down_po2(input_width, 4 /* SIMD output width */ * 2 /* subsampling */ * sizeof(__fp16));
 

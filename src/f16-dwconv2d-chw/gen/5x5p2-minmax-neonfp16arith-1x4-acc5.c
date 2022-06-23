@@ -38,7 +38,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x4_acc5(
   const float16x8_t vw01234567 = vld1q_f16(w0);
   const float16x8_t vw89ABCDEF = vld1q_f16(w0 + 8);
   const float16x8_t vwGHIJKLMN = vld1q_f16(w0 + 16);
-  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_lane_u32((const uint32_t*)(w0 + 24), vmov_n_u32(0), 0));
+  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_lane_u32((const void*)(w0 + 24), vmov_n_u32(0), 0));
 
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(__fp16));
 

@@ -55,10 +55,10 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl(
       const uint8x8_t vres0 = vtbl2_u8(v, vperm0);
       const uint8x8_t vres1 = vtbl2_u8(v, vperm1);
 
-      vst1_lane_u32(o1, vreinterpret_u32_u8(vres1), 0); o1 = (uint8_t*) ((uintptr_t) o1 + 4);
-      vst1_lane_u32(o0, vreinterpret_u32_u8(vres0), 0); o0 = (uint8_t*) ((uintptr_t) o0 + 4);
-      vst1_lane_u16(o1, vreinterpret_u16_u8(vres1), 2); o1 = (uint8_t*) ((uintptr_t) o1 + tile_wbytes_minus_4);
-      vst1_lane_u16(o0, vreinterpret_u16_u8(vres0), 2); o0 = (uint8_t*) ((uintptr_t) o0 + tile_wbytes_minus_4);
+      vst1_lane_u32((void*) o1, vreinterpret_u32_u8(vres1), 0); o1 = (uint8_t*) ((uintptr_t) o1 + 4);
+      vst1_lane_u32((void*) o0, vreinterpret_u32_u8(vres0), 0); o0 = (uint8_t*) ((uintptr_t) o0 + 4);
+      vst1_lane_u16((void*) o1, vreinterpret_u16_u8(vres1), 2); o1 = (uint8_t*) ((uintptr_t) o1 + tile_wbytes_minus_4);
+      vst1_lane_u16((void*) o0, vreinterpret_u16_u8(vres0), 2); o0 = (uint8_t*) ((uintptr_t) o0 + tile_wbytes_minus_4);
     }
 
     if (bh != 0) {
