@@ -54,6 +54,28 @@ static enum xnn_status create_leaky_relu_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_compute_type_qs8:
+      status = xnn_create_leaky_relu_nc_qs8(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->params.leaky_relu.negative_slope,
+        (int8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+        (int8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_compute_type_qu8:
+      status = xnn_create_leaky_relu_nc_qu8(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->params.leaky_relu.negative_slope,
+        (uint8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+        (uint8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -104,6 +126,24 @@ static enum xnn_status setup_leaky_relu_operator(
         input_data,
         output_data,
         threadpool);
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_operator_type_leaky_relu_nc_qs8:
+      return xnn_setup_leaky_relu_nc_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_operator_type_leaky_relu_nc_qu8:
+      return xnn_setup_leaky_relu_nc_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -142,6 +182,12 @@ enum xnn_status xnn_define_leaky_relu(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -162,9 +208,21 @@ enum xnn_status xnn_define_leaky_relu(
     return status;
   }
 
+  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
+      compute_type = xnn_compute_type_fp32;
       break;
+#ifndef XNN_NO_QS8_OPERATORS
+    case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
+#endif  // !defined(XNN_NO_QS8_OPERATORS)
+#ifndef XNN_NO_QU8_OPERATORS
+    case xnn_datatype_quint8:
+      compute_type = xnn_compute_type_qu8;
+      break;
+#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -172,6 +230,39 @@ enum xnn_status xnn_define_leaky_relu(
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
+  assert(compute_type != xnn_compute_type_invalid);
+
+  status = xnn_subgraph_check_datatype_matches(xnn_node_type_leaky_relu, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+#if !defined(XNN_NO_U8_OPERATORS) || !defined(XNN_NO_S8_OPERATORS)
+  if (compute_type == xnn_datatype_qint8 || compute_type == xnn_datatype_quint8) {
+    const float positive_input_output_scale = input_value->quantization.scale * output_value->quantization.scale;
+    if (positive_input_output_scale < 0x1.0p-8f || positive_input_output_scale > 0x1.0p+7f) {
+      xnn_log_error(
+        "failed to define %s operator with %.7g positive-input-to-output scale ratio: scale ratio must be in [2**-8, 2**7] range",
+        xnn_node_type_to_string(xnn_node_type_leaky_relu), positive_input_output_scale);
+      return xnn_status_invalid_parameter;
+    }
+
+    const float negative_input_output_scale = positive_input_output_scale * negative_slope;
+    if (negative_input_output_scale < -0x1.FFFC00p+6f || negative_input_output_scale > 0x1.0p+7f) {
+      xnn_log_error(
+        "failed to define %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be in (-2**7, 2**7] range and ",
+        xnn_node_type_to_string(xnn_node_type_leaky_relu), negative_input_output_scale);
+      return xnn_status_invalid_parameter;
+    }
+
+    if (fabsf(negative_input_output_scale) < 0x1.0p-8f) {
+      xnn_log_error(
+        "failed to define %s operator with %.7g negative-input-to-output scale ratio: scale ratio must be at least 2**-8 in absolute value",
+        xnn_node_type_to_string(xnn_node_type_leaky_relu), negative_input_output_scale);
+      return xnn_status_invalid_parameter;
+    }
+  }
+#endif  // !defined(XNN_NO_U8_OPERATORS) || !defined(XNN_NO_S8_OPERATORS)
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
@@ -179,7 +270,7 @@ enum xnn_status xnn_define_leaky_relu(
   }
 
   node->type = xnn_node_type_leaky_relu;
-  node->compute_type = xnn_compute_type_fp32;
+  node->compute_type = compute_type;
   node->params.leaky_relu.negative_slope = negative_slope;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
