@@ -31,6 +31,9 @@
 
 #define XNN_MAX_OPERATOR_OBJECTS 4
 
+/// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
+#define XNN_FLAG_NO_SUBGRAPH_FUSION 0x80000000
+
 #ifdef __cplusplus
 extern "C" {
 #endif

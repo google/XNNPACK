@@ -948,24 +948,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   return true;
 }
 
-enum xnn_status xnn_subgraph_optimize(
-  xnn_subgraph_t subgraph,
-  uint32_t flags)
+enum xnn_status xnn_subgraph_fusion(
+    xnn_subgraph_t subgraph)
 {
-  xnn_subgraph_analyze_consumers_and_producers(subgraph);
-
-  // Remove unreferenced values.
-  for (uint32_t i = 0; i < subgraph->num_values; i++) {
-    struct xnn_value* value = &subgraph->values[i];
-    if (value->type == xnn_value_type_invalid) {
-      continue;
-    }
-
-    if ((value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) == 0 && value->num_consumers == 0) {
-      xnn_value_clear(value);
-    }
-  }
-
   // Fuse Nodes where possible
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     struct xnn_value* value = &subgraph->values[i];
@@ -1094,6 +1079,32 @@ enum xnn_status xnn_subgraph_optimize(
         }
       }
     }
+  }
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_subgraph_optimize(
+  xnn_subgraph_t subgraph,
+  uint32_t flags)
+{
+  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+
+  // Remove unreferenced values.
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    struct xnn_value* value = &subgraph->values[i];
+    if (value->type == xnn_value_type_invalid) {
+      continue;
+    }
+
+    if ((value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) == 0 && value->num_consumers == 0) {
+      xnn_value_clear(value);
+    }
+  }
+
+
+  if (!(flags & XNN_FLAG_NO_SUBGRAPH_FUSION)) {
+    xnn_subgraph_fusion(subgraph);
   }
 
   #if XNN_ENABLE_SPARSE
