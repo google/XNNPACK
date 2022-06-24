@@ -19,6 +19,7 @@
 #include <random>
 #include <vector>
 
+#include "convolution-test-helpers.h"
 #include <fp16.h>
 
 #include <xnnpack.h>
@@ -571,74 +572,60 @@ class ConvolutionOperatorTester {
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
-      if (has_bias()) {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                  accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    bias[g * group_output_channels() + oc];
-                }
-              }
-            }
-          }
-        }
-      } else {
-        std::fill(accumulators.begin(), accumulators.end(), 0);
-      }
       if (depthwise_layout()) {
         ASSERT_EQ(group_input_channels(), 1);
-
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) - int32_t(input_zero_point)) *
-                            int32_t(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_depthwise_convolution_qs8_reference_results(
+          batch_size(),
+          output_height(),
+          output_width(),
+          input_height(),
+          input_width(),
+          padding_top(),
+          padding_right(),
+          padding_bottom(),
+          padding_left(),
+          kernel_height(),
+          kernel_width(),
+          subsampling_height(),
+          subsampling_width(),
+          dilation_height(),
+          dilation_width(),
+          groups(),
+          group_output_channels(),
+          input_channel_stride(),
+          input_zero_point,
+          input,
+          kernel,
+          accumulators,
+          has_bias(),
+          bias);
       } else {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                            accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
-                              int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_convolution_qs8_reference_results(
+          batch_size(),
+          output_height(),
+          output_width(),
+          input_height(),
+          input_width(),
+          padding_top(),
+          padding_right(),
+          padding_bottom(),
+          padding_left(),
+          kernel_height(),
+          kernel_width(),
+          subsampling_height(),
+          subsampling_width(),
+          dilation_height(),
+          dilation_width(),
+          groups(),
+          group_input_channels(),
+          group_output_channels(),
+          input_channel_stride(),
+          input_zero_point,
+          input,
+          kernel,
+          accumulators,
+          has_bias(),
+          bias);
       }
 
       // Compute renormalization parameters.
@@ -821,74 +808,60 @@ class ConvolutionOperatorTester {
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
-      if (has_bias()) {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t g = 0; g < groups(); g++) {
-                for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                  accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    bias[g * group_output_channels() + oc];
-                }
-              }
-            }
-          }
-        }
-      } else {
-        std::fill(accumulators.begin(), accumulators.end(), 0);
-      }
       if (depthwise_layout()) {
         ASSERT_EQ(group_input_channels(), 1);
-
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) - int32_t(input_zero_point)) *
-                            int32_t(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_depthwise_convolution_qs8_reference_results(
+          batch_size(),
+          output_height(),
+          output_width(),
+          input_height(),
+          input_width(),
+          padding_top(),
+          padding_right(),
+          padding_bottom(),
+          padding_left(),
+          kernel_height(),
+          kernel_width(),
+          subsampling_height(),
+          subsampling_width(),
+          dilation_height(),
+          dilation_width(),
+          groups(),
+          group_output_channels(),
+          input_channel_stride(),
+          input_zero_point,
+          input,
+          kernel,
+          accumulators,
+          has_bias(),
+          bias);
       } else {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                            accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
-                              int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_convolution_qs8_reference_results(
+          batch_size(),
+          output_height(),
+          output_width(),
+          input_height(),
+          input_width(),
+          padding_top(),
+          padding_right(),
+          padding_bottom(),
+          padding_left(),
+          kernel_height(),
+          kernel_width(),
+          subsampling_height(),
+          subsampling_width(),
+          dilation_height(),
+          dilation_width(),
+          groups(),
+          group_input_channels(),
+          group_output_channels(),
+          input_channel_stride(),
+          input_zero_point,
+          input,
+          kernel,
+          accumulators,
+          has_bias(),
+          bias);
       }
 
       // Compute renormalization parameters.
@@ -1072,56 +1045,60 @@ class ConvolutionOperatorTester {
       }
       if (depthwise_layout()) {
         ASSERT_EQ(group_input_channels(), 1);
-
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) - int32_t(input_zero_point)) *
-                            (int32_t(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]) - int32_t(kernel_zero_point));
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_depthwise_convolution_qu8_reference_results(
+            batch_size(),
+            output_height(),
+            output_width(),
+            input_height(),
+            input_width(),
+            padding_top(),
+            padding_right(),
+            padding_bottom(),
+            padding_left(),
+            kernel_height(),
+            kernel_width(),
+            subsampling_height(),
+            subsampling_width(),
+            dilation_height(),
+            dilation_width(),
+            groups(),
+            group_output_channels(),
+            input_channel_stride(),
+            input_zero_point,
+            kernel_zero_point,
+            input,
+            kernel,
+            accumulators,
+            has_bias(),
+            bias);
       } else {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oy = 0; oy < output_height(); oy++) {
-            for (size_t ox = 0; ox < output_width(); ox++) {
-              for (size_t ky = 0; ky < kernel_height(); ky++) {
-                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
-                if (iy < input_height()) {
-                  for (size_t kx = 0; kx < kernel_width(); kx++) {
-                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
-                    if (ix < input_width()) {
-                      for (size_t g = 0; g < groups(); g++) {
-                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
-                          for (size_t ic = 0; ic < group_input_channels(); ic++) {
-                            accumulators[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              (int32_t(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) - int32_t(input_zero_point)) *
-                              (int32_t(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]) - int32_t(kernel_zero_point));
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        xnnpack::compute_convolution_qu8_reference_results(
+            batch_size(),
+            output_height(),
+            output_width(),
+            input_height(),
+            input_width(),
+            padding_top(),
+            padding_right(),
+            padding_bottom(),
+            padding_left(),
+            kernel_height(),
+            kernel_width(),
+            subsampling_height(),
+            subsampling_width(),
+            dilation_height(),
+            dilation_width(),
+            groups(),
+            group_input_channels(),
+            group_output_channels(),
+            input_channel_stride(),
+            input_zero_point,
+            kernel_zero_point,
+            input,
+            kernel,
+            accumulators,
+            has_bias(),
+            bias);
       }
 
       // Compute renormalization parameters.

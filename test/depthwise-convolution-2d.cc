@@ -10,15 +10,18 @@
 #include <cstdint>
 #include <memory>
 #include <random>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 #include <xnnpack.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
+#include "convolution-test-helpers.h"
 #include <gtest/gtest.h>
+
+namespace xnnpack {
 
 template <class T, class BiasType = T> class DepthwiseConvolutionTestBase : public ::testing::Test {
 protected:
@@ -128,24 +131,6 @@ protected:
     else {
       input_zero_point = u8dist(this->rng);
       kernel_zero_point = 0;
-    }
-  }
-
-  void initialize_accumulators_from_bias()
-  {
-    for (size_t i = 0; i < this->batch_size; i++) {
-      for (size_t oy = 0; oy < this->output_height; oy++) {
-        for (size_t ox = 0; ox < this->output_width; ox++) {
-          for (size_t g = 0; g < this->input_channels; g++) {
-            for (size_t oc = 0; oc < this->depth_multiplier; oc++) {
-              accumulators
-                [(((i * this->output_height + oy) * this->output_width + ox) * this->input_channels + g) *
-                   this->depth_multiplier +
-                 oc] = this->bias[g * this->depth_multiplier + oc];
-            }
-          }
-        }
-      }
     }
   }
 
@@ -472,37 +457,30 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
   const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
 
   // Compute reference results, without renormalization.
-  initialize_accumulators_from_bias();
-  for (size_t i = 0; i < batch_size; i++) {
-    for (size_t oy = 0; oy < output_height; oy++) {
-      for (size_t ox = 0; ox < output_width; ox++) {
-        for (size_t ky = 0; ky < kernel_height; ky++) {
-          const size_t iy = oy * subsampling_height + ky * dilation_height - input_padding_top;
-          if (iy < input_height) {
-            for (size_t kx = 0; kx < kernel_width; kx++) {
-              const size_t ix = ox * subsampling_width + kx * dilation_width - input_padding_left;
-              if (ix < input_width) {
-                for (size_t g = 0; g < input_channels; g++) {
-                  for (size_t oc = 0; oc < depth_multiplier; oc++) {
-                    for (size_t ic = 0; ic < 1; ic++) {
-                      accumulators
-                        [(((i * output_height + oy) * output_width + ox) * input_channels + g) * depth_multiplier +
-                         oc] +=
-                        (int32_t(
-                           input[((i * input_height + iy) * input_width + ix) * input_channels * 1 + g * 1 + ic]) -
-                         int32_t(input_zero_point)) *
-                        int32_t(
-                          filter[(((g * depth_multiplier + oc) * kernel_height + ky) * kernel_width + kx) * 1 + ic]);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  compute_depthwise_convolution_qs8_reference_results(
+      batch_size,
+      output_height,
+      output_width,
+      input_height,
+      input_width,
+      input_padding_top,
+      input_padding_right,
+      input_padding_bottom,
+      input_padding_left,
+      kernel_height,
+      kernel_width,
+      subsampling_height,
+      subsampling_width,
+      dilation_height,
+      dilation_width,
+      input_channels,
+      depth_multiplier,
+      input_zero_point,
+      input,
+      filter,
+      accumulators,
+      /*has_bias=*/true,
+      bias);
 
   // Compute renormalization parameters.
   for (size_t c = 0; c < input_channels * depth_multiplier; c++) {
@@ -623,38 +601,31 @@ TEST_F(DepthwiseConvolutionTestQS8, matches_operator_api)
   std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
   std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
-  // Compute reference results, without renormalization.
-  initialize_accumulators_from_bias();
-  for (size_t i = 0; i < batch_size; i++) {
-    for (size_t oy = 0; oy < output_height; oy++) {
-      for (size_t ox = 0; ox < output_width; ox++) {
-        for (size_t ky = 0; ky < kernel_height; ky++) {
-          const size_t iy = oy * subsampling_height + ky * dilation_height - input_padding_top;
-          if (iy < input_height) {
-            for (size_t kx = 0; kx < kernel_width; kx++) {
-              const size_t ix = ox * subsampling_width + kx * dilation_width - input_padding_left;
-              if (ix < input_width) {
-                for (size_t g = 0; g < input_channels; g++) {
-                  for (size_t oc = 0; oc < depth_multiplier; oc++) {
-                    for (size_t ic = 0; ic < 1; ic++) {
-                      accumulators
-                        [(((i * output_height + oy) * output_width + ox) * input_channels + g) * depth_multiplier +
-                         oc] +=
-                        (int32_t(
-                           input[((i * input_height + iy) * input_width + ix) * input_channels * 1 + g * 1 + ic]) -
-                         int32_t(input_zero_point)) *
-                        int32_t(
-                          filter[(((g * depth_multiplier + oc) * kernel_height + ky) * kernel_width + kx) * 1 + ic]);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  compute_convolution_qs8_reference_results(
+      batch_size,
+      output_height,
+      output_width,
+      input_height,
+      input_width,
+      input_padding_top,
+      input_padding_right,
+      input_padding_bottom,
+      input_padding_left,
+      kernel_height,
+      kernel_width,
+      subsampling_height,
+      subsampling_width,
+      dilation_height,
+      dilation_width,
+      /*groups=*/input_channels,
+      /*group_input_channels=*/1,
+      /*group_output_channels=*/depth_multiplier,
+      input_zero_point,
+      input,
+      filter,
+      accumulators,
+      /*has_bias=*/true,
+      bias);
 
   // Compute renormalization parameters.
   const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
@@ -761,38 +732,32 @@ TEST_F(DepthwiseConvolutionTestQU8, matches_operator_api)
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   // Compute reference results, without renormalization.
-  initialize_accumulators_from_bias();
-  for (size_t i = 0; i < batch_size; i++) {
-    for (size_t oy = 0; oy < output_height; oy++) {
-      for (size_t ox = 0; ox < output_width; ox++) {
-        for (size_t ky = 0; ky < kernel_height; ky++) {
-          const size_t iy = oy * subsampling_height + ky * dilation_height - input_padding_top;
-          if (iy < input_height) {
-            for (size_t kx = 0; kx < kernel_width; kx++) {
-              const size_t ix = ox * subsampling_width + kx * dilation_width - input_padding_left;
-              if (ix < input_width) {
-                for (size_t g = 0; g < input_channels; g++) {
-                  for (size_t oc = 0; oc < depth_multiplier; oc++) {
-                    for (size_t ic = 0; ic < 1; ic++) {
-                      accumulators
-                        [(((i * output_height + oy) * output_width + ox) * input_channels + g) * depth_multiplier +
-                         oc] +=
-                        (int32_t(
-                           input[((i * input_height + iy) * input_width + ix) * input_channels * 1 + g * 1 + ic]) -
-                         int32_t(input_zero_point)) *
-                        (int32_t(
-                           filter[(((g * depth_multiplier + oc) * kernel_height + ky) * kernel_width + kx) * 1 + ic]) -
-                         int32_t(kernel_zero_point));
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  compute_convolution_qu8_reference_results(
+      batch_size,
+      output_height,
+      output_width,
+      input_height,
+      input_width,
+      input_padding_top,
+      input_padding_right,
+      input_padding_bottom,
+      input_padding_left,
+      kernel_height,
+      kernel_width,
+      subsampling_height,
+      subsampling_width,
+      dilation_height,
+      dilation_width,
+      /*groups=*/input_channels,
+      /*group_input_channels=*/1,
+      /*group_output_channels=*/depth_multiplier,
+      input_zero_point,
+      kernel_zero_point,
+      input,
+      filter,
+      accumulators,
+      /*has_bias=*/true,
+      bias);
 
   // Compute renormalization parameters.
   const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
@@ -970,3 +935,4 @@ TEST_F(DepthwiseConvolutionTestF32, matches_operator_api)
 
   ASSERT_EQ(subgraph_output, operator_output);
 }
+}  // namespace xnnpack

@@ -14265,7 +14265,9 @@ xnnpack_unit_test(
         "test/convolution-operator-tester.h",
     ],
     shard_count = 10,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        ":convolution_test_helpers",
+    ],
 )
 
 xnnpack_unit_test(
@@ -14275,7 +14277,9 @@ xnnpack_unit_test(
         "test/convolution-nchw.cc",
         "test/convolution-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        ":convolution_test_helpers",
+    ],
 )
 
 xnnpack_unit_test(
@@ -14295,7 +14299,9 @@ xnnpack_unit_test(
         "test/deconvolution-operator-tester.h",
     ],
     shard_count = 10,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        ":convolution_test_helpers",
+    ],
 )
 
 xnnpack_unit_test(
@@ -14571,6 +14577,17 @@ xnnpack_unit_test(
 ########################### Unit tests for subgraph ###########################
 
 xnnpack_cc_library(
+    name = "convolution_test_helpers",
+    testonly = True,
+    srcs = [
+        "test/convolution-test-helpers.cc",
+    ],
+    hdrs = [
+        "test/convolution-test-helpers.h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "subgraph_unary_tester",
     testonly = True,
     hdrs = [
@@ -14769,6 +14786,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":convolution_test_helpers",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -14808,6 +14826,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":convolution_test_helpers",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
