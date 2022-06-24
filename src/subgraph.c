@@ -1103,7 +1103,7 @@ enum xnn_status xnn_subgraph_optimize(
   }
 
 
-  if (!(flags & XNN_FLAG_NO_SUBGRAPH_FUSION)) {
+  if (!(flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
   }
 
