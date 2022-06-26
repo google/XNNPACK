@@ -239,7 +239,7 @@ enum xnn_status xnn_define_leaky_relu(
 
 #if !defined(XNN_NO_U8_OPERATORS) || !defined(XNN_NO_S8_OPERATORS)
   if (compute_type == xnn_datatype_qint8 || compute_type == xnn_datatype_quint8) {
-    const float positive_input_output_scale = input_value->quantization.scale * output_value->quantization.scale;
+    const float positive_input_output_scale = input_value->quantization.scale / output_value->quantization.scale;
     if (positive_input_output_scale < 0x1.0p-8f || positive_input_output_scale > 0x1.0p+7f) {
       xnn_log_error(
         "failed to define %s operator with %.7g positive-input-to-output scale ratio: scale ratio must be in [2**-8, 2**7] range",
