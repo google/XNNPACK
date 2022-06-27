@@ -7483,7 +7483,7 @@ static void init(void) {
     };
     xnn_params.vcvt.qu8 = (struct vunary_parameters) {
       .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vcvt_ukernel__scalar_x4,
-      .init.qu8_cvt = xnn_init_qu8_f32_cvt_scalar_params,
+      .init.qu8_cvt = xnn_init_qu8_cvt_scalar_params,
       .element_tile = 4,
     };
     xnn_params.vcvt.qu8_to_f32 = (struct vunary_parameters) {
