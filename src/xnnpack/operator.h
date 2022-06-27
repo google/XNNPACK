@@ -224,7 +224,9 @@ struct xnn_operator {
     union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
     union xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    union xnn_qs8_cvt_params qs8_cvt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    union xnn_qu8_cvt_params qu8_cvt;
     union xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch

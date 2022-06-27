@@ -4420,8 +4420,10 @@ struct vunary_parameters {
     xnn_init_f32_rnd_params_fn f32_rnd;
     xnn_init_f32_sigmoid_params_fn f32_sigmoid;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
+    xnn_init_qs8_cvt_params_fn qs8_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
     xnn_init_qs8_lrelu_params_fn qs8_lrelu;
+    xnn_init_qu8_cvt_params_fn qu8_cvt;
     xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
     xnn_init_qu8_lrelu_params_fn qu8_lrelu;
     xnn_init_s8_minmax_params_fn s8_minmax;
@@ -4873,7 +4875,9 @@ struct xnn_parameters {
     struct vunary_parameters f32_to_f16;
     struct vunary_parameters f32_to_qs8;
     struct vunary_parameters f32_to_qu8;
+    struct vunary_parameters qs8;
     struct vunary_parameters qs8_to_f32;
+    struct vunary_parameters qu8;
     struct vunary_parameters qu8_to_f32;
   } vcvt;
   struct {
