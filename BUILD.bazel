@@ -15241,6 +15241,19 @@ xnnpack_unit_test(
     ],
 )
 
+xnnpack_unit_test(
+    name = "fusion_test",
+    srcs = [
+        "test/fusion.cc",
+        "test/runtime-tester.h",
+        "test/subgraph-tester.h",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(

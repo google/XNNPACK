@@ -7740,6 +7740,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(unpooling-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
   ADD_TEST(NAME unpooling-2d-test COMMAND unpooling-2d-test)
 
+  ADD_EXECUTABLE(fusion-test test/fusion.cc)
+  TARGET_INCLUDE_DIRECTORIES(fusion-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(fusion-test PRIVATE XNNPACK fp16 gmock gtest gtest_main subgraph)
+  ADD_TEST(NAME fusion-test COMMAND fusion-test)
+
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
