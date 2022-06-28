@@ -9,6 +9,8 @@
 #include "runtime-tester.h"
 #include <gtest/gtest.h>
 
+namespace xnnpack {
+
 TEST(ADD_THEN_CLAMP, fusion) {
   auto tester = RuntimeTester(4);
   float output_min = -0.5f;
@@ -110,8 +112,8 @@ TEST(CONVOLUTION_2D_THEN_CLAMP, fusion) {
   uint32_t output_id = 4;
   tester
     .AddInputTensorF32({1, 256, 256, 3}, input_id)
-    .AddStaticTensorF32({32, 3, 3, 3}, kStaticDense, filter_id)
-    .AddStaticTensorF32({32}, kStaticDense, bias_id)
+    .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({32}, TensorType::kDense, bias_id)
     .AddDynamicTensorF32({1, 128, 128, 32}, intermediate_id)
     .AddOutputTensorF32({1, 128, 128, 32}, output_id)
     .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, input_id, filter_id, bias_id, intermediate_id)
@@ -172,8 +174,8 @@ TEST(DECONVOLUTION_2D_THEN_CLAMP, fusion) {
   uint32_t output_id = 4;
   tester
     .AddInputTensorF32({1, 128, 128, 3}, input_id)
-    .AddStaticTensorF32({32, 3, 3, 3}, kStaticDense, filter_id)
-    .AddStaticTensorF32({32}, kStaticDense, bias_id)
+    .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({32}, TensorType::kDense, bias_id)
     .AddDynamicTensorF32({1, 255, 255, 32}, intermediate_id)
     .AddOutputTensorF32({1, 255, 255, 32}, output_id)
     .AddDeconvolution2D(1, 1, 1, 1, 0, 0, 3, 3, 2, 2, 1, 1, 1, 3, 32, input_id, filter_id, bias_id, intermediate_id)
@@ -204,8 +206,8 @@ TEST(DEPTHWISE_CONVOLUTION_2D_THEN_CLAMP, fusion) {
   uint32_t output_id = 4;
   tester
     .AddInputTensorF32({1, 128, 128, 4}, input_id)
-    .AddStaticTensorF32({1, 3, 3, 4}, kStaticDense, filter_id)
-    .AddStaticTensorF32({4}, kStaticDense, bias_id)
+    .AddStaticTensorF32({1, 3, 3, 4}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({4}, TensorType::kDense, bias_id)
     .AddDynamicTensorF32({1, 128, 128, 4}, intermediate_id)
     .AddOutputTensorF32({1, 128, 128, 4}, output_id)
     .AddDepthwiseConv(1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 4, input_id, filter_id, bias_id, intermediate_id)
@@ -236,8 +238,8 @@ TEST(FULLY_CONNECTED_2D_THEN_CLAMP, fusion) {
   uint32_t output_id = 4;
   tester
     .AddInputTensorF32({5, 3}, input_id)
-    .AddStaticTensorF32({7, 3}, kStaticDense, filter_id)
-    .AddStaticTensorF32({7}, kStaticDense, bias_id)
+    .AddStaticTensorF32({7, 3}, TensorType::kDense, filter_id)
+    .AddStaticTensorF32({7}, TensorType::kDense, bias_id)
     .AddDynamicTensorF32({5, 7}, intermediate_id)
     .AddOutputTensorF32({5, 7}, output_id)
     .AddFullyConnected(input_id, filter_id, bias_id, intermediate_id)
@@ -344,3 +346,5 @@ TEST(SUBTRACT_THEN_CLAMP, fusion) {
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
+
+}  // namespace xnnpack

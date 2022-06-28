@@ -16,6 +16,8 @@
 
 #include "subgraph-tester.h"
 
+namespace xnnpack {
+
 class RuntimeTester : public SubgraphTester {
  public:
   using SubgraphTester::SubgraphTester;
@@ -70,3 +72,5 @@ class RuntimeTester : public SubgraphTester {
 
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> runtime_{nullptr, xnn_delete_runtime};
 };
+
+}  // namespace xnnpack

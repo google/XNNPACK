@@ -21,9 +21,11 @@
 
 #include <gtest/gtest.h>
 
-enum xnn_tensor_type {
-  kStaticDense,
-  kStaticSparse,
+namespace xnnpack {
+
+enum class TensorType {
+  kDense,
+  kSparse,
 };
 
 class SubgraphTester {
@@ -55,14 +57,14 @@ class SubgraphTester {
   }
 
   inline SubgraphTester& AddStaticTensorF32(const std::vector<size_t>& dims,
-                                            xnn_tensor_type tensor_type,
+                                            TensorType tensor_type,
                                             uint32_t external_id,
                                             uint32_t flags = 0) {
     const size_t num_elements = NumElements(dims);
     static_data_.emplace_back(num_elements * sizeof(float));
     float* data = reinterpret_cast<float*>(static_data_.back().data());
 
-    if (tensor_type == kStaticDense) {
+    if (tensor_type == TensorType::kDense) {
       std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
     } else {
       // Create tensor with 90% sparsity in two steps:
@@ -310,3 +312,5 @@ class SubgraphTester {
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
 
 };
+
+}  // namespace xnnpack
