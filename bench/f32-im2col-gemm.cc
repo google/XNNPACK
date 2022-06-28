@@ -26,6 +26,7 @@
 static void Im2ColGEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_function f32_gemm,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
+  xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -86,8 +87,8 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_minmax_params params;
-  xnn_init_f32_minmax_params(
-    &params, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
+  init_params(&params,
+    -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -140,7 +141,8 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   static void f32_gemm_4x8__aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, const char* net) {
-    Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75, 4, 8, 1, 1);
+    Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75, 4, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params);
   }
 
   BENCHMARK_CONV(f32_gemm_4x8__aarch64_neonfma_prfm_cortex_a75)
@@ -148,11 +150,13 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
 
 
 static void f32_gemm_2x4__scalar(benchmark::State& state, const char* net) {
-  Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_2x4__scalar, 2, 4, 1, 1);
+  Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_2x4__scalar, 2, 4, 1, 1,
+    xnn_init_f32_minmax_scalar_params);
 }
 
 static void f32_gemm_4x4__scalar(benchmark::State& state, const char* net) {
-  Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x4__scalar, 4, 4, 1, 1);
+  Im2ColGEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x4__scalar, 4, 4, 1, 1,
+    xnn_init_f32_minmax_scalar_params);
 }
 
 BENCHMARK_CONV(f32_gemm_2x4__scalar)
