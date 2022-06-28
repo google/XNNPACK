@@ -5,25 +5,36 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <vector>
+
 #include <xnnpack.h>
 #include <xnnpack/subgraph.h>
 
 #include "subgraph-tester.h"
 
-template<typename T>
-class RuntimeTester : public SubgraphTester<T> {
+class RuntimeTester : public SubgraphTester {
  public:
-  using SubgraphTester<T>::SubgraphTester;
+  using SubgraphTester::SubgraphTester;
 
+  template<typename T>
   inline std::vector<T> RunWithFusion() {
     Run();
-    std::vector<T>& output = this->external_tensors_.at(this->output_id);
+    std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
+    std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
+    std::memcpy(output.data(), tensor.data(), tensor.size());
     return output;
   }
 
+  template<typename T>
   inline std::vector<T> RunWithoutFusion() {
     Run(XNN_FLAG_NO_OPERATOR_FUSION);
-    std::vector<T>& output = this->external_tensors_.at(this->output_id);
+    std::vector<char>& tensor = this->external_tensors_.at(this->output_id_);
+    std::vector<float> output = std::vector<float>(tensor.size() / sizeof(float));
+    memcpy(output.data(), tensor.data(), tensor.size());
     return output;
   }
 
@@ -38,10 +49,6 @@ class RuntimeTester : public SubgraphTester<T> {
   }
 
  private:
-  void ScrambleOutput(std::vector<float>& output) {
-    std::fill(output.begin(), output.end(), std::nanf(""));
-  }
-
   void Run(uint32_t flags = 0) {
     xnn_runtime_t runtime = nullptr;
     ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(this->subgraph_.get(), nullptr, nullptr, flags, &runtime));
@@ -50,9 +57,9 @@ class RuntimeTester : public SubgraphTester<T> {
 
     std::vector<xnn_external_value> externals;
     for (auto it = this->external_tensors_.begin(); it != this->external_tensors_.end(); ++it) {
-      if (it->first == this->output_id) {
-        // Scramble output data.
-        ScrambleOutput(it->second);
+      if (it->first == this->output_id_) {
+        // Scramble output tensor.
+        std::fill(it->second.begin(), it->second.end(), 0xA8);
       }
       externals.push_back(xnn_external_value{it->first, it->second.data()});
     }

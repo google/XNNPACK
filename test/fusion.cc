@@ -10,7 +10,7 @@
 #include <gtest/gtest.h>
 
 TEST(ADD_THEN_CLAMP, fusion) {
-  auto tester = RuntimeTester<float>(4);
+  auto tester = RuntimeTester(4);
   float output_min = -0.5f;
   float output_max = 0.5f;
   uint32_t input1_id = 0;
@@ -18,17 +18,17 @@ TEST(ADD_THEN_CLAMP, fusion) {
   uint32_t intermediate_id = 2;
   uint32_t output_id = 3;
   tester
-    .AddInputTensor({1, 2, 2, 3}, input1_id)
-    .AddInputTensor({1, 2, 2, 3}, input2_id)
-    .AddTensor({1, 2, 2, 3}, kDynamic, intermediate_id)
-    .AddOutputTensor({1, 2, 2, 3}, output_id)
+    .AddInputTensorF32({1, 2, 2, 3}, input1_id)
+    .AddInputTensorF32({1, 2, 2, 3}, input2_id)
+    .AddDynamicTensorF32({1, 2, 2, 3}, intermediate_id)
+    .AddOutputTensorF32({1, 2, 2, 3}, output_id)
     .AddAddition(input1_id, input2_id, intermediate_id)
     .AddClamp(output_min, output_max, intermediate_id, output_id);
 
-  std::vector<float> unoptimized_output = tester.RunWithoutFusion();
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
   ASSERT_EQ(tester.NumOperators(), 2);
 
-  std::vector<float> optimized_output = tester.RunWithFusion();
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
 
   ASSERT_EQ(tester.NumOperators(), 1);
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);

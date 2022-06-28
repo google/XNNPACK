@@ -9,13 +9,13 @@
 #include <gtest/gtest.h>
 
 TEST(SUBGRAPH_NCHW, single_conv) {
-  auto tester = SubgraphTesterF32(4);
+  auto tester = SubgraphTester(4);
   tester
-    .AddTensor({1, 256, 256, 3}, kDynamic, 0)
-    .AddTensor({32, 3, 3, 3}, kStaticDense, 1)
-    .AddTensor({32}, kStaticDense, 2)
-    .AddTensor({1, 128, 128, 32}, kDynamic, 3)
-    .AddConv(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
+    .AddDynamicTensorF32({1, 256, 256, 3}, 0)
+    .AddStaticTensorF32({32, 3, 3, 3}, kStaticDense, 1)
+    .AddStaticTensorF32({32}, kStaticDense, 2)
+    .AddDynamicTensorF32({1, 128, 128, 32}, 3)
+    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
     .Optimize()
     .Rewrite();
 
@@ -24,14 +24,14 @@ TEST(SUBGRAPH_NCHW, single_conv) {
 }
 
 TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
-  auto tester = SubgraphTesterF32(5);
+  auto tester = SubgraphTester(5);
   tester
-    .AddTensor({1, 256, 256, 3}, kDynamic, 0)
-    .AddTensor({32, 3, 3, 3}, kStaticDense, 1)
-    .AddTensor({32}, kStaticDense, 2)
-    .AddTensor({1, 128, 128, 32}, kDynamic, 3)
-    .AddTensor({32}, kDynamic, 4)
-    .AddConv(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
+    .AddDynamicTensorF32({1, 256, 256, 3}, 0)
+    .AddStaticTensorF32({32, 3, 3, 3}, kStaticDense, 1)
+    .AddStaticTensorF32({32}, kStaticDense, 2)
+    .AddDynamicTensorF32({1, 128, 128, 32}, 3)
+    .AddDynamicTensorF32({32}, 4)
+    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
     .AddGlobalAveragePooling(3, 4)
     .Optimize()
     .Rewrite();
@@ -42,18 +42,18 @@ TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
 }
 
 TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
-  auto tester = SubgraphTesterF32(8);
+  auto tester = SubgraphTester(8);
   tester
-    .AddTensor({1, 256, 256, 3}, kDynamic, 0)
-    .AddTensor({8, 3, 3, 3}, kStaticDense, 1)
-    .AddTensor({8}, kStaticDense, 2)
-    .AddTensor({1, 128, 128, 8}, kDynamic, 3)
-    .AddTensor({4, 1, 1, 8}, kStaticSparse, 4)
-    .AddTensor({4}, kStaticDense, 5)
-    .AddTensor({1, 128, 128, 4}, kDynamic, 6)
-    .AddTensor({1, 4}, kDynamic, 7)
-    .AddConv(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
-    .AddConv(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
+    .AddDynamicTensorF32({1, 256, 256, 3}, 0)
+    .AddStaticTensorF32({8, 3, 3, 3}, kStaticDense, 1)
+    .AddStaticTensorF32({8}, kStaticDense, 2)
+    .AddDynamicTensorF32({1, 128, 128, 8}, 3)
+    .AddStaticTensorF32({4, 1, 1, 8}, kStaticSparse, 4)
+    .AddStaticTensorF32({4}, kStaticDense, 5)
+    .AddDynamicTensorF32({1, 128, 128, 4}, 6)
+    .AddDynamicTensorF32({1, 4}, 7)
+    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
+    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
     .AddGlobalAveragePooling(6, 7)
     .Optimize()
     .Rewrite();
@@ -65,28 +65,28 @@ TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
 }
 
 TEST(SUBGRAPH_NCHW, bottleneck) {
-  auto tester = SubgraphTesterF32(15);
+  auto tester = SubgraphTester(15);
   tester
-    .AddTensor({1, 256, 256, 3}, kDynamic, 0)
-    .AddTensor({8, 3, 3, 3}, kStaticDense, 1)
-    .AddTensor({8}, kStaticDense, 2)
-    .AddTensor({1, 128, 128, 8}, kDynamic, 3)
-    .AddTensor({4, 1, 1, 8}, kStaticSparse, 4)
-    .AddTensor({4}, kStaticDense, 5)
-    .AddTensor({1, 128, 128, 4}, kDynamic, 6)
-    .AddTensor({1, 3, 3, 4}, kStaticDense, 7)
-    .AddTensor({4}, kStaticDense, 8)
-    .AddTensor({1, 128, 128, 4}, kDynamic, 9)
-    .AddTensor({8, 1, 1, 4}, kStaticSparse, 10)
-    .AddTensor({8}, kStaticDense, 11)
-    .AddTensor({1, 128, 128, 8}, kDynamic, 12)
-    .AddTensor({1, 128, 128, 8}, kDynamic, 13)
-    .AddTensor({1, 128, 128, 8}, kDynamic, 13)
-    .AddTensor({1, 8}, kDynamic, 14)
-    .AddConv(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
-    .AddConv(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
+    .AddDynamicTensorF32({1, 256, 256, 3}, 0)
+    .AddStaticTensorF32({8, 3, 3, 3}, kStaticDense, 1)
+    .AddStaticTensorF32({8}, kStaticDense, 2)
+    .AddDynamicTensorF32({1, 128, 128, 8}, 3)
+    .AddStaticTensorF32({4, 1, 1, 8}, kStaticSparse, 4)
+    .AddStaticTensorF32({4}, kStaticDense, 5)
+    .AddDynamicTensorF32({1, 128, 128, 4}, 6)
+    .AddStaticTensorF32({1, 3, 3, 4}, kStaticDense, 7)
+    .AddStaticTensorF32({4}, kStaticDense, 8)
+    .AddDynamicTensorF32({1, 128, 128, 4}, 9)
+    .AddStaticTensorF32({8, 1, 1, 4}, kStaticSparse, 10)
+    .AddStaticTensorF32({8}, kStaticDense, 11)
+    .AddDynamicTensorF32({1, 128, 128, 8}, 12)
+    .AddDynamicTensorF32({1, 128, 128, 8}, 13)
+    .AddDynamicTensorF32({1, 128, 128, 8}, 13)
+    .AddDynamicTensorF32({1, 8}, 14)
+    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
+    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
     .AddDepthwiseConv(1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 4, 6, 7, 8, 9)
-    .AddConv(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 9, 10, 11, 12)
+    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 9, 10, 11, 12)
     .AddAddition(3, 12, 13)
     .AddGlobalAveragePooling(13, 14)
     .Optimize()
