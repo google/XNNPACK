@@ -4,7 +4,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 jobs:
-  build-xnnpack-cmake:
+  cmake-linux-local:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -16,7 +16,23 @@ jobs:
       - name: Configure CMake and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
-  build-xnnpack-cmake-linux-armhf:
+  cmake-linux-aarch64:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update apt
+        run: sudo apt update
+      - name: Install ninja
+        run: sudo apt install ninja-build
+      - name: Install aarch64 cross-toolchain
+        run: sudo apt install crossbuild-essential-arm64
+      - name: Install qemu-aarch64
+        run: sudo apt install qemu-user
+      - name: Configure CMake and build
+        run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
+        working-directory: ${{ github.workspace }}
+  cmake-linux-armhf:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
@@ -32,7 +48,7 @@ jobs:
       - name: Configure CMake and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
-  build-xnnpack-cmake-linux-riscv64:
+  cmake-linux-riscv64:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -48,7 +64,7 @@ jobs:
       - name: Configure CMake and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
-  build-xnnpack-cmake-windows:
+  cmake-windows:
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -59,7 +75,7 @@ jobs:
         run: scripts/build-windows.sh
         shell: bash  # Specify bash so we can reuse the build script on Windows (runs on Git bash)
         working-directory: ${{ github.workspace }}
-  build-xnnpack-cmake-android:
+  cmake-android:
     strategy:
       matrix:
         script: [build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
