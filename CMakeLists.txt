@@ -7597,7 +7597,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET_TARGET_PROPERTIES(depthwise-convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(depthwise-convolution-2d-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(depthwise-convolution-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph convolution-test-helpers)
-  ADD_TEST(depthwise-convolution-2d-test depthwise-convolution-2d-test)
+  ADD_TEST(NAME depthwise-convolution-2d-test COMMAND depthwise-convolution-2d-test)
 
   ADD_EXECUTABLE(divide2-test test/divide2.cc)
   TARGET_INCLUDE_DIRECTORIES(divide2-test PRIVATE src test)
