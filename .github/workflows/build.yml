@@ -9,8 +9,10 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
+      - name: Update apt
+        run: sudo apt update
       - name: Install ninja
-        run: sudo apt-get install ninja-build
+        run: sudo apt install ninja-build
       - name: Configure CMake and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
@@ -20,13 +22,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Update apt
-        run: sudo apt-get update
+        run: sudo apt update
       - name: Install ninja
-        run: sudo apt-get install ninja-build
+        run: sudo apt install ninja-build
       - name: Install armhf cross-toolchain
-        run: sudo apt-get install crossbuild-essential-armhf
+        run: sudo apt install crossbuild-essential-armhf
       - name: Install qemu-arm
-        run: sudo apt-get install qemu-user
+        run: sudo apt install qemu-user
       - name: Configure CMake and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
@@ -36,13 +38,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Update apt
-        run: sudo apt-get update
+        run: sudo apt update
       - name: Install ninja
-        run: sudo apt-get install ninja-build
+        run: sudo apt install ninja-build
       - name: Install riscv64 cross-toolchain
-        run: sudo apt-get install crossbuild-essential-riscv64
+        run: sudo apt install crossbuild-essential-riscv64
       - name: Install qemu-riscv64
-        run: sudo apt-get install qemu-user
+        run: sudo apt install qemu-user
       - name: Configure CMake and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
@@ -65,8 +67,10 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v2
+      - name: Update apt
+        run: sudo apt update
       - name: Install ninja
-        run: sudo apt-get install ninja-build
+        run: sudo apt install ninja-build
       - name: Setup Android NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1.0.6
