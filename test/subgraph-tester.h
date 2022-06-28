@@ -158,6 +158,22 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddAveragePooling2D(
+      uint32_t input_padding_top, uint32_t input_padding_right,
+      uint32_t input_padding_bottom, uint32_t input_padding_left,
+      uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
+      uint32_t stride_width, uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_average_pooling_2d(
+        subgraph_.get(), input_padding_top, input_padding_right,
+        input_padding_bottom, input_padding_left, pooling_height, pooling_width,
+        stride_height, stride_width, -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, output_id,
+        0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
   inline SubgraphTester& AddClamp(float output_min, float output_max, uint32_t input_id, uint32_t output_id) {
     const xnn_status status =
         xnn_define_clamp(subgraph_.get(), output_min, output_max, input_id, output_id, 0 /* flags */);
@@ -166,10 +182,93 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddDeconvolution2D(
+      uint32_t input_padding_top, uint32_t input_padding_right,
+      uint32_t input_padding_bottom, uint32_t input_padding_left,
+      uint32_t adjustment_height, uint32_t adjustment_width,
+      uint32_t kernel_height, uint32_t kernel_width,
+      uint32_t upsampling_height, uint32_t upsampling_width,
+      uint32_t dilation_height, uint32_t dilation_width, uint32_t groups,
+      size_t group_input_channels, size_t group_output_channels,
+      uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
+      uint32_t output_id) {
+    const xnn_status status = xnn_define_deconvolution_2d(
+        subgraph_.get(), input_padding_top, input_padding_right,
+        input_padding_bottom, input_padding_left, adjustment_height,
+        adjustment_width, kernel_height, kernel_width, upsampling_height,
+        upsampling_width, dilation_height, dilation_width, groups,
+        group_input_channels, group_output_channels,
+        -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
+        output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddDivide(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_divide(subgraph_.get(), -std::numeric_limits<float>::infinity(),
+                        std::numeric_limits<float>::infinity(), input_id1,
+                        input_id2, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddFullyConnected(
+      uint32_t input_id, uint32_t filter_id, uint32_t bias_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_fully_connected(
+        subgraph_.get(),
+        -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
+        output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+
   inline SubgraphTester& AddGlobalAveragePooling(uint32_t input_id, uint32_t output_id) {
     const xnn_status status = xnn_define_global_average_pooling_2d(
         subgraph_.get(), -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddMaxPooling2D(
+      uint32_t input_padding_top, uint32_t input_padding_right,
+      uint32_t input_padding_bottom, uint32_t input_padding_left,
+      uint32_t pooling_height, uint32_t pooling_width, uint32_t stride_height,
+      uint32_t stride_width, uint32_t dilation_height, uint32_t dilation_width, uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_max_pooling_2d(
+        subgraph_.get(), input_padding_top, input_padding_right,
+        input_padding_bottom, input_padding_left, pooling_height, pooling_width,
+        stride_height, stride_width, dilation_height, dilation_width, -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, output_id,
+        0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddMultiply(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_multiply2(subgraph_.get(), -std::numeric_limits<float>::infinity(),
+                        std::numeric_limits<float>::infinity(), input_id1,
+                        input_id2, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddSubtract(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_subtract(subgraph_.get(), -std::numeric_limits<float>::infinity(),
+                        std::numeric_limits<float>::infinity(), input_id1,
+                        input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
