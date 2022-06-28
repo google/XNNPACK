@@ -14,6 +14,22 @@ jobs:
       - name: Configure CMake and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
+  build-xnnpack-cmake-linux-armhf:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update apt
+        run: sudo apt-get update
+      - name: Install ninja
+        run: sudo apt-get install ninja-build
+      - name: Install armhf cross-toolchain
+        run: sudo apt-get install crossbuild-essential-armhf
+      - name: Install qemu-arm
+        run: sudo apt-get install qemu-user
+      - name: Configure CMake and build
+        run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
+        working-directory: ${{ github.workspace }}
   build-xnnpack-cmake-windows:
     runs-on: windows-latest
     timeout-minutes: 40
