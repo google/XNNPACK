@@ -13,7 +13,7 @@ jobs:
         run: sudo apt update
       - name: Install ninja
         run: sudo apt install ninja-build
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
   cmake-linux-aarch64:
@@ -29,9 +29,12 @@ jobs:
         run: sudo apt install crossbuild-essential-arm64
       - name: Install qemu-aarch64
         run: sudo apt install qemu-user
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/linux/aarch64
   cmake-linux-armhf:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -45,11 +48,14 @@ jobs:
         run: sudo apt install crossbuild-essential-armhf
       - name: Install qemu-arm
         run: sudo apt install qemu-user
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/linux/armhf
   cmake-linux-riscv64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v2
@@ -61,9 +67,12 @@ jobs:
         run: sudo apt install crossbuild-essential-riscv64
       - name: Install qemu-riscv64
         run: sudo apt install qemu-user
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-windows:
     runs-on: windows-latest
     timeout-minutes: 40
@@ -71,7 +80,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install ninja
         run: choco install ninja
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/build-windows.sh
         shell: bash  # Specify bash so we can reuse the build script on Windows (runs on Git bash)
         working-directory: ${{ github.workspace }}
@@ -93,7 +102,7 @@ jobs:
         with:
           ndk-version: r23b
           add-to-path: false
-      - name: Configure CMake and build
+      - name: Configure and build
         run: scripts/${{ matrix.script }}
         working-directory: ${{ github.workspace }}
         env:
