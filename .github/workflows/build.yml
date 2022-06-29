@@ -18,7 +18,7 @@ jobs:
         working-directory: ${{ github.workspace }}
   cmake-linux-aarch64:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v2
       - name: Update apt
