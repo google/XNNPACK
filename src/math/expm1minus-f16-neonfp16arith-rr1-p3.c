@@ -33,7 +33,7 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr1_p3(
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(float)) {
+  for (; n != 0; n -= 8 * sizeof(__fp16)) {
     float16x8_t vx = vld1q_f16(i); i += 8;
 
     // The function saturates at -1 for large negative inputs: expm1h(x) == -1.0h for x <= sat_cutoff ~= -8.3203125.

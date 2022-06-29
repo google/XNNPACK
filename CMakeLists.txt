@@ -6021,6 +6021,7 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/expminus-f16-avx2-rr1-p3.c
   src/math/expminus-f32-avx2-rr1-p5.c
   src/math/expminus-f32-avx2-rr2-p5.c
+  src/math/expm1minus-f16-avx2-rr1-p3.c
   src/math/expm1minus-f32-avx2-rr1-lut4-p4-perm.c
   src/math/expm1minus-f32-avx2-rr1-lut8-p4-perm.c
   src/math/expm1minus-f32-avx2-rr1-lut16-p3-gather.c

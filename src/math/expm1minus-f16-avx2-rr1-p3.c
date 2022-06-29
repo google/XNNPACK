@@ -6,41 +6,42 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <arm_neon.h>
+#include <immintrin.h>
 
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_expm1minus__neonfp16arith_rr2_p3(
+void xnn_math_f16_expm1minus__avx2_rr1_p3(
     size_t n,
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // The largest x for which expm1f(x) is saturated at -1.0f.
-  const float16x8_t vsat_cutoff = vmovq_n_f16(-0x1.0A4p+3f);
-  // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
-  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
-  const float16x8_t vlog2e = vmovq_n_f16(0x1.714p+0f);
-  const float16x8_t vminus_ln2_hi = vmovq_n_f16(-0x1.630p-1f);
-  const float16x8_t vminus_ln2_lo = vmovq_n_f16(0x1.BD0p-13f);
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.0A4000p+3f);
+  // Large number such that ulp(magic bias) == 1 and magic bias === 127 mod 2**22.
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
   // Coefficient of polynomial approximation
   //   exp(t) - 1 ~ t * (1 + t * (c2 + t * c3))
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc3 = vmovq_n_f16(0x1.56Cp-3f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.5554DCp-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.01EBB2p-1f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.0002F2p0f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    i += 8;
 
     // The function saturates at -1 for large negative inputs: expm1h(x) == -1.0h for x <= sat_cutoff ~= -8.3203125.
     // To guarantee this behaviour, we clip input at sat_cutoff, and leverage the fact that for our implementation
     // expm1m(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vx = vmaxq_f16(vx, vsat_cutoff);
+    vx = _mm256_max_ps(vx, vsat_cutoff);
 
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -48,38 +49,36 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr2_p3(
     // trick with adding large number is valid only within certain bounds (|x / log(2)| <= 2**9, i.e.
     // |x| <= 0x1.630p+8 = 355.0), but that is acceptable, because inputs x are restricted to [-8.3203125, 0].
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float16x8_t vn = vfmaq_f16(vmagic_bias, vx, vlog2e);
+    __m256 vn = _mm256_fmadd_ps(vx, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**n for valid inputs, i.e.
     // -8.3203125 <= x <= 0.0, and -12 <= n <= 0 accordingly.
     // For NaN inputs, s would have zero mantissa and can have arbitrary sign and exponent, depending on the input
     // NaN payload. In these cases, n and t are NaNs with the same payload as input while s is non-NaN, and thus
     // input payload would be propagated in all computations.
-    const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
 
     // Subtract the large number back to get final n := round(x / log(2)).
-    vn = vsubq_f16(vn, vmagic_bias);
+    vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := x - n * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float16x8_t vt = vfmaq_f16(vx, vn, vminus_ln2_hi);
-    vt = vfmaq_f16(vt, vn, vminus_ln2_lo);
+    __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vx);
 
     // Compute degree-3 polynomial approximation for exp(t) - 1 on [-log(2)/2, log(2)/2].
-    //   P(t) = t * (1 + t * (c2 + t * c3))
-    //        = t + t * (t * (c2 + t * c3)) = t + t * p
-    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vmulq_f16(vp, vt);
+    //   P(t) = t * (c1 + t * (c2 + t * c3))
+    //        = t * p
+    __m256 vp = _mm256_fmadd_ps(vc3, vt, vc2);
+    vp = _mm256_fmadd_ps(vp, vt, vc1);
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 + t * (1 + t * (c2 + t * c3))) - 1
-    //              = (s - 1) + s * (t + t * p)
-    //              = ((t * s) + (t * s) * p) + (s - 1)
-    vt = vmulq_f16(vt, vs);
-    const float16x8_t vsm1 = vsubq_f16(vs, vone);
-    vp = vfmaq_f16(vt, vp, vt);
-    const float16x8_t vf = vaddq_f16(vp, vsm1);
+    //   exp(x) - 1 = s * (1 + t * p) - 1
+    //              = (s - 1) + (s * t) * p
+    //              = (t * s) * p + (s - 1)
+    vt = _mm256_mul_ps(vt, vs);
+    vs = _mm256_sub_ps(vs, vone);
+    const __m256 vf = _mm256_fmadd_ps(vp, vt, vs);
 
-    vst1q_f16(o, vf); o += 8;
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    o += 8;
   }
 }
