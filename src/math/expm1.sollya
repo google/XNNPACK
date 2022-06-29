@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 display=hexadecimal !;
-
+print("***IEEE FP32***");
 print("log2(e) =", round(log2(exp(1)), single, RN));
 minus_ln2_hi = round(-log(2), single, RN);
 minus_ln2_lo = round(-log(2) - minus_ln2_hi, single, RN);
@@ -170,3 +170,41 @@ print("  -log(2)/1024 =", lb);
 print("  +log(2)/1024 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
 
+print("***IEEE FP16***");
+print("log2(e) =", round(log2(exp(1)), halfprecision, RN));
+minus_ln2_hi = round(-log(2), halfprecision, RN);
+minus_ln2_lo = round(-log(2) - minus_ln2_hi, halfprecision, RN);
+print("-log(2):hi =", minus_ln2_hi);
+print("-log(2):lo =", minus_ln2_lo);
+
+lb = round(-log(2)/2, halfprecision, RN);
+ub = round(log(2)/2, halfprecision, RN);
+P = fpminimax(expm1(x), [|1,2,3|], [|HP...|], [lb; ub], relative, 0);
+print("Degree-3 P[expm1(x)] with 0 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), halfprecision, RU));
+
+lb = round(-log(2)/2, halfprecision, RN);
+ub = round(log(2)/2, halfprecision, RN);
+P = fpminimax(expm1(x), [|2,3|], [|HP...|], [lb; ub], relative, 0+x);
+print("Degree-3 P[expm1(x)] with 0+x constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), halfprecision, RU));
+
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|1,2,3|], [|SG...|], [lb; ub], relative, 0);
+print("Degree-3 P[expm1(x)] with 0 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|1,2|], [|SG...|], [lb; ub], relative, 0);
+print("Degree-2 P[expm1(x)] with 0 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));

@@ -3626,6 +3626,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/expminus-f16-neonfp16arith-rr1-p3.c
   src/math/expminus-f16-neonfp16arith-rr2-p2.c
   src/math/expminus-f16-neonfp16arith-rr2-p3.c
+  src/math/expm1minus-f16-neonfp16arith-rr1-p3.c
+  src/math/expm1minus-f16-neonfp16arith-rr2-p3.c
   src/math/sigmoid-f16-neonfp16arith-rr1-p2-div.c
   src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c
@@ -8715,6 +8717,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f16-expminus-ulp-eval eval/f16-expminus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-expminus-ulp-eval PRIVATE . src)
   TARGET_LINK_LIBRARIES(f16-expminus-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(f16-expm1minus-ulp-eval eval/f16-expm1minus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-expm1minus-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f16-expm1minus-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f16-sigmoid-ulp-eval eval/f16-sigmoid-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-sigmoid-ulp-eval PRIVATE . src)

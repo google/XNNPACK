@@ -5107,6 +5107,8 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/expminus-f16-neonfp16arith-rr1-p3.c",
     "src/math/expminus-f16-neonfp16arith-rr2-p2.c",
     "src/math/expminus-f16-neonfp16arith-rr2-p3.c",
+    "src/math/expm1minus-f16-neonfp16arith-rr1-p3.c",
+    "src/math/expm1minus-f16-neonfp16arith-rr2-p3.c",
     "src/math/sigmoid-f16-neonfp16arith-rr1-p2-div.c",
     "src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c",
     "src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c",
@@ -12209,6 +12211,14 @@ xnnpack_benchmark(
     name = "f16_expminus_ulp_eval",
     srcs = [
         "eval/f16-expminus-ulp.cc",
+    ],
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_expm1minus_ulp_eval",
+    srcs = [
+        "eval/f16-expm1minus-ulp.cc",
     ],
     deps = ACCURACY_EVAL_DEPS,
 )
