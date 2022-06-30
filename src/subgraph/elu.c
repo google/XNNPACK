@@ -38,6 +38,15 @@ static enum xnn_status create_elu_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_compute_type_fp16:
+      status = xnn_create_elu_nc_f16(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->params.elu.alpha,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
+#endif  // XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp32:
       status = xnn_create_elu_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -93,6 +102,15 @@ static enum xnn_status setup_elu_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_elu_nc_f16:
+      return xnn_setup_elu_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
+#endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_elu_nc_f32:
       return xnn_setup_elu_nc_f32(
         opdata->operator_objects[0],
