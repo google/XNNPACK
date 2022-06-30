@@ -273,6 +273,47 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_velu_ukernel_function velu, xnn_init_f16_elu_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-9.0f, 9.0f);
+
+    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<float> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      } else {
+        std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      }
+      const uint16_t* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float x_value = fp16_ieee_to_fp32_value(x_data[i]);
+        y_ref[i] = std::signbit(x_value) ? alpha() * std::expm1(x_value * prescale()) : x_value * beta();
+      }
+
+      // Prepare parameters.
+      union xnn_f16_elu_params params;
+      init_params(&params, fp16_ieee_from_fp32_value(prescale()), fp16_ieee_from_fp32_value(alpha()), fp16_ieee_from_fp32_value(beta()));
+
+      // Call optimized micro-kernel.
+      velu(batch_size() * sizeof(uint16_t), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_NEAR(
+            fp16_ieee_to_fp32_value(y[i]),
+            y_ref[i],
+            std::max(1.0e-4f, std::abs(y_ref[i]) * 5.0e-3f))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
+      }
+    }
+  }
+
   void Test(xnn_f32_velu_ukernel_function velu, xnn_init_f32_elu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

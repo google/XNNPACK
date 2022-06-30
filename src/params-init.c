@@ -2530,6 +2530,47 @@ void xnn_init_f32_rnd_avx_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_ARM64
+void xnn_init_f16_elu_neonfp16arith_rr1_p3_params(
+  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t prescale,
+  uint16_t alpha,
+  uint16_t beta)
+{
+  params->neonfp16arith_rr1_p3.prescale = prescale;
+  params->neonfp16arith_rr1_p3.sat_cutoff = UINT16_C(0xC829);  // -0x1.0A4p+3h;
+  params->neonfp16arith_rr1_p3.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->neonfp16arith_rr1_p3.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
+  params->neonfp16arith_rr1_p3.minus_ln2 = UINT16_C(0xB98C);  // -0x1.62E430p-1h
+  params->neonfp16arith_rr1_p3.c3 = UINT16_C(0x315B);  // 0x1.56Cp-3h
+  params->neonfp16arith_rr1_p3.c2 = UINT16_C(0x3808);  // 0x1.020p-1h
+  params->neonfp16arith_rr1_p3.minus_alpha = alpha ^ UINT16_C(0x8000);
+  params->neonfp16arith_rr1_p3.beta = beta;
+}
+#endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+void xnn_init_f16_elu_avx2_rr1_p3_params(
+  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t prescale,
+  uint16_t alpha,
+  uint16_t beta)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx2_rr1_p3.prescale[i] = fp16_ieee_to_fp32_value(prescale);
+    params->avx2_rr1_p3.sat_cutoff[i] = -0x1.0A4000p+3f;
+    params->avx2_rr1_p3.magic_bias[i] = 0x1.8000FEp23f;
+    params->avx2_rr1_p3.log2e[i] = 0x1.715476p+0f;
+    params->avx2_rr1_p3.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx2_rr1_p3.c3[i] = 0x1.5554DCp-3f;
+    params->avx2_rr1_p3.c2[i] = 0x1.01EBB2p-1f;
+    params->avx2_rr1_p3.c1[i] = 0x1.0002F2p+0f;
+    params->avx2_rr1_p3.alpha[i] = fp16_ieee_to_fp32_value(alpha);
+    params->avx2_rr1_p3.beta[i] = fp16_ieee_to_fp32_value(beta);
+  }
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_init_f32_elu_scalar_rr2_lut16_p3_params(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,

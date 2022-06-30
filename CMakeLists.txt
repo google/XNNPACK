@@ -3575,6 +3575,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vsubc-minmax-neonfp16arith-x16.c
   src/f16-vclamp/gen/vclamp-neonfp16arith-x8.c
   src/f16-vclamp/gen/vclamp-neonfp16arith-x16.c
+  src/f16-velu/gen/velu-neonfp16arith-rr1-p3-x8.c
+  src/f16-velu/gen/velu-neonfp16arith-rr1-p3-x16.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x8.c
   src/f16-vhswish/gen/vhswish-neonfp16arith-x16.c
   src/f16-vlrelu/gen/vlrelu-neonfp16arith-x8.c
@@ -5858,6 +5860,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc3.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96-acc6.c
   src/f16-raddstoreexpminusmax/gen/avx2-rr1-p2-x96.c
+  src/f16-velu/gen/velu-avx2-rr1-p3-x8.c
+  src/f16-velu/gen/velu-avx2-rr1-p3-x16.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x8.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x16.c
   src/f16-vsigmoid/gen/vsigmoid-avx2-rr1-p2-div-x24.c
@@ -7843,6 +7847,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-vrdivc-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-vrdivc-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME f16-vrdivc-minmax-test COMMAND f16-vrdivc-minmax-test)
+
+  ADD_EXECUTABLE(f16-velu-test test/f16-velu.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-velu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-velu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
+  ADD_TEST(NAME f16-velu-test COMMAND f16-velu-test)
 
   ADD_EXECUTABLE(f16-vhswish-test test/f16-vhswish.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vhswish-test PRIVATE include src test)

@@ -1,0 +1,94 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-velu/neonfp16arith-rr1-p3.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8(
+    size_t n,
+    const void* input,
+    void* output,
+    const union xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(n != 0);
+  assert(n % sizeof(__fp16) == 0);
+
+  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.prescale));
+  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.sat_cutoff));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.magic_bias));
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.log2e));
+  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.minus_ln2));
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c3));
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c2));
+  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.minus_alpha));
+  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.beta));
+
+  const __fp16* i = (const __fp16*) input;
+  __fp16* o = (__fp16*) output;
+  for (; n >= 8 * sizeof(__fp16); n -= 8 * sizeof(__fp16)) {
+    float16x8_t vx = vld1q_f16(i); i += 8;
+    float16x8_t vz = vmulq_f16(vx, vprescale);
+    vz = vmaxq_f16(vz, vsat_cutoff);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vlog2e);
+    float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+    float16x8_t vt = vfmaq_f16(vz, vn, vminus_ln2);
+
+    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
+    vp = vmulq_f16(vp, vt);
+    vt = vmulq_f16(vt, vs);
+    vs = vfmsq_f16(vminus_alpha, vs, vminus_alpha);
+    vp = vfmaq_f16(vt, vp, vt);
+    float16x8_t ve = vfmsq_f16(vs, vp, vminus_alpha);
+
+    const uint16x8_t vm = vcltq_s16(vreinterpretq_s16_f16(vx), vmovq_n_s16(0));
+    vx = vmulq_f16(vx, vbeta);
+    const float16x8_t vy = vbslq_f16(vm, ve, vx);
+    vst1q_f16(o, vy); o += 8;
+  }
+  if XNN_UNLIKELY(n != 0) {
+    float16x8_t vx = vld1q_f16(i); i += 8;
+    float16x8_t vz = vmulq_f16(vx, vprescale);
+    vz = vmaxq_f16(vz, vsat_cutoff);
+
+    float16x8_t vn = vfmaq_f16(vmagic_bias, vz, vlog2e);
+    float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
+    vn = vsubq_f16(vn, vmagic_bias);
+    float16x8_t vt = vfmaq_f16(vz, vn, vminus_ln2);
+
+    float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
+    vp = vmulq_f16(vp, vt);
+    vt = vmulq_f16(vt, vs);
+    vs = vfmsq_f16(vminus_alpha, vs, vminus_alpha);
+    vp = vfmaq_f16(vt, vp, vt);
+    float16x8_t ve = vfmsq_f16(vs, vp, vminus_alpha);
+
+    const uint16x8_t vm = vcltq_s16(vreinterpretq_s16_f16(vx), vmovq_n_s16(0));
+    vx = vmulq_f16(vx, vbeta);
+    float16x8_t vy = vbslq_f16(vm, ve, vx);
+    float16x4_t vy_lo = vget_low_f16(vy);
+    if (n & (4 * sizeof(__fp16))) {
+      vst1_f16(o, vy_lo); o += 4;
+      vy_lo = vget_high_f16(vy);
+    }
+    if (n & (2 * sizeof(__fp16))) {
+      vst1_lane_u32((void*) o, vreinterpret_u32_f16(vy_lo), 0); o += 2;
+      vy_lo = vext_f16(vy_lo, vy_lo, 2);
+    }
+    if (n & (1 * sizeof(__fp16))) {
+      vst1_lane_f16(o, vy_lo, 0);
+    }
+  }
+}

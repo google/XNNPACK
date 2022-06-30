@@ -483,6 +483,21 @@ DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_para
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#define DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL void fn_name(                              \
+    union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t prescale,                                    \
+    uint16_t alpha,                                       \
+    uint16_t beta);
+
+#if XNN_ARCH_ARM64
+  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_neonfp16arith_rr1_p3_params)
+#endif  // XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_avx2_rr1_p3_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL void fn_name(                              \
     union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)], \

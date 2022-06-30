@@ -174,6 +174,37 @@ union xnn_f32_rnd_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+union xnn_f16_elu_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_ARM64
+  struct {
+    uint16_t prescale;
+    uint16_t sat_cutoff;
+    uint16_t magic_bias;
+    uint16_t log2e;
+    uint16_t minus_ln2;
+    uint16_t c3;
+    uint16_t c2;
+    uint16_t minus_alpha;
+    uint16_t beta;
+  } neonfp16arith_rr1_p3;
+#endif
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) float prescale[8];
+    XNN_ALIGN(32) float sat_cutoff[8];
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c3[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float c1[8];
+    XNN_ALIGN(32) float alpha[8];
+    XNN_ALIGN(32) float beta[8];
+  } avx2_rr1_p3;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_elu_params {
   struct {
     float prescale;
@@ -3693,12 +3724,17 @@ typedef void (*xnn_qs8_vmul_minmax_ukernel_function)(
     int8_t* output,
     const union xnn_qs8_mul_minmax_params* params);
 
+typedef void (*xnn_f16_velu_ukernel_function)(
+    size_t n,
+    const void* x,
+    void* y,
+    const union xnn_f16_elu_params* params);
+
 typedef void (*xnn_f32_velu_ukernel_function)(
     size_t n,
     const float* x,
     float* y,
     const union xnn_f32_elu_params* params);
-
 
 typedef void (*xnn_f16_vsqr_ukernel_function)(
     size_t n,
@@ -4133,6 +4169,12 @@ typedef void (*xnn_init_f16_expminus_params_fn)(
 
 typedef void (*xnn_init_f32_expminus_params_fn)(
   union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_init_f16_elu_params_fn)(
+  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t prescale,
+  uint16_t alpha,
+  uint16_t beta);
 
 typedef void (*xnn_init_f32_elu_params_fn)(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
