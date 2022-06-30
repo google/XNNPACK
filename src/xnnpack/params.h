@@ -4443,6 +4443,7 @@ struct vunary_parameters {
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_abs_params_fn f16_abs;
+    xnn_init_f16_elu_params_fn f16_elu;
     xnn_init_f16_hswish_params_fn f16_hswish;
     xnn_init_f16_lrelu_params_fn f16_lrelu;
     xnn_init_f16_neg_params_fn f16_neg;
@@ -4819,6 +4820,7 @@ struct xnn_parameters {
     struct ibilinear_parameters ibilinear;
     struct vunary_parameters abs;
     struct vunary_parameters clamp;
+    struct vunary_parameters elu;
     struct vunary_parameters hswish;
     struct vunary_parameters lrelu;
     struct vunary_parameters neg;

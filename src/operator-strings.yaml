@@ -105,6 +105,8 @@
   string: "Divide (ND, F16)"
 - name: xnn_operator_type_divide_nd_f32
   string: "Divide (ND, F32)"
+- name: xnn_operator_type_elu_nc_f16
+  string: "ELU (NC, F16)"
 - name: xnn_operator_type_elu_nc_f32
   string: "ELU (NC, F32)"
 - name: xnn_operator_type_elu_nc_qs8

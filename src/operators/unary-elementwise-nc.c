@@ -741,6 +741,36 @@ enum xnn_status xnn_create_copy_nc_x32(
     copy_op_out);
 }
 
+enum xnn_status xnn_create_elu_nc_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float alpha,
+  uint32_t flags,
+  xnn_operator_t* elu_op_out)
+{
+  const uint16_t alpha_as_half = fp16_ieee_from_fp32_value(alpha);
+  alpha = fp16_ieee_to_fp32_value(alpha_as_half);
+  if (alpha <= 0.0f || !isnormal(alpha)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g alpha parameter: alpha must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_elu_nc_f16), alpha);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f16_elu_params params;
+  if (xnn_params.f16.elu.init.f16_elu != NULL) {
+    xnn_params.f16.elu.init.f16_elu(&params,
+      UINT16_C(0x3C00)  /* prescale = 1.0h */, alpha_as_half, UINT16_C(0x3C00)  /* beta = 1.0h */);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params), XNN_INIT_FLAG_F16,
+    xnn_operator_type_elu_nc_f16,
+    xnn_params.f16.elu.ukernel,
+    elu_op_out);
+}
+
 enum xnn_status xnn_create_elu_nc_f32(
   size_t channels,
   size_t input_stride,
@@ -1553,6 +1583,22 @@ enum xnn_status xnn_setup_copy_nc_x32(
     2 /* log2(sizeof(uint32_t)) */,
     2 /* log2(sizeof(uint32_t)) */,
     NULL, 0,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_elu_nc_f16(
+    xnn_operator_t elu_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    elu_op, xnn_operator_type_elu_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(half)) */,
+    &elu_op->params.f16_elu, sizeof(elu_op->params.f16_elu),
     pthreadpool_get_threads_count(threadpool));
 }
 
