@@ -61,7 +61,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -81,7 +81,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -99,7 +99,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -148,7 +148,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -168,7 +168,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -186,7 +186,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
       }
       xnn_math_f32_expminus__neonfma_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -235,7 +235,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
       xnn_math_f32_expminus__neonfma_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -255,7 +255,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
       xnn_math_f32_expminus__neonfma_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -273,7 +273,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
       }
       xnn_math_f32_expminus__neonfma_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -322,7 +322,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
       xnn_math_f32_expminus__avx2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -342,7 +342,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
       xnn_math_f32_expminus__avx2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -360,7 +360,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
       }
       xnn_math_f32_expminus__avx2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -403,7 +403,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
       xnn_math_f32_expminus__sse2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -421,7 +421,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
       xnn_math_f32_expminus__sse2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -437,7 +437,7 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+        inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
       }
       xnn_math_f32_expminus__sse2_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -479,7 +479,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT64_P2, negative_saturation) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
     }
     xnn_math_f32_expminus__scalar_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -497,7 +497,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT64_P2, positive_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
     }
     xnn_math_f32_expminus__scalar_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -513,7 +513,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT64_P2, negative_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
     }
     xnn_math_f32_expminus__scalar_rr2_lut64_p2(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -554,7 +554,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT2048_P1, negative_saturation) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
     }
     xnn_math_f32_expminus__scalar_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -572,7 +572,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT2048_P1, positive_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
     }
     xnn_math_f32_expminus__scalar_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -588,7 +588,7 @@ TEST(EXPMINUS__SCALAR_RR2_LUT2048_P1, negative_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
     }
     xnn_math_f32_expminus__scalar_rr2_lut2048_p1(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -629,7 +629,7 @@ TEST(EXPMINUS__SCALAR_RR2_P5, negative_saturation) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0xC2AEAC50); n <= UINT32_C(0xFF800000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(n + i, UINT32_C(0xFF800000)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
     }
     xnn_math_f32_expminus__scalar_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -647,7 +647,7 @@ TEST(EXPMINUS__SCALAR_RR2_P5, positive_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), n + i));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
     }
     xnn_math_f32_expminus__scalar_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -663,7 +663,7 @@ TEST(EXPMINUS__SCALAR_RR2_P5, negative_nan) {
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
   for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
     for (uint32_t i = 0; i < kBlockSize; i++) {
-      inputs[i] = fp32_from_bits(std::min(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
+      inputs[i] = fp32_from_bits(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), UINT32_C(0x80000000) | (n + i)));
     }
     xnn_math_f32_expminus__scalar_rr2_p5(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
