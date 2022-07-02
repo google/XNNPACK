@@ -48,7 +48,7 @@ enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
   }
 
   if (block_size <= 1) {
-    xnn_log_error("failed to create %s operator with %u block size: block size must be greater than 1",
+    xnn_log_error("failed to create %s operator with %" PRIu32 " block size: block size must be greater than 1",
       xnn_operator_type_to_string(xnn_operator_type_depth_to_space_nchw2nhwc_x32),
       block_size);
     goto error;

@@ -254,7 +254,7 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->opdata = xnn_allocate_zero_memory(sizeof(struct xnn_operator_data) * subgraph->num_nodes);
   if (runtime->opdata == NULL) {
     xnn_log_error("failed to allocate %zu bytes for opdata descriptors",
-      sizeof(struct xnn_operator_data) * subgraph->num_nodes);
+      sizeof(struct xnn_operator_data) * (size_t) subgraph->num_nodes);
     goto error;
   }
   runtime->num_ops = subgraph->num_nodes;
@@ -307,7 +307,7 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->blobs = xnn_allocate_zero_memory(sizeof(struct xnn_blob) * subgraph->num_values);
   if (runtime->blobs == NULL) {
     xnn_log_error("failed to allocate %zu bytes for blob descriptors",
-      sizeof(struct xnn_blob) * subgraph->num_values);
+      sizeof(struct xnn_blob) * (size_t) subgraph->num_values);
     goto error;
   }
   runtime->num_blobs = subgraph->num_values;

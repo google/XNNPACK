@@ -484,7 +484,7 @@ enum xnn_status check_input_compute_type(
   if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
     xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": mismatching quantization zero point across the %s input (%d) and the output (%d)",
+        ": mismatching quantization zero point across the %s input (%" PRId32 ") and the output (%" PRId32 ")",
         xnn_node_type_to_string(node_type), input_id, output_id,
         nth, input_value->quantization.zero_point, output_value->quantization.zero_point);
     return xnn_status_invalid_parameter;

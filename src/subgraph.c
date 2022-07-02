@@ -47,7 +47,8 @@ enum xnn_status xnn_create_subgraph(
 
   subgraph->values = xnn_allocate_zero_memory(external_value_ids * sizeof(struct xnn_value));
   if (subgraph->values == NULL) {
-    xnn_log_error("failed to allocate %zu bytes for subgraph values", external_value_ids * sizeof(struct xnn_value));
+    xnn_log_error("failed to allocate %zu bytes for subgraph values",
+      (size_t) external_value_ids * sizeof(struct xnn_value));
     goto error;
   }
   for (size_t i = 0; i < external_value_ids; i++) {
@@ -740,7 +741,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_subtract:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
           if (subgraph->values[node->inputs[i]].data != NULL) {
-            xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %i",
+            xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %" PRIu32,
               n, xnn_node_type_to_string(node->type), i);
             return false;
           }

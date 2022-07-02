@@ -195,7 +195,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
   if (weights_ptr == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
-      packed_group_weights_size * groups, xnn_operator_type_to_string(operator_type));
+      aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
