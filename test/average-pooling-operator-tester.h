@@ -740,10 +740,10 @@ class AveragePoolingOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint16_t> output(std::max(
+    std::vector<uint16_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -910,10 +910,10 @@ class AveragePoolingOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<float> output(std::max(
+    std::vector<float> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -1068,10 +1068,10 @@ class AveragePoolingOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint8_t> output(std::max(
+    std::vector<uint8_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());

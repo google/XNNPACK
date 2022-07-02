@@ -301,8 +301,8 @@ class UnpoolingOperatorTester {
               const uint32_t pooling_index = index[((i * input_height() + iy) * input_width() + ix) * channels() + c];
               const uint32_t py = pooling_index % pooling_height();
               const uint32_t px = pooling_index / pooling_height();
-              const size_t oy = std::min(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), output_height() - 1);
-              const size_t ox = std::min(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), output_width() - 1);
+              const size_t oy = std::min<size_t>(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), output_height() - 1);
+              const size_t ox = std::min<size_t>(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), output_width() - 1);
               output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] =
                 input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c];
             }
@@ -356,13 +356,13 @@ class UnpoolingOperatorTester {
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto idx_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, pooling_height() * pooling_width() - 1), std::ref(rng));
 
-    std::vector<uint32_t> input(std::max(
+    std::vector<uint32_t> input(std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint32_t> index(std::max(
+    std::vector<uint32_t> index(std::max<size_t>(
       batch_size() * input_height() * input_width() * channels(),
       next_batch_size() * next_input_height() * next_input_width() * channels()));
-    std::vector<uint32_t> output(std::max(
+    std::vector<uint32_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() * channels()));
     std::vector<uint32_t> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -382,8 +382,8 @@ class UnpoolingOperatorTester {
               const uint32_t pooling_index = index[((i * input_height() + iy) * input_width() + ix) * channels() + c];
               const uint32_t py = pooling_index % pooling_height();
               const uint32_t px = pooling_index / pooling_height();
-              const size_t oy = std::min(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), output_height() - 1);
-              const size_t ox = std::min(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), output_width() - 1);
+              const size_t oy = std::min<size_t>(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), output_height() - 1);
+              const size_t ox = std::min<size_t>(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), output_width() - 1);
               output_ref[((i * output_height() + oy) * output_width() + ox) * channels() + c] =
                 input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + c];
             }
@@ -443,8 +443,8 @@ class UnpoolingOperatorTester {
               const uint32_t pooling_index = index[((i * next_input_height() + iy) * next_input_width() + ix) * channels() + c];
               const uint32_t py = pooling_index % pooling_height();
               const uint32_t px = pooling_index / pooling_height();
-              const size_t oy = std::min(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), next_output_height() - 1);
-              const size_t ox = std::min(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), next_output_width() - 1);
+              const size_t oy = std::min<size_t>(std::max<size_t>(iy * pooling_height() + py, padding_top()) - padding_top(), next_output_height() - 1);
+              const size_t ox = std::min<size_t>(std::max<size_t>(ix * pooling_width() + px, padding_left()) - padding_left(), next_output_width() - 1);
               next_output_ref[((i * next_output_height() + oy) * next_output_width() + ox) * channels() + c] =
                 input[((i * next_input_height() + iy) * next_input_width() + ix) * input_pixel_stride() + c];
             }

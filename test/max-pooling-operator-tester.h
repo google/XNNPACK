@@ -832,10 +832,10 @@ class MaxPoolingOperatorTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
+    std::vector<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -973,10 +973,10 @@ class MaxPoolingOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint8_t> output(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
+    std::vector<uint8_t> output(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -1115,10 +1115,10 @@ class MaxPoolingOperatorTester {
     // native vs emulated arithmetics, and we use exact comparison to verify the results against reference.
     std::uniform_real_distribution<float> f32dist(0.001f, 1.0f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint16_t> output(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+    std::vector<uint16_t> output(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
@@ -1284,10 +1284,10 @@ class MaxPoolingOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<float> output(XNN_EXTRA_BYTES / sizeof(float) + std::max(
+    std::vector<float> output(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());

@@ -421,13 +421,13 @@ class ArgmaxPoolingOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<float> output(std::max(
+    std::vector<float> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
-    std::vector<uint32_t> index(std::max(
+    std::vector<uint32_t> index(std::max<size_t>(
       batch_size() * output_height() * output_width() * channels(),
       next_batch_size() * next_output_height() * next_output_width() * channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
