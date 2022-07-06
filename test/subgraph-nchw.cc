@@ -17,7 +17,16 @@ TEST(SUBGRAPH_NCHW, single_conv) {
     .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, 1)
     .AddStaticTensorF32({32}, TensorType::kDense, 2)
     .AddDynamicTensorF32({1, 128, 128, 32}, 3)
-    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{1, 1, 1, 1},
+          Kernel{3, 3},
+          Subsampling{2, 2},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 3,
+          /*group_output_channels=*/ 32,
+        }, 0, 1, 2, 3)
     .Optimize()
     .Rewrite();
 
@@ -33,7 +42,16 @@ TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
     .AddStaticTensorF32({32}, TensorType::kDense, 2)
     .AddDynamicTensorF32({1, 128, 128, 32}, 3)
     .AddDynamicTensorF32({32}, 4)
-    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 32, 0, 1, 2, 3)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{1, 1, 1, 1},
+          Kernel{3, 3},
+          Subsampling{2, 2},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 3,
+          /*group_output_channels=*/ 32,
+        }, 0, 1, 2, 3)
     .AddGlobalAveragePooling(3, 4)
     .Optimize()
     .Rewrite();
@@ -54,8 +72,26 @@ TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
     .AddStaticTensorF32({4}, TensorType::kDense, 5)
     .AddDynamicTensorF32({1, 128, 128, 4}, 6)
     .AddDynamicTensorF32({1, 4}, 7)
-    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
-    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{1, 1, 1, 1},
+          Kernel{3, 3},
+          Subsampling{2, 2},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 3,
+          /*group_output_channels=*/ 8
+        }, 0, 1, 2, 3)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{0, 0, 0, 0},
+          Kernel{1, 1},
+          Subsampling{1, 1},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 8,
+          /*group_output_channels=*/ 4
+        }, 3, 4, 5, 6)
     .AddGlobalAveragePooling(6, 7)
     .Optimize()
     .Rewrite();
@@ -85,10 +121,45 @@ TEST(SUBGRAPH_NCHW, bottleneck) {
     .AddDynamicTensorF32({1, 128, 128, 8}, 13)
     .AddDynamicTensorF32({1, 128, 128, 8}, 13)
     .AddDynamicTensorF32({1, 8}, 14)
-    .AddConvolution2D(1, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1, 3, 8, 0, 1, 2, 3)
-    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 3, 4, 5, 6)
-    .AddDepthwiseConv(1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 4, 6, 7, 8, 9)
-    .AddConvolution2D(0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 8, 4, 9, 10, 11, 12)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{1, 1, 1, 1},
+          Kernel{3, 3},
+          Subsampling{2, 2},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 3,
+          /*group_output_channels=*/ 8
+        }, 0, 1, 2, 3)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{0, 0, 0, 0},
+          Kernel{1, 1},
+          Subsampling{1, 1},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 8,
+          /*group_output_channels=*/ 4
+        }, 3, 4, 5, 6)
+    .AddDepthwiseConvolution2D(
+        DepthwiseConvolutionParams{
+          Padding{1, 1, 1, 1},
+          Kernel{3, 3},
+          Subsampling{1, 1},
+          Dilation{1, 1},
+          /*depth_multiplier=*/ 1,
+          /*input_channels=*/ 4
+        }, 6, 7, 8, 9)
+    .AddConvolution2D(
+        ConvolutionParams{
+          Padding{0, 0, 0, 0},
+          Kernel{1, 1},
+          Subsampling{1, 1},
+          Dilation{1, 1},
+          /*groups=*/ 1,
+          /*group_input_channels=*/ 8,
+          /*group_output_channels=*/ 4
+        }, 9, 10, 11, 12)
     .AddAddition(3, 12, 13)
     .AddGlobalAveragePooling(13, 14)
     .Optimize()

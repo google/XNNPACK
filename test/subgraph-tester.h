@@ -28,6 +28,54 @@ enum class TensorType {
   kSparse,
 };
 
+struct Padding {
+  uint32_t top;
+  uint32_t right;
+  uint32_t bottom;
+  uint32_t left;
+};
+
+struct HeightWidth {
+  uint32_t height;
+  uint32_t width;
+};
+
+using Kernel = HeightWidth;
+using Subsampling = HeightWidth;
+using Dilation = HeightWidth;
+using Upsampling = HeightWidth;
+using Adjustment = HeightWidth;
+
+struct ConvolutionParams {
+  Padding padding;
+  Kernel kernel;
+  Subsampling subsampling;
+  Dilation dilation;
+  uint32_t groups;
+  uint32_t group_input_channels;
+  uint32_t group_output_channels;
+};
+
+struct DeconvolutionParams {
+  Padding padding;
+  Adjustment adjustment;
+  Kernel kernel;
+  Upsampling upsampling;
+  Dilation dilation;
+  uint32_t groups;
+  uint32_t group_input_channels;
+  uint32_t group_output_channels;
+};
+
+struct DepthwiseConvolutionParams {
+  Padding padding;
+  Kernel kernel;
+  Subsampling subsampling;
+  Dilation dilation;
+  uint32_t depth_multiplier;
+  uint32_t input_channels;
+};
+
 class SubgraphTester {
  public:
   explicit SubgraphTester(uint32_t external_value_ids) {
@@ -107,20 +155,25 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddConstantPad(
+      const size_t *pre_paddings, const size_t *post_paddings,
+      float padding_value, uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_static_constant_pad(
+        subgraph_.get(), pre_paddings, post_paddings, padding_value, input_id,
+        output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   inline SubgraphTester& AddConvolution2D(
-      uint32_t input_padding_top, uint32_t input_padding_right,
-      uint32_t input_padding_bottom, uint32_t input_padding_left,
-      uint32_t kernel_height, uint32_t kernel_width,
-      uint32_t subsampling_height, uint32_t subsampling_width,
-      uint32_t dilation_height, uint32_t dilation_width, uint32_t groups,
-      size_t group_input_channels, size_t group_output_channels,
+      ConvolutionParams params,
       uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
       uint32_t output_id) {
     const xnn_status status = xnn_define_convolution_2d(
-        subgraph_.get(), input_padding_top, input_padding_right,
-        input_padding_bottom, input_padding_left, kernel_height, kernel_width,
-        subsampling_height, subsampling_width, dilation_height, dilation_width,
-        groups, group_input_channels, group_output_channels,
+        subgraph_.get(), params.padding.top, params.padding.right,
+        params.padding.bottom, params.padding.left, params.kernel.height, params.kernel.width,
+        params.subsampling.height, params.subsampling.width, params.dilation.height, params.dilation.width,
+        params.groups, params.group_input_channels, params.group_output_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
         output_id, 0 /* flags */);
@@ -129,19 +182,14 @@ class SubgraphTester {
     return *this;
   }
 
-  inline SubgraphTester& AddDepthwiseConv(
-      uint32_t input_padding_top, uint32_t input_padding_right,
-      uint32_t input_padding_bottom, uint32_t input_padding_left,
-      uint32_t kernel_height, uint32_t kernel_width,
-      uint32_t subsampling_height, uint32_t subsampling_width,
-      uint32_t dilation_height, uint32_t dilation_width,
-      uint32_t depth_multiplier, size_t input_channels, uint32_t input_id,
-      uint32_t filter_id, uint32_t bias_id, uint32_t output_id) {
+  inline SubgraphTester& AddDepthwiseConvolution2D(
+      DepthwiseConvolutionParams params,
+      uint32_t input_id, uint32_t filter_id, uint32_t bias_id, uint32_t output_id) {
     const xnn_status status = xnn_define_depthwise_convolution_2d(
-        subgraph_.get(), input_padding_top, input_padding_right,
-        input_padding_bottom, input_padding_left, kernel_height, kernel_width,
-        subsampling_height, subsampling_width, dilation_height, dilation_width,
-        depth_multiplier, input_channels,
+        subgraph_.get(), params.padding.top, params.padding.right,
+        params.padding.bottom, params.padding.left, params.kernel.height, params.kernel.width,
+        params.subsampling.height, params.subsampling.width, params.dilation.height, params.dilation.width,
+        params.depth_multiplier, params.input_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
         output_id, 0 /* flags */);
@@ -200,6 +248,24 @@ class SubgraphTester {
         adjustment_width, kernel_height, kernel_width, upsampling_height,
         upsampling_width, dilation_height, dilation_width, groups,
         group_input_channels, group_output_channels,
+        -std::numeric_limits<float>::infinity(),
+        std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
+        output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddDeconvolution2D(
+      DeconvolutionParams params,
+      uint32_t input_id, uint32_t filter_id, uint32_t bias_id,
+      uint32_t output_id) {
+    const xnn_status status = xnn_define_deconvolution_2d(
+        subgraph_.get(), params.padding.top, params.padding.right,
+        params.padding.bottom, params.padding.left, params.adjustment.height,
+        params.adjustment.width, params.kernel.height, params.kernel.width, params.upsampling.height,
+        params.upsampling.width, params.dilation.height, params.dilation.width, params.groups,
+        params.group_input_channels, params.group_output_channels,
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
         output_id, 0 /* flags */);
