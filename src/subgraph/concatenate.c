@@ -538,13 +538,11 @@ enum xnn_status xnn_define_concatenate_n(
     return xnn_status_invalid_parameter;
   }
 
-  check_input_value(subgraph, axis, input_ids[0], output_id, 1, node_type);
-  check_input_value(subgraph, axis, input_ids[1], output_id, 2, node_type);
-  if (num_inputs > 2) {
-    check_input_value(subgraph, axis, input_ids[2], output_id, 3, node_type);
-  }
-  if (num_inputs > 3) {
-    check_input_value(subgraph, axis, input_ids[3], output_id, 4, node_type);
+  for (size_t i = 0; i < num_inputs; i++) {
+    status = check_input_value(subgraph, axis, input_ids[i], output_id, i+1, node_type);
+    if (status != xnn_status_success) {
+      return status;
+    }
   }
 
   size_t input_axis_dimensions_sum = 0;
