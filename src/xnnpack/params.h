@@ -17,6 +17,16 @@
 #include <xnnpack/microparams.h>
 
 
+union xnn_f32_constant_param {
+  float c;
+};
+
+union xnn_fused_operator_params {
+  union xnn_f32_abs_params f32_abs;
+  union xnn_f32_constant_param f32_constant;
+  union xnn_f32_neg_params f32_neg;
+  union xnn_f32_hswish_params f32_hswish;
+};
 typedef void (*xnn_ppmm_ukernel_function)(
     size_t mr,
     size_t nc,
@@ -154,6 +164,18 @@ typedef void (*xnn_f32_gemm_minmax_ukernel_function)(
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params* params);
+
+typedef void (*xnn_f32_fused_gemm_minmax_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const void* params);
 
 typedef void (*xnn_f32_gemminc_minmax_ukernel_function)(
     size_t mr,
@@ -1885,6 +1907,13 @@ typedef void (*xnn_init_qc8_scale_params_fn)(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
+typedef void (*xnn_init_f32_constant_params_fn)(
+    union xnn_f32_constant_param* params,
+    float c);
+
+// Forward declare to avoid circular includes between this and allocator.h.
+struct xnn_code_buffer;
+
 typedef enum xnn_status (*xnn_jit_gemm_code_generator_function)(
     struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
 typedef enum xnn_status (*xnn_jit_igemm_code_generator_function)(
@@ -2093,6 +2122,12 @@ struct vbinary_fused_ukernels {
   xnn_vbinary_ukernel_function op_ukernel;
   xnn_vbinary_ukernel_function opc_ukernel;
   xnn_vbinary_ukernel_function ropc_ukernel;
+};
+
+struct constant_parameters {
+  union {
+    xnn_init_f32_constant_params_fn f32_constant;
+  } init;
 };
 
 struct vbinary_parameters {
@@ -2527,6 +2562,7 @@ struct xnn_parameters {
     struct gavgpool_cw_parameters gavgpool_cw;
     // Bilinear interpolation (2D) in CHW layout.
     struct ibilinear_chw_parameters ibilinear_chw;
+    struct constant_parameters fused_vadd;
   } f32;
   struct {
     struct vunary_parameters f16_to_f32;

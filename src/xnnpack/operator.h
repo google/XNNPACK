@@ -260,6 +260,8 @@ struct xnn_operator {
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
+  size_t num_fused_params;
+  union xnn_fused_operator_params* fused_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 

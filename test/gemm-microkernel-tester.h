@@ -9,7 +9,9 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 
+#include <xnnpack.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
@@ -271,6 +273,9 @@ class GemmMicrokernelTester {
     xnn_jit_igemm_code_generator_function igemm_generator,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
+  void Test(
+    xnn_jit_gemm_code_generator_function gemm_generator,
+    std::vector<xnn_fused_operator>& fused_operators) const;
 #endif  // XNN_PLATFORM_JIT
 
  private:

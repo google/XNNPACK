@@ -241,6 +241,8 @@ static enum xnn_status create_convolution2d_nhwc(
     bool relu_activation,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    size_t num_fused_operators,
+    union xnn_fused_operator_params* fused_operator_params,
     xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
@@ -378,6 +380,14 @@ static enum xnn_status create_convolution2d_nhwc(
   }
   assert(ukernel_type != xnn_ukernel_type_default);
 
+  if (num_fused_operators != 0 && ukernel_type != xnn_ukernel_type_gemm) {
+    xnn_log_error(
+        "convolution with fused operators not support for these parameters: "
+        "kernel_size: %zu unit_subsampling: %d padding: %d",
+        kernel_size, unit_subsampling, any_padding);
+    goto error;
+  }
+
   size_t zero_size = 0;
   switch (ukernel_type) {
     case xnn_ukernel_type_vmulcaddc:
@@ -493,6 +503,8 @@ static enum xnn_status create_convolution2d_nhwc(
         goto error;
       }
       memcpy(&convolution_op->params, gemm_params, gemm_params_size);
+      convolution_op->num_fused_params = num_fused_operators;
+      convolution_op->fused_params = fused_operator_params;
 
       const struct gemm_fused_ukernels* gemm_ukernels = &gemm_parameters->minmax;
       const uint32_t mr = gemm_parameters->mr;
@@ -749,6 +761,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QU8,
     xnn_operator_type_convolution_nhwc_qu8,
+    0, NULL,
     caches,
     convolution_op_out);
 }
@@ -862,6 +875,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QS8,
     xnn_operator_type_convolution_nhwc_qs8,
+    0, NULL,
     caches,
     convolution_op_out);
 }
@@ -983,6 +997,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_QC8,
     xnn_operator_type_convolution_nhwc_qc8,
+    0, NULL,
     caches,
     convolution_op_out);
 }
@@ -1095,6 +1110,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     NULL /* jit_gemm_params */,
     false /* linear activation */, false /* relu activation */, XNN_INIT_FLAG_F16,
     xnn_operator_type_convolution_nhwc_f16,
+    0, NULL,
     caches,
     convolution_op_out);
 }
@@ -1206,6 +1222,151 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     &jit_gemm_params,
     linear_activation, relu_activation, XNN_INIT_FLAG_F32,
     xnn_operator_type_convolution_nhwc_f32,
+    0, NULL,
+    caches,
+    convolution_op_out);
+}
+
+enum xnn_status xnn_create_convolution2d_nhwc_f32_fused(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    const float* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    size_t num_fused_operations,
+    struct xnn_fused_operator* fused_operators,
+    uint32_t flags,
+    xnn_caches_t caches,
+    xnn_operator_t* convolution_op_out)
+{
+  #if !XNN_PLATFORM_JIT
+    xnn_log_error(
+      "failed to create %s operator: convolution with fused operators only support on JIT platforms",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+  #endif
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+
+  union xnn_f32_minmax_params gemm_params;
+  if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
+    xnn_params.f32.gemm.init.f32(&gemm_params, output_min, output_max);
+  }
+
+  struct jit_gemm_params jit_gemm_params = {
+    .f32_minmax = {
+      .min = output_min,
+      .max = output_max
+    },
+    .num_fused_operators = num_fused_operations,
+    .fused_operators = fused_operators,
+  };
+
+  union xnn_fused_operator_params* fused_operator_params = xnn_allocate_zero_memory(
+      num_fused_operations * sizeof(union xnn_fused_operator_params));
+  // Convert fused operator types to fused ops that microkernels know how to deal with.
+  // Initialize params or each fused operation if required.
+  for (size_t i = 0; i < num_fused_operations; i++) {
+    struct xnn_fused_operator fused_op = fused_operators[i];
+    switch (fused_op.op_type) {
+      case xnn_fused_operator_type_abs:
+        if (xnn_params.f32.abs.init.f32_abs != NULL) {
+          xnn_params.f32.abs.init.f32_abs(&fused_operator_params[i].f32_abs);
+        }
+        break;
+      case xnn_fused_operator_type_negate:
+        if (xnn_params.f32.neg.init.f32_neg != NULL) {
+          xnn_params.f32.neg.init.f32_neg(&fused_operator_params[i].f32_neg);
+        }
+        break;
+      case xnn_fused_operator_type_hardswish:
+        if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
+          xnn_params.f32.hswish.init.f32_hswish(&fused_operator_params[i].f32_hswish);
+        }
+        break;
+      case xnn_fused_operator_type_add:
+        if (xnn_params.f32.fused_vadd.init.f32_constant != NULL) {
+          xnn_params.f32.fused_vadd.init.f32_constant(&fused_operator_params[i].f32_constant, fused_op.arg);
+        }
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+
+  union xnn_f32_minmax_params dwconv_params;
+  const struct dwconv_parameters* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS);
+  if XNN_LIKELY(dwconv_ukernel != NULL) {
+    dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
+  }
+
+  union xnn_f32_minmax_params vmulcaddc_params;
+  if XNN_LIKELY(xnn_params.f32.vmulcaddc.init.f32 != NULL) {
+    xnn_params.f32.vmulcaddc.init.f32(&vmulcaddc_params, output_min, output_max);
+  }
+
+  return create_convolution2d_nhwc(
+    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
+    kernel_height, kernel_width,
+    subsampling_height, subsampling_width,
+    dilation_height, dilation_width,
+    groups, group_input_channels, group_output_channels,
+    input_channel_stride, output_channel_stride,
+    kernel, bias, flags,
+    2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
+    2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
+    sizeof(float) /* sizeof(bias element) */,
+    (xnn_pack_vmulcaddc_w_function) xnn_pack_f32_vmulcaddc_w,
+    (xnn_pack_dwconv_hwg_w_function) xnn_pack_f32_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_function) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_function) xnn_pack_f32_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_function) xnn_pack_f32_conv_kgo_w,
+    (xnn_pack_conv_goki_w_function) xnn_pack_f32_conv_goki_w,
+    NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
+    0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
+    (void*) &gemm_params, sizeof(gemm_params),
+    &dwconv_params, sizeof(dwconv_params),
+    &vmulcaddc_params, sizeof(vmulcaddc_params),
+    &xnn_params.f32.gemm, dwconv_ukernel, &xnn_params.f32.vmulcaddc,
+    &jit_gemm_params,
+    linear_activation, relu_activation, XNN_INIT_FLAG_F32,
+    xnn_operator_type_convolution_nhwc_f32,
+    num_fused_operations, fused_operator_params,
     caches,
     convolution_op_out);
 }
@@ -1353,6 +1514,8 @@ static enum xnn_status setup_convolution2d_nhwc(
           .ukernel = gemm_ukernel,
       };
       memcpy(&convolution_op->context.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.params));
+      convolution_op->context.gemm.num_fused_params = convolution_op->num_fused_params;
+      convolution_op->context.gemm.fused_params = convolution_op->fused_params;
 
       #if XNN_TEST_MODE
         const size_t nc = nr;

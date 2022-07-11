@@ -2478,4 +2478,6 @@ struct jit_gemm_params {
     float min;
     float max;
   } f32_minmax;
+  size_t num_fused_operators;
+  struct xnn_fused_operator* fused_operators;
 };

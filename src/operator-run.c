@@ -1212,17 +1212,31 @@ void xnn_compute_vmulcaddc(
     const size_t a_stride  = context->a_stride;
     const size_t cm_stride = context->cm_stride;
 
-    context->ukernel.function[uarch_index](
-        mr_block_size,
-        nr_block_size,
-        context->k_scaled,
-        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
-        a_stride,
-        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
-        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
-        cm_stride,
-        context->cn_stride,
-        &context->params);
+    if (context->num_fused_params == 0) {
+      context->ukernel.function[uarch_index](
+          mr_block_size,
+          nr_block_size,
+          context->k_scaled,
+          (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
+          a_stride,
+          (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+          (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+          cm_stride,
+          context->cn_stride,
+          &context->params);
+    } else {
+      context->ukernel.function[uarch_index](
+          mr_block_size,
+          nr_block_size,
+          context->k_scaled,
+          (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
+          a_stride,
+          (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
+          (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
+          cm_stride,
+          context->cn_stride,
+          context->fused_params);
+    }
   }
 
   void xnn_compute_hmp_grouped_batch_igemm(

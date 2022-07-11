@@ -185,6 +185,8 @@ struct gemm_context {
     union xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
+  size_t num_fused_params;
+  union xnn_fused_operator_params* fused_params;
 };
 
 #ifndef __cplusplus

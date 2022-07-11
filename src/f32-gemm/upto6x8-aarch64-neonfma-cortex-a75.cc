@@ -17,7 +17,9 @@ namespace {
 class Generator : public Assembler {
   using Assembler::Assembler;
  public:
-  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max);
+  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
+  void perform_fused_ops(VRegister dst, VRegister src, size_t num_fused_operators,
+         const xnn_fused_operator* fused_operators);
 };
 
 // void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
@@ -67,13 +69,62 @@ class Generator : public Assembler {
 // C   v30 v31
 // Clamp v6 v7
 
+void Generator::perform_fused_ops(VRegister dst, VRegister src, size_t num_fused_operators,
+       const xnn_fused_operator* fused_operators) {
+  mov(x15, x8); // backup x8
+  for (size_t i = 0; i < num_fused_operators; i++) {
+    switch (fused_operators[i].op_type) {
+      case xnn_fused_operator_type_add: {
+        ld1r({v6.v4s()}, mem[x8]);
+        fadd(dst, src, v6.v4s());
+        break;
+      }
+      case xnn_fused_operator_type_abs: {
+        fabs(dst, src);
+        break;
+      }
+      case xnn_fused_operator_type_negate: {
+        fneg(dst, src);
+        break;
+      }
+      case xnn_fused_operator_type_hardswish: {
+        auto sixth = v6.v4s();
+        auto three = v7.v4s();
+        auto six = v8.v4s();
+        auto zero = v9.v4s();
+        // src and dst are the same, back up src.
+        auto src_backup = v10.v4s();
+        mov(src_backup, src);
+        ld3r({sixth, three, six}, mem[x8]);
+        movi(zero, 0);
+        fadd(dst, src, three.v4s());
+        fmul(src_backup, src_backup, sixth.v4s());
+        fmax(dst, dst, zero);
+        fmin(dst, dst, six.v4s());
+        // maybe don't need v10
+        fmul(dst, dst, src_backup);
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+    add(x8, x8, sizeof(union xnn_fused_operator_params));
+  }
+  mov(x8, x15); // restore x8
+}
+
 // Converted from: src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max)
+void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 6);
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  const float min = jit_gemm_params->f32_minmax.min;
+  const float max = jit_gemm_params->f32_minmax.max;
+  const size_t num_fused_operators = jit_gemm_params->num_fused_operators;
+  const xnn_fused_operator* fused_operators = jit_gemm_params->fused_operators;
+  // const xnn_fused_operator_params* fused_operator_params = jit_gemm_params->fused_operator_params;
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
@@ -912,6 +963,33 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     }
   }
 
+  // TODO(zhin): this way of emitting instructions does not allow us to do software pipelining, and requires us to
+  // back up and restore x8 (pointer to params) constantly. We should instead emit instructions for a single fused op
+  // across all registers. That can trivially let us pipeline fused operations that emit a single instruction, but does
+  // not work for operations like hardswish with multiple instructions and dependency chains.
+  perform_fused_ops(v20.v4s(), v20.v4s(), num_fused_operators, fused_operators);
+  perform_fused_ops(v21.v4s(), v21.v4s(), num_fused_operators, fused_operators);
+  if (max_mr > 1) {
+    perform_fused_ops(v22.v4s(), v22.v4s(), num_fused_operators, fused_operators);
+    perform_fused_ops(v23.v4s(), v23.v4s(), num_fused_operators, fused_operators);
+  }
+  if (max_mr > 2) {
+    perform_fused_ops(v24.v4s(), v24.v4s(), num_fused_operators, fused_operators);
+    perform_fused_ops(v25.v4s(), v25.v4s(), num_fused_operators, fused_operators);
+  }
+  if (max_mr > 3) {
+    perform_fused_ops(v26.v4s(), v26.v4s(), num_fused_operators, fused_operators);
+    perform_fused_ops(v27.v4s(), v27.v4s(), num_fused_operators, fused_operators);
+  }
+  if (max_mr > 4) {
+    perform_fused_ops(v28.v4s(), v28.v4s(), num_fused_operators, fused_operators);
+    perform_fused_ops(v29.v4s(), v29.v4s(), num_fused_operators, fused_operators);
+  }
+  if (max_mr > 5) {
+    perform_fused_ops(v30.v4s(), v30.v4s(), num_fused_operators, fused_operators);
+    perform_fused_ops(v31.v4s(), v31.v4s(), num_fused_operators, fused_operators);
+  }
+
   // Store full 6 x 8
   b_lo(l7);
 
@@ -1353,8 +1431,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75(xnn
   using namespace xnnpack::aarch64;
   Generator g(code);
   assert(params != nullptr);
-  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(false, max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
+  g.generate(false, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -1367,8 +1444,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_prfm_cortex_a7
   using namespace xnnpack::aarch64;
   Generator g(code);
   assert(params != nullptr);
-  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(true, max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
+  g.generate(true, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

@@ -6541,3 +6541,10 @@ XNN_INTERNAL void xnn_init_qu8_f32_cvt_wasmsimd_params(
   }
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+XNN_INTERNAL void xnn_init_f32_constant_params(
+  union xnn_f32_constant_param params[XNN_MIN_ELEMENTS(1)],
+  float c)
+{
+  params->c = c;
+}

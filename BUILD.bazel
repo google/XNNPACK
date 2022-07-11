@@ -13094,6 +13094,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_fused_gemm_minmax_test",
+    srcs = [
+        "test/f32-fused-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":XNNPACK",
+        ":gemm_microkernel_tester",
+        ":jit_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_vhswish_test",
     srcs = [
         "test/f32-vhswish.cc",
