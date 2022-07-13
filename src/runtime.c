@@ -448,7 +448,7 @@ static xnn_timestamp xnn_read_timer() {
 static inline uint64_t xnn_get_elapsed_time(const xnn_timestamp* start, const xnn_timestamp* end) {
 #ifdef __MACH__
   const uint64_t kMicrosInNanos = 1000;
-  return (end - start) / kMicrosInNanos;
+  return (*end - *start) / kMicrosInNanos;
 #elif __EMSCRIPTEN__
   const double kMillisInMicros = 1.0e3;
   return (uint64_t) ((*end - *start) * kMillisInMicros);
