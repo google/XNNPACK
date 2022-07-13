@@ -14254,6 +14254,7 @@ xnnpack_unit_test(
         "test/average-pooling-nhwc.cc",
         "test/average-pooling-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
