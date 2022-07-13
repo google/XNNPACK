@@ -20,7 +20,6 @@ extern "C" {
                             size_t input_stride,        \
                             size_t output_stride,       \
                             size_t element_size,        \
-                            size_t block_width,         \
                             size_t block_height);
 
 DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_memcpy)

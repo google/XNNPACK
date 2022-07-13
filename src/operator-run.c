@@ -151,14 +151,13 @@ void xnn_compute_transposev_2d(
     const struct transpose_context* context,
     size_t i,
     size_t j,
-    size_t tile_i,
-    size_t tile_j)
+    size_t tile_i)
 {
   const size_t element_size = context->element_size;
-  const size_t ld_input = context->input_stride[1];
+  const size_t ld_input = context->input_stride[0];
   const size_t ld_output = context->output_stride[0];
   const void* x = (const void*) ((uintptr_t) context->x +
-                                 i * context->input_stride[0] + j * ld_input);
+                                 i * context->input_stride[0] + j * context->input_stride[1]);
   void* y = (void*) ((uintptr_t) context->y + element_size * j + i * context->output_stride[0]);
 
   context->variable_size_ukernel(
@@ -167,8 +166,7 @@ void xnn_compute_transposev_2d(
       ld_input,
       ld_output,
       element_size,
-      tile_i,
-      tile_j);
+      tile_i);
 }
 
 void xnn_compute_transposev_3d(
@@ -176,14 +174,13 @@ void xnn_compute_transposev_3d(
     size_t i,
     size_t j,
     size_t k,
-    size_t tile_j,
     size_t tile_k)
 {
   const size_t element_size = context->element_size;
-  const size_t ld_input = context->input_stride[2];
+  const size_t ld_input = context->input_stride[1];
   const size_t ld_output = context->output_stride[1];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
-                                 k * ld_input);
+                                 k * context->input_stride[2]);
   void* y = (void*)((uintptr_t)context->y + i * context->output_stride[0] + j * context->output_stride[1] +
                      k * element_size);
 
@@ -193,7 +190,6 @@ void xnn_compute_transposev_3d(
       ld_input,
       ld_output,
       element_size,
-      tile_j,
       tile_k);
 }
 
@@ -203,14 +199,13 @@ void xnn_compute_transposev_4d(
     size_t j,
     size_t k,
     size_t l,
-    size_t tile_k,
-    size_t tile_l)
+    size_t tile_k)
 {
   const size_t element_size = context->element_size;
-  const size_t ld_input = context->input_stride[3];
+  const size_t ld_input = context->input_stride[2];
   const size_t ld_output = context->output_stride[2];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
-                                 k * context->input_stride[2] + l * ld_input);
+                                 k * context->input_stride[2] + l * context->input_stride[3]);
   void* y = (void*)((uintptr_t)context->y + element_size * l + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2]);
 
@@ -220,8 +215,7 @@ void xnn_compute_transposev_4d(
       ld_input,
       ld_output,
       element_size,
-      tile_k,
-      tile_l);
+      tile_k);
 }
 
 void xnn_compute_transposev_5d(
@@ -231,14 +225,13 @@ void xnn_compute_transposev_5d(
     size_t k,
     size_t l,
     size_t m,
-    size_t tile_l,
-    size_t tile_m)
+    size_t tile_l)
 {
   const size_t element_size = context->element_size;
-  const size_t ld_input = context->input_stride[4];
+  const size_t ld_input = context->input_stride[3];
   const size_t ld_output = context->output_stride[3];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
-                                 k * context->input_stride[2] + l * context->input_stride[3] + m * ld_input);
+                                 k * context->input_stride[2] + l * context->input_stride[3] + m * context->input_stride[4]);
   void* y = (void*)((uintptr_t)context->y + element_size * m + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2] + l * context->output_stride[3]);
 
@@ -248,8 +241,7 @@ void xnn_compute_transposev_5d(
       ld_input,
       ld_output,
       element_size,
-      tile_l,
-      tile_m);
+      tile_l);
 }
 
 void xnn_compute_transposev_6d(
@@ -260,15 +252,14 @@ void xnn_compute_transposev_6d(
     size_t l,
     size_t m,
     size_t n,
-    size_t tile_m,
-    size_t tile_n)
+    size_t tile_m)
 {
   const size_t element_size = context->element_size;
-  const size_t ld_input = context->input_stride[5];
+  const size_t ld_input = context->input_stride[4];
   const size_t ld_output = context->output_stride[4];
   const void* x = (const void*)((uintptr_t)context->x + i * context->input_stride[0] + j * context->input_stride[1] +
                                  k * context->input_stride[2] + l * context->input_stride[3] +
-                                 m * context->input_stride[4] + n * ld_input);
+                                 m * context->input_stride[4] + n * context->input_stride[5]);
   void* y = (void*)((uintptr_t)context->y + element_size * n + i * context->output_stride[0] +
                      j * context->output_stride[1] + k * context->output_stride[2] + l * context->output_stride[3] +
                      m * context->output_stride[4]);
@@ -279,8 +270,7 @@ void xnn_compute_transposev_6d(
       ld_input,
       ld_output,
       element_size,
-      tile_m,
-      tile_n);
+      tile_m);
 }
 
 void xnn_compute_grouped_gemm(
@@ -660,62 +650,6 @@ void xnn_compute_dwconv2d_chw(
     (void*) ((uintptr_t) context->output + channel * context->output_channel_stride + batch_index * context->output_batch_stride),
     context->input_padding_top,
     &context->params);
-}
-
-void xnn_compute_depthtospace2d_hwc_contiguous(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y)
-{
-  const size_t input_width = context->input_width;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    (batch_input_y * input_width + input_x) * context->input_width_stride + block_y * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    ((batch_input_y * context->block_size + block_y) * input_width + input_x) * elements);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
-void xnn_compute_depthtospace2d_hwc_strided(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y,
-    size_t block_x)
-{
-  const size_t block_size = context->block_size;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    batch_input_y * context->input_height_stride + input_x * context->input_width_stride + (block_y * block_size + block_x) * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    (batch_input_y * block_size + block_y) * context->output_height_stride +
-    (input_x * block_size + block_x) * context->output_width_stride);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
-void xnn_compute_depthtospace2d_chw2hwc(
-    const struct depthtospace2d_chw2hwc_context* context,
-    size_t batch_index)
-{
-  context->ukernel(
-    context->output_channels,
-    context->input_height,
-    context->input_width,
-    context->block_size,
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride),
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride),
-    context->output_channel_stride);
 }
 
 void xnn_compute_argmax_pooling_unipass(
@@ -1423,6 +1357,19 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.range[0], op->compute.range[1], op->compute.range[2],
           flags);
       break;
+    case xnn_parallelization_type_3d_tile_1d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.tile[0] != 0);
+      pthreadpool_parallelize_3d_tile_1d(
+          threadpool,
+          op->compute.task_3d_tile_1d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2],
+          op->compute.tile[0],
+          flags);
+      break;
     case xnn_parallelization_type_3d_tile_2d:
       assert(op->compute.range[0] != 0);
       assert(op->compute.range[1] != 0);
@@ -1447,6 +1394,20 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.task_4d,
           &op->context,
           op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
+          flags);
+      break;
+    case xnn_parallelization_type_4d_tile_1d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      assert(op->compute.tile[0] != 0);
+      pthreadpool_parallelize_4d_tile_1d(
+          threadpool,
+          op->compute.task_4d_tile_1d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3],
+          op->compute.tile[0],
           flags);
       break;
     case xnn_parallelization_type_4d_tile_2d:
@@ -1477,6 +1438,21 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3], op->compute.range[4],
           flags);
       break;
+    case xnn_parallelization_type_5d_tile_1d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      assert(op->compute.range[4] != 0);
+      assert(op->compute.tile[0] != 0);
+      pthreadpool_parallelize_5d_tile_1d(
+          threadpool,
+          op->compute.task_5d_tile_1d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3], op->compute.range[4],
+          op->compute.tile[0],
+          flags);
+      break;
     case xnn_parallelization_type_5d_tile_2d:
       assert(op->compute.range[0] != 0);
       assert(op->compute.range[1] != 0);
@@ -1491,6 +1467,22 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
           &op->context,
           op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3], op->compute.range[4],
           op->compute.tile[0], op->compute.tile[1],
+          flags);
+      break;
+    case xnn_parallelization_type_6d_tile_1d:
+      assert(op->compute.range[0] != 0);
+      assert(op->compute.range[1] != 0);
+      assert(op->compute.range[2] != 0);
+      assert(op->compute.range[3] != 0);
+      assert(op->compute.range[4] != 0);
+      assert(op->compute.range[5] != 0);
+      assert(op->compute.tile[0] != 0);
+      pthreadpool_parallelize_6d_tile_1d(
+          threadpool,
+          op->compute.task_6d_tile_1d,
+          &op->context,
+          op->compute.range[0], op->compute.range[1], op->compute.range[2], op->compute.range[3], op->compute.range[4], op->compute.range[5],
+          op->compute.tile[0],
           flags);
       break;
     case xnn_parallelization_type_6d_tile_2d:

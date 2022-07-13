@@ -277,8 +277,6 @@ struct xnn_operator {
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
-    struct depthtospace2d_chw2hwc_context depthtospace2d_chw;
-    struct depthtospace2d_hwc_context depthtospace2d_hwc;
     struct elementwise_binary_context elementwise_binary;
     struct gemm_context gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;

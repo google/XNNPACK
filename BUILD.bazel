@@ -85,8 +85,6 @@ OPERATOR_SRCS = [
     "src/operators/convolution-nchw.c",
     "src/operators/convolution-nhwc.c",
     "src/operators/deconvolution-nhwc.c",
-    "src/operators/depth-to-space-nchw2nhwc.c",
-    "src/operators/depth-to-space-nhwc.c",
     "src/operators/fully-connected-nc.c",
     "src/operators/global-average-pooling-ncw.c",
     "src/operators/global-average-pooling-nwc.c",
@@ -162,7 +160,6 @@ PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS = [
     "src/xx-copy/memcpy.c",
     "src/xx-transpose/1x1-memcpy.c",
     "src/x8-lut/gen/lut-scalar-x4.c",
-    "src/x32-depthtospace2d-chw2hwc/scalar.c",
 ]
 
 PROD_SCALAR_AARCH32_MICROKERNEL_SRCS = [
@@ -1378,7 +1375,6 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x24-transposec/gen/4x1-scalar.c",
     "src/x24-transposec/gen/4x2-scalar.c",
     "src/x24-transposec/gen/4x4-scalar.c",
-    "src/x32-depthtospace2d-chw2hwc/scalar.c",
     "src/x32-packx/x2-scalar.c",
     "src/x32-packx/x3-scalar.c",
     "src/x32-packx/x4-scalar.c",
@@ -8447,7 +8443,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/avgpool.h",
     "src/xnnpack/cache.h",
     "src/xnnpack/conv.h",
-    "src/xnnpack/depthtospace.h",
     "src/xnnpack/dwconv.h",
     "src/xnnpack/fill.h",
     "src/xnnpack/gavgpool.h",
@@ -10951,6 +10946,9 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":math",
+    ],
 )
 
 xnnpack_cc_library(
@@ -10963,6 +10961,9 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":math",
+    ],
 )
 
 xnnpack_cc_library(
@@ -14089,15 +14090,6 @@ xnnpack_unit_test(
     srcs = [
         "test/x8-zip.cc",
         "test/zip-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x32_depthtospace2d_chw2hwc_test",
-    srcs = [
-        "test/depthtospace-microkernel-tester.h",
-        "test/x32-depthtospace2d-chw2hwc.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

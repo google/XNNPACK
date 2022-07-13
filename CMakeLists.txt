@@ -195,8 +195,6 @@ SET(OPERATOR_SRCS
   src/operators/convolution-nchw.c
   src/operators/convolution-nhwc.c
   src/operators/deconvolution-nhwc.c
-  src/operators/depth-to-space-nchw2nhwc.c
-  src/operators/depth-to-space-nhwc.c
   src/operators/fully-connected-nc.c
   src/operators/global-average-pooling-ncw.c
   src/operators/global-average-pooling-nwc.c
@@ -320,8 +318,7 @@ SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/u8-lut32norm/scalar.c
   src/xx-copy/memcpy.c
   src/xx-transpose/1x1-memcpy.c
-  src/x8-lut/gen/lut-scalar-x4.c
-  src/x32-depthtospace2d-chw2hwc/scalar.c)
+  src/x8-lut/gen/lut-scalar-x4.c)
 
 SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-scalar-x4.c
@@ -1385,7 +1382,6 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x24-transposec/gen/4x1-scalar.c
   src/x24-transposec/gen/4x2-scalar.c
   src/x24-transposec/gen/4x4-scalar.c
-  src/x32-depthtospace2d-chw2hwc/scalar.c
   src/x32-packx/x2-scalar.c
   src/x32-packx/x3-scalar.c
   src/x32-packx/x4-scalar.c
@@ -8651,11 +8647,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(x32-unpool-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME x32-unpool-test COMMAND x32-unpool-test)
-
-  ADD_EXECUTABLE(x32-depthtospace2d-chw2hwc-test test/x32-depthtospace2d-chw2hwc.cc $<TARGET_OBJECTS:all_microkernels>)
-  TARGET_INCLUDE_DIRECTORIES(x32-depthtospace2d-chw2hwc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-depthtospace2d-chw2hwc-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  ADD_TEST(NAME x32-depthtospace2d-chw2hwc-test COMMAND x32-depthtospace2d-chw2hwc-test)
 
   ADD_EXECUTABLE(x32-transpose-test test/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(x32-transpose-test PRIVATE include src test)
