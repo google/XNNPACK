@@ -110,17 +110,19 @@ static void generate_gemms_up_to_max_mr(
     size_t nr,
     size_t group_input_channels,
     size_t log2_input_element_size,
-    struct xnn_code_cache* code_cache,
     xnn_operator_t convolution_op)
 {
   assert(XNN_MAX_MR >= max_mr);
+  if (convolution_op->code_cache == NULL) {
+    return;
+  }
   convolution_op->ukernel.gemm.gemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT] =
       get_generated_gemm(generators.gemm1, jit_gemm_params, 1, group_output_channels, nr, group_input_channels,
-                         log2_input_element_size, code_cache);
+                         log2_input_element_size, convolution_op->code_cache);
   for (size_t mr = 2; mr <= max_mr; mr++) {
     convolution_op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
         get_generated_gemm(generators.gemm, jit_gemm_params, mr, group_output_channels, nr, group_input_channels,
-                           log2_input_element_size, code_cache);
+                           log2_input_element_size, convolution_op->code_cache);
   }
 }
 
@@ -174,17 +176,19 @@ static void generate_igemms_up_to_max_mr(
     size_t group_input_channels,
     size_t log2_input_element_size,
     size_t kernel_size,
-    struct xnn_code_cache* code_cache,
     xnn_operator_t convolution_op)
 {
   assert(XNN_MAX_MR >= max_mr);
+  if (convolution_op->code_cache == NULL) {
+    return;
+  }
   convolution_op->ukernel.igemm.igemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT] =
       get_generated_igemm(generators.igemm1, jit_gemm_params, group_output_channels, nr, group_input_channels,
-                          log2_input_element_size, kernel_size, 1, code_cache);
+                          log2_input_element_size, kernel_size, 1, convolution_op->code_cache);
   for (size_t mr = 2; mr <= max_mr; mr++) {
     convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
       get_generated_igemm(generators.igemm, jit_gemm_params, group_output_channels, nr, group_input_channels,
-                          log2_input_element_size, kernel_size, mr, code_cache);
+                          log2_input_element_size, kernel_size, mr, convolution_op->code_cache);
   }
 }
 #endif  // XNN_PLATFORM_JIT
@@ -355,6 +359,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   if (caches != NULL) {
     convolution_op->weights_cache = caches->weights_cache;
+    convolution_op->code_cache = caches->code_cache;
   }
 
   const size_t kernel_size = kernel_height * kernel_width;
@@ -515,13 +520,9 @@ static enum xnn_status create_convolution2d_nhwc(
           }
 
           #if XNN_PLATFORM_JIT
-            if (caches != NULL && caches->code_cache != NULL) {
-              convolution_op->code_cache = caches->code_cache;
-              generate_gemms_up_to_max_mr(
-                  mr,
-                  gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
-                  group_input_channels, log2_input_element_size, caches->code_cache, convolution_op);
-            }
+            generate_gemms_up_to_max_mr(
+              mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
+              group_input_channels, log2_input_element_size, convolution_op);
           #endif  // XNN_PLATFORM_JIT
 
           break;
@@ -550,12 +551,9 @@ static enum xnn_status create_convolution2d_nhwc(
           }
 
           #if XNN_PLATFORM_JIT
-            if (caches != NULL && caches->code_cache != NULL) {
-              convolution_op->code_cache = caches->code_cache;
-              generate_igemms_up_to_max_mr(
-                  mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
-                  group_input_channels, log2_input_element_size, kernel_size,  caches->code_cache, convolution_op);
-            }
+            generate_igemms_up_to_max_mr(
+              mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
+              group_input_channels, log2_input_element_size, kernel_size, convolution_op);
           #endif  // XNN_PLATFORM_JIT
 
           break;
