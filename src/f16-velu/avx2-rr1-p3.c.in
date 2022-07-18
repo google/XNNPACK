@@ -11,6 +11,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vunary.h>
 
 
