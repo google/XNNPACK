@@ -76,7 +76,6 @@ def xnnpack_cc_library(
         gcc_x86_copts = [],
         msvc_x86_32_copts = [],
         msvc_x86_64_copts = [],
-        apple_aarch32_copts = [],
         aarch32_copts = [],
         aarch64_copts = [],
         riscv_copts = [],
@@ -120,8 +119,6 @@ def xnnpack_cc_library(
                          builds.
       msvc_x86_64_copts: The list of MSVC compiler flags to use in x86 (64-bit)
                          builds.
-      apple_aarch32_copts: The list of compiler flags to use in AArch32 builds
-                           with Apple Clang.
       aarch32_copts: The list of compiler flags to use in AArch32 builds.
       aarch64_copts: The list of compiler flags to use in AArch64 builds.
       riscv_copts: The list of compiler flags to use in RISC-V builds.
@@ -171,15 +168,11 @@ def xnnpack_cc_library(
             ":android_arm64": aarch64_copts,
             ":android_x86": gcc_x86_copts,
             ":android_x86_64": gcc_x86_copts,
-            ":ios_armv7": apple_aarch32_copts,
             ":ios_arm64": aarch64_copts,
             ":ios_arm64e": aarch64_copts,
             ":ios_sim_arm64": aarch64_copts,
-            ":ios_x86": gcc_x86_copts,
             ":ios_x86_64": gcc_x86_copts,
-            ":watchos_armv7k": apple_aarch32_copts,
             ":watchos_arm64_32": aarch64_copts,
-            ":watchos_x86": gcc_x86_copts,
             ":watchos_x86_64": gcc_x86_copts,
             ":tvos_arm64": aarch64_copts,
             ":tvos_x86_64": gcc_x86_copts,
@@ -220,8 +213,7 @@ def xnnpack_aggregate_library(
         name,
         generic_deps = [],
         x86_deps = [],
-        aarch32_ios_deps = [],
-        aarch32_nonios_deps = [],
+        aarch32_deps = [],
         aarch64_deps = [],
         riscv_deps = [],
         wasm_deps = [],
@@ -233,10 +225,7 @@ def xnnpack_aggregate_library(
       name: The name of the library target to define.
       generic_deps: The list of libraries to link on all architectures.
       x86_deps: The list of libraries to link in x86 and x86-64 builds.
-      aarch32_ios_deps: The list of libraries to link in AArch32 iOS (incl
-                        WatchOS) builds.
-      aarch32_nonios_deps: The list of libraries to link in AArch32 non-iOS
-                           builds.
+      aarch32_deps: The list of libraries to link in AArch32 builds.
       aarch64_deps: The list of libraries to link in AArch64 builds.
       riscv_deps: The list of libraries to link in RISC-V builds.
       wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
@@ -250,10 +239,10 @@ def xnnpack_aggregate_library(
         linkstatic = True,
         deps = generic_deps + select({
             ":linux_k8": x86_deps,
-            ":linux_arm": aarch32_nonios_deps,
-            ":linux_armeabi": aarch32_nonios_deps,
-            ":linux_armhf": aarch32_nonios_deps,
-            ":linux_armv7a": aarch32_nonios_deps,
+            ":linux_arm": aarch32_deps,
+            ":linux_armeabi": aarch32_deps,
+            ":linux_armhf": aarch32_deps,
+            ":linux_armv7a": aarch32_deps,
             ":linux_arm64": aarch64_deps,
             ":macos_x86_64": x86_deps,
             ":macos_arm64": aarch64_deps,
@@ -261,19 +250,15 @@ def xnnpack_aggregate_library(
             ":windows_x86_64_mingw": x86_deps,
             ":windows_x86_64_msys": x86_deps,
             ":windows_x86_64": x86_deps,
-            ":android_armv7": aarch32_nonios_deps,
+            ":android_armv7": aarch32_deps,
             ":android_arm64": aarch64_deps,
             ":android_x86": x86_deps,
             ":android_x86_64": x86_deps,
-            ":ios_armv7": aarch32_ios_deps,
             ":ios_arm64": aarch64_deps,
             ":ios_arm64e": aarch64_deps,
             ":ios_sim_arm64": aarch64_deps,
-            ":ios_x86": x86_deps,
             ":ios_x86_64": x86_deps,
-            ":watchos_armv7k": aarch32_ios_deps,
             ":watchos_arm64_32": aarch64_deps,
-            ":watchos_x86": x86_deps,
             ":watchos_x86_64": x86_deps,
             ":tvos_arm64": aarch64_deps,
             ":tvos_x86_64": x86_deps,

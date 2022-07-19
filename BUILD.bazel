@@ -8984,10 +8984,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cortex-a9",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9011,10 +9007,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = PROD_NEONFP16_MICROKERNEL_SRCS,
     aarch64_srcs = PROD_NEONFP16_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cortex-a9",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9038,10 +9030,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONFP16_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cortex-a9",
-        "-mtune=generic",
-    ],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9069,10 +9057,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=swift",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9096,10 +9080,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
     aarch64_srcs = PROD_NEONFMA_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=swift",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9123,10 +9103,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONFMA_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=swift",
-        "-mtune=generic",
-    ],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -9154,10 +9130,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cyclone",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9181,10 +9153,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = PROD_NEONV8_MICROKERNEL_SRCS,
     aarch64_srcs = PROD_NEONV8_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cyclone",
-        "-mtune=generic",
-    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -9208,10 +9176,6 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
     aarch64_srcs = ALL_NEONV8_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cyclone",
-        "-mtune=generic",
-    ],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -10250,10 +10214,6 @@ xnnpack_cc_library(
     aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
     aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,
-    apple_aarch32_copts = [
-        "-mcpu=cyclone",
-        "-mtune=generic",
-    ],
     wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
@@ -10319,15 +10279,7 @@ xnnpack_cc_library(
 
 xnnpack_aggregate_library(
     name = "amalgam_microkernels",
-    aarch32_ios_deps = [
-        ":armv6simd_prod_microkernels",
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch32_nonios_deps = [
+    aarch32_deps = [
         ":armv6simd_prod_microkernels",
         ":neon_prod_microkernels",
         ":neonfp16_prod_microkernels",
@@ -10376,15 +10328,7 @@ xnnpack_aggregate_library(
 
 xnnpack_aggregate_library(
     name = "bench_microkernels",
-    aarch32_ios_deps = [
-        ":armv6simd_bench_microkernels",
-        ":neon_bench_microkernels",
-        ":neonfp16_bench_microkernels",
-        ":neonfma_bench_microkernels",
-        ":neonv8_bench_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch32_nonios_deps = [
+    aarch32_deps = [
         ":armv6simd_bench_microkernels",
         ":neon_bench_microkernels",
         ":neonfp16_bench_microkernels",
@@ -10433,15 +10377,7 @@ xnnpack_aggregate_library(
 
 xnnpack_aggregate_library(
     name = "prod_microkernels",
-    aarch32_ios_deps = [
-        ":armv6simd_prod_microkernels",
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch32_nonios_deps = [
+    aarch32_deps = [
         ":armv6simd_prod_microkernels",
         ":neon_prod_microkernels",
         ":neonfp16_prod_microkernels",
@@ -10490,15 +10426,7 @@ xnnpack_aggregate_library(
 
 xnnpack_aggregate_library(
     name = "test_microkernels",
-    aarch32_ios_deps = [
-        ":armv6simd_test_microkernels",
-        ":neon_test_microkernels",
-        ":neonfp16_test_microkernels",
-        ":neonfma_test_microkernels",
-        ":neonv8_test_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch32_nonios_deps = [
+    aarch32_deps = [
         ":armv6simd_test_microkernels",
         ":neon_test_microkernels",
         ":neonfp16_test_microkernels",
@@ -15689,14 +15617,6 @@ config_setting(
 )
 
 config_setting(
-    name = "ios_armv7",
-    values = {
-        "apple_platform_type": "ios",
-        "cpu": "ios_armv7",
-    },
-)
-
-config_setting(
     name = "ios_arm64",
     values = {
         "apple_platform_type": "ios",
@@ -15721,14 +15641,6 @@ config_setting(
 )
 
 config_setting(
-    name = "ios_x86",
-    values = {
-        "apple_platform_type": "ios",
-        "cpu": "ios_i386",
-    },
-)
-
-config_setting(
     name = "ios_x86_64",
     values = {
         "apple_platform_type": "ios",
@@ -15737,26 +15649,10 @@ config_setting(
 )
 
 config_setting(
-    name = "watchos_armv7k",
-    values = {
-        "apple_platform_type": "watchos",
-        "cpu": "watchos_armv7k",
-    },
-)
-
-config_setting(
     name = "watchos_arm64_32",
     values = {
         "apple_platform_type": "watchos",
         "cpu": "watchos_arm64_32",
-    },
-)
-
-config_setting(
-    name = "watchos_x86",
-    values = {
-        "apple_platform_type": "watchos",
-        "cpu": "watchos_i386",
     },
 )
 
