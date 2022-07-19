@@ -12,7 +12,7 @@
 #include "gavgpool-cw-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_CW__NEONFP16ARITH_X8, elements_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolCWMicrokernelTester()
@@ -228,4 +228,4 @@
         .Test(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4, xnn_init_f16_gavgpool_neonfp16arith_x4_params);
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

@@ -3,103 +3,55 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-# ARM NEON
+# ARM NEON+FP16ARITH
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x8
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x16
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x32
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x40
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x48
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x56
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x64
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x8
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x16
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x24
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x32
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x48
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x56
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x64
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x8
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x16
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x24
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x32
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x40
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x48
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x56
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 - name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x64
   init: xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params
-  arch:
-    - aarch64
 
 # x86 AVX2
 - name: xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_x8

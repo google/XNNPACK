@@ -9196,6 +9196,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_bench_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONFP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -9214,6 +9220,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_prod_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = PROD_NEONFP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = PROD_NEONFP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -9232,6 +9244,12 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neonfp16arith_test_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONFP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_NEONFP16ARITH_MICROKERNEL_SRCS,
     copts = [
@@ -10293,13 +10311,15 @@ xnnpack_aggregate_library(
         ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
         ":neonv8_prod_microkernels",
-        ":neonfp16arith_prod_microkernels",
         ":neondot_prod_microkernels",
         ":asm_microkernels",
     ],
     generic_deps = [
         ":scalar_prod_microkernels",
-    ],
+    ] + select({
+        ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }),
     wasm_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -10342,13 +10362,19 @@ xnnpack_aggregate_library(
         ":neonfp16_bench_microkernels",
         ":neonfma_bench_microkernels",
         ":neonv8_bench_microkernels",
-        ":neonfp16arith_bench_microkernels",
         ":neondot_bench_microkernels",
         ":asm_microkernels",
     ],
+    defines = select({
+        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+    }),
     generic_deps = [
         ":scalar_bench_microkernels",
-    ],
+    ] + select({
+        ":arm_fp16_enabled": [":neonfp16arith_bench_microkernels"],
+        "//conditions:default": [],
+    }),
     wasm_deps = [
         ":wasm_bench_microkernels",
         ":asm_microkernels",
@@ -10391,13 +10417,19 @@ xnnpack_aggregate_library(
         ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
         ":neonv8_prod_microkernels",
-        ":neonfp16arith_prod_microkernels",
         ":neondot_prod_microkernels",
         ":asm_microkernels",
     ],
+    defines = select({
+        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+    }),
     generic_deps = [
         ":scalar_prod_microkernels",
-    ],
+    ] + select({
+        ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }),
     wasm_deps = [
         ":wasm_prod_microkernels",
         ":asm_microkernels",
@@ -10440,13 +10472,19 @@ xnnpack_aggregate_library(
         ":neonfp16_test_microkernels",
         ":neonfma_test_microkernels",
         ":neonv8_test_microkernels",
-        ":neonfp16arith_test_microkernels",
         ":neondot_test_microkernels",
         ":asm_microkernels",
     ],
+    defines = select({
+        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+    }),
     generic_deps = [
         ":scalar_test_microkernels",
-    ],
+    ] + select({
+        ":arm_fp16_enabled": [":neonfp16arith_test_microkernels"],
+        "//conditions:default": [],
+    }),
     wasm_deps = [
         ":wasm_test_microkernels",
         ":asm_microkernels",
@@ -15325,6 +15363,18 @@ xnnpack_unit_test(
 
 ############################# Build configurations #############################
 
+# Enables usage of ARM FP16 (FP16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_explicit_true",
+    define_values = {"xnn_enable_arm_fp16": "true"},
+)
+
+# Disables usage of ARM FP16 (FP16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_explicit_false",
+    define_values = {"xnn_enable_arm_fp16": "false"},
+)
+
 # Enables usage of assembly kernels.
 config_setting(
     name = "xnn_enable_assembly_explicit_true",
@@ -15727,4 +15777,20 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "riscv",
     match_any = [],
+)
+
+selects.config_setting_group(
+    name = "arm_fp16_enabled_by_default",
+    match_any = [
+        ":aarch64",
+    ],
+)
+
+alias(
+    name = "arm_fp16_enabled",
+    actual = select({
+        ":xnn_enable_arm_fp16_explicit_true": ":xnn_enable_arm_fp16_explicit_true",
+        ":xnn_enable_arm_fp16_explicit_false": ":xnn_enable_arm_fp16_explicit_true",
+        "//conditions:default": ":arm_fp16_enabled_by_default",
+    }),
 )

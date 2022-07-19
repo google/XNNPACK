@@ -100,10 +100,10 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
         float16x4_t vtltr = vmov_n_f16(0);  // vmov for uninitialized var warning
         float16x4_t vblbr = vmov_n_f16(0);
 
-        vtltr = vreinterpret_f16_u32(vld1_lane_u32(itl0, vreinterpret_u32_f16(vtltr), 0));
-        vblbr = vreinterpret_f16_u32(vld1_lane_u32(ibl0, vreinterpret_u32_f16(vblbr), 0));
-        vtltr = vreinterpret_f16_u32(vld1_lane_u32(itl1, vreinterpret_u32_f16(vtltr), 1));
-        vblbr = vreinterpret_f16_u32(vld1_lane_u32(ibl1, vreinterpret_u32_f16(vblbr), 1));
+        vtltr = vreinterpret_f16_u32(vld1_lane_u32((const void*) itl0, vreinterpret_u32_f16(vtltr), 0));
+        vblbr = vreinterpret_f16_u32(vld1_lane_u32((const void*) ibl0, vreinterpret_u32_f16(vblbr), 0));
+        vtltr = vreinterpret_f16_u32(vld1_lane_u32((const void*) itl1, vreinterpret_u32_f16(vtltr), 1));
+        vblbr = vreinterpret_f16_u32(vld1_lane_u32((const void*) ibl1, vreinterpret_u32_f16(vblbr), 1));
 
         const float16x4_t vldrd = vsub_f16(vblbr, vtltr);
 
@@ -121,7 +121,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_u32(o, vreinterpret_u32_f16(vo), 0);
+        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo), 0);
         o += 2;
       }
 

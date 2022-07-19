@@ -30,6 +30,12 @@ _ARCH_TO_MACRO_MAP = {
   "wasmrelaxedsimd": "XNN_ARCH_WASMRELAXEDSIMD",
 }
 
+# Mapping from ISA extension to macro guarding build-time enabled/disabled
+# status for the ISA. Only ISAs that can be enabled/disabled have an entry.
+_ISA_TO_MACRO_MAP = {
+  "neonfp16arith": "XNN_ENABLE_ARM_FP16",
+}
+
 _ISA_TO_ARCH_MAP = {
   "armv6simd": ["aarch32"],
   "neon": ["aarch32", "aarch64"],
@@ -110,6 +116,11 @@ def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
   test_case = _remove_duplicate_newlines(test_case)
   if arch:
     guard = " || ".join(arch_to_macro(a, isa) for a in arch)
+    if isa in _ISA_TO_MACRO_MAP:
+      if len(arch) > 1:
+        guard = "%s && (%s)" % (_ISA_TO_MACRO_MAP[isa], guard)
+      else:
+        guard = "%s && %s" % (_ISA_TO_MACRO_MAP[isa], guard)
     if assembly:
       guard += " && XNN_ENABLE_ASSEMBLY"
     if jit:

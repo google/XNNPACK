@@ -5,11 +5,7 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vneg_ukernel__neonfp16arith_x8
-  arch:
-  - aarch64
 - name: xnn_f16_vneg_ukernel__neonfp16arith_x16
-  arch:
-  - aarch64
 
 # x86 SSE2
 - name: xnn_f16_vneg_ukernel__sse2_x8

@@ -6,12 +6,8 @@
 # ARM NEON+FP16ARITH
 - name: xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8
   init: xnn_init_f16_elu_neonfp16arith_rr1_p3_params
-  arch:
-    - aarch64
 - name: xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16
   init: xnn_init_f16_elu_neonfp16arith_rr1_p3_params
-  arch:
-    - aarch64
 
 # x86 AVX2
 - name: xnn_f16_velu_ukernel__avx2_rr1_p3_x8

@@ -149,7 +149,7 @@ static void DWConv2DBenchmark(benchmark::State& state,
 }
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void dwconv2d_chw_3x3p1__neonfp16arith_1x4(benchmark::State& state, const char* net) {
     DWConv2DBenchmark(state, xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x4, 3, 3, 1, 1);
   }
@@ -321,7 +321,7 @@ static void DWConv2DBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc3)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x4_acc2)
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

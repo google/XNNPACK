@@ -18,7 +18,7 @@
 #include "vbinary-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMUL_MINMAX__NEONFP16ARITH_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -103,10 +103,10 @@
         .Test(xnn_f16_vmul_minmax_ukernel__neonfp16arith_x8, VBinaryMicrokernelTester::OpType::Mul, xnn_init_f16_minmax_neon_params);
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMUL_MINMAX__NEONFP16ARITH_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -191,7 +191,7 @@
         .Test(xnn_f16_vmul_minmax_ukernel__neonfp16arith_x16, VBinaryMicrokernelTester::OpType::Mul, xnn_init_f16_minmax_neon_params);
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

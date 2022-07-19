@@ -4856,6 +4856,8 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
     // Global Average Pooling in CW layout.
     struct gavgpool_cw_parameters gavgpool_cw;
+    // Bilinear interpolation (2D) in CHW layout.
+    struct ibilinear_chw_parameters ibilinear_chw;
   } f16;
   struct {
     struct gemm_parameters gemm;

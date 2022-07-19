@@ -116,14 +116,14 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2(benchmark::State& state, const char* net) {
     DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2, 4,
       xnn_init_f16_minmax_neon_params, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   BENCHMARK_DCONV(f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2);
-#endif
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

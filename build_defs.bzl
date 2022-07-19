@@ -218,7 +218,9 @@ def xnnpack_aggregate_library(
         riscv_deps = [],
         wasm_deps = [],
         wasmsimd_deps = [],
-        wasmrelaxedsimd_deps = []):
+        wasmrelaxedsimd_deps = [],
+        defines = [],
+        compatible_with = None):
     """Static library that aggregates architecture-specific dependencies.
 
     Args:
@@ -232,40 +234,24 @@ def xnnpack_aggregate_library(
       wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
       wasmrelaxedsimd_deps: The list of libraries to link in WebAssembly
                             Relaxed SIMD builds.
+      defines: List of predefines macros to be added to the compile line.
+      compatible_with: The list of additional environments this rule can be built for.
     """
 
     native.cc_library(
         name = name,
         linkstatic = True,
         deps = generic_deps + select({
-            ":linux_k8": x86_deps,
-            ":linux_arm": aarch32_deps,
-            ":linux_armeabi": aarch32_deps,
-            ":linux_armhf": aarch32_deps,
-            ":linux_armv7a": aarch32_deps,
-            ":linux_arm64": aarch64_deps,
-            ":macos_x86_64": x86_deps,
-            ":macos_arm64": aarch64_deps,
-            ":windows_x86_64_clang": x86_deps,
-            ":windows_x86_64_mingw": x86_deps,
-            ":windows_x86_64_msys": x86_deps,
-            ":windows_x86_64": x86_deps,
-            ":android_armv7": aarch32_deps,
-            ":android_arm64": aarch64_deps,
-            ":android_x86": x86_deps,
-            ":android_x86_64": x86_deps,
-            ":ios_arm64": aarch64_deps,
-            ":ios_arm64e": aarch64_deps,
-            ":ios_sim_arm64": aarch64_deps,
-            ":ios_x86_64": x86_deps,
-            ":watchos_arm64_32": aarch64_deps,
-            ":watchos_x86_64": x86_deps,
-            ":tvos_arm64": aarch64_deps,
-            ":tvos_x86_64": x86_deps,
+            ":aarch32": aarch32_deps,
+            ":aarch64": aarch64_deps,
+            ":x86": x86_deps,
             ":emscripten_wasm": wasm_deps,
             ":emscripten_wasmsimd": wasmsimd_deps,
             ":emscripten_wasmrelaxedsimd": wasmrelaxedsimd_deps,
+            ":riscv": riscv_deps,
         }),
+        defines = defines,
+        compatible_with = compatible_with,
     )
 
 def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True, timeout = "short", shard_count = 1):

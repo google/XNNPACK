@@ -17,7 +17,7 @@
 #include "vmulcaddc-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMULCADDC_MINMAX_C8__NEONFP16ARITH_2X, channels_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VMulCAddCMicrokernelTester()
@@ -168,10 +168,10 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMULCADDC_MINMAX_C16__NEONFP16ARITH_2X, channels_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VMulCAddCMicrokernelTester()
@@ -322,7 +322,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
