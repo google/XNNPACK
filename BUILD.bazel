@@ -6,6 +6,7 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_gcc_std_copts", "xnnpack_min_size_copts", "xnnpack_msvc_std_copts", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
 
 licenses(["notice"])
@@ -15781,4 +15782,53 @@ config_setting(
         "apple_platform_type": "tvos",
         "cpu": "tvos_x86_64",
     },
+)
+
+######################## Composite build configurations #######################
+
+selects.config_setting_group(
+    name = "aarch32",
+    match_any = [
+        ":android_armv7",
+        ":linux_arm",
+        ":linux_armeabi",
+        ":linux_armhf",
+        ":linux_armv7a",
+    ],
+)
+
+selects.config_setting_group(
+    name = "aarch64",
+    match_any = [
+        ":android_arm64",
+        ":ios_arm64",
+        ":ios_arm64e",
+        ":ios_sim_arm64",
+        ":linux_arm64",
+        ":macos_arm64",
+        ":tvos_arm64",
+        ":watchos_arm64_32",
+    ],
+)
+
+selects.config_setting_group(
+    name = "x86",
+    match_any = [
+        ":android_x86",
+        ":android_x86_64",
+        ":ios_x86_64",
+        ":linux_k8",
+        ":macos_x86_64",
+        ":tvos_x86_64",
+        ":watchos_x86_64",
+        ":windows_x86_64",
+        ":windows_x86_64_clang",
+        ":windows_x86_64_mingw",
+        ":windows_x86_64_msys",
+    ],
+)
+
+selects.config_setting_group(
+    name = "riscv",
+    match_any = [],
 )
