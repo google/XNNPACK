@@ -176,7 +176,7 @@ union xnn_f32_rnd_params {
 
 union xnn_f16_elu_params {
   char _; // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t prescale;
     uint16_t sat_cutoff;
@@ -188,7 +188,7 @@ union xnn_f16_elu_params {
     uint16_t minus_alpha;
     uint16_t beta;
   } neonfp16arith_rr1_p3;
-#endif
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) float prescale[8];
@@ -488,7 +488,7 @@ union xnn_f32_elu_params {
 
 union xnn_f16_expminus_params {
   char _; // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t magic_bias;
     uint16_t log2e;
@@ -498,7 +498,7 @@ union xnn_f16_expminus_params {
     uint16_t c1;
     uint16_t denorm_cutoff;
   } neonfp16arith_rr2_p2;
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) float magic_bias[8];
@@ -659,7 +659,7 @@ union xnn_f32_lrelu_params {
 
 union xnn_f16_sigmoid_params {
   char _; // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t magic_bias;
     uint16_t minus_log2e;
@@ -669,7 +669,7 @@ union xnn_f16_sigmoid_params {
     uint16_t c1;
     uint16_t denorm_cutoff;
   } neonfp16arith_rr2_p2;
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(32) float sign_mask[8];

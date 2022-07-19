@@ -2055,7 +2055,7 @@ void xnn_init_f32_hswish_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params(
   union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -2067,7 +2067,7 @@ void xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params(
   params->neonfp16arith_rr2_p2.c1 = UINT16_C(0xBC0E);  // -0x1.038p+0h
   params->neonfp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
 }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f16_sigmoid_avx2_rr1_p2_params(
@@ -2530,7 +2530,7 @@ void xnn_init_f32_rnd_avx_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_f16_elu_neonfp16arith_rr1_p3_params(
   union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
@@ -2547,7 +2547,7 @@ void xnn_init_f16_elu_neonfp16arith_rr1_p3_params(
   params->neonfp16arith_rr1_p3.minus_alpha = alpha ^ UINT16_C(0x8000);
   params->neonfp16arith_rr1_p3.beta = beta;
 }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f16_elu_avx2_rr1_p3_params(
@@ -3062,7 +3062,7 @@ void xnn_init_f32_elu_wasmsimd_rr2_p6_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 void xnn_init_f16_expminus_neonfp16arith_rr2_p2_params(
   union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
 {
@@ -3074,7 +3074,7 @@ void xnn_init_f16_expminus_neonfp16arith_rr2_p2_params(
   params->neonfp16arith_rr2_p2.c1 = UINT16_C(0x3C0E);  // 0x1.038p+0h
   params->neonfp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
 }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 void xnn_init_f16_expminus_avx2_rr1_p2_params(

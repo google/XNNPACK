@@ -20,6 +20,7 @@ void xnn_f16_rmax_ukernel__neonfp16arith(
   assert(batch % sizeof(__fp16) == 0);
 
   const __fp16* i = (const __fp16*) input;
+  __fp16* o = (__fp16*) output;
   float16x8_t vmax0 = vld1q_dup_f16(i);
   float16x8_t vmax1 = vmax0;
   float16x8_t vmax2 = vmax0;
@@ -56,5 +57,11 @@ void xnn_f16_rmax_ukernel__neonfp16arith(
       vmax_lo = vmax_f16(vmax_lo, vext_f16(vmax_lo, vx_lo, 1));
     }
   }
-  *((__fp16*) output) = vmaxv_f16(vmax_lo);
+  #if XNN_ARCH_ARM64
+    *o = vmaxv_f16(vmax_lo);
+  #else
+    vmax_lo = vpmax_f16(vmax_lo, vmax_lo);
+    vmax_lo = vpmax_f16(vmax_lo, vmax_lo);
+    vst1_lane_f16(o, vmax_lo, 0);
+  #endif
 }

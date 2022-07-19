@@ -7,6 +7,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/common.h>
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
 
@@ -22,7 +23,7 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
   assert(elements % sizeof(__fp16) == 0);
   assert(channels != 0);
 
- __fp16* o = (__fp16*) output;
+  __fp16* o = (__fp16*) output;
   const __fp16* i0 = input;
   const __fp16* i1 = (const __fp16*) ((uintptr_t) i0 + elements);
   const __fp16* i2 = (const __fp16*) ((uintptr_t) i1 + elements);
@@ -71,10 +72,20 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
 
     // Having exactly 4 rows makes this work out nicely as we end up with
     // the 4 totals in 4 different lanes of the same vector.
-    const float16x8_t vsum01 = vpaddq_f16(vsum0, vsum1);
-    const float16x8_t vsum23 = vpaddq_f16(vsum2, vsum3);
-    const float16x8_t vsum0123 = vpaddq_f16(vsum01, vsum23);
-    const float16x4_t vsum = vget_low_f16(vpaddq_f16(vsum0123, vsum0123));
+    #if XNN_ARCH_ARM64
+      const float16x8_t vsum01 = vpaddq_f16(vsum0, vsum1);
+      const float16x8_t vsum23 = vpaddq_f16(vsum2, vsum3);
+      const float16x8_t vsum0123 = vpaddq_f16(vsum01, vsum23);
+      const float16x4_t vsum = vpadd_f16(vget_low_f16(vsum0123), vget_high_f16(vsum0123));
+    #else
+      const float16x4_t vsum0_lo = vadd_f16(vget_low_f16(vsum0), vget_high_f16(vsum0));
+      const float16x4_t vsum1_lo = vadd_f16(vget_low_f16(vsum1), vget_high_f16(vsum1));
+      const float16x4_t vsum2_lo = vadd_f16(vget_low_f16(vsum2), vget_high_f16(vsum2));
+      const float16x4_t vsum3_lo = vadd_f16(vget_low_f16(vsum3), vget_high_f16(vsum3));
+      const float16x4_t vsum01_lo = vpadd_f16(vsum0_lo, vsum1_lo);
+      const float16x4_t vsum23_lo = vpadd_f16(vsum2_lo, vsum3_lo);
+      const float16x4_t vsum = vpadd_f16(vsum01_lo, vsum23_lo);
+    #endif
 
     float16x4_t vout = vmul_f16(vsum, vmultiplier);
 
@@ -108,11 +119,9 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
       vsum0 = vaddq_f16(vsum0, vi0);
     }
 
-
-    const float16x8_t vsum01 = vpaddq_f16(vsum0, vsum0);
-    const float16x8_t vsum23 = vpaddq_f16(vsum01, vsum01);
-    const float16x8_t vsum0123 = vpaddq_f16(vsum01, vsum23);
-    const float16x4_t vsum = vget_low_f16(vpaddq_f16(vsum0123, vsum0123));
+    float16x4_t vsum = vadd_f16(vget_low_f16(vsum0), vget_high_f16(vsum0));
+    vsum = vpadd_f16(vsum, vsum);
+    vsum = vpadd_f16(vsum, vsum);
 
     float16x4_t vout = vmul_f16(vsum, vmultiplier);
 

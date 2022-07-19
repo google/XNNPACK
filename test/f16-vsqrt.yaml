@@ -5,7 +5,11 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x8
+  arch:
+  - aarch64
 - name: xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x16
+  arch:
+  - aarch64
 
 # x86 F16C
 - name: xnn_f16_vsqrt_ukernel__f16c_sqrt_x8

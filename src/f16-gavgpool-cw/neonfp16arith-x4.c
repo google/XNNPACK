@@ -22,7 +22,7 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4(
   assert(elements % sizeof(__fp16) == 0);
   assert(channels != 0);
 
- __fp16* o = (__fp16*) output;
+  __fp16* o = (__fp16*) output;
   const __fp16* i0 = input;
   const __fp16* i1 = (const __fp16*) ((uintptr_t) i0 + elements);
   const __fp16* i2 = (const __fp16*) ((uintptr_t) i1 + elements);
