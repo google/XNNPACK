@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <random>
 
 #include <xnnpack.h>
