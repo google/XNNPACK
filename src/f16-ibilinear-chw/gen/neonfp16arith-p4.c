@@ -50,14 +50,14 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
 
       float16x8_t vtltr = vmovq_n_f16(0);  // vmov for uninitialized var warning
       float16x8_t vblbr = vmovq_n_f16(0);
-      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32(itl0, vreinterpretq_u32_f16(vtltr), 0));
-      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32(ibl0, vreinterpretq_u32_f16(vblbr), 0));
-      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32(itl1, vreinterpretq_u32_f16(vtltr), 1));
-      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32(ibl1, vreinterpretq_u32_f16(vblbr), 1));
-      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32(itl2, vreinterpretq_u32_f16(vtltr), 2));
-      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32(ibl2, vreinterpretq_u32_f16(vblbr), 2));
-      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32(itl3, vreinterpretq_u32_f16(vtltr), 3));
-      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32(ibl3, vreinterpretq_u32_f16(vblbr), 3));
+      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl0, vreinterpretq_u32_f16(vtltr), 0));
+      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl0, vreinterpretq_u32_f16(vblbr), 0));
+      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl1, vreinterpretq_u32_f16(vtltr), 1));
+      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl1, vreinterpretq_u32_f16(vblbr), 1));
+      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl2, vreinterpretq_u32_f16(vtltr), 2));
+      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl2, vreinterpretq_u32_f16(vblbr), 2));
+      vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl3, vreinterpretq_u32_f16(vtltr), 3));
+      vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl3, vreinterpretq_u32_f16(vblbr), 3));
 
       const float16x4_t valphah = vw.val[0];
       const float16x4_t valphav = vw.val[1];
@@ -143,7 +143,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
         i += 2;
 
         float16x4_t vw = vmov_n_f16(0);
-        vw = vreinterpret_f16_u32(vld1_lane_u32(w, vreinterpret_u32_f16(vw), 0));
+        vw = vreinterpret_f16_u32(vld1_lane_u32((const void*) w, vreinterpret_u32_f16(vw), 0));
         w += 2;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
@@ -153,8 +153,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
         float16x4_t vtltr = vmov_n_f16(0);  // vmov for uninitialized var warning
         float16x4_t vblbr = vmov_n_f16(0);
 
-        vtltr = vreinterpret_f16_u32(vld1_lane_u32(itl, vreinterpret_u32_f16(vtltr), 0));
-        vblbr = vreinterpret_f16_u32(vld1_lane_u32(ibl, vreinterpret_u32_f16(vblbr), 0));
+        vtltr = vreinterpret_f16_u32(vld1_lane_u32((const void*) itl, vreinterpret_u32_f16(vtltr), 0));
+        vblbr = vreinterpret_f16_u32(vld1_lane_u32((const void*) ibl, vreinterpret_u32_f16(vblbr), 0));
 
         const float16x4_t vldrd = vsub_f16(vblbr, vtltr);
 
