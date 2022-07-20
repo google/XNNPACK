@@ -3553,7 +3553,7 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x8.c
   src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4.c
   src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-1x4.c
   src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4.c
@@ -3564,16 +3564,16 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc2.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc3.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4-acc4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4-acc2.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-3x4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-4x4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-5x4.c
-  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-6x4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x8-acc2.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x8-acc3.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x8-acc4.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-1x8.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x8-acc2.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x8.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-3x8.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-4x8.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-5x8.c
+  src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-6x8.c
   src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4-acc2.c
   src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4-acc3.c
   src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x4-acc4.c
