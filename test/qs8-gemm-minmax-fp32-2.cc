@@ -15527,7 +15527,7 @@
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(QS8_GEMM_MINMAX_FP32_4X16C4__AARCH64_NEONDOT_CORTEX_A55, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -15980,10 +15980,10 @@
       .cm_stride(19)
       .Test(xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(QS8_GEMM_MINMAX_FP32_4X16C4__AARCH64_NEONDOT_LD32, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -16436,10 +16436,10 @@
       .cm_stride(19)
       .Test(xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld32, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(QS8_GEMM_MINMAX_FP32_4X16C4__AARCH64_NEONDOT_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -16892,10 +16892,10 @@
       .cm_stride(19)
       .Test(xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld64, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(QS8_GEMM_MINMAX_FP32_4X16C4__AARCH64_NEONDOT_LD128, k_eq_16) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -17348,7 +17348,7 @@
       .cm_stride(19)
       .Test(xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128, xnn_init_qs8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

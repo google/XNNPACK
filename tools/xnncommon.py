@@ -34,6 +34,7 @@ _ARCH_TO_MACRO_MAP = {
 # status for the ISA. Only ISAs that can be enabled/disabled have an entry.
 _ISA_TO_MACRO_MAP = {
   "neonfp16arith": "XNN_ENABLE_ARM_FP16",
+  "neondot": "XNN_ENABLE_ARM_DOTPROD",
 }
 
 _ISA_TO_ARCH_MAP = {
