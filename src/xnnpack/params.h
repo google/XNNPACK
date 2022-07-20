@@ -3981,6 +3981,14 @@ typedef void (*xnn_f32_vscale_ukernel_function)(
     float* y,
     float c);
 
+typedef void (*xnn_s16_window_ukernel_function)(
+    size_t rows,
+    size_t channels,
+    const int16_t* input,
+    const int16_t* weights,
+    uint32_t shift,
+    int16_t* output);
+
 // Reduce-Add Extended ("mantissa" + "exponent") Exponentials
 typedef void (*xnn_f32_raddextexp_ukernel_function)(
     size_t n,

@@ -1,0 +1,75 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/window.h>
+
+
+void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const int16_t* input,
+    const int16_t* weights,
+    uint32_t shift,
+    int16_t* output) {
+
+  assert(rows > 0);
+  assert(channels > 0);
+  assert(input != NULL);
+  assert(weights != NULL);
+  assert(shift < 32);
+  assert(output != NULL);
+
+  size_t i = rows;
+  do {
+    const int16_t* w = weights;
+    size_t n = channels;
+    for (; n >= ${CHANNEL_TILE}; n -= ${CHANNEL_TILE}) {
+      $for N in range(CHANNEL_TILE):
+        const int16_t i${N} = input[${N}];
+      input += ${CHANNEL_TILE};
+
+      $for N in range(CHANNEL_TILE):
+        const int16_t w${N} = w[${N}];
+      w += ${CHANNEL_TILE};
+
+      $for N in range(CHANNEL_TILE):
+        int32_t vout${N} = (int32_t) i${N} * (int32_t) w${N};
+
+      $for N in range(CHANNEL_TILE):
+        vout${N} = asr_s32(vout${N}, shift);
+
+      $for N in range(CHANNEL_TILE):
+        vout${N} = math_max_s32(vout${N}, INT16_MIN);
+
+      $for N in range(CHANNEL_TILE):
+        vout${N} = math_min_s32(vout${N}, INT16_MAX);
+
+      $for N in range(CHANNEL_TILE):
+        output[${N}] = (int16_t)(vout${N});
+
+      output += ${CHANNEL_TILE};
+    }
+
+    $if CHANNEL_TILE > 1:
+      if XNN_UNLIKELY(n != 0) {
+        do {
+          int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
+          ++input;
+          ++w;
+          vout = asr_s32(vout, shift);
+          vout = math_max_s32(vout, INT16_MIN);
+          vout = math_min_s32(vout, INT16_MAX);
+          output[0] = (int16_t)(vout);
+          ++output;
+        } while (--n != 0);
+      }
+  } while (--i != 0);
+}

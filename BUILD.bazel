@@ -1335,6 +1335,9 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s8-ibilinear/gen/scalar-c4.c",
     "src/s8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/s8-vclamp/scalar-x4.c",
+    "src/s16-window/gen/scalar-x1.c",
+    "src/s16-window/gen/scalar-x2.c",
+    "src/s16-window/gen/scalar-x4.c",
     "src/u8-ibilinear/gen/scalar-c1.c",
     "src/u8-ibilinear/gen/scalar-c2.c",
     "src/u8-ibilinear/gen/scalar-c4.c",
@@ -8487,6 +8490,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
+    "src/xnnpack/window.h",
     "src/xnnpack/zip.h",
 ]
 
@@ -11702,6 +11706,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "s16_window_bench",
+    srcs = [
+        "bench/s16-window.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
@@ -13992,6 +14004,15 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmulc-minmax-rndnu.cc",
         "test/vmulc-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "s16_window_test",
+    srcs = [
+        "test/s16-window.cc",
+        "test/window-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

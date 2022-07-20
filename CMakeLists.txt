@@ -1323,6 +1323,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/scalar-c4.c
   src/s8-maxpool/9p8x-minmax-scalar-c1.c
   src/s8-vclamp/scalar-x4.c
+  src/s16-window/gen/scalar-x1.c
+  src/s16-window/gen/scalar-x2.c
+  src/s16-window/gen/scalar-x4.c
   src/u8-ibilinear/gen/scalar-c1.c
   src/u8-ibilinear/gen/scalar-c2.c
   src/u8-ibilinear/gen/scalar-c4.c
@@ -8590,6 +8593,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME qu8-vmulc-minmax-rndnu-test COMMAND qu8-vmulc-minmax-rndnu-test)
 
+  ADD_EXECUTABLE(s16-window-test test/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-window-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s16-window-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
+
   ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9158,6 +9166,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(rounding-bench bench/rounding.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(rounding-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
+
+  ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(xx-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(xx-transpose-bench PRIVATE . include src)
