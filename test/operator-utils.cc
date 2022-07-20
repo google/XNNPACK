@@ -48,7 +48,7 @@ TEST(HEURISTIC_MR, batch_size_same_as_mr) {
   ASSERT_EQ(2, xnn_get_heuristic_mr_gemm(2, params.mr, params.nr, params.minmax.gemm));
   ASSERT_EQ(2, xnn_get_heuristic_mr_igemm(2, params.mr, params.nr, params.minmax.igemm));
 
-  params = {
+  params = (gemm_parameters) {
     .minmax = {
       .gemm = {
         dummy_gemm_ukernel,
@@ -95,7 +95,7 @@ TEST(HEURISTIC_MR, batch_size_smaller_than_mr) {
   ASSERT_EQ(3, xnn_get_heuristic_mr_gemm(3, params.mr, params.nr, params.minmax.gemm));
   ASSERT_EQ(3, xnn_get_heuristic_mr_igemm(3, params.mr, params.nr, params.minmax.igemm));
 
-  params = {
+  params = (gemm_parameters) {
     .minmax = {
       .gemm = {
         dummy_gemm_ukernel,
@@ -120,7 +120,7 @@ TEST(HEURISTIC_MR, batch_size_smaller_than_mr) {
   ASSERT_EQ(1, xnn_get_heuristic_mr_gemm(1, params.mr, params.nr, params.minmax.gemm));
   ASSERT_EQ(1, xnn_get_heuristic_mr_igemm(1, params.mr, params.nr, params.minmax.igemm));
 
-  params = {
+  params = (gemm_parameters) {
     .minmax = {
       .gemm = {
         dummy_gemm_ukernel,
@@ -176,7 +176,7 @@ TEST(HEURISTIC_MR, batch_size_larger_than_mr) {
   ASSERT_EQ(3, xnn_get_heuristic_mr_gemm(5, params.mr, params.nr, params.minmax.gemm));
   ASSERT_EQ(3, xnn_get_heuristic_mr_igemm(5, params.mr, params.nr, params.minmax.igemm));
 
-  params = {
+  params = (gemm_parameters) {
     .minmax = {
       .gemm = {
         dummy_gemm_ukernel,
