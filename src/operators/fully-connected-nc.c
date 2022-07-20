@@ -121,7 +121,7 @@ static enum xnn_status create_fully_connected_nc(
   const size_t packed_weights_size = n_stride * (bias_element_size + (k_stride << log2_filter_element_size));
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
-      fully_connected_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+      fully_connected_op, aligned_total_weights_size, packed_weights_padding_byte);
   if (weights_ptr == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator packed weights",
@@ -146,9 +146,9 @@ static enum xnn_status create_fully_connected_nc(
       packing_params);
   }
 
-  if (use_weights_cache(caches)) {
+  if (use_weights_cache(fully_connected_op)) {
     fully_connected_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        caches->weights_cache, weights_ptr, aligned_total_weights_size);
+        fully_connected_op->weights_cache, weights_ptr, aligned_total_weights_size);
   }
 
   fully_connected_op->group_input_channels = input_channels;

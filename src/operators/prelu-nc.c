@@ -91,13 +91,12 @@ static enum xnn_status create_prelu_nc(
 
   const size_t packed_weights_size = (channels << log2_weights_element_size) + XNN_EXTRA_BYTES;
   const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-  void* weights_ptr = xnn_get_pointer_to_write_weights(
-      prelu_op, caches, aligned_total_weights_size, 0);
+  void* weights_ptr = xnn_get_pointer_to_write_weights(prelu_op, aligned_total_weights_size, 0);
   pack_prelu_w(channels, negative_slope, weights_ptr);
 
-  if (use_weights_cache(caches)) {
+  if (use_weights_cache(prelu_op)) {
     prelu_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-        caches->weights_cache, weights_ptr, aligned_total_weights_size);
+        prelu_op->weights_cache, weights_ptr, aligned_total_weights_size);
   }
 
   prelu_op->channels = channels;

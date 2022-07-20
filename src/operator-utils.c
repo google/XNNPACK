@@ -10,14 +10,13 @@
 
 void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
-  xnn_caches_t caches,
   size_t aligned_weights_size,
   int padding_byte)
 {
   assert(aligned_weights_size % XNN_ALLOCATION_ALIGNMENT == 0);
   void* weights_ptr = NULL;
-  if (use_weights_cache(caches)) {
-    weights_ptr = xnn_reserve_space_in_weights_cache(caches->weights_cache, aligned_weights_size);
+  if (use_weights_cache(op)) {
+    weights_ptr = xnn_reserve_space_in_weights_cache(op->weights_cache, aligned_weights_size);
     if (weights_ptr == NULL) {
       return NULL;
     }

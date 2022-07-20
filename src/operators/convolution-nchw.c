@@ -412,7 +412,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         (group_input_channels * kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, caches, aligned_total_weights_size, 0);
+          convolution_op, aligned_total_weights_size, 0);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
                       aligned_total_weights_size,
@@ -427,9 +427,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
         kernel_height, kernel_width,
         kernel, bias, weights_ptr, NULL);
 
-      if (use_weights_cache(caches)) {
+      if (use_weights_cache(convolution_op)) {
         convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
@@ -449,7 +449,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       const size_t packed_weights_size = groups * (kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, caches, aligned_total_weights_size, 0);
+          convolution_op, aligned_total_weights_size, 0);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocate %zu bytes for %s operator dwconv packed weights",
                       aligned_total_weights_size,
@@ -467,9 +467,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
           kernel, bias, weights_ptr, NULL);
       }
 
-      if (use_weights_cache(caches)) {
+      if (use_weights_cache(convolution_op)) {
         convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {

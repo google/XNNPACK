@@ -389,7 +389,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t packed_weights_size = ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) * c_stride;
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+          convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator vmulcaddc packed weights",
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -400,9 +400,9 @@ static enum xnn_status create_convolution2d_nhwc(
         groups, vmulcaddc_parameters->channel_tile,
         kernel, bias, weights_ptr, packing_params);
 
-      if (use_weights_cache(caches)) {
+      if (use_weights_cache(convolution_op)) {
         convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
@@ -422,7 +422,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+          convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator dwconv packed weights",
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -456,9 +456,9 @@ static enum xnn_status create_convolution2d_nhwc(
           (void*) ((uintptr_t) weights_ptr + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
       }
 
-      if (use_weights_cache(caches)) {
+      if (use_weights_cache(convolution_op)) {
         convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;
@@ -486,7 +486,7 @@ static enum xnn_status create_convolution2d_nhwc(
       const size_t packed_group_weights_size = ((kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * n_stride;
       const size_t aligned_total_weights_size = round_up_po2(packed_group_weights_size * groups, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
-        convolution_op, caches, aligned_total_weights_size, packed_weights_padding_byte);
+        convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
       if (weights_ptr == NULL) {
         xnn_log_error("failed to reserve or allocated %zu bytes for %s operator gemm packed weights",
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
@@ -577,9 +577,9 @@ static enum xnn_status create_convolution2d_nhwc(
         }
       }
 
-      if (use_weights_cache(caches)) {
+      if (use_weights_cache(convolution_op)) {
         convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            caches->weights_cache, weights_ptr, aligned_total_weights_size);
+            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
       }
 
       zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);
