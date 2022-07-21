@@ -459,12 +459,21 @@ void Assembler::ld1r(VRegisterList xs, MemOperand xn) {
 }
 
 void Assembler::ld2r(VRegisterList xs, MemOperand xn) {
-  if (xs.length != 2 || !is_same_shape(xs.vt1, xs.vt2) || xn.offset != 0) {
+  if (xs.length != 2 || !is_same_shape(xs.vt1, xs.vt2) || xn.offset != 0 || !is_consecutive(xs)) {
     error_ = Error::kInvalidOperand;
     return;
   }
 
   emit32(0x0D60C000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
+}
+
+void Assembler::ld3r(VRegisterList xs, MemOperand xn) {
+  if (xs.length != 3 || !is_same_shape(xs.vt1, xs.vt2, xs.vt3) || xn.offset != 0 || !is_consecutive(xs)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0x0D40E000 | q(xs.vt1) | size(xs.vt1) | rn(xn.base) | xs.vt1.code);
 }
 
 void Assembler::ldp(DRegister dt1, DRegister dt2, MemOperand xn) {

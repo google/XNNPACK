@@ -178,8 +178,13 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
 
   CHECK_ENCODING(0x4D60C902, a.ld2r({v2.v4s(), v3.v4s()}, mem[x8]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v3.v4s()}, mem[x8, 16]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v4.v4s()}, mem[x8, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v4.v4s()}, mem[x8]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v3.v8b()}, mem[x8]));
+
+  CHECK_ENCODING(0x4D40E906, a.ld3r({v6.v4s(), v7.v4s(), v8.v4s()}, mem[x8]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v4s(), v8.v4s()}, mem[x8, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v4s(), v9.v4s()}, mem[x8]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v2s(), v8.v4s()}, mem[x8]));
 
   CHECK_ENCODING(0x4EB21E50, a.mov(v16.v16b(), v18.v16b()));
   CHECK_ENCODING(0x0EB21E50, a.mov(v16.v8b(), v18.v8b()));

@@ -368,6 +368,7 @@ class Assembler : public AssemblerBase {
   void ld1(VRegisterList vs, MemOperand xn, int32_t imm);
   void ld1r(VRegisterList xs, MemOperand xn);
   void ld2r(VRegisterList xs, MemOperand xn);
+  void ld3r(VRegisterList xs, MemOperand xn);
   void ldp(DRegister dt1, DRegister dt2, MemOperand xn);
   void ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
   void ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
