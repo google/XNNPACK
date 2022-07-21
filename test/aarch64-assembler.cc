@@ -121,6 +121,9 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.d()[2]));
   EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.s()[1]));
 
+  CHECK_ENCODING(0x4EA0F8B0, a.fabs(v16.v4s(), v5.v4s()));
+  EXPECT_ERROR(Error::kInvalidOperand, a.fabs(v16.v4s(), v5.v2s()));
+
   CHECK_ENCODING(0x4E25D690, a.fadd(v16.v4s(), v20.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fadd(v16.v4s(), v20.v4s(), v5.v2s()));
 
@@ -134,6 +137,12 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v4s(), v20.v2s(), v0.s()[0]));
   EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v2d(), v20.v2d(), v0.s()[0]));
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.fmla(v16.v4s(), v20.v4s(), v0.s()[4]));
+
+  CHECK_ENCODING(0x6E29DC61, a.fmul(v1.v4s(), v3.v4s(), v9.v4s()));
+  EXPECT_ERROR(Error::kInvalidOperand, a.fmul(v16.v4s(), v20.v4s(), v5.v2s()));
+
+  CHECK_ENCODING(0x6EA0FBC2, a.fneg(v2.v4s(), v30.v4s()));
+  EXPECT_ERROR(Error::kInvalidOperand, a.fneg(v2.v4s(), v30.v16b()));
 
   CHECK_ENCODING(0x0CDF7060, a.ld1({v0.v8b()}, mem[x3], 8));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v0.v8b()}, mem[x3], 16));
