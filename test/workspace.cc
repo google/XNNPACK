@@ -13,7 +13,6 @@
 #include <xnnpack.h>
 #include <xnnpack/subgraph.h>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace {
@@ -90,18 +89,23 @@ void DefineGraphWithStaticData(xnn_subgraph_t* subgraph, std::array<size_t, 4> d
                             static_value_id, output_id, /*flags=*/0));
 }
 
-using testing::PrintToString;
+testing::AssertionResult BlobInWorkspace(xnn_blob* blob, xnn_workspace_t workspace) {
+  if ((blob->data >= workspace->data) &&
+         ((uintptr_t) blob->data + blob->size) <= ((uintptr_t) workspace->data + workspace->size)) {
+    return testing::AssertionSuccess();
+  } else {
+    return testing::AssertionFailure()
+        << "blob at " << blob->data << " of size " << blob->size
+        << "is outside of workspace at " << workspace->data << " of size " << workspace->size;
+  }
+}
 
-MATCHER_P(
-  IsInWorkspace,
-  workspace,
-  std::string(negation ? "is not" : "is") + " in workspace [" + PrintToString(workspace->data) + ", " +
-    PrintToString((void*) ((uintptr_t) workspace->data + workspace->size)) + "] of size " +
-    PrintToString(workspace->size))
-{
-  *result_listener << "blob data: " << arg->data << " size: " << arg->size << " ";
-  return (arg->data >= workspace->data) &&
-         ((uintptr_t) arg->data + arg->size) <= ((uintptr_t) workspace->data + workspace->size);
+testing::AssertionResult Contains(std::vector<xnn_runtime_t> workspace_users, xnn_runtime_t runtime) {
+  if (std::find(workspace_users.begin(), workspace_users.end(), runtime) != workspace_users.end()) {
+    return testing::AssertionSuccess();
+  } else {
+    return testing::AssertionFailure() << "runtime " << runtime << " not found in list of workspace users";
+  }
 }
 
 std::vector<xnn_runtime_t> workspace_user_to_list(xnn_workspace_t workspace)
@@ -215,15 +219,15 @@ TEST(WORKSPACE, workspace_no_growth)
     if (blob1->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_THAT(blob1, IsInWorkspace(runtime1->workspace));
+    ASSERT_TRUE(BlobInWorkspace(blob1, runtime1->workspace));
     xnn_blob* blob2 = &runtime2->blobs[i];
-    ASSERT_THAT(blob2, IsInWorkspace(runtime2->workspace));
+    ASSERT_TRUE(BlobInWorkspace(blob2, runtime2->workspace));
   }
 
   std::vector<xnn_runtime_t> workspace_users = workspace_user_to_list(workspace);
   ASSERT_EQ(workspace_users.size(), 2);
-  ASSERT_THAT(workspace_users, ::testing::Contains(runtime1));
-  ASSERT_THAT(workspace_users, ::testing::Contains(runtime2));
+  ASSERT_TRUE(Contains(workspace_users, runtime1));
+  ASSERT_TRUE(Contains(workspace_users, runtime2));
   ASSERT_EQ(workspace->ref_count, 3);
 }
 
@@ -274,20 +278,20 @@ TEST(WORKSPACE, workspace_grow)
     if (blob->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_THAT(blob, IsInWorkspace(runtime1->workspace));
+    ASSERT_TRUE(BlobInWorkspace(blob, runtime1->workspace));
   }
   for (size_t i = 0; i < runtime2->num_blobs; i++) {
     xnn_blob* blob = &runtime2->blobs[i];
     if (blob->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_THAT(blob, IsInWorkspace(runtime2->workspace));
+    ASSERT_TRUE(BlobInWorkspace(blob, runtime2->workspace));
   }
 
   std::vector<xnn_runtime_t> workspace_users = workspace_user_to_list(workspace);
   ASSERT_EQ(workspace_users.size(), 2);
-  ASSERT_THAT(workspace_users, ::testing::Contains(runtime1));
-  ASSERT_THAT(workspace_users, ::testing::Contains(runtime2));
+  ASSERT_TRUE(Contains(workspace_users, runtime1));
+  ASSERT_TRUE(Contains(workspace_users, runtime2));
   ASSERT_EQ(workspace->ref_count, 3);
 }
 
