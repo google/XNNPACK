@@ -1017,6 +1017,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sigmoid-f32-scalar-rr2-lut64-p2-div.c
   src/math/sigmoid-f32-scalar-rr2-lut2048-p1-div.c
   src/math/sigmoid-f32-scalar-rr2-p5-div.c
+  src/math/sqrt-u32-scalar-tflm.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-lrintf.c
@@ -8838,6 +8839,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f32-roundz-eval eval/f32-roundz.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-roundz-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(u32-sqrt-eval eval/u32-sqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-sqrt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(u32-sqrt-eval PRIVATE cpuinfo pthreadpool gtest gtest_main)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC

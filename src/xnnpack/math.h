@@ -176,13 +176,23 @@ XNN_INLINE static int64_t asr_s64(int64_t x, uint32_t n) {
   #endif
 }
 
+XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
+  #ifdef _MSC_VER
+    unsigned long index;
+    _BitScanReverse(&index, (unsigned long) x);
+    return (uint32_t) index ^ 31;
+  #else
+    return (uint32_t) __builtin_clz((unsigned int) x);
+  #endif
+}
+
 XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
   #ifdef _MSC_VER
     unsigned long index;
     _BitScanForward(&index, (unsigned long) x);
     return (uint32_t) index;
   #else
-    return __builtin_ctz(x);
+    return (uint32_t) __builtin_ctz((unsigned int) x);
   #endif
 }
 
