@@ -27,49 +27,48 @@ void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
   assert(shift < 32);
   assert(output != NULL);
 
-  size_t i = rows;
   do {
     const int16_t* w = weights;
-    size_t n = channels;
-    for (; n >= ${CHANNEL_TILE}; n -= ${CHANNEL_TILE}) {
-      $for N in range(CHANNEL_TILE):
-        const int16_t i${N} = input[${N}];
-      input += ${CHANNEL_TILE};
-
-      $for N in range(CHANNEL_TILE):
-        const int16_t w${N} = w[${N}];
-      w += ${CHANNEL_TILE};
-
-      $for N in range(CHANNEL_TILE):
-        int32_t vout${N} = (int32_t) i${N} * (int32_t) w${N};
-
-      $for N in range(CHANNEL_TILE):
-        vout${N} = asr_s32(vout${N}, shift);
-
-      $for N in range(CHANNEL_TILE):
-        vout${N} = math_max_s32(vout${N}, INT16_MIN);
-
-      $for N in range(CHANNEL_TILE):
-        vout${N} = math_min_s32(vout${N}, INT16_MAX);
-
-      $for N in range(CHANNEL_TILE):
-        output[${N}] = (int16_t)(vout${N});
-
-      output += ${CHANNEL_TILE};
-    }
-
+    size_t c = channels;
     $if CHANNEL_TILE > 1:
-      if XNN_UNLIKELY(n != 0) {
-        do {
-          int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
-          ++input;
-          ++w;
-          vout = asr_s32(vout, shift);
-          vout = math_max_s32(vout, INT16_MIN);
-          vout = math_min_s32(vout, INT16_MAX);
-          output[0] = (int16_t)(vout);
-          ++output;
-        } while (--n != 0);
+      for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+        $for C in range(CHANNEL_TILE):
+          const int16_t vi${C} = input[${C}];
+        input += ${CHANNEL_TILE};
+
+        $for C in range(CHANNEL_TILE):
+          const int16_t w${C} = w[${C}];
+        w += ${CHANNEL_TILE};
+
+        $for C in range(CHANNEL_TILE):
+          int32_t vout${C} = (int32_t) vi${C} * (int32_t) w${C};
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} = asr_s32(vout${C}, shift);
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_max_s32(vout${C}, INT16_MIN);
+
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_min_s32(vout${C}, INT16_MAX);
+
+        $for C in range(CHANNEL_TILE):
+          output[${C}] = (int16_t)(vout${C});
+
+        output += ${CHANNEL_TILE};
       }
-  } while (--i != 0);
+
+    if XNN_UNLIKELY(c != 0) {
+      do {
+        int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
+        ++input;
+        ++w;
+        vout = asr_s32(vout, shift);
+        vout = math_max_s32(vout, INT16_MIN);
+        vout = math_min_s32(vout, INT16_MAX);
+        output[0] = (int16_t)(vout);
+        ++output;
+      } while (--c != 0);
+    }
+  } while (--rows != 0);
 }

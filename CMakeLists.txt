@@ -1326,6 +1326,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s8-vclamp/scalar-x4.c
   src/s16-window/gen/scalar-x1.c
   src/s16-window/gen/scalar-x2.c
+  src/s16-window/gen/scalar-x3.c
   src/s16-window/gen/scalar-x4.c
   src/u8-ibilinear/gen/scalar-c1.c
   src/u8-ibilinear/gen/scalar-c2.c
@@ -1591,6 +1592,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x32-zip/x4-neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
+  src/s16-window/gen/neon-x8.c
+  src/s16-window/gen/neon-x16.c
+  src/s16-window/gen/neon-x24.c
+  src/s16-window/gen/neon-x32.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c

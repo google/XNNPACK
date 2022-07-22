@@ -30,29 +30,21 @@ void xnn_s16_window_ukernel__scalar_x1(
   assert(shift < 32);
   assert(output != NULL);
 
-  size_t i = rows;
   do {
     const int16_t* w = weights;
-    size_t n = channels;
-    for (; n >= 1; n -= 1) {
-      const int16_t i0 = input[0];
-      input += 1;
+    size_t c = channels;
 
-      const int16_t w0 = w[0];
-      w += 1;
-
-      int32_t vout0 = (int32_t) i0 * (int32_t) w0;
-
-      vout0 = asr_s32(vout0, shift);
-
-      vout0 = math_max_s32(vout0, INT16_MIN);
-
-      vout0 = math_min_s32(vout0, INT16_MAX);
-
-      output[0] = (int16_t)(vout0);
-
-      output += 1;
+    if XNN_UNLIKELY(c != 0) {
+      do {
+        int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
+        ++input;
+        ++w;
+        vout = asr_s32(vout, shift);
+        vout = math_max_s32(vout, INT16_MIN);
+        vout = math_min_s32(vout, INT16_MAX);
+        output[0] = (int16_t)(vout);
+        ++output;
+      } while (--c != 0);
     }
-
-  } while (--i != 0);
+  } while (--rows != 0);
 }
