@@ -31,7 +31,7 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x1(
     const int32_t va = *input_a++;
     const int32_t vacc = vbias + va * va_multiplier;
 
-    int32_t vout = asr_s32(vacc, vshift);
+    int32_t vout = math_asr_s32(vacc, vshift);
     vout = math_max_s32(vout, voutput_min_less_zero_point);
     vout = math_min_s32(vout, voutput_max_less_zero_point);
     *output++ = (int8_t) (vout + voutput_zero_point);

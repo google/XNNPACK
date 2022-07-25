@@ -29,8 +29,8 @@ void xnn_qu8_vcvt_ukernel__scalar_x2(
     vacc0 = vbias + vacc0 * vmultiplier;
     vacc1 = vbias + vacc1 * vmultiplier;
 
-    int32_t vout0 = asr_s32(vacc0, 8);
-    int32_t vout1 = asr_s32(vacc1, 8);
+    int32_t vout0 = math_asr_s32(vacc0, 8);
+    int32_t vout1 = math_asr_s32(vacc1, 8);
 
     vout0 = math_max_s32(vout0, 0);
     vout1 = math_max_s32(vout1, 0);
@@ -46,7 +46,7 @@ void xnn_qu8_vcvt_ukernel__scalar_x2(
     int32_t vacc = *x;
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, 0);
     vout = math_min_s32(vout, 255);
     *y = (uint8_t) vout;

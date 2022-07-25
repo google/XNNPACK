@@ -133,7 +133,7 @@ void xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1(
 
       const int64_t vproduct = (int64_t) vacc * (int64_t) vmultiplier;
       const int64_t vadjusted_product = vproduct - (int64_t) (vacc < 0);
-      int32_t vout = (int32_t) asr_s64(vadjusted_product + vrounding, vshift);
+      int32_t vout = (int32_t) math_asr_s64(vadjusted_product + vrounding, vshift);
       vout = vout < voutput_min ? voutput_min : vout;
       vout = vout > voutput_max ? voutput_max : vout;
       vout += voutput_zero_point;

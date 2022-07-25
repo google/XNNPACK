@@ -39,7 +39,7 @@ void xnn_s16_window_ukernel__scalar_x1(
         int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
         ++input;
         ++w;
-        vout = asr_s32(vout, shift);
+        vout = math_asr_s32(vout, shift);
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         output[0] = (int16_t)(vout);

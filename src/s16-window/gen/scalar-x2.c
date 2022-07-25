@@ -45,8 +45,8 @@ void xnn_s16_window_ukernel__scalar_x2(
       int32_t vout0 = (int32_t) vi0 * (int32_t) w0;
       int32_t vout1 = (int32_t) vi1 * (int32_t) w1;
 
-      vout0 = asr_s32(vout0, shift);
-      vout1 = asr_s32(vout1, shift);
+      vout0 = math_asr_s32(vout0, shift);
+      vout1 = math_asr_s32(vout1, shift);
 
       vout0 = math_max_s32(vout0, INT16_MIN);
       vout1 = math_max_s32(vout1, INT16_MIN);
@@ -65,7 +65,7 @@ void xnn_s16_window_ukernel__scalar_x2(
         int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
         ++input;
         ++w;
-        vout = asr_s32(vout, shift);
+        vout = math_asr_s32(vout, shift);
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         output[0] = (int16_t)(vout);

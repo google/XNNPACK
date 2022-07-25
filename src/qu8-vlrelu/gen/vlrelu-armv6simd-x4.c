@@ -44,10 +44,10 @@ void xnn_qu8_vlrelu_ukernel__armv6simd_x4(
     int32_t vacc2 = __smlatt(vmultiplier02, vx02, vbias);
     int32_t vacc3 = __smlatt(vmultiplier13, vx13, vbias);
 
-    vacc0 = __usat(asr_s32(vacc0, 8), 8);
-    vacc1 = __usat(asr_s32(vacc1, 8), 8);
-    vacc2 = __usat(asr_s32(vacc2, 8), 8);
-    vacc3 = __usat(asr_s32(vacc3, 8), 8);
+    vacc0 = __usat(math_asr_s32(vacc0, 8), 8);
+    vacc1 = __usat(math_asr_s32(vacc1, 8), 8);
+    vacc2 = __usat(math_asr_s32(vacc2, 8), 8);
+    vacc3 = __usat(math_asr_s32(vacc3, 8), 8);
 
     y[0] = (uint8_t) vacc0;
     y[1] = (uint8_t) vacc1;
@@ -70,13 +70,13 @@ void xnn_qu8_vlrelu_ukernel__armv6simd_x4(
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);
     const int32_t vacc2 = __smlatt(vmultiplier02, vx02, vbias);
 
-    vacc0 = __usat(asr_s32(vacc0, 8), 8);
-    vacc1 = __usat(asr_s32(vacc1, 8), 8);
+    vacc0 = __usat(math_asr_s32(vacc0, 8), 8);
+    vacc1 = __usat(math_asr_s32(vacc1, 8), 8);
 
     if (n & (2 * sizeof(uint8_t))) {
       y[0] = (uint8_t) vacc0;
       y[1] = (uint8_t) vacc1;
-      vacc0 = __usat(asr_s32(vacc2, 8), 8);
+      vacc0 = __usat(math_asr_s32(vacc2, 8), 8);
       y += 2;
     }
     if (n & (1 * sizeof(uint8_t))) {

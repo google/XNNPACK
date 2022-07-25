@@ -55,7 +55,7 @@ void xnn_u8_ibilinear_ukernel__scalar_c1(
 
       const int32_t vacc = (int32_t) ((uint32_t) vt << 11) + vd * valphav;
 
-      const int32_t vo = asr_s32(vacc + vrounding, 22);
+      const int32_t vo = math_asr_s32(vacc + vrounding, 22);
 
       *output++ = vo;
 

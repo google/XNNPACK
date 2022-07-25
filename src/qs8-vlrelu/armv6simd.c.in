@@ -56,7 +56,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
         int32_t vacc${ABC[N+3]} = __smlatt(vmultiplier${ABC[N+1]}${ABC[N+3]}, vx${ABC[N+1]}${ABC[N+3]}, vbias);
 
       $for N in range(BATCH_TILE):
-        vacc${ABC[N]} = ${__XSAT}(asr_s32(vacc${ABC[N]}, 8), 8);
+        vacc${ABC[N]} = ${__XSAT}(math_asr_s32(vacc${ABC[N]}, 8), 8);
 
       $for N in range(BATCH_TILE):
         y[${N}] = (${XINT8_T}) vacc${ABC[N]};
@@ -79,10 +79,10 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
     int32_t vacc2 = __smlatt(vmultiplier02, vx02, vbias);
     int32_t vacc3 = __smlatt(vmultiplier13, vx13, vbias);
 
-    vacc0 = ${__XSAT}(asr_s32(vacc0, 8), 8);
-    vacc1 = ${__XSAT}(asr_s32(vacc1, 8), 8);
-    vacc2 = ${__XSAT}(asr_s32(vacc2, 8), 8);
-    vacc3 = ${__XSAT}(asr_s32(vacc3, 8), 8);
+    vacc0 = ${__XSAT}(math_asr_s32(vacc0, 8), 8);
+    vacc1 = ${__XSAT}(math_asr_s32(vacc1, 8), 8);
+    vacc2 = ${__XSAT}(math_asr_s32(vacc2, 8), 8);
+    vacc3 = ${__XSAT}(math_asr_s32(vacc3, 8), 8);
 
     y[0] = (${XINT8_T}) vacc0;
     y[1] = (${XINT8_T}) vacc1;
@@ -105,13 +105,13 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armv6simd_x${BATCH_TILE}(
     int32_t vacc1 = __smlabb(vmultiplier13, vx13, vbias);
     const int32_t vacc2 = __smlatt(vmultiplier02, vx02, vbias);
 
-    vacc0 = ${__XSAT}(asr_s32(vacc0, 8), 8);
-    vacc1 = ${__XSAT}(asr_s32(vacc1, 8), 8);
+    vacc0 = ${__XSAT}(math_asr_s32(vacc0, 8), 8);
+    vacc1 = ${__XSAT}(math_asr_s32(vacc1, 8), 8);
 
     if (n & (2 * sizeof(${XINT8_T}))) {
       y[0] = (${XINT8_T}) vacc0;
       y[1] = (${XINT8_T}) vacc1;
-      vacc0 = ${__XSAT}(asr_s32(vacc2, 8), 8);
+      vacc0 = ${__XSAT}(math_asr_s32(vacc2, 8), 8);
       y += 2;
     }
     if (n & (1 * sizeof(${XINT8_T}))) {

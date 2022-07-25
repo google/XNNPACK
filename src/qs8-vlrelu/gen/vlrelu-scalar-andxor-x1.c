@@ -25,10 +25,10 @@ void xnn_qs8_vlrelu_ukernel__scalar_andxor_x1(
   const int32_t vbias = params->scalar_andxor.bias;
   do {
     int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-    const int32_t vmultiplier = vmultiplier_base ^ (vmultiplier_diff & asr_s32(vacc, 31));
+    const int32_t vmultiplier = vmultiplier_base ^ (vmultiplier_diff & math_asr_s32(vacc, 31));
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
     *y++ = (int8_t) vout;

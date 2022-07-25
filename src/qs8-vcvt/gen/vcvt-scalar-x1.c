@@ -25,7 +25,7 @@ void xnn_qs8_vcvt_ukernel__scalar_x1(
     int32_t vacc = *x++;
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
     *y++ = (int8_t) vout;

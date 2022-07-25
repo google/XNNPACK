@@ -100,10 +100,10 @@ void xnn_qu8_requantize_gemmlowp__scalar(
     const int32_t z_remainder = (z_q31product & remainder_mask) - (int32_t) (z_q31product < 0);
     const int32_t w_remainder = (w_q31product & remainder_mask) - (int32_t) (w_q31product < 0);
 
-    const int32_t x_scaled = asr_s32(x_q31product, shift) + (int32_t) (x_remainder > threshold);
-    const int32_t y_scaled = asr_s32(y_q31product, shift) + (int32_t) (y_remainder > threshold);
-    const int32_t z_scaled = asr_s32(z_q31product, shift) + (int32_t) (z_remainder > threshold);
-    const int32_t w_scaled = asr_s32(w_q31product, shift) + (int32_t) (w_remainder > threshold);
+    const int32_t x_scaled = math_asr_s32(x_q31product, shift) + (int32_t) (x_remainder > threshold);
+    const int32_t y_scaled = math_asr_s32(y_q31product, shift) + (int32_t) (y_remainder > threshold);
+    const int32_t z_scaled = math_asr_s32(z_q31product, shift) + (int32_t) (z_remainder > threshold);
+    const int32_t w_scaled = math_asr_s32(w_q31product, shift) + (int32_t) (w_remainder > threshold);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
     const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);

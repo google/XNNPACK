@@ -229,7 +229,7 @@ class IBilinearMicrokernelTester {
         for (size_t c = 0; c < channels(); c++) {
           const int32_t alpha_h = packed_weights[i * 2 + 0];
           const int32_t alpha_v = packed_weights[i * 2 + 1];
-          const int32_t acc = asr_s32(
+          const int32_t acc = math_asr_s32(
             int32_t(indirection[i * 4 + 0][c + input_offset()]) * (2048 - alpha_h) * (2048 - alpha_v) +
             int32_t(indirection[i * 4 + 1][c + input_offset()]) * alpha_h * (2048 - alpha_v) +
             int32_t(indirection[i * 4 + 2][c + input_offset()]) * (2048 - alpha_h) * alpha_v +

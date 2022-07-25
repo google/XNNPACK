@@ -35,10 +35,10 @@ void xnn_qu8_vlrelu_ukernel__scalar_andxor_x4(
     vacc2 -= vinput_zero_point;
     vacc3 -= vinput_zero_point;
 
-    int32_t vmultiplier0 = asr_s32(vacc0, 31);
-    int32_t vmultiplier1 = asr_s32(vacc1, 31);
-    int32_t vmultiplier2 = asr_s32(vacc2, 31);
-    int32_t vmultiplier3 = asr_s32(vacc3, 31);
+    int32_t vmultiplier0 = math_asr_s32(vacc0, 31);
+    int32_t vmultiplier1 = math_asr_s32(vacc1, 31);
+    int32_t vmultiplier2 = math_asr_s32(vacc2, 31);
+    int32_t vmultiplier3 = math_asr_s32(vacc3, 31);
 
     vmultiplier0 &= vmultiplier_diff;
     vmultiplier1 &= vmultiplier_diff;
@@ -55,10 +55,10 @@ void xnn_qu8_vlrelu_ukernel__scalar_andxor_x4(
     vacc2 = vbias + vacc2 * vmultiplier2;
     vacc3 = vbias + vacc3 * vmultiplier3;
 
-    int32_t vout0 = asr_s32(vacc0, 8);
-    int32_t vout1 = asr_s32(vacc1, 8);
-    int32_t vout2 = asr_s32(vacc2, 8);
-    int32_t vout3 = asr_s32(vacc3, 8);
+    int32_t vout0 = math_asr_s32(vacc0, 8);
+    int32_t vout1 = math_asr_s32(vacc1, 8);
+    int32_t vout2 = math_asr_s32(vacc2, 8);
+    int32_t vout3 = math_asr_s32(vacc3, 8);
 
     vout0 = math_max_s32(vout0, 0);
     vout1 = math_max_s32(vout1, 0);
@@ -79,10 +79,10 @@ void xnn_qu8_vlrelu_ukernel__scalar_andxor_x4(
   if XNN_UNLIKELY(n != 0) {
     do {
       int32_t vacc = (int32_t) *x++ - vinput_zero_point;
-      const int32_t vmultiplier = vmultiplier_base ^ (vmultiplier_diff & asr_s32(vacc, 31));
+      const int32_t vmultiplier = vmultiplier_base ^ (vmultiplier_diff & math_asr_s32(vacc, 31));
       vacc = vbias + vacc * vmultiplier;
 
-      int32_t vout = asr_s32(vacc, 8);
+      int32_t vout = math_asr_s32(vacc, 8);
       vout = math_max_s32(vout, 0);
       vout = math_min_s32(vout, 255);
       *y++ = (uint8_t) vout;

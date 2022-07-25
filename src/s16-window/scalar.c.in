@@ -44,7 +44,7 @@ void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
           int32_t vout${C} = (int32_t) vi${C} * (int32_t) w${C};
 
         $for C in range(CHANNEL_TILE):
-          vout${C} = asr_s32(vout${C}, shift);
+          vout${C} = math_asr_s32(vout${C}, shift);
 
         $for C in range(CHANNEL_TILE):
           vout${C} = math_max_s32(vout${C}, INT16_MIN);
@@ -63,7 +63,7 @@ void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
         int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
         ++input;
         ++w;
-        vout = asr_s32(vout, shift);
+        vout = math_asr_s32(vout, shift);
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         output[0] = (int16_t)(vout);

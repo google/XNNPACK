@@ -31,7 +31,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
       const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
       vacc = vbias + vacc * vmultiplier;
 
-      int32_t vout = asr_s32(vacc, 8);
+      int32_t vout = math_asr_s32(vacc, 8);
       vout = math_max_s32(vout, ${OUTPUT_MIN});
       vout = math_min_s32(vout, ${OUTPUT_MAX});
       *y++ = (${XINT8_T}) vout;
@@ -54,7 +54,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
         vacc${ABC[N]} = vbias + vacc${ABC[N]} * vmultiplier${ABC[N]};
 
       $for N in range(BATCH_TILE):
-        int32_t vout${ABC[N]} = asr_s32(vacc${ABC[N]}, 8);
+        int32_t vout${ABC[N]} = math_asr_s32(vacc${ABC[N]}, 8);
 
       $for N in range(BATCH_TILE):
         vout${ABC[N]} = math_max_s32(vout${ABC[N]}, ${OUTPUT_MIN});
@@ -72,7 +72,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
         const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
         vacc = vbias + vacc * vmultiplier;
 
-        int32_t vout = asr_s32(vacc, 8);
+        int32_t vout = math_asr_s32(vacc, 8);
         vout = math_max_s32(vout, ${OUTPUT_MIN});
         vout = math_min_s32(vout, ${OUTPUT_MAX});
         *y = (${XINT8_T}) vout;
@@ -82,7 +82,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
           const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
           vacc = vbias + vacc * vmultiplier;
 
-          int32_t vout = asr_s32(vacc, 8);
+          int32_t vout = math_asr_s32(vacc, 8);
           vout = math_max_s32(vout, ${OUTPUT_MIN});
           vout = math_min_s32(vout, ${OUTPUT_MAX});
           *y++ = (${XINT8_T}) vout;

@@ -65,10 +65,10 @@ void xnn_qs8_requantize_rndna__scalar_signed64(
     // Note that although rounding is precomputed, it is dependent on shift value, and on processors with 64-bit
     // "right shift with rounding" instruction each line below can be represented by just one such instruction
     // (e.g. VRSHL.S64 on ARM NEON, SRSHL in ARM64 Advanced SIMD).
-    const int32_t x_scaled = (int32_t) asr_s64(x_adjusted_product + rounding, shift);
-    const int32_t y_scaled = (int32_t) asr_s64(y_adjusted_product + rounding, shift);
-    const int32_t z_scaled = (int32_t) asr_s64(z_adjusted_product + rounding, shift);
-    const int32_t w_scaled = (int32_t) asr_s64(w_adjusted_product + rounding, shift);
+    const int32_t x_scaled = (int32_t) math_asr_s64(x_adjusted_product + rounding, shift);
+    const int32_t y_scaled = (int32_t) math_asr_s64(y_adjusted_product + rounding, shift);
+    const int32_t z_scaled = (int32_t) math_asr_s64(z_adjusted_product + rounding, shift);
+    const int32_t w_scaled = (int32_t) math_asr_s64(w_adjusted_product + rounding, shift);
 
     // Clamp scaled value with zero point between (qmin - zero point) and (qmax - zero point).
     const int32_t x_clamped = math_min_s32(math_max_s32(x_scaled, smin), smax);

@@ -155,7 +155,7 @@ XNN_INLINE static float math_nonsign_mask_f32() {
 #endif
 
 XNN_IGNORE_SHIFT_BASE_UB
-XNN_INLINE static int32_t asr_s32(int32_t x, uint32_t n) {
+XNN_INLINE static int32_t math_asr_s32(int32_t x, uint32_t n) {
   #ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
     #if XNN_ARCH_X86_64 || XNN_ARCH_ARM64
       return (int32_t) ((uint64_t) (int64_t) x >> n);
@@ -168,7 +168,7 @@ XNN_INLINE static int32_t asr_s32(int32_t x, uint32_t n) {
 }
 
 XNN_IGNORE_SHIFT_BASE_UB
-XNN_INLINE static int64_t asr_s64(int64_t x, uint32_t n) {
+XNN_INLINE static int64_t math_asr_s64(int64_t x, uint32_t n) {
   #ifdef XNN_USE_SHIFT_BASE_UB_WORKAROUND
     return x >= 0 ? x >> n : ~(~x >> n);
   #else

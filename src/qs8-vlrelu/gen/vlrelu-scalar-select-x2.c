@@ -37,8 +37,8 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_x2(
     vacc0 = vbias + vacc0 * vmultiplier0;
     vacc1 = vbias + vacc1 * vmultiplier1;
 
-    int32_t vout0 = asr_s32(vacc0, 8);
-    int32_t vout1 = asr_s32(vacc1, 8);
+    int32_t vout0 = math_asr_s32(vacc0, 8);
+    int32_t vout1 = math_asr_s32(vacc1, 8);
 
     vout0 = math_max_s32(vout0, -128);
     vout1 = math_max_s32(vout1, -128);
@@ -55,7 +55,7 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_x2(
     const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
     vacc = vbias + vacc * vmultiplier;
 
-    int32_t vout = asr_s32(vacc, 8);
+    int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
     *y = (int8_t) vout;

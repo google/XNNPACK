@@ -173,7 +173,7 @@ static inline int8_t xnn_qs8_requantize_rndnu(
   const int32_t max_less_zero_point = (int32_t) max - (int32_t) zero_point;
 
   const int64_t abs_prescaled_input = (int64_t) input * (int64_t) multiplier;
-  int32_t output = (int32_t) asr_s64(abs_prescaled_input + rounding, shift);
+  int32_t output = (int32_t) math_asr_s64(abs_prescaled_input + rounding, shift);
   output = math_max_s32(output, min_less_zero_point);
   output = math_min_s32(output, max_less_zero_point);
   return (int8_t) (output + (int32_t) zero_point);
@@ -200,7 +200,7 @@ static inline uint8_t xnn_qu8_requantize_rndnu(
   const int32_t max_less_zero_point = (int32_t) max - (int32_t) zero_point;
 
   const int64_t abs_prescaled_input = (int64_t) input * (int64_t) multiplier;
-  int32_t output = (int32_t) asr_s64(abs_prescaled_input + rounding, shift);
+  int32_t output = (int32_t) math_asr_s64(abs_prescaled_input + rounding, shift);
   output = math_max_s32(output, min_less_zero_point);
   output = math_min_s32(output, max_less_zero_point);
   return (uint8_t) (output + (int32_t) zero_point);
@@ -214,7 +214,7 @@ static inline uint8_t xnn_qu8_quantize_add(
   int32_t acc = params.scalar.bias + (int32_t) (uint32_t) a * params.scalar.a_multiplier + (int32_t) (uint32_t) b * params.scalar.b_multiplier;
 
   // Shift right with rounding away from zero.
-  acc = asr_s32(acc, params.scalar.shift);
+  acc = math_asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
   acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
@@ -230,7 +230,7 @@ static inline int8_t xnn_qs8_quantize_add(
   int32_t acc = params.scalar.bias + (int32_t) a * params.scalar.a_multiplier + (int32_t) b * params.scalar.b_multiplier;
 
   // Shift right with rounding away from zero.
-  acc = asr_s32(acc, params.scalar.shift);
+  acc = math_asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
   acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);

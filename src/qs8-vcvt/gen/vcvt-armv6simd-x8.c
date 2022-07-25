@@ -45,14 +45,14 @@ void xnn_qs8_vcvt_ukernel__armv6simd_x8(
     int32_t vacc6 = __smlawt(vmultiplier, vx46, vbias);
     int32_t vacc7 = __smlawt(vmultiplier, vx57, vbias);
 
-    vacc0 = __ssat(asr_s32(vacc0, 1), 8);
-    vacc1 = __ssat(asr_s32(vacc1, 1), 8);
-    vacc2 = __ssat(asr_s32(vacc2, 1), 8);
-    vacc3 = __ssat(asr_s32(vacc3, 1), 8);
-    vacc4 = __ssat(asr_s32(vacc4, 1), 8);
-    vacc5 = __ssat(asr_s32(vacc5, 1), 8);
-    vacc6 = __ssat(asr_s32(vacc6, 1), 8);
-    vacc7 = __ssat(asr_s32(vacc7, 1), 8);
+    vacc0 = __ssat(math_asr_s32(vacc0, 1), 8);
+    vacc1 = __ssat(math_asr_s32(vacc1, 1), 8);
+    vacc2 = __ssat(math_asr_s32(vacc2, 1), 8);
+    vacc3 = __ssat(math_asr_s32(vacc3, 1), 8);
+    vacc4 = __ssat(math_asr_s32(vacc4, 1), 8);
+    vacc5 = __ssat(math_asr_s32(vacc5, 1), 8);
+    vacc6 = __ssat(math_asr_s32(vacc6, 1), 8);
+    vacc7 = __ssat(math_asr_s32(vacc7, 1), 8);
 
     y[0] = (int8_t) vacc0;
     y[1] = (int8_t) vacc1;
@@ -76,10 +76,10 @@ void xnn_qs8_vcvt_ukernel__armv6simd_x8(
     int32_t vacc2 = __smlawt(vmultiplier, vx02, vbias);
     int32_t vacc3 = __smlawt(vmultiplier, vx13, vbias);
 
-    vacc0 = __ssat(asr_s32(vacc0, 1), 8);
-    vacc1 = __ssat(asr_s32(vacc1, 1), 8);
-    vacc2 = __ssat(asr_s32(vacc2, 1), 8);
-    vacc3 = __ssat(asr_s32(vacc3, 1), 8);
+    vacc0 = __ssat(math_asr_s32(vacc0, 1), 8);
+    vacc1 = __ssat(math_asr_s32(vacc1, 1), 8);
+    vacc2 = __ssat(math_asr_s32(vacc2, 1), 8);
+    vacc3 = __ssat(math_asr_s32(vacc3, 1), 8);
 
     y[0] = (int8_t) vacc0;
     y[1] = (int8_t) vacc1;
@@ -97,13 +97,13 @@ void xnn_qs8_vcvt_ukernel__armv6simd_x8(
     int32_t vacc1 = __smlawb(vmultiplier, vx13, vbias);
     const int32_t vacc2 = __smlawt(vmultiplier, vx02, vbias);
 
-    vacc0 = __ssat(asr_s32(vacc0, 1), 8);
-    vacc1 = __ssat(asr_s32(vacc1, 1), 8);
+    vacc0 = __ssat(math_asr_s32(vacc0, 1), 8);
+    vacc1 = __ssat(math_asr_s32(vacc1, 1), 8);
 
     if (n & (2 * sizeof(int8_t))) {
       y[0] = (int8_t) vacc0;
       y[1] = (int8_t) vacc1;
-      vacc0 = __ssat(asr_s32(vacc2, 1), 8);
+      vacc0 = __ssat(math_asr_s32(vacc2, 1), 8);
       y += 2;
     }
     if (n & (1 * sizeof(int8_t))) {
