@@ -179,10 +179,17 @@ XNN_INLINE static int64_t asr_s64(int64_t x, uint32_t n) {
 XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
   #ifdef _MSC_VER
     unsigned long index;
-    _BitScanReverse(&index, (unsigned long) x);
-    return (uint32_t) index ^ 31;
+    if XNN_UNPREDICTABLE(_BitScanReverse(&index, (unsigned long) x) != 0) {
+      return (uint32_t) index ^ 31;
+    } else {
+      return 32;
+    }
   #else
-    return (uint32_t) __builtin_clz((unsigned int) x);
+    if XNN_UNPREDICTABLE(x == 0) {
+      return 32;
+    } else {
+      return (uint32_t) __builtin_clz((unsigned int) x);
+    }
   #endif
 }
 

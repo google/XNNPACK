@@ -15,7 +15,7 @@ void xnn_math_u32_sqrt__scalar_tflm(
     const uint32_t* input,
     uint32_t* output)
 {
-  assert(n % (4 * sizeof(uint32_t)) == 0);
+  assert(n % sizeof(uint32_t) == 0);
 
   for (; n != 0; n -= sizeof(uint32_t)) {
     uint32_t vx = *input++;
