@@ -34,6 +34,17 @@ TEST(WEIGHTS_CACHE, init_and_release)
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
 }
 
+TEST(WEIGHTS_CACHE, init_with_size_and_release)
+{
+  constexpr size_t four_mb = 4194304;
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  struct xnn_weights_cache cache;
+  EXPECT_EQ(xnn_status_success, xnn_init_weights_cache_with_size(&cache, four_mb));
+  // Allocation can be rounded up to alignment, so check GE instead of EQ.
+  ASSERT_GE(cache.cache.weights.capacity, four_mb);
+  EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(&cache));
+}
+
 TEST(WEIGHTS_CACHE, release_null)
 {
   EXPECT_EQ(xnn_status_success, xnn_release_weights_cache(nullptr));

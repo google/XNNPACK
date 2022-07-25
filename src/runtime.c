@@ -71,7 +71,7 @@ enum xnn_status xnn_release_workspace(xnn_workspace_t workspace)
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
+enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cache_t* weights_cache_out)
 {
   struct xnn_weights_cache* weights_cache = NULL;
   enum xnn_status status = xnn_status_uninitialized;
@@ -87,7 +87,7 @@ enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
     goto error;
   }
 
-  status = xnn_init_weights_cache(weights_cache);
+  status = xnn_init_weights_cache_with_size(weights_cache, size);
   if (status != xnn_status_success) {
     goto error;
   }
@@ -97,6 +97,11 @@ enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
 error:
   xnn_release_weights_cache(weights_cache);
   return status;
+}
+
+enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out)
+{
+  return xnn_create_weights_cache_with_size(XNN_DEFAULT_WEIGHTS_BUFFER_SIZE, weights_cache_out);
 }
 
 enum xnn_status xnn_delete_weights_cache(xnn_weights_cache_t weights_cache)

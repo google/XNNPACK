@@ -149,9 +149,6 @@ enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache)
   return xnn_init_code_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
 }
 
-// Forward declare.
-enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t num_buckets);
-
 static bool cache_buckets_grow(struct xnn_cache* cache)
 {
   const size_t new_num_buckets = cache->num_buckets * XNN_CACHE_GROWTH_FACTOR;
@@ -306,7 +303,10 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
   return xnn_status_success;
 }
 
-enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t num_buckets)
+enum xnn_status xnn_internal_init_weights_cache(
+  struct xnn_weights_cache* cache,
+  size_t num_buckets,
+  size_t buffer_size)
 {
   memset(cache, 0, sizeof(struct xnn_weights_cache));
 
@@ -316,7 +316,7 @@ enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache
     goto error;
   }
 
-  status = xnn_allocate_weights_memory(&cache->cache.weights, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
+  status = xnn_allocate_weights_memory(&cache->cache.weights, buffer_size);
   if (status != xnn_status_success) {
     goto error;
   }
@@ -333,9 +333,14 @@ error:
   return status;
 }
 
+enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t size)
+{
+  return xnn_internal_init_weights_cache(cache, XNN_CACHE_INITIAL_BUCKETS, size);
+}
+
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache)
 {
-  return xnn_init_weights_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
+  return xnn_init_weights_cache_with_size(cache, XNN_DEFAULT_WEIGHTS_BUFFER_SIZE);
 }
 
 enum xnn_status xnn_finalize_weights_cache(

@@ -92,6 +92,7 @@ struct xnn_weights_cache {
 };
 
 enum xnn_status xnn_init_weights_cache(struct xnn_weights_cache* cache);
+enum xnn_status xnn_init_weights_cache_with_size(struct xnn_weights_cache* cache, size_t size);
 // Finalizes the weights cache, so that we cannot insert any more entries into the cache.
 enum xnn_status xnn_finalize_weights_cache(
   struct xnn_weights_cache* cache,

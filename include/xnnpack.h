@@ -1353,11 +1353,14 @@ enum xnn_status xnn_define_static_transpose(
 /// Weights cache is a cache for packed weights. It can be reused between runtimes.
 typedef struct xnn_weights_cache* xnn_weights_cache_t;
 
-/// Create a weights cache object.
+enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out);
+
+/// Create a weights cache object specifying the initial size of weights cache (in bytes).
+/// @size - initial capacity of the weights cache (in bytes), i.e. it can hold size bytes without growing.
 /// @param weights_cache_out - pointer to the variable that will be initialized to a handle to the weights cache object
 ///                            upon successful return. Once created, the weights cache object can be shared between
 ///                            different Runtime objects.
-enum xnn_status xnn_create_weights_cache(xnn_weights_cache_t* weights_cache_out);
+enum xnn_status xnn_create_weights_cache_with_size(size_t size, xnn_weights_cache_t* weights_cache_out);
 
 
 /// Weights cache can be finalized in these ways:
