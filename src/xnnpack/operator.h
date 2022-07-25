@@ -136,8 +136,6 @@ struct xnn_operator {
   size_t group_output_channels;
   size_t channels;
 
-  size_t pad_before_channels;
-  size_t pad_after_channels;
   uint32_t pad_value;
 
   size_t input_height;
