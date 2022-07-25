@@ -268,10 +268,11 @@ enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf) {
 
 enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n) {
   if (buf->size + n <= buf->capacity) {
+    xnn_log_debug("reserving weights memory of size %zu without growing buffer", n);
     return xnn_status_success;
   }
 
-  xnn_log_debug("reserving weights memory of size %zu", n);
+  xnn_log_debug("growing buffer to reserve weights memory of size %zu, previous capacity %zu", n, buf->capacity);
   // TODO(zhin): use mremap
   size_t size = buf->size;
   struct xnn_weights_buffer new_weights_buffer;

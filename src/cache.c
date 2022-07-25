@@ -352,12 +352,14 @@ enum xnn_status xnn_finalize_weights_cache(
       enum xnn_cache_state finalized_state;
 
       if (finalization_kind == xnn_weights_cache_finalization_kind_hard) {
+        xnn_log_debug("hard finalizing weights cache");
         status = xnn_finalize_weights_memory(&cache->cache.weights);
         // Also release the memory used by hash table (but not the weights memory).
         xnn_release_memory(cache->cache.buckets);
         cache->cache.buckets = NULL;
         finalized_state = xnn_cache_state_hard_finalized;
       } else {
+        xnn_log_debug("soft finalizing weights cache");
         assert(finalization_kind == xnn_weights_cache_finalization_kind_soft);
         // Finalize weights cache by reserving sufficient space for the insertion of the largest cached weights. This
         // ensures that we have space to write packed weights to check for cache hits without growing and moving the
