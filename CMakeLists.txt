@@ -1017,6 +1017,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sigmoid-f32-scalar-rr2-lut64-p2-div.c
   src/math/sigmoid-f32-scalar-rr2-lut2048-p1-div.c
   src/math/sigmoid-f32-scalar-rr2-p5-div.c
+  src/math/sqrt-u32-scalar-bitmanip.c
   src/math/sqrt-u32-scalar-clz-binsearch.c
   src/math/sqrt-u32-scalar-clz-newton.c
   src/math/sqrt-u32-scalar-cvti32-sqrt-lrint.c
