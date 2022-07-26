@@ -177,7 +177,7 @@ XNN_INLINE static int64_t math_asr_s64(int64_t x, uint32_t n) {
 }
 
 XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
-  #ifdef _MSC_VER
+  #if defined(_MSC_VER) && !defined(__clang__)
     unsigned long index;
     if XNN_UNPREDICTABLE(_BitScanReverse(&index, (unsigned long) x) != 0) {
       return (uint32_t) index ^ 31;
@@ -195,7 +195,7 @@ XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
 
 XNN_INLINE static uint32_t math_clz_nonzero_u32(uint32_t x) {
   assert(x != 0);
-  #ifdef _MSC_VER
+  #if defined(_MSC_VER) && !defined(__clang__)
     unsigned long index;
     _BitScanReverse(&index, (unsigned long) x);
     return (uint32_t) index ^ 31;
@@ -205,7 +205,7 @@ XNN_INLINE static uint32_t math_clz_nonzero_u32(uint32_t x) {
 }
 
 XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
-  #ifdef _MSC_VER
+  #if defined(_MSC_VER) && !defined(__clang__)
     unsigned long index;
     _BitScanForward(&index, (unsigned long) x);
     return (uint32_t) index;
