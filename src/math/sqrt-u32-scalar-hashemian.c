@@ -27,7 +27,7 @@ void xnn_math_u32_sqrt__scalar_hashemian(
        * and StackOverflow answer https://stackoverflow.com/a/31149161
       */
 
-      const uint32_t vn = math_clz_u32(vx);
+      const uint32_t vn = math_clz_nonzero_u32(vx);
       const uint32_t vleft_shift = vn & 1;
       const uint32_t vm_minus_1 = 15 - (vn >> 1);
       const uint32_t vm_plus_1 = vm_minus_1 + 2;

@@ -193,6 +193,17 @@ XNN_INLINE static uint32_t math_clz_u32(uint32_t x) {
   #endif
 }
 
+XNN_INLINE static uint32_t math_clz_nonzero_u32(uint32_t x) {
+  assert(x != 0);
+  #ifdef _MSC_VER
+    unsigned long index;
+    _BitScanReverse(&index, (unsigned long) x);
+    return (uint32_t) index ^ 31;
+  #else
+    return (uint32_t) __builtin_clz((unsigned int) x);
+  #endif
+}
+
 XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
   #ifdef _MSC_VER
     unsigned long index;

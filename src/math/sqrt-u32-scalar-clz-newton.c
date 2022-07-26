@@ -23,8 +23,8 @@ void xnn_math_u32_sqrt__scalar_clz_newton(
     uint32_t vy = vx;
 
     // Based on Hacker's Delight, Figure 11-1.
-    if (vx > 1) {
-      const uint32_t vs = 16 - (math_clz_u32(vx - 1) >> 1);
+    if (vx != 0) {
+      const uint32_t vs = 16 - (math_clz_nonzero_u32(vx - 1) >> 1);
 
       uint32_t vg0 = UINT32_C(1) << vs;
       uint32_t vg1 = (vg0 + (vx >> vs)) >> 1;

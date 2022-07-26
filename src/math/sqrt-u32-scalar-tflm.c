@@ -23,7 +23,7 @@ void xnn_math_u32_sqrt__scalar_tflm(
     // Algorithm adapted from tensorflow/lite/experimental/microfrontend/lib/filterbank.c in TFLite-Micro
     uint32_t vy = 0;
     if (vx != 0) {
-      const uint32_t vn = (math_clz_u32(vx) | 1) ^ 31;
+      const uint32_t vn = (math_clz_nonzero_u32(vx) | 1) ^ 31;
       uint32_t vb = UINT32_C(1) << vn;
       uint32_t iterations = (vn >> 1) + 1;
       while (iterations--) {
