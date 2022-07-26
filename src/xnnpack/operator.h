@@ -168,9 +168,6 @@ struct xnn_operator {
   float input_scale;
   float output_scale;
   int32_t input_zero_point;
-  uint8_t output_zero_point;
-  uint8_t output_min;
-  uint8_t output_max;
 
   size_t valid_batch_size;
   size_t last_input_height;

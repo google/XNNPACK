@@ -217,11 +217,8 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
   average_pooling_op->input_zero_point = (int32_t) (uint32_t) input_zero_point;
-  average_pooling_op->output_zero_point = output_zero_point;
   average_pooling_op->input_scale = input_scale;
   average_pooling_op->output_scale = output_scale;
-  average_pooling_op->output_min = output_min;
-  average_pooling_op->output_max = output_max;
 
   // Number of rows read in the AVGPOOL micro-kernel.
   const size_t avgpool_nrows =
