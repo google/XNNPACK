@@ -128,8 +128,7 @@ void xnn_f32_dwconv_minmax_ukernel_up2x4__wasm_acc2(
       const float vk3 = w[7];
       vacc0p1 = math_muladd_f32(vi3, vk3, vacc0p1);
 
-      // Add up all accumulators to vacc01p0
-      vacc0p0 = vacc0p0 + vacc0p1;
+      vacc0p0 += vacc0p1;
 
       float vacc0 = __builtin_wasm_max_f32(vacc0p0, vmin);
       vacc0 = __builtin_wasm_min_f32(vacc0, vmax);

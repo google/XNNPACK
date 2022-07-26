@@ -103,14 +103,8 @@ void xnn_f32_dwconv${SUFFIX}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" 
           $else:
             vacc0p${K % ACCUMULATORS} = math_muladd_f32(vi${K}, vk${K}, vacc0p${K % ACCUMULATORS});
 
-        $if ACCUMULATORS > 1:
-          // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
-          $ACC_SLICE = 1
-          $while ACC_SLICE < ACCUMULATORS:
-            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-              $if A + ACC_SLICE < ACCUMULATORS:
-                vacc0p${A} = vacc0p${A} + vacc0p${A + ACC_SLICE};
-            $ACC_SLICE *= 2
+        $for A in range(1, ACCUMULATORS):
+          vacc0p0 += vacc0p${A};
 
         $if ACTIVATION == "MINMAX":
           float vacc0 = ${MAX_F32}(vacc0p0, vmin);

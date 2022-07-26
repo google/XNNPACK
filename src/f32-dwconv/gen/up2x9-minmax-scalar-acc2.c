@@ -213,8 +213,7 @@ void xnn_f32_dwconv_minmax_ukernel_up2x9__scalar_acc2(
       const float vk8 = w[17];
       vacc0p0 = math_muladd_f32(vi8, vk8, vacc0p0);
 
-      // Add up all accumulators to vacc01p0
-      vacc0p0 = vacc0p0 + vacc0p1;
+      vacc0p0 += vacc0p1;
 
       float vacc0 = math_max_f32(vacc0p0, vmin);
       vacc0 = math_min_f32(vacc0, vmax);

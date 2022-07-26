@@ -103,8 +103,7 @@ void xnn_f32_dwconv_ukernel_up2x3__scalar_acc2(
       const float vk2 = w[5];
       vacc0p0 = math_muladd_f32(vi2, vk2, vacc0p0);
 
-      // Add up all accumulators to vacc01p0
-      vacc0p0 = vacc0p0 + vacc0p1;
+      vacc0p0 += vacc0p1;
 
       *output++ = vacc0p0;
     }
