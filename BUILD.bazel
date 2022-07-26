@@ -1346,6 +1346,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s16-window/gen/scalar-x2.c",
     "src/s16-window/gen/scalar-x3.c",
     "src/s16-window/gen/scalar-x4.c",
+    "src/s16-rabsmax/gen/scalar-x1.c",
+    "src/s16-rabsmax/gen/scalar-x2.c",
+    "src/s16-rabsmax/gen/scalar-x3.c",
+    "src/s16-rabsmax/gen/scalar-x4.c",
     "src/u8-ibilinear/gen/scalar-c1.c",
     "src/u8-ibilinear/gen/scalar-c2.c",
     "src/u8-ibilinear/gen/scalar-c4.c",
@@ -3092,6 +3096,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/s16-window/gen/neon-x16.c",
     "src/s16-window/gen/neon-x24.c",
     "src/s16-window/gen/neon-x32.c",
+    "src/s16-rabsmax/gen/neon-x8.c",
+    "src/s16-rabsmax/gen/neon-x16.c",
+    "src/s16-rabsmax/gen/neon-x24.c",
+    "src/s16-rabsmax/gen/neon-x32.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c",
@@ -8503,6 +8511,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vunary.h",
     "src/xnnpack/window.h",
+    "src/xnnpack/rabsmax.h",
     "src/xnnpack/zip.h",
 ]
 
@@ -11718,6 +11727,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "s16_rabsmax_bench",
+    srcs = [
+        "bench/s16-rabsmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "s16_window_bench",
     srcs = [
         "bench/s16-window.cc",
@@ -14025,6 +14042,15 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vmulc-minmax-rndnu.cc",
         "test/vmulc-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "s16_rabsmax_test",
+    srcs = [
+        "test/rabsmax-microkernel-tester.h",
+        "test/s16-rabsmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

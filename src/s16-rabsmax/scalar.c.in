@@ -1,0 +1,56 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/rabsmax.h>
+
+
+void xnn_s16_rabsmax_ukernel__scalar_x${CHANNEL_TILE}(
+    size_t channels,
+    const int16_t* input,
+    uint16_t* output) {
+
+  assert(channels > 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  $for C in range(CHANNEL_TILE):
+    int32_t vmax${C} = 0;
+
+  size_t c = channels;
+  $if CHANNEL_TILE > 1:
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      $for C in range(CHANNEL_TILE):
+        const int32_t vi${C} = (int32_t) input[${C}];
+      input += ${CHANNEL_TILE};
+
+      $for C in range(CHANNEL_TILE):
+        const int32_t vabs${C} = vi${C} >= 0 ? vi${C} : -vi${C};
+
+      $for C in range(CHANNEL_TILE):
+        vmax${C} = math_max_s32(vmax${C}, vabs${C});
+    }
+
+    $CHANNEL_SLICE = 1
+    $while CHANNEL_SLICE < CHANNEL_TILE:
+      $for S in range(0, CHANNEL_TILE, CHANNEL_SLICE * 2):
+        $if S + CHANNEL_SLICE < CHANNEL_TILE:
+          vmax${S} = math_max_s32(vmax${S}, vmax${S + CHANNEL_SLICE});
+      $CHANNEL_SLICE *= 2
+
+  if (c != 0) {
+    do {
+      const int32_t vi = (int32_t) *input++;
+      const int32_t vabs = vi >= 0 ? vi : -vi;
+      vmax0 = math_max_s32(vmax0, vabs);
+    } while (--c != 0);
+  }
+  *output = (uint16_t) vmax0;
+}

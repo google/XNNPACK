@@ -3981,6 +3981,11 @@ typedef void (*xnn_f32_vscale_ukernel_function)(
     float* y,
     float c);
 
+typedef void (*xnn_s16_rabsmax_ukernel_function)(
+    size_t n,
+    const int16_t* x,
+    uint16_t* y);
+
 typedef void (*xnn_s16_window_ukernel_function)(
     size_t rows,
     size_t channels,
