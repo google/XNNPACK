@@ -105,6 +105,7 @@ class WindowMicrokernelTester {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_EQ(y[n * channels() + c], y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
+            << ", shift " << shift()
             << ", channel " << c << " / " << channels();
         }
       }
