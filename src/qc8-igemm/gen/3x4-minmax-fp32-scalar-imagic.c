@@ -158,18 +158,18 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4__scalar_imagic(
     vfpacc2x2 += vmagic_bias;
     vfpacc2x3 += vmagic_bias;
 
-    int32_t vout0x0 = (int32_t) fp32_to_bits(vfpacc0x0);
-    int32_t vout0x1 = (int32_t) fp32_to_bits(vfpacc0x1);
-    int32_t vout0x2 = (int32_t) fp32_to_bits(vfpacc0x2);
-    int32_t vout0x3 = (int32_t) fp32_to_bits(vfpacc0x3);
-    int32_t vout1x0 = (int32_t) fp32_to_bits(vfpacc1x0);
-    int32_t vout1x1 = (int32_t) fp32_to_bits(vfpacc1x1);
-    int32_t vout1x2 = (int32_t) fp32_to_bits(vfpacc1x2);
-    int32_t vout1x3 = (int32_t) fp32_to_bits(vfpacc1x3);
-    int32_t vout2x0 = (int32_t) fp32_to_bits(vfpacc2x0);
-    int32_t vout2x1 = (int32_t) fp32_to_bits(vfpacc2x1);
-    int32_t vout2x2 = (int32_t) fp32_to_bits(vfpacc2x2);
-    int32_t vout2x3 = (int32_t) fp32_to_bits(vfpacc2x3);
+    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0);
+    int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1);
+    int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2);
+    int32_t vout0x3 = (int32_t) float_as_uint32(vfpacc0x3);
+    int32_t vout1x0 = (int32_t) float_as_uint32(vfpacc1x0);
+    int32_t vout1x1 = (int32_t) float_as_uint32(vfpacc1x1);
+    int32_t vout1x2 = (int32_t) float_as_uint32(vfpacc1x2);
+    int32_t vout1x3 = (int32_t) float_as_uint32(vfpacc1x3);
+    int32_t vout2x0 = (int32_t) float_as_uint32(vfpacc2x0);
+    int32_t vout2x1 = (int32_t) float_as_uint32(vfpacc2x1);
+    int32_t vout2x2 = (int32_t) float_as_uint32(vfpacc2x2);
+    int32_t vout2x3 = (int32_t) float_as_uint32(vfpacc2x3);
 
     const int32_t vmagic_min = params->scalar_imagic.magic_min;
     vout0x0 = math_max_s32(vout0x0, vmagic_min);

@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <fp16/bitcasts.h>
-
 #include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
@@ -51,10 +49,10 @@ void xnn_qu8_requantize_fp32__scalar_fmagic(
     const float z_clamped = math_min_f32(math_max_f32(z_scaled, fmin), fmax);
     const float w_clamped = math_min_f32(math_max_f32(w_scaled, fmin), fmax);
 
-    const int32_t x_biased = (int32_t) fp32_to_bits(x_clamped + fmagic) - imagic;
-    const int32_t y_biased = (int32_t) fp32_to_bits(y_clamped + fmagic) - imagic;
-    const int32_t z_biased = (int32_t) fp32_to_bits(z_clamped + fmagic) - imagic;
-    const int32_t w_biased = (int32_t) fp32_to_bits(w_clamped + fmagic) - imagic;
+    const int32_t x_biased = (int32_t) float_as_uint32(x_clamped + fmagic) - imagic;
+    const int32_t y_biased = (int32_t) float_as_uint32(y_clamped + fmagic) - imagic;
+    const int32_t z_biased = (int32_t) float_as_uint32(z_clamped + fmagic) - imagic;
+    const int32_t w_biased = (int32_t) float_as_uint32(w_clamped + fmagic) - imagic;
 
     output[0] = (uint8_t) x_biased;
     output[1] = (uint8_t) y_biased;

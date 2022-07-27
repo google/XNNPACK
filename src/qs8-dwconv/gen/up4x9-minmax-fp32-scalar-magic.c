@@ -263,10 +263,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic(
       vfpacc2 += vmagic_bias;
       vfpacc3 += vmagic_bias;
 
-      int32_t vout0 = (int32_t) fp32_to_bits(vfpacc0) - vmagic_bias_less_output_zero_point;
-      int32_t vout1 = (int32_t) fp32_to_bits(vfpacc1) - vmagic_bias_less_output_zero_point;
-      int32_t vout2 = (int32_t) fp32_to_bits(vfpacc2) - vmagic_bias_less_output_zero_point;
-      int32_t vout3 = (int32_t) fp32_to_bits(vfpacc3) - vmagic_bias_less_output_zero_point;
+      int32_t vout0 = (int32_t) float_as_uint32(vfpacc0) - vmagic_bias_less_output_zero_point;
+      int32_t vout1 = (int32_t) float_as_uint32(vfpacc1) - vmagic_bias_less_output_zero_point;
+      int32_t vout2 = (int32_t) float_as_uint32(vfpacc2) - vmagic_bias_less_output_zero_point;
+      int32_t vout3 = (int32_t) float_as_uint32(vfpacc3) - vmagic_bias_less_output_zero_point;
 
       output[0] = (int8_t) vout0;
       output[1] = (int8_t) vout1;
@@ -313,7 +313,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up4x9__scalar_magic(
         vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
         vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
         vfpacc += vmagic_bias;
-        int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+        int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
 
         *output++ = (int8_t) vout;
       } while (--c != 0);

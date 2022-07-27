@@ -114,7 +114,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(fp32_to_bits(output[i]), fp32_to_bits(fp16_ieee_to_fp32_value(input[i])))
+        ASSERT_EQ(float_as_uint32(output[i]), float_as_uint32(fp16_ieee_to_fp32_value(input[i])))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = 0x" << std::hex << std::setw(4) << std::setfill('0') << input[i];
       }
@@ -144,7 +144,7 @@ class VCvtMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_EQ(output[i], fp16_ieee_from_fp32_value(input[i]))
           << "at " << i << " / " << batch_size()
-          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(input[i])
+          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(input[i])
           << " (" << input[i] << ")";
       }
     }
@@ -189,7 +189,7 @@ class VCvtMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
-          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(input[i])
+          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(input[i])
           << " (" << input[i] << ")";
       }
     }
@@ -232,7 +232,7 @@ class VCvtMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
-          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(input[i])
+          << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(input[i])
           << " (" << input[i] << ")";
       }
     }

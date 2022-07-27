@@ -87,7 +87,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd(
 
     vfpacc0x0 += vmagic_bias;
 
-    int32_t vout0x0 = (int32_t) fp32_to_bits(vfpacc0x0);
+    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0);
 
     const int32_t vmagic_bias_less_zero_point = params->armv6simd.magic_bias_less_zero_point;
     vout0x0 = __qsub(vout0x0, vmagic_bias_less_zero_point);

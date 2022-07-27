@@ -19,6 +19,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
@@ -34,11 +35,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -52,11 +53,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -66,11 +67,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT16, negative_zero) {
@@ -78,11 +79,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT16, positive_subnormal) {
@@ -94,11 +95,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -112,11 +113,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -126,11 +127,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT16, negative_infinity) {
@@ -138,11 +139,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT16, positive_nan) {
@@ -154,11 +155,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -172,11 +173,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -192,11 +193,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -210,11 +211,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -224,11 +225,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT32, negative_zero) {
@@ -236,11 +237,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT32, positive_subnormal) {
@@ -252,11 +253,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -270,11 +271,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -284,11 +285,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT32, negative_infinity) {
@@ -296,11 +297,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE2_INT32, positive_nan) {
@@ -312,11 +313,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -330,11 +331,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse2_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -352,11 +353,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -372,11 +373,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -388,11 +389,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT16, negative_zero) {
@@ -402,11 +403,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT16, positive_subnormal) {
@@ -420,11 +421,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -440,11 +441,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -456,11 +457,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT16, negative_infinity) {
@@ -470,11 +471,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT16, positive_nan) {
@@ -488,11 +489,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -508,11 +509,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -530,11 +531,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -550,11 +551,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -566,11 +567,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT32, negative_zero) {
@@ -580,11 +581,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT32, positive_subnormal) {
@@ -598,11 +599,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -618,11 +619,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -634,11 +635,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT32, negative_infinity) {
@@ -648,11 +649,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__SSE41_INT32, positive_nan) {
@@ -666,11 +667,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -686,11 +687,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__sse41_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -708,11 +709,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -728,11 +729,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -744,11 +745,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__F16C, negative_zero) {
@@ -758,11 +759,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__F16C, positive_subnormal) {
@@ -776,11 +777,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -796,11 +797,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -812,11 +813,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__F16C, negative_infinity) {
@@ -826,11 +827,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__F16C, positive_nan) {
@@ -844,11 +845,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -864,11 +865,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__f16c(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -886,11 +887,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -906,11 +907,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -922,11 +923,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT16, negative_zero) {
@@ -936,11 +937,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT16, positive_subnormal) {
@@ -954,11 +955,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -974,11 +975,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -990,11 +991,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT16, negative_infinity) {
@@ -1004,11 +1005,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT16, positive_nan) {
@@ -1022,11 +1023,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1042,11 +1043,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1064,11 +1065,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1084,11 +1085,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1100,11 +1101,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT32, negative_zero) {
@@ -1114,11 +1115,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT32, positive_subnormal) {
@@ -1132,11 +1133,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1152,11 +1153,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1168,11 +1169,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT32, negative_infinity) {
@@ -1182,11 +1183,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEON_INT32, positive_nan) {
@@ -1200,11 +1201,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1220,11 +1221,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neon_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1242,11 +1243,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1262,11 +1263,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1278,11 +1279,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEONFP16, negative_zero) {
@@ -1292,11 +1293,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEONFP16, positive_subnormal) {
@@ -1310,11 +1311,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1330,11 +1331,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1346,11 +1347,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEONFP16, negative_infinity) {
@@ -1360,11 +1361,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__NEONFP16, positive_nan) {
@@ -1378,11 +1379,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1398,11 +1399,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__neonfp16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1418,11 +1419,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1436,11 +1437,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1450,11 +1451,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT16, negative_zero) {
@@ -1462,11 +1463,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT16, positive_subnormal) {
@@ -1478,11 +1479,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1496,11 +1497,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1510,11 +1511,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT16, negative_infinity) {
@@ -1522,11 +1523,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT16, positive_nan) {
@@ -1538,11 +1539,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1556,11 +1557,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int16(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1576,11 +1577,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1594,11 +1595,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1608,11 +1609,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
     xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT32, negative_zero) {
@@ -1620,11 +1621,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
     xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT32, positive_subnormal) {
@@ -1636,11 +1637,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1654,11 +1655,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1668,11 +1669,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0x7C00));
     xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT32, negative_infinity) {
@@ -1680,11 +1681,11 @@ constexpr int kBlockSize = 1024;
     std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
     std::fill(inputs.begin(), inputs.end(), UINT16_C(0xFC00));
     xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-    const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[0]));
-    ASSERT_EQ(reference_output, fp32_to_bits(outputs[0]))
-      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[0])
+    const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[0]));
+    ASSERT_EQ(reference_output, float_as_uint32(outputs[0]))
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[0])
       << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[0]);
+      << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[0]);
   }
 
   TEST(CVT__WASMSIMD_INT32, positive_nan) {
@@ -1696,11 +1697,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }
@@ -1714,11 +1715,11 @@ constexpr int kBlockSize = 1024;
       }
       xnn_math_f16_f32_cvt__wasmsimd_int32(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = fp32_to_bits(fp16_ieee_to_fp32_value(inputs[i]));
-        ASSERT_EQ(reference_output, fp32_to_bits(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << fp32_to_bits(inputs[i])
+        const uint32_t reference_output = float_as_uint32(fp16_ieee_to_fp32_value(inputs[i]));
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << float_as_uint32(inputs[i])
           << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(outputs[i]);
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
       }
     }
   }

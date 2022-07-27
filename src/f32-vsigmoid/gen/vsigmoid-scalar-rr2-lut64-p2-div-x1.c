@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.
@@ -42,9 +41,9 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x1(
     const float vz = fabsf(vx);
 
     float vn = vz * vminus_log2e + vmagic_bias;
-    const uint32_t ve = fp32_to_bits(vn) << 17;
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
-    const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx] + ve);
+    const uint32_t ve = float_as_uint32(vn) << 17;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
+    const float vs = uint32_as_float(xnn_table_exp2minus_k_over_64[vidx] + ve);
     vn -= vmagic_bias;
 
     float vt = vn * vln2_hi + vz;

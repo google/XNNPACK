@@ -259,7 +259,7 @@ enum xnn_status xnn_define_static_constant_pad(
   memcpy(&node->params.static_pad.post_paddings, post_paddings, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
-      node->params.static_pad.padding_value = fp32_to_bits(padding_value);
+      node->params.static_pad.padding_value = float_as_uint32(padding_value);
       break;
 #ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:

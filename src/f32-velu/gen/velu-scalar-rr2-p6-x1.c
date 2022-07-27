@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_velu_ukernel__scalar_rr2_p6_x1(
@@ -45,7 +44,7 @@ void xnn_f32_velu_ukernel__scalar_rr2_p6_x1(
     const float vz = vx * vprescale;
 
     float vn = vz * vlog2e + vmagic_bias;
-    float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    float vs = uint32_as_float(float_as_uint32(vn) << 23);
     vn -= vmagic_bias;
 
     float vt = vn * vminus_ln2_hi + vz;

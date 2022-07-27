@@ -9,9 +9,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x${BATCH_TILE}(
@@ -47,7 +46,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x${BATCH_TILE}(
         float vn${N} = vz${N} * vminus_log2e + vmagic_bias;
 
       $for N in range(BATCH_TILE):
-        const float vs${N} = fp32_from_bits(fp32_to_bits(vn${N}) << 23);
+        const float vs${N} = uint32_as_float(float_as_uint32(vn${N}) << 23);
 
       $for N in range(BATCH_TILE):
         vn${N} -= vmagic_bias;
@@ -103,7 +102,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x${BATCH_TILE}(
       const float vz = fabsf(vx);
 
       float vn = vz * vminus_log2e + vmagic_bias;
-      const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      const float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vln2_hi + vz;
@@ -137,7 +136,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x${BATCH_TILE}(
       const float vz = fabsf(vx);
 
       float vn = vz * vminus_log2e + vmagic_bias;
-      const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      const float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vln2_hi + vz;
@@ -170,7 +169,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x${BATCH_TILE}(
         const float vz = fabsf(vx);
 
         float vn = vz * vminus_log2e + vmagic_bias;
-        const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+        const float vs = uint32_as_float(float_as_uint32(vn) << 23);
         vn -= vmagic_bias;
 
         float vt = vn * vln2_hi + vz;

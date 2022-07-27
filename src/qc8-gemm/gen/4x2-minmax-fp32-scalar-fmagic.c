@@ -140,14 +140,14 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x2__scalar_fmagic(
     vfpacc3x1 += vmagic_bias;
 
     const int32_t vmagic_bias_less_output_zero_point = params->scalar_fmagic.magic_bias_less_output_zero_point;
-    int32_t vout0x0 = (int32_t) fp32_to_bits(vfpacc0x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout0x1 = (int32_t) fp32_to_bits(vfpacc0x1) - vmagic_bias_less_output_zero_point;
-    int32_t vout1x0 = (int32_t) fp32_to_bits(vfpacc1x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout1x1 = (int32_t) fp32_to_bits(vfpacc1x1) - vmagic_bias_less_output_zero_point;
-    int32_t vout2x0 = (int32_t) fp32_to_bits(vfpacc2x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout2x1 = (int32_t) fp32_to_bits(vfpacc2x1) - vmagic_bias_less_output_zero_point;
-    int32_t vout3x0 = (int32_t) fp32_to_bits(vfpacc3x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout3x1 = (int32_t) fp32_to_bits(vfpacc3x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout1x0 = (int32_t) float_as_uint32(vfpacc1x0) - vmagic_bias_less_output_zero_point;
+    int32_t vout1x1 = (int32_t) float_as_uint32(vfpacc1x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout2x0 = (int32_t) float_as_uint32(vfpacc2x0) - vmagic_bias_less_output_zero_point;
+    int32_t vout2x1 = (int32_t) float_as_uint32(vfpacc2x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout3x0 = (int32_t) float_as_uint32(vfpacc3x0) - vmagic_bias_less_output_zero_point;
+    int32_t vout3x1 = (int32_t) float_as_uint32(vfpacc3x1) - vmagic_bias_less_output_zero_point;
 
     if XNN_LIKELY(nc >= 2) {
       c0[0] = (int8_t) vout0x0;

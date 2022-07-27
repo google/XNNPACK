@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <fp16/bitcasts.h>
-
 #include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
@@ -30,7 +28,7 @@ void xnn_qu8_requantize_gemmlowp__scalar(
   assert(scale >= 0x1.0p-32f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t)(((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -38,7 +36,7 @@ void xnn_qu8_requantize_gemmlowp__scalar(
   assert(multiplier <= INT32_C(0x7FFFFF80));
 
   // Shift is in [0, 31] range.
-  const int32_t shift = 127 + 31 - 32 - (fp32_to_bits(scale) >> 23);
+  const int32_t shift = 127 + 31 - 32 - (float_as_uint32(scale) >> 23);
   assert(shift >= 0);
   assert(shift < 32);
 

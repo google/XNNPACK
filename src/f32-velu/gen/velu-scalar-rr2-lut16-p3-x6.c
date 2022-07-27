@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
@@ -62,37 +61,37 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x6(
     float vn4 = vz4 * vlog2e + vmagic_bias;
     float vn5 = vz5 * vlog2e + vmagic_bias;
 
-    const uint32_t ven0 = fp32_to_bits(vn0) << 19;
-    const uint32_t vidx0 = fp32_to_bits(vn0) & vindex_mask;
+    const uint32_t ven0 = float_as_uint32(vn0) << 19;
+    const uint32_t vidx0 = float_as_uint32(vn0) & vindex_mask;
     vn0 -= vmagic_bias;
-    const uint32_t ven1 = fp32_to_bits(vn1) << 19;
-    const uint32_t vidx1 = fp32_to_bits(vn1) & vindex_mask;
+    const uint32_t ven1 = float_as_uint32(vn1) << 19;
+    const uint32_t vidx1 = float_as_uint32(vn1) & vindex_mask;
     vn1 -= vmagic_bias;
-    const uint32_t ven2 = fp32_to_bits(vn2) << 19;
-    const uint32_t vidx2 = fp32_to_bits(vn2) & vindex_mask;
+    const uint32_t ven2 = float_as_uint32(vn2) << 19;
+    const uint32_t vidx2 = float_as_uint32(vn2) & vindex_mask;
     vn2 -= vmagic_bias;
-    const uint32_t ven3 = fp32_to_bits(vn3) << 19;
-    const uint32_t vidx3 = fp32_to_bits(vn3) & vindex_mask;
+    const uint32_t ven3 = float_as_uint32(vn3) << 19;
+    const uint32_t vidx3 = float_as_uint32(vn3) & vindex_mask;
     vn3 -= vmagic_bias;
-    const uint32_t ven4 = fp32_to_bits(vn4) << 19;
-    const uint32_t vidx4 = fp32_to_bits(vn4) & vindex_mask;
+    const uint32_t ven4 = float_as_uint32(vn4) << 19;
+    const uint32_t vidx4 = float_as_uint32(vn4) & vindex_mask;
     vn4 -= vmagic_bias;
-    const uint32_t ven5 = fp32_to_bits(vn5) << 19;
-    const uint32_t vidx5 = fp32_to_bits(vn5) & vindex_mask;
+    const uint32_t ven5 = float_as_uint32(vn5) << 19;
+    const uint32_t vidx5 = float_as_uint32(vn5) & vindex_mask;
     vn5 -= vmagic_bias;
 
     float vt0 = vn0 * vminus_ln2_hi + vz0;
-    float vs0 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx0] + ven0);
+    float vs0 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx0] + ven0);
     float vt1 = vn1 * vminus_ln2_hi + vz1;
-    float vs1 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx1] + ven1);
+    float vs1 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx1] + ven1);
     float vt2 = vn2 * vminus_ln2_hi + vz2;
-    float vs2 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx2] + ven2);
+    float vs2 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx2] + ven2);
     float vt3 = vn3 * vminus_ln2_hi + vz3;
-    float vs3 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx3] + ven3);
+    float vs3 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx3] + ven3);
     float vt4 = vn4 * vminus_ln2_hi + vz4;
-    float vs4 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx4] + ven4);
+    float vs4 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx4] + ven4);
     float vt5 = vn5 * vminus_ln2_hi + vz5;
-    float vs5 = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx5] + ven5);
+    float vs5 = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx5] + ven5);
 
     vt0 = vn0 * vminus_ln2_lo + vt0;
     if XNN_UNPREDICTABLE(vz0 <= vsat_cutoff) {
@@ -206,12 +205,12 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x6(
       const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      const uint32_t ven = fp32_to_bits(vn) << 19;
-      const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+      const uint32_t ven = float_as_uint32(vn) << 19;
+      const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;
-      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+      float vs = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
       vt = vn * vminus_ln2_lo + vt;
       if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {

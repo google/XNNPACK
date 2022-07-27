@@ -86,7 +86,7 @@ static inline int8_t xnn_qs8_requantize_rndna(
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
   assert(scale < 256.0f);
 
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
   const uint32_t multiplier = (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);
@@ -124,7 +124,7 @@ static inline uint8_t xnn_qu8_requantize_rndna(
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
   assert(scale < 256.0f);
 
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
   const uint32_t multiplier = (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);
@@ -162,7 +162,7 @@ static inline int8_t xnn_qs8_requantize_rndnu(
   assert(scale < 256.0f);
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
 
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);
@@ -189,7 +189,7 @@ static inline uint8_t xnn_qu8_requantize_rndnu(
   assert(scale < 256.0f);
   assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
 
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
   const uint32_t shift = 127 + 23 - (scale_bits >> 23);
   assert(shift >= 16);

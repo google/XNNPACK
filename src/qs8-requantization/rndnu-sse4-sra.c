@@ -9,8 +9,7 @@
 
 #include <smmintrin.h>
 
-#include <fp16/bitcasts.h>
-
+#include <xnnpack/math.h>
 #include <xnnpack/requantization-stubs.h>
 
 
@@ -27,7 +26,7 @@ void xnn_qs8_requantize_rndnu__sse4_sra(
   assert(scale < 1.0f);
   assert(scale >= 0x1.0p-32f);
 
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
   const int32_t multiplier = ((int32_t) (scale_bits << 7) & INT32_C(0x3FFFFF80)) | INT32_C(0x40000000);
   const uint32_t shift = 127 + 30 - (scale_bits >> 23);
   assert(shift >= 31);

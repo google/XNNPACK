@@ -42,9 +42,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
     const float vx = *input++;
 
     const float vabsx = fabsf(vx);
-    uint32_t vsignw = fp32_to_bits(vx);
+    uint32_t vsignw = float_as_uint32(vx);
 
-    const uint32_t vnonsignw = fp32_to_bits(vabsx);
+    const uint32_t vnonsignw = float_as_uint32(vabsx);
     float vf = vabsx * vscale_to_inf;
 
     uint32_t vbias = vnonsignw + vexp_bias;
@@ -55,9 +55,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
 
     vbias = math_max_u32(vbias, vbias_min);
 
-    vf += fp32_from_bits(vbias);
+    vf += uint32_as_float(vbias);
 
-    const uint32_t vbits = fp32_to_bits(vf);
+    const uint32_t vbits = float_as_uint32(vf);
 
     const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
     const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

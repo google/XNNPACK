@@ -38,7 +38,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x1(
     vx *= vscale;
     vx += vmagic_bias;
 
-    int32_t vy = (int32_t) fp32_to_bits(vx);
+    int32_t vy = (int32_t) float_as_uint32(vx);
     vy = math_max_s32(vy, vmagic_min);
     vy = math_min_s32(vy, vmagic_max);
     vy -= vmagic_bias_less_zero_point;

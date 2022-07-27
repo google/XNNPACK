@@ -10,9 +10,8 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2(
@@ -65,10 +64,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2(
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-    const float vs0 = fp32_from_bits(fp32_to_bits(vn0) << 23);
-    const float vs1 = fp32_from_bits(fp32_to_bits(vn1) << 23);
-    const float vs2 = fp32_from_bits(fp32_to_bits(vn2) << 23);
-    const float vs3 = fp32_from_bits(fp32_to_bits(vn3) << 23);
+    const float vs0 = uint32_as_float(float_as_uint32(vn0) << 23);
+    const float vs1 = uint32_as_float(float_as_uint32(vn1) << 23);
+    const float vs2 = uint32_as_float(float_as_uint32(vn2) << 23);
+    const float vs3 = uint32_as_float(float_as_uint32(vn3) << 23);
 
     // Subtract the large number back to get final n := round(x / log(2)).
     vn0 -= vmagic_bias;
@@ -171,7 +170,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2(
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-    const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    const float vs = uint32_as_float(float_as_uint32(vn) << 23);
 
     // Subtract the large number back to get final n := round(x / log(2)).
     vn -= vmagic_bias;

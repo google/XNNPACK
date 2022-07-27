@@ -5,13 +5,11 @@
 
 #include <assert.h>
 #include <stddef.h>
-
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Table of exp2(k / 2048) values decremented (as integer) by (k << 12), k = 0..2048
@@ -70,12 +68,12 @@ void xnn_math_f32_sigmoid__scalar_rr2_lut2048_p1_div(
     //    -126 <= int(n) <= 0, and thus the adjusted exponent is not lower than -126.
     //
     // Shift bits 11:19 into 23:31 (position of floating-point exponent).
-    const uint32_t ve = fp32_to_bits(vn) << 12;
+    const uint32_t ve = float_as_uint32(vn) << 12;
 
     // Use bits 0:11 of n, as integer, as an index for table lookup of l := 2**frac(n).
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_2048[vidx] + ve);
+    const float vs = uint32_as_float(xnn_table_exp2minus_k_over_2048[vidx] + ve);
 
     // Subtract the large number back to get the final n := round(-z / log(2), 11) as a floating-point number.
     vn -= vmagic_bias;

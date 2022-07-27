@@ -19,6 +19,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
@@ -34,10 +35,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t max_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neon(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -48,7 +49,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -66,10 +67,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t max_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neon(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -80,7 +81,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -98,17 +99,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t min_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neon(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::max();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -126,17 +127,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t min_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neon(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::min();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -156,10 +157,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t max_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neonv8(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -170,7 +171,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -188,10 +189,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t max_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neonv8(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -202,7 +203,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -220,17 +221,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t min_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neonv8(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::max();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -248,17 +249,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t min_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__neonv8(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::min();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -276,10 +277,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t max_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__wasmsimd(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -290,7 +291,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -306,10 +307,10 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t max_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t max_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       for (uint32_t n = 0; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__wasmsimd(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
@@ -320,7 +321,7 @@ constexpr int kBlockSize = 1024;
             reference_output = std::numeric_limits<int8_t>::min();
           }
           ASSERT_EQ(reference_output, long(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -336,17 +337,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (std::numeric_limits<int8_t>::max() - zero_point));
+      const uint32_t min_input = float_as_uint32((float) (std::numeric_limits<int8_t>::max() - zero_point));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__wasmsimd(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::max();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;
@@ -362,17 +363,17 @@ constexpr int kBlockSize = 1024;
          zero_point <= std::numeric_limits<int8_t>::max();
          zero_point++)
     {
-      const uint32_t min_input = fp32_to_bits((float) (zero_point - std::numeric_limits<int8_t>::min()));
+      const uint32_t min_input = float_as_uint32((float) (zero_point - std::numeric_limits<int8_t>::min()));
       const uint32_t max_input = UINT32_C(0x7F800000);
       for (uint32_t n = min_input; n < max_input; n += kBlockSize) {
         for (uint32_t i = 0; i < kBlockSize; i++) {
-          inputs[i] = fp32_from_bits(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
+          inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(n + i, max_input));
         }
         xnn_math_f32_qs8_cvt__wasmsimd(kBlockSize * sizeof(int8_t), inputs.data(), outputs.data(), int8_t(zero_point));
         for (uint32_t i = 0; i < kBlockSize; i++) {
           const int32_t reference_output = std::numeric_limits<int8_t>::min();
           ASSERT_EQ(reference_output, int32_t(outputs[i]))
-            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << fp32_to_bits(inputs[i])
+            << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
             << ", reference = " << std::dec << reference_output
             << ", optimized = " << std::dec << int32_t(outputs[i])
             << ", zero point = " << std::dec << zero_point;

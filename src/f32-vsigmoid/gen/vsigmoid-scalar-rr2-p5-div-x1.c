@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x1(
@@ -42,7 +41,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x1(
     const float vz = fabsf(vx);
 
     float vn = vz * vminus_log2e + vmagic_bias;
-    const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    const float vs = uint32_as_float(float_as_uint32(vn) << 23);
     vn -= vmagic_bias;
 
     float vt = vn * vln2_hi + vz;

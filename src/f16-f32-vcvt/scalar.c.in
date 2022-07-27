@@ -8,6 +8,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
 #include <fp16.h>
@@ -49,10 +50,10 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
         const uint32_t v2w${N} = vw${N} + vw${N};
 
       $for N in range(BATCH_TILE):
-        const uint32_t vnorm${N} = fp32_to_bits(fp32_from_bits((v2w${N} >> 4) + vexp_offset) * vexp_scale);
+        const uint32_t vnorm${N} = float_as_uint32(uint32_as_float((v2w${N} >> 4) + vexp_offset) * vexp_scale);
 
       $for N in range(BATCH_TILE):
-        const uint32_t vdenorm${N} = fp32_to_bits(fp32_from_bits((v2w${N} >> 17) | vmagic_mask) - vmagic_bias);
+        const uint32_t vdenorm${N} = float_as_uint32(uint32_as_float((v2w${N} >> 17) | vmagic_mask) - vmagic_bias);
 
       $for N in range(BATCH_TILE):
         const uint32_t vf${N} = vsign${N} | (XNN_UNPREDICTABLE(v2w${N} < vdenorm_cutoff) ? vdenorm${N} : vnorm${N});
@@ -68,8 +69,8 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
       const uint32_t vw = (uint32_t) vh << 16;
       const uint32_t vsign = vw & vsign_mask;
       const uint32_t v2w = vw + vw;
-      const uint32_t vnorm = fp32_to_bits(fp32_from_bits((v2w >> 4) + vexp_offset) * vexp_scale);
-      const uint32_t vdenorm = fp32_to_bits(fp32_from_bits((v2w >> 17) | vmagic_mask) - vmagic_bias);
+      const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+      const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
       const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
 
       *o++ = vf;
@@ -83,8 +84,8 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
       const uint32_t vw = (uint32_t) vh << 16;
       const uint32_t vsign = vw & vsign_mask;
       const uint32_t v2w = vw + vw;
-      const uint32_t vnorm = fp32_to_bits(fp32_from_bits((v2w >> 4) + vexp_offset) * vexp_scale);
-      const uint32_t vdenorm = fp32_to_bits(fp32_from_bits((v2w >> 17) | vmagic_mask) - vmagic_bias);
+      const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+      const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
       const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
 
       *o = vf;
@@ -97,8 +98,8 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
         const uint32_t vw = (uint32_t) vh << 16;
         const uint32_t vsign = vw & vsign_mask;
         const uint32_t v2w = vw + vw;
-        const uint32_t vnorm = fp32_to_bits(fp32_from_bits((v2w >> 4) + vexp_offset) * vexp_scale);
-        const uint32_t vdenorm = fp32_to_bits(fp32_from_bits((v2w >> 17) | vmagic_mask) - vmagic_bias);
+        const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+        const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
         const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
 
         *o++ = vf;

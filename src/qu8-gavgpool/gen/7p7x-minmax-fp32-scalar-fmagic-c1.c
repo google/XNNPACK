@@ -150,7 +150,7 @@ void xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__scalar_fmagic_c1(
     vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
     vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
     vfpacc += vmagic_bias;
-    int32_t vout = (int32_t) fp32_to_bits(vfpacc) - vmagic_bias_less_output_zero_point;
+    int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
 
     *output++ = (uint8_t) vout;
   } while (--channels != 0);

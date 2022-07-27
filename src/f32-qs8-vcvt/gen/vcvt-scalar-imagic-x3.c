@@ -47,9 +47,9 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x3(
     vx1 += vmagic_bias;
     vx2 += vmagic_bias;
 
-    int32_t vy0 = (int32_t) fp32_to_bits(vx0);
-    int32_t vy1 = (int32_t) fp32_to_bits(vx1);
-    int32_t vy2 = (int32_t) fp32_to_bits(vx2);
+    int32_t vy0 = (int32_t) float_as_uint32(vx0);
+    int32_t vy1 = (int32_t) float_as_uint32(vx1);
+    int32_t vy2 = (int32_t) float_as_uint32(vx2);
 
     vy0 = math_max_s32(vy0, vmagic_min);
     vy1 = math_max_s32(vy1, vmagic_min);
@@ -74,7 +74,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x3(
       vx *= vscale;
       vx += vmagic_bias;
 
-      int32_t vy = (int32_t) fp32_to_bits(vx);
+      int32_t vy = (int32_t) float_as_uint32(vx);
       vy = math_max_s32(vy, vmagic_min);
       vy = math_min_s32(vy, vmagic_max);
       vy -= vmagic_bias_less_zero_point;

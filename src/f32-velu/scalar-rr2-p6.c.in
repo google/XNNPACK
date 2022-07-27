@@ -8,9 +8,8 @@ $assert BATCH_TILE >= 1
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}(
@@ -52,7 +51,7 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
         float vn${N} = vz${N} * vlog2e + vmagic_bias;
 
       $for N in range(BATCH_TILE):
-        float vs${N} = fp32_from_bits(fp32_to_bits(vn${N}) << 23);
+        float vs${N} = uint32_as_float(float_as_uint32(vn${N}) << 23);
         vn${N} -= vmagic_bias;
 
       $for N in range(BATCH_TILE):
@@ -120,7 +119,7 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
         const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;
@@ -166,7 +165,7 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
         const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;
@@ -211,7 +210,7 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}
           const float vz = vx * vprescale;
 
         float vn = vz * vlog2e + vmagic_bias;
-        float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+        float vs = uint32_as_float(float_as_uint32(vn) << 23);
         vn -= vmagic_bias;
 
         float vt = vn * vminus_ln2_hi + vz;

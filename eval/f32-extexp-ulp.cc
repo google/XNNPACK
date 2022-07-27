@@ -21,6 +21,7 @@
 #include "bench/utils.h"
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
@@ -97,7 +98,7 @@ static void ExtExpError(benchmark::State& state,
   for (auto _ : state) {
     for (uint32_t n = min_input; int32_t(n) < 0; n -= block_size) {
       for (uint32_t i = 0; i < block_size; i++) {
-        x[i] = fp32_from_bits(std::max<uint32_t>(n - i, 0x80000000));
+        x[i] = uint32_as_float(std::max<uint32_t>(n - i, 0x80000000));
       }
       std::fill(m.begin(), m.end(), std::nanf(""));
       std::fill(e.begin(), e.end(), std::nanf(""));
@@ -115,7 +116,7 @@ static void ExtExpError(benchmark::State& state,
     }
     for (uint32_t n = 0; n < max_input; n += block_size) {
       for (uint32_t i = 0; i < block_size; i++) {
-        x[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+        x[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
       }
       std::fill(m.begin(), m.end(), std::nanf(""));
       std::fill(e.begin(), e.end(), std::nanf(""));

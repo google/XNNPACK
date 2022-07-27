@@ -50,8 +50,8 @@ void xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params(
   params->fp32_scalar_imagic.kernel_zero_point = (int32_t) kernel_zero_point;
   params->fp32_scalar_imagic.scale = scale;
   params->fp32_scalar_imagic.magic_bias = 12582912.0f;
-  params->fp32_scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->fp32_scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->fp32_scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->fp32_scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->fp32_scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -228,7 +228,7 @@ void xnn_init_qu8_conv_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -270,7 +270,7 @@ void xnn_init_qu8_conv_minmax_fp32_wasmsimd_params(
   assert(scale < 256.0f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_wasmsimd.kernel_zero_point[i] = (int16_t) (uint16_t) kernel_zero_point;
@@ -318,8 +318,8 @@ void xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params(
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_scalar_imagic.scale = scale;
   params->fp32_scalar_imagic.magic_bias = 12582912.0f;
-  params->fp32_scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->fp32_scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->fp32_scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->fp32_scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->fp32_scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -495,7 +495,7 @@ void xnn_init_qs8_conv_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -532,7 +532,7 @@ void xnn_init_qs8_conv_minmax_fp32_wasmsimd_params(
   assert(scale < 256.0f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->fp32_wasmsimd.scale[i] = scale;
@@ -583,8 +583,8 @@ void xnn_init_qs8_minmax_scalar_imagic_params(
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -718,7 +718,7 @@ void xnn_init_qs8_minmax_wasmsimd_params(
   int8_t output_max)
 {
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd.magic_bias[i] = 12582912.0f;
@@ -778,8 +778,8 @@ void xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params(
   params->fp32_scalar_imagic.init_bias = init_bias;
   params->fp32_scalar_imagic.scale = scale;
   params->fp32_scalar_imagic.magic_bias = 12582912.0f;
-  params->fp32_scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->fp32_scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->fp32_scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->fp32_scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->fp32_scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -977,7 +977,7 @@ void xnn_init_qs8_avgpool_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -1011,7 +1011,7 @@ void xnn_update_qs8_avgpool_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -1047,7 +1047,7 @@ void xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params(
   assert(scale < 256.0f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->fp32_wasmsimd.init_bias[i] = init_bias;
@@ -1123,8 +1123,8 @@ void xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params(
   params->fp32_scalar_imagic.init_bias = init_bias;
   params->fp32_scalar_imagic.scale = scale;
   params->fp32_scalar_imagic.magic_bias = 12582912.0f;
-  params->fp32_scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->fp32_scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->fp32_scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->fp32_scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->fp32_scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -1324,7 +1324,7 @@ void xnn_init_qu8_avgpool_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -1358,7 +1358,7 @@ void xnn_update_qu8_avgpool_minmax_rndnu_neon_params(
   assert(scale < 256.0f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -1394,7 +1394,7 @@ void xnn_init_qu8_avgpool_minmax_fp32_wasmsimd_params(
   assert(scale < 256.0f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->fp32_wasmsimd.init_bias[i] = init_bias;
@@ -1434,7 +1434,7 @@ void xnn_init_qu8_avgpool_minmax_scalar_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -1471,7 +1471,7 @@ void xnn_init_qu8_avgpool_minmax_neon_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -1504,7 +1504,7 @@ void xnn_init_qu8_avgpool_minmax_sse2_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -1548,7 +1548,7 @@ void xnn_update_qu8_avgpool_minmax_scalar_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -1576,7 +1576,7 @@ void xnn_update_qu8_avgpool_minmax_neon_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -1603,7 +1603,7 @@ void xnn_update_qu8_avgpool_minmax_sse2_params(
   // Compute requantization parameters.
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
-  const uint32_t scale_bits = fp32_to_bits(scale);
+  const uint32_t scale_bits = float_as_uint32(scale);
 
   // Multiplier is in [0x00800000, 0x00FFFFFF] range.
   const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
@@ -4203,7 +4203,7 @@ void xnn_init_qu8_add_minmax_sse2_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4212,8 +4212,8 @@ void xnn_init_qu8_add_minmax_sse2_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4268,7 +4268,7 @@ void xnn_init_qu8_add_minmax_sse4_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4277,8 +4277,8 @@ void xnn_init_qu8_add_minmax_sse4_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4326,7 +4326,7 @@ void xnn_init_qu8_add_minmax_avx2_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4335,8 +4335,8 @@ void xnn_init_qu8_add_minmax_avx2_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4382,7 +4382,7 @@ void xnn_init_qu8_add_minmax_avx512_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4391,8 +4391,8 @@ void xnn_init_qu8_add_minmax_avx512_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4440,7 +4440,7 @@ void xnn_init_qu8_add_minmax_neon_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4449,8 +4449,8 @@ void xnn_init_qu8_add_minmax_neon_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4491,7 +4491,7 @@ void xnn_init_qu8_add_minmax_wasmsimd_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4500,8 +4500,8 @@ void xnn_init_qu8_add_minmax_wasmsimd_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4548,7 +4548,7 @@ void xnn_init_qu8_add_minmax_scalar_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4557,8 +4557,8 @@ void xnn_init_qu8_add_minmax_scalar_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4598,7 +4598,7 @@ void xnn_init_qs8_add_minmax_sse2_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4607,8 +4607,8 @@ void xnn_init_qs8_add_minmax_sse2_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4661,7 +4661,7 @@ void xnn_init_qs8_add_minmax_sse4_mul16_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4670,8 +4670,8 @@ void xnn_init_qs8_add_minmax_sse4_mul16_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4726,7 +4726,7 @@ void xnn_init_qs8_add_minmax_sse4_mul32_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4735,8 +4735,8 @@ void xnn_init_qs8_add_minmax_sse4_mul32_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4784,7 +4784,7 @@ void xnn_init_qs8_add_minmax_avx2_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4793,8 +4793,8 @@ void xnn_init_qs8_add_minmax_avx2_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4840,7 +4840,7 @@ void xnn_init_qs8_add_minmax_avx512_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4849,8 +4849,8 @@ void xnn_init_qs8_add_minmax_avx512_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4898,7 +4898,7 @@ void xnn_init_qs8_add_minmax_neon_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4907,8 +4907,8 @@ void xnn_init_qs8_add_minmax_neon_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -4949,7 +4949,7 @@ void xnn_init_qs8_add_minmax_wasmsimd_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -4958,8 +4958,8 @@ void xnn_init_qs8_add_minmax_wasmsimd_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -5006,7 +5006,7 @@ void xnn_init_qs8_add_minmax_scalar_params(
   const float max_abs_output_scale = math_max_f32(abs_a_output_scale, abs_b_output_scale);
   assert(max_abs_output_scale >= 0x1.0p-10f);
   assert(max_abs_output_scale < 0x1.0p+8f);
-  const uint32_t max_scale_bits = fp32_to_bits(max_abs_output_scale);
+  const uint32_t max_scale_bits = float_as_uint32(max_abs_output_scale);
   const int32_t max_scale_exponent = (int32_t) (max_scale_bits >> 23) - 127;
 
   // Shift is in [12, 30] range.
@@ -5015,8 +5015,8 @@ void xnn_init_qs8_add_minmax_scalar_params(
   assert(shift >= 12);
 
   // Multipliers are in [0, 2**21) range, largest multiplier is in [2**20, 2**21) range.
-  const int32_t abs_a_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_a_output_scale) + (shift << 23)));
-  const int32_t abs_b_multiplier = (int32_t) lrintf(fp32_from_bits(fp32_to_bits(abs_b_output_scale) + (shift << 23)));
+  const int32_t abs_a_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_a_output_scale) + (shift << 23)));
+  const int32_t abs_b_multiplier = (int32_t) lrintf(uint32_as_float(float_as_uint32(abs_b_output_scale) + (shift << 23)));
   assert(math_max_s32(abs_a_multiplier, abs_b_multiplier) >= INT32_C(0x00100000));
   assert(abs_a_multiplier <= INT32_C(0x00200000));
   assert(abs_b_multiplier <= INT32_C(0x00200000));
@@ -5114,7 +5114,7 @@ void xnn_init_qu8_mul_minmax_rndnu_neon_params(
   assert(product_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(product_output_scale);
+  const uint32_t scale_bits = float_as_uint32(product_output_scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -5187,7 +5187,7 @@ void xnn_init_qu8_mul_minmax_fp32_wasmsimd_params(
   assert(product_output_scale < 0x1.0p+8f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_wasmsimd.a_zero_point[i] = (int16_t) a_zero_point;
@@ -5285,7 +5285,7 @@ void xnn_init_qs8_mul_minmax_rndnu_neon_params(
   assert(product_output_scale < 0x1.0p+8f);
 
   // Compute requantization parameters.
-  const uint32_t scale_bits = fp32_to_bits(product_output_scale);
+  const uint32_t scale_bits = float_as_uint32(product_output_scale);
 
   // Multiplier is in [0x40000000, 0x7FFFFF80] range.
   const int32_t multiplier = (int32_t) (((scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000)) << 7);
@@ -5386,7 +5386,7 @@ void xnn_init_qs8_mul_minmax_fp32_wasmsimd_params(
   assert(product_output_scale < 0x1.0p+8f);
 
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 4; i++) {
     params->fp32_wasmsimd.a_zero_point[i] = (int16_t) a_zero_point;
@@ -5620,8 +5620,8 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_scalar_imagic_params(
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->scalar_imagic.scale = scale;
   params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -5839,7 +5839,7 @@ XNN_INTERNAL void xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
   int8_t output_max)
 {
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd_magic.scale[i] = scale;
@@ -5878,8 +5878,8 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_scalar_imagic_params(
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->scalar_imagic.scale = scale;
   params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) fp32_to_bits(12582912.0f + output_max_less_zero_point);
+  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
   params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
 }
 
@@ -6079,7 +6079,7 @@ XNN_INTERNAL void xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
   uint8_t output_max)
 {
   const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) fp32_to_bits(12582912.0f + output_min_less_zero_point);
+  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
   const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
   for (uint32_t i = 0; i < 2; i++) {
     params->wasmsimd_magic.scale[i] = scale;

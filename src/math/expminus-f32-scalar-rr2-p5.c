@@ -7,9 +7,8 @@
 #include <stddef.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_math_f32_expminus__scalar_rr2_p5(
@@ -49,7 +48,7 @@ void xnn_math_f32_expminus__scalar_rr2_p5(
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-    const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    const float vs = uint32_as_float(float_as_uint32(vn) << 23);
 
     // Subtract the large number back to get final n := round(x / log(2)) as a floating-point number.
     vn -= vmagic_bias;

@@ -46,7 +46,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
         const uint32_t vnonsignw${N} = vw${N} & vnonsign_mask;
 
       $for N in range(BATCH_TILE):
-        float vf${N} = fp32_from_bits(vnonsignw${N});
+        float vf${N} = uint32_as_float(vnonsignw${N});
       $for N in range(BATCH_TILE):
         const uint32_t vsignw${N} = vw${N} ^ vnonsignw${N};
       $for N in range(BATCH_TILE):
@@ -63,10 +63,10 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
         vbias${N} = math_max_u32(vbias${N}, vbias_min);
 
       $for N in range(BATCH_TILE):
-        vf${N} += fp32_from_bits(vbias${N});
+        vf${N} += uint32_as_float(vbias${N});
 
       $for N in range(BATCH_TILE):
-        const uint32_t vbits${N} = fp32_to_bits(vf${N});
+        const uint32_t vbits${N} = float_as_uint32(vf${N});
 
       $for N in range(BATCH_TILE):
         const uint16_t vexph${N} = (uint16_t) (vbits${N} >> 13) & vexph_mask;
@@ -94,7 +94,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
 
       const uint32_t vnonsignw = vw & vnonsign_mask;
 
-      float vf = fp32_from_bits(vnonsignw);
+      float vf = uint32_as_float(vnonsignw);
       const uint32_t vsignw = vw ^ vnonsignw;
       uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -104,9 +104,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
       vf *= vscale_to_zero;
       vbias = math_max_u32(vbias, vbias_min);
 
-      vf += fp32_from_bits(vbias);
+      vf += uint32_as_float(vbias);
 
-      const uint32_t vbits = fp32_to_bits(vf);
+      const uint32_t vbits = float_as_uint32(vf);
 
       const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
       const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;
@@ -128,7 +128,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
 
       const uint32_t vnonsignw = vw & vnonsign_mask;
 
-      float vf = fp32_from_bits(vnonsignw);
+      float vf = uint32_as_float(vnonsignw);
       const uint32_t vsignw = vw ^ vnonsignw;
       uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -138,9 +138,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
       vf *= vscale_to_zero;
       vbias = math_max_u32(vbias, vbias_min);
 
-      vf += fp32_from_bits(vbias);
+      vf += uint32_as_float(vbias);
 
-      const uint32_t vbits = fp32_to_bits(vf);
+      const uint32_t vbits = float_as_uint32(vf);
 
       const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
       const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;
@@ -161,7 +161,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
 
         const uint32_t vnonsignw = vw & vnonsign_mask;
 
-        float vf = fp32_from_bits(vnonsignw);
+        float vf = uint32_as_float(vnonsignw);
         const uint32_t vsignw = vw ^ vnonsignw;
         uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -171,9 +171,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x${BATCH_TILE}(
         vf *= vscale_to_zero;
         vbias = math_max_u32(vbias, vbias_min);
 
-        vf += fp32_from_bits(vbias);
+        vf += uint32_as_float(vbias);
 
-        const uint32_t vbits = fp32_to_bits(vf);
+        const uint32_t vbits = float_as_uint32(vf);
 
         const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
         const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

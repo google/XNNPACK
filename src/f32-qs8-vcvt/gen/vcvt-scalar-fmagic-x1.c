@@ -40,7 +40,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x1(
     vx = math_min_f32(vx, voutput_max_less_zero_point);
     vx += vmagic_bias;
 
-    int32_t vy = (int32_t) fp32_to_bits(vx);
+    int32_t vy = (int32_t) float_as_uint32(vx);
     vy -= vmagic_bias_less_zero_point;
 
     *y++ = (int8_t) vy;

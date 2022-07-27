@@ -8,9 +8,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
@@ -59,7 +58,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" i
       // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
       // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
       $for N in range(ELEMENTS_TILE):
-        const float vs${N} = fp32_from_bits(fp32_to_bits(vn${N}) << 23);
+        const float vs${N} = uint32_as_float(float_as_uint32(vn${N}) << 23);
 
       // Subtract the large number back to get final n := round(x / log(2)).
       $for N in range(ELEMENTS_TILE):
@@ -140,7 +139,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" i
 
     // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-    const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    const float vs = uint32_as_float(float_as_uint32(vn) << 23);
 
     // Subtract the large number back to get final n := round(x / log(2)).
     vn -= vmagic_bias;

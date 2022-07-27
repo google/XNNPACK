@@ -111,10 +111,10 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
     vfpacc0x3 += vmagic_bias;
 
     const int32_t vmagic_bias_less_output_zero_point = params->scalar_fmagic.magic_bias_less_output_zero_point;
-    int32_t vout0x0 = (int32_t) fp32_to_bits(vfpacc0x0) - vmagic_bias_less_output_zero_point;
-    int32_t vout0x1 = (int32_t) fp32_to_bits(vfpacc0x1) - vmagic_bias_less_output_zero_point;
-    int32_t vout0x2 = (int32_t) fp32_to_bits(vfpacc0x2) - vmagic_bias_less_output_zero_point;
-    int32_t vout0x3 = (int32_t) fp32_to_bits(vfpacc0x3) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
+    int32_t vout0x3 = (int32_t) float_as_uint32(vfpacc0x3) - vmagic_bias_less_output_zero_point;
 
     if XNN_LIKELY(nc >= 4) {
       c0[0] = (int8_t) vout0x0;

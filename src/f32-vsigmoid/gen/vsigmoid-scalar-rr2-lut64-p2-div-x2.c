@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.
@@ -47,13 +46,13 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
     float vn0 = vz0 * vminus_log2e + vmagic_bias;
     float vn1 = vz1 * vminus_log2e + vmagic_bias;
 
-    const uint32_t ve0 = fp32_to_bits(vn0) << 17;
-    const uint32_t ve1 = fp32_to_bits(vn1) << 17;
+    const uint32_t ve0 = float_as_uint32(vn0) << 17;
+    const uint32_t ve1 = float_as_uint32(vn1) << 17;
 
-    const uint32_t vidx0 = fp32_to_bits(vn0) & vindex_mask;
-    const float vs0 = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx0] + ve0);
-    const uint32_t vidx1 = fp32_to_bits(vn1) & vindex_mask;
-    const float vs1 = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx1] + ve1);
+    const uint32_t vidx0 = float_as_uint32(vn0) & vindex_mask;
+    const float vs0 = uint32_as_float(xnn_table_exp2minus_k_over_64[vidx0] + ve0);
+    const uint32_t vidx1 = float_as_uint32(vn1) & vindex_mask;
+    const float vs1 = uint32_as_float(xnn_table_exp2minus_k_over_64[vidx1] + ve1);
 
     vn0 -= vmagic_bias;
     vn1 -= vmagic_bias;
@@ -103,9 +102,9 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
     const float vz = fabsf(vx);
 
     float vn = vz * vminus_log2e + vmagic_bias;
-    const uint32_t ve = fp32_to_bits(vn) << 17;
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
-    const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx] + ve);
+    const uint32_t ve = float_as_uint32(vn) << 17;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
+    const float vs = uint32_as_float(xnn_table_exp2minus_k_over_64[vidx] + ve);
     vn -= vmagic_bias;
 
     float vt = vn * vln2_hi + vz;

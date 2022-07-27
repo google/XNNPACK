@@ -7,9 +7,8 @@
 #include <stddef.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Table of exp2(k / 64) values decremented (as integer) by (k << 17), k = 0..63
@@ -58,12 +57,12 @@ void xnn_math_f32_expminus__scalar_rr2_lut64_p2(
     //    and thus the adjusted exponent is not lower than -126.
     //
     // Shift bits 6:14 into 23:31 (position of floating-point exponent).
-    const uint32_t ve = fp32_to_bits(vn) << 17;
+    const uint32_t ve = float_as_uint32(vn) << 17;
 
     // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = fp32_from_bits(xnn_table_exp2minus_k_over_64[vidx] + ve);
+    const float vs = uint32_as_float(xnn_table_exp2minus_k_over_64[vidx] + ve);
 
     // Subtract the large number back to get the final n := round(x / log(2), 6) as a floating-point number.
     vn -= vmagic_bias;

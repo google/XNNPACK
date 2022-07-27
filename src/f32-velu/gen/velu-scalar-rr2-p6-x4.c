@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_velu_ukernel__scalar_rr2_p6_x4(
@@ -56,13 +55,13 @@ void xnn_f32_velu_ukernel__scalar_rr2_p6_x4(
     float vn2 = vz2 * vlog2e + vmagic_bias;
     float vn3 = vz3 * vlog2e + vmagic_bias;
 
-    float vs0 = fp32_from_bits(fp32_to_bits(vn0) << 23);
+    float vs0 = uint32_as_float(float_as_uint32(vn0) << 23);
     vn0 -= vmagic_bias;
-    float vs1 = fp32_from_bits(fp32_to_bits(vn1) << 23);
+    float vs1 = uint32_as_float(float_as_uint32(vn1) << 23);
     vn1 -= vmagic_bias;
-    float vs2 = fp32_from_bits(fp32_to_bits(vn2) << 23);
+    float vs2 = uint32_as_float(float_as_uint32(vn2) << 23);
     vn2 -= vmagic_bias;
-    float vs3 = fp32_from_bits(fp32_to_bits(vn3) << 23);
+    float vs3 = uint32_as_float(float_as_uint32(vn3) << 23);
     vn3 -= vmagic_bias;
 
     float vt0 = vn0 * vminus_ln2_hi + vz0;
@@ -166,7 +165,7 @@ void xnn_f32_velu_ukernel__scalar_rr2_p6_x4(
       const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;

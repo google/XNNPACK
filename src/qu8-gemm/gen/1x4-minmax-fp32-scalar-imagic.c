@@ -78,10 +78,10 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic(
     vfpacc0x2 += vmagic_bias;
     vfpacc0x3 += vmagic_bias;
 
-    int32_t vout0x0 = (int32_t) fp32_to_bits(vfpacc0x0);
-    int32_t vout0x1 = (int32_t) fp32_to_bits(vfpacc0x1);
-    int32_t vout0x2 = (int32_t) fp32_to_bits(vfpacc0x2);
-    int32_t vout0x3 = (int32_t) fp32_to_bits(vfpacc0x3);
+    int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0);
+    int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1);
+    int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2);
+    int32_t vout0x3 = (int32_t) float_as_uint32(vfpacc0x3);
 
     const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
     vout0x0 = math_max_s32(vout0x0, vmagic_min);

@@ -135,7 +135,7 @@ TEST_F(StaticConstantPadTestF32, define)
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
   float padding_value = f32dist(rng);
-  uint32_t padding_value_as_bits = fp32_to_bits(padding_value);
+  uint32_t padding_value_as_bits = float_as_uint32(padding_value);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -333,7 +333,7 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
   float padding_value = f32dist(rng);
-  uint32_t padding_value_as_u32 = fp32_to_bits(padding_value);
+  uint32_t padding_value_as_u32 = float_as_uint32(padding_value);
   std::vector<size_t> output_dims = dims;
   for (size_t i = 0; i < dims.size(); i++) {
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];

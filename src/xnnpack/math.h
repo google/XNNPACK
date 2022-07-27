@@ -69,6 +69,22 @@ XNN_INLINE static size_t subtract_modulo(size_t a, size_t b, size_t m) {
   return XNN_UNPREDICTABLE(a >= b) ? a - b : a - b + m;
 }
 
+XNN_INLINE static float uint32_as_float(uint32_t i) {
+  union {
+    uint32_t as_uint32;
+    float as_float;
+  } bits = { i };
+  return bits.as_float;
+}
+
+XNN_INLINE static uint32_t float_as_uint32(float f) {
+  union {
+    float as_float;
+    uint32_t as_uint32;
+  } bits = { f };
+  return bits.as_uint32;
+}
+
 XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a < b) ? a : b;
 }

@@ -47,13 +47,13 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
     const float vabsx0 = fabsf(vx0);
     const float vabsx1 = fabsf(vx1);
     const float vabsx2 = fabsf(vx2);
-    uint32_t vsignw0 = fp32_to_bits(vx0);
-    uint32_t vsignw1 = fp32_to_bits(vx1);
-    uint32_t vsignw2 = fp32_to_bits(vx2);
+    uint32_t vsignw0 = float_as_uint32(vx0);
+    uint32_t vsignw1 = float_as_uint32(vx1);
+    uint32_t vsignw2 = float_as_uint32(vx2);
 
-    const uint32_t vnonsignw0 = fp32_to_bits(vabsx0);
-    const uint32_t vnonsignw1 = fp32_to_bits(vabsx1);
-    const uint32_t vnonsignw2 = fp32_to_bits(vabsx2);
+    const uint32_t vnonsignw0 = float_as_uint32(vabsx0);
+    const uint32_t vnonsignw1 = float_as_uint32(vabsx1);
+    const uint32_t vnonsignw2 = float_as_uint32(vabsx2);
     float vf0 = vabsx0 * vscale_to_inf;
     float vf1 = vabsx1 * vscale_to_inf;
     float vf2 = vabsx2 * vscale_to_inf;
@@ -76,13 +76,13 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
     vbias1 = math_max_u32(vbias1, vbias_min);
     vbias2 = math_max_u32(vbias2, vbias_min);
 
-    vf0 += fp32_from_bits(vbias0);
-    vf1 += fp32_from_bits(vbias1);
-    vf2 += fp32_from_bits(vbias2);
+    vf0 += uint32_as_float(vbias0);
+    vf1 += uint32_as_float(vbias1);
+    vf2 += uint32_as_float(vbias2);
 
-    const uint32_t vbits0 = fp32_to_bits(vf0);
-    const uint32_t vbits1 = fp32_to_bits(vf1);
-    const uint32_t vbits2 = fp32_to_bits(vf2);
+    const uint32_t vbits0 = float_as_uint32(vf0);
+    const uint32_t vbits1 = float_as_uint32(vf1);
+    const uint32_t vbits2 = float_as_uint32(vf2);
 
     const uint16_t vexph0 = (uint16_t) (vbits0 >> 13) & vexph_mask;
     const uint16_t vexph1 = (uint16_t) (vbits1 >> 13) & vexph_mask;
@@ -120,9 +120,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
       const float vx = *input++;
 
       const float vabsx = fabsf(vx);
-      uint32_t vsignw = fp32_to_bits(vx);
+      uint32_t vsignw = float_as_uint32(vx);
 
-      const uint32_t vnonsignw = fp32_to_bits(vabsx);
+      const uint32_t vnonsignw = float_as_uint32(vabsx);
       float vf = vabsx * vscale_to_inf;
 
       uint32_t vbias = vnonsignw + vexp_bias;
@@ -133,9 +133,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
 
       vbias = math_max_u32(vbias, vbias_min);
 
-      vf += fp32_from_bits(vbias);
+      vf += uint32_as_float(vbias);
 
-      const uint32_t vbits = fp32_to_bits(vf);
+      const uint32_t vbits = float_as_uint32(vf);
 
       const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
       const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

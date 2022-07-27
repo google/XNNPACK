@@ -11,8 +11,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
-#include <fp16/bitcasts.h>
-
 
 void xnn_math_f32_f16_cvt__scalar_bitcast(
     size_t n,
@@ -35,10 +33,10 @@ void xnn_math_f32_f16_cvt__scalar_bitcast(
   for (; n != 0; n -= sizeof(uint16_t)) {
     const float vx = *input++;
 
-    const uint32_t vw = fp32_to_bits(vx);
+    const uint32_t vw = float_as_uint32(vx);
     const uint32_t vnonsignw = vw & vnonsign_mask;
 
-    float vf = fp32_from_bits(vnonsignw);
+    float vf = uint32_as_float(vnonsignw);
     const uint32_t vsignw = vw ^ vnonsignw;
     uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -48,9 +46,9 @@ void xnn_math_f32_f16_cvt__scalar_bitcast(
     vf *= vscale_to_zero;
     vbias = math_max_u32(vbias, vbias_min);
 
-    vf += fp32_from_bits(vbias);
+    vf += uint32_as_float(vbias);
 
-    const uint32_t vbits = fp32_to_bits(vf);
+    const uint32_t vbits = float_as_uint32(vf);
 
     const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
     const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

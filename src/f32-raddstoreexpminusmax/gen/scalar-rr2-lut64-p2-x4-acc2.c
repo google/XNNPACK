@@ -10,9 +10,8 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.
@@ -75,21 +74,21 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc2(
     //    and thus the adjusted exponent is not lower than -126.
     //
     // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const uint32_t ve0 = (fp32_to_bits(vn0) & UINT32_C(0xFFFFFFC0)) << 17;
-    const uint32_t ve1 = (fp32_to_bits(vn1) & UINT32_C(0xFFFFFFC0)) << 17;
-    const uint32_t ve2 = (fp32_to_bits(vn2) & UINT32_C(0xFFFFFFC0)) << 17;
-    const uint32_t ve3 = (fp32_to_bits(vn3) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve0 = (float_as_uint32(vn0) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve1 = (float_as_uint32(vn1) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve2 = (float_as_uint32(vn2) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve3 = (float_as_uint32(vn3) & UINT32_C(0xFFFFFFC0)) << 17;
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
-    const uint32_t vidx0 = fp32_to_bits(vn0) & vindex_mask;
-    const uint32_t vidx1 = fp32_to_bits(vn1) & vindex_mask;
-    const uint32_t vidx2 = fp32_to_bits(vn2) & vindex_mask;
-    const uint32_t vidx3 = fp32_to_bits(vn3) & vindex_mask;
+    const uint32_t vidx0 = float_as_uint32(vn0) & vindex_mask;
+    const uint32_t vidx1 = float_as_uint32(vn1) & vindex_mask;
+    const uint32_t vidx2 = float_as_uint32(vn2) & vindex_mask;
+    const uint32_t vidx3 = float_as_uint32(vn3) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs0 = fp32_from_bits(xnn_table_exp2_k_over_64[vidx0] + ve0);
-    const float vs1 = fp32_from_bits(xnn_table_exp2_k_over_64[vidx1] + ve1);
-    const float vs2 = fp32_from_bits(xnn_table_exp2_k_over_64[vidx2] + ve2);
-    const float vs3 = fp32_from_bits(xnn_table_exp2_k_over_64[vidx3] + ve3);
+    const float vs0 = uint32_as_float(xnn_table_exp2_k_over_64[vidx0] + ve0);
+    const float vs1 = uint32_as_float(xnn_table_exp2_k_over_64[vidx1] + ve1);
+    const float vs2 = uint32_as_float(xnn_table_exp2_k_over_64[vidx2] + ve2);
+    const float vs3 = uint32_as_float(xnn_table_exp2_k_over_64[vidx3] + ve3);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn0 -= vmagic_bias;
@@ -188,12 +187,12 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x4_acc2(
     //    and thus the adjusted exponent is not lower than -126.
     //
     // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const uint32_t ve = (fp32_to_bits(vn) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve = (float_as_uint32(vn) & UINT32_C(0xFFFFFFC0)) << 17;
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = fp32_from_bits(xnn_table_exp2_k_over_64[vidx] + ve);
+    const float vs = uint32_as_float(xnn_table_exp2_k_over_64[vidx] + ve);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn -= vmagic_bias;

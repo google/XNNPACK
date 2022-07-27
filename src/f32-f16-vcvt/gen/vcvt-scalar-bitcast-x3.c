@@ -49,9 +49,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3(
     const uint32_t vnonsignw1 = vw1 & vnonsign_mask;
     const uint32_t vnonsignw2 = vw2 & vnonsign_mask;
 
-    float vf0 = fp32_from_bits(vnonsignw0);
-    float vf1 = fp32_from_bits(vnonsignw1);
-    float vf2 = fp32_from_bits(vnonsignw2);
+    float vf0 = uint32_as_float(vnonsignw0);
+    float vf1 = uint32_as_float(vnonsignw1);
+    float vf2 = uint32_as_float(vnonsignw2);
     const uint32_t vsignw0 = vw0 ^ vnonsignw0;
     const uint32_t vsignw1 = vw1 ^ vnonsignw1;
     const uint32_t vsignw2 = vw2 ^ vnonsignw2;
@@ -73,13 +73,13 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3(
     vbias1 = math_max_u32(vbias1, vbias_min);
     vbias2 = math_max_u32(vbias2, vbias_min);
 
-    vf0 += fp32_from_bits(vbias0);
-    vf1 += fp32_from_bits(vbias1);
-    vf2 += fp32_from_bits(vbias2);
+    vf0 += uint32_as_float(vbias0);
+    vf1 += uint32_as_float(vbias1);
+    vf2 += uint32_as_float(vbias2);
 
-    const uint32_t vbits0 = fp32_to_bits(vf0);
-    const uint32_t vbits1 = fp32_to_bits(vf1);
-    const uint32_t vbits2 = fp32_to_bits(vf2);
+    const uint32_t vbits0 = float_as_uint32(vf0);
+    const uint32_t vbits1 = float_as_uint32(vf1);
+    const uint32_t vbits2 = float_as_uint32(vf2);
 
     const uint16_t vexph0 = (uint16_t) (vbits0 >> 13) & vexph_mask;
     const uint16_t vexph1 = (uint16_t) (vbits1 >> 13) & vexph_mask;
@@ -118,7 +118,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3(
 
       const uint32_t vnonsignw = vw & vnonsign_mask;
 
-      float vf = fp32_from_bits(vnonsignw);
+      float vf = uint32_as_float(vnonsignw);
       const uint32_t vsignw = vw ^ vnonsignw;
       uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -128,9 +128,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x3(
       vf *= vscale_to_zero;
       vbias = math_max_u32(vbias, vbias_min);
 
-      vf += fp32_from_bits(vbias);
+      vf += uint32_as_float(vbias);
 
-      const uint32_t vbits = fp32_to_bits(vf);
+      const uint32_t vbits = float_as_uint32(vf);
 
       const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
       const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

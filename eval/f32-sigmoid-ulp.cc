@@ -21,6 +21,7 @@
 #include "bench/utils.h"
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
@@ -49,7 +50,7 @@ static void ComputeError(
     }
     const double abs_error = std::abs(output_ref - double(output[i]));
     const float output_abs = std::abs(output_ref);
-    const float output_ulp = fp32_from_bits(fp32_to_bits(output_abs) + 1) - output_abs;
+    const float output_ulp = uint32_as_float(float_as_uint32(output_abs) + 1) - output_abs;
     error[i] = float(abs_error / output_ulp);
   }
 }
@@ -99,7 +100,7 @@ static void SigmoidError(benchmark::State& state,
   for (auto _ : state) {
     for (uint32_t n = min_input; int32_t(n) < 0; n -= block_size) {
       for (uint32_t i = 0; i < block_size; i++) {
-        x[i] = fp32_from_bits(std::max<uint32_t>(n - i, 0x80000000));
+        x[i] = uint32_as_float(std::max<uint32_t>(n - i, 0x80000000));
       }
       std::fill(y.begin(), y.end(), std::nanf(""));
 
@@ -116,7 +117,7 @@ static void SigmoidError(benchmark::State& state,
     }
     for (uint32_t n = 0; n < max_input; n += block_size) {
       for (uint32_t i = 0; i < block_size; i++) {
-        x[i] = fp32_from_bits(std::min<uint32_t>(n + i, max_input));
+        x[i] = uint32_as_float(std::min<uint32_t>(n + i, max_input));
       }
       std::fill(y.begin(), y.end(), std::nanf(""));
 

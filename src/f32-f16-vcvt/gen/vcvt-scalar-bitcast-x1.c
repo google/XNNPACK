@@ -44,7 +44,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1(
 
     const uint32_t vnonsignw = vw & vnonsign_mask;
 
-    float vf = fp32_from_bits(vnonsignw);
+    float vf = uint32_as_float(vnonsignw);
     const uint32_t vsignw = vw ^ vnonsignw;
     uint32_t vbias = vnonsignw + vexp_bias;
 
@@ -54,9 +54,9 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1(
     vf *= vscale_to_zero;
     vbias = math_max_u32(vbias, vbias_min);
 
-    vf += fp32_from_bits(vbias);
+    vf += uint32_as_float(vbias);
 
-    const uint32_t vbits = fp32_to_bits(vf);
+    const uint32_t vbits = float_as_uint32(vf);
 
     const uint16_t vexph = (uint16_t) (vbits >> 13) & vexph_mask;
     const uint16_t vmanth = (uint16_t) vbits & vmanth_mask;

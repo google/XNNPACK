@@ -858,7 +858,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     node->compute_type = xnn_compute_type_fp16;
     if (node->type == xnn_node_type_static_constant_pad) {
       node->params.static_pad.padding_value =
-        fp16_ieee_from_fp32_value(fp32_from_bits(node->params.static_pad.padding_value));
+        fp16_ieee_from_fp32_value(uint32_as_float(node->params.static_pad.padding_value));
     }
     for (uint32_t i = 0; i < node->num_inputs; i++) {
       const uint32_t fp16_id = subgraph->values[node->inputs[i]].fp16_id;

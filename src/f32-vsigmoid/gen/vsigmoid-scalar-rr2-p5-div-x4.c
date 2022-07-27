@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x4(
@@ -53,10 +52,10 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x4(
     float vn2 = vz2 * vminus_log2e + vmagic_bias;
     float vn3 = vz3 * vminus_log2e + vmagic_bias;
 
-    const float vs0 = fp32_from_bits(fp32_to_bits(vn0) << 23);
-    const float vs1 = fp32_from_bits(fp32_to_bits(vn1) << 23);
-    const float vs2 = fp32_from_bits(fp32_to_bits(vn2) << 23);
-    const float vs3 = fp32_from_bits(fp32_to_bits(vn3) << 23);
+    const float vs0 = uint32_as_float(float_as_uint32(vn0) << 23);
+    const float vs1 = uint32_as_float(float_as_uint32(vn1) << 23);
+    const float vs2 = uint32_as_float(float_as_uint32(vn2) << 23);
+    const float vs3 = uint32_as_float(float_as_uint32(vn3) << 23);
 
     vn0 -= vmagic_bias;
     vn1 -= vmagic_bias;
@@ -152,7 +151,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x4(
       const float vz = fabsf(vx);
 
       float vn = vz * vminus_log2e + vmagic_bias;
-      const float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+      const float vs = uint32_as_float(float_as_uint32(vn) << 23);
       vn -= vmagic_bias;
 
       float vt = vn * vln2_hi + vz;

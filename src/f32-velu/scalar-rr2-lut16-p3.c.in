@@ -8,9 +8,8 @@ $assert BATCH_TILE >= 1
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
@@ -52,13 +51,13 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_lut16_p3_x${BATCH
         float vn${N} = vz${N} * vlog2e + vmagic_bias;
 
       $for N in range(BATCH_TILE):
-        const uint32_t ven${N} = fp32_to_bits(vn${N}) << 19;
-        const uint32_t vidx${N} = fp32_to_bits(vn${N}) & vindex_mask;
+        const uint32_t ven${N} = float_as_uint32(vn${N}) << 19;
+        const uint32_t vidx${N} = float_as_uint32(vn${N}) & vindex_mask;
         vn${N} -= vmagic_bias;
 
       $for N in range(BATCH_TILE):
         float vt${N} = vn${N} * vminus_ln2_hi + vz${N};
-        float vs${N} = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx${N}] + ven${N});
+        float vs${N} = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx${N}] + ven${N});
 
       $for N in range(BATCH_TILE):
         vt${N} = vn${N} * vminus_ln2_lo + vt${N};
@@ -111,12 +110,12 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_lut16_p3_x${BATCH
         const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      const uint32_t ven = fp32_to_bits(vn) << 19;
-      const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+      const uint32_t ven = float_as_uint32(vn) << 19;
+      const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;
-      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+      float vs = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
       vt = vn * vminus_ln2_lo + vt;
       $if not WASM:
@@ -156,12 +155,12 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_lut16_p3_x${BATCH
         const float vz = vx * vprescale;
 
       float vn = vz * vlog2e + vmagic_bias;
-      const uint32_t ven = fp32_to_bits(vn) << 19;
-      const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+      const uint32_t ven = float_as_uint32(vn) << 19;
+      const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
       vn -= vmagic_bias;
 
       float vt = vn * vminus_ln2_hi + vz;
-      float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+      float vs = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
       vt = vn * vminus_ln2_lo + vt;
       $if not WASM:
@@ -200,12 +199,12 @@ void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_lut16_p3_x${BATCH
           const float vz = vx * vprescale;
 
         float vn = vz * vlog2e + vmagic_bias;
-        const uint32_t ven = fp32_to_bits(vn) << 19;
-        const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+        const uint32_t ven = float_as_uint32(vn) << 19;
+        const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
         vn -= vmagic_bias;
 
         float vt = vn * vminus_ln2_hi + vz;
-        float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+        float vs = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
         vt = vn * vminus_ln2_lo + vt;
         $if not WASM:

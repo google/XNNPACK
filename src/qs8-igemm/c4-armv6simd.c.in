@@ -141,7 +141,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
 
     $for M in range(MR):
       $for N in range(NR):
-        int32_t vout${M}x${N} = (int32_t) fp32_to_bits(vfpacc${M}x${N});
+        int32_t vout${M}x${N} = (int32_t) float_as_uint32(vfpacc${M}x${N});
 
     const int32_t vmagic_bias_less_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_zero_point;
     $for M in range(MR):

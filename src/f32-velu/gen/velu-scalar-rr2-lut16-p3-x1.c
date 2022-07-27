@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
@@ -45,12 +44,12 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x1(
     const float vz = vx * vprescale;
 
     float vn = vz * vlog2e + vmagic_bias;
-    const uint32_t ven = fp32_to_bits(vn) << 19;
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const uint32_t ven = float_as_uint32(vn) << 19;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     vn -= vmagic_bias;
 
     float vt = vn * vminus_ln2_hi + vz;
-    float vs = fp32_from_bits(xnn_table_exp2minus_k_over_16[vidx] + ven);
+    float vs = uint32_as_float(xnn_table_exp2minus_k_over_16[vidx] + ven);
 
     vt = vn * vminus_ln2_lo + vt;
     if XNN_UNPREDICTABLE(vz <= vsat_cutoff) {

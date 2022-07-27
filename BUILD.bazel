@@ -40,6 +40,7 @@ ACCURACY_EVAL_DEPS = [
     ":bench_utils",
     ":common",
     ":isa_checks",
+    ":math",
     ":math_stubs",
     "@FP16",
     "@cpuinfo",

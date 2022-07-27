@@ -10,9 +10,8 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-
-#include <fp16/bitcasts.h>
 
 
 // Note redefine as uint32[] to avoid redundant bitcasts.
@@ -64,12 +63,12 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x1(
     //    and thus the adjusted exponent is not lower than -126.
     //
     // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-    const uint32_t ve = (fp32_to_bits(vn) & UINT32_C(0xFFFFFFC0)) << 17;
+    const uint32_t ve = (float_as_uint32(vn) & UINT32_C(0xFFFFFFC0)) << 17;
 
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
-    const uint32_t vidx = fp32_to_bits(vn) & vindex_mask;
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = fp32_from_bits(xnn_table_exp2_k_over_64[vidx] + ve);
+    const float vs = uint32_as_float(xnn_table_exp2_k_over_64[vidx] + ve);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn -= vmagic_bias;

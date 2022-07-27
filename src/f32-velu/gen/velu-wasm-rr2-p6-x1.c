@@ -11,9 +11,8 @@
 #include <math.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vunary.h>
-
-#include <fp16/bitcasts.h>
 
 
 void xnn_f32_velu_ukernel__wasm_rr2_p6_x1(
@@ -45,7 +44,7 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x1(
     const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
 
     float vn = vz * vlog2e + vmagic_bias;
-    float vs = fp32_from_bits(fp32_to_bits(vn) << 23);
+    float vs = uint32_as_float(float_as_uint32(vn) << 23);
     vn -= vmagic_bias;
 
     float vt = vn * vminus_ln2_hi + vz;

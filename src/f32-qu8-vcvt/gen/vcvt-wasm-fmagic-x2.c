@@ -50,8 +50,8 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x2(
     vx0 += vmagic_bias;
     vx1 += vmagic_bias;
 
-    int32_t vy0 = (int32_t) fp32_to_bits(vx0);
-    int32_t vy1 = (int32_t) fp32_to_bits(vx1);
+    int32_t vy0 = (int32_t) float_as_uint32(vx0);
+    int32_t vy1 = (int32_t) float_as_uint32(vx1);
 
     vy0 -= vmagic_bias_less_zero_point;
     vy1 -= vmagic_bias_less_zero_point;
@@ -67,7 +67,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x2(
     vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
     vx += vmagic_bias;
 
-    int32_t vy = (int32_t) fp32_to_bits(vx);
+    int32_t vy = (int32_t) float_as_uint32(vx);
     vy -= vmagic_bias_less_zero_point;
 
     *y = (uint8_t) vy;

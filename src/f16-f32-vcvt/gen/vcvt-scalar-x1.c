@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
 #include <fp16.h>
@@ -41,8 +42,8 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x1(
     const uint32_t vw = (uint32_t) vh << 16;
     const uint32_t vsign = vw & vsign_mask;
     const uint32_t v2w = vw + vw;
-    const uint32_t vnorm = fp32_to_bits(fp32_from_bits((v2w >> 4) + vexp_offset) * vexp_scale);
-    const uint32_t vdenorm = fp32_to_bits(fp32_from_bits((v2w >> 17) | vmagic_mask) - vmagic_bias);
+    const uint32_t vnorm = float_as_uint32(uint32_as_float((v2w >> 4) + vexp_offset) * vexp_scale);
+    const uint32_t vdenorm = float_as_uint32(uint32_as_float((v2w >> 17) | vmagic_mask) - vmagic_bias);
     const uint32_t vf = vsign | (XNN_UNPREDICTABLE(v2w < vdenorm_cutoff) ? vdenorm : vnorm);
 
     *o++ = vf;
