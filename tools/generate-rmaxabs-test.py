@@ -18,7 +18,7 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='RAbsMax microkernel test generator')
+parser = argparse.ArgumentParser(description='RMaxAbs microkernel test generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_s16_rabsmax_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_s16_rmaxabs_ukernel__(.+)_x(\d+)", name)
   assert match is not None
   channel_tile = int(match.group(2))
 
@@ -35,11 +35,11 @@ def split_ukernel_name(name):
   return channel_tile, arch, isa
 
 
-RABSMAX_TEST_TEMPLATE = """\
+RMAXABS_TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  RAbsMaxMicrokernelTester()
+  RMaxAbsMicrokernelTester()
     .channels(${CHANNEL_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -49,7 +49,7 @@ $if CHANNEL_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
-      RAbsMaxMicrokernelTester()
+      RMaxAbsMicrokernelTester()
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -59,7 +59,7 @@ $if CHANNEL_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      RAbsMaxMicrokernelTester()
+      RMaxAbsMicrokernelTester()
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -69,7 +69,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    RAbsMaxMicrokernelTester()
+    RMaxAbsMicrokernelTester()
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -79,7 +79,7 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
 
 
 def generate_test_cases(ukernel, channel_tile, isa):
-  """Generates all tests cases for a RAbsMax micro-kernel.
+  """Generates all tests cases for a RMaxAbs micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
@@ -93,7 +93,7 @@ def generate_test_cases(ukernel, channel_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  return xngen.preprocess(RABSMAX_TEST_TEMPLATE, {
+  return xngen.preprocess(RMAXABS_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
@@ -127,8 +127,8 @@ def main(args):
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/rabsmax.h>
-#include "rabsmax-microkernel-tester.h"
+#include <xnnpack/rmaxabs.h>
+#include "rmaxabs-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

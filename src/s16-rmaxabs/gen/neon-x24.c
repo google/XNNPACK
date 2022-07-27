@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-rabsmax/neon.c.in
+//   Template: src/s16-rmaxabs/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -14,10 +14,10 @@
 #include <arm_neon.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/rabsmax.h>
+#include <xnnpack/rmaxabs.h>
 
 
-void xnn_s16_rabsmax_ukernel__neon_x24(
+void xnn_s16_rmaxabs_ukernel__neon_x24(
     size_t channels,
     const int16_t* input,
     uint16_t* output) {

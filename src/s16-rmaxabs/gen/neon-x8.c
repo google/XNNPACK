@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-rabsmax/neon.c.in
+//   Template: src/s16-rmaxabs/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -14,10 +14,10 @@
 #include <arm_neon.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/rabsmax.h>
+#include <xnnpack/rmaxabs.h>
 
 
-void xnn_s16_rabsmax_ukernel__neon_x32(
+void xnn_s16_rmaxabs_ukernel__neon_x8(
     size_t channels,
     const int16_t* input,
     uint16_t* output) {
@@ -28,31 +28,8 @@ void xnn_s16_rabsmax_ukernel__neon_x32(
 
   const uint16x8_t vzero = vdupq_n_u16(0);
   uint16x8_t vmax0 = vzero;
-  uint16x8_t vmax1 = vzero;
-  uint16x8_t vmax2 = vzero;
-  uint16x8_t vmax3 = vzero;
 
   size_t c = channels;
-  for (; c >= 32; c -= 32) {
-    const int16x8_t vi0 = vld1q_s16(input); input += 8;
-    const int16x8_t vi1 = vld1q_s16(input); input += 8;
-    const int16x8_t vi2 = vld1q_s16(input); input += 8;
-    const int16x8_t vi3 = vld1q_s16(input); input += 8;
-
-    const uint16x8_t vabs0 = vreinterpretq_u16_s16(vabsq_s16(vi0));
-    const uint16x8_t vabs1 = vreinterpretq_u16_s16(vabsq_s16(vi1));
-    const uint16x8_t vabs2 = vreinterpretq_u16_s16(vabsq_s16(vi2));
-    const uint16x8_t vabs3 = vreinterpretq_u16_s16(vabsq_s16(vi3));
-
-    vmax0 = vmaxq_u16(vmax0, vabs0);
-    vmax1 = vmaxq_u16(vmax1, vabs1);
-    vmax2 = vmaxq_u16(vmax2, vabs2);
-    vmax3 = vmaxq_u16(vmax3, vabs3);
-  }
-
-  vmax0 = vmaxq_u16(vmax0, vmax1);
-  vmax2 = vmaxq_u16(vmax2, vmax3);
-  vmax0 = vmaxq_u16(vmax0, vmax2);
 
   // Remainder of full vectors
   for (; c >= 8; c -= 8) {

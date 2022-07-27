@@ -1331,14 +1331,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/scalar-c4.c
   src/s8-maxpool/9p8x-minmax-scalar-c1.c
   src/s8-vclamp/scalar-x4.c
+  src/s16-rmaxabs/gen/scalar-x1.c
+  src/s16-rmaxabs/gen/scalar-x2.c
+  src/s16-rmaxabs/gen/scalar-x3.c
+  src/s16-rmaxabs/gen/scalar-x4.c
   src/s16-window/gen/scalar-x1.c
   src/s16-window/gen/scalar-x2.c
   src/s16-window/gen/scalar-x3.c
   src/s16-window/gen/scalar-x4.c
-  src/s16-rabsmax/gen/scalar-x1.c
-  src/s16-rabsmax/gen/scalar-x2.c
-  src/s16-rabsmax/gen/scalar-x3.c
-  src/s16-rabsmax/gen/scalar-x4.c
   src/u8-ibilinear/gen/scalar-c1.c
   src/u8-ibilinear/gen/scalar-c2.c
   src/u8-ibilinear/gen/scalar-c4.c
@@ -1603,14 +1603,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x32-zip/x4-neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
-  src/s16-window/gen/neon-x8.c
-  src/s16-window/gen/neon-x16.c
-  src/s16-window/gen/neon-x24.c
-  src/s16-window/gen/neon-x32.c
-  src/s16-rabsmax/gen/neon-x8.c
-  src/s16-rabsmax/gen/neon-x16.c
-  src/s16-rabsmax/gen/neon-x24.c
-  src/s16-rabsmax/gen/neon-x32.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c
@@ -2643,6 +2635,14 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s8-maxpool/4p3x-minmax-neon-c16.c
   src/s8-maxpool/9p8x-minmax-neon-c16.c
   src/s8-vclamp/neon-x64.c
+  src/s16-rmaxabs/gen/neon-x8.c
+  src/s16-rmaxabs/gen/neon-x16.c
+  src/s16-rmaxabs/gen/neon-x24.c
+  src/s16-rmaxabs/gen/neon-x32.c
+  src/s16-window/gen/neon-x8.c
+  src/s16-window/gen/neon-x16.c
+  src/s16-window/gen/neon-x24.c
+  src/s16-window/gen/neon-x32.c
   src/u8-ibilinear/gen/neon-c8.c
   src/u8-ibilinear/gen/neon-c16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
@@ -8614,10 +8614,10 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main params_init)
   ADD_TEST(NAME qu8-vmulc-minmax-rndnu-test COMMAND qu8-vmulc-minmax-rndnu-test)
 
-  ADD_EXECUTABLE(s16-rabsmax-test test/s16-rabsmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  TARGET_INCLUDE_DIRECTORIES(s16-rabsmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s16-rabsmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  ADD_TEST(NAME s16-rabsmax-test COMMAND s16-rabsmax-test)
+  ADD_EXECUTABLE(s16-rmaxabs-test test/s16-rmaxabs.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s16-rmaxabs-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME s16-rmaxabs-test COMMAND s16-rmaxabs-test)
 
   ADD_EXECUTABLE(s16-window-test test/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-window-test PRIVATE include src test)
@@ -9197,9 +9197,9 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(rounding-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool params_init)
 
-  ADD_EXECUTABLE(s16-rabsmax-bench bench/s16-rabsmax.cc $<TARGET_OBJECTS:all_microkernels>)
-  TARGET_INCLUDE_DIRECTORIES(s16-rabsmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(s16-rabsmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+  ADD_EXECUTABLE(s16-rmaxabs-bench bench/s16-rmaxabs.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(s16-rmaxabs-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)

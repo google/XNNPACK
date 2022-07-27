@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-rabsmax/scalar.c.in
+//   Template: src/s16-rmaxabs/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -12,10 +12,10 @@
 #include <stdint.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/rabsmax.h>
+#include <xnnpack/rmaxabs.h>
 
 
-void xnn_s16_rabsmax_ukernel__scalar_x2(
+void xnn_s16_rmaxabs_ukernel__scalar_x4(
     size_t channels,
     const int16_t* input,
     uint16_t* output) {
@@ -26,21 +26,31 @@ void xnn_s16_rabsmax_ukernel__scalar_x2(
 
   int32_t vmax0 = 0;
   int32_t vmax1 = 0;
+  int32_t vmax2 = 0;
+  int32_t vmax3 = 0;
 
   size_t c = channels;
-  for (; c >= 2; c -= 2) {
+  for (; c >= 4; c -= 4) {
     const int32_t vi0 = (int32_t) input[0];
     const int32_t vi1 = (int32_t) input[1];
-    input += 2;
+    const int32_t vi2 = (int32_t) input[2];
+    const int32_t vi3 = (int32_t) input[3];
+    input += 4;
 
     const int32_t vabs0 = vi0 >= 0 ? vi0 : -vi0;
     const int32_t vabs1 = vi1 >= 0 ? vi1 : -vi1;
+    const int32_t vabs2 = vi2 >= 0 ? vi2 : -vi2;
+    const int32_t vabs3 = vi3 >= 0 ? vi3 : -vi3;
 
     vmax0 = math_max_s32(vmax0, vabs0);
     vmax1 = math_max_s32(vmax1, vabs1);
+    vmax2 = math_max_s32(vmax2, vabs2);
+    vmax3 = math_max_s32(vmax3, vabs3);
   }
 
   vmax0 = math_max_s32(vmax0, vmax1);
+  vmax2 = math_max_s32(vmax2, vmax3);
+  vmax0 = math_max_s32(vmax0, vmax2);
 
   if (c != 0) {
     do {

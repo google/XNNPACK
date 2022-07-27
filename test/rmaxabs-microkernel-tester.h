@@ -20,10 +20,10 @@
 #include <xnnpack/params.h>
 
 
-class RAbsMaxMicrokernelTester {
+class RMaxAbsMicrokernelTester {
  public:
 
-  inline RAbsMaxMicrokernelTester& channels(size_t channels) {
+  inline RMaxAbsMicrokernelTester& channels(size_t channels) {
     assert(channels != 0);
     this->channels_ = channels;
     return *this;
@@ -33,7 +33,7 @@ class RAbsMaxMicrokernelTester {
     return this->channels_;
   }
 
-  inline RAbsMaxMicrokernelTester& iterations(size_t iterations) {
+  inline RMaxAbsMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -42,7 +42,7 @@ class RAbsMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_s16_rabsmax_ukernel_function rabsmax) const {
+  void Test(xnn_s16_rmaxabs_ukernel_function rmaxabs) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
@@ -62,7 +62,7 @@ class RAbsMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       uint16_t y = UINT16_C(0xDEAD);
-      rabsmax(channels(), x.data(), &y);
+      rmaxabs(channels(), x.data(), &y);
 
       // Verify results.
       ASSERT_EQ(static_cast<int32_t>(y), y_ref);

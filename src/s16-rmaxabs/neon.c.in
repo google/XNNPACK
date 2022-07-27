@@ -1,12 +1,11 @@
-// Auto-generated file. Do not edit!
-//   Template: src/s16-rabsmax/neon.c.in
-//   Generator: tools/xngen
-//
 // Copyright 2022 Google LLC
 //
 // Tacchis source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of tacchis source tree.
 
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$SIMD_TILE = CHANNEL_TILE // 8
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,35 +13,40 @@
 #include <arm_neon.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/rabsmax.h>
+#include <xnnpack/rmaxabs.h>
 
 
-void xnn_s16_rabsmax_ukernel__neon_x16(
-    size_t channels,
+void xnn_s16_rmaxabs_ukernel__neon_x${CHANNEL_TILE}(
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
   const uint16x8_t vzero = vdupq_n_u16(0);
-  uint16x8_t vmax0 = vzero;
-  uint16x8_t vmax1 = vzero;
+  $for C in range(SIMD_TILE):
+    uint16x8_t vmax${C} = vzero;
 
-  size_t c = channels;
-  for (; c >= 16; c -= 16) {
-    const int16x8_t vi0 = vld1q_s16(input); input += 8;
-    const int16x8_t vi1 = vld1q_s16(input); input += 8;
+  $if CHANNEL_TILE > 8:
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      $for N in range(SIMD_TILE):
+        const int16x8_t vi${N} = vld1q_s16(input); input += 8;
 
-    const uint16x8_t vabs0 = vreinterpretq_u16_s16(vabsq_s16(vi0));
-    const uint16x8_t vabs1 = vreinterpretq_u16_s16(vabsq_s16(vi1));
+      $for N in range(SIMD_TILE):
+        const uint16x8_t vabs${N} = vreinterpretq_u16_s16(vabsq_s16(vi${N}));
 
-    vmax0 = vmaxq_u16(vmax0, vabs0);
-    vmax1 = vmaxq_u16(vmax1, vabs1);
-  }
+      $for N in range(SIMD_TILE):
+        vmax${N} = vmaxq_u16(vmax${N}, vabs${N});
+    }
 
-  vmax0 = vmaxq_u16(vmax0, vmax1);
+    $SIMD_SLICE = 1
+    $while SIMD_SLICE < SIMD_TILE:
+      $for S in range(0, SIMD_TILE, SIMD_SLICE * 2):
+        $if S + SIMD_SLICE < SIMD_TILE:
+          vmax${S} = vmaxq_u16(vmax${S}, vmax${S + SIMD_SLICE});
+      $SIMD_SLICE *= 2
 
   // Remainder of full vectors
   for (; c >= 8; c -= 8) {

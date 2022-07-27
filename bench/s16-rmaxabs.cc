@@ -6,7 +6,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
-#include <xnnpack/rabsmax.h>
+#include <xnnpack/rmaxabs.h>
 
 #include <algorithm>
 #include <cmath>
@@ -17,9 +17,9 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-void rabsmax(
+void rmaxabs(
     benchmark::State& state,
-    xnn_s16_rabsmax_ukernel_function rabsmax,
+    xnn_s16_rmaxabs_ukernel_function rmaxabs,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -33,7 +33,7 @@ void rabsmax(
 
   uint16_t output = 0u;
   for (auto _ : state) {
-    rabsmax(channels, input.data(), &output);
+    rmaxabs(channels, input.data(), &output);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -55,23 +55,23 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-BENCHMARK_CAPTURE(rabsmax, s16_neon_x8, xnn_s16_rabsmax_ukernel__neon_x8)
+BENCHMARK_CAPTURE(rmaxabs, s16_neon_x8, xnn_s16_rmaxabs_ukernel__neon_x8)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_neon_x16, xnn_s16_rabsmax_ukernel__neon_x16)
+BENCHMARK_CAPTURE(rmaxabs, s16_neon_x16, xnn_s16_rmaxabs_ukernel__neon_x16)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_neon_x24, xnn_s16_rabsmax_ukernel__neon_x24)
+BENCHMARK_CAPTURE(rmaxabs, s16_neon_x24, xnn_s16_rmaxabs_ukernel__neon_x24)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_neon_x32, xnn_s16_rabsmax_ukernel__neon_x32)
+BENCHMARK_CAPTURE(rmaxabs, s16_neon_x32, xnn_s16_rmaxabs_ukernel__neon_x32)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(rabsmax, s16_scalar_x1, xnn_s16_rabsmax_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x1, xnn_s16_rmaxabs_ukernel__scalar_x1)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_scalar_x2, xnn_s16_rabsmax_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x2, xnn_s16_rmaxabs_ukernel__scalar_x2)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_scalar_x3, xnn_s16_rabsmax_ukernel__scalar_x3)
+BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x3, xnn_s16_rmaxabs_ukernel__scalar_x3)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rabsmax, s16_scalar_x4, xnn_s16_rabsmax_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x4, xnn_s16_rmaxabs_ukernel__scalar_x4)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
