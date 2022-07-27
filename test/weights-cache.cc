@@ -147,6 +147,11 @@ TEST(WEIGHTS_MEMORY, grow) {
   // But size stays the same.
   ASSERT_EQ(old_size, b.size);
 
+  // Check that after growing, the contents remain.
+  std::string actual(junk.length(), 'a');
+  std::memcpy(actual.data(), b.start, junk.length());
+  ASSERT_EQ(junk, actual);
+
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
 }
 

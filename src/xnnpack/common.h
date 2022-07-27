@@ -79,6 +79,12 @@
   #define XNN_PLATFORM_ANDROID 0
 #endif
 
+#if defined(__linux__)
+  #define XNN_PLATFORM_LINUX 1
+#else
+  #define XNN_PLATFORM_LINUX 0
+#endif
+
 #if defined(__APPLE__) && TARGET_OS_IPHONE
   // iOS on iPhone / iPad Touch, iPad OS, watchOS, or tvOS
   #define XNN_PLATFORM_IOS 1
