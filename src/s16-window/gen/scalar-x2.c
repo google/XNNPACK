@@ -24,15 +24,15 @@ void xnn_s16_window_ukernel__scalar_x2(
     int16_t* output) {
 
   assert(rows > 0);
-  assert(channels > 0);
+  assert(channels != 0);
   assert(input != NULL);
   assert(weights != NULL);
   assert(shift < 32);
   assert(output != NULL);
 
   do {
-    const int16_t* w = weights;
     size_t c = channels;
+    const int16_t* w = weights;
     for (; c >= 2; c -= 2) {
       const int16_t vi0 = input[0];
       const int16_t vi1 = input[1];
@@ -54,22 +54,21 @@ void xnn_s16_window_ukernel__scalar_x2(
       vout0 = math_min_s32(vout0, INT16_MAX);
       vout1 = math_min_s32(vout1, INT16_MAX);
 
-      output[0] = (int16_t)(vout0);
-      output[1] = (int16_t)(vout1);
+      output[0] = (int16_t) vout0;
+      output[1] = (int16_t) vout1;
 
       output += 2;
     }
 
     if XNN_UNLIKELY(c != 0) {
       do {
-        int32_t vout = ((int32_t) input[0] * (int32_t) w[0]);
-        ++input;
-        ++w;
+        const int32_t vi = (int32_t) *input++;
+        const int32_t vw = (int32_t) *w++;
+        int32_t vout = vi * vw;
         vout = math_asr_s32(vout, shift);
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
-        output[0] = (int16_t)(vout);
-        ++output;
+        *output++ = (int16_t) vout;
       } while (--c != 0);
     }
   } while (--rows != 0);
