@@ -10,8 +10,6 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-#include <fp16.h>
-
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_x${BATCH_TILE}(

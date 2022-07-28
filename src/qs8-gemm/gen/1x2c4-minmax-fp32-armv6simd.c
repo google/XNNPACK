@@ -8,7 +8,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <fp16.h>
 
 #include <arm_acle.h>
 

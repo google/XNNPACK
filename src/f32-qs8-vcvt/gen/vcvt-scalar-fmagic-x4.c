@@ -13,8 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-#include <fp16.h>
-
 
 void xnn_f32_qs8_vcvt_ukernel__scalar_fmagic_x4(
     size_t n,

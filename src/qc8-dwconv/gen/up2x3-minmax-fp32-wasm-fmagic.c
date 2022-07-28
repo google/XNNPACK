@@ -9,8 +9,6 @@
 
 #include <assert.h>
 
-#include <fp16.h>
-
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>

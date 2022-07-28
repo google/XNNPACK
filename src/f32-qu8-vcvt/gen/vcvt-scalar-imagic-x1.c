@@ -13,8 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-#include <fp16.h>
-
 
 void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x1(
     size_t n,

@@ -9,8 +9,6 @@
 
 #include <assert.h>
 
-#include <fp16.h>
-
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>
 

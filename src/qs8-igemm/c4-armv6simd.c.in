@@ -8,7 +8,6 @@ $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert 1 <= MR <= 2
 $assert 1 <= NR <= 2
 #include <assert.h>
-#include <fp16.h>
 
 #include <arm_acle.h>
 

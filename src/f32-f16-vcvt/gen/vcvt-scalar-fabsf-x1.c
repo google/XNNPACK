@@ -14,8 +14,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-#include <fp16.h>
-
 
 void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
     size_t n,

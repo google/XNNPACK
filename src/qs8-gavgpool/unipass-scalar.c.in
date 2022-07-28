@@ -10,9 +10,6 @@ $assert REQUANTIZATION == "FP32"
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
-$elif VARIANT in ["FMAGIC", "IMAGIC"]:
-
-  #include <fp16.h>
 
 #include <xnnpack/gavgpool.h>
 #include <xnnpack/math.h>

@@ -13,8 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vcvt.h>
 
-#include <fp16.h>
-
 
 void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2(
     size_t n,

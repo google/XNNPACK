@@ -9,9 +9,6 @@ $assert DATATYPE in ["QC8", "QS8", "QU8"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
-$elif VARIANT in ["FMAGIC", "IMAGIC"]:
-
-  #include <fp16.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/gemm.h>

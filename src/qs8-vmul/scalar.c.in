@@ -8,8 +8,6 @@ $assert REQUANTIZATION == "FP32"
 $assert BATCH_TILE >= 1
 #include <assert.h>
 
-#include <fp16.h>
-
 #include <xnnpack/math.h>
 #include <xnnpack/vmul.h>
 
