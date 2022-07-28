@@ -620,6 +620,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s16-vlshift/gen/scalar-x2.c",
     "src/s16-vlshift/gen/scalar-x3.c",
     "src/s16-vlshift/gen/scalar-x4.c",
+    "src/cs16-vsquareabs/gen/scalar-x1.c",
+    "src/cs16-vsquareabs/gen/scalar-x2.c",
+    "src/cs16-vsquareabs/gen/scalar-x3.c",
+    "src/cs16-vsquareabs/gen/scalar-x4.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x2.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x3.c",
@@ -8521,6 +8525,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
+    "src/xnnpack/vsquareabs.h",
     "src/xnnpack/vunary.h",
     "src/xnnpack/window.h",
     "src/xnnpack/zip.h",
@@ -11765,6 +11770,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "cs16_vsquareabs_bench",
+    srcs = [
+        "bench/cs16-vsquareabs.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
@@ -14091,6 +14104,15 @@ xnnpack_unit_test(
     srcs = [
         "test/s16-vlshift.cc",
         "test/vlshift-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "cs16_vsquareabs_test",
+    srcs = [
+        "test/cs16-vsquareabs.cc",
+        "test/vsquareabs-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
