@@ -1,0 +1,49 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/vlshift.h>
+
+
+void xnn_s16_vlshift_ukernel__scalar_x${BATCH_TILE}(
+    size_t batch,
+    const int16_t* input,
+    uint32_t shift,
+    int16_t* output) {
+
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(shift < 16);
+  assert(output != NULL);
+
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE}; batch -= ${BATCH_TILE}) {
+      $for C in range(BATCH_TILE):
+        const uint16_t vi${C} = (uint16_t) input[${C}];
+      input += ${BATCH_TILE};
+
+      $for C in range(BATCH_TILE):
+        const uint16_t vout${C} = vi${C} << shift;
+
+      $for C in range(BATCH_TILE):
+        output[${C}] = (int16_t) vout${C};
+      output += ${BATCH_TILE};
+    }
+
+ if XNN_UNLIKELY(batch != 0) {
+   do {
+     const uint16_t vi = (uint16_t) *input++;
+
+     const uint16_t vout = vi << shift;
+
+     *output++ = (int16_t) vout;
+   } while (--batch != 0);
+ }
+}

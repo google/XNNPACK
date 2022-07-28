@@ -603,6 +603,10 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
+  src/s16-vlshift/gen/scalar-x1.c
+  src/s16-vlshift/gen/scalar-x2.c
+  src/s16-vlshift/gen/scalar-x3.c
+  src/s16-vlshift/gen/scalar-x4.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x2.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x3.c
@@ -1603,6 +1607,10 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x32-zip/x4-neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
+  src/s16-vlshift/gen/neon-x8.c
+  src/s16-vlshift/gen/neon-x16.c
+  src/s16-vlshift/gen/neon-x24.c
+  src/s16-vlshift/gen/neon-x32.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c
@@ -8624,6 +8632,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s16-window-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
 
+  ADD_EXECUTABLE(s16-vlshift-test test/s16-vlshift.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-vlshift-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s16-vlshift-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME s16-vlshift-test COMMAND s16-vlshift-test)
+
   ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9204,6 +9217,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(s16-vlshift-bench bench/s16-vlshift.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-vlshift-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(s16-vlshift-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(xx-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(xx-transpose-bench PRIVATE . include src)

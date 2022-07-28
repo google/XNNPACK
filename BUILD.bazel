@@ -616,6 +616,10 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
+    "src/s16-vlshift/gen/scalar-x1.c",
+    "src/s16-vlshift/gen/scalar-x2.c",
+    "src/s16-vlshift/gen/scalar-x3.c",
+    "src/s16-vlshift/gen/scalar-x4.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x2.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x3.c",
@@ -3094,6 +3098,10 @@ PROD_NEON_MICROKERNEL_SRCS = [
 ]
 
 ALL_NEON_MICROKERNEL_SRCS = [
+    "src/s16-vlshift/gen/neon-x8.c",
+    "src/s16-vlshift/gen/neon-x16.c",
+    "src/s16-vlshift/gen/neon-x24.c",
+    "src/s16-vlshift/gen/neon-x32.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c",
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c",
@@ -8502,6 +8510,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/rmax.h",
     "src/xnnpack/rmaxabs.h",
     "src/xnnpack/spmm.h",
+    "src/xnnpack/vlshift.h",
     "src/xnnpack/transpose.h",
     "src/xnnpack/unpool.h",
     "src/xnnpack/vaddsub.h",
@@ -11745,6 +11754,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "s16_vlshift_bench",
+    srcs = [
+        "bench/s16-vlshift.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
@@ -14062,6 +14079,15 @@ xnnpack_unit_test(
     srcs = [
         "test/s16-window.cc",
         "test/window-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "s16_vlshift_test",
+    srcs = [
+        "test/s16-vlshift.cc",
+        "test/vlshift-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
