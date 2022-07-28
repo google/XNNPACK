@@ -63,19 +63,19 @@ The table below presents **single-threaded** performance of XNNPACK library on t
 
 | Model                   | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
 | ----------------------- | :-------: | :---------: | :----------: |
-| FP32 MobileNet v1 1.0X  |    82     |      86     |      88      |
-| FP32 MobileNet v2 1.0X  |    49     |      53     |      55      |
-| FP32 MobileNet v3 Large |    39     |      42     |      44      |
-| FP32 MobileNet v3 Small |    12     |      14     |      14      |
+| FP32 MobileNet v1 1.0X  |    82     |     86      |      88      |
+| FP32 MobileNet v2 1.0X  |    49     |     53      |      55      |
+| FP32 MobileNet v3 Large |    39     |     42      |      44      |
+| FP32 MobileNet v3 Small |    12     |     14      |      14      |
 
 The following table presents **multi-threaded** (using as many threads as there are big cores) performance of XNNPACK library on three generations of MobileNet models and three generations of Pixel phones.
 
 | Model                   | Pixel, ms | Pixel 2, ms | Pixel 3a, ms |
 | ----------------------- | :-------: | :---------: | :----------: |
-| FP32 MobileNet v1 1.0X  |    43     |      27     |      46      |
-| FP32 MobileNet v2 1.0X  |    26     |      18     |      28      |
-| FP32 MobileNet v3 Large |    22     |      16     |      24      |
-| FP32 MobileNet v3 Small |     7     |       6     |       8      |
+| FP32 MobileNet v1 1.0X  |    43     |     27      |      46      |
+| FP32 MobileNet v2 1.0X  |    26     |     18      |      28      |
+| FP32 MobileNet v3 Large |    22     |     16      |      24      |
+| FP32 MobileNet v3 Small |     7     |      6      |      8       |
 
 Benchmarked on March 27, 2020 with `end2end_bench --benchmark_min_time=5` on an Android/ARM64 build with Android NDK r21 (`bazel build -c opt --config android_arm64 :end2end_bench`) and neural network models with randomized weights and inputs.
 
@@ -85,12 +85,12 @@ The table below presents **multi-threaded** performance of XNNPACK library on th
 
 | Model                   | RPi Zero W (BCM2835), ms | RPi 2 (BCM2836), ms | RPi 3+ (BCM2837B0), ms | RPi 4 (BCM2711), ms | RPi 4 (BCM2711, ARM64), ms |
 | ----------------------- | :----------------------: | :-----------------: | :--------------------: | :-----------------: | :------------------------: |
-| FP32 MobileNet v1 1.0X  |          3919            |         302         |          114           |          72         |             77             |
-| FP32 MobileNet v2 1.0X  |          1987            |         191         |           79           |          41         |             46             |
-| FP32 MobileNet v3 Large |          1658            |         161         |           67           |          38         |             40             |
-| FP32 MobileNet v3 Small |           474            |          50         |           22           |          13         |             15             |
-| INT8 MobileNet v1 1.0X  |          2589            |         128         |           46           |          29         |             24             |
-| INT8 MobileNet v2 1.0X  |          1495            |          82         |           30           |          20         |             17             |
+| FP32 MobileNet v1 1.0X  |           3919           |         302         |          114           |         72          |             77             |
+| FP32 MobileNet v2 1.0X  |           1987           |         191         |           79           |         41          |             46             |
+| FP32 MobileNet v3 Large |           1658           |         161         |           67           |         38          |             40             |
+| FP32 MobileNet v3 Small |           474            |         50          |           22           |         13          |             15             |
+| INT8 MobileNet v1 1.0X  |           2589           |         128         |           46           |         29          |             24             |
+| INT8 MobileNet v2 1.0X  |           1495           |         82          |           30           |         20          |             17             |
 
 Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Raspbian Buster build with CMake (`./scripts/build-local.sh`) and neural network models with randomized weights and inputs. INT8 inference was evaluated on per-channel quantization schema.
 
@@ -118,4 +118,4 @@ Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Rasp
 
 ## Acknowledgements
 
-XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Over time its codebase diverged a lot, and XNNPACK API is no longer compatible with QNNPACK.
+XNNPACK is a based on [QNNPACK](https://github.com/pytorch/QNNPACK) library. Over time its codebase diverged and XNNPACK API is no longer compatible with QNNPACK.
