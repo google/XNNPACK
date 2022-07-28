@@ -47,7 +47,7 @@
 #include <xnnpack/maxpool.h>
 #include <xnnpack/pad.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/raddstoreexpminusmax.h>

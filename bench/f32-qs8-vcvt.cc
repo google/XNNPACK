@@ -16,7 +16,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/vcvt.h>
 
 

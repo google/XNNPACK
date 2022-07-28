@@ -11,7 +11,7 @@
 #include <fp16.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/unaligned.h>
 
 

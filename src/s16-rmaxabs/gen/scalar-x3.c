@@ -16,11 +16,11 @@
 
 
 void xnn_s16_rmaxabs_ukernel__scalar_x3(
-    size_t channels,
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -28,7 +28,6 @@ void xnn_s16_rmaxabs_ukernel__scalar_x3(
   int32_t vmax1 = 0;
   int32_t vmax2 = 0;
 
-  size_t c = channels;
   for (; c >= 3; c -= 3) {
     const int32_t vi0 = (int32_t) input[0];
     const int32_t vi1 = (int32_t) input[1];

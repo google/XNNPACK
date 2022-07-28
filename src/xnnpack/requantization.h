@@ -13,11 +13,9 @@
 #include <assert.h>
 #include <math.h>
 
-#include <fp16.h>
-
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microparams.h>
 
 
 typedef int8_t (*xnn_qs8_requantize_fn)(

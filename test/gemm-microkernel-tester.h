@@ -11,7 +11,7 @@
 #include <cstddef>
 
 #include <xnnpack/math.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 

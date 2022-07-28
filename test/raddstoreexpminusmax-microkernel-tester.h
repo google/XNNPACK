@@ -18,7 +18,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 
 class RAddStoreExpMinusMaxMicrokernelTester {

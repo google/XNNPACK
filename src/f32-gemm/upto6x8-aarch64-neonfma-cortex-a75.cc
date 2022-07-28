@@ -10,7 +10,6 @@
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
-#include <xnnpack/params.h>
 
 namespace xnnpack {
 namespace aarch64 {

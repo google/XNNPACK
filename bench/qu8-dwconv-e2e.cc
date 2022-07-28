@@ -18,7 +18,7 @@
 #include "models/models.h"
 #include <xnnpack/dwconv.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 
 static void DWConvEnd2EndBenchmark(

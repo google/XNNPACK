@@ -11,8 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <xnnpack.h>  // For xnn_status
+
 #include <xnnpack/common.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microparams.h>
 
 #ifdef __cplusplus
 extern "C" {

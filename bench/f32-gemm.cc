@@ -28,7 +28,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packx.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/ppmm.h>
 

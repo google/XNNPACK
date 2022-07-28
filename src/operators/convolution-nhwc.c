@@ -27,7 +27,7 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 #ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
 #error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"

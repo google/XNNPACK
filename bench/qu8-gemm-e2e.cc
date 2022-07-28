@@ -20,7 +20,7 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 
 static void GEMMEnd2EndBenchmark(

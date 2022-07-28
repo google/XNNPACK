@@ -20,7 +20,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
 

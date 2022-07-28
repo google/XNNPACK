@@ -18,7 +18,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/pack.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 

@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <xnnpack/params.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

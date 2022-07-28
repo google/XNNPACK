@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
 
 #ifdef __cplusplus

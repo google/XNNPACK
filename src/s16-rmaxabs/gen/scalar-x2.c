@@ -16,18 +16,17 @@
 
 
 void xnn_s16_rmaxabs_ukernel__scalar_x2(
-    size_t channels,
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
   int32_t vmax0 = 0;
   int32_t vmax1 = 0;
 
-  size_t c = channels;
   for (; c >= 2; c -= 2) {
     const int32_t vi0 = (int32_t) input[0];
     const int32_t vi1 = (int32_t) input[1];

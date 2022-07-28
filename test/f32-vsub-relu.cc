@@ -13,7 +13,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/vbinary.h>
 #include "vbinary-microkernel-tester.h"
 

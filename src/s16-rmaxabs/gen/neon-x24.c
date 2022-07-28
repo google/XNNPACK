@@ -18,11 +18,11 @@
 
 
 void xnn_s16_rmaxabs_ukernel__neon_x24(
-    size_t channels,
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -31,7 +31,6 @@ void xnn_s16_rmaxabs_ukernel__neon_x24(
   uint16x8_t vmax1 = vzero;
   uint16x8_t vmax2 = vzero;
 
-  size_t c = channels;
   for (; c >= 24; c -= 24) {
     const int16x8_t vi0 = vld1q_s16(input); input += 8;
     const int16x8_t vi1 = vld1q_s16(input); input += 8;

@@ -18,7 +18,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/log.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 
 enum xnn_status xnn_create_softmax_nc_qu8(

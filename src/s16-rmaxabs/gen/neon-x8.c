@@ -18,18 +18,17 @@
 
 
 void xnn_s16_rmaxabs_ukernel__neon_x8(
-    size_t channels,
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
   const uint16x8_t vzero = vdupq_n_u16(0);
   uint16x8_t vmax0 = vzero;
 
-  size_t c = channels;
 
   // Remainder of full vectors
   for (; c >= 8; c -= 8) {

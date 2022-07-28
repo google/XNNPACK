@@ -16,17 +16,16 @@
 
 
 void xnn_s16_rmaxabs_ukernel__scalar_x1(
-    size_t channels,
+    size_t c,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(channels > 0);
+  assert(c > 0);
   assert(input != NULL);
   assert(output != NULL);
 
   int32_t vmax0 = 0;
 
-  size_t c = channels;
 
   if (c != 0) {
     do {

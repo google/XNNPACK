@@ -17,7 +17,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 
 
 static void f16_velu(

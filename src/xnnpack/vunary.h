@@ -8,8 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/params.h>
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 
 #ifdef __cplusplus
 extern "C" {

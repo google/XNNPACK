@@ -9,7 +9,7 @@
 #include "bench/utils.h"
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
-#include <xnnpack/params-init.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/raddexpminusmax.h>
 #include <xnnpack/raddextexp.h>
 #include <xnnpack/raddstoreexpminusmax.h>
