@@ -153,13 +153,13 @@ class VAddCMicrokernelTester {
       const uint8_t b = u8rng();
 
       // Prepare parameters.
-      xnn_qu8_addsub_minmax_params quantization_params;
+      xnn_qu8_add_minmax_params quantization_params;
       init_params(
         &quantization_params,
         a_zero_point(), b_zero_point(), y_zero_point(),
         a_scale() / y_scale(), b_scale() / y_scale(),
         qmin(), qmax());
-      xnn_qu8_addsub_minmax_params scalar_quantization_params;
+      xnn_qu8_add_minmax_params scalar_quantization_params;
       xnn_init_qu8_add_minmax_scalar_params(
         &scalar_quantization_params,
         a_zero_point(), b_zero_point(), y_zero_point(),
@@ -214,13 +214,13 @@ class VAddCMicrokernelTester {
       const int8_t b = i8rng();
 
       // Prepare parameters.
-      xnn_qs8_addsub_minmax_params quantization_params;
+      xnn_qs8_add_minmax_params quantization_params;
       init_params(
         &quantization_params,
         int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),
         a_scale() / y_scale(), b_scale() / y_scale(),
         int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
-      xnn_qs8_addsub_minmax_params scalar_quantization_params;
+      xnn_qs8_add_minmax_params scalar_quantization_params;
       xnn_init_qs8_add_minmax_scalar_params(
         &scalar_quantization_params,
         int8_t(a_zero_point() - 0x80), int8_t(b_zero_point() - 0x80), int8_t(y_zero_point() - 0x80),

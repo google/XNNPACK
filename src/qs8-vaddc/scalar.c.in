@@ -8,7 +8,7 @@ $assert BATCH_TILE >= 1
 #include <assert.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/vaddsub.h>
+#include <xnnpack/vadd.h>
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
@@ -17,7 +17,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__scalar_x${BATCH_TILE}(
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;

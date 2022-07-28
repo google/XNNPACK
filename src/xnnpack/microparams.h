@@ -168,7 +168,7 @@ union xnn_u8_minmax_params {
 };
 
 
-// Conv Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
+// Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
 
 union xnn_qs8_minmax_params {
   struct {
@@ -427,9 +427,9 @@ union xnn_qu8_conv_minmax_params {
 };
 
 
-// Add/Sub Min+Max: used by quantized VADD[C] microkernels with MINMAX activation.
+// Add w. Min+Max: used by quantized VADD[C] microkernels with MINMAX activation.
 
-union xnn_qs8_addsub_minmax_params {
+union xnn_qs8_add_minmax_params {
   struct {
     int32_t bias;
     int32_t a_multiplier;
@@ -517,7 +517,7 @@ union xnn_qs8_addsub_minmax_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
-union xnn_qu8_addsub_minmax_params {
+union xnn_qu8_add_minmax_params {
   struct {
     int32_t bias;
     int32_t a_multiplier;
@@ -595,7 +595,7 @@ union xnn_qu8_addsub_minmax_params {
 };
 
 
-// Mul Min+Max: used by quantized VMUL[C] microkernels with MINMAX activation.
+// Mul w. Min+Max: used by quantized VMUL[C] microkernels with MINMAX activation.
 
 union xnn_qs8_mul_minmax_params {
   struct {
@@ -730,7 +730,7 @@ union xnn_qu8_mul_minmax_params {
 };
 
 
-// AvgPool Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
+// AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
 
 union xnn_qs8_avgpool_minmax_params {
   struct {

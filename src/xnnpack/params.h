@@ -1298,14 +1298,14 @@ typedef void (*xnn_qu8_vaddsub_minmax_ukernel_function)(
     const uint8_t* input_x,
     const uint8_t* input_y,
     uint8_t* output,
-    const union xnn_qu8_addsub_minmax_params* params);
+    const union xnn_qu8_add_minmax_params* params);
 
 typedef void (*xnn_qs8_vaddsub_minmax_ukernel_function)(
     size_t n,
     const int8_t* input_x,
     const int8_t* input_y,
     int8_t* output,
-    const union xnn_qs8_addsub_minmax_params* params);
+    const union xnn_qs8_add_minmax_params* params);
 
 typedef void (*xnn_qu8_vmul_minmax_ukernel_function)(
     size_t n,
@@ -1701,7 +1701,7 @@ typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
   float scale);
 
 typedef void (*xnn_init_qs8_addsub_minmax_params_fn)(
-  union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t a_zero_point,
   int8_t b_zero_point,
   int8_t output_zero_point,
@@ -1711,7 +1711,7 @@ typedef void (*xnn_init_qs8_addsub_minmax_params_fn)(
   int8_t output_max);
 
 typedef void (*xnn_init_qu8_addsub_minmax_params_fn)(
-  union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t a_zero_point,
   uint8_t b_zero_point,
   uint8_t output_zero_point,

@@ -722,7 +722,7 @@ DECLARE_INIT_U8_MINMAX_PARAMS_FUNCTION(xnn_init_u8_minmax_scalar_params)
 
 #define DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(fn_name)        \
   XNN_INTERNAL void fn_name(                                        \
-    union xnn_qs8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)], \
     int8_t x_zero_point,                                            \
     int8_t y_zero_point,                                            \
     int8_t output_zero_point,                                       \
@@ -749,7 +749,7 @@ DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_param
 
 #define DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(fn_name)        \
   XNN_INTERNAL void fn_name(                                        \
-    union xnn_qu8_addsub_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)], \
     uint8_t x_zero_point,                                           \
     uint8_t y_zero_point,                                           \
     uint8_t output_zero_point,                                      \

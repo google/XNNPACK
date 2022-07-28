@@ -11,7 +11,7 @@
 
 #include <wasm_simd128.h>
 
-#include <xnnpack/vaddsub.h>
+#include <xnnpack/vadd.h>
 
 
 void xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8(
@@ -19,7 +19,7 @@ void xnn_qu8_vadd_minmax_ukernel__wasmsimd_x8(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const v128_t vbias = wasm_v128_load64_splat(params->wasmsimd.bias);
   const v128_t va_multiplier = wasm_v128_load64_splat(params->wasmsimd.a_multiplier);

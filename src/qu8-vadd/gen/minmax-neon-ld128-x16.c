@@ -11,7 +11,7 @@
 
 #include <arm_neon.h>
 
-#include <xnnpack/vaddsub.h>
+#include <xnnpack/vadd.h>
 
 
 void xnn_qu8_vadd_minmax_ukernel__neon_ld128_x16(
@@ -19,7 +19,7 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld128_x16(
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
-    const union xnn_qu8_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   #if XNN_ARCH_ARM64
     const uint8x16_t va_zero_point = vld1q_dup_u8(&params->neon.a_zero_point);

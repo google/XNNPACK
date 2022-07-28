@@ -11,7 +11,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
-#include <xnnpack/vaddsub.h>
+#include <xnnpack/vadd.h>
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
@@ -39,7 +39,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__neon_${"ld128" if LD128 else 
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
-    const union xnn_${DATATYPE.lower()}_addsub_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   $if LD128:
     #if XNN_ARCH_ARM64

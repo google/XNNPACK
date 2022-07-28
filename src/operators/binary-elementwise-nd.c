@@ -223,8 +223,8 @@ enum xnn_status xnn_create_add_nd_qs8(
   }
 
   struct {
-    union xnn_qs8_addsub_minmax_params qs8_addsub;
-    union xnn_qs8_addsub_minmax_params qs8_raddsub;
+    union xnn_qs8_add_minmax_params qs8_addsub;
+    union xnn_qs8_add_minmax_params qs8_raddsub;
   } params;
   if (xnn_params.qs8.vadd.init.qs8_addsub != NULL) {
     xnn_params.qs8.vadd.init.qs8_addsub(
@@ -301,8 +301,8 @@ enum xnn_status xnn_create_add_nd_qu8(
   }
 
   struct {
-    union xnn_qu8_addsub_minmax_params qu8_addsub;
-    union xnn_qu8_addsub_minmax_params qu8_raddsub;
+    union xnn_qu8_add_minmax_params qu8_addsub;
+    union xnn_qu8_add_minmax_params qu8_raddsub;
   } params;
   if (xnn_params.qu8.vadd.init.qu8_addsub != NULL) {
     xnn_params.qu8.vadd.init.qu8_addsub(
@@ -737,8 +737,8 @@ enum xnn_status xnn_create_subtract_nd_qs8(
   }
 
   struct {
-    union xnn_qs8_addsub_minmax_params qs8_addsub;
-    union xnn_qs8_addsub_minmax_params qs8_raddsub;
+    union xnn_qs8_add_minmax_params qs8_addsub;
+    union xnn_qs8_add_minmax_params qs8_raddsub;
   } params;
   if (xnn_params.qs8.vadd.init.qs8_addsub != NULL) {
     xnn_params.qs8.vadd.init.qs8_addsub(
@@ -815,8 +815,8 @@ enum xnn_status xnn_create_subtract_nd_qu8(
   }
 
   struct {
-    union xnn_qu8_addsub_minmax_params qu8_addsub;
-    union xnn_qu8_addsub_minmax_params qu8_raddsub;
+    union xnn_qu8_add_minmax_params qu8_addsub;
+    union xnn_qu8_add_minmax_params qu8_raddsub;
   } params;
   if (xnn_params.qu8.vadd.init.qu8_addsub != NULL) {
     xnn_params.qu8.vadd.init.qu8_addsub(
