@@ -1578,26 +1578,26 @@ typedef void (*xnn_f32_vscale_ukernel_function)(
     float c);
 
 typedef void (*xnn_s16_rmaxabs_ukernel_function)(
-    size_t n,
+    size_t batch_size,
     const int16_t* x,
     uint16_t* y);
 
 typedef void (*xnn_s16_window_ukernel_function)(
-    size_t rows,
-    size_t channels,
+    size_t mr,
+    size_t batch_size,
     const int16_t* input,
     const int16_t* weights,
     uint32_t shift,
     int16_t* output);
 
 typedef void (*xnn_s16_vlshift_ukernel_function)(
-    size_t batch,
+    size_t batch_size,
     const int16_t* input,
     uint32_t shift,
     int16_t* output);
 
 typedef void (*xnn_cs16_vsquareabs_ukernel_function)(
-    size_t n,
+    size_t batch_size,
     const int16_t* input,
     uint32_t* output);
 

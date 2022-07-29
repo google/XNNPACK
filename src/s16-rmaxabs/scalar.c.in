@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE >= 1
+$assert BATCH_TILE >= 1
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -12,44 +12,44 @@ $assert CHANNEL_TILE >= 1
 #include <xnnpack/rmaxabs.h>
 
 
-void xnn_s16_rmaxabs_ukernel__scalar_x${CHANNEL_TILE}(
-    size_t c,
+void xnn_s16_rmaxabs_ukernel__scalar_x${BATCH_TILE}(
+    size_t batch,
     const int16_t* input,
     uint16_t* output) {
 
-  assert(c > 0);
+  assert(batch > 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  $for C in range(CHANNEL_TILE):
-    int32_t vmax${C} = 0;
+  $for N in range(BATCH_TILE):
+    int32_t vmax${N} = 0;
 
-  $if CHANNEL_TILE > 1:
-    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
-      $for C in range(CHANNEL_TILE):
-        const int32_t vi${C} = (int32_t) input[${C}];
-      input += ${CHANNEL_TILE};
+  $if BATCH_TILE > 1:
+    for (; batch >= ${BATCH_TILE}; batch -= ${BATCH_TILE}) {
+      $for N in range(BATCH_TILE):
+        const int32_t vi${N} = (int32_t) input[${N}];
+      input += ${BATCH_TILE};
 
-      $for C in range(CHANNEL_TILE):
-        const int32_t vabs${C} = vi${C} >= 0 ? vi${C} : -vi${C};
+      $for N in range(BATCH_TILE):
+        const int32_t vabs${N} = vi${N} >= 0 ? vi${N} : -vi${N};
 
-      $for C in range(CHANNEL_TILE):
-        vmax${C} = math_max_s32(vmax${C}, vabs${C});
+      $for N in range(BATCH_TILE):
+        vmax${N} = math_max_s32(vmax${N}, vabs${N});
     }
 
-    $CHANNEL_SLICE = 1
-    $while CHANNEL_SLICE < CHANNEL_TILE:
-      $for S in range(0, CHANNEL_TILE, CHANNEL_SLICE * 2):
-        $if S + CHANNEL_SLICE < CHANNEL_TILE:
-          vmax${S} = math_max_s32(vmax${S}, vmax${S + CHANNEL_SLICE});
-      $CHANNEL_SLICE *= 2
+    $BATCH_SLICE = 1
+    $while BATCH_SLICE < BATCH_TILE:
+      $for S in range(0, BATCH_TILE, BATCH_SLICE * 2):
+        $if S + BATCH_SLICE < BATCH_TILE:
+          vmax${S} = math_max_s32(vmax${S}, vmax${S + BATCH_SLICE});
+      $BATCH_SLICE *= 2
 
-  if (c != 0) {
+  if (batch != 0) {
     do {
       const int32_t vi = (int32_t) *input++;
       const int32_t vabs = vi >= 0 ? vi : -vi;
       vmax0 = math_max_s32(vmax0, vabs);
-    } while (--c != 0);
+    } while (--batch != 0);
   }
   *output = (uint16_t) vmax0;
 }

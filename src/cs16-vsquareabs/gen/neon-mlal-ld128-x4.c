@@ -4,8 +4,8 @@
 //
 // Copyright 2022 Google LLC
 //
-// Tacchis source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of tacchis source tree.
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stddef.h>
@@ -17,17 +17,17 @@
 
 
 void xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4(
-    size_t n,
+    size_t batch,
     const int16_t* input,
     uint32_t* output) {
 
-  assert(n != 0);
+  assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
 
 
   // Remainder of full vectors
-  for (; n >= 4; n -= 4) {
+  for (; batch >= 4; batch -= 4) {
     const int16x4x2_t vi = vld2_s16(input); input += 8;
 
     int32x4_t vacc = vmull_s16(vi.val[0], vi.val[0]);
@@ -38,18 +38,18 @@ void xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4(
   }
 
   // Remainder of 1 to 3 elements
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     const int16x4x2_t vi = vld2_s16(input);
 
     int32x4_t vacc = vmull_s16(vi.val[0], vi.val[0]);
     vacc = vmlal_s16(vacc, vi.val[1], vi.val[1]);
 
     uint32x2_t vacc_lo = vreinterpret_u32_s32(vget_low_s32(vacc));
-    if (n & 2) {
+    if (batch & 2) {
       vst1_u32(output, vacc_lo); output += 2;
       vacc_lo = vreinterpret_u32_s32(vget_high_s32(vacc));
     }
-    if (n & 1) {
+    if (batch & 1) {
       vst1_lane_u32(output, vacc_lo, 0);
     }
   }

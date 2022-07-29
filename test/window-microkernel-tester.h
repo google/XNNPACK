@@ -32,14 +32,14 @@ class WindowMicrokernelTester {
     return this->rows_;
   }
 
-  inline WindowMicrokernelTester& channels(size_t channels) {
-    assert(channels != 0);
-    this->channels_ = channels;
+  inline WindowMicrokernelTester& batch(size_t batch) {
+    assert(batch != 0);
+    this->batch_ = batch;
     return *this;
   }
 
-  inline size_t channels() const {
-    return this->channels_;
+  inline size_t batch() const {
+    return this->batch_;
   }
 
   inline WindowMicrokernelTester& shift(uint32_t shift) {
@@ -75,10 +75,10 @@ class WindowMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> x((channels() * rows()) + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t, AlignedAllocator<int16_t, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y((channels() * rows()) + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y_ref(channels() * rows());
+    std::vector<int16_t> x((batch() * rows()) + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t, AlignedAllocator<int16_t, 64>> w(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> y((batch() * rows()) + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> y_ref(batch() * rows());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(i16rng));
@@ -87,26 +87,26 @@ class WindowMicrokernelTester {
       const int16_t* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results.
-      for (size_t n = 0; n < rows(); n++) {
-        for (size_t c = 0; c < channels(); c++) {
-          const int16_t x_value = x_data[n * channels() + c];
-          int32_t value = ((int32_t) x_value * (int32_t) w[c]) >> shift();
+      for (size_t m = 0; m < rows(); m++) {
+        for (size_t n = 0; n < batch(); n++) {
+          const int16_t x_value = x_data[m * batch() + n];
+          int32_t value = ((int32_t) x_value * (int32_t) w[n]) >> shift();
           value = std::min(value, (int32_t) std::numeric_limits<int16_t>::max());
           value = std::max(value, (int32_t) std::numeric_limits<int16_t>::min());
-          y_ref[n * channels() + c] = value;
+          y_ref[m * batch() + n] = value;
         }
       }
 
       // Call optimized micro-kernel.
-      window(rows(), channels(), x_data, w.data(), shift(), y.data());
+      window(rows(), batch(), x_data, w.data(), shift(), y.data());
 
       // Verify results.
-      for (size_t n = 0; n < rows(); n++) {
-        for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(y[n * channels() + c], y_ref[n * channels() + c])
-            << "at row " << n << " / " << rows()
+      for (size_t m = 0; m < rows(); m++) {
+        for (size_t n = 0; n < batch(); n++) {
+          ASSERT_EQ(y[m * batch() + n], y_ref[m * batch() + n])
+            << "at row " << m << " / " << rows()
             << ", shift " << shift()
-            << ", channel " << c << " / " << channels();
+            << ", batch " << n << " / " << batch();
         }
       }
     }
@@ -114,7 +114,7 @@ class WindowMicrokernelTester {
 
  private:
   size_t rows_{1};
-  size_t channels_{1};
+  size_t batch_{1};
   uint32_t shift_{12};
   bool inplace_{false};
   size_t iterations_{15};

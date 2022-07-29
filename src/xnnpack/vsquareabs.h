@@ -18,7 +18,7 @@ extern "C" {
 
 #define DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    size_t n,                                             \
+    size_t batch_size,                                    \
     const int16_t* input,                                 \
     uint32_t* output);
 

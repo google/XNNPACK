@@ -603,10 +603,6 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
-  src/s16-vlshift/gen/scalar-x1.c
-  src/s16-vlshift/gen/scalar-x2.c
-  src/s16-vlshift/gen/scalar-x3.c
-  src/s16-vlshift/gen/scalar-x4.c
   src/cs16-vsquareabs/gen/scalar-x1.c
   src/cs16-vsquareabs/gen/scalar-x2.c
   src/cs16-vsquareabs/gen/scalar-x3.c
@@ -1343,6 +1339,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/scalar-x2.c
   src/s16-rmaxabs/gen/scalar-x3.c
   src/s16-rmaxabs/gen/scalar-x4.c
+  src/s16-vlshift/gen/scalar-x1.c
+  src/s16-vlshift/gen/scalar-x2.c
+  src/s16-vlshift/gen/scalar-x3.c
+  src/s16-vlshift/gen/scalar-x4.c
   src/s16-window/gen/scalar-x1.c
   src/s16-window/gen/scalar-x2.c
   src/s16-window/gen/scalar-x3.c
@@ -1615,10 +1615,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x8.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x12.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x16.c
-  src/s16-vlshift/gen/neon-x8.c
-  src/s16-vlshift/gen/neon-x16.c
-  src/s16-vlshift/gen/neon-x24.c
-  src/s16-vlshift/gen/neon-x32.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x8.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x24.c
@@ -2655,6 +2651,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/neon-x16.c
   src/s16-rmaxabs/gen/neon-x24.c
   src/s16-rmaxabs/gen/neon-x32.c
+  src/s16-vlshift/gen/neon-x8.c
+  src/s16-vlshift/gen/neon-x16.c
+  src/s16-vlshift/gen/neon-x24.c
+  src/s16-vlshift/gen/neon-x32.c
   src/s16-window/gen/neon-x8.c
   src/s16-window/gen/neon-x16.c
   src/s16-window/gen/neon-x24.c
@@ -7020,9 +7020,9 @@ ADD_LIBRARY(allocator OBJECT ${ALLOCATOR_SRCS})
 # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
 SET_TARGET_PROPERTIES(allocator PROPERTIES C_EXTENSIONS YES)
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
+ADD_LIBRARY(microparams_init OBJECT "src/microparams-init.c"
 ADD_LIBRARY(normalization OBJECT src/normalization.c)
-ADD_LIBRARY(packing OBJECT src/packing.c)
-ADD_LIBRARY(microparams_init OBJECT "src/microparams-init.c")
+ADD_LIBRARY(packing OBJECT src/packing.c))
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(cache OBJECT "src/cache.c")

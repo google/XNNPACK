@@ -17,23 +17,23 @@
 
 void xnn_s16_window_ukernel__scalar_x3(
     size_t rows,
-    size_t channels,
+    size_t batch_size,
     const int16_t* input,
     const int16_t* weights,
     uint32_t shift,
     int16_t* output) {
 
   assert(rows > 0);
-  assert(channels != 0);
+  assert(batch_size != 0);
   assert(input != NULL);
   assert(weights != NULL);
   assert(shift < 32);
   assert(output != NULL);
 
   do {
-    size_t c = channels;
+    size_t n = batch_size;
     const int16_t* w = weights;
-    for (; c >= 3; c -= 3) {
+    for (; n >= 3; n -= 3) {
       const int16_t vi0 = input[0];
       const int16_t vi1 = input[1];
       const int16_t vi2 = input[2];
@@ -67,7 +67,7 @@ void xnn_s16_window_ukernel__scalar_x3(
       output += 3;
     }
 
-    if XNN_UNLIKELY(c != 0) {
+    if XNN_UNLIKELY(n != 0) {
       do {
         const int32_t vi = (int32_t) *input++;
         const int32_t vw = (int32_t) *w++;
@@ -76,7 +76,7 @@ void xnn_s16_window_ukernel__scalar_x3(
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         *output++ = (int16_t) vout;
-      } while (--c != 0);
+      } while (--n != 0);
     }
   } while (--rows != 0);
 }

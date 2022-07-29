@@ -55,22 +55,22 @@ class VSquareAbsMicrokernelTester {
       std::fill(y.begin(), y.end(), INT32_C(0x12345678));
 
       // Compute reference results.
-      for (size_t c = 0; c < batch_size(); c++) {
-        const int16_t r = x[c * 2];
-        const int16_t i = x[c * 2 + 1];
+      for (size_t n = 0; n < batch_size(); n++) {
+        const int16_t r = x[n * 2];
+        const int16_t i = x[n * 2 + 1];
         uint32_t rsquare = static_cast<uint32_t>(static_cast<int32_t>(r) * static_cast<int32_t>(r));
         uint32_t isquare = static_cast<uint32_t>(static_cast<int32_t>(i) * static_cast<int32_t>(i));
         uint32_t value = rsquare + isquare;
-        y_ref[c] = value;
+        y_ref[n] = value;
       }
 
       // Call optimized micro-kernel.
       vsquareabs(batch_size(), x.data(), y.data());
 
       // Verify results.
-      for (size_t c = 0; c < batch_size(); c++) {
-        ASSERT_EQ(y[c], y_ref[c])
-          << ", channel " << c << " / " << batch_size();
+      for (size_t n = 0; n < batch_size(); n++) {
+        ASSERT_EQ(y[n], y_ref[n])
+          << ", batch " << n << " / " << batch_size();
       }
     }
   }

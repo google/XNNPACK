@@ -18,7 +18,7 @@ extern "C" {
 #define DECLARE_S16_WINDOW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
     size_t rows,                                     \
-    size_t channels,                                 \
+    size_t batch_size,                               \
     const int16_t* input,                            \
     const int16_t* weights,                          \
     uint32_t shift,                                  \

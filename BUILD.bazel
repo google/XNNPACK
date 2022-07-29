@@ -616,10 +616,6 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
-    "src/s16-vlshift/gen/scalar-x1.c",
-    "src/s16-vlshift/gen/scalar-x2.c",
-    "src/s16-vlshift/gen/scalar-x3.c",
-    "src/s16-vlshift/gen/scalar-x4.c",
     "src/cs16-vsquareabs/gen/scalar-x1.c",
     "src/cs16-vsquareabs/gen/scalar-x2.c",
     "src/cs16-vsquareabs/gen/scalar-x3.c",
@@ -1356,6 +1352,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s16-rmaxabs/gen/scalar-x2.c",
     "src/s16-rmaxabs/gen/scalar-x3.c",
     "src/s16-rmaxabs/gen/scalar-x4.c",
+    "src/s16-vlshift/gen/scalar-x1.c",
+    "src/s16-vlshift/gen/scalar-x2.c",
+    "src/s16-vlshift/gen/scalar-x3.c",
+    "src/s16-vlshift/gen/scalar-x4.c",
     "src/s16-window/gen/scalar-x1.c",
     "src/s16-window/gen/scalar-x2.c",
     "src/s16-window/gen/scalar-x3.c",
@@ -3102,10 +3102,6 @@ PROD_NEON_MICROKERNEL_SRCS = [
 ]
 
 ALL_NEON_MICROKERNEL_SRCS = [
-    "src/s16-vlshift/gen/neon-x8.c",
-    "src/s16-vlshift/gen/neon-x16.c",
-    "src/s16-vlshift/gen/neon-x24.c",
-    "src/s16-vlshift/gen/neon-x32.c",
     "src/cs16-vsquareabs/gen/neon-mlal-ld128-x4.c",
     "src/cs16-vsquareabs/gen/neon-mlal-ld128-x8.c",
     "src/cs16-vsquareabs/gen/neon-mlal-ld128-x12.c",
@@ -4146,6 +4142,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/s16-rmaxabs/gen/neon-x16.c",
     "src/s16-rmaxabs/gen/neon-x24.c",
     "src/s16-rmaxabs/gen/neon-x32.c",
+    "src/s16-vlshift/gen/neon-x8.c",
+    "src/s16-vlshift/gen/neon-x16.c",
+    "src/s16-vlshift/gen/neon-x24.c",
+    "src/s16-vlshift/gen/neon-x32.c",
     "src/s16-window/gen/neon-x8.c",
     "src/s16-window/gen/neon-x16.c",
     "src/s16-window/gen/neon-x24.c",
@@ -8518,13 +8518,13 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/rmax.h",
     "src/xnnpack/rmaxabs.h",
     "src/xnnpack/spmm.h",
-    "src/xnnpack/vlshift.h",
     "src/xnnpack/transpose.h",
     "src/xnnpack/unpool.h",
     "src/xnnpack/vadd.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
     "src/xnnpack/vlrelu.h",
+    "src/xnnpack/vlshift.h",
     "src/xnnpack/vmul.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",

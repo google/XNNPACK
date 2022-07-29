@@ -17,7 +17,7 @@ extern "C" {
 
 #define DECLARE_S16_RMAXABS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                          \
-    size_t channels,                                  \
+    size_t batch_size,                                \
     const int16_t* input,                             \
     uint16_t* output);
 

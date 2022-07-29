@@ -18,36 +18,36 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_RMAXABS__NEON_X8, channels_eq_8) {
+  TEST(S16_RMAXABS__NEON_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     RMaxAbsMicrokernelTester()
-      .channels(8)
+      .batch(8)
       .Test(xnn_s16_rmaxabs_ukernel__neon_x8);
   }
 
-  TEST(S16_RMAXABS__NEON_X8, channels_div_8) {
+  TEST(S16_RMAXABS__NEON_X8, batch_div_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 16; channels < 80; channels += 8) {
+    for (size_t batch = 16; batch < 80; batch += 8) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X8, channels_lt_8) {
+  TEST(S16_RMAXABS__NEON_X8, batch_lt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 8; channels++) {
+    for (size_t batch = 1; batch < 8; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X8, channels_gt_8) {
+  TEST(S16_RMAXABS__NEON_X8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 9; channels < 16; channels++) {
+    for (size_t batch = 9; batch < 16; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x8);
     }
   }
@@ -55,36 +55,36 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_RMAXABS__NEON_X16, channels_eq_16) {
+  TEST(S16_RMAXABS__NEON_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     RMaxAbsMicrokernelTester()
-      .channels(16)
+      .batch(16)
       .Test(xnn_s16_rmaxabs_ukernel__neon_x16);
   }
 
-  TEST(S16_RMAXABS__NEON_X16, channels_div_16) {
+  TEST(S16_RMAXABS__NEON_X16, batch_div_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 32; channels < 160; channels += 16) {
+    for (size_t batch = 32; batch < 160; batch += 16) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X16, channels_lt_16) {
+  TEST(S16_RMAXABS__NEON_X16, batch_lt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    for (size_t batch = 1; batch < 16; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X16, channels_gt_16) {
+  TEST(S16_RMAXABS__NEON_X16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 17; channels < 32; channels++) {
+    for (size_t batch = 17; batch < 32; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x16);
     }
   }
@@ -92,36 +92,36 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_RMAXABS__NEON_X24, channels_eq_24) {
+  TEST(S16_RMAXABS__NEON_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON;
     RMaxAbsMicrokernelTester()
-      .channels(24)
+      .batch(24)
       .Test(xnn_s16_rmaxabs_ukernel__neon_x24);
   }
 
-  TEST(S16_RMAXABS__NEON_X24, channels_div_24) {
+  TEST(S16_RMAXABS__NEON_X24, batch_div_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 48; channels < 240; channels += 24) {
+    for (size_t batch = 48; batch < 240; batch += 24) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X24, channels_lt_24) {
+  TEST(S16_RMAXABS__NEON_X24, batch_lt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 24; channels++) {
+    for (size_t batch = 1; batch < 24; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X24, channels_gt_24) {
+  TEST(S16_RMAXABS__NEON_X24, batch_gt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 25; channels < 48; channels++) {
+    for (size_t batch = 25; batch < 48; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x24);
     }
   }
@@ -129,145 +129,145 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_RMAXABS__NEON_X32, channels_eq_32) {
+  TEST(S16_RMAXABS__NEON_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON;
     RMaxAbsMicrokernelTester()
-      .channels(32)
+      .batch(32)
       .Test(xnn_s16_rmaxabs_ukernel__neon_x32);
   }
 
-  TEST(S16_RMAXABS__NEON_X32, channels_div_32) {
+  TEST(S16_RMAXABS__NEON_X32, batch_div_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 64; channels < 320; channels += 32) {
+    for (size_t batch = 64; batch < 320; batch += 32) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X32, channels_lt_32) {
+  TEST(S16_RMAXABS__NEON_X32, batch_lt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; channels++) {
+    for (size_t batch = 1; batch < 32; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_RMAXABS__NEON_X32, channels_gt_32) {
+  TEST(S16_RMAXABS__NEON_X32, batch_gt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 33; channels < 64; channels++) {
+    for (size_t batch = 33; batch < 64; batch++) {
       RMaxAbsMicrokernelTester()
-        .channels(channels)
+        .batch(batch)
         .Test(xnn_s16_rmaxabs_ukernel__neon_x32);
     }
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-TEST(S16_RMAXABS__SCALAR_X1, channels_eq_1) {
+TEST(S16_RMAXABS__SCALAR_X1, batch_eq_1) {
   RMaxAbsMicrokernelTester()
-    .channels(1)
+    .batch(1)
     .Test(xnn_s16_rmaxabs_ukernel__scalar_x1);
 }
 
-TEST(S16_RMAXABS__SCALAR_X1, channels_gt_1) {
-  for (size_t channels = 2; channels < 10; channels++) {
+TEST(S16_RMAXABS__SCALAR_X1, batch_gt_1) {
+  for (size_t batch = 2; batch < 10; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x1);
   }
 }
 
 
-TEST(S16_RMAXABS__SCALAR_X2, channels_eq_2) {
+TEST(S16_RMAXABS__SCALAR_X2, batch_eq_2) {
   RMaxAbsMicrokernelTester()
-    .channels(2)
+    .batch(2)
     .Test(xnn_s16_rmaxabs_ukernel__scalar_x2);
 }
 
-TEST(S16_RMAXABS__SCALAR_X2, channels_div_2) {
-  for (size_t channels = 4; channels < 20; channels += 2) {
+TEST(S16_RMAXABS__SCALAR_X2, batch_div_2) {
+  for (size_t batch = 4; batch < 20; batch += 2) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x2);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X2, channels_lt_2) {
-  for (size_t channels = 1; channels < 2; channels++) {
+TEST(S16_RMAXABS__SCALAR_X2, batch_lt_2) {
+  for (size_t batch = 1; batch < 2; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x2);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X2, channels_gt_2) {
-  for (size_t channels = 3; channels < 4; channels++) {
+TEST(S16_RMAXABS__SCALAR_X2, batch_gt_2) {
+  for (size_t batch = 3; batch < 4; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x2);
   }
 }
 
 
-TEST(S16_RMAXABS__SCALAR_X3, channels_eq_3) {
+TEST(S16_RMAXABS__SCALAR_X3, batch_eq_3) {
   RMaxAbsMicrokernelTester()
-    .channels(3)
+    .batch(3)
     .Test(xnn_s16_rmaxabs_ukernel__scalar_x3);
 }
 
-TEST(S16_RMAXABS__SCALAR_X3, channels_div_3) {
-  for (size_t channels = 6; channels < 30; channels += 3) {
+TEST(S16_RMAXABS__SCALAR_X3, batch_div_3) {
+  for (size_t batch = 6; batch < 30; batch += 3) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x3);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X3, channels_lt_3) {
-  for (size_t channels = 1; channels < 3; channels++) {
+TEST(S16_RMAXABS__SCALAR_X3, batch_lt_3) {
+  for (size_t batch = 1; batch < 3; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x3);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X3, channels_gt_3) {
-  for (size_t channels = 4; channels < 6; channels++) {
+TEST(S16_RMAXABS__SCALAR_X3, batch_gt_3) {
+  for (size_t batch = 4; batch < 6; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x3);
   }
 }
 
 
-TEST(S16_RMAXABS__SCALAR_X4, channels_eq_4) {
+TEST(S16_RMAXABS__SCALAR_X4, batch_eq_4) {
   RMaxAbsMicrokernelTester()
-    .channels(4)
+    .batch(4)
     .Test(xnn_s16_rmaxabs_ukernel__scalar_x4);
 }
 
-TEST(S16_RMAXABS__SCALAR_X4, channels_div_4) {
-  for (size_t channels = 8; channels < 40; channels += 4) {
+TEST(S16_RMAXABS__SCALAR_X4, batch_div_4) {
+  for (size_t batch = 8; batch < 40; batch += 4) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x4);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X4, channels_lt_4) {
-  for (size_t channels = 1; channels < 4; channels++) {
+TEST(S16_RMAXABS__SCALAR_X4, batch_lt_4) {
+  for (size_t batch = 1; batch < 4; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x4);
   }
 }
 
-TEST(S16_RMAXABS__SCALAR_X4, channels_gt_4) {
-  for (size_t channels = 5; channels < 8; channels++) {
+TEST(S16_RMAXABS__SCALAR_X4, batch_gt_4) {
+  for (size_t batch = 5; batch < 8; batch++) {
     RMaxAbsMicrokernelTester()
-      .channels(channels)
+      .batch(batch)
       .Test(xnn_s16_rmaxabs_ukernel__scalar_x4);
   }
 }

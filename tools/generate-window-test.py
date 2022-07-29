@@ -30,52 +30,52 @@ def split_ukernel_name(name):
   match = re.fullmatch(r"xnn_s16_window_ukernel__(.+)_x(\d+)", name)
   assert match is not None
   row_tile = 1
-  channel_tile = int(match.group(2))
+  batch_tile = int(match.group(2))
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
-  return row_tile, channel_tile, arch, isa
+  return row_tile, batch_tile, arch, isa
 
 
 WINDOW_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   WindowMicrokernelTester()
     .rows(${BATCH_TILE})
-    .channels(${CHANNEL_TILE})
+    .batch(${BATCH_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
+$if BATCH_TILE > 1:
+  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
+    for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
       WindowMicrokernelTester()
         .rows(${BATCH_TILE})
-        .channels(channels)
+        .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
+  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+    for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
       WindowMicrokernelTester()
         .rows(${BATCH_TILE})
-        .channels(channels)
+        .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
 
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
+TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+  for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
     WindowMicrokernelTester()
       .rows(${BATCH_TILE})
-      .channels(channels)
+      .batch(batch)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -85,10 +85,10 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = 1; rows < ${BATCH_TILE}; rows++) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+      for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
         WindowMicrokernelTester()
           .rows(rows)
-          .channels(channels)
+          .batch(batch)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -98,10 +98,10 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t rows = ${BATCH_TILE*2}; rows <= ${BATCH_TILE*4}; rows += ${BATCH_TILE}) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+      for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
         WindowMicrokernelTester()
           .rows(rows)
-          .channels(channels)
+          .batch(batch)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -111,10 +111,10 @@ TEST(${TEST_NAME}, rows_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = ${BATCH_TILE+1}; rows < ${BATCH_TILE*2}; rows++) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+    for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
       WindowMicrokernelTester()
         .rows(rows)
-        .channels(channels)
+        .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -124,10 +124,10 @@ TEST(${TEST_NAME}, inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t rows = 1; rows <= ${BATCH_TILE*3}; rows += ${max(1, BATCH_TILE-1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE*5}; channels += ${max(1, CHANNEL_TILE-1)}) {
+    for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
       WindowMicrokernelTester()
         .rows(rows)
-        .channels(channels)
+        .batch(batch)
         .inplace(true)
         .iterations(1)
         .Test(${", ".join(TEST_ARGS)});
@@ -141,7 +141,7 @@ TEST(${TEST_NAME}, shift) {
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
       .rows(${BATCH_TILE})
-      .channels(${CHANNEL_TILE})
+      .batch(${BATCH_TILE})
       .shift(shift)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -150,14 +150,14 @@ TEST(${TEST_NAME}, shift) {
 """
 
 
-def generate_test_cases(ukernel, row_tile, channel_tile, isa):
+def generate_test_cases(ukernel, row_tile, batch_tile, isa):
   """Generates all tests cases for a Window micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     row_tile: Number of rows (pixels) processed per one iteration of the outer
               loop of the micro-kernel.
-    channel_tile: Number of channels processed per one iteration of the inner
+    batch_tile: Number of batch processed per one iteration of the inner
                   loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
@@ -172,7 +172,7 @@ def generate_test_cases(ukernel, row_tile, channel_tile, isa):
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
       "BATCH_TILE": row_tile,
-      "CHANNEL_TILE": channel_tile,
+      "BATCH_TILE": batch_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -208,12 +208,12 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      row_tile, channel_tile, arch, isa = split_ukernel_name(name)
+      row_tile, batch_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, row_tile, channel_tile, isa)
+      test_case = generate_test_cases(name, row_tile, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

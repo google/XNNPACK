@@ -75,20 +75,20 @@ class VLShiftMicrokernelTester {
       std::fill(y.begin(), y.end(), INT32_C(0x12345678));
 
       // Compute reference results.
-      for (size_t c = 0; c < batch(); c++) {
-        const uint16_t i = static_cast<uint16_t>(x_data[c]);
+      for (size_t n = 0; n < batch(); n++) {
+        const uint16_t i = static_cast<uint16_t>(x_data[n]);
         uint16_t value = i << shift();
-        y_ref[c] = reinterpret_cast<uint16_t>(value);
+        y_ref[n] = reinterpret_cast<uint16_t>(value);
       }
 
       // Call optimized micro-kernel.
       vlshift(batch(), x_data, shift(), y.data());
 
       // Verify results.
-      for (size_t c = 0; c < batch(); c++) {
-        ASSERT_EQ(y[c], y_ref[c])
+      for (size_t n = 0; n < batch(); n++) {
+        ASSERT_EQ(y[n], y_ref[n])
           << ", shift " << shift()
-          << ", batch " << c << " / " << batch();
+          << ", batch " << n << " / " << batch();
       }
     }
   }
