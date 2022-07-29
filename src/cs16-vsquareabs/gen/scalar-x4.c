@@ -16,15 +16,15 @@
 
 
 void xnn_cs16_vsquareabs_ukernel__scalar_x4(
-    size_t channels,
+    size_t n,
     const int16_t* input,
     uint32_t* output) {
 
-  assert(channels != 0);
+  assert(n != 0);
   assert(input != NULL);
   assert(output != NULL);
 
- for (; channels >= 4; channels -= 4) {
+ for (; n >= 4; n -= 4) {
    const int32_t vr0 = (int32_t) input[0];
    const int32_t vi0 = (int32_t) input[1];
    const int32_t vr1 = (int32_t) input[2];
@@ -56,7 +56,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x4(
    output += 4;
  }
 
- if XNN_UNLIKELY(channels != 0) {
+ if XNN_UNLIKELY(n != 0) {
    do {
      const int32_t vr = (int32_t) input[0];
      const int32_t vi = (int32_t) input[1];
@@ -68,6 +68,6 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x4(
      const uint32_t vout = vrsquare + visquare;
 
      *output++ = vout;
-   } while (--channels != 0);
+   } while (--n != 0);
  }
 }

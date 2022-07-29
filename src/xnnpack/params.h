@@ -1597,7 +1597,7 @@ typedef void (*xnn_s16_vlshift_ukernel_function)(
     int16_t* output);
 
 typedef void (*xnn_cs16_vsquareabs_ukernel_function)(
-    size_t channels,
+    size_t n,
     const int16_t* input,
     uint32_t* output);
 

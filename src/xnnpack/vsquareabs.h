@@ -18,7 +18,7 @@ extern "C" {
 
 #define DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
-    size_t channels,                                      \
+    size_t n,                                             \
     const int16_t* input,                                 \
     uint32_t* output);
 
@@ -27,6 +27,11 @@ DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__scalar_x1)
 DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__scalar_x2)
 DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__scalar_x3)
 DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__scalar_x4)
+
+DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4)
+DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8)
+DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x12)
+DECLARE_CS16_VSQUAREABS_UKERNEL_FUNCTION(xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16)
 
 #ifdef __cplusplus
 }  // extern "C"

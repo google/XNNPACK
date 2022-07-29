@@ -9,3 +9,9 @@
 - name: xnn_cs16_vsquareabs_ukernel__scalar_x2
 - name: xnn_cs16_vsquareabs_ukernel__scalar_x3
 - name: xnn_cs16_vsquareabs_ukernel__scalar_x4
+
+# NEON
+- name: xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4
+- name: xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8
+- name: xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x12
+- name: xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16

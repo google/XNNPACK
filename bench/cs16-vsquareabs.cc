@@ -25,16 +25,16 @@ void vsquareabs(
   if (isa_check && !isa_check(state)) {
     return;
   }
-  const size_t channels = state.range(0);
+  const size_t batch_size = state.range(0);
 
   std::vector<int16_t, AlignedAllocator<int16_t, 64>> input(
-      channels * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> output(channels);
+      batch_size * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> output(batch_size);
   std::iota(input.begin(), input.end(), 0);
   std::iota(output.begin(), output.end(), 0);
 
   for (auto _ : state) {
-    vsquareabs(channels, input.data(), output.data());
+    vsquareabs(batch_size, input.data(), output.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -45,7 +45,7 @@ void vsquareabs(
 
 static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"channels"});
+  b->ArgNames({"batch_size"});
   b->Args({32});
   b->Args({64});
   b->Args({117});
@@ -53,6 +53,17 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({1000});
   b->Args({10000});
 }
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x4, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4, benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x8, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8, benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x12, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x12, benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x16, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16, benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 BENCHMARK_CAPTURE(vsquareabs, cs16_scalar_x1, xnn_cs16_vsquareabs_ukernel__scalar_x1)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
