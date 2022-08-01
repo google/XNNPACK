@@ -14,7 +14,9 @@
 #else
 // This define needs to come first because errno include features.h and would have defined macros that lead to
 // sys/mman.h not having mremap.
+#if !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
+#endif
 #include <errno.h>
 #include <sys/mman.h>
 #include <unistd.h>
