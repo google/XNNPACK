@@ -887,6 +887,10 @@ static void init(void) {
             xnn_params.f32.gemm.init.f32 = xnn_init_f32_minmax_scalar_params;
             xnn_params.f32.gemm.mr = 4;
             xnn_params.f32.gemm.nr = 8;
+            #if XNN_ENABLE_JIT
+              xnn_params.f32.gemm.generator.gemm = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75);
+              xnn_params.f32.gemm.generator.igemm = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75);
+            #endif
             break;
         }
         #if XNN_MAX_UARCH_TYPES > 1
@@ -3009,6 +3013,10 @@ static void init(void) {
           xnn_params.f32.gemm.init.f32 = xnn_init_f32_minmax_scalar_params;
           xnn_params.f32.gemm.mr = 6;
           xnn_params.f32.gemm.nr = 8;
+          #if XNN_ENABLE_JIT
+            xnn_params.f32.gemm.generator.gemm = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128);
+            xnn_params.f32.gemm.generator.igemm = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128);
+          #endif
           break;
       }
       #if XNN_MAX_UARCH_TYPES > 1

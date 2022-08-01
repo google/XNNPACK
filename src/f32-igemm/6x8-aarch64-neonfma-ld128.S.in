@@ -5,6 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
+# LINT.IfChange
 # void xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
@@ -378,6 +379,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
+# LINT.ThenChange(6x8-aarch64-neonfma-ld128.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

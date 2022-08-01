@@ -1393,6 +1393,8 @@ class ConvolutionOperatorTester {
 
       #if XNN_PLATFORM_JIT
         if (use_jit()) {
+          // Check that we actually generated code.
+          ASSERT_GT(code_cache.cache.code.size, 0);
           xnn_finalize_code_memory(&code_cache.cache.code);
         }
       #endif
@@ -1410,6 +1412,14 @@ class ConvolutionOperatorTester {
       VerifyNHWCxF32(output, output_ref, output_min, output_max);
 
       if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        #if XNN_PLATFORM_JIT
+          xnn_code_cache inner_code_cache;
+          if (use_jit()) {
+            xnn_init_code_cache(&inner_code_cache);
+            caches.code_cache = &inner_code_cache;
+          }
+        #endif
         // To test weights cache, we create the operator with the same parameters, and setup with a different output.
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size = weights_cache.cache.weights.size;
@@ -1429,6 +1439,15 @@ class ConvolutionOperatorTester {
             &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
+
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            // Check that we actually generated code.
+            ASSERT_GT(inner_code_cache.cache.code.size, 0);
+            xnn_finalize_code_memory(&inner_code_cache.cache.code);
+          }
+        #endif
+
         std::vector<float> output2(output.size(), nanf(""));
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_convolution2d_nhwc_f32(
@@ -1445,6 +1464,11 @@ class ConvolutionOperatorTester {
         ASSERT_EQ(old_weights_cache_size, weights_cache.cache.weights.size);
 
         VerifyNHWCxF32(output2, output_ref, output_min, output_max);
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            xnn_release_code_cache(&inner_code_cache);
+          }
+        #endif
       }
 
       #if XNN_PLATFORM_JIT

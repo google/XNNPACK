@@ -1886,9 +1886,9 @@ typedef void (*xnn_init_qc8_scale_params_fn)(
   void* packed_w);
 
 typedef enum xnn_status (*xnn_jit_gemm_code_generator_function)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc, size_t kc, const void *params);
+    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
 typedef enum xnn_status (*xnn_jit_igemm_code_generator_function)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc, size_t kc, size_t ks, const void *params);
+    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void *params);
 
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];

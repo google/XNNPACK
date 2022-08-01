@@ -860,10 +860,16 @@ static void GEMMBenchmark(benchmark::State& state,
     GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75, 4, 8, 1, 1,
       xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
   }
+  static void jit_f32_gemm_6x8__aarch64_neonfma_ld128(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state, xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128, 6, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
   BENCHMARK_GEMM(jit_f32_gemm_1x8__aarch64_neonfma_cortex_a75)
   BENCHMARK_GEMM(jit_f32_gemm_1x8__aarch64_neonfma_prfm_cortex_a75)
   BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch64_neonfma_cortex_a75)
   BENCHMARK_GEMM(jit_f32_gemm_4x8__aarch64_neonfma_prfm_cortex_a75)
+  BENCHMARK_GEMM(jit_f32_gemm_6x8__aarch64_neonfma_ld128)
 
 #define BENCHMARK_UPTO_MR_GEMM(name, max_mr, nr)                                \
   static void name(benchmark::State &state, const char *net) {                  \

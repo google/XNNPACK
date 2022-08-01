@@ -294,9 +294,11 @@ SET(JIT_AARCH64_SRCS
   src/f32-gemm/upto6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/1x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-gemm/6x8-aarch64-neonfma-ld128.cc
   src/f32-igemm/upto6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.cc)
+  src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/6x8-aarch64-neonfma-ld128.cc)
 
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/u8-lut32norm/scalar.c

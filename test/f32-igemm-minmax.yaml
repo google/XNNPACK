@@ -700,3 +700,6 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
+- name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
