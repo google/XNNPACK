@@ -101,6 +101,22 @@ XNN_INLINE static uint32_t math_max_u32(uint32_t a, uint32_t b) {
   return XNN_UNPREDICTABLE(a > b) ? a : b;
 }
 
+XNN_INLINE static int64_t math_mulext_s32(int32_t a, int32_t b) {
+#if defined(_MSC_VER) && defined(_M_IX86)
+  return (int64_t) __emul((int) a, (int) b);
+#else
+  return (int64_t) a * (int64_t) b;
+#endif
+}
+
+XNN_INLINE static uint64_t math_mulext_u32(uint32_t a, uint32_t b) {
+#if defined(_MSC_VER) && defined(_M_IX86)
+  return (uint64_t) __emulu((unsigned int) a, (unsigned int) b);
+#else
+  return (uint64_t) a * (uint64_t) b;
+#endif
+}
+
 XNN_INLINE static float math_muladd_f32(float x, float y, float acc) {
   #if defined(__GNUC__) && defined(__FP_FAST_FMAF)
     return __builtin_fmaf(x, y, acc);
