@@ -254,6 +254,14 @@ void Assembler::tst(CoreRegister rn, uint8_t imm) {
   emit32(kAL | 0x31 << 20 | rn.code << 16 | imm);
 }
 
+void Assembler::vabs_f32(QRegister qd, QRegister qm) {
+  emit32(0xF3B90740 | encode(qd, 22, 12) | encode(qm, 5, 0));
+}
+
+void Assembler::vadd_f32(QRegister qd, QRegister qn, QRegister qm) {
+  emit32(0xF2000D40 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
 void Assembler::vcmpe_f32(SRegister sd, SRegister sm) {
   emit32(kAL | 0x0EB40AC0 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
@@ -340,6 +348,22 @@ void Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
   emit32(0xF4A00C80 | encode(regs.start, 22, 12) | op.base().code << 16 | (regs.length - 1) << 5 | rm);
 }
 
+void Assembler::vld3r_32(VLD3RegList regs, MemOperand op) {
+  if ((op.mode() == AddressingMode::kOffset && op.offset() != 0)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  uint8_t spacing = regs.double_spaced ? 2 : 1;
+  if (regs.reg1.code != regs.reg2.code - spacing || regs.reg2.code != regs.reg3.code - spacing) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  size_t t = spacing - 1;
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? op.base().code : 0xF;
+  emit32(0xF4A00E80 | encode(regs.reg1, 22, 12) | op.base().code << 16 | t << 5 | rm);
+}
+
 void Assembler::vldm(MemOperand rn, SRegisterList regs) {
   if (invalid_register_list(regs)) {
     error_ = Error::kInvalidRegisterListLength;
@@ -421,6 +445,15 @@ void Assembler::vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm) {
   emit32(0xF2900240 | encode(qd, 22, 12) | encode(dn, 7, 16) | lane_top << 5 | lane_bot << 3 | dm.code);
 }
 
+void Assembler::vmov(QRegister qd, uint8_t imm) {
+  if (imm != 0) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0xF2800050 | encode(qd, 22, 12));
+}
+
 void Assembler::vmov(SRegister sd, SRegister sm) {
   emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
@@ -430,7 +463,7 @@ void Assembler::vmov(DRegister dm, CoreRegister rt, CoreRegister rt2) {
 }
 
 void Assembler::vmov(DRegister dd, DRegister dm) {
-  emit32(0xF2600110 | encode(dd, 22, 12) | encode(dm, 7, 16) | encode(dm, 5, 0));
+  emit32(0xF2200110 | encode(dd, 22, 12) | encode(dm, 7, 16) | encode(dm, 5, 0));
 }
 
 void Assembler::vmov(QRegister qd, QRegister qm) {
@@ -455,6 +488,10 @@ void Assembler::vmrs(CoreRegister rt, SpecialFPRegister spec_reg) {
 
 void Assembler::vmul_f32(QRegister qd, QRegister qn, QRegister qm) {
   emit32(0xF3000D50 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
+}
+
+void Assembler::vneg_f32(QRegister qd, QRegister qm) {
+  emit32(0xF3B907C0 | encode(qd, 22, 12) | encode(qm, 5, 0));
 }
 
 void Assembler::vpop(DRegisterList regs) {
