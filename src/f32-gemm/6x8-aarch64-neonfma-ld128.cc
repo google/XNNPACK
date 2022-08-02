@@ -384,7 +384,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, float min, 
 }  // aarch64
 }  // xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128(
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128(
     xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch64;
   Generator g(code);
@@ -393,7 +393,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128(
   g.generate(max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return xnn_status_invalid_state;
+    return 3;
   }
-  return xnn_status_success;
+  return 0;
 }

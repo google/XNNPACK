@@ -11,8 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack.h>  // For xnn_status
-
 #include <xnnpack/common.h>
 #include <xnnpack/microparams.h>
 
@@ -1626,7 +1624,7 @@ DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_4x2_
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
 
 #define DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL enum xnn_status fn_name(                  \
+  XNN_INTERNAL xnn_status_t fn_name(                     \
       struct xnn_code_buffer* code,                      \
       size_t max_mr,                                     \
       size_t nc_mod_nr,                                  \

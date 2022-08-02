@@ -260,7 +260,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 } // namespace aarch64
 } // namespace xnnpack
 
-xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75(
+xnn_status_t xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75(
     xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   using namespace xnnpack::aarch64;
@@ -270,12 +270,12 @@ xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a75(
   g.generate(false, max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return xnn_status_invalid_state;
+    return 3;
   }
-  return xnn_status_success;
+  return 0;
 }
 
-xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
+xnn_status_t xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
     xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   using namespace xnnpack::aarch64;
@@ -285,7 +285,7 @@ xnn_status xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75(
   g.generate(true, max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return xnn_status_invalid_state;
+    return 3;
   }
-  return xnn_status_success;
+  return 0;
 }

@@ -2479,3 +2479,5 @@ struct jit_gemm_params {
     float max;
   } f32_minmax;
 };
+
+typedef int xnn_status_t;
