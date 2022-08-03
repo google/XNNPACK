@@ -496,7 +496,6 @@ def main(input_file):
     mr = m[1]
     nr = m[2]
   labels_str = ', '.join(f'l{l}' for l in labels)
-  # TODO(zhin): remove this hardcoded 8, base it on the tile size in file name.
   print(f'  assert(max_mr <= {mr});')
   print(f'  assert(nc_mod_nr < {nr});')
   print('  assert(kc != 0);')
