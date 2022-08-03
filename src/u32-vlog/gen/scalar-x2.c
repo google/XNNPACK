@@ -14,7 +14,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vlog.h>
 
-extern XNN_INTERNAL const uint16_t xnn_table_loglut[130];
+extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
 // Calculate integer logarithm, 32 Bit version
 static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
@@ -43,8 +43,8 @@ static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
   assert(128 == (1 << log_segments_log2));
   assert(base_seg < (1 << log_segments_log2));
 
-  const uint32_t c0 = xnn_table_loglut[base_seg];
-  const uint32_t c1 = xnn_table_loglut[base_seg + 1];
+  const uint32_t c0 = xnn_table_vlog[base_seg];
+  const uint32_t c1 = xnn_table_vlog[base_seg + 1];
   const uint32_t seg_base = seg_unit * base_seg;
   const uint32_t rel_pos = ((c1 - c0) * (frac - seg_base)) >> log_scale_log2;
   const uint32_t fraction =  frac + c0 + rel_pos;

@@ -264,7 +264,7 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-16.c
   src/tables/exp2minus-k-over-64.c
   src/tables/exp2minus-k-over-2048.c
-  src/tables/loglut.c)
+  src/tables/vlog.c)
 
 SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
