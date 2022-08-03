@@ -124,6 +124,11 @@ TEST(AArch32Assembler, InstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.vld1r_32({d4, d5}, mem[r5, 4]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vld1r_32({d4, d6}, mem[r5]));
 
+  CHECK_ENCODING(0xF4A54D8F, a.vld2r_32({d4, d5}, mem[r5]));
+  CHECK_ENCODING(0xF4A54DAF, a.vld2r_32({d4, d6}, mem[r5]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vld2r_32({d4, d5}, mem[r5, 4]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.vld2r_32({d4, d7}, mem[r5]));
+
   CHECK_ENCODING(0xF4A54E8F, a.vld3r_32({d4, d5, d6}, mem[r5]));
   CHECK_ENCODING(0xF4A54EAF, a.vld3r_32({d4, d6, d8}, mem[r5]));
   EXPECT_ERROR(Error::kInvalidOperand, a.vld3r_32({d4, d5, d6}, mem[r5, 4]));

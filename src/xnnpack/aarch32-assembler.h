@@ -217,16 +217,24 @@ struct ConsecutiveRegisterList {
   uint8_t length;
 };
 
-// Specific struct for VLD3 register list operand.
-struct VLD3RegList {
-  VLD3RegList(DRegister reg1, DRegister reg2, DRegister reg3)
+// Specific struct for VLD2 and VLD3 register list operand.
+struct VLoadStoreRegList {
+  VLoadStoreRegList(DRegister reg1, DRegister reg2)
+      : reg1(reg1), reg2(reg2) {
+    if (reg1.code == reg2.code - 2) {
+      double_spaced = true;
+    } else {
+      double_spaced = false;
+    }
+  }
+  VLoadStoreRegList(DRegister reg1, DRegister reg2, DRegister reg3)
       : reg1(reg1), reg2(reg2), reg3(reg3) {
-        if (reg1.code == reg2.code - 2) {
-          double_spaced = true;
-        } else {
-          double_spaced = false;
-        }
-      }
+    if (reg1.code == reg2.code - 2) {
+      double_spaced = true;
+    } else {
+      double_spaced = false;
+    }
+  }
 
   DRegister reg1;
   DRegister reg2;
@@ -419,8 +427,9 @@ class Assembler : public AssemblerBase {
   // VLD1.32 <list>, [<Rn>]{!} (single element to all lanes).
   // We cannot differentiate the register list in C++ syntax, so use an instruction name similar to AArch64 LD1R.
   void vld1r_32(DRegisterList regs, MemOperand op);
+  void vld2r_32(VLoadStoreRegList regs, MemOperand op);
+  void vld3r_32(VLoadStoreRegList regs, MemOperand op);
   // VLDM <Rn>{!}, <list> (IA).
-  void vld3r_32(VLD3RegList regs, MemOperand op);
   void vldm(MemOperand rn, SRegisterList regs);
   void vldm(MemOperand rn, DRegisterList regs);
   void vldr(SRegister sd, MemOperand op);

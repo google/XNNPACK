@@ -348,7 +348,24 @@ void Assembler::vld1r_32(DRegisterList regs, MemOperand op) {
   emit32(0xF4A00C80 | encode(regs.start, 22, 12) | op.base().code << 16 | (regs.length - 1) << 5 | rm);
 }
 
-void Assembler::vld3r_32(VLD3RegList regs, MemOperand op) {
+void Assembler::vld2r_32(VLoadStoreRegList regs, MemOperand op) {
+  if ((op.mode() == AddressingMode::kOffset && op.offset() != 0)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  uint8_t spacing = regs.double_spaced ? 2 : 1;
+  if (regs.reg1.code != regs.reg2.code - spacing) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  size_t t = spacing - 1;
+  const uint32_t rm = op.mode() == AddressingMode::kPostIndexed ? op.base().code : 0xF;
+  emit32(0xF4A00D80 | encode(regs.reg1, 22, 12) | op.base().code << 16 | t << 5 | rm);
+}
+
+
+void Assembler::vld3r_32(VLoadStoreRegList regs, MemOperand op) {
   if ((op.mode() == AddressingMode::kOffset && op.offset() != 0)) {
     error_ = Error::kInvalidOperand;
     return;
