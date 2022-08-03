@@ -1,0 +1,148 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#pragma once
+
+#include <gtest/gtest.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <random>
+#include <vector>
+
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/math.h>
+#include <xnnpack/params.h>
+
+extern XNN_INTERNAL const uint16_t xnn_table_loglut[130];
+
+// Calculate integer logarithm, 32 Bit version
+static uint32_t reference_log(uint32_t x, uint32_t out_scale) {
+  const int log_scale = 65536;
+  const int log_scale_log2 = 16;
+  const int log_coeff = 45426;
+  const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;  // log2 of x
+  assert(log2x < 32);
+
+  // Number of segments in the log lookup table. The table will be log_segments+1
+  // in length (with some padding).
+  const int log_segments_log2 = 7;
+
+  // Part 1
+  uint32_t frac = x - (UINT32_C(1) << log2x);
+
+  // Shift the fractional part into msb of 16 bits
+  frac =  XNN_UNPREDICTABLE(log2x < log_scale_log2) ?
+      (frac << (log_scale_log2 - log2x)) :
+      (frac >> (log2x - log_scale_log2));
+
+  // Part 2
+  const uint32_t base_seg = frac >> (log_scale_log2 - log_segments_log2);
+  const uint32_t seg_unit = (UINT32_C(1) << log_scale_log2) >> log_segments_log2;
+
+  assert(128 == (1 << log_segments_log2));
+  assert(base_seg < (1 << log_segments_log2));
+
+  const uint32_t c0 = xnn_table_loglut[base_seg];
+  const uint32_t c1 = xnn_table_loglut[base_seg + 1];
+  const uint32_t seg_base = seg_unit * base_seg;
+  const uint32_t rel_pos = ((c1 - c0) * (frac - seg_base)) >> log_scale_log2;
+  const uint32_t fraction =  frac + c0 + rel_pos;
+
+  const uint32_t log2 = (log2x << log_scale_log2) + fraction;
+  const uint32_t round = log_scale / 2;
+  const uint32_t loge = (((uint64_t) log_coeff) * log2 + round) >> log_scale_log2;
+  // Finally scale to our output scale
+  const uint32_t loge_scaled = (out_scale * loge + round) >> log_scale_log2;
+  return loge_scaled;
+}
+
+class VLogMicrokernelTester {
+ public:
+  inline VLogMicrokernelTester& batch(size_t batch) {
+    assert(batch != 0);
+    this->batch_ = batch;
+    return *this;
+  }
+
+  inline size_t batch() const {
+    return this->batch_;
+  }
+
+  inline VLogMicrokernelTester& input_lshift(uint32_t input_lshift) {
+    assert(input_lshift < 32);
+    this->input_lshift_ = input_lshift;
+    return *this;
+  }
+
+  inline uint32_t input_lshift() const {
+    return this->input_lshift_;
+  }
+
+  inline VLogMicrokernelTester& output_scale(uint32_t output_scale) {
+    this->output_scale_ = output_scale;
+    return *this;
+  }
+
+  inline uint32_t output_scale() const {
+    return this->output_scale_;
+  }
+
+  inline VLogMicrokernelTester& iterations(size_t iterations) {
+    this->iterations_ = iterations;
+    return *this;
+  }
+
+  inline size_t iterations() const {
+    return this->iterations_;
+  }
+
+  void Test(xnn_u32_vlog_ukernel_function vlog) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto i16rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
+
+    std::vector<uint32_t> x(batch() + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    std::vector<uint16_t> y(batch());
+    std::vector<uint16_t> y_ref(batch());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(i16rng));
+      std::fill(y.begin(), y.end(), uint16_t(0x1234));
+      std::fill(y_ref.begin(), y_ref.end(), uint16_t(0x5678));
+
+      // Compute reference results.
+      for (size_t n = 0; n < batch(); n++) {
+        const uint32_t x_value = x[n];
+        const uint32_t scaled = x_value << input_lshift();
+        const uint32_t log_value = scaled ? reference_log(scaled,  output_scale()) : 0;
+        const uint32_t vout = math_min_u32(log_value, (uint32_t) INT16_MAX);
+        y_ref[n] = vout;
+      }
+
+      // Call optimized micro-kernel.
+      vlog(batch(), x.data(), input_lshift(), output_scale(), y.data());
+
+      // Verify results.
+      for (size_t n = 0; n < batch(); n++) {
+        ASSERT_EQ(y[n], y_ref[n])
+          << ", input_lshift " << input_lshift()
+          << ", output_scale " << output_scale()
+          << ", batch " << n << " / " << batch();
+      }
+    }
+  }
+
+ private:
+  size_t batch_{1};
+  uint32_t input_lshift_{4};
+  uint32_t output_scale_{16};
+  bool inplace_{false};
+  size_t iterations_{15};
+};

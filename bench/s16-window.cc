@@ -26,20 +26,20 @@ void window(
     return;
   }
   const size_t rows = state.range(0);
-  const size_t channels = state.range(1);
+  const size_t batch = state.range(1);
 
   std::vector<int16_t, AlignedAllocator<int16_t, 64>> input(
-      (rows * channels) + XNN_EXTRA_BYTES / sizeof(int16_t));
+      (rows * batch) + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t, AlignedAllocator<int16_t, 64>> weights(
-      channels + XNN_EXTRA_BYTES / sizeof(int16_t));
+      batch + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t, AlignedAllocator<int16_t, 64>> output(
-      (rows * channels) + XNN_EXTRA_BYTES / sizeof(int16_t));
+      (rows * batch) + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::iota(input.begin(), input.end(), 0);
   std::fill(weights.begin(), weights.end(), 0);
   std::iota(output.begin(), output.end(), 0);
 
   for (auto _ : state) {
-    window(rows, channels, input.data(), weights.data(), 12, output.data());
+    window(rows, batch, input.data(), weights.data(), 12, output.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -50,7 +50,7 @@ void window(
 
 static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"rows", "channels"});
+  b->ArgNames({"rows", "batch"});
   b->Args({1, 32});
   b->Args({1, 64});
   b->Args({1, 117});

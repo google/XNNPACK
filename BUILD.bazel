@@ -157,6 +157,7 @@ TABLE_SRCS = [
     "src/tables/exp2minus-k-over-16.c",
     "src/tables/exp2minus-k-over-64.c",
     "src/tables/exp2minus-k-over-2048.c",
+    "src/tables/loglut.c",
 ]
 
 PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS = [
@@ -1367,6 +1368,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/u8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-rmax/scalar.c",
     "src/u8-vclamp/scalar-x4.c",
+    "src/u32-vlog/gen/scalar-x1.c",
+    "src/u32-vlog/gen/scalar-x2.c",
+    "src/u32-vlog/gen/scalar-x3.c",
+    "src/u32-vlog/gen/scalar-x4.c",
     "src/xx-copy/memcpy.c",
     "src/xx-fill/scalar-x16.c",
     "src/xx-pad/scalar.c",
@@ -8525,6 +8530,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vadd.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
+    "src/xnnpack/vlog.h",
     "src/xnnpack/vlrelu.h",
     "src/xnnpack/vlshift.h",
     "src/xnnpack/vmul.h",
@@ -11768,6 +11774,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "u32_vlog_bench",
+    srcs = [
+        "bench/u32-vlog.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "s16_vlshift_bench",
     srcs = [
         "bench/s16-vlshift.cc",
@@ -14101,6 +14115,15 @@ xnnpack_unit_test(
     srcs = [
         "test/s16-window.cc",
         "test/window-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "u32_vlog_test",
+    srcs = [
+        "test/u32-vlog.cc",
+        "test/vlog-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

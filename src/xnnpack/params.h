@@ -1601,6 +1601,13 @@ typedef void (*xnn_cs16_vsquareabs_ukernel_function)(
     const int16_t* input,
     uint32_t* output);
 
+typedef void (*xnn_u32_vlog_ukernel_function)(
+    size_t batch_size,
+    const uint32_t* input,
+    uint32_t input_lshift,
+    uint32_t output_scale,
+    uint16_t* output);
+
 
 // Reduce-Add Extended ("mantissa" + "exponent") Exponentials
 typedef void (*xnn_f32_raddextexp_ukernel_function)(

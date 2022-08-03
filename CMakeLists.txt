@@ -263,7 +263,8 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-8.c
   src/tables/exp2minus-k-over-16.c
   src/tables/exp2minus-k-over-64.c
-  src/tables/exp2minus-k-over-2048.c)
+  src/tables/exp2minus-k-over-2048.c
+  src/tables/loglut.c)
 
 SET(JIT_SRCS
   src/jit/aarch32-assembler.cc
@@ -1356,6 +1357,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
   src/u8-vclamp/scalar-x4.c
+  src/u32-vlog/gen/scalar-x1.c
+  src/u32-vlog/gen/scalar-x2.c
+  src/u32-vlog/gen/scalar-x3.c
+  src/u32-vlog/gen/scalar-x4.c
   src/xx-copy/memcpy.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
@@ -8642,6 +8647,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s16-window-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
 
+  ADD_EXECUTABLE(u32-vlog-test test/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-vlog-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME u32-vlog-test COMMAND u32-vlog-test)
+
   ADD_EXECUTABLE(s16-vlshift-test test/s16-vlshift.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-vlshift-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s16-vlshift-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9232,6 +9242,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(u32-vlog-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(s16-vlshift-bench bench/s16-vlshift.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-vlshift-bench PRIVATE . include src)
