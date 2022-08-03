@@ -29,7 +29,6 @@ MICROKERNEL_BENCHMARK_DEPS = [
     ":microkernels_h",
     ":params",
     ":microparams_init",
-    ":xnnpack_h",
     "@FP16",
     "@cpuinfo",
 ]
@@ -59,7 +58,6 @@ MICROKERNEL_TEST_DEPS = [
     ":microparams_init",
     ":requantization",
     ":test_microkernels",
-    ":xnnpack_h",
     "@FP16",
 ]
 

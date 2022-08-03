@@ -20,7 +20,6 @@
 
 #include <fp16.h>
 
-#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>

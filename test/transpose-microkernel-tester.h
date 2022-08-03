@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <xnnpack.h>
 #include <xnnpack/params.h>
 
 #include <numeric>

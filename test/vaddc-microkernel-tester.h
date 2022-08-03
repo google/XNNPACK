@@ -19,7 +19,6 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 #include <xnnpack/requantization.h>

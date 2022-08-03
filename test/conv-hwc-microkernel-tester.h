@@ -20,7 +20,6 @@
 #include <xnnpack/pack.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
-#include <xnnpack.h>
 
 
 class ConvHWCMicrokernelTester {
