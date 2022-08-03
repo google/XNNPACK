@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
@@ -260,7 +261,7 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7(xnn_code_
   g.generate(max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }

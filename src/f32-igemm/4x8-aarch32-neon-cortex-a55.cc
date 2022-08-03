@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
@@ -469,7 +470,7 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_cod
   g.generate(max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }

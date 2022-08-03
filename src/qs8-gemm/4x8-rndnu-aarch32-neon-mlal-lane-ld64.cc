@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
@@ -483,9 +484,9 @@ xnn_status_t xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld6
   g.generate(false, max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }
 
 xnn_status_t xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prfm_ld64(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
@@ -494,7 +495,7 @@ xnn_status_t xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_prf
   g.generate(true, max_mr, nc_mod_nr, kc, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }

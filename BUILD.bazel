@@ -10856,6 +10856,7 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":params",
+        ":xnnpack_h",
     ],
 )
 
@@ -10885,6 +10886,7 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":params",
+        ":xnnpack_h",
     ],
 )
 

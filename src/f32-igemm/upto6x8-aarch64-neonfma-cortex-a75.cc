@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <limits>
 
+#include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
@@ -1392,9 +1393,9 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75(
   g.generate(false, max_mr, nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 
 }
 
@@ -1406,7 +1407,7 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_upto6x8__aarch64_neonfma_prfm_cortex
   g.generate(true, max_mr, nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }

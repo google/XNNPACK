@@ -6,6 +6,7 @@
 
 #include <cassert>
 
+#include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
@@ -324,7 +325,7 @@ xnn_status_t xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64(xn
   g.generate(max_mr, nc_mod_nr, kc, ks, nullptr);
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
-    return 3;
+    return xnn_status_invalid_state;
   }
-  return 0;
+  return xnn_status_success;
 }
