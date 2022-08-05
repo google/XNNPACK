@@ -2277,6 +2277,7 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_x40(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -2883,6 +2884,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -3049,6 +3051,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx2_mul32(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -4027,6 +4030,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -4630,6 +4634,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -6008,6 +6013,7 @@ void xnn_qs8_vlrelu_ukernel__avx2_x32(
 void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,
@@ -6612,6 +6618,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
 void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,

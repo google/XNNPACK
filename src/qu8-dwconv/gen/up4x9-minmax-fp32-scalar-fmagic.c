@@ -16,6 +16,7 @@
 void xnn_qu8_dwconv_minmax_fp32_ukernel_up4x9__scalar_fmagic(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,

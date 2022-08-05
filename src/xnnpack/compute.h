@@ -495,6 +495,7 @@ struct dwconv_context {
   size_t output_batch_stride;
   size_t output_height_stride;
   size_t output_width;
+  size_t kernel_elements;
   size_t groups;
   const void* zero;
   size_t output_increment;

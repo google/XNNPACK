@@ -21,6 +21,7 @@
 void xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -451,6 +452,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f(
 void xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -551,6 +553,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f(
 void xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -666,6 +669,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f(
 void xnn_f32_dwconv_minmax_ukernel_up16x9__avx512f(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

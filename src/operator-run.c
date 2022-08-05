@@ -639,7 +639,7 @@ void xnn_compute_dwconv_unipass(
     batch_index * context->output_batch_stride + output_y * context->output_height_stride);
 
   context->unipass_ukernel(
-    context->groups, context->output_width,
+    context->groups, context->output_width, context->kernel_elements,
     indirect_input, context->packed_weights, output,
     context->indirect_input_width_stride, context->output_increment,
     input_offset, context->zero,

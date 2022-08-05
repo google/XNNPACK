@@ -2688,6 +2688,7 @@ void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_x8(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -3545,6 +3546,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__sse2_mul16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -3742,6 +3744,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__sse2_mul16(
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -4699,6 +4702,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__sse2_ld64(
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -5481,6 +5485,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16_add16(
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16_add16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -8479,6 +8484,7 @@ void xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8(
 void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,
@@ -9334,6 +9340,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x25__sse2_mul16(
 void xnn_qu8_dwconv_minmax_fp32_ukernel_up8x9__sse2_mul16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,

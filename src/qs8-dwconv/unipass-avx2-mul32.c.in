@@ -27,6 +27,7 @@ $_MM_MAX_EPX8 = "_mm_max_epu8" if DATATYPE == "QU8" else "_mm_max_epi8"
 void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx2_mul32(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const ${XINT8_T}** input,
     const void* weights,
     ${XINT8_T}* output,

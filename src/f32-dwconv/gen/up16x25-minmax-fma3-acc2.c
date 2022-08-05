@@ -17,6 +17,7 @@
 void xnn_f32_dwconv_minmax_ukernel_up16x25__fma3_acc2(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

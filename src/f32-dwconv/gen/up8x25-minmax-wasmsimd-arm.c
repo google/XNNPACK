@@ -17,6 +17,7 @@
 void xnn_f32_dwconv_minmax_ukernel_up8x25__wasmsimd_arm(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

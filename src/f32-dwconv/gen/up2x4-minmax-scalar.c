@@ -16,6 +16,7 @@
 void xnn_f32_dwconv_minmax_ukernel_up2x4__scalar(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

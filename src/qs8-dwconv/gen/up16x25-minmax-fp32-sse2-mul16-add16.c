@@ -18,6 +18,7 @@
 void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__sse2_mul16_add16(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,

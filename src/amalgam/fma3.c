@@ -21,6 +21,7 @@
 void xnn_f16_dwconv_minmax_ukernel_up16x3__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -180,6 +181,7 @@ void xnn_f16_dwconv_minmax_ukernel_up16x3__fma3(
 void xnn_f16_dwconv_minmax_ukernel_up16x4__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -364,6 +366,7 @@ void xnn_f16_dwconv_minmax_ukernel_up16x4__fma3(
 void xnn_f16_dwconv_minmax_ukernel_up16x9__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -673,6 +676,7 @@ void xnn_f16_dwconv_minmax_ukernel_up16x9__fma3(
 void xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -1349,6 +1353,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
 void xnn_f32_dwconv_minmax_ukernel_up16x3__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -1504,6 +1509,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x3__fma3(
 void xnn_f32_dwconv_minmax_ukernel_up16x4__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -1683,6 +1689,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x4__fma3(
 void xnn_f32_dwconv_minmax_ukernel_up16x9__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -1982,6 +1989,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x9__fma3(
 void xnn_f32_dwconv_minmax_ukernel_up8x25__fma3(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

@@ -1164,6 +1164,7 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2(
 void xnn_f32_dwconv_minmax_ukernel_up8x25__sse(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -1837,6 +1838,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x25__sse(
 void xnn_f32_dwconv_minmax_ukernel_up8x3__sse(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -1982,6 +1984,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x3__sse(
 void xnn_f32_dwconv_minmax_ukernel_up8x4__sse(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -2151,6 +2154,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x4__sse(
 void xnn_f32_dwconv_minmax_ukernel_up8x9__sse(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

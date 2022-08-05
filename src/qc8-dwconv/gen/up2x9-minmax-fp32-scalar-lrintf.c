@@ -18,6 +18,7 @@
 void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x9__scalar_lrintf(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,

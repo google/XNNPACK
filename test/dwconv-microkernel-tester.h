@@ -250,7 +250,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv_minmax(
-        channels(), width(),
+        channels(), width(), kr(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint8_t),
@@ -370,7 +370,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv_minmax(
-        channels(), width(),
+        channels(), width(), kr(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(int8_t),
@@ -481,7 +481,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv_minmax(
-        channels(), width(),
+        channels(), width(), kr(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(int8_t),
@@ -572,7 +572,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv_minmax(
-        channels(), width(),
+        channels(), width(), kr(),
         reinterpret_cast<const void**>(indirection.data()), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(uint16_t),
@@ -645,7 +645,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv(
-        channels(), width(),
+        channels(), width(), kr(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
@@ -733,7 +733,7 @@ class DWConvMicrokernelTester {
 
       // Call optimized micro-kernel.
       dwconv_minmax(
-        channels(), width(),
+        channels(), width(), kr(),
         indirection.data(), packed_weights.data(), output.data(),
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),

@@ -17,6 +17,7 @@
 void xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith_acc2(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output_ptr,

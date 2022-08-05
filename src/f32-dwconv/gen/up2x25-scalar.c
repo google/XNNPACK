@@ -16,6 +16,7 @@
 void xnn_f32_dwconv_ukernel_up2x25__scalar(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,

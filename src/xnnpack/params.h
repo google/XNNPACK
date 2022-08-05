@@ -574,6 +574,7 @@ typedef void (*xnn_f16_dwconv2d_chw_ukernel_function)(
 typedef void (*xnn_dwconv_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -586,6 +587,7 @@ typedef void (*xnn_dwconv_unipass_ukernel_function)(
 typedef void (*xnn_f32_dwconv_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -598,6 +600,7 @@ typedef void (*xnn_f32_dwconv_unipass_ukernel_function)(
 typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const float** input,
     const float* weights,
     float* output,
@@ -610,6 +613,7 @@ typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_function)(
 typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const void** input,
     const void* weights,
     void* output,
@@ -622,6 +626,7 @@ typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_function)(
 typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -634,6 +639,7 @@ typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_function)(
 typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const int8_t** input,
     const void* weights,
     int8_t* output,
@@ -646,6 +652,7 @@ typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
 typedef void (*xnn_qu8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,

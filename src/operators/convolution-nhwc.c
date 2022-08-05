@@ -1623,6 +1623,7 @@ static enum xnn_status setup_convolution2d_nhwc(
           .output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
           .output_height_stride = (output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
           .output_width = output_width,
+          .kernel_elements = kernel_size,
           .groups = groups,
           .zero = convolution_op->zero_buffer,
           .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,

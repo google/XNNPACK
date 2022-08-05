@@ -17,6 +17,7 @@
 void xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul8(
     size_t channels,
     size_t output_width,
+    size_t kernel_elements,
     const uint8_t** input,
     const void* weights,
     uint8_t* output,

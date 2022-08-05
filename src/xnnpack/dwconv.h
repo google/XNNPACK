@@ -23,6 +23,7 @@ extern "C" {
   XNN_INTERNAL void fn_name(                                 \
     size_t channels,                                         \
     size_t output_width,                                     \
+    size_t kernel_elements,                                  \
     const float** input,                                     \
     const float* weights,                                    \
     float* output,                                           \
@@ -36,6 +37,7 @@ extern "C" {
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
+    size_t kernel_elements,                                         \
     const float** input,                                            \
     const float* weights,                                           \
     float* output,                                                  \
@@ -318,6 +320,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
   XNN_INTERNAL void fn_name(                                 \
     size_t channels,                                         \
     size_t output_width,                                     \
+    size_t kernel_elements,                                  \
     const void** input,                                      \
     const void* weights,                                     \
     void* output,                                            \
@@ -331,6 +334,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
+    size_t kernel_elements,                                         \
     const void** input,                                             \
     const void* weights,                                            \
     void* output,                                                   \
@@ -395,6 +399,7 @@ DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
+    size_t kernel_elements,                                         \
     const uint8_t** input,                                          \
     const void* weights,                                            \
     uint8_t* output,                                                \
@@ -539,6 +544,7 @@ DECLARE_QU8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_dwconv_minmax_fp32_uk
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
+    size_t kernel_elements,                                         \
     const int8_t** input,                                           \
     const void* weights,                                            \
     int8_t* output,                                                 \
@@ -753,6 +759,7 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_fp32_uk
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
+    size_t kernel_elements,                                         \
     const int8_t** input,                                           \
     const void* weights,                                            \
     int8_t* output,                                                 \

@@ -134,7 +134,7 @@ static void DWConvBenchmark(benchmark::State& state,
     state.ResumeTiming();
 
     for (size_t y = 0; y < output_height; y++) {
-      dwconv(channels, output_width,
+      dwconv(channels, output_width, kernel_size,
         i.data() + buffer_index * i_elements + step_height * y,
         w.data() + buffer_index * w_size,
         c.data() + buffer_index * c_elements + y * output_width * channels,
