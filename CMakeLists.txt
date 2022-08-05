@@ -264,6 +264,7 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-16.c
   src/tables/exp2minus-k-over-64.c
   src/tables/exp2minus-k-over-2048.c
+  src/tables/fft256-twiddle.c
   src/tables/vlog.c)
 
 SET(JIT_SRCS
@@ -610,6 +611,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-vsquareabs/gen/scalar-x2.c
   src/cs16-vsquareabs/gen/scalar-x3.c
   src/cs16-vsquareabs/gen/scalar-x4.c
+  src/cs16-bfly4/gen/scalar-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x2.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x3.c
@@ -8662,6 +8664,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(cs16-vsquareabs-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME cs16-vsquareabs-test COMMAND cs16-vsquareabs-test)
 
+  ADD_EXECUTABLE(cs16-bfly4-test test/cs16-bfly4.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(cs16-bfly4-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(cs16-bfly4-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME cs16-bfly4-test COMMAND cs16-bfly4-test)
+
   ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9254,6 +9261,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(cs16-vsquareabs-bench bench/cs16-vsquareabs.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(cs16-vsquareabs-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(cs16-vsquareabs-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(cs16-bfly4-bench bench/cs16-bfly4.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(cs16-bfly4-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(cs16-bfly4-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(xx-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(xx-transpose-bench PRIVATE . include src)

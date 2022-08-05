@@ -1608,6 +1608,12 @@ typedef void (*xnn_u32_vlog_ukernel_function)(
     uint32_t output_scale,
     uint16_t* output);
 
+typedef void (*xnn_cs16_bfly4_ukernel_function)(
+    size_t samples,
+    int16_t* data,
+    size_t stride,
+    const int16_t* twiddle);
+
 
 // Reduce-Add Extended ("mantissa" + "exponent") Exponentials
 typedef void (*xnn_f32_raddextexp_ukernel_function)(
