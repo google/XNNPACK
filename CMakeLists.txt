@@ -612,6 +612,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-vsquareabs/gen/scalar-x2.c
   src/cs16-vsquareabs/gen/scalar-x3.c
   src/cs16-vsquareabs/gen/scalar-x4.c
+  src/cs16-bfly4/gen/scalar-x2.c
+  src/cs16-bfly4/gen/scalar-x3.c
+  src/cs16-bfly4/gen/scalar-x4.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x2.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x3.c

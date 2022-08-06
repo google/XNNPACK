@@ -6,3 +6,6 @@
 
 # Scalar
 - name: xnn_cs16_bfly4_ukernel__scalar_x1
+- name: xnn_cs16_bfly4_ukernel__scalar_x2
+- name: xnn_cs16_bfly4_ukernel__scalar_x3
+- name: xnn_cs16_bfly4_ukernel__scalar_x4

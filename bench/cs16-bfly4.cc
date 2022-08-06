@@ -57,15 +57,17 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({256, 16, 4});
   b->Args({256, 4, 16});
   b->Args({256, 1, 64});
-  b->Args({512, 128, 1});
-  b->Args({512, 64,  4});
-  b->Args({512, 16, 16});
-  b->Args({512, 4,  64});
-  b->Args({512, 1, 128});
+  b->Args({1024, 256, 1});
+  b->Args({1024, 64,  4});
+  b->Args({1024, 16, 16});
+  b->Args({1024, 4,  64});
+  b->Args({1024, 1, 256});
 }
 
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(bfly4, cs16_scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(bfly4, cs16_scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(bfly4, cs16_scalar_x4, xnn_cs16_bfly4_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

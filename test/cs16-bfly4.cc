@@ -44,3 +44,90 @@ TEST(CS16_BFLY4__SCALAR_X1, samples_eq_64) {
     .stride(1)
     .Test(xnn_cs16_bfly4_ukernel__scalar_x1);
 }
+
+
+TEST(CS16_BFLY4__SCALAR_X2, samples_eq_1) {
+  BFly4MicrokernelTester()
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
+}
+
+TEST(CS16_BFLY4__SCALAR_X2, samples_eq_4) {
+  BFly4MicrokernelTester()
+    .samples(4)
+    .stride(16)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
+}
+
+TEST(CS16_BFLY4__SCALAR_X2, samples_eq_16) {
+  BFly4MicrokernelTester()
+    .samples(16)
+    .stride(4)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
+}
+
+TEST(CS16_BFLY4__SCALAR_X2, samples_eq_64) {
+  BFly4MicrokernelTester()
+    .samples(64)
+    .stride(1)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
+}
+
+
+TEST(CS16_BFLY4__SCALAR_X3, samples_eq_1) {
+  BFly4MicrokernelTester()
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x3);
+}
+
+TEST(CS16_BFLY4__SCALAR_X3, samples_eq_4) {
+  BFly4MicrokernelTester()
+    .samples(4)
+    .stride(16)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x3);
+}
+
+TEST(CS16_BFLY4__SCALAR_X3, samples_eq_16) {
+  BFly4MicrokernelTester()
+    .samples(16)
+    .stride(4)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x3);
+}
+
+TEST(CS16_BFLY4__SCALAR_X3, samples_eq_64) {
+  BFly4MicrokernelTester()
+    .samples(64)
+    .stride(1)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x3);
+}
+
+
+TEST(CS16_BFLY4__SCALAR_X4, samples_eq_1) {
+  BFly4MicrokernelTester()
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
+}
+
+TEST(CS16_BFLY4__SCALAR_X4, samples_eq_4) {
+  BFly4MicrokernelTester()
+    .samples(4)
+    .stride(16)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
+}
+
+TEST(CS16_BFLY4__SCALAR_X4, samples_eq_16) {
+  BFly4MicrokernelTester()
+    .samples(16)
+    .stride(4)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
+}
+
+TEST(CS16_BFLY4__SCALAR_X4, samples_eq_64) {
+  BFly4MicrokernelTester()
+    .samples(64)
+    .stride(1)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
+}
