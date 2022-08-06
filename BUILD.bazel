@@ -616,11 +616,11 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
+    "src/cs16-bfly4/gen/scalar-x1.c",
     "src/cs16-vsquareabs/gen/scalar-x1.c",
     "src/cs16-vsquareabs/gen/scalar-x2.c",
     "src/cs16-vsquareabs/gen/scalar-x3.c",
     "src/cs16-vsquareabs/gen/scalar-x4.c",
-    "src/cs16-bfly4/gen/scalar-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x1.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x2.c",
     "src/f16-f32-vcvt/gen/vcvt-scalar-x3.c",
@@ -8504,6 +8504,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/conv.h",
     "src/xnnpack/depthtospace.h",
     "src/xnnpack/dwconv.h",
+    "src/xnnpack/fft.h",
     "src/xnnpack/fill.h",
     "src/xnnpack/gavgpool.h",
     "src/xnnpack/gemm.h",
@@ -8538,7 +8539,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vsquareabs.h",
-    "src/xnnpack/fft.h",
     "src/xnnpack/vunary.h",
     "src/xnnpack/window.h",
     "src/xnnpack/zip.h",

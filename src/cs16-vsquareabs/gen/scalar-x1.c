@@ -25,18 +25,18 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x1(
   assert(output != NULL);
 
 
- if XNN_UNLIKELY(batch != 0) {
-   do {
-     const int32_t vr = (int32_t) input[0];
-     const int32_t vi = (int32_t) input[1];
-     input += 2;
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const int32_t vr = (int32_t) input[0];
+      const int32_t vi = (int32_t) input[1];
+      input += 2;
 
-     const uint32_t vrsquare = (uint32_t) (vr * vr);
-     const uint32_t visquare = (uint32_t) (vi * vi);
+      const uint32_t vrsquare = (uint32_t) (vr * vr);
+      const uint32_t visquare = (uint32_t) (vi * vi);
 
-     const uint32_t vout = vrsquare + visquare;
+      const uint32_t vout = vrsquare + visquare;
 
-     *output++ = vout;
-   } while (--batch != 0);
- }
+      *output++ = vout;
+    } while (--batch != 0);
+  }
 }
