@@ -9,7 +9,7 @@
 #include <stddef.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microparams.h>
 
 
 #ifdef __cplusplus
