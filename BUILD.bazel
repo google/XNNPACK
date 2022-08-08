@@ -8702,7 +8702,6 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":params",
-        "@FP16",
     ],
 )
 
@@ -8744,9 +8743,7 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
         "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8771,9 +8768,7 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
         "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8798,9 +8793,7 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
         "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8821,9 +8814,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8844,9 +8834,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8871,9 +8858,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8899,9 +8883,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8930,9 +8911,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8962,9 +8940,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@FXdiv",
-        "@pthreadpool",
     ],
 )
 
@@ -8986,8 +8961,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9009,8 +8982,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9036,8 +9007,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9059,8 +9028,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9082,8 +9049,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9109,8 +9074,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9132,8 +9095,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9155,8 +9116,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9182,8 +9141,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9205,8 +9162,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9228,8 +9183,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9255,8 +9208,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9279,8 +9230,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9303,8 +9252,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9331,8 +9278,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9355,8 +9300,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9379,8 +9322,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9407,8 +9348,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9429,8 +9368,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9448,8 +9385,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9467,8 +9402,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9490,8 +9423,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9509,8 +9440,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9528,8 +9457,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9547,8 +9474,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9570,8 +9495,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9589,8 +9512,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9608,8 +9529,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9627,8 +9546,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9650,8 +9567,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9670,8 +9585,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9690,8 +9603,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9710,8 +9621,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9734,8 +9643,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9753,8 +9660,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9772,8 +9677,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9791,8 +9694,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9814,8 +9715,6 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":params",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9834,8 +9733,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9854,8 +9751,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9878,8 +9773,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9901,8 +9794,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9924,8 +9815,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9947,8 +9836,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9974,8 +9861,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -9998,8 +9883,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10022,8 +9905,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10046,8 +9927,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10074,8 +9953,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10096,8 +9973,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10118,8 +9993,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10140,8 +10013,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10166,8 +10037,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10194,8 +10063,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10222,8 +10089,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10250,8 +10115,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
@@ -10282,8 +10145,6 @@ xnnpack_cc_library(
         ":params",
         ":tables",
         ":unaligned",
-        "@FP16",
-        "@pthreadpool",
     ],
 )
 
