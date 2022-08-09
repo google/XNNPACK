@@ -264,7 +264,6 @@ SET(TABLE_SRCS
   src/tables/exp2minus-k-over-16.c
   src/tables/exp2minus-k-over-64.c
   src/tables/exp2minus-k-over-2048.c
-  src/tables/fft256-twiddle.c
   src/tables/vlog.c)
 
 SET(JIT_SRCS
@@ -608,13 +607,13 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-bfly4/gen/scalar-x1.c
+  src/cs16-bfly4/gen/scalar-x2.c
+  src/cs16-bfly4/gen/scalar-x3.c
+  src/cs16-bfly4/gen/scalar-x4.c
   src/cs16-vsquareabs/gen/scalar-x1.c
   src/cs16-vsquareabs/gen/scalar-x2.c
   src/cs16-vsquareabs/gen/scalar-x3.c
   src/cs16-vsquareabs/gen/scalar-x4.c
-  src/cs16-bfly4/gen/scalar-x2.c
-  src/cs16-bfly4/gen/scalar-x3.c
-  src/cs16-bfly4/gen/scalar-x4.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x1.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x2.c
   src/f16-f32-vcvt/gen/vcvt-scalar-x3.c
