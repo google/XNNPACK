@@ -1614,6 +1614,12 @@ typedef void (*xnn_cs16_bfly4_ukernel_function)(
     size_t stride,
     const int16_t* twiddle);
 
+typedef void (*xnn_cs16_fftr_ukernel_function)(
+    size_t samples,
+    const int16_t* input,
+    int16_t* output,
+    const int16_t* twiddle);
+
 
 // Reduce-Add Extended ("mantissa" + "exponent") Exponentials
 typedef void (*xnn_f32_raddextexp_ukernel_function)(

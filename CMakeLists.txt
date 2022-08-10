@@ -606,6 +606,10 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
+  src/cs16-fftr/gen/scalar-x1.c
+  src/cs16-fftr/gen/scalar-x2.c
+  src/cs16-fftr/gen/scalar-x3.c
+  src/cs16-fftr/gen/scalar-x4.c
   src/cs16-bfly4/gen/scalar-x1.c
   src/cs16-bfly4/gen/scalar-x2.c
   src/cs16-bfly4/gen/scalar-x3.c
@@ -8671,6 +8675,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(cs16-bfly4-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME cs16-bfly4-test COMMAND cs16-bfly4-test)
 
+  ADD_EXECUTABLE(cs16-fftr-test test/cs16-fftr.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(cs16-fftr-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(cs16-fftr-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME cs16-fftr-test COMMAND cs16-fftr-test)
+
   ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9267,6 +9276,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(cs16-bfly4-bench bench/cs16-bfly4.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(cs16-bfly4-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(cs16-bfly4-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(cs16-fftr-bench bench/cs16-fftr.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(cs16-fftr-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(cs16-fftr-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(xx-transpose-bench bench/x32-transpose.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(xx-transpose-bench PRIVATE . include src)

@@ -617,6 +617,10 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
+    "src/cs16-fftr/gen/scalar-x1.c",
+    "src/cs16-fftr/gen/scalar-x2.c",
+    "src/cs16-fftr/gen/scalar-x3.c",
+    "src/cs16-fftr/gen/scalar-x4.c",
     "src/cs16-bfly4/gen/scalar-x1.c",
     "src/cs16-bfly4/gen/scalar-x2.c",
     "src/cs16-bfly4/gen/scalar-x3.c",
@@ -11682,6 +11686,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "cs16_fftr_bench",
+    srcs = [
+        "bench/cs16-fftr.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "x8_lut_bench",
     srcs = [
         "bench/x8-lut.cc",
@@ -14035,6 +14047,15 @@ xnnpack_unit_test(
     srcs = [
         "test/bfly4-microkernel-tester.h",
         "test/cs16-bfly4.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "cs16_fftr_test",
+    srcs = [
+        "test/cs16-fftr.cc",
+        "test/fftr-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
