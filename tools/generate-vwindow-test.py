@@ -18,7 +18,7 @@ import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='Window microkernel test generator')
+parser = argparse.ArgumentParser(description='VWindow microkernel test generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_s16_window_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_s16_vwindow_ukernel__(.+)_x(\d+)", name)
   assert match is not None
   row_tile = 1
   batch_tile = int(match.group(2))
@@ -36,11 +36,11 @@ def split_ukernel_name(name):
   return row_tile, batch_tile, arch, isa
 
 
-WINDOW_TEST_TEMPLATE = """\
+VWINDOW_TEST_TEMPLATE = """\
 TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  WindowMicrokernelTester()
+  VWindowMicrokernelTester()
     .batch(${BATCH_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -50,7 +50,7 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
-      WindowMicrokernelTester()
+      VWindowMicrokernelTester()
         .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -60,7 +60,7 @@ $if BATCH_TILE > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
-      WindowMicrokernelTester()
+      VWindowMicrokernelTester()
         .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -70,7 +70,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
-    WindowMicrokernelTester()
+    VWindowMicrokernelTester()
       .batch(batch)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -82,7 +82,7 @@ $if BATCH_TILE > 1:
       ${ISA_CHECK};
     for (size_t rows = 1; rows < ${BATCH_TILE}; rows++) {
       for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-        WindowMicrokernelTester()
+        VWindowMicrokernelTester()
           .rows(rows)
           .batch(batch)
           .Test(${", ".join(TEST_ARGS)});
@@ -95,7 +95,7 @@ $if BATCH_TILE > 1:
       ${ISA_CHECK};
     for (size_t rows = ${BATCH_TILE*2}; rows <= ${BATCH_TILE*4}; rows += ${BATCH_TILE}) {
       for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-        WindowMicrokernelTester()
+        VWindowMicrokernelTester()
           .rows(rows)
           .batch(batch)
           .Test(${", ".join(TEST_ARGS)});
@@ -108,7 +108,7 @@ TEST(${TEST_NAME}, rows_gt_${BATCH_TILE}) {
     ${ISA_CHECK};
   for (size_t rows = ${BATCH_TILE+1}; rows < ${BATCH_TILE*2}; rows++) {
     for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-      WindowMicrokernelTester()
+      VWindowMicrokernelTester()
         .rows(rows)
         .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
@@ -121,7 +121,7 @@ TEST(${TEST_NAME}, inplace) {
     ${ISA_CHECK};
   for (size_t rows = 1; rows <= ${BATCH_TILE*3}; rows += ${max(1, BATCH_TILE-1)}) {
     for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-      WindowMicrokernelTester()
+      VWindowMicrokernelTester()
         .rows(rows)
         .batch(batch)
         .inplace(true)
@@ -135,7 +135,7 @@ TEST(${TEST_NAME}, shift) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t shift = 0; shift < 32; shift++) {
-    WindowMicrokernelTester()
+    VWindowMicrokernelTester()
       .rows(${BATCH_TILE})
       .batch(${BATCH_TILE})
       .shift(shift)
@@ -163,7 +163,7 @@ def generate_test_cases(ukernel, row_tile, batch_tile, isa):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  return xngen.preprocess(WINDOW_TEST_TEMPLATE, {
+  return xngen.preprocess(VWINDOW_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
@@ -198,8 +198,8 @@ def main(args):
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
 
-#include <xnnpack/window.h>
-#include "window-microkernel-tester.h"
+#include <xnnpack/vwindow.h>
+#include "vwindow-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:

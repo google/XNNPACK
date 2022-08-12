@@ -1582,8 +1582,8 @@ typedef void (*xnn_s16_rmaxabs_ukernel_function)(
     const int16_t* x,
     uint16_t* y);
 
-typedef void (*xnn_s16_window_ukernel_function)(
-    size_t mr,
+typedef void (*xnn_s16_vwindow_ukernel_function)(
+    size_t rows,
     size_t batch_size,
     const int16_t* input,
     const int16_t* weights,

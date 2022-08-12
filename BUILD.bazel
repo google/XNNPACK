@@ -1365,10 +1365,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s16-vlshift/gen/scalar-x2.c",
     "src/s16-vlshift/gen/scalar-x3.c",
     "src/s16-vlshift/gen/scalar-x4.c",
-    "src/s16-window/gen/scalar-x1.c",
-    "src/s16-window/gen/scalar-x2.c",
-    "src/s16-window/gen/scalar-x3.c",
-    "src/s16-window/gen/scalar-x4.c",
+    "src/s16-vwindow/gen/scalar-x1.c",
+    "src/s16-vwindow/gen/scalar-x2.c",
+    "src/s16-vwindow/gen/scalar-x3.c",
+    "src/s16-vwindow/gen/scalar-x4.c",
     "src/u8-ibilinear/gen/scalar-c1.c",
     "src/u8-ibilinear/gen/scalar-c2.c",
     "src/u8-ibilinear/gen/scalar-c4.c",
@@ -4159,10 +4159,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/s16-vlshift/gen/neon-x16.c",
     "src/s16-vlshift/gen/neon-x24.c",
     "src/s16-vlshift/gen/neon-x32.c",
-    "src/s16-window/gen/neon-x8.c",
-    "src/s16-window/gen/neon-x16.c",
-    "src/s16-window/gen/neon-x24.c",
-    "src/s16-window/gen/neon-x32.c",
+    "src/s16-vwindow/gen/neon-x8.c",
+    "src/s16-vwindow/gen/neon-x16.c",
+    "src/s16-vwindow/gen/neon-x24.c",
+    "src/s16-vwindow/gen/neon-x32.c",
     "src/u8-ibilinear/gen/neon-c8.c",
     "src/u8-ibilinear/gen/neon-c16.c",
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
@@ -8548,7 +8548,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/vscaleextexp.h",
     "src/xnnpack/vsquareabs.h",
     "src/xnnpack/vunary.h",
-    "src/xnnpack/window.h",
+    "src/xnnpack/vwindow.h",
     "src/xnnpack/zip.h",
 ]
 
@@ -11646,9 +11646,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "s16_window_bench",
+    name = "s16_vwindow_bench",
     srcs = [
-        "bench/s16-window.cc",
+        "bench/s16-vwindow.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -14007,10 +14007,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "s16_window_test",
+    name = "s16_vwindow_test",
     srcs = [
-        "test/s16-window.cc",
-        "test/window-microkernel-tester.h",
+        "test/s16-vwindow.cc",
+        "test/vwindow-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

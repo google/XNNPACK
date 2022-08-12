@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-window/neon.c.in
+//   Template: src/s16-vwindow/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -14,10 +14,10 @@
 #include <arm_neon.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/window.h>
+#include <xnnpack/vwindow.h>
 
 
-void xnn_s16_window_ukernel__neon_x24(
+void xnn_s16_vwindow_ukernel__neon_x16(
     size_t rows,
     size_t batch_size,
     const int16_t* input,
@@ -37,36 +37,28 @@ void xnn_s16_window_ukernel__neon_x24(
   do {
     const int16_t* w = weights;
     size_t n = batch_size * sizeof(int16_t);
-    for (; n >= 24 * sizeof(int16_t); n -= 24 * sizeof(int16_t)) {
+    for (; n >= 16 * sizeof(int16_t); n -= 16 * sizeof(int16_t)) {
       const int16x8_t vi0 = vld1q_s16(input); input += 8;
       const int16x8_t vi1 = vld1q_s16(input); input += 8;
-      const int16x8_t vi2 = vld1q_s16(input); input += 8;
 
       const int16x8_t vw0 = vld1q_s16(w); w += 8;
       const int16x8_t vw1 = vld1q_s16(w); w += 8;
-      const int16x8_t vw2 = vld1q_s16(w); w += 8;
 
       int32x4_t vacc0_lo = vmull_s16(vget_low_s16(vi0), vget_low_s16(vw0));
       int32x4_t vacc0_hi = vmull_s16(vget_high_s16(vi0), vget_high_s16(vw0));
       int32x4_t vacc1_lo = vmull_s16(vget_low_s16(vi1), vget_low_s16(vw1));
       int32x4_t vacc1_hi = vmull_s16(vget_high_s16(vi1), vget_high_s16(vw1));
-      int32x4_t vacc2_lo = vmull_s16(vget_low_s16(vi2), vget_low_s16(vw2));
-      int32x4_t vacc2_hi = vmull_s16(vget_high_s16(vi2), vget_high_s16(vw2));
 
       vacc0_lo = vshlq_s32(vacc0_lo, vshift);
       vacc0_hi = vshlq_s32(vacc0_hi, vshift);
       vacc1_lo = vshlq_s32(vacc1_lo, vshift);
       vacc1_hi = vshlq_s32(vacc1_hi, vshift);
-      vacc2_lo = vshlq_s32(vacc2_lo, vshift);
-      vacc2_hi = vshlq_s32(vacc2_hi, vshift);
 
       const int16x8_t vout0 = vcombine_s16(vqmovn_s32(vacc0_lo), vqmovn_s32(vacc0_hi));
       const int16x8_t vout1 = vcombine_s16(vqmovn_s32(vacc1_lo), vqmovn_s32(vacc1_hi));
-      const int16x8_t vout2 = vcombine_s16(vqmovn_s32(vacc2_lo), vqmovn_s32(vacc2_hi));
 
       vst1q_s16(output, vout0); output += 8;
       vst1q_s16(output, vout1); output += 8;
-      vst1q_s16(output, vout2); output += 8;
     }
 
     // Remainder of full vectors

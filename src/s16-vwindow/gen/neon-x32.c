@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/s16-vwindow/neon.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -13,10 +14,10 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <arm_neon.h>
 
 #include <xnnpack/math.h>
-#include <xnnpack/window.h>
+#include <xnnpack/vwindow.h>
 
 
-void xnn_s16_window_ukernel__neon_x${BATCH_TILE}(
+void xnn_s16_vwindow_ukernel__neon_x32(
     size_t rows,
     size_t batch_size,
     const int16_t* input,
@@ -36,28 +37,45 @@ void xnn_s16_window_ukernel__neon_x${BATCH_TILE}(
   do {
     const int16_t* w = weights;
     size_t n = batch_size * sizeof(int16_t);
-    $if BATCH_TILE > 8:
-      for (; n >= ${BATCH_TILE} * sizeof(int16_t); n -= ${BATCH_TILE} * sizeof(int16_t)) {
-        $for N in range(SIMD_TILE):
-          const int16x8_t vi${N} = vld1q_s16(input); input += 8;
+    for (; n >= 32 * sizeof(int16_t); n -= 32 * sizeof(int16_t)) {
+      const int16x8_t vi0 = vld1q_s16(input); input += 8;
+      const int16x8_t vi1 = vld1q_s16(input); input += 8;
+      const int16x8_t vi2 = vld1q_s16(input); input += 8;
+      const int16x8_t vi3 = vld1q_s16(input); input += 8;
 
-        $for N in range(SIMD_TILE):
-          const int16x8_t vw${N} = vld1q_s16(w); w += 8;
+      const int16x8_t vw0 = vld1q_s16(w); w += 8;
+      const int16x8_t vw1 = vld1q_s16(w); w += 8;
+      const int16x8_t vw2 = vld1q_s16(w); w += 8;
+      const int16x8_t vw3 = vld1q_s16(w); w += 8;
 
-        $for N in range(SIMD_TILE):
-          int32x4_t vacc${N}_lo = vmull_s16(vget_low_s16(vi${N}), vget_low_s16(vw${N}));
-          int32x4_t vacc${N}_hi = vmull_s16(vget_high_s16(vi${N}), vget_high_s16(vw${N}));
+      int32x4_t vacc0_lo = vmull_s16(vget_low_s16(vi0), vget_low_s16(vw0));
+      int32x4_t vacc0_hi = vmull_s16(vget_high_s16(vi0), vget_high_s16(vw0));
+      int32x4_t vacc1_lo = vmull_s16(vget_low_s16(vi1), vget_low_s16(vw1));
+      int32x4_t vacc1_hi = vmull_s16(vget_high_s16(vi1), vget_high_s16(vw1));
+      int32x4_t vacc2_lo = vmull_s16(vget_low_s16(vi2), vget_low_s16(vw2));
+      int32x4_t vacc2_hi = vmull_s16(vget_high_s16(vi2), vget_high_s16(vw2));
+      int32x4_t vacc3_lo = vmull_s16(vget_low_s16(vi3), vget_low_s16(vw3));
+      int32x4_t vacc3_hi = vmull_s16(vget_high_s16(vi3), vget_high_s16(vw3));
 
-        $for N in range(SIMD_TILE):
-          vacc${N}_lo = vshlq_s32(vacc${N}_lo, vshift);
-          vacc${N}_hi = vshlq_s32(vacc${N}_hi, vshift);
+      vacc0_lo = vshlq_s32(vacc0_lo, vshift);
+      vacc0_hi = vshlq_s32(vacc0_hi, vshift);
+      vacc1_lo = vshlq_s32(vacc1_lo, vshift);
+      vacc1_hi = vshlq_s32(vacc1_hi, vshift);
+      vacc2_lo = vshlq_s32(vacc2_lo, vshift);
+      vacc2_hi = vshlq_s32(vacc2_hi, vshift);
+      vacc3_lo = vshlq_s32(vacc3_lo, vshift);
+      vacc3_hi = vshlq_s32(vacc3_hi, vshift);
 
-        $for N in range(SIMD_TILE):
-          const int16x8_t vout${N} = vcombine_s16(vqmovn_s32(vacc${N}_lo), vqmovn_s32(vacc${N}_hi));
+      const int16x8_t vout0 = vcombine_s16(vqmovn_s32(vacc0_lo), vqmovn_s32(vacc0_hi));
+      const int16x8_t vout1 = vcombine_s16(vqmovn_s32(vacc1_lo), vqmovn_s32(vacc1_hi));
+      const int16x8_t vout2 = vcombine_s16(vqmovn_s32(vacc2_lo), vqmovn_s32(vacc2_hi));
+      const int16x8_t vout3 = vcombine_s16(vqmovn_s32(vacc3_lo), vqmovn_s32(vacc3_hi));
 
-        $for N in range(SIMD_TILE):
-          vst1q_s16(output, vout${N}); output += 8;
-      }
+      vst1q_s16(output, vout0); output += 8;
+      vst1q_s16(output, vout1); output += 8;
+      vst1q_s16(output, vout2); output += 8;
+      vst1q_s16(output, vout3); output += 8;
+    }
 
     // Remainder of full vectors
     for (; n >= 8 * sizeof(int16_t); n -= 8 * sizeof(int16_t)) {

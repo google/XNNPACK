@@ -19,9 +19,9 @@
 #include <xnnpack/params.h>
 
 
-class WindowMicrokernelTester {
+class VWindowMicrokernelTester {
  public:
-  inline WindowMicrokernelTester& rows(size_t rows) {
+  inline VWindowMicrokernelTester& rows(size_t rows) {
     assert(rows != 0);
     this->rows_ = rows;
     return *this;
@@ -31,7 +31,7 @@ class WindowMicrokernelTester {
     return this->rows_;
   }
 
-  inline WindowMicrokernelTester& batch(size_t batch) {
+  inline VWindowMicrokernelTester& batch(size_t batch) {
     assert(batch != 0);
     this->batch_ = batch;
     return *this;
@@ -41,7 +41,7 @@ class WindowMicrokernelTester {
     return this->batch_;
   }
 
-  inline WindowMicrokernelTester& shift(uint32_t shift) {
+  inline VWindowMicrokernelTester& shift(uint32_t shift) {
     assert(shift < 32);
     this->shift_ = shift;
     return *this;
@@ -51,7 +51,7 @@ class WindowMicrokernelTester {
     return this->shift_;
   }
 
-  inline WindowMicrokernelTester& inplace(bool inplace) {
+  inline VWindowMicrokernelTester& inplace(bool inplace) {
     this->inplace_ = inplace;
     return *this;
   }
@@ -60,7 +60,7 @@ class WindowMicrokernelTester {
     return this->inplace_;
   }
 
-  inline WindowMicrokernelTester& iterations(size_t iterations) {
+  inline VWindowMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -69,7 +69,7 @@ class WindowMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_s16_window_ukernel_function window) const {
+  void Test(xnn_s16_vwindow_ukernel_function vwindow) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
@@ -97,7 +97,7 @@ class WindowMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      window(rows(), batch(), x_data, w.data(), shift(), y.data());
+      vwindow(rows(), batch(), x_data, w.data(), shift(), y.data());
 
       // Verify results.
       for (size_t m = 0; m < rows(); m++) {

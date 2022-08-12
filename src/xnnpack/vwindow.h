@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 
-#define DECLARE_S16_WINDOW_UKERNEL_FUNCTION(fn_name) \
+#define DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
     size_t rows,                                     \
     size_t batch_size,                               \
@@ -25,15 +25,15 @@ extern "C" {
     int16_t* output);
 
 
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__neon_x8)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__neon_x16)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__neon_x24)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__neon_x32)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__neon_x8)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__neon_x16)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__neon_x24)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__neon_x32)
 
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__scalar_x1)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__scalar_x2)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__scalar_x3)
-DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__scalar_x4)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__scalar_x1)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__scalar_x2)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__scalar_x3)
+DECLARE_S16_VWINDOW_UKERNEL_FUNCTION(xnn_s16_vwindow_ukernel__scalar_x4)
 
 #ifdef __cplusplus
 }  // extern "C"

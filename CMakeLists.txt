@@ -1354,10 +1354,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-vlshift/gen/scalar-x2.c
   src/s16-vlshift/gen/scalar-x3.c
   src/s16-vlshift/gen/scalar-x4.c
-  src/s16-window/gen/scalar-x1.c
-  src/s16-window/gen/scalar-x2.c
-  src/s16-window/gen/scalar-x3.c
-  src/s16-window/gen/scalar-x4.c
+  src/s16-vwindow/gen/scalar-x1.c
+  src/s16-vwindow/gen/scalar-x2.c
+  src/s16-vwindow/gen/scalar-x3.c
+  src/s16-vwindow/gen/scalar-x4.c
   src/u8-ibilinear/gen/scalar-c1.c
   src/u8-ibilinear/gen/scalar-c2.c
   src/u8-ibilinear/gen/scalar-c4.c
@@ -2670,10 +2670,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-vlshift/gen/neon-x16.c
   src/s16-vlshift/gen/neon-x24.c
   src/s16-vlshift/gen/neon-x32.c
-  src/s16-window/gen/neon-x8.c
-  src/s16-window/gen/neon-x16.c
-  src/s16-window/gen/neon-x24.c
-  src/s16-window/gen/neon-x32.c
+  src/s16-vwindow/gen/neon-x8.c
+  src/s16-vwindow/gen/neon-x16.c
+  src/s16-vwindow/gen/neon-x24.c
+  src/s16-vwindow/gen/neon-x32.c
   src/u8-ibilinear/gen/neon-c8.c
   src/u8-ibilinear/gen/neon-c16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
@@ -8650,10 +8650,10 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s16-rmaxabs-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME s16-rmaxabs-test COMMAND s16-rmaxabs-test)
 
-  ADD_EXECUTABLE(s16-window-test test/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
-  TARGET_INCLUDE_DIRECTORIES(s16-window-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s16-window-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
+  ADD_EXECUTABLE(s16-vwindow-test test/s16-vwindow.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-vwindow-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s16-vwindow-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME s16-vwindow-test COMMAND s16-vwindow-test)
 
   ADD_EXECUTABLE(u32-vlog-test test/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-test PRIVATE include src test)
@@ -9257,9 +9257,9 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(s16-rmaxabs-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
-  ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
-  TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+  ADD_EXECUTABLE(s16-vwindow-bench bench/s16-vwindow.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(s16-vwindow-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(s16-vwindow-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)

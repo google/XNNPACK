@@ -6,7 +6,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
-#include <xnnpack/window.h>
+#include <xnnpack/vwindow.h>
 
 #include <algorithm>
 #include <cmath>
@@ -17,9 +17,9 @@
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
-void window(
+void vwindow(
     benchmark::State& state,
-    xnn_s16_window_ukernel_function window,
+    xnn_s16_vwindow_ukernel_function vwindow,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -39,7 +39,7 @@ void window(
   std::iota(output.begin(), output.end(), 0);
 
   for (auto _ : state) {
-    window(rows, batch, input.data(), weights.data(), 12, output.data());
+    vwindow(rows, batch, input.data(), weights.data(), 12, output.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -63,23 +63,23 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-BENCHMARK_CAPTURE(window, s16_neon_x8, xnn_s16_window_ukernel__neon_x8, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(vwindow, s16_neon_x8, xnn_s16_vwindow_ukernel__neon_x8, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_neon_x16, xnn_s16_window_ukernel__neon_x16, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(vwindow, s16_neon_x16, xnn_s16_vwindow_ukernel__neon_x16, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_neon_x24, xnn_s16_window_ukernel__neon_x24, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(vwindow, s16_neon_x24, xnn_s16_vwindow_ukernel__neon_x24, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_neon_x32, xnn_s16_window_ukernel__neon_x32, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(vwindow, s16_neon_x32, xnn_s16_vwindow_ukernel__neon_x32, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(window, s16_scalar_x1, xnn_s16_window_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(vwindow, s16_scalar_x1, xnn_s16_vwindow_ukernel__scalar_x1)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_scalar_x2, xnn_s16_window_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(vwindow, s16_scalar_x2, xnn_s16_vwindow_ukernel__scalar_x2)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_scalar_x3, xnn_s16_window_ukernel__scalar_x3)
+BENCHMARK_CAPTURE(vwindow, s16_scalar_x3, xnn_s16_vwindow_ukernel__scalar_x3)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(window, s16_scalar_x4, xnn_s16_window_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(vwindow, s16_scalar_x4, xnn_s16_vwindow_ukernel__scalar_x4)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
