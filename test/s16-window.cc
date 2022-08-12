@@ -21,7 +21,6 @@
   TEST(S16_WINDOW__NEON_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
-      .rows(8)
       .batch(8)
       .Test(xnn_s16_window_ukernel__neon_x8);
   }
@@ -30,7 +29,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 16; batch < 80; batch += 8) {
       WindowMicrokernelTester()
-        .rows(8)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
@@ -40,7 +38,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 1; batch < 8; batch++) {
       WindowMicrokernelTester()
-        .rows(8)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
@@ -50,7 +47,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 9; batch < 16; batch++) {
       WindowMicrokernelTester()
-        .rows(8)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
@@ -123,7 +119,6 @@
   TEST(S16_WINDOW__NEON_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
-      .rows(16)
       .batch(16)
       .Test(xnn_s16_window_ukernel__neon_x16);
   }
@@ -132,7 +127,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 32; batch < 160; batch += 16) {
       WindowMicrokernelTester()
-        .rows(16)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
@@ -142,7 +136,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 1; batch < 16; batch++) {
       WindowMicrokernelTester()
-        .rows(16)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
@@ -152,7 +145,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 17; batch < 32; batch++) {
       WindowMicrokernelTester()
-        .rows(16)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
@@ -225,7 +217,6 @@
   TEST(S16_WINDOW__NEON_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
-      .rows(24)
       .batch(24)
       .Test(xnn_s16_window_ukernel__neon_x24);
   }
@@ -234,7 +225,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 48; batch < 240; batch += 24) {
       WindowMicrokernelTester()
-        .rows(24)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
@@ -244,7 +234,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 1; batch < 24; batch++) {
       WindowMicrokernelTester()
-        .rows(24)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
@@ -254,7 +243,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 25; batch < 48; batch++) {
       WindowMicrokernelTester()
-        .rows(24)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
@@ -327,7 +315,6 @@
   TEST(S16_WINDOW__NEON_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
-      .rows(32)
       .batch(32)
       .Test(xnn_s16_window_ukernel__neon_x32);
   }
@@ -336,7 +323,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 64; batch < 320; batch += 32) {
       WindowMicrokernelTester()
-        .rows(32)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
@@ -346,7 +332,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 1; batch < 32; batch++) {
       WindowMicrokernelTester()
-        .rows(32)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
@@ -356,7 +341,6 @@
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch = 33; batch < 64; batch++) {
       WindowMicrokernelTester()
-        .rows(32)
         .batch(batch)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
@@ -427,7 +411,6 @@
 
 TEST(S16_WINDOW__SCALAR_X1, batch_eq_1) {
   WindowMicrokernelTester()
-    .rows(1)
     .batch(1)
     .Test(xnn_s16_window_ukernel__scalar_x1);
 }
@@ -435,7 +418,6 @@ TEST(S16_WINDOW__SCALAR_X1, batch_eq_1) {
 TEST(S16_WINDOW__SCALAR_X1, batch_gt_1) {
   for (size_t batch = 2; batch < 10; batch++) {
     WindowMicrokernelTester()
-      .rows(1)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x1);
   }
@@ -478,7 +460,6 @@ TEST(S16_WINDOW__SCALAR_X1, shift) {
 
 TEST(S16_WINDOW__SCALAR_X2, batch_eq_2) {
   WindowMicrokernelTester()
-    .rows(2)
     .batch(2)
     .Test(xnn_s16_window_ukernel__scalar_x2);
 }
@@ -486,7 +467,6 @@ TEST(S16_WINDOW__SCALAR_X2, batch_eq_2) {
 TEST(S16_WINDOW__SCALAR_X2, batch_div_2) {
   for (size_t batch = 4; batch < 20; batch += 2) {
     WindowMicrokernelTester()
-      .rows(2)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
@@ -495,7 +475,6 @@ TEST(S16_WINDOW__SCALAR_X2, batch_div_2) {
 TEST(S16_WINDOW__SCALAR_X2, batch_lt_2) {
   for (size_t batch = 1; batch < 2; batch++) {
     WindowMicrokernelTester()
-      .rows(2)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
@@ -504,7 +483,6 @@ TEST(S16_WINDOW__SCALAR_X2, batch_lt_2) {
 TEST(S16_WINDOW__SCALAR_X2, batch_gt_2) {
   for (size_t batch = 3; batch < 4; batch++) {
     WindowMicrokernelTester()
-      .rows(2)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
@@ -569,7 +547,6 @@ TEST(S16_WINDOW__SCALAR_X2, shift) {
 
 TEST(S16_WINDOW__SCALAR_X3, batch_eq_3) {
   WindowMicrokernelTester()
-    .rows(3)
     .batch(3)
     .Test(xnn_s16_window_ukernel__scalar_x3);
 }
@@ -577,7 +554,6 @@ TEST(S16_WINDOW__SCALAR_X3, batch_eq_3) {
 TEST(S16_WINDOW__SCALAR_X3, batch_div_3) {
   for (size_t batch = 6; batch < 30; batch += 3) {
     WindowMicrokernelTester()
-      .rows(3)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
@@ -586,7 +562,6 @@ TEST(S16_WINDOW__SCALAR_X3, batch_div_3) {
 TEST(S16_WINDOW__SCALAR_X3, batch_lt_3) {
   for (size_t batch = 1; batch < 3; batch++) {
     WindowMicrokernelTester()
-      .rows(3)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
@@ -595,7 +570,6 @@ TEST(S16_WINDOW__SCALAR_X3, batch_lt_3) {
 TEST(S16_WINDOW__SCALAR_X3, batch_gt_3) {
   for (size_t batch = 4; batch < 6; batch++) {
     WindowMicrokernelTester()
-      .rows(3)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
@@ -660,7 +634,6 @@ TEST(S16_WINDOW__SCALAR_X3, shift) {
 
 TEST(S16_WINDOW__SCALAR_X4, batch_eq_4) {
   WindowMicrokernelTester()
-    .rows(4)
     .batch(4)
     .Test(xnn_s16_window_ukernel__scalar_x4);
 }
@@ -668,7 +641,6 @@ TEST(S16_WINDOW__SCALAR_X4, batch_eq_4) {
 TEST(S16_WINDOW__SCALAR_X4, batch_div_4) {
   for (size_t batch = 8; batch < 40; batch += 4) {
     WindowMicrokernelTester()
-      .rows(4)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }
@@ -677,7 +649,6 @@ TEST(S16_WINDOW__SCALAR_X4, batch_div_4) {
 TEST(S16_WINDOW__SCALAR_X4, batch_lt_4) {
   for (size_t batch = 1; batch < 4; batch++) {
     WindowMicrokernelTester()
-      .rows(4)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }
@@ -686,7 +657,6 @@ TEST(S16_WINDOW__SCALAR_X4, batch_lt_4) {
 TEST(S16_WINDOW__SCALAR_X4, batch_gt_4) {
   for (size_t batch = 5; batch < 8; batch++) {
     WindowMicrokernelTester()
-      .rows(4)
       .batch(batch)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }

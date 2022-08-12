@@ -41,7 +41,6 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   WindowMicrokernelTester()
-    .rows(${BATCH_TILE})
     .batch(${BATCH_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -52,7 +51,6 @@ $if BATCH_TILE > 1:
       ${ISA_CHECK};
     for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
       WindowMicrokernelTester()
-        .rows(${BATCH_TILE})
         .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -63,7 +61,6 @@ $if BATCH_TILE > 1:
       ${ISA_CHECK};
     for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
       WindowMicrokernelTester()
-        .rows(${BATCH_TILE})
         .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -74,7 +71,6 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
     ${ISA_CHECK};
   for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
     WindowMicrokernelTester()
-      .rows(${BATCH_TILE})
       .batch(batch)
       .Test(${", ".join(TEST_ARGS)});
   }
