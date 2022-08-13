@@ -606,14 +606,14 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
-  src/cs16-fftr/gen/scalar-x1.c
-  src/cs16-fftr/gen/scalar-x2.c
-  src/cs16-fftr/gen/scalar-x3.c
-  src/cs16-fftr/gen/scalar-x4.c
   src/cs16-bfly4/gen/scalar-x1.c
   src/cs16-bfly4/gen/scalar-x2.c
   src/cs16-bfly4/gen/scalar-x3.c
   src/cs16-bfly4/gen/scalar-x4.c
+  src/cs16-fftr/gen/scalar-x1.c
+  src/cs16-fftr/gen/scalar-x2.c
+  src/cs16-fftr/gen/scalar-x3.c
+  src/cs16-fftr/gen/scalar-x4.c
   src/cs16-vsquareabs/gen/scalar-x1.c
   src/cs16-vsquareabs/gen/scalar-x2.c
   src/cs16-vsquareabs/gen/scalar-x3.c
@@ -1365,6 +1365,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-scalar-c1.c
   src/u8-rmax/scalar.c
   src/u8-vclamp/scalar-x4.c
+  src/u32-filterbank-accumulate/gen/scalar-x1.c
   src/u32-vlog/gen/scalar-x1.c
   src/u32-vlog/gen/scalar-x2.c
   src/u32-vlog/gen/scalar-x3.c
@@ -2679,6 +2680,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
+  src/u32-filterbank-accumulate/gen/neon-x1.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
   src/x8-transposec/gen/8x8-multi-dec-zip-neon.c
@@ -8655,6 +8657,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s16-window-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
 
+  ADD_EXECUTABLE(u32-filterbank-accumulate-test test/u32-filterbank-accumulate.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME u32-filterbank-accumulate-test COMMAND u32-filterbank-accumulate-test)
+
   ADD_EXECUTABLE(u32-vlog-test test/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9260,6 +9267,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(u32-filterbank-accumulate-bench bench/u32-filterbank-accumulate.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)

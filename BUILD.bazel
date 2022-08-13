@@ -617,14 +617,14 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
 ]
 
 ALL_SCALAR_MICROKERNEL_SRCS = [
-    "src/cs16-fftr/gen/scalar-x1.c",
-    "src/cs16-fftr/gen/scalar-x2.c",
-    "src/cs16-fftr/gen/scalar-x3.c",
-    "src/cs16-fftr/gen/scalar-x4.c",
     "src/cs16-bfly4/gen/scalar-x1.c",
     "src/cs16-bfly4/gen/scalar-x2.c",
     "src/cs16-bfly4/gen/scalar-x3.c",
     "src/cs16-bfly4/gen/scalar-x4.c",
+    "src/cs16-fftr/gen/scalar-x1.c",
+    "src/cs16-fftr/gen/scalar-x2.c",
+    "src/cs16-fftr/gen/scalar-x3.c",
+    "src/cs16-fftr/gen/scalar-x4.c",
     "src/cs16-vsquareabs/gen/scalar-x1.c",
     "src/cs16-vsquareabs/gen/scalar-x2.c",
     "src/cs16-vsquareabs/gen/scalar-x3.c",
@@ -1376,6 +1376,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/u8-maxpool/9p8x-minmax-scalar-c1.c",
     "src/u8-rmax/scalar.c",
     "src/u8-vclamp/scalar-x4.c",
+    "src/u32-filterbank-accumulate/gen/scalar-x1.c",
     "src/u32-vlog/gen/scalar-x1.c",
     "src/u32-vlog/gen/scalar-x2.c",
     "src/u32-vlog/gen/scalar-x3.c",
@@ -4168,6 +4169,7 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/u8-maxpool/9p8x-minmax-neon-c16.c",
     "src/u8-rmax/neon.c",
     "src/u8-vclamp/neon-x64.c",
+    "src/u32-filterbank-accumulate/gen/neon-x1.c",
     "src/xx-fill/neon-x64.c",
     "src/xx-pad/neon.c",
     "src/x8-transposec/gen/8x8-multi-dec-zip-neon.c",
@@ -8514,6 +8516,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/dwconv.h",
     "src/xnnpack/fft.h",
     "src/xnnpack/fill.h",
+    "src/xnnpack/filterbank.h",
     "src/xnnpack/gavgpool.h",
     "src/xnnpack/gemm.h",
     "src/xnnpack/ibilinear.h",
@@ -11654,6 +11657,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "u32_filterbank_accumulate_bench",
+    srcs = [
+        "bench/u32-filterbank-accumulate.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "u32_vlog_bench",
     srcs = [
         "bench/u32-vlog.cc",
@@ -14011,6 +14022,15 @@ xnnpack_unit_test(
     srcs = [
         "test/s16-window.cc",
         "test/window-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "u32_filterbank_accumulate_test",
+    srcs = [
+        "test/filterbank-accumulate-microkernel-tester.h",
+        "test/u32-filterbank-accumulate.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

@@ -1583,12 +1583,23 @@ typedef void (*xnn_s16_rmaxabs_ukernel_function)(
     uint16_t* y);
 
 typedef void (*xnn_s16_window_ukernel_function)(
-    size_t mr,
+    size_t rows,
     size_t batch_size,
     const int16_t* input,
     const int16_t* weights,
     uint32_t shift,
     int16_t* output);
+
+typedef void (*xnn_u32_filterbank_accumulate_ukernel_function)(
+    size_t rows,
+    size_t batch_size,
+    const uint32_t* input,
+    const uint16_t* input_offset,
+    const uint16_t* weight_offset,
+    const uint16_t* weight_widths,
+    const uint16_t* weights,
+    const uint16_t* unweights,
+    uint64_t* output);
 
 typedef void (*xnn_s16_vlshift_ukernel_function)(
     size_t batch_size,
