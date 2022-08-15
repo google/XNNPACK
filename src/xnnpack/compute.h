@@ -179,6 +179,7 @@ struct gemm_context {
   size_t cg_stride;
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
+  void* fused_params;
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;

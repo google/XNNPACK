@@ -261,6 +261,7 @@ static enum xnn_status setup_fully_connected_nc(
     .ukernel = gemm_ukernel,
   };
   memcpy(&fully_connected_op->context.gemm.params, params, params_size);
+  fully_connected_op->context.gemm.fused_params = &fully_connected_op->context.gemm.params;
 
   #if XNN_TEST_MODE
     const size_t nc = nr;

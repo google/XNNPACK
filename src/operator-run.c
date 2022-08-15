@@ -328,7 +328,7 @@ void xnn_compute_gemm(
       (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
       cm_stride,
       context->cn_stride,
-      &context->params);
+      context->fused_params);
 }
 
 void xnn_compute_spmm(
@@ -1222,7 +1222,7 @@ void xnn_compute_vmulcaddc(
         (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
         cm_stride,
         context->cn_stride,
-        &context->params);
+        context->fused_params);
   }
 
   void xnn_compute_hmp_grouped_batch_igemm(

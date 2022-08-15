@@ -1659,6 +1659,38 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   xnn_caches_t caches,
   xnn_operator_t* convolution_op_out);
 
+// Forward declare.
+struct xnn_post_operation;
+
+/// Create a convolution operator with a number of post operations. The
+/// convolution operator created using this function does not have output_min
+/// and output_max. The list of operators in post_operations will be applied in
+/// order. Convolution with post operations is only supported on JIT platforms
+/// and when JIT is enabled.
+enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
+    uint32_t input_padding_top,
+    uint32_t input_padding_right,
+    uint32_t input_padding_bottom,
+    uint32_t input_padding_left,
+    uint32_t kernel_height,
+    uint32_t kernel_width,
+    uint32_t subsampling_height,
+    uint32_t subsampling_width,
+    uint32_t dilation_height,
+    uint32_t dilation_width,
+    uint32_t groups,
+    size_t group_input_channels,
+    size_t group_output_channels,
+    size_t input_channel_stride,
+    size_t output_channel_stride,
+    const float* kernel,
+    const float* bias,
+    size_t num_post_operations,
+    struct xnn_post_operation* post_operations,
+    uint32_t flags,
+    xnn_caches_t caches,
+    xnn_operator_t* convolution_op_out);
+
 enum xnn_status xnn_setup_convolution2d_nhwc_f32(
   xnn_operator_t convolution_op,
   size_t batch_size,

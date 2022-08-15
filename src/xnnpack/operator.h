@@ -118,6 +118,21 @@ struct subconvolution_params {
   size_t scaled_kernel_size;
 };
 
+/// Operators that can be applied post convolution.
+enum xnn_post_operation_type {
+  xnn_post_operation_type_none,
+  xnn_post_operation_type_hardswish,
+};
+
+/// Struct representing a post operation and its associated data. For example,
+/// an addition with constant will specify the constant in the arg1 field, a
+/// clamp will specify min in arg1, and max in arg2.
+struct xnn_post_operation {
+  enum xnn_post_operation_type op_type;
+  float arg1;
+  float arg2;
+};
+
 struct xnn_operator {
   size_t batch_size;
   uint32_t padding_top;
@@ -260,6 +275,8 @@ struct xnn_operator {
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
+  size_t num_post_operation_params;
+  void* post_operation_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 
