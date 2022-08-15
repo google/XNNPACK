@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/math.h>
 #include <xnnpack/filterbank.h>
 
 
