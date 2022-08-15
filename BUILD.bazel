@@ -14933,6 +14933,7 @@ xnnpack_unit_test(
     srcs = [
         "test/deconvolution-2d.cc",
     ],
+    shard_count = 5,
     deps = [
         ":XNNPACK_test_mode",
         ":operators_test_mode",
