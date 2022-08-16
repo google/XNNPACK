@@ -10619,6 +10619,21 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cc_library(
+    name = "post_operation",
+    srcs = [
+        "src/operators/post-operation.c",
+    ],
+    hdrs = [
+        "src/xnnpack/post-operation.h",
+    ],
+    deps = [
+        ":allocator",
+        ":microparams",
+        ":params",
+    ],
+)
+
 # Define a library with just the header to remove circular dependencies:
 # indirection <-> operators.
 xnnpack_cc_library(
@@ -10669,6 +10684,7 @@ xnnpack_cc_library(
         ":normalization",
         ":packing",
         ":params",
+        ":post_operation",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -10708,6 +10724,7 @@ xnnpack_cc_library(
         ":normalization_test_mode",
         ":packing_test_mode",
         ":params",
+        ":post_operation",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",

@@ -27,6 +27,7 @@
 #include <xnnpack/operator.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
+#include <xnnpack/post-operation.h>
 #include <xnnpack/microparams-init.h>
 
 #ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
@@ -1271,41 +1272,7 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     .post_operations = post_operations,
   };
 
-  union {
-    union xnn_f32_hswish_params hswish_params;
-  } post_op_params;  // Anonymous union to hold params of all valid post operations.
-
-  // Calculate how much space all post operation params will take.
-  size_t total_size = 0;
-  for (size_t i = 0; i < num_post_operations; i++) {
-    const struct xnn_post_operation post_op = post_operations[i];
-    switch (post_op.op_type) {
-      case xnn_post_operation_type_hardswish:
-        if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
-          total_size += xnn_params.f32.hswish.init.f32_hswish(&post_op_params.hswish_params);
-        }
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
-  // Copy all params compactly into post_operation_params.
-  char* post_operation_params = xnn_allocate_zero_memory(total_size);
-  char* cur_params = post_operation_params;
-  for (size_t i = 0; i < num_post_operations; i++) {
-    const struct xnn_post_operation post_op = post_operations[i];
-    switch (post_op.op_type) {
-      case xnn_post_operation_type_hardswish:
-        if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
-          const size_t initialized_size = xnn_params.f32.hswish.init.f32_hswish(&post_op_params.hswish_params);
-          memcpy(cur_params, &post_op_params.hswish_params, initialized_size);
-          cur_params += initialized_size;
-        }
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
+  char* post_operation_params = allocate_and_initialize_post_operation_params(num_post_operations, post_operations);
 
   union xnn_f32_minmax_params gemm_params;
   if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
