@@ -47,6 +47,34 @@
 - name: xnn_qu8_vlrelu_ukernel__avx2_x64
   init: xnn_init_qu8_lrelu_avx2_params
 
+# WAsm SIMD (ARM-optimized)
+- name: xnn_qu8_vlrelu_ukernel__wasmsimd_arm_x16
+  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+- name: xnn_qu8_vlrelu_ukernel__wasmsimd_arm_x32
+  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+
+# WAsm SIMD (x86-optimized)
+- name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x8
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+- name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+- name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x32
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+
+# WAsm Relaxed SIMD (ARM-optimized)
+- name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_x16
+  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+- name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32
+  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+
+# WAsm Relaxed SIMD (x86-optimized)
+- name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x8
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+- name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x16
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+- name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32
+  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+
 # ARMv6 SIMD
 - name: xnn_qu8_vlrelu_ukernel__armv6simd_x4
   init: xnn_init_qu8_lrelu_armv6simd_params

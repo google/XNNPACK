@@ -53,6 +53,14 @@
 - name: xnn_qu8_vcvt_ukernel__wasmsimd_x32
   init: xnn_init_qu8_cvt_wasmsimd_params
 
+# WAsm Relaxed SIMD
+- name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8
+  init: xnn_init_qu8_cvt_wasmsimd_params
+- name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16
+  init: xnn_init_qu8_cvt_wasmsimd_params
+- name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32
+  init: xnn_init_qu8_cvt_wasmsimd_params
+
 # ARMv6 SIMD
 - name: xnn_qu8_vcvt_ukernel__armv6simd_x4
   init: xnn_init_qu8_cvt_armv6simd_params

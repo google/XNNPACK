@@ -2926,6 +2926,22 @@ ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-vmulcaddc/gen/c4-minmax-wasmrelaxedsimd-2x.c",
     "src/f32-vmulcaddc/gen/c8-minmax-wasmrelaxedsimd-fma-2x.c",
     "src/f32-vmulcaddc/gen/c8-minmax-wasmrelaxedsimd-2x.c",
+    "src/qs8-vcvt/gen/vcvt-wasmrelaxedsimd-x8.c",
+    "src/qs8-vcvt/gen/vcvt-wasmrelaxedsimd-x16.c",
+    "src/qs8-vcvt/gen/vcvt-wasmrelaxedsimd-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmrelaxedsimd-arm-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmrelaxedsimd-arm-x32.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x16.c",
+    "src/qs8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x32.c",
+    "src/qu8-vcvt/gen/vcvt-wasmrelaxedsimd-x8.c",
+    "src/qu8-vcvt/gen/vcvt-wasmrelaxedsimd-x16.c",
+    "src/qu8-vcvt/gen/vcvt-wasmrelaxedsimd-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-arm-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-arm-x32.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x16.c",
+    "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x32.c",
 ]
 
 PROD_ARMV6SIMD_MICROKERNEL_SRCS = [

@@ -17,8 +17,10 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
+$WASM_I16X8_Q15MULR = "__builtin_wasm_relaxed_q15mulr_s_i16x8" if RELAXED else "wasm_i16x8_q15mulr_sat"
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_x86_x${BATCH_TILE}(
+$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x86_x${BATCH_TILE}(
     size_t n,
     const ${XINT8_T}* x,
     ${XINT8_T}* y,
@@ -50,7 +52,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_x86_x${BATCH_TILE}(
         vmultiplier${ABC[N]} = wasm_v128_xor(vmultiplier${ABC[N]}, vmultiplier_base);
 
       $for N in range(2*SIMD_TILE):
-        vacc${ABC[N]} = wasm_i16x8_q15mulr_sat(vacc${ABC[N]}, vmultiplier${ABC[N]});
+        vacc${ABC[N]} = ${WASM_I16X8_Q15MULR}(vacc${ABC[N]}, vmultiplier${ABC[N]});
 
       $for N in range(2*SIMD_TILE):
         vacc${ABC[N]} = wasm_i16x8_add_sat(vacc${ABC[N]}, voutput_zero_point);
@@ -70,7 +72,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_x86_x${BATCH_TILE}(
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
     vacc = wasm_i16x8_shl(vacc, 7);
     vmultiplier = wasm_v128_xor(vmultiplier, vmultiplier_base);
-    vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
+    vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     x += 8;
 
@@ -88,7 +90,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__wasmsimd_x86_x${BATCH_TILE}(
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
     vacc = wasm_i16x8_shl(vacc, 7);
     vmultiplier = wasm_v128_xor(vmultiplier, vmultiplier_base);
-    vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
+    vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);

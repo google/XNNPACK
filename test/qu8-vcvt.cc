@@ -1630,6 +1630,243 @@
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, batch_eq_8) {
+    VCvtMicrokernelTester()
+      .batch_size(8)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, batch_div_8) {
+    for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, batch_lt_8) {
+    for (size_t batch_size = 1; batch_size < 8; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, batch_gt_8) {
+    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, scale) {
+    for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .output_zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, input_zero_point) {
+    for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X8, output_zero_point) {
+    for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .output_zero_point(output_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x8, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, batch_eq_16) {
+    VCvtMicrokernelTester()
+      .batch_size(16)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, batch_div_16) {
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, batch_lt_16) {
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, batch_gt_16) {
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, scale) {
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .output_zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, input_zero_point) {
+    for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X16, output_zero_point) {
+    for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .output_zero_point(output_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x16, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, batch_eq_32) {
+    VCvtMicrokernelTester()
+      .batch_size(32)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, batch_div_32) {
+    for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, batch_lt_32) {
+    for (size_t batch_size = 1; batch_size < 32; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, batch_gt_32) {
+    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, scale) {
+    for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .output_zero_point(100)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, input_zero_point) {
+    for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+
+  TEST(QU8_VCVT__WASMRELAXEDSIMD_X32, output_zero_point) {
+    for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .output_zero_point(output_zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .Test(xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32, xnn_init_qu8_cvt_wasmsimd_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+
 #if XNN_ARCH_ARM
   TEST(QU8_VCVT__ARMV6SIMD_X4, batch_eq_4) {
     TEST_REQUIRES_ARM_V6_SIMD;
