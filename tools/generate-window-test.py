@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -76,11 +76,11 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, rows_lt_${BATCH_TILE}) {
+$if ROW_TILE > 1:
+  TEST(${TEST_NAME}, rows_lt_${ROW_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t rows = 1; rows < ${BATCH_TILE}; rows++) {
+    for (size_t rows = 1; rows < ${ROW_TILE}; rows++) {
       for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
         WindowMicrokernelTester()
           .rows(rows)
@@ -90,10 +90,10 @@ $if BATCH_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, rows_div_${BATCH_TILE}) {
+  TEST(${TEST_NAME}, rows_div_${ROW_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t rows = ${BATCH_TILE*2}; rows <= ${BATCH_TILE*4}; rows += ${BATCH_TILE}) {
+    for (size_t rows = ${ROW_TILE*2}; rows <= ${ROW_TILE*4}; rows += ${ROW_TILE}) {
       for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
         WindowMicrokernelTester()
           .rows(rows)
@@ -103,10 +103,10 @@ $if BATCH_TILE > 1:
     }
   }
 
-TEST(${TEST_NAME}, rows_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, rows_gt_${ROW_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t rows = ${BATCH_TILE+1}; rows < ${BATCH_TILE*2}; rows++) {
+  for (size_t rows = ${ROW_TILE+1}; rows < ${ROW_TILE*2}; rows++) {
     for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
       WindowMicrokernelTester()
         .rows(rows)
@@ -119,7 +119,7 @@ TEST(${TEST_NAME}, rows_gt_${BATCH_TILE}) {
 TEST(${TEST_NAME}, inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t rows = 1; rows <= ${BATCH_TILE*3}; rows += ${max(1, BATCH_TILE-1)}) {
+  for (size_t rows = 1; rows <= ${ROW_TILE*3}; rows += ${max(1, ROW_TILE-1)}) {
     for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
       WindowMicrokernelTester()
         .rows(rows)
@@ -136,7 +136,7 @@ TEST(${TEST_NAME}, shift) {
     ${ISA_CHECK};
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
-      .rows(${BATCH_TILE})
+      .rows(${ROW_TILE})
       .batch(${BATCH_TILE})
       .shift(shift)
       .Test(${", ".join(TEST_ARGS)});
@@ -167,7 +167,7 @@ def generate_test_cases(ukernel, row_tile, batch_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
-      "BATCH_TILE": row_tile,
+      "ROW_TILE": row_tile,
       "BATCH_TILE": batch_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
@@ -183,7 +183,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
