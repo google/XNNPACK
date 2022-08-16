@@ -179,6 +179,35 @@ class TransposeOperatorTester {
     }
   }
 
+  void TestRunX32() const {
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    std::vector<uint32_t> output(count);
+    std::vector<size_t> input_stride(input.size(), 1);
+    std::vector<size_t> output_stride(input.size(), 1);
+    for (size_t i = num_dims() - 1; i > 0; --i) {
+      input_stride[i - 1] = input_stride[i] * shape_[i];
+      output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
+    }
+    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+    std::iota(input.begin(), input.end(), 0);
+    std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
+
+    // Call transpose eager API
+    ASSERT_EQ(xnn_status_success,
+              xnn_run_transpose_nd_x32(
+                  0,
+                  input.data(), output.data(),
+                  num_dims(), shape_.data(), perm_.data(),
+                  nullptr /* thread pool */));
+
+    // Verify results.
+    for (size_t i = 0; i < count; ++i) {
+      const size_t in_idx = reference_index(input_stride.data(), output_stride.data(), perm_.data(), num_dims(), i);
+      ASSERT_EQ(input[in_idx], output[i]);
+    }
+  }
+
  private:
   size_t num_dims_ = 1;
   std::vector<size_t> shape_;

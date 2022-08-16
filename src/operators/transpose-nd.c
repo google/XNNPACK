@@ -32,22 +32,13 @@ static void reorder_array(
   }
 }
 
-static enum xnn_status create_transpose_nd(
+static enum xnn_status init_transpose_nd(
     uint32_t flags,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
-    xnn_operator_t* transpose_op_out)
+    xnn_operator_t transpose_op)
 {
-  xnn_operator_t transpose_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
+  enum xnn_status status = xnn_status_unsupported_hardware;
 
   if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
     xnn_log_error(
@@ -55,10 +46,31 @@ static enum xnn_status create_transpose_nd(
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  transpose_op->flags = flags;
+  transpose_op->type = operator_type;
+
+  return xnn_status_success;
+
+error:
+  return status;
+}
+
+static enum xnn_status create_transpose_nd(
+    uint32_t flags,
+    uint32_t datatype_init_flags,
+    enum xnn_operator_type operator_type,
+    xnn_operator_t* transpose_op_out)
+{
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return status;
+  }
 
   status = xnn_status_out_of_memory;
-
-  transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  xnn_operator_t transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (transpose_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
@@ -66,8 +78,10 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
-  transpose_op->flags = flags;
-  transpose_op->type = operator_type;
+  status = init_transpose_nd(flags, datatype_init_flags, operator_type, transpose_op);
+  if (status != xnn_status_success) {
+    goto error;
+  }
   *transpose_op_out = transpose_op;
 
   return xnn_status_success;
@@ -77,7 +91,7 @@ error:
   return status;
 }
 
-static enum xnn_status setup_transpose(
+static enum xnn_status setup_transpose_nd(
   xnn_operator_t transpose_op,
   const void* input,
   void* output,
@@ -309,7 +323,7 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     return xnn_status_invalid_parameter;
   }
 
-  return setup_transpose(
+  return setup_transpose_nd(
     transpose_op,
     input, output,
     num_dims, shape, perm,
@@ -332,7 +346,7 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     return xnn_status_invalid_parameter;
   }
 
-  return setup_transpose(
+  return setup_transpose_nd(
     transpose_op,
     input, output,
     num_dims, shape, perm,
@@ -355,9 +369,76 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     return xnn_status_invalid_parameter;
   }
 
-  return setup_transpose(
+  return setup_transpose_nd(
     transpose_op,
     input, output,
     num_dims, shape, perm,
     sizeof(uint8_t));
+}
+
+enum xnn_status run_transpose_nd(
+    uint32_t flags,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    size_t element_size,
+    uint32_t datatype_init_flags,
+    enum xnn_operator_type operator_type,
+    pthreadpool_t threadpool) {
+  enum xnn_status status = xnn_status_uninitialized;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return status;
+  }
+
+  struct xnn_operator transpose_op;
+  memset(&transpose_op, 0, sizeof(transpose_op));
+
+  status = init_transpose_nd(
+      flags,
+      datatype_init_flags,
+      operator_type,
+      &transpose_op);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = setup_transpose_nd(&transpose_op,
+                              input,
+                              output,
+                              num_dims,
+                              input_shape,
+                              output_perm,
+                              element_size);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  return xnn_run_operator(&transpose_op, threadpool);
+}
+
+enum xnn_status xnn_run_transpose_nd_x32(
+    uint32_t flags,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    pthreadpool_t threadpool) {
+
+  return run_transpose_nd(
+    flags,
+    input,
+    output,
+    num_dims,
+    input_shape,
+    output_perm,
+    sizeof(uint32_t),
+    XNN_INIT_FLAG_X32,
+    xnn_operator_type_transpose_nd_x32,
+    threadpool);
 }
