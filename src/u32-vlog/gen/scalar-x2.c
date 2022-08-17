@@ -18,9 +18,9 @@ extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
 // Calculate integer logarithm, 32 Bit version
 static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
-  const int log_scale = 65536;
-  const int log_scale_log2 = 16;
-  const int log_coeff = 45426;
+  const uint32_t log_scale = 65536;
+  const uint32_t log_scale_log2 = 16;
+  const uint32_t log_coeff = 45426;
   const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;  // log2 of x
   assert(log2x < 32);
 
@@ -40,8 +40,8 @@ static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
   const uint32_t base_seg = frac >> (log_scale_log2 - log_segments_log2);
   const uint32_t seg_unit = (UINT32_C(1) << log_scale_log2) >> log_segments_log2;
 
-  assert(128 == (1 << log_segments_log2));
-  assert(base_seg < (1 << log_segments_log2));
+  assert(128 == (UINT32_C(1) << log_segments_log2));
+  assert(base_seg < (UINT32_C(1) << log_segments_log2));
 
   const uint32_t c0 = xnn_table_vlog[base_seg];
   const uint32_t c1 = xnn_table_vlog[base_seg + 1];
@@ -50,8 +50,8 @@ static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
   const uint32_t fraction =  frac + c0 + rel_pos;
 
   const uint32_t log2 = (log2x << log_scale_log2) + fraction;
-  const uint32_t round = log_scale / 2;
-  const uint32_t loge = (((uint64_t) log_coeff) * log2 + round) >> log_scale_log2;
+  const uint32_t round = log_scale >> 1;
+  const uint32_t loge = (math_mulext_u32(log_coeff, log2) + round) >> log_scale_log2;
   // Finally scale to our output scale
   const uint32_t loge_scaled = (out_scale * loge + round) >> log_scale_log2;
   return loge_scaled;
