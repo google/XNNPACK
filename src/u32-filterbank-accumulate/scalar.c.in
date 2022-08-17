@@ -9,6 +9,7 @@ $assert BATCH_TILE == 1
 #include <stdint.h>
 
 #include <xnnpack/filterbank.h>
+#include <xnnpack/math.h>
 
 
 void xnn_u32_filterbank_accumulate_ukernel__scalar_x${BATCH_TILE}(
@@ -46,12 +47,12 @@ void xnn_u32_filterbank_accumulate_ukernel__scalar_x${BATCH_TILE}(
     assert(n != 0);
 
     do {
-      const uint32_t vi = (uint32_t) *i++;
+      const uint32_t vi = *i++;
       const uint32_t vw = (uint32_t) *w++;
       const uint32_t vu = (uint32_t) *u++;
 
-      const uint64_t vwacc = (uint64_t) vi * (uint64_t) vw;
-      const uint64_t vuacc = (uint64_t) vi * (uint64_t) vu;
+      const uint64_t vwacc = math_mulext_u32(vi, vw);
+      const uint64_t vuacc = math_mulext_u32(vi, vu);
 
       weight_accumulator += vwacc;
       unweight_accumulator += vuacc;

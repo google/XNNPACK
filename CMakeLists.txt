@@ -1452,12 +1452,12 @@ SET(PROD_ARMSIMD32_MICROKERNEL_SRCS
   src/qs8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
   src/qs8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
   src/qs8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-vcvt/gen/vcvt-armsimd32-x8.c
+  src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c
   src/qu8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
   src/qu8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
   src/qu8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
   src/qu8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
-  src/qs8-vcvt/gen/vcvt-armsimd32-x8.c
-  src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c
   src/qu8-vcvt/gen/vcvt-armsimd32-x8.c
   src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c)
 
@@ -3708,20 +3708,20 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c)
 
 SET(ALL_NEONBF16_MICROKERNEL_SRCS
-  src/bf16-gemm/gen/1x8c2-minmax-neonbf16-bfdot-lane-ld128.c
-  src/bf16-gemm/gen/4x8c2-minmax-neonbf16-bfdot-lane-ld128.c
-  src/bf16-gemm/gen/5x8c2-minmax-neonbf16-bfdot-lane-ld128.c
-  src/bf16-gemm/gen/6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
   src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfdot.c
-  src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfdot.c
-  src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfdot.c
-  src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfdot.c
-  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfdot.c
   src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/1x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfdot.c
   src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfdot.c
   src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfdot.c
   src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfmlal.c
-  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfmlal.c)
+  src/bf16-gemm/gen/4x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/5x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/6x8c2-minmax-neonbf16-bfdot-lane-ld128.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
