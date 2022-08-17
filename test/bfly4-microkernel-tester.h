@@ -23,7 +23,7 @@
 // Even numbers are numpy.floor(0.5 + 32767 * numpy.cos(-2*pi*numpy.linspace(0, 255, num=256) / 256)).astype(numpy.int16).tolist()
 // Odd numbers are numpy.floor(0.5 + 32767 * numpy.sin(-2*pi*numpy.linspace(0, 255, num=256) / 256)).astype(numpy.int16).tolist()
 
-static XNN_INTERNAL const int16_t xnn_reference_table_fft256_twiddle[512] = {
+static const int16_t xnn_reference_table_fft256_twiddle[512] = {
    32767,     0,  32757,  -804,  32728, -1608,  32678, -2410,
    32609, -3212,  32521, -4011,  32412, -4808,  32285, -5602,
    32137, -6393,  31971, -7179,  31785, -7962,  31580, -8739,
