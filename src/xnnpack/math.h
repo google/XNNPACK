@@ -43,6 +43,10 @@ XNN_INLINE static size_t doz(size_t a, size_t b) {
   return XNN_UNPREDICTABLE(b < a) ? a - b : 0;
 }
 
+XNN_INLINE static uint32_t math_doz_u32(uint32_t a, uint32_t b) {
+  return XNN_UNPREDICTABLE(b < a) ? a - b : 0;
+}
+
 XNN_INLINE static size_t divide_round_up(size_t n, size_t q) {
   return XNN_UNPREDICTABLE(n % q == 0) ? n / q : n / q + 1;
 }

@@ -1377,6 +1377,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/u8-rmax/scalar.c",
     "src/u8-vclamp/scalar-x4.c",
     "src/u32-filterbank-accumulate/gen/scalar-x1.c",
+    "src/u32-filterbank-subtract/scalar-x2.c",
     "src/u32-vlog/gen/scalar-x1.c",
     "src/u32-vlog/gen/scalar-x2.c",
     "src/u32-vlog/gen/scalar-x3.c",
@@ -11858,6 +11859,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "u32_filterbank_subtract_bench",
+    srcs = [
+        "bench/u32-filterbank-subtract.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "u32_vlog_bench",
     srcs = [
         "bench/u32-vlog.cc",
@@ -14234,6 +14243,15 @@ xnnpack_unit_test(
     srcs = [
         "test/filterbank-accumulate-microkernel-tester.h",
         "test/u32-filterbank-accumulate.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "u32_filterbank_subtract_test",
+    srcs = [
+        "test/filterbank-subtract-microkernel-tester.h",
+        "test/u32-filterbank-subtract.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

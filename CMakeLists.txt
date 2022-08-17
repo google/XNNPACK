@@ -1367,6 +1367,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u8-rmax/scalar.c
   src/u8-vclamp/scalar-x4.c
   src/u32-filterbank-accumulate/gen/scalar-x1.c
+  src/u32-filterbank-subtract/scalar-x2.c
   src/u32-vlog/gen/scalar-x1.c
   src/u32-vlog/gen/scalar-x2.c
   src/u32-vlog/gen/scalar-x3.c
@@ -8718,6 +8719,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
   ADD_TEST(NAME u32-filterbank-accumulate-test COMMAND u32-filterbank-accumulate-test)
 
+  ADD_EXECUTABLE(u32-filterbank-subtract-test test/u32-filterbank-subtract.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-subtract-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  ADD_TEST(NAME u32-filterbank-subtract-test COMMAND u32-filterbank-subtract-test)
+
   ADD_EXECUTABLE(u32-vlog-test test/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
@@ -9326,6 +9332,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(u32-filterbank-accumulate-bench bench/u32-filterbank-accumulate.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(u32-filterbank-subtract-bench bench/u32-filterbank-subtract.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-subtract-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)

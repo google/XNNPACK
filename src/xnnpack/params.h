@@ -1595,6 +1595,19 @@ typedef void (*xnn_u32_filterbank_accumulate_ukernel_function)(
     const uint16_t* unweights,
     uint64_t* output);
 
+typedef void (*xnn_u32_filterbank_subtract_ukernel_function)(
+    size_t batch_size,
+    const uint32_t* input,
+    uint32_t smoothing,
+    uint32_t alternate_smoothing,
+    uint32_t one_minus_smoothing,
+    uint32_t alternate_one_minus_smoothing,
+    uint32_t min_signal_remaining,
+    uint32_t smoothing_bits,
+    uint32_t spectral_subtraction_bits,
+    uint32_t* noise_estimate,
+    uint32_t* output);
+
 typedef void (*xnn_s16_vlshift_ukernel_function)(
     size_t batch_size,
     const int16_t* input,
