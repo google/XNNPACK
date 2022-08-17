@@ -704,20 +704,6 @@ void xnn_compute_depthtospace2d_hwc_strided(
     NULL);
 }
 
-void xnn_compute_depthtospace2d_chw2hwc(
-    const struct depthtospace2d_chw2hwc_context* context,
-    size_t batch_index)
-{
-  context->ukernel(
-    context->output_channels,
-    context->input_height,
-    context->input_width,
-    context->block_size,
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride),
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride),
-    context->output_channel_stride);
-}
-
 void xnn_compute_argmax_pooling_unipass(
     const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,

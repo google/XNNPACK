@@ -573,25 +573,6 @@ struct depthtospace2d_hwc_context {
       size_t block_x);
 #endif
 
-struct depthtospace2d_chw2hwc_context {
-  size_t output_channels;
-  size_t input_height;
-  size_t input_width;
-  uint32_t block_size;
-  const void* input;
-  void* output;
-  size_t input_batch_stride;
-  size_t output_batch_stride;
-  size_t output_channel_stride;
-  xnn_depthtospace2d_chw2hwc_ukernel_function ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_depthtospace2d_chw2hwc(
-      const struct depthtospace2d_chw2hwc_context* context,
-      size_t batch_index);
-#endif
-
 struct max_pooling_context {
   const void** indirect_input;
   size_t indirect_input_height_stride;

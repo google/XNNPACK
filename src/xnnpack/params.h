@@ -457,15 +457,6 @@ typedef void (*xnn_fill_ukernel_function)(
     size_t output_stride,
     const uint32_t fill_pattern);
 
-typedef void (*xnn_depthtospace2d_chw2hwc_ukernel_function)(
-    size_t output_channels,
-    size_t input_height,
-    size_t input_width,
-    size_t block_size,
-    const void* input,
-    void* output,
-    size_t output_channels_stride);
-
 typedef void (*xnn_x32_depthtospace2d_chw2hwc_ukernel_function)(
     size_t output_channels,
     size_t input_height,
@@ -2211,16 +2202,6 @@ struct dwconv_parameters {
   uint8_t incremental_tile;
 };
 
-struct depthtospace2d_chw2hwc_parameters {
-  xnn_depthtospace2d_chw2hwc_ukernel_function ukernel;
-  // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
-  uint8_t pixel_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint8_t channel_tile;
-};
-
 struct gavgpool_parameters {
   xnn_gavgpool_unipass_ukernel_function unipass;
   xnn_gavgpool_multipass_ukernel_function multipass;
@@ -2582,8 +2563,6 @@ struct xnn_parameters {
   struct {
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
-    // Depth To Space 2D with CHW->HWC layout conversion.
-    struct depthtospace2d_chw2hwc_parameters depthtospace2d_chw2hwc;
     struct transpose_parameters transpose;
   } x32;
   struct {
