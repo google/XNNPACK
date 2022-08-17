@@ -144,18 +144,12 @@ static enum xnn_status setup_transpose_nd(
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_perm[XNN_MAX_TENSOR_DIMS];
   size_t normalized_element_size;
-  xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, &normalized_dims,
-                                      &normalized_element_size, normalized_perm, normalized_shape);
+  xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, NULL, NULL, &normalized_dims,
+                                      &normalized_element_size, normalized_perm, normalized_shape, context->input_stride, context->output_stride);
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
-  context->input_stride[normalized_dims - 1] = normalized_element_size;
-  context->output_stride[normalized_perm[normalized_dims - 1]] = normalized_element_size;
-  for(size_t i = normalized_dims - 1; i-- > 0;) {
-    context->input_stride[i] = context->input_stride[i + 1] * normalized_shape[i + 1];
-    context->output_stride[normalized_perm[i]] = context->output_stride[normalized_perm[i + 1]] * normalized_shape[normalized_perm[i + 1]];
-  }
-
   memcpy(loop_order, normalized_perm, sizeof(size_t) * normalized_dims);
+
   /// The innermost loop must iterate over the contiguous input dimension and the second most inner loop over the
   /// contiguous output dimension.
   if (normalized_dims > 1) {
@@ -164,6 +158,9 @@ static enum xnn_status setup_transpose_nd(
         size_t tmp = loop_order[i];
         loop_order[i] = loop_order[normalized_dims - 2];
         loop_order[normalized_dims - 2] = tmp;
+        tmp = context->output_stride[i];
+        context->output_stride[i] = context->output_stride[normalized_dims - 2];
+        context->output_stride[normalized_dims - 2] = tmp;
         break;
       }
     }
@@ -173,7 +170,6 @@ static enum xnn_status setup_transpose_nd(
     transpose_op->compute.range[i] = normalized_shape[i];
   }
   reorder_array(normalized_dims, loop_order, context->input_stride);
-  reorder_array(normalized_dims, loop_order, context->output_stride);
   reorder_array(normalized_dims, loop_order, transpose_op->compute.range);
 
   bool variable_size_ukernel = false;
