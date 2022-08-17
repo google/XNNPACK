@@ -2944,46 +2944,46 @@ ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x32.c",
 ]
 
-PROD_ARMV6SIMD_MICROKERNEL_SRCS = [
-    "src/qs8-vcvt/gen/vcvt-armv6simd-x8.c",
-    "src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c",
-    "src/qu8-vcvt/gen/vcvt-armv6simd-x8.c",
-    "src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c",
+PROD_ARMSIMD32_MICROKERNEL_SRCS = [
+    "src/qs8-vcvt/gen/vcvt-armsimd32-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c",
+    "src/qu8-vcvt/gen/vcvt-armsimd32-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c",
 ]
 
-ALL_ARMV6SIMD_MICROKERNEL_SRCS = [
-    "src/qc8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qc8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qc8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qc8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qc8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qc8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qc8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qc8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qs8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qs8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qs8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qs8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qs8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qs8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qs8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qs8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qs8-vcvt/gen/vcvt-armv6simd-x4.c",
-    "src/qs8-vcvt/gen/vcvt-armv6simd-x8.c",
-    "src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c",
-    "src/qs8-vlrelu/gen/vlrelu-armv6simd-x8.c",
-    "src/qu8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qu8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qu8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qu8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qu8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c",
-    "src/qu8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c",
-    "src/qu8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c",
-    "src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c",
-    "src/qu8-vcvt/gen/vcvt-armv6simd-x4.c",
-    "src/qu8-vcvt/gen/vcvt-armv6simd-x8.c",
-    "src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c",
-    "src/qu8-vlrelu/gen/vlrelu-armv6simd-x8.c",
+ALL_ARMSIMD32_MICROKERNEL_SRCS = [
+    "src/qc8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qc8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qc8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qc8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qc8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qc8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qc8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qc8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qs8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qs8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qs8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qs8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qs8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qs8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qs8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qs8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qs8-vcvt/gen/vcvt-armsimd32-x4.c",
+    "src/qs8-vcvt/gen/vcvt-armsimd32-x8.c",
+    "src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c",
+    "src/qs8-vlrelu/gen/vlrelu-armsimd32-x8.c",
+    "src/qu8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qu8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qu8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qu8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qu8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c",
+    "src/qu8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c",
+    "src/qu8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c",
+    "src/qu8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c",
+    "src/qu8-vcvt/gen/vcvt-armsimd32-x4.c",
+    "src/qu8-vcvt/gen/vcvt-armsimd32-x8.c",
+    "src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c",
+    "src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c",
 ]
 
 PROD_NEON_MICROKERNEL_SRCS = [
@@ -8893,14 +8893,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "armv6simd_bench_microkernels",
+    name = "armsimd32_bench_microkernels",
     aarch32_copts = [
         "-marm",
         "-march=armv6",
         "-mfpu=vfp",
         "-munaligned-access",
     ],
-    aarch32_srcs = ALL_ARMV6SIMD_MICROKERNEL_SRCS,
+    aarch32_srcs = ALL_ARMSIMD32_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
@@ -8917,14 +8917,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "armv6simd_prod_microkernels",
+    name = "armsimd32_prod_microkernels",
     aarch32_copts = [
         "-marm",
         "-march=armv6",
         "-mfpu=vfp",
         "-munaligned-access",
     ],
-    aarch32_srcs = PROD_ARMV6SIMD_MICROKERNEL_SRCS,
+    aarch32_srcs = PROD_ARMSIMD32_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
@@ -8945,14 +8945,14 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "armv6simd_test_microkernels",
+    name = "armsimd32_test_microkernels",
     aarch32_copts = [
         "-marm",
         "-march=armv6",
         "-mfpu=vfp",
         "-munaligned-access",
     ],
-    aarch32_srcs = ALL_ARMV6SIMD_MICROKERNEL_SRCS,
+    aarch32_srcs = ALL_ARMSIMD32_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -10254,7 +10254,7 @@ xnnpack_cc_library(
 xnnpack_aggregate_library(
     name = "amalgam_microkernels",
     aarch32_deps = [
-        ":armv6simd_prod_microkernels",
+        ":armsimd32_prod_microkernels",
         ":neon_prod_microkernels",
         ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
@@ -10313,7 +10313,7 @@ xnnpack_aggregate_library(
 xnnpack_aggregate_library(
     name = "bench_microkernels",
     aarch32_deps = [
-        ":armv6simd_bench_microkernels",
+        ":armsimd32_bench_microkernels",
         ":neon_bench_microkernels",
         ":neonfp16_bench_microkernels",
         ":neonfma_bench_microkernels",
@@ -10372,7 +10372,7 @@ xnnpack_aggregate_library(
 xnnpack_aggregate_library(
     name = "prod_microkernels",
     aarch32_deps = [
-        ":armv6simd_prod_microkernels",
+        ":armsimd32_prod_microkernels",
         ":neon_prod_microkernels",
         ":neonfp16_prod_microkernels",
         ":neonfma_prod_microkernels",
@@ -10431,7 +10431,7 @@ xnnpack_aggregate_library(
 xnnpack_aggregate_library(
     name = "test_microkernels",
     aarch32_deps = [
-        ":armv6simd_test_microkernels",
+        ":armsimd32_test_microkernels",
         ":neon_test_microkernels",
         ":neonfp16_test_microkernels",
         ":neonfma_test_microkernels",

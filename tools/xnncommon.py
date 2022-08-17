@@ -38,7 +38,7 @@ _ISA_TO_MACRO_MAP = {
 }
 
 _ISA_TO_ARCH_MAP = {
-  "armv6simd": ["aarch32"],
+  "armsimd32": ["aarch32"],
   "neon": ["aarch32", "aarch64"],
   "neonfp16": ["aarch32", "aarch64"],
   "neonfma": ["aarch32", "aarch64"],
@@ -63,7 +63,7 @@ _ISA_TO_ARCH_MAP = {
 }
 
 _ISA_TO_CHECK_MAP = {
-  "armv6simd": "TEST_REQUIRES_ARM_V6_SIMD",
+  "armsimd32": "TEST_REQUIRES_ARM_SIMD32",
   "neon": "TEST_REQUIRES_ARM_NEON",
   "neonfp16": "TEST_REQUIRES_ARM_NEON_FP16",
   "neonfma": "TEST_REQUIRES_ARM_NEON_FMA",

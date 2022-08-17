@@ -71,11 +71,11 @@ tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D RELAXED=1 -D DATATYPE
 tools/xngen src/qs8-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -D RELAXED=1 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-wasmrelaxedsimd-x32.c &
 
 ################################## ARMv6 SIMD #################################
-tools/xngen src/qs8-vcvt/armv6simd.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-armv6simd-x4.c &
-tools/xngen src/qs8-vcvt/armv6simd.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-armv6simd-x8.c &
+tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-armsimd32-x4.c &
+tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-armsimd32-x8.c &
 
-tools/xngen src/qs8-vcvt/armv6simd.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-armv6simd-x4.c &
-tools/xngen src/qs8-vcvt/armv6simd.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-armv6simd-x8.c &
+tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-armsimd32-x4.c &
+tools/xngen src/qs8-vcvt/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vcvt/gen/vcvt-armsimd32-x8.c &
 
 #################################### Scalar ###################################
 tools/xngen src/qs8-vcvt/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vcvt/gen/vcvt-scalar-x1.c &

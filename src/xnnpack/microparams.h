@@ -194,7 +194,7 @@ union xnn_qs8_minmax_params {
     int32_t magic_bias_less_zero_point;
     uint32_t output_min;
     uint32_t output_max;
-  } armv6simd;
+  } armsimd32;
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -269,7 +269,7 @@ union xnn_qs8_conv_minmax_params {
     int32_t magic_bias_less_zero_point;
     uint32_t output_min;
     uint32_t output_max;
-  } fp32_armv6simd;
+  } fp32_armsimd32;
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -363,7 +363,7 @@ union xnn_qu8_conv_minmax_params {
     int32_t magic_bias_less_zero_point;
     uint32_t output_min;
     uint32_t output_max;
-  } fp32_armv6simd;
+  } fp32_armsimd32;
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
@@ -1250,7 +1250,7 @@ union xnn_qs8_cvt_params {
     uint32_t minus_input_zero_point;
     int32_t multiplier;
     int32_t bias;
-  } armv6simd;
+  } armsimd32;
   struct {
     int16_t input_zero_point;
     int16_t multiplier;
@@ -1331,7 +1331,7 @@ union xnn_qu8_cvt_params {
     uint32_t minus_input_zero_point;
     int32_t multiplier;
     int32_t bias;
-  } armv6simd;
+  } armsimd32;
   struct {
     uint16_t input_zero_point;
     int16_t multiplier;
@@ -1966,7 +1966,7 @@ union xnn_qs8_lrelu_params {
     uint32_t positive_multiplier;
     uint32_t negative_multiplier;
     int32_t bias;
-  } armv6simd;
+  } armsimd32;
   struct {
     int16_t input_zero_point;
     int16_t positive_multiplier;
@@ -2029,7 +2029,7 @@ union xnn_qu8_lrelu_params {
     uint32_t positive_multiplier;
     uint32_t negative_multiplier;
     int32_t bias;
-  } armv6simd;
+  } armsimd32;
   struct {
     uint16_t input_zero_point;
     int16_t positive_multiplier;

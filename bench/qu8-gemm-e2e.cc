@@ -542,51 +542,51 @@ static void GEMMEnd2EndBenchmark(
 
 
 #if XNN_ARCH_ARM
-  static void qu8_gemm_1x1c4__armv6simd(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void qu8_gemm_1x1c4__armsimd32(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_init_qu8_conv_minmax_fp32_armv6simd_params,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_init_qu8_conv_minmax_fp32_armsimd32_params,
       1 /* mr */, 1  /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckARMV6);
   }
-  static void qu8_gemm_2x1c4__armv6simd(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void qu8_gemm_2x1c4__armsimd32(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_2x1c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_2x1c4__armv6simd,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd,
-      xnn_init_qu8_conv_minmax_fp32_armv6simd_params,
+      xnn_qu8_gemm_minmax_fp32_ukernel_2x1c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_2x1c4__armsimd32,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32,
+      xnn_init_qu8_conv_minmax_fp32_armsimd32_params,
       2 /* mr */, 1  /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckARMV6);
   }
-  static void qu8_gemm_1x2c4__armv6simd(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void qu8_gemm_1x2c4__armsimd32(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_init_qu8_conv_minmax_fp32_armv6simd_params,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_init_qu8_conv_minmax_fp32_armsimd32_params,
       1 /* mr */, 2  /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckARMV6);
   }
-  static void qu8_gemm_2x2c4__armv6simd(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void qu8_gemm_2x2c4__armsimd32(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
-      xnn_qu8_gemm_minmax_fp32_ukernel_2x2c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_2x2c4__armv6simd,
-      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armv6simd,
-      xnn_init_qu8_conv_minmax_fp32_armv6simd_params,
+      xnn_qu8_gemm_minmax_fp32_ukernel_2x2c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32,
+      xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32,
+      xnn_init_qu8_conv_minmax_fp32_armsimd32_params,
       2 /* mr */, 2  /* nr */, 2 /* log2_kr */, 0 /* log2_sr */,
       benchmark::utils::CheckARMV6);
   }
 
-  BENCHMARK_QU8_END2END(qu8_gemm_1x1c4__armv6simd);
-  BENCHMARK_QU8_END2END(qu8_gemm_2x1c4__armv6simd);
-  BENCHMARK_QU8_END2END(qu8_gemm_1x2c4__armv6simd);
-  BENCHMARK_QU8_END2END(qu8_gemm_2x2c4__armv6simd);
+  BENCHMARK_QU8_END2END(qu8_gemm_1x1c4__armsimd32);
+  BENCHMARK_QU8_END2END(qu8_gemm_2x1c4__armsimd32);
+  BENCHMARK_QU8_END2END(qu8_gemm_1x2c4__armsimd32);
+  BENCHMARK_QU8_END2END(qu8_gemm_2x2c4__armsimd32);
 #endif  // XNN_ARCH_ARM
 
 

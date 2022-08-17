@@ -90,7 +90,7 @@
     } \
   } while (0)
 
-#define TEST_REQUIRES_ARM_V6_SIMD \
+#define TEST_REQUIRES_ARM_SIMD32 \
   do { \
     if (!cpuinfo_initialize() || !cpuinfo_has_arm_v6()) { \
       GTEST_SKIP(); \

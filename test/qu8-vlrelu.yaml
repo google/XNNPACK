@@ -76,10 +76,10 @@
   init: xnn_init_qu8_lrelu_wasmsimd_x86_params
 
 # ARMv6 SIMD
-- name: xnn_qu8_vlrelu_ukernel__armv6simd_x4
-  init: xnn_init_qu8_lrelu_armv6simd_params
-- name: xnn_qu8_vlrelu_ukernel__armv6simd_x8
-  init: xnn_init_qu8_lrelu_armv6simd_params
+- name: xnn_qu8_vlrelu_ukernel__armsimd32_x4
+  init: xnn_init_qu8_lrelu_armsimd32_params
+- name: xnn_qu8_vlrelu_ukernel__armsimd32_x8
+  init: xnn_init_qu8_lrelu_armsimd32_params
 
 # Scalar (select)
 - name: xnn_qu8_vlrelu_ukernel__scalar_select_x1

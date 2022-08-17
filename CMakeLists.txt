@@ -1443,45 +1443,45 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x64-transposec/gen/4x2-scalar-float.c
   src/x64-transposec/gen/4x2-scalar-int.c)
 
-SET(PROD_ARMV6SIMD_MICROKERNEL_SRCS
-  src/qs8-vcvt/gen/vcvt-armv6simd-x8.c
-  src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c
-  src/qu8-vcvt/gen/vcvt-armv6simd-x8.c
-  src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c)
+SET(PROD_ARMSIMD32_MICROKERNEL_SRCS
+  src/qs8-vcvt/gen/vcvt-armsimd32-x8.c
+  src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c
+  src/qu8-vcvt/gen/vcvt-armsimd32-x8.c
+  src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c)
 
-SET(ALL_ARMV6SIMD_MICROKERNEL_SRCS
-  src/qc8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qc8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qc8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qc8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qc8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qc8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qc8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qc8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qs8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qs8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qs8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qs8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qs8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qs8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qs8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qs8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qs8-vcvt/gen/vcvt-armv6simd-x4.c
-  src/qs8-vcvt/gen/vcvt-armv6simd-x8.c
-  src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c
-  src/qs8-vlrelu/gen/vlrelu-armv6simd-x8.c
-  src/qu8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qu8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qu8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qu8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qu8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c
-  src/qu8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c
-  src/qu8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c
-  src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c
-  src/qu8-vcvt/gen/vcvt-armv6simd-x4.c
-  src/qu8-vcvt/gen/vcvt-armv6simd-x8.c
-  src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c
-  src/qu8-vlrelu/gen/vlrelu-armv6simd-x8.c)
+SET(ALL_ARMSIMD32_MICROKERNEL_SRCS
+  src/qc8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qc8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qc8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qc8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-vcvt/gen/vcvt-armsimd32-x4.c
+  src/qs8-vcvt/gen/vcvt-armsimd32-x8.c
+  src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c
+  src/qs8-vlrelu/gen/vlrelu-armsimd32-x8.c
+  src/qu8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qu8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qu8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qu8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qu8-vcvt/gen/vcvt-armsimd32-x4.c
+  src/qu8-vcvt/gen/vcvt-armsimd32-x8.c
+  src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c
+  src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c)
 
 SET(PROD_NEON_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c
@@ -6946,7 +6946,7 @@ SET(PROD_MICROKERNEL_SRCS ${PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS})
 SET(ALL_MICROKERNEL_SRCS ${ALL_SCALAR_MICROKERNEL_SRCS})
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SCALAR_AARCH32_MICROKERNEL_SRCS})
-  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_ARMV6SIMD_MICROKERNEL_SRCS})
+  LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_ARMSIMD32_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEON_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFP16_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFMA_MICROKERNEL_SRCS})
@@ -6957,7 +6957,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOT_MICROKERNEL_SRCS})
   ENDIF()
-  LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_ARMV6SIMD_MICROKERNEL_SRCS})
+  LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_ARMSIMD32_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEON_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFP16_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFMA_MICROKERNEL_SRCS})
@@ -7064,7 +7064,7 @@ IF(NOT MSVC)
 ENDIF()
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -marm ")
-  SET_PROPERTY(SOURCE ${ALL_ARMV6SIMD_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv6 -mfpu=vfp -munaligned-access ")
+  SET_PROPERTY(SOURCE ${ALL_ARMSIMD32_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv6 -mfpu=vfp -munaligned-access ")
   SET_PROPERTY(SOURCE ${ALL_NEON_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon ")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon-fp16 ")
   # GCC requires -mfp16-format=ieee to define __fp16 type, but Clang doesn't support this option at all.

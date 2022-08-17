@@ -54,13 +54,6 @@ tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/qu8
 tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-avx2-x32.c &
 tools/xngen src/qs8-vlrelu/avx2.c.in -D BATCH_TILE=64 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-avx2-x64.c &
 
-################################## ARMv6 SIMD #################################
-tools/xngen src/qs8-vlrelu/armv6simd.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-armv6simd-x4.c &
-tools/xngen src/qs8-vlrelu/armv6simd.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-armv6simd-x8.c &
-
-tools/xngen src/qs8-vlrelu/armv6simd.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-armv6simd-x4.c &
-tools/xngen src/qs8-vlrelu/armv6simd.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-armv6simd-x8.c &
-
 ################################## WAsm SIMD ##################################
 tools/xngen src/qs8-vlrelu/wasmsimd-arm.c.in -D BATCH_TILE=16 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-wasmsimd-arm-x16.c &
 tools/xngen src/qs8-vlrelu/wasmsimd-arm.c.in -D BATCH_TILE=32 -D RELAXED=0 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-wasmsimd-arm-x32.c &
@@ -89,6 +82,13 @@ tools/xngen src/qs8-vlrelu/wasmsimd-x86.c.in -D BATCH_TILE=32 -D RELAXED=1 -D DA
 tools/xngen src/qs8-vlrelu/wasmsimd-x86.c.in -D BATCH_TILE=8  -D RELAXED=1 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x8.c &
 tools/xngen src/qs8-vlrelu/wasmsimd-x86.c.in -D BATCH_TILE=16 -D RELAXED=1 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x16.c &
 tools/xngen src/qs8-vlrelu/wasmsimd-x86.c.in -D BATCH_TILE=32 -D RELAXED=1 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-wasmrelaxedsimd-x86-x32.c &
+
+################################## ARMv6 SIMD #################################
+tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c &
+tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-armsimd32-x8.c &
+
+tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c &
+tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c &
 
 #################################### Scalar ###################################
 tools/xngen src/qs8-vlrelu/scalar-select.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/vlrelu-scalar-select-x1.c &

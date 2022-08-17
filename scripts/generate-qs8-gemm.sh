@@ -127,20 +127,20 @@ tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=FP32 -D V
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QU8 -D WASM=1 -o src/qu8-gemm/gen/4x4-minmax-fp32-wasm-fmagic.c &
 
 ################################## ARMv6 SIMD #################################
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-gemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-gemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
 ################################## WAsm SIMD ##################################
 ### C2 micro-kernels

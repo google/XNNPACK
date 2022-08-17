@@ -1374,8 +1374,8 @@ static void init(void) {
       };
 
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
-        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__armv6simd_x4,
-        .init.qs8_lrelu = xnn_init_qs8_lrelu_armv6simd_params,
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vlrelu_ukernel__armsimd32_x4,
+        .init.qs8_lrelu = xnn_init_qs8_lrelu_armsimd32_params,
         .element_tile = 4,
       };
     #endif  // XNN_NO_QS8_OPERATORS
@@ -1433,8 +1433,8 @@ static void init(void) {
       };
 
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
-        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__armv6simd_x4,
-        .init.qu8_lrelu = xnn_init_qu8_lrelu_armv6simd_params,
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vlrelu_ukernel__armsimd32_x4,
+        .init.qu8_lrelu = xnn_init_qu8_lrelu_armsimd32_params,
         .element_tile = 4,
       };
     #endif  // XNN_NO_QU8_OPERATORS
@@ -1815,7 +1815,7 @@ static void init(void) {
         .element_tile = 4,
       };
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
-        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vcvt_ukernel__armv6simd_x8,
+        .ukernel = (xnn_univector_ukernel_function) xnn_qs8_vcvt_ukernel__armsimd32_x8,
         .init.qs8_cvt = xnn_init_qs8_cvt_scalar_params,
         .element_tile = 8,
       };
@@ -1825,7 +1825,7 @@ static void init(void) {
         .element_tile = 4,
       };
       xnn_params.vcvt.qu8 = (struct vunary_parameters) {
-        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vcvt_ukernel__armv6simd_x8,
+        .ukernel = (xnn_univector_ukernel_function) xnn_qu8_vcvt_ukernel__armsimd32_x8,
         .init.qu8_cvt = xnn_init_qu8_cvt_scalar_params,
         .element_tile = 8,
       };

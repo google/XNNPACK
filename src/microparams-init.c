@@ -157,7 +157,7 @@ size_t xnn_init_qu8_conv_minmax_fp32_avx512_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qu8_conv_minmax_fp32_armv6simd_params(
+size_t xnn_init_qu8_conv_minmax_fp32_armsimd32_params(
   union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t kernel_zero_point,
   float scale,
@@ -169,13 +169,13 @@ size_t xnn_init_qu8_conv_minmax_fp32_armv6simd_params(
   assert(scale < 256.0f);
 
   const int32_t minus_kernel_zero_point = -(int32_t) kernel_zero_point;
-  params->fp32_armv6simd.scale = scale;
-  params->fp32_armv6simd.magic_bias = 12582912.0f;
-  params->fp32_armv6simd.minus_kernel_zero_point = (uint32_t) (uint16_t) minus_kernel_zero_point * UINT32_C(0x00010001);
-  params->fp32_armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->fp32_armv6simd.output_min = (uint32_t) output_min * UINT32_C(0x01010101);
-  params->fp32_armv6simd.output_max = (uint32_t) output_max * UINT32_C(0x01010101);
-  return sizeof(params->fp32_armv6simd);
+  params->fp32_armsimd32.scale = scale;
+  params->fp32_armsimd32.magic_bias = 12582912.0f;
+  params->fp32_armsimd32.minus_kernel_zero_point = (uint32_t) (uint16_t) minus_kernel_zero_point * UINT32_C(0x00010001);
+  params->fp32_armsimd32.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_armsimd32.output_min = (uint32_t) output_min * UINT32_C(0x01010101);
+  params->fp32_armsimd32.output_max = (uint32_t) output_max * UINT32_C(0x01010101);
+  return sizeof(params->fp32_armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -450,7 +450,7 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qs8_conv_minmax_fp32_armv6simd_params(
+size_t xnn_init_qs8_conv_minmax_fp32_armsimd32_params(
   union xnn_qs8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
@@ -460,12 +460,12 @@ size_t xnn_init_qs8_conv_minmax_fp32_armv6simd_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
-  params->fp32_armv6simd.scale = scale;
-  params->fp32_armv6simd.magic_bias = 12582912.0f;
-  params->fp32_armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->fp32_armv6simd.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
-  params->fp32_armv6simd.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
-  return sizeof(params->fp32_armv6simd);
+  params->fp32_armsimd32.scale = scale;
+  params->fp32_armsimd32.magic_bias = 12582912.0f;
+  params->fp32_armsimd32.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->fp32_armsimd32.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
+  params->fp32_armsimd32.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
+  return sizeof(params->fp32_armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -702,17 +702,17 @@ size_t xnn_init_qs8_minmax_avx512_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qs8_minmax_armv6simd_params(
+size_t xnn_init_qs8_minmax_armsimd32_params(
   union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
 {
-  params->armv6simd.magic_bias = 12582912.0f;
-  params->armv6simd.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->armv6simd.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
-  params->armv6simd.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
-  return sizeof(params->armv6simd);
+  params->armsimd32.magic_bias = 12582912.0f;
+  params->armsimd32.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
+  params->armsimd32.output_min = (uint32_t) (uint8_t) output_min * UINT32_C(0x01010101);
+  params->armsimd32.output_max = (uint32_t) (uint8_t) output_max * UINT32_C(0x01010101);
+  return sizeof(params->armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -3517,7 +3517,7 @@ size_t xnn_init_qs8_lrelu_scalar_andxor_params(
 }
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qs8_lrelu_armv6simd_params(
+size_t xnn_init_qs8_lrelu_armsimd32_params(
   union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
@@ -3537,11 +3537,11 @@ size_t xnn_init_qs8_lrelu_armv6simd_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  params->armv6simd.input_zero_point = (uint32_t) (uint16_t) (int16_t) input_zero_point * UINT32_C(0x00010001);
-  params->armv6simd.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
-  params->armv6simd.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
-  params->armv6simd.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->armv6simd);
+  params->armsimd32.input_zero_point = (uint32_t) (uint16_t) (int16_t) input_zero_point * UINT32_C(0x00010001);
+  params->armsimd32.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
+  params->armsimd32.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
+  params->armsimd32.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
+  return sizeof(params->armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -3782,7 +3782,7 @@ size_t xnn_init_qu8_lrelu_scalar_andxor_params(
 }
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qu8_lrelu_armv6simd_params(
+size_t xnn_init_qu8_lrelu_armsimd32_params(
   union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
@@ -3802,11 +3802,11 @@ size_t xnn_init_qu8_lrelu_armv6simd_params(
   assert(negative_multiplier >= -32768L);
   assert(negative_multiplier <= 32767L);
   assert(negative_multiplier != 0L);
-  params->armv6simd.input_zero_point = (uint32_t) input_zero_point * UINT32_C(0x00010001);
-  params->armv6simd.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
-  params->armv6simd.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
-  params->armv6simd.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->armv6simd);
+  params->armsimd32.input_zero_point = (uint32_t) input_zero_point * UINT32_C(0x00010001);
+  params->armsimd32.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
+  params->armsimd32.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
+  params->armsimd32.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
+  return sizeof(params->armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -6371,7 +6371,7 @@ size_t xnn_init_qs8_cvt_scalar_params(
 }
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qs8_cvt_armv6simd_params(
+size_t xnn_init_qs8_cvt_armsimd32_params(
   union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   int8_t input_zero_point,
@@ -6384,10 +6384,10 @@ size_t xnn_init_qs8_cvt_armv6simd_params(
   assert(multiplier >= 512L);
   assert(multiplier <= 16777216L);
   const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
-  params->armv6simd.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
-  params->armv6simd.multiplier = (int32_t) multiplier;
-  params->armv6simd.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
-  return sizeof(params->armv6simd);
+  params->armsimd32.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
+  params->armsimd32.multiplier = (int32_t) multiplier;
+  params->armsimd32.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
+  return sizeof(params->armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 
@@ -6611,7 +6611,7 @@ size_t xnn_init_qu8_cvt_scalar_params(
 }
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qu8_cvt_armv6simd_params(
+size_t xnn_init_qu8_cvt_armsimd32_params(
   union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   uint8_t input_zero_point,
@@ -6624,10 +6624,10 @@ size_t xnn_init_qu8_cvt_armv6simd_params(
   assert(multiplier >= 512L);
   assert(multiplier <= 16777216L);
   const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
-  params->armv6simd.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
-  params->armv6simd.multiplier = (int32_t) multiplier;
-  params->armv6simd.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
-  return sizeof(params->armv6simd);
+  params->armsimd32.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
+  params->armsimd32.multiplier = (int32_t) multiplier;
+  params->armsimd32.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
+  return sizeof(params->armsimd32);
 }
 #endif  // XNN_ARCH_ARM
 

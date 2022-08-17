@@ -220,20 +220,20 @@ tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=3 -D VARIANT=LD128 
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=4 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -o src/qu8-igemm/gen/4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c &
 
 ################################## ARMv6 SIMD #################################
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x2c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/2x1c4-minmax-fp32-armv6simd.c &
-tools/xngen src/qs8-igemm/c4-armv6simd.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/2x2c4-minmax-fp32-armv6simd.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/2x1c4-minmax-fp32-armsimd32.c &
+tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-igemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-igemm/gen/1x8-minmax-rndnu-neon-mlal-lane.c &

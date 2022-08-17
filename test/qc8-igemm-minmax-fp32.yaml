@@ -119,17 +119,17 @@
   assembly: true
 
 # ARMv6 SIMD
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x1c4__armv6simd
-  init: xnn_init_qs8_minmax_armv6simd_params
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32
+  init: xnn_init_qs8_minmax_armsimd32_params
   k-block: 4
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x2c4__armv6simd
-  init: xnn_init_qs8_minmax_armv6simd_params
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32
+  init: xnn_init_qs8_minmax_armsimd32_params
   k-block: 4
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x1c4__armv6simd
-  init: xnn_init_qs8_minmax_armv6simd_params
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x1c4__armsimd32
+  init: xnn_init_qs8_minmax_armsimd32_params
   k-block: 4
-- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x2c4__armv6simd
-  init: xnn_init_qs8_minmax_armv6simd_params
+- name: xnn_qc8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32
+  init: xnn_init_qs8_minmax_armsimd32_params
   k-block: 4
 
 # ARM NEON

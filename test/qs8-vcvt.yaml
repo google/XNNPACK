@@ -62,10 +62,10 @@
   init: xnn_init_qs8_cvt_wasmsimd_params
 
 # ARMv6 SIMD
-- name: xnn_qs8_vcvt_ukernel__armv6simd_x4
-  init: xnn_init_qs8_cvt_armv6simd_params
-- name: xnn_qs8_vcvt_ukernel__armv6simd_x8
-  init: xnn_init_qs8_cvt_armv6simd_params
+- name: xnn_qs8_vcvt_ukernel__armsimd32_x4
+  init: xnn_init_qs8_cvt_armsimd32_params
+- name: xnn_qs8_vcvt_ukernel__armsimd32_x8
+  init: xnn_init_qs8_cvt_armsimd32_params
 
 # Scalar
 - name: xnn_qs8_vcvt_ukernel__scalar_x1

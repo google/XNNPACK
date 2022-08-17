@@ -29,7 +29,7 @@ DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scala
 DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params)
 DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_armv6simd_params)
+  DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_conv_minmax_fp32_neon_params)
@@ -60,7 +60,7 @@ DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scala
 DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params)
 DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_armv6simd_params)
+  DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_CONV_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_conv_minmax_fp32_neon_params)
@@ -96,7 +96,7 @@ DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_fmagic_params
 DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_imagic_params)
 DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_scalar_lrintf_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_armv6simd_params)
+  DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_minmax_neon_params)
@@ -605,7 +605,7 @@ DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
 DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_andxor_params)
 DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_select_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_armv6simd_params)
+  DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_neon_params)
@@ -632,7 +632,7 @@ DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_select_params)
 DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_andxor_params)
 DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_armv6simd_params)
+  DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_neon_params)
@@ -922,7 +922,7 @@ DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_lrintf_para
 
 DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_scalar_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_armv6simd_params)
+  DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_neon_params)
@@ -967,7 +967,7 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
 
 DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
 #if XNN_ARCH_ARM
-  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_armv6simd_params)
+  DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_armsimd32_params)
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_neon_params)

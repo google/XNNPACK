@@ -2512,50 +2512,50 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, batch_eq_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, batch_eq_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     VLReLUMicrokernelTester()
       .batch_size(4)
       .input_zero_point(150)
       .output_zero_point(100)
-      .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+      .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, batch_div_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, batch_div_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, batch_lt_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, batch_lt_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, batch_gt_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, batch_gt_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 5; batch_size < 8; batch_size++) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, positive_scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, positive_scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       for (float positive_scale : std::vector<float>({1.0f / 256.0f, 0.3f, 1.3f, 128.0f})) {
         VLReLUMicrokernelTester()
@@ -2563,13 +2563,13 @@
           .positive_scale(positive_scale)
           .input_zero_point(150)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
         }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, negative_scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, negative_scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       for (float negative_scale : std::vector<float>({-127.99609375f, -1.3f, -0.3f, -1.0f / 256.0f, 1 / 256.0f, 0.3f, 1.3f, 128.0f})) {
         VLReLUMicrokernelTester()
@@ -2577,33 +2577,33 @@
           .negative_scale(negative_scale)
           .input_zero_point(150)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
         }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, input_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, input_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
       for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
         VLReLUMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
       }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X4, output_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X4, output_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
       for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
         VLReLUMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(150)
           .output_zero_point(output_zero_point)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x4, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x4, xnn_init_qu8_lrelu_armsimd32_params);
       }
     }
   }
@@ -2611,50 +2611,50 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, batch_eq_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, batch_eq_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     VLReLUMicrokernelTester()
       .batch_size(8)
       .input_zero_point(150)
       .output_zero_point(100)
-      .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+      .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, batch_div_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, batch_div_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, batch_lt_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, batch_lt_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, batch_gt_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, batch_gt_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 9; batch_size < 16; batch_size++) {
       VLReLUMicrokernelTester()
         .batch_size(batch_size)
         .input_zero_point(150)
         .output_zero_point(100)
-        .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+        .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, positive_scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, positive_scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       for (float positive_scale : std::vector<float>({1.0f / 256.0f, 0.3f, 1.3f, 128.0f})) {
         VLReLUMicrokernelTester()
@@ -2662,13 +2662,13 @@
           .positive_scale(positive_scale)
           .input_zero_point(150)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
         }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, negative_scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, negative_scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       for (float negative_scale : std::vector<float>({-127.99609375f, -1.3f, -0.3f, -1.0f / 256.0f, 1 / 256.0f, 0.3f, 1.3f, 128.0f})) {
         VLReLUMicrokernelTester()
@@ -2676,33 +2676,33 @@
           .negative_scale(negative_scale)
           .input_zero_point(150)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
         }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, input_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, input_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VLReLUMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
           .output_zero_point(100)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
       }
     }
   }
 
-  TEST(QU8_VLRELU__ARMV6SIMD_X8, output_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QU8_VLRELU__ARMSIMD32_X8, output_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VLReLUMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(150)
           .output_zero_point(output_zero_point)
-          .Test(xnn_qu8_vlrelu_ukernel__armv6simd_x8, xnn_init_qu8_lrelu_armv6simd_params);
+          .Test(xnn_qu8_vlrelu_ukernel__armsimd32_x8, xnn_init_qu8_lrelu_armsimd32_params);
       }
     }
   }

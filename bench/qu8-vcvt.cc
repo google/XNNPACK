@@ -85,15 +85,15 @@ static void qu8_vcvt(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM
-  BENCHMARK_CAPTURE(qu8_vcvt, armv6simd_x4,
-                    xnn_qu8_vcvt_ukernel__armv6simd_x4,
-                    xnn_init_qu8_cvt_armv6simd_params,
+  BENCHMARK_CAPTURE(qu8_vcvt, armsimd32_x4,
+                    xnn_qu8_vcvt_ukernel__armsimd32_x4,
+                    xnn_init_qu8_cvt_armsimd32_params,
                     benchmark::utils::CheckARMV6)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vcvt, armv6simd_x8,
-                    xnn_qu8_vcvt_ukernel__armv6simd_x8,
-                    xnn_init_qu8_cvt_armv6simd_params,
+  BENCHMARK_CAPTURE(qu8_vcvt, armsimd32_x8,
+                    xnn_qu8_vcvt_ukernel__armsimd32_x8,
+                    xnn_init_qu8_cvt_armsimd32_params,
                     benchmark::utils::CheckARMV6)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();

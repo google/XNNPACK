@@ -85,15 +85,15 @@ static void qs8_vlrelu(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM
-  BENCHMARK_CAPTURE(qs8_vlrelu, armv6simd_x4,
-                    xnn_qs8_vlrelu_ukernel__armv6simd_x4,
-                    xnn_init_qs8_lrelu_armv6simd_params,
+  BENCHMARK_CAPTURE(qs8_vlrelu, armsimd32_x4,
+                    xnn_qs8_vlrelu_ukernel__armsimd32_x4,
+                    xnn_init_qs8_lrelu_armsimd32_params,
                     benchmark::utils::CheckARMV6)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_vlrelu, armv6simd_x8,
-                    xnn_qs8_vlrelu_ukernel__armv6simd_x8,
-                    xnn_init_qs8_lrelu_armv6simd_params,
+  BENCHMARK_CAPTURE(qs8_vlrelu, armsimd32_x8,
+                    xnn_qs8_vlrelu_ukernel__armsimd32_x8,
+                    xnn_init_qs8_lrelu_armsimd32_params,
                     benchmark::utils::CheckARMV6)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
     ->UseRealTime();

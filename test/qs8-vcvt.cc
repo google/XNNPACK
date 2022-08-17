@@ -1846,62 +1846,62 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QS8_VCVT__ARMV6SIMD_X4, batch_eq_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, batch_eq_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     VCvtMicrokernelTester()
       .batch_size(4)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
-      .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+      .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, batch_div_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, batch_div_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, batch_lt_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, batch_lt_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size < 4; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, batch_gt_4) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, batch_gt_4) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 5; batch_size < 8; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, input_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, input_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
       for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
         VCvtMicrokernelTester()
@@ -1909,13 +1909,13 @@
           .input_zero_point(input_zero_point)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
-          .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+          .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
       }
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X4, output_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X4, output_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
       for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
         VCvtMicrokernelTester()
@@ -1923,7 +1923,7 @@
           .output_zero_point(output_zero_point)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
-          .Test(xnn_qs8_vcvt_ukernel__armv6simd_x4, xnn_init_qs8_cvt_armv6simd_params);
+          .Test(xnn_qs8_vcvt_ukernel__armsimd32_x4, xnn_init_qs8_cvt_armsimd32_params);
       }
     }
   }
@@ -1931,62 +1931,62 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QS8_VCVT__ARMV6SIMD_X8, batch_eq_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, batch_eq_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     VCvtMicrokernelTester()
       .batch_size(8)
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
-      .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+      .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, batch_div_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, batch_div_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, batch_lt_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, batch_lt_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, batch_gt_8) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, batch_gt_8) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 9; batch_size < 16; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, scale) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, scale) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
-        .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+        .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, input_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, input_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t input_zero_point = 0; input_zero_point < 5; input_zero_point += 2) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VCvtMicrokernelTester()
@@ -1994,13 +1994,13 @@
           .input_zero_point(input_zero_point)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
-          .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+          .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
       }
     }
   }
 
-  TEST(QS8_VCVT__ARMV6SIMD_X8, output_zero_point) {
-    TEST_REQUIRES_ARM_V6_SIMD;
+  TEST(QS8_VCVT__ARMSIMD32_X8, output_zero_point) {
+    TEST_REQUIRES_ARM_SIMD32;
     for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
       for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
         VCvtMicrokernelTester()
@@ -2008,7 +2008,7 @@
           .output_zero_point(output_zero_point)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
-          .Test(xnn_qs8_vcvt_ukernel__armv6simd_x8, xnn_init_qs8_cvt_armv6simd_params);
+          .Test(xnn_qs8_vcvt_ukernel__armsimd32_x8, xnn_init_qs8_cvt_armsimd32_params);
       }
     }
   }
