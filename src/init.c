@@ -1329,17 +1329,45 @@ static void init(void) {
 
   } else if (!XNN_PLATFORM_MOBILE) {
 
+    /*************************** QC8 AArch32 Pre-NEON micro-kernels ***************************/
+    #ifndef XNN_NO_QC8_OPERATORS
+      init_flags |= XNN_INIT_FLAG_QC8;
+
+      xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qc8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qc8.gemm.init.qc8 = xnn_init_qs8_minmax_armsimd32_params;
+      xnn_params.qc8.gemm.mr = 2;
+      xnn_params.qc8.gemm.nr = 2;
+      xnn_params.qc8.gemm.log2_kr = 2;
+
+      xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up1x3__scalar_fmagic;
+      xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.dwconv[0].channel_tile = 1;
+      xnn_params.qc8.dwconv[0].primary_tile = 3;
+      xnn_params.qc8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up1x9__scalar_fmagic;
+      xnn_params.qc8.dwconv[1].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.dwconv[1].channel_tile = 1;
+      xnn_params.qc8.dwconv[1].primary_tile = 9;
+      xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qc8_dwconv_minmax_fp32_ukernel_up1x25__scalar_fmagic;
+      xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qs8_minmax_scalar_fmagic_params;
+      xnn_params.qc8.dwconv[2].channel_tile = 1;
+      xnn_params.qc8.dwconv[2].primary_tile = 25;
+    #endif  // XNN_NO_QS8_OPERATORS
+
     /*************************** QS8 AArch32 Pre-NEON micro-kernels ***************************/
     #ifndef XNN_NO_QS8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QS8;
 
-      xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qs8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qs8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qs8.gemm.init.qs8 = xnn_init_qs8_conv_minmax_fp32_armsimd32_params;
       xnn_params.qs8.gemm.mr = 2;
       xnn_params.qs8.gemm.nr = 2;
+      xnn_params.qs8.gemm.log2_kr = 2;
 
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qs8_dwconv_minmax_fp32_ukernel_up1x9__scalar_fmagic;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params;
@@ -1384,13 +1412,14 @@ static void init(void) {
     #ifndef XNN_NO_QU8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QU8;
 
-      xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic);
-      xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;
+      xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32);
+      xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32);
+      xnn_params.qu8.gemm.init.qu8 = xnn_init_qu8_conv_minmax_fp32_armsimd32_params;
       xnn_params.qu8.gemm.mr = 2;
       xnn_params.qu8.gemm.nr = 2;
+      xnn_params.qu8.gemm.log2_kr = 2;
 
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_qu8_dwconv_minmax_fp32_ukernel_up1x9__scalar_fmagic;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params;

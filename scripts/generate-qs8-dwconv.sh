@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### Scalar ###################################
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/up1x3-minmax-fp32-scalar-fmagic.c &
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/up2x3-minmax-fp32-scalar-imagic.c &
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/up2x3-minmax-fp32-scalar-lrintf.c &
 

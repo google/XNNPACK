@@ -394,8 +394,9 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f32-vunary/gen/vabs-scalar-x4.c
   src/f32-vunary/gen/vneg-scalar-x4.c
   src/f32-vunary/gen/vsqr-scalar-x4.c
-  src/qc8-dwconv/gen/up2x9-minmax-fp32-scalar-fmagic.c
-  src/qc8-dwconv/gen/up2x25-minmax-fp32-scalar-fmagic.c
+  src/qc8-dwconv/gen/up1x3-minmax-fp32-scalar-fmagic.c
+  src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
+  src/qc8-dwconv/gen/up1x25-minmax-fp32-scalar-fmagic.c
   src/qc8-gemm/gen/1x2-minmax-fp32-scalar-fmagic.c
   src/qc8-gemm/gen/1x8-minmax-fp32-neon-mlal-lane.c
   src/qc8-gemm/gen/2x2-minmax-fp32-scalar-fmagic.c
@@ -1040,6 +1041,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sqrt-u32-scalar-cvtu32-sqrt-lrint.c
   src/math/sqrt-u32-scalar-hashemian.c
   src/math/sqrt-u32-scalar-tflm.c
+  src/qc8-dwconv/gen/up1x3-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-lrintf.c
@@ -1444,6 +1446,18 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x64-transposec/gen/4x2-scalar-int.c)
 
 SET(PROD_ARMSIMD32_MICROKERNEL_SRCS
+  src/qc8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qc8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qc8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qs8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qs8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qu8-gemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qu8-gemm/gen/2x2c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/1x2c4-minmax-fp32-armsimd32.c
+  src/qu8-igemm/gen/2x2c4-minmax-fp32-armsimd32.c
   src/qs8-vcvt/gen/vcvt-armsimd32-x8.c
   src/qs8-vlrelu/gen/vlrelu-armsimd32-x4.c
   src/qu8-vcvt/gen/vcvt-armsimd32-x8.c
