@@ -662,48 +662,6 @@ void xnn_compute_dwconv2d_chw(
     &context->params);
 }
 
-void xnn_compute_depthtospace2d_hwc_contiguous(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y)
-{
-  const size_t input_width = context->input_width;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    (batch_input_y * input_width + input_x) * context->input_width_stride + block_y * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    ((batch_input_y * context->block_size + block_y) * input_width + input_x) * elements);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
-void xnn_compute_depthtospace2d_hwc_strided(
-    const struct depthtospace2d_hwc_context* context,
-    size_t batch_input_y,
-    size_t input_x,
-    size_t block_y,
-    size_t block_x)
-{
-  const size_t block_size = context->block_size;
-  const size_t elements = context->elements;
-  const void* input = (const void*) ((uintptr_t) context->input +
-    batch_input_y * context->input_height_stride + input_x * context->input_width_stride + (block_y * block_size + block_x) * elements);
-  void* output = (void*) ((uintptr_t) context->output +
-    (batch_input_y * block_size + block_y) * context->output_height_stride +
-    (input_x * block_size + block_x) * context->output_width_stride);
-
-  context->ukernel(
-    elements,
-    input,
-    output,
-    NULL);
-}
-
 void xnn_compute_argmax_pooling_unipass(
     const struct argmax_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,

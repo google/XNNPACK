@@ -177,7 +177,6 @@ SET(OPERATOR_SRCS
   src/operators/convolution-nchw.c
   src/operators/convolution-nhwc.c
   src/operators/deconvolution-nhwc.c
-  src/operators/depth-to-space-nhwc.c
   src/operators/fully-connected-nc.c
   src/operators/global-average-pooling-ncw.c
   src/operators/global-average-pooling-nwc.c

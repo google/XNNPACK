@@ -457,15 +457,6 @@ typedef void (*xnn_fill_ukernel_function)(
     size_t output_stride,
     const uint32_t fill_pattern);
 
-typedef void (*xnn_x32_depthtospace2d_chw2hwc_ukernel_function)(
-    size_t output_channels,
-    size_t input_height,
-    size_t input_width,
-    size_t block_size,
-    const uint32_t* input,
-    uint32_t* output,
-    size_t output_channel_stride);
-
 typedef void (*xnn_pad_ukernel_function)(
     size_t rows,
     size_t channels,
