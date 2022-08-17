@@ -325,6 +325,15 @@ XNN_INTERNAL size_t xnn_init_scalar_f32_gavgpool_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#define DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                \
+    union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    uint16_t output_min,                                      \
+    uint16_t output_max);
+
+DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(xnn_init_bf16_minmax_scalar_params)
+
+
 #define DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                               \
     union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)], \

@@ -104,6 +104,10 @@ bool CheckNEONV8(benchmark::State& state);
 // If NEON-FP16-ARITH is unsupported, report error in benchmark state, and return false.
 bool CheckNEONFP16ARITH(benchmark::State& state);
 
+// Check if ARM NEON-BF16 extension is supported.
+// If NEON-BF16 is unsupported, report error in benchmark state, and return false.
+bool CheckNEONBF16(benchmark::State& state);
+
 // Check if ARM DOT extension is supported.
 // If DOT is unsupported, report error in benchmark state, and return false.
 bool CheckNEONDOT(benchmark::State& state);

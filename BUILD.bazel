@@ -4287,6 +4287,11 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
 ]
 
 ALL_NEONFMA_MICROKERNEL_SRCS = [
+    "src/bf16-gemm/gen/1x4c8-minmax-neonfma-shland.c",
+    "src/bf16-gemm/gen/2x4c8-minmax-neonfma-shland.c",
+    "src/bf16-gemm/gen/3x4c8-minmax-neonfma-shland.c",
+    "src/bf16-gemm/gen/4x4c8-minmax-neonfma-shland.c",
+    "src/bf16-gemm/gen/5x4c8-minmax-neonfma-shland.c",
     "src/f32-dwconv/gen/up4x3-minmax-neonfma-acc2.c",
     "src/f32-dwconv/gen/up4x3-minmax-neonfma.c",
     "src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c",
@@ -4533,6 +4538,11 @@ PROD_AARCH64_NEON_MICROKERNEL_SRCS = [
 ]
 
 ALL_AARCH64_NEON_MICROKERNEL_SRCS = [
+    "src/bf16-gemm/gen/1x4c8-minmax-neonfma-zip.c",
+    "src/bf16-gemm/gen/2x4c8-minmax-neonfma-zip.c",
+    "src/bf16-gemm/gen/3x4c8-minmax-neonfma-zip.c",
+    "src/bf16-gemm/gen/4x4c8-minmax-neonfma-zip.c",
+    "src/bf16-gemm/gen/5x4c8-minmax-neonfma-zip.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x2.c",
     "src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x1.c",
@@ -5212,6 +5222,32 @@ ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c",
     "src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c",
     "src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c",
+]
+
+PROD_NEONBF16_MICROKERNEL_SRCS = [
+]
+
+ALL_NEONBF16_MICROKERNEL_SRCS = [
+    "src/bf16-gemm/gen/1x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-gemm/gen/4x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-gemm/gen/5x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-gemm/gen/6x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
+    "src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfdot.c",
+    "src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfdot.c",
+    "src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfdot.c",
+    "src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfdot.c",
+    "src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfdot.c",
+    "src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfmlal.c",
+    "src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfmlal.c",
+    "src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfmlal.c",
+    "src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfmlal.c",
+    "src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfmlal.c",
+]
+
+PROD_AARCH64_NEONBF16_MICROKERNEL_SRCS = [
+]
+
+ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS = [
 ]
 
 PROD_NEONDOT_MICROKERNEL_SRCS = [
@@ -9320,6 +9356,76 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonbf16_bench_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+bf16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONBF16_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+bf16"],
+    aarch64_srcs = ALL_NEONBF16_MICROKERNEL_SRCS + ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":params",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonbf16_prod_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+bf16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = PROD_NEONBF16_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+bf16"],
+    aarch64_srcs = PROD_NEONBF16_MICROKERNEL_SRCS + PROD_AARCH64_NEONBF16_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":params",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonbf16_test_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+bf16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ALL_NEONBF16_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+bf16"],
+    aarch64_srcs = ALL_NEONBF16_MICROKERNEL_SRCS + ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":params",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neondot_bench_microkernels",
     aarch32_copts = [
         "-marm",
@@ -10281,6 +10387,9 @@ xnnpack_aggregate_library(
         ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
     }) + select({
+        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
+    }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }),
@@ -10288,6 +10397,9 @@ xnnpack_aggregate_library(
         ":scalar_prod_microkernels",
     ] + select({
         ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_prod_microkernels"],
@@ -10340,6 +10452,9 @@ xnnpack_aggregate_library(
         ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
     }) + select({
+        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
+    }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }),
@@ -10347,6 +10462,9 @@ xnnpack_aggregate_library(
         ":scalar_bench_microkernels",
     ] + select({
         ":arm_fp16_enabled": [":neonfp16arith_bench_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_bf16_enabled": [":neonbf16_bench_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_bench_microkernels"],
@@ -10399,6 +10517,9 @@ xnnpack_aggregate_library(
         ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
     }) + select({
+        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
+    }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }),
@@ -10406,6 +10527,9 @@ xnnpack_aggregate_library(
         ":scalar_prod_microkernels",
     ] + select({
         ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_prod_microkernels"],
@@ -10458,6 +10582,9 @@ xnnpack_aggregate_library(
         ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
     }) + select({
+        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
+    }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }),
@@ -10465,6 +10592,9 @@ xnnpack_aggregate_library(
         ":scalar_test_microkernels",
     ] + select({
         ":arm_fp16_enabled": [":neonfp16arith_test_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_bf16_enabled": [":neonbf16_test_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_test_microkernels"],
@@ -11304,6 +11434,18 @@ xnnpack_benchmark(
         "bench/qu8-vmulc.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "bf16_gemm_bench",
+    srcs = [
+        "bench/bf16-gemm.cc",
+        "bench/gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":math",
+        ":packing",
+    ],
 )
 
 xnnpack_benchmark(
@@ -12461,6 +12603,16 @@ xnnpack_cc_library(
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "bf16_gemm_minmax_test",
+    srcs = [
+        "test/bf16-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -15528,6 +15680,18 @@ config_setting(
     define_values = {"xnn_enable_arm_fp16": "false"},
 )
 
+# Enables usage of ARM BF16 (BF16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_bf16_explicit_true",
+    define_values = {"xnn_enable_arm_bf16": "true"},
+)
+
+# Disables usage of ARM BF16 (BF16 arithmetics) kernels.
+config_setting(
+    name = "xnn_enable_arm_bf16_explicit_false",
+    define_values = {"xnn_enable_arm_bf16": "false"},
+)
+
 # Enables usage of ARM DotProd (integer dot product) kernels.
 config_setting(
     name = "xnn_enable_arm_dotprod_explicit_true",
@@ -15962,6 +16126,22 @@ alias(
         ":xnn_enable_arm_fp16_explicit_true": ":xnn_enable_arm_fp16_explicit_true",
         ":xnn_enable_arm_fp16_explicit_false": ":xnn_enable_arm_fp16_explicit_true",
         "//conditions:default": ":arm_fp16_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_bf16_enabled_by_default",
+    match_any = [
+        ":aarch64",
+    ],
+)
+
+alias(
+    name = "arm_bf16_enabled",
+    actual = select({
+        ":xnn_enable_arm_bf16_explicit_true": ":xnn_enable_arm_bf16_explicit_true",
+        ":xnn_enable_arm_bf16_explicit_false": ":xnn_enable_arm_bf16_explicit_true",
+        "//conditions:default": ":arm_bf16_enabled_by_default",
     }),
 )
 

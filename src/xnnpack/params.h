@@ -168,6 +168,18 @@ typedef void (*xnn_f32_gemminc_minmax_ukernel_function)(
     const float* acc,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_bf16_gemm_minmax_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const void* a,
+    size_t a_stride,
+    const void* w,
+    void* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_bf16_minmax_params* params);
+
 typedef void (*xnn_f16_gemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,
@@ -1770,6 +1782,11 @@ typedef size_t (*xnn_init_f16_chw_params_fn)(
 
 typedef size_t (*xnn_init_f16_hswish_params_fn)(
   union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_bf16_minmax_params_fn)(
+  union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t min,
+  uint16_t max);
 
 typedef size_t (*xnn_init_f16_minmax_params_fn)(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],

@@ -1934,6 +1934,16 @@ size_t xnn_init_scalar_f32_gavgpool_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_bf16_minmax_scalar_params(
+  union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t output_min,
+  uint16_t output_max)
+{
+  params->scalar.min = uint32_as_float((uint32_t) output_min << 16);
+  params->scalar.max = uint32_as_float((uint32_t) output_max << 16);
+  return sizeof(params->scalar);
+}
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_minmax_neon_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],

@@ -1,0 +1,177 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR % 4 == 0
+$assert BFOPT in ["BFDOT", "BFMLAL"]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+#include <assert.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/gemm.h>
+
+
+void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonbf16_${BFOPT.lower()}(
+    size_t mr,
+    size_t nc,
+    size_t kc,
+    const void* restrict a,
+    size_t a_stride,
+    const void* restrict w_ptr,
+    void* restrict c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_bf16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(mr != 0);
+  assert(mr <= ${MR});
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(kc % sizeof(bfloat16_t) == 0);
+  assert(a != NULL);
+  assert(w_ptr != NULL);
+  assert(c != NULL);
+
+  const bfloat16_t* a0 = (const bfloat16_t*) a;
+  bfloat16_t* c0 = (bfloat16_t*) c;
+  $for M in range(1, MR):
+    const bfloat16_t* a${M} = (const bfloat16_t*) ((uintptr_t) a${M-1} + a_stride);
+    bfloat16_t* c${M} = (bfloat16_t*) ((uintptr_t) c${M-1} + cm_stride);
+    $if M % 2 == 0:
+      if XNN_UNPREDICTABLE(mr <= ${M}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $elif M + 1 == MR:
+      if XNN_UNPREDICTABLE(mr != ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+    $else:
+      if XNN_UNPREDICTABLE(mr < ${M+1}) {
+        a${M} = a${M-1};
+        c${M} = c${M-1};
+      }
+
+  const bfloat16_t* w = (const bfloat16_t*) w_ptr;
+  do {
+    $for N in range(NR):
+      float32x4_t vacc0x${ABC[N]} = vcvt_f32_bf16(vld1_lane_bf16(w, vreinterpret_bf16_u16(vdup_n_u16(0)), 0)); w += 1;
+    $for M in range(1, MR):
+      $for N in range(NR):
+        float32x4_t vacc${M}x${ABC[N]} = vacc0x${ABC[N]};
+
+    size_t k = kc;
+    for (; k >= 8 * sizeof(bfloat16_t); k -= 8 * sizeof(bfloat16_t)) {
+      $for M in range(MR):
+        const bfloat16x8_t va${M} = vld1q_bf16(a${M}); a${M} += 8;
+
+      $for N in range(NR):
+        const bfloat16x8_t vb${ABC[N]} = vld1q_bf16(w); w += 8;
+
+      $if BFOPT == "BFDOT":
+        $for N in range(NR):
+          $for M in range(MR):
+            vacc${M}x${ABC[N]} = vbfdotq_f32(vacc${M}x${ABC[N]}, va${M}, vb${ABC[N]});
+      $elif BFOPT == "BFMLAL":
+        $for N in range(NR):
+          $for M in range(MR):
+            vacc${M}x${ABC[N]} = vbfmlalbq_f32(vacc${M}x${ABC[N]}, va${M}, vb${ABC[N]});
+
+        $for N in range(NR):
+          $for M in range(MR):
+            vacc${M}x${ABC[N]} = vbfmlaltq_f32(vacc${M}x${ABC[N]}, va${M}, vb${ABC[N]});
+    }
+    if XNN_UNLIKELY(k != 0) {
+      $for M in range(MR):
+        const bfloat16x8_t va${M} = vld1q_bf16(a${M}); a${M} = (const bfloat16_t*) ((uintptr_t) a${M} + k);
+
+      $for N in range(NR):
+        const bfloat16x8_t vb${ABC[N]} = vld1q_bf16(w); w += 8;
+
+      $for N in range(NR):
+        const uint16x8_t vm${ABC[N]} = vceqq_u16(vreinterpretq_u16_bf16(vb${ABC[N]}), vmovq_n_u16(0));
+
+      $for N in range(NR):
+        $for M in range(MR):
+          const bfloat16x8_t va${M}x${ABC[N]} = vreinterpretq_bf16_u16(vbicq_u16(vreinterpretq_u16_bf16(va${M}), vm${ABC[N]}));
+          $if BFOPT == "BFDOT":
+            vacc${M}x${ABC[N]} = vbfdotq_f32(vacc${M}x${ABC[N]}, va${M}x${ABC[N]}, vb${ABC[N]});
+          $elif BFOPT == "BFMLAL":
+            vacc${M}x${ABC[N]} = vbfmlalbq_f32(vacc${M}x${ABC[N]}, va${M}x${ABC[N]}, vb${ABC[N]});
+            vacc${M}x${ABC[N]} = vbfmlaltq_f32(vacc${M}x${ABC[N]}, va${M}x${ABC[N]}, vb${ABC[N]});
+    }
+
+#if XNN_ARCH_ARM64
+    $for N in range(0, NR, 2):
+      $for M in range(MR):
+        const float32x4_t vacc${M}x${ABC[N:N+2]} = vpaddq_f32(vacc${M}x${ABC[N]}, vacc${M}x${ABC[N+1]});
+
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        float32x4_t vacc${M}x${ABC[N:N+4]} = vpaddq_f32(vacc${M}x${ABC[N:N+2]}, vacc${M}x${ABC[N+2:N+4]});
+#else
+    $for N in range(NR):
+      $for M in range(MR):
+        const float32x2_t vsum${M}x${ABC[N]} = vadd_f32(vget_low_f32(vacc${M}x${ABC[N]}), vget_high_f32(vacc${M}x${ABC[N]}));
+
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        float32x4_t vacc${M}x${ABC[N:N+4]} = vcombine_f32(vpadd_f32(vsum${M}x${ABC[N]}, vsum${M}x${ABC[N+1]}), vpadd_f32(vsum${M}x${ABC[N+2]}, vsum${M}x${ABC[N+3]}));
+#endif
+
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
+
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);
+
+    $for N in range(0, NR, 4):
+      $for M in range(MR):
+        bfloat16x4_t vout${M}x${ABC[N:N+4]} = vcvt_bf16_f32(vacc${M}x${ABC[N:N+4]});
+
+    if XNN_LIKELY(nc >= ${NR}) {
+      $for M in range(MR):
+        vst1_bf16(c${M}, vout${M}x${ABC[0:4]});
+        $for N in range(4, NR, 4):
+          vst1_bf16(c${M} + ${N}, vout${M}x${ABC[N:N+4]});
+        c${M} = (bfloat16_t*) ((uintptr_t) c${M} + cn_stride);
+
+      $for M in range(MR):
+        a${M} = (const bfloat16_t*) ((uintptr_t) a${M} - kc);
+
+      nc -= ${NR};
+    } else {
+      $for LOG2N in reversed(range(NR.bit_length())):
+        $if NR != 1 << LOG2N:
+          if (nc & ${1 << LOG2N}) {
+            $if LOG2N >= 2:
+              $for N in range(0, 1 << LOG2N, 4):
+                $for M in range(MR):
+                  vst1_bf16(c${M}, vout${M}x${ABC[N:N+4]}); c${M} += 4;
+
+              $for M in range(MR):
+                $for N in range(0, 1 << (LOG2N - 1), 4):
+                  vout${M}x${ABC[N:N+4]} = vout${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
+            $elif LOG2N == 1:
+              $for M in range(MR):
+                vst1_lane_u32((void*) c${M}, vreinterpret_u32_bf16(vout${M}x${ABC[0:4]}), 0); c${M} += 2;
+
+              $for M in range(MR):
+                vout${M}x${ABC[0:4]} = vreinterpret_bf16_u16(vext_u16(vreinterpret_u16_bf16(vout${M}x${ABC[0:4]}), vreinterpret_u16_bf16(vout${M}x${ABC[0:4]}), 2));
+            $elif LOG2N == 0:
+              $for M in range(MR):
+                vst1_lane_bf16(c${M}, vout${M}x${ABC[0:4]}, 0);
+          }
+
+      nc = 0;
+    }
+  } while (nc != 0);
+}

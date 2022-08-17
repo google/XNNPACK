@@ -40,6 +40,7 @@ ENDIF()
 
 # --- [ Processor-specific options
 OPTION(XNNPACK_ENABLE_ARM_FP16 "Build XNNPACK with ARM FP16 (FP16 data processing) micro-kernels" ON)
+OPTION(XNNPACK_ENABLE_ARM_BF16 "Build XNNPACK with ARM BF16 (BFLOAT16) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_DOTPROD "Build XNNPACK with ARM DotProd (integer dot product) micro-kernels" ON)
 
 # ---[ CMake options
@@ -50,6 +51,7 @@ IF(XNNPACK_BUILD_TESTS)
 ENDIF()
 
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ARM_FP16=$<BOOL:${XNNPACK_ENABLE_ARM_FP16}>")
+ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ARM_BF16=$<BOOL:${XNNPACK_ENABLE_ARM_BF16}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ARM_DOTPROD=$<BOOL:${XNNPACK_ENABLE_ARM_DOTPROD}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ASSEMBLY=$<BOOL:${XNNPACK_ENABLE_ASSEMBLY}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_JIT=$<BOOL:${XNNPACK_ENABLE_JIT}>")
@@ -2777,6 +2779,11 @@ SET(PROD_NEONFMA_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x16.c)
 
 SET(ALL_NEONFMA_MICROKERNEL_SRCS
+  src/bf16-gemm/gen/1x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/2x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/3x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/4x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonfma-shland.c
   src/f32-dwconv/gen/up4x3-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/up4x3-minmax-neonfma.c
   src/f32-dwconv/gen/up4x4-minmax-neonfma-acc2.c
@@ -3021,6 +3028,11 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/x32-transposec/4x4-aarch64-tbl.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
+  src/bf16-gemm/gen/1x4c8-minmax-neonfma-zip.c
+  src/bf16-gemm/gen/2x4c8-minmax-neonfma-zip.c
+  src/bf16-gemm/gen/3x4c8-minmax-neonfma-zip.c
+  src/bf16-gemm/gen/4x4c8-minmax-neonfma-zip.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonfma-zip.c
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
   src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x2.c
   src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x1.c
@@ -3694,6 +3706,22 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c)
+
+SET(ALL_NEONBF16_MICROKERNEL_SRCS
+  src/bf16-gemm/gen/1x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/4x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/5x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/6x8c2-minmax-neonbf16-bfdot-lane-ld128.c
+  src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfdot.c
+  src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfmlal.c
+  src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfmlal.c)
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qc8-gemm/gen/1x8c4-minmax-fp32-neondot.c
@@ -6975,6 +7003,9 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   IF(XNNPACK_ENABLE_ARM_FP16)
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
+  IF(XNNPACK_ENABLE_ARM_BF16)
+    LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONBF16_MICROKERNEL_SRCS})
+  ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONDOT_MICROKERNEL_SRCS})
   ENDIF()
@@ -7005,6 +7036,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(aarch64|arm64)$" OR IOS_ARCH MATCHES "^ar
   IF(XNNPACK_ENABLE_ARM_FP16)
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS})
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS})
+  ENDIF()
+  IF(XNNPACK_ENABLE_ARM_BF16)
+    LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONBF16_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONDOT_MICROKERNEL_SRCS})
@@ -7085,6 +7119,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   SET_PROPERTY(SOURCE ${ALL_NEONFMA_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv7-a -mfpu=neon-vfpv4 ")
   SET_PROPERTY(SOURCE ${ALL_NEONV8_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8-a -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 -mfpu=neon-fp-armv8 ")
+  SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+bf16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
   # Workground the neon detection bug in ARM v8
@@ -7094,6 +7129,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   IF(ANDROID_NDK_MAJOR AND ANDROID_NDK_MAJOR LESS 21)
     SET_PROPERTY(SOURCE ${ALL_NEONV8_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfloat-abi=softfp ")
     SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfloat-abi=softfp ")
+    SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfloat-abi=softfp ")
     SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfloat-abi=softfp ")
     SET_PROPERTY(SOURCE ${AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfloat-abi=softfp ")
   ENDIF()
@@ -7101,6 +7137,7 @@ ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(aarch64|arm64)$" OR IOS_ARCH MATCHES "^arm64.*")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
   SET_PROPERTY(SOURCE ${ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 ")
+  SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+bf16 ")
   SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod ")
   SET_PROPERTY(SOURCE ${AARCH64_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16+dotprod ")
   IF(IOS)
@@ -7829,6 +7866,11 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_TEST(NAME fusion-test COMMAND fusion-test)
 
   # ---[ Build microkernel-level unit tests
+  ADD_EXECUTABLE(bf16-gemm-minmax-test test/bf16-gemm-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  TARGET_INCLUDE_DIRECTORIES(bf16-gemm-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  ADD_TEST(NAME bf16-gemm-minmax-test COMMAND bf16-gemm-minmax-test)
+
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-f32-vcvt-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
@@ -9079,6 +9121,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils microparams_init logging operators)
 
   # ---[ Build microkernel-level microbenchmarks
+  ADD_EXECUTABLE(bf16-gemm-bench bench/bf16-gemm.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  TARGET_INCLUDE_DIRECTORIES(bf16-gemm-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(bf16-gemm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
   ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)

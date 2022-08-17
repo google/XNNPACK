@@ -72,6 +72,13 @@ union xnn_f32_scaleminmax_params {
 
 // Min+Max: used by VCLAMP and GEMM/IGEMM/DWCONV/MAXPOOL/etc with MINMAX activation.
 
+union xnn_bf16_minmax_params {
+  struct {
+    float min;
+    float max;
+  } scalar;
+};
+
 union xnn_f16_minmax_params {
   char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

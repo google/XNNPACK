@@ -55,6 +55,9 @@ CMAKE_ARGS+=("-DANDROID_PIE=ON")
 CMAKE_ARGS+=("-DANDROID_STL=c++_static")
 CMAKE_ARGS+=("-DANDROID_CPP_FEATURES=exceptions")
 
+# BF16 instructions cause ICE in Android NDK compiler
+CMAKE_ARGS+=("-DXNNPACK_ENABLE_ARM_BF16=OFF")
+
 # Use-specified CMake arguments go last to allow overridding defaults
 CMAKE_ARGS+=($@)
 

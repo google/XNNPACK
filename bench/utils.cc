@@ -223,6 +223,14 @@ bool CheckNEONFP16ARITH(benchmark::State& state) {
   return true;
 }
 
+bool CheckNEONBF16(benchmark::State& state) {
+  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_bf16()) {
+    state.SkipWithError("no NEON-BF16 extension");
+    return false;
+  }
+  return true;
+}
+
 bool CheckNEONDOT(benchmark::State& state) {
   if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) {
     state.SkipWithError("no NEON-DOT extension");
