@@ -21,7 +21,7 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 
 
 class ZipMicrokernelTester {

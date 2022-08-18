@@ -15,9 +15,11 @@
 #include <random>
 #include <vector>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
+
 
 extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 

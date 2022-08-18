@@ -16,6 +16,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
+#include <xnnpack/microparams-init.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>

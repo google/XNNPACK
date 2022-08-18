@@ -20,7 +20,6 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack/params.h>
 #include <xnnpack/requantization-stubs.h>
 #include <xnnpack/requantization.h>
 

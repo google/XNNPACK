@@ -17,8 +17,9 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 
 
 class PReLUMicrokernelTester {

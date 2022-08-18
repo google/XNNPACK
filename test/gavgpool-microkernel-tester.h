@@ -21,9 +21,10 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
 
 

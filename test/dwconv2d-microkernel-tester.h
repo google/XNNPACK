@@ -20,11 +20,12 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/math.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 class DWConv2DMicrokernelTester {

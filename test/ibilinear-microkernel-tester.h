@@ -17,9 +17,10 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/math.h>
-#include <xnnpack/params.h>
 
 
 class IBilinearMicrokernelTester {

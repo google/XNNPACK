@@ -56,11 +56,12 @@ MICROKERNEL_TEST_DEPS = [
     ":isa_checks",
     ":math",
     ":microkernels_h",
-    ":params",
     ":microparams",
     ":microparams_init",
+    ":params",
     ":requantization",
     ":test_microkernels",
+    ":xnnpack_h",
     "@FP16",
 ]
 
@@ -8659,6 +8660,7 @@ xnnpack_cc_library(
     name = "params",
     srcs = ["src/params.c"],
     hdrs = [
+        "src/xnnpack/microfnptr.h",
         "src/xnnpack/params.h",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),

@@ -10,6 +10,7 @@
 #include <xnnpack.h>
 #include <xnnpack/normalization.h>
 
+
 class TransposeNormalizationTester {
  public:
   inline TransposeNormalizationTester& num_dims(size_t num_dims) {

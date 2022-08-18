@@ -20,8 +20,8 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack/common.h>
-#include <xnnpack/params.h>
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
 
 
 class LUTMicrokernelTester {

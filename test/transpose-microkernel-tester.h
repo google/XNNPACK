@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <xnnpack/params.h>
-
 #include <numeric>
 #include <cassert>
 #include <cstddef>
@@ -15,6 +13,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
 
 
 class TransposeMicrokernelTester {

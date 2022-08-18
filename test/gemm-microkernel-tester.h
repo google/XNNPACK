@@ -9,10 +9,9 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
-#include <xnnpack/math.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/requantization.h>
 
 

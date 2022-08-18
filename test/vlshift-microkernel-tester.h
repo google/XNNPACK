@@ -15,8 +15,8 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/params.h>
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
 
 
 class VLShiftMicrokernelTester {

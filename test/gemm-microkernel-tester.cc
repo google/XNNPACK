@@ -14,12 +14,14 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 #include <xnnpack/requantization.h>
+
 
 void GemmMicrokernelTester::Test(
   xnn_qu8_gemm_minmax_ukernel_function gemm,

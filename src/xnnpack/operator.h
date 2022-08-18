@@ -233,16 +233,16 @@ struct xnn_operator {
     };
     // Quantized Add parameters are sensitive to order of inputs, so we initialize an extra copy with the reversed order.
     struct {
-      union xnn_qs8_add_minmax_params qs8_addsub;
-      union xnn_qs8_add_minmax_params qs8_raddsub;
+      union xnn_qs8_add_minmax_params qs8_add;
+      union xnn_qs8_add_minmax_params qs8_radd;
     };
     struct {
       union xnn_qs8_mul_minmax_params qs8_mul;
       union xnn_qs8_mul_minmax_params qs8_rmul;
     };
     struct {
-      union xnn_qu8_add_minmax_params qu8_addsub;
-      union xnn_qu8_add_minmax_params qu8_raddsub;
+      union xnn_qu8_add_minmax_params qu8_add;
+      union xnn_qu8_add_minmax_params qu8_radd;
     };
     struct {
       union xnn_qu8_mul_minmax_params qu8_mul;

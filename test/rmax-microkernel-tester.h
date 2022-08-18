@@ -20,7 +20,8 @@
 
 #include <fp16.h>
 
-#include <xnnpack/params.h>
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
 
 
 class RMaxMicrokernelTester {

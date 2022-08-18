@@ -917,7 +917,7 @@ struct univector_strided_context {
   size_t x_stride;
   void* y;
   size_t y_stride;
-  xnn_univector_ukernel_function ukernel;
+  xnn_vunary_ukernel_function ukernel;
   union {
     union xnn_f16_abs_params f16_abs;
     union xnn_f16_default_params f16_default;
@@ -963,7 +963,7 @@ struct univector_contiguous_context {
   void* y;
   uint16_t log2_xsize;
   uint16_t log2_ysize;
-  xnn_univector_ukernel_function ukernel;
+  xnn_vunary_ukernel_function ukernel;
   union {
     union xnn_f16_abs_params f16_abs;
     union xnn_f16_default_params f16_default;

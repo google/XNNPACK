@@ -16,10 +16,11 @@
 #include <random>
 #include <vector>
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 class ConvHWCMicrokernelTester {

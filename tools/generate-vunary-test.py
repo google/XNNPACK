@@ -209,10 +209,6 @@ def generate_test_cases(ukernel, op_type, init_fn, batch_tile, isa):
       test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
     if init_fn is not None:
       test_args.append(init_fn)
-  elif op_type not in ["Abs", "Negate", "Square", "SquareRoot"]:
-    test_args.append("VUnaryMicrokernelTester::OpType::" + op_type)
-    if not isa:
-      test_args.append("VUnaryMicrokernelTester::Variant::Scalar")
   return xngen.preprocess(BINOP_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,

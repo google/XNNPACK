@@ -17,8 +17,9 @@
 
 #include <fp16.h>
 
+#include <xnnpack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 class VBinaryMicrokernelTester {
