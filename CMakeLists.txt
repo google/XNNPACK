@@ -228,6 +228,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/prelu.c
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
+  src/subgraph/space-to-depth-2d.c
   src/subgraph/square-root.c
   src/subgraph/square.c
   src/subgraph/squared-difference.c
@@ -8158,6 +8159,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(softmax-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(softmax-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME softmax-test COMMAND softmax-test)
+
+    ADD_EXECUTABLE(space-to-depth-2d-test test/space-to-depth-2d.cc)
+    TARGET_INCLUDE_DIRECTORIES(space-to-depth-2d-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(space-to-depth-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME space-to-depth-2d-test COMMAND space-to-depth-2d-test)
 
     ADD_EXECUTABLE(square-test test/square.cc)
     TARGET_INCLUDE_DIRECTORIES(square-test PRIVATE src test)

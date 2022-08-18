@@ -20,13 +20,13 @@
 
 #include <gtest/gtest.h>
 
-template <typename InputType, typename OutputType = InputType, size_t min_dim = 0> class UnaryTest : public ::testing::Test {
+template <typename InputType, typename OutputType = InputType, size_t min_dim = 0, size_t max_dim = XNN_MAX_TENSOR_DIMS> class UnaryTest : public ::testing::Test {
 protected:
   UnaryTest()
   {
     random_device = std::unique_ptr<std::random_device>(new std::random_device());
     rng = std::mt19937((*random_device)());
-    shape_dist = std::uniform_int_distribution<size_t>(min_dim, XNN_MAX_TENSOR_DIMS);
+    shape_dist = std::uniform_int_distribution<size_t>(min_dim, max_dim);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
     i8dist =
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
@@ -36,6 +36,10 @@ protected:
     scale_dist = std::uniform_real_distribution<float>(0.1f, 10.0f);
     f32dist = std::uniform_real_distribution<float>(0.01f, 1.0f);
     dims = RandomShape();
+    AllocateInputsAndOutputs();
+  };
+
+  void AllocateInputsAndOutputs() {
     channels = dims.empty() ? 1 : dims.back();
     xnn_shape shape = {
       .num_dims = dims.size(),
