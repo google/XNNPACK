@@ -15,12 +15,14 @@
 #include <benchmark/benchmark.h>
 #include "bench/dconv.h"
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/conv.h>
-#include <xnnpack/pack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
+#include <xnnpack/pack.h>
 
 
 static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,

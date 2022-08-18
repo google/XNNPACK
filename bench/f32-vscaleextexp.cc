@@ -6,14 +6,15 @@
 #include <random>
 #include <vector>
 
+#include <benchmark/benchmark.h>
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/raddextexp.h>
 #include <xnnpack/vscaleextexp.h>
-
-#include <benchmark/benchmark.h>
 
 
 static void f32_vscaleextexp(

@@ -11,9 +11,11 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/raddexpminusmax.h>
 #include <xnnpack/rmax.h>
 

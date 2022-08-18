@@ -13,10 +13,11 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
-#include <xnnpack/params.h>
 #include <xnnpack/lut.h>
+#include <xnnpack/microfnptr.h>
 
 
 static void x8_lut(

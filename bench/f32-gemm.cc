@@ -21,19 +21,18 @@
 #endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/packx.h>
-#include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 #include <xnnpack/ppmm.h>
-
-// These benchmarks crash on Pixel 6 and Samsung S22
-#undef INCLUDE_BROKEN_BENCHMARKS
 
 
 static void GEMMBenchmark(benchmark::State& state,

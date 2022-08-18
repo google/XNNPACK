@@ -13,13 +13,14 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
-
 #include "bench/end2end.h"
 #include "bench/utils.h"
 #include "models/models.h"
+
+#include <xnnpack.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 
 

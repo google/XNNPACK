@@ -14,6 +14,7 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
+
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math-stubs.h>

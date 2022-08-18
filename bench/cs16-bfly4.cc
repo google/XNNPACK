@@ -3,10 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/params.h>
-#include <xnnpack/fft.h>
 
 #include <algorithm>
 #include <cmath>
@@ -16,6 +12,13 @@
 
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
+
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/fft.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 
 
 void bfly4(

@@ -13,14 +13,16 @@
 #include <benchmark/benchmark.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/im2col.h>
 #include <xnnpack/math.h>
-#include <xnnpack/pack.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
+#include <xnnpack/pack.h>
 
 
 static void Im2ColGEMMBenchmark(benchmark::State& state,

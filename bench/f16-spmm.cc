@@ -16,10 +16,12 @@
 #include <fp16/fp16.h>
 #include "bench/spmm.h"
 #include "bench/utils.h"
+
+#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 #include <xnnpack/spmm.h>
 
 

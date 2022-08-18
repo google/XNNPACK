@@ -3,11 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/params.h>
-#include <xnnpack/vsquareabs.h>
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -16,6 +11,14 @@
 
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
+
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
+#include <xnnpack/vsquareabs.h>
+
 
 void vsquareabs(
     benchmark::State& state,

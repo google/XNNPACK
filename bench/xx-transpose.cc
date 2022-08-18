@@ -3,19 +3,21 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/aligned-allocator.h>
-#include <xnnpack/common.h>
-#include <xnnpack/params.h>
-#include <xnnpack/transpose.h>
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <numeric>
 #include <vector>
 
-#include "bench/utils.h"
 #include <benchmark/benchmark.h>
+#include "bench/utils.h"
+
+#include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/transpose.h>
+
 
 void transpose(
     benchmark::State& state,
