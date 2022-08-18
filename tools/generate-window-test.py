@@ -27,13 +27,16 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_s16_window_ukernel__(.+)_x(\d+)", name)
-  assert match is not None
+  shift = 0;
   row_tile = 1
-  batch_tile = int(match.group(2))
+  match = re.fullmatch(r"xnn_s16_window(_shift(\d+))?_ukernel__(.+)_x(\d+)", name)
+  assert match is not None
+  if match.group(2):
+    shift = int(match.group(2))
+  batch_tile = int(match.group(4))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
-  return row_tile, batch_tile, arch, isa
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  return shift, row_tile, batch_tile, arch, isa
 
 
 WINDOW_TEST_TEMPLATE = """\
@@ -41,7 +44,9 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   WindowMicrokernelTester()
+    .rows(1)
     .batch(${BATCH_TILE})
+    .shift(${SHIFT})
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -52,6 +57,7 @@ $if BATCH_TILE > 1:
     for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
       WindowMicrokernelTester()
         .batch(batch)
+        .shift(${SHIFT})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -62,6 +68,7 @@ $if BATCH_TILE > 1:
     for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
       WindowMicrokernelTester()
         .batch(batch)
+        .shift(${SHIFT})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -72,6 +79,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
     WindowMicrokernelTester()
       .batch(batch)
+      .shift(${SHIFT})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -85,6 +93,7 @@ $if ROW_TILE > 1:
         WindowMicrokernelTester()
           .rows(rows)
           .batch(batch)
+          .shift(${SHIFT})
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -98,6 +107,7 @@ $if ROW_TILE > 1:
         WindowMicrokernelTester()
           .rows(rows)
           .batch(batch)
+          .shift(${SHIFT})
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -111,6 +121,7 @@ TEST(${TEST_NAME}, rows_gt_${ROW_TILE}) {
       WindowMicrokernelTester()
         .rows(rows)
         .batch(batch)
+        .shift(${SHIFT})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -124,6 +135,7 @@ TEST(${TEST_NAME}, inplace) {
       WindowMicrokernelTester()
         .rows(rows)
         .batch(batch)
+        .shift(${SHIFT})
         .inplace(true)
         .iterations(1)
         .Test(${", ".join(TEST_ARGS)});
@@ -131,26 +143,28 @@ TEST(${TEST_NAME}, inplace) {
   }
 }
 
-TEST(${TEST_NAME}, shift) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (uint32_t shift = 0; shift < 32; shift++) {
-    WindowMicrokernelTester()
-      .rows(${ROW_TILE})
-      .batch(${BATCH_TILE})
-      .shift(shift)
-      .Test(${", ".join(TEST_ARGS)});
+$if SHIFT == 0:
+  TEST(${TEST_NAME}, shift) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (uint32_t shift = 0; shift < 32; shift++) {
+      WindowMicrokernelTester()
+        .rows(${ROW_TILE})
+        .batch(${BATCH_TILE})
+        .shift(shift)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
-}
 
 """
 
 
-def generate_test_cases(ukernel, row_tile, batch_tile, isa):
+def generate_test_cases(ukernel, shift, row_tile, batch_tile, isa):
   """Generates all tests cases for a Window micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    shift: Shift by constant value.
     row_tile: Number of rows (pixels) processed per one iteration of the outer
               loop of the micro-kernel.
     batch_tile: Number of batch processed per one iteration of the inner
@@ -167,6 +181,7 @@ def generate_test_cases(ukernel, row_tile, batch_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
+      "SHIFT": shift,
       "ROW_TILE": row_tile,
       "BATCH_TILE": batch_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
@@ -204,12 +219,12 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      row_tile, batch_tile, arch, isa = split_ukernel_name(name)
+      shift, row_tile, batch_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, row_tile, batch_tile, isa)
+      test_case = generate_test_cases(name, shift, row_tile, batch_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

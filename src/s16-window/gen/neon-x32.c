@@ -97,7 +97,6 @@ void xnn_s16_window_ukernel__neon_x32(
       int32x4_t vacc = vmull_s16(vget_low_s16(vi), vget_low_s16(vw));
       vacc = vshlq_s32(vacc, vshift);
       int16x4_t vout = vqmovn_s32(vacc);
-
       if (n & (4 * sizeof(int16_t))) {
         vst1_s16(output, vout); output += 4;
         vacc = vmull_s16(vget_high_s16(vi), vget_high_s16(vw));
