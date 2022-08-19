@@ -79,7 +79,7 @@ class VLogMicrokernelTester {
     auto i32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
     std::vector<uint32_t> x(batch() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint16_t> y(batch() + (inplace() ? sizeof(uint32_t) / sizeof(uint16_t) + XNN_EXTRA_BYTES / sizeof(uint32_t) : 0));
+    std::vector<uint16_t> y(batch() * (inplace() ? sizeof(uint32_t) / sizeof(uint16_t) : 1) + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint16_t> y_ref(batch());
     const uint32_t* x_data = inplace() ? reinterpret_cast<const uint32_t*>(y.data()) : x.data();
 
