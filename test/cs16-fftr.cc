@@ -23,6 +23,12 @@ TEST(CS16_FFTR__SCALAR_X1, samples_eq_256) {
     .Test(xnn_cs16_fftr_ukernel__scalar_x1);
 }
 
+TEST(CS16_FFTR__SCALAR_X1, inplace) {
+  FftrMicrokernelTester()
+    .samples(256)
+    .inplace(true)
+    .Test(xnn_cs16_fftr_ukernel__scalar_x1);
+}
 
 TEST(CS16_FFTR__SCALAR_X2, samples_eq_256) {
   FftrMicrokernelTester()
@@ -30,6 +36,12 @@ TEST(CS16_FFTR__SCALAR_X2, samples_eq_256) {
     .Test(xnn_cs16_fftr_ukernel__scalar_x2);
 }
 
+TEST(CS16_FFTR__SCALAR_X2, inplace) {
+  FftrMicrokernelTester()
+    .samples(256)
+    .inplace(true)
+    .Test(xnn_cs16_fftr_ukernel__scalar_x2);
+}
 
 TEST(CS16_FFTR__SCALAR_X3, samples_eq_256) {
   FftrMicrokernelTester()
@@ -37,9 +49,22 @@ TEST(CS16_FFTR__SCALAR_X3, samples_eq_256) {
     .Test(xnn_cs16_fftr_ukernel__scalar_x3);
 }
 
+TEST(CS16_FFTR__SCALAR_X3, inplace) {
+  FftrMicrokernelTester()
+    .samples(256)
+    .inplace(true)
+    .Test(xnn_cs16_fftr_ukernel__scalar_x3);
+}
 
 TEST(CS16_FFTR__SCALAR_X4, samples_eq_256) {
   FftrMicrokernelTester()
     .samples(256)
+    .Test(xnn_cs16_fftr_ukernel__scalar_x4);
+}
+
+TEST(CS16_FFTR__SCALAR_X4, inplace) {
+  FftrMicrokernelTester()
+    .samples(256)
+    .inplace(true)
     .Test(xnn_cs16_fftr_ukernel__scalar_x4);
 }

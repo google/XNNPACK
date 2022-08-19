@@ -96,6 +96,15 @@ class FftrMicrokernelTester {
     return this->samples_;
   }
 
+  inline FftrMicrokernelTester& inplace(bool inplace) {
+    this->inplace_ = inplace;
+    return *this;
+  }
+
+  inline bool inplace() const {
+    return this->inplace_;
+  }
+
   inline FftrMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -112,21 +121,22 @@ class FftrMicrokernelTester {
     const size_t sample_size = samples() * 2 + 2;
 
     std::vector<int16_t> x(sample_size + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y(sample_size);
+    std::vector<int16_t> twiddle(samples() + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> y(sample_size + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
     std::vector<int16_t> y_ref(sample_size);
-    std::vector<int16_t> twiddle(samples());
+    const int16_t* x_data = inplace() ? y.data() : x.data();
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(i16rng));
+      std::generate(twiddle.begin(), twiddle.end(), std::ref(i16rng));
       std::generate(y.begin(), y.end(), std::ref(i16rng));
       std::generate(y_ref.begin(), y_ref.end(), std::ref(i16rng));
-      std::generate(twiddle.begin(), twiddle.end(), std::ref(i16rng));
 
       // Compute reference results.
-      xnn_cs16_fftr_reference(samples(), x.data(), y_ref.data(), twiddle.data());
+      xnn_cs16_fftr_reference(samples(), x_data, y_ref.data(), twiddle.data());
 
       // Call optimized micro-kernel.
-      fftr(samples(), x.data(), y.data(), twiddle.data());
+      fftr(samples(), x_data, y.data(), twiddle.data());
 
       // Verify results.
       for (size_t n = 0; n < sample_size; n++) {
@@ -138,5 +148,6 @@ class FftrMicrokernelTester {
 
  private:
   size_t samples_{256};
+  bool inplace_{false};
   size_t iterations_{15};
 };

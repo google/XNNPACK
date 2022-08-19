@@ -54,6 +54,15 @@ class VLogMicrokernelTester {
     return this->output_scale_;
   }
 
+  inline VLogMicrokernelTester& inplace(bool inplace) {
+    this->inplace_ = inplace;
+    return *this;
+  }
+
+  inline bool inplace() const {
+    return this->inplace_;
+  }
+
   inline VLogMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -66,30 +75,31 @@ class VLogMicrokernelTester {
   void Test(xnn_u32_vlog_ukernel_function vlog) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
+    auto i16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
     auto i32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
     std::vector<uint32_t> x(batch() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint16_t> y(batch());
+    std::vector<uint16_t> y(batch() + (inplace() ? sizeof(uint32_t) / sizeof(uint16_t) + XNN_EXTRA_BYTES / sizeof(uint32_t) : 0));
     std::vector<uint16_t> y_ref(batch());
+    const uint32_t* x_data = inplace() ? reinterpret_cast<const uint32_t*>(y.data()) : x.data();
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(i32rng));
-      std::fill(y.begin(), y.end(), uint16_t(0x1234));
-      std::fill(y_ref.begin(), y_ref.end(), uint16_t(0x5678));
+      std::generate(y.begin(), y.end(), std::ref(i16rng));
+      std::generate(y_ref.begin(), y_ref.end(), std::ref(i16rng));
 
       // Compute reference results.
       for (size_t n = 0; n < batch(); n++) {
-        const uint32_t x_value = x[n];
+        const uint32_t x_value = x_data[n];
         const uint32_t scaled = x_value << input_lshift();
         uint32_t log_value = 0;
         if (scaled != 0) {
           const uint32_t out_scale = output_scale();
-          uint32_t x = scaled;
 
           const int log_scale = 65536;
           const int log_scale_log2 = 16;
           const int log_coeff = 45426;
-          const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;  // log2 of x
+          const uint32_t log2x = math_clz_nonzero_u32(scaled) ^ 31;  // log2 of scaled
           assert(log2x < 32);
 
           // Number of segments in the log lookup table. The table will be log_segments+1
@@ -97,7 +107,7 @@ class VLogMicrokernelTester {
           const int log_segments_log2 = 7;
 
           // Part 1
-          uint32_t frac = x - (UINT32_C(1) << log2x);
+          uint32_t frac = scaled - (UINT32_C(1) << log2x);
 
           // Shift the fractional part into msb of 16 bits
           frac =  XNN_UNPREDICTABLE(log2x < log_scale_log2) ?
@@ -130,7 +140,7 @@ class VLogMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vlog(batch(), x.data(), input_lshift(), output_scale(), y.data());
+      vlog(batch(), x_data, input_lshift(), output_scale(), y.data());
 
       // Verify results.
       for (size_t n = 0; n < batch(); n++) {
@@ -146,5 +156,6 @@ class VLogMicrokernelTester {
   size_t batch_{1};
   uint32_t input_lshift_{4};
   uint32_t output_scale_{16};
+  bool inplace_{false};
   size_t iterations_{15};
 };

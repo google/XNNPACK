@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -45,6 +45,15 @@ TEST(U32_VLOG__SCALAR_X1, output_scale) {
     VLogMicrokernelTester()
       .batch(1)
       .output_scale(output_scale)
+      .Test(xnn_u32_vlog_ukernel__scalar_x1);
+  }
+}
+
+TEST(U32_VLOG__SCALAR_X1, inplace) {
+  for (size_t batch = 2; batch < 10; batch++) {
+    VLogMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
       .Test(xnn_u32_vlog_ukernel__scalar_x1);
   }
 }
@@ -98,6 +107,15 @@ TEST(U32_VLOG__SCALAR_X2, output_scale) {
   }
 }
 
+TEST(U32_VLOG__SCALAR_X2, inplace) {
+  for (size_t batch = 3; batch < 4; batch++) {
+    VLogMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
+      .Test(xnn_u32_vlog_ukernel__scalar_x2);
+  }
+}
+
 
 TEST(U32_VLOG__SCALAR_X3, batch_eq_3) {
   VLogMicrokernelTester()
@@ -147,6 +165,15 @@ TEST(U32_VLOG__SCALAR_X3, output_scale) {
   }
 }
 
+TEST(U32_VLOG__SCALAR_X3, inplace) {
+  for (size_t batch = 4; batch < 6; batch++) {
+    VLogMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
+      .Test(xnn_u32_vlog_ukernel__scalar_x3);
+  }
+}
+
 
 TEST(U32_VLOG__SCALAR_X4, batch_eq_4) {
   VLogMicrokernelTester()
@@ -192,6 +219,15 @@ TEST(U32_VLOG__SCALAR_X4, output_scale) {
     VLogMicrokernelTester()
       .batch(4)
       .output_scale(output_scale)
+      .Test(xnn_u32_vlog_ukernel__scalar_x4);
+  }
+}
+
+TEST(U32_VLOG__SCALAR_X4, inplace) {
+  for (size_t batch = 5; batch < 8; batch++) {
+    VLogMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
       .Test(xnn_u32_vlog_ukernel__scalar_x4);
   }
 }

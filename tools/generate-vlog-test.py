@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -97,6 +97,17 @@ TEST(${TEST_NAME}, output_scale) {
   }
 }
 
+TEST(${TEST_NAME}, inplace) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
+    VLogMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
 """
 
 
@@ -134,7 +145,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.

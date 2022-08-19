@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -43,6 +43,15 @@ TEST(U32_FILTERBANK_SUBTRACT__SCALAR_X2, batch_gt_2) {
   for (size_t batch = 4; batch < 4; batch += 2) {
     FilterbankSubtractMicrokernelTester()
       .batch(batch)
+      .Test(xnn_u32_filterbank_subtract_ukernel__scalar_x2);
+  }
+}
+
+TEST(U32_FILTERBANK_SUBTRACT__SCALAR_X2, inplace) {
+  for (size_t batch = 4; batch < 4; batch += 2) {
+    FilterbankSubtractMicrokernelTester()
+      .batch(batch)
+      .inplace(true)
       .Test(xnn_u32_filterbank_subtract_ukernel__scalar_x2);
   }
 }

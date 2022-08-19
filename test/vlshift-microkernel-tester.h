@@ -65,13 +65,14 @@ class VLShiftMicrokernelTester {
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> x(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> y(batch() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
     std::vector<int16_t> y_ref(batch());
     const int16_t* x_data = inplace() ? y.data() : x.data();
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(i16rng));
-      std::fill(y.begin(), y.end(), INT32_C(0x12345678));
+      std::generate(y.begin(), y.end(), std::ref(i16rng));
+      std::generate(y_ref.begin(), y_ref.end(), std::ref(i16rng));
 
       // Compute reference results.
       for (size_t n = 0; n < batch(); n++) {

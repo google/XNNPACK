@@ -44,6 +44,14 @@ TEST(${TEST_NAME}, samples_eq_256) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
+TEST(${TEST_NAME}, inplace) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  FftrMicrokernelTester()
+    .samples(256)
+    .inplace(true)
+    .Test(${", ".join(TEST_ARGS)});
+}
 """
 
 
