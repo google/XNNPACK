@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  shift = 0;
+  shift = 0
   row_tile = 1
   match = re.fullmatch(r"xnn_s16_window(_shift(\d+))?_ukernel__(.+)_x(\d+)", name)
   assert match is not None

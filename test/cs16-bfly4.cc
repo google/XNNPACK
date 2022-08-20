@@ -131,3 +131,11 @@ TEST(CS16_BFLY4__SCALAR_X4, samples_eq_64) {
     .stride(1)
     .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
 }
+
+
+TEST(CS16_BFLY4M1__SCALAR_X1, samples_eq_1) {
+  BFly4MicrokernelTester()
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4m1_ukernel__scalar_x1);
+}

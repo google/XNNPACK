@@ -9,3 +9,4 @@
 - name: xnn_cs16_bfly4_ukernel__scalar_x2
 - name: xnn_cs16_bfly4_ukernel__scalar_x3
 - name: xnn_cs16_bfly4_ukernel__scalar_x4
+- name: xnn_cs16_bfly4m1_ukernel__scalar_x1

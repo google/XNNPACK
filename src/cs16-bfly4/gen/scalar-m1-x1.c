@@ -15,21 +15,18 @@
 #include <xnnpack/fft.h>
 
 
-void xnn_cs16_bfly4_ukernel__scalar_x1(
+void xnn_cs16_bfly4m1_ukernel__scalar_x1(
     size_t samples,
     int16_t* data,
     const size_t stride,
     const int16_t* twiddle) {
 
-  const int16_t* tw1 = twiddle;
-  const int16_t* tw2 = tw1;
-  const int16_t* tw3 = tw1;
   int16_t* out0 = data;
   int16_t* out1 = data + samples * 2;
   int16_t* out2 = data + samples * 4;
   int16_t* out3 = data + samples * 6;
 
-  assert(samples != 0);
+  assert(samples == 1);
   assert(data != NULL);
   assert(stride != 0);
   assert(twiddle != NULL);
@@ -46,15 +43,6 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
       int32_t vout3r = (int32_t) out3[0];
       int32_t vout3i = (int32_t) out3[1];
 
-      const int32_t vtw1r = (const int32_t) tw1[0];
-      const int32_t vtw1i = (const int32_t) tw1[1];
-      const int32_t vtw2r = (const int32_t) tw2[0];
-      const int32_t vtw2i = (const int32_t) tw2[1];
-      const int32_t vtw3r = (const int32_t) tw3[0];
-      const int32_t vtw3i = (const int32_t) tw3[1];
-      tw1 += stride * 2;
-      tw2 += stride * 4;
-      tw3 += stride * 6;
 
       // Note 32767 / 4 = 8191.  Should be 8192.
       vout0r = math_asr_s32(vout0r * 8191 + 16384, 15);
@@ -66,12 +54,12 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
       vout3r = math_asr_s32(vout3r * 8191 + 16384, 15);
       vout3i = math_asr_s32(vout3i * 8191 + 16384, 15);
 
-      const int32_t vtmp0r = math_asr_s32(vout1r * vtw1r - vout1i * vtw1i + 16384, 15);
-      const int32_t vtmp0i = math_asr_s32(vout1r * vtw1i + vout1i * vtw1r + 16384, 15);
-      const int32_t vtmp1r = math_asr_s32(vout2r * vtw2r - vout2i * vtw2i + 16384, 15);
-      const int32_t vtmp1i = math_asr_s32(vout2r * vtw2i + vout2i * vtw2r + 16384, 15);
-      const int32_t vtmp2r = math_asr_s32(vout3r * vtw3r - vout3i * vtw3i + 16384, 15);
-      const int32_t vtmp2i = math_asr_s32(vout3r * vtw3i + vout3i * vtw3r + 16384, 15);
+      const int32_t vtmp0r = math_asr_s32(vout1r * 32767 + 16384, 15);
+      const int32_t vtmp0i = math_asr_s32(vout1i * 32767 + 16384, 15);
+      const int32_t vtmp1r = math_asr_s32(vout2r * 32767 + 16384, 15);
+      const int32_t vtmp1i = math_asr_s32(vout2i * 32767 + 16384, 15);
+      const int32_t vtmp2r = math_asr_s32(vout3r * 32767 + 16384, 15);
+      const int32_t vtmp2i = math_asr_s32(vout3i * 32767 + 16384, 15);
 
       const int32_t vtmp5r = vout0r - vtmp1r;
       const int32_t vtmp5i = vout0i - vtmp1i;

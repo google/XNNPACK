@@ -27,12 +27,15 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_cs16_bfly4_ukernel__(.+)_x(\d+)", name)
+  m = 0
+  match = re.fullmatch(r"xnn_cs16_bfly4(m(\d+))?_ukernel__(.+)_x(\d+)", name)
   assert match is not None
-  samples_tile = int(match.group(2))
+  if match.group(2):
+    m = int(match.group(2))
+  samples_tile = int(match.group(4))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
-  return samples_tile, arch, isa
+  arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
+  return m, samples_tile, arch, isa
 
 
 BFLY4_TEST_TEMPLATE = """\
@@ -45,41 +48,43 @@ TEST(${TEST_NAME}, samples_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, samples_eq_4) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  BFly4MicrokernelTester()
-    .samples(4)
-    .stride(16)
-    .Test(${", ".join(TEST_ARGS)});
-}
+$if M == 0:
+  TEST(${TEST_NAME}, samples_eq_4) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    BFly4MicrokernelTester()
+      .samples(4)
+      .stride(16)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 
-TEST(${TEST_NAME}, samples_eq_16) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  BFly4MicrokernelTester()
-    .samples(16)
-    .stride(4)
-    .Test(${", ".join(TEST_ARGS)});
-}
+  TEST(${TEST_NAME}, samples_eq_16) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    BFly4MicrokernelTester()
+      .samples(16)
+      .stride(4)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 
-TEST(${TEST_NAME}, samples_eq_64) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  BFly4MicrokernelTester()
-    .samples(64)
-    .stride(1)
-    .Test(${", ".join(TEST_ARGS)});
-}
+  TEST(${TEST_NAME}, samples_eq_64) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    BFly4MicrokernelTester()
+      .samples(64)
+      .stride(1)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 
 """
 
 
-def generate_test_cases(ukernel, samples_tile, isa):
+def generate_test_cases(ukernel, m, samples_tile, isa):
   """Generates all tests cases for a BFly4 micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
+    m: fixed number of samples for specialized m1 microkernel.
     samples_tile: Number of samples processed per one iteration of the inner
                   loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -94,6 +99,7 @@ def generate_test_cases(ukernel, samples_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
+      "M": m,
       "SAMPLE_TILE": samples_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
@@ -130,12 +136,12 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      samples_tile, arch, isa = split_ukernel_name(name)
+      m, samples_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, samples_tile, isa)
+      test_case = generate_test_cases(name, m, samples_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

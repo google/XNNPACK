@@ -14,6 +14,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/fft.h>
 
+
 void xnn_cs16_bfly4_ukernel__scalar_x3(
     size_t samples,
     int16_t* data,
@@ -29,9 +30,9 @@ void xnn_cs16_bfly4_ukernel__scalar_x3(
   int16_t* out3 = data + samples * 6;
 
   assert(samples != 0);
+  assert(data != NULL);
   assert(stride != 0);
   assert(twiddle != NULL);
-  assert(data != NULL);
 
   for (; samples >= 3; samples -= 3) {
     int32_t vout0r0 = (int32_t) out0[0];
