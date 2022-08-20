@@ -24,15 +24,15 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__neon_mla8_ld128(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
-  const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
+  const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neon.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neon.output_max);
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);

@@ -1277,7 +1277,7 @@ DECLARE_QS8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_igemm_minmax_fp32_ukernel_4x4_
       size_t cn_stride,                                    \
       size_t a_offset,                                     \
       const int8_t* zero,                                  \
-      const union xnn_qs8_minmax_params* params);
+      const union xnn_qc8_conv_minmax_params* params);
 
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane)
 DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_1x8__neon_mlal_lane_prfm)

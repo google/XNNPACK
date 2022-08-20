@@ -958,13 +958,13 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
 
-  union xnn_qs8_minmax_params gemm_params;
+  union xnn_qc8_conv_minmax_params gemm_params;
   if XNN_LIKELY(xnn_params.qc8.gemm.init.qc8 != NULL) {
     xnn_params.qc8.gemm.init.qc8(&gemm_params,
       output_zero_point, output_min, output_max);
   }
 
-  union xnn_qs8_minmax_params dwconv_params;
+  union xnn_qc8_conv_minmax_params dwconv_params;
   const struct dwconv_parameters* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qc8.dwconv, XNN_MAX_QC8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {

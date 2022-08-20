@@ -17,8 +17,8 @@ $if CHANNEL_TILE % 4 != 0:
   #include <xnnpack/unaligned.h>
 
 
-$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + "scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"

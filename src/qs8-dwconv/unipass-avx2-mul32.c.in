@@ -17,8 +17,8 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/unaligned.h>
 
 
-$PARAMS_STRUCT = "avx2" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_avx2"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $_MM256_CVTEPX8_EPI32 = "_mm256_cvtepu8_epi32" if DATATYPE == "QU8" else "_mm256_cvtepi8_epi32"
 $_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"

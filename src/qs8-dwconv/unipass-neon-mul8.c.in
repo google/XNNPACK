@@ -20,8 +20,8 @@ $if REQUANTIZATION == "FP32" and ARMV8:
   #include <xnnpack/intrinsics-polyfill.h>
 
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
-$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_") + ("neonv8" if ARMV8 else "neon")
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $ISA = "neonv8" if ARMV8 else "neon"
 void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_${"mla8" if MLA else "mul8"}_${LOAD_VARIANT.lower()}(
     size_t channels,

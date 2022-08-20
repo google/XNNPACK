@@ -274,7 +274,7 @@ class DWConvMicrokernelTester {
 
   void Test(
     xnn_qc8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
-    xnn_init_qs8_minmax_params_fn init_params,
+    xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -357,7 +357,7 @@ class DWConvMicrokernelTester {
         (void*) ((uintptr_t) packed_weights.data() + cr() * (kr() * sizeof(int8_t) + sizeof(int32_t))));
 
       // Prepare parameters.
-      union xnn_qs8_minmax_params minmax_params;
+      union xnn_qc8_conv_minmax_params minmax_params;
       init_params(&minmax_params,
         output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 

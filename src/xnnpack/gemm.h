@@ -1603,7 +1603,7 @@ DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_fp32_ukernel_4x4__s
       int8_t* c,                                          \
       size_t cm_stride,                                   \
       size_t cn_stride,                                   \
-      const union xnn_qs8_minmax_params* params);
+      const union xnn_qc8_conv_minmax_params* params);
 
 DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neon_mlal_lane)
 DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neon_mlal_lane_prfm)

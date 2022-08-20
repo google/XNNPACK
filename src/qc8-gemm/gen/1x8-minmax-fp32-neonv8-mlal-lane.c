@@ -26,7 +26,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neonv8_mlal_lane(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -164,7 +164,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neonv8_mlal_lane(
     vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
     vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
 #if XNN_ARCH_ARM64
     int16x8_t vacc0x01234567 = vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567);
 
@@ -179,10 +179,10 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8__neonv8_mlal_lane(
     int8x8_t vout0x01234567 = vqmovn_s16(vacc0x01234567);
 #endif
 
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neonv8.output_min);
+    const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neonv8.output_min);
     vout0x01234567 = vmax_s8(vout0x01234567, voutput_min);
 
-    const int8x8_t voutput_max = vld1_dup_s8(&params->neonv8.output_max);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neonv8.output_max);
     vout0x01234567 = vmin_s8(vout0x01234567, voutput_max);
 
     if (nc >= 8) {

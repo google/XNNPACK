@@ -27,7 +27,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -38,7 +38,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
-  const float vmagic_bias = params->armsimd32.magic_bias;
+  const float vmagic_bias = params->fp32_armsimd32.magic_bias;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -84,7 +84,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0);
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1);
 
-    const int32_t vmagic_bias_less_zero_point = params->armsimd32.magic_bias_less_zero_point;
+    const int32_t vmagic_bias_less_zero_point = params->fp32_armsimd32.magic_bias_less_zero_point;
     vout0x0 = __qsub(vout0x0, vmagic_bias_less_zero_point);
     vout0x1 = __qsub(vout0x1, vmagic_bias_less_zero_point);
 
@@ -95,11 +95,11 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(
 
     uint32_t vout = vout0;
 
-    const int8x4_t voutput_min = (int8x4_t) params->armsimd32.output_min;
+    const int8x4_t voutput_min = (int8x4_t) params->fp32_armsimd32.output_min;
     __ssub8((int8x4_t) vout, voutput_min);
     vout = (uint32_t) __sel((uint8x4_t) vout, (uint8x4_t) voutput_min);
 
-    const int8x4_t voutput_max = (int8x4_t) params->armsimd32.output_max;
+    const int8x4_t voutput_max = (int8x4_t) params->fp32_armsimd32.output_max;
     __ssub8((int8x4_t) vout, voutput_max);
     vout = (uint32_t) __sel((uint8x4_t) voutput_max, (uint8x4_t) vout);
 

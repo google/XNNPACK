@@ -27,7 +27,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -134,7 +134,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
     vfpacc3x1 *= vscale1;
     w = (const void*) ((const float*) w + 2);
 
-    const float voutput_min_less_zero_point = params->scalar_lrintf.output_min_less_zero_point;
+    const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
     vfpacc0x0 = math_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = math_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc1x0 = math_max_f32(vfpacc1x0, voutput_min_less_zero_point);
@@ -144,7 +144,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
     vfpacc3x0 = math_max_f32(vfpacc3x0, voutput_min_less_zero_point);
     vfpacc3x1 = math_max_f32(vfpacc3x1, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->scalar_lrintf.output_max_less_zero_point;
+    const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc1x0 = math_min_f32(vfpacc1x0, voutput_max_less_zero_point);
@@ -163,7 +163,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x2__scalar_lrintf(
     const int32_t vrndacc3x0 = (int32_t) lrintf(vfpacc3x0);
     const int32_t vrndacc3x1 = (int32_t) lrintf(vfpacc3x1);
 
-    const int32_t voutput_zero_point = params->scalar_lrintf.output_zero_point;
+    const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
     int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
     int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;
     int32_t vout1x0 = vrndacc1x0 + voutput_zero_point;

@@ -26,7 +26,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -42,9 +42,9 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   int8_t* c0 = c;
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
+  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_zero_point);
+  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
     __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 4));

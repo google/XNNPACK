@@ -19,8 +19,8 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$PARAMS_STRUCT = ("" if CHANNELWISE else REQUANTIZATION.lower() + "_") + ("neonv8" if ARMV8 and REQUANTIZATION == "FP32" else "neon")
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $ISA = "neonv8" if ARMV8 else "neon"
 void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}_${"mlal" if MLA else "mull"}(
     size_t mr,

@@ -25,7 +25,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);
@@ -168,7 +168,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic(
     vfpacc3x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float vmagic_bias = params->scalar_imagic.magic_bias;
+    const float vmagic_bias = params->fp32_scalar_imagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -203,7 +203,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic(
     int32_t vout3x2 = (int32_t) float_as_uint32(vfpacc3x2);
     int32_t vout3x3 = (int32_t) float_as_uint32(vfpacc3x3);
 
-    const int32_t vmagic_min = params->scalar_imagic.magic_min;
+    const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
     vout0x0 = math_max_s32(vout0x0, vmagic_min);
     vout0x1 = math_max_s32(vout0x1, vmagic_min);
     vout0x2 = math_max_s32(vout0x2, vmagic_min);
@@ -221,7 +221,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic(
     vout3x2 = math_max_s32(vout3x2, vmagic_min);
     vout3x3 = math_max_s32(vout3x3, vmagic_min);
 
-    const int32_t vmagic_max = params->scalar_imagic.magic_max;
+    const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
     vout0x0 = math_min_s32(vout0x0, vmagic_max);
     vout0x1 = math_min_s32(vout0x1, vmagic_max);
     vout0x2 = math_min_s32(vout0x2, vmagic_max);
@@ -239,7 +239,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_imagic(
     vout3x2 = math_min_s32(vout3x2, vmagic_max);
     vout3x3 = math_min_s32(vout3x3, vmagic_max);
 
-    const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
+    const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
     vout0x0 -= vmagic_bias_less_zero_point;
     vout0x1 -= vmagic_bias_less_zero_point;
     vout0x2 -= vmagic_bias_less_zero_point;

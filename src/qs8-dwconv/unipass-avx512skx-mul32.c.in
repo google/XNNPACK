@@ -17,8 +17,8 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-$PARAMS_STRUCT = "avx512" if DATATYPE == "QC8" else REQUANTIZATION.lower() + "_avx512"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $_MM512_CVTEPX8_EPI32 = "_mm512_cvtepu8_epi32" if DATATYPE == "QU8" else "_mm512_cvtepi8_epi32"
 $_MM256_PACKXS_EPI16 = "_mm256_packus_epi16" if DATATYPE == "QU8" else "_mm256_packs_epi16"

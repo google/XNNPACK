@@ -166,7 +166,7 @@ struct gemm_parameters {
   struct gemm_codegens generator;
 #endif  // XNN_PLATFORM_JIT
   union {
-    xnn_init_qs8_minmax_params_fn qc8;
+    xnn_init_qc8_conv_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_minmax_params_fn f16;
@@ -287,7 +287,7 @@ struct dwconv_parameters {
   union dwconv_fused_ukernels minmax;
   union dwconv_fused_ukernels linear;
   union {
-    xnn_init_qs8_minmax_params_fn qc8;
+    xnn_init_qc8_conv_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_minmax_params_fn f16;

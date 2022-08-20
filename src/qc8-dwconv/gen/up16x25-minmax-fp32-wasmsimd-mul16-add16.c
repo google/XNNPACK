@@ -24,7 +24,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16_add16(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -487,19 +487,19 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16_add16(
       vacc89AB = wasm_f32x4_mul(vacc89AB, vscale89AB);
       vaccCDEF = wasm_f32x4_mul(vaccCDEF, vscaleCDEF);
 
-      const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd.magic_bias);
+      const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
       vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
       vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
       vacc89AB = wasm_f32x4_add(vacc89AB, vmagic_bias);
       vaccCDEF = wasm_f32x4_add(vaccCDEF, vmagic_bias);
 
-      const v128_t vmagic_min = wasm_v128_load64_splat(params->wasmsimd.magic_min);
+      const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
       vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
       vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
       vacc89AB = wasm_i32x4_max(vacc89AB, vmagic_min);
       vaccCDEF = wasm_i32x4_max(vaccCDEF, vmagic_min);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->wasmsimd.magic_bias_less_output_zero_point);
+      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
       vacc89AB = wasm_i32x4_sub(vacc89AB, vmagic_bias_less_output_zero_point);
@@ -510,7 +510,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16_add16(
 
       v128_t vout0123456789ABCDEF = wasm_i8x16_narrow_i16x8(vout01234567, vout89ABCDEF);
 
-      const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.output_max);
+      const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
       vout0123456789ABCDEF = wasm_i8x16_min(vout0123456789ABCDEF, voutput_max);
 
       wasm_v128_store(output, vout0123456789ABCDEF);
@@ -736,22 +736,22 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16_add16(
       vacc0123 = wasm_f32x4_mul(vacc0123, vscale0123);
       vacc4567 = wasm_f32x4_mul(vacc4567, vscale4567);
 
-      const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd.magic_bias);
+      const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
       vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
       vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
 
-      const v128_t vmagic_min = wasm_v128_load64_splat(params->wasmsimd.magic_min);
+      const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
       vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
       vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->wasmsimd.magic_bias_less_output_zero_point);
+      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
       v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
       v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
-      const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.output_max);
+      const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
       vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));

@@ -29,7 +29,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__avx2(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 2);
@@ -136,21 +136,21 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x8c8__avx2(
     vscaled0x01234567 = _mm256_mul_ps(vscaled0x01234567, vscale01234567);
     vscaled1x01234567 = _mm256_mul_ps(vscaled1x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
+    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
     vscaled1x01234567 = _mm256_min_ps(vscaled1x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vscaled0x01234567);
     vacc1x01234567 = _mm256_cvtps_epi32(vscaled1x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
+    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
 
     vacc01x01234567 = _mm256_permute4x64_epi64(vacc01x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packs_epi16(vacc01x01234567, vacc01x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->avx2.output_min));
+    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

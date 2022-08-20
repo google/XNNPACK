@@ -27,7 +27,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld64(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 2);
@@ -116,15 +116,15 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld64(
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vscale0123);
 
-    const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd.magic_bias);
+    const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);
     vacc1x0123 = wasm_f32x4_add(vacc1x0123, vmagic_bias);
 
-    const v128_t vmagic_min = wasm_v128_load64_splat(params->wasmsimd.magic_min);
+    const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
     vacc0x0123 = wasm_i32x4_max(vacc0x0123, vmagic_min);
     vacc1x0123 = wasm_i32x4_max(vacc1x0123, vmagic_min);
 
-    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->wasmsimd.magic_bias_less_output_zero_point);
+    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
     vacc0x0123 = wasm_i32x4_sub(vacc0x0123, vmagic_bias_less_output_zero_point);
     vacc1x0123 = wasm_i32x4_sub(vacc1x0123, vmagic_bias_less_output_zero_point);
 
@@ -132,7 +132,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld64(
 
     v128_t vout = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
 
-    const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.output_max);
+    const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
     vout = wasm_i8x16_min(vout, voutput_max);
 
     if (nc >= 4) {

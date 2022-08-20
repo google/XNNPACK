@@ -31,8 +31,8 @@ $else:
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$PARAMS_STRUCT = ("" if DATATYPE == "QC8" else "fp32_") + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
 void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2s4__${ISA}${LOAD_SUFFIX}(

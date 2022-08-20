@@ -18,8 +18,8 @@ $assert MR <= 4
 
 
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$PARAMS_STRUCT = "avx512" if DATATYPE == "QC8" else "fp32_avx512"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 void xnn_${DATATYPE.lower()}_igemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x16c8__avx512skx(
     size_t mr,

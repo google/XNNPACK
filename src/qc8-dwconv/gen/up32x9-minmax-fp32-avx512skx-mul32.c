@@ -25,14 +25,14 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_MSAN
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_MSAN
 {
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
-  const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->fp32_avx512.output_max_less_zero_point);
+  const __m512i voutput_zero_point = _mm512_load_si512(params->fp32_avx512.output_zero_point);
+  const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_min);
   const __m256i vpermute_mask = _mm256_set_epi32(7, 3, 5, 1, 6, 2, 4, 0);
 
   do {

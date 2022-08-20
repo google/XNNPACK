@@ -134,7 +134,7 @@ typedef void (*xnn_qc8_gemm_minmax_ukernel_function)(
     int8_t* c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params* params);
+    const union xnn_qc8_conv_minmax_params* params);
 
 typedef void (*xnn_qs8_gemm_minmax_ukernel_function)(
     size_t mr,
@@ -263,7 +263,7 @@ typedef void (*xnn_qc8_igemm_minmax_ukernel_function)(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params* params);
+    const union xnn_qc8_conv_minmax_params* params);
 
 typedef void (*xnn_qs8_igemm_minmax_ukernel_function)(
     size_t mr,
@@ -390,7 +390,7 @@ typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_function)(
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params* params);
+    const union xnn_qc8_conv_minmax_params* params);
 
 typedef void (*xnn_qs8_dwconv_minmax_unipass_ukernel_function)(
     size_t channels,
@@ -1801,8 +1801,8 @@ typedef size_t (*xnn_init_qu8_f32_cvt_params_fn)(
   float scale,
   uint8_t zero_point);
 
-typedef size_t (*xnn_init_qs8_minmax_params_fn)(
-  union xnn_qs8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef size_t (*xnn_init_qc8_conv_minmax_params_fn)(
+  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);

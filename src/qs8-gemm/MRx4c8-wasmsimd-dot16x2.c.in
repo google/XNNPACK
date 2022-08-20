@@ -17,8 +17,8 @@ $assert MR <= 4
 
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
-$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$PARAMS_STRUCT = "wasmsimd" if DATATYPE == "QC8" else "fp32_wasmsimd"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
+$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
 $WASM_X8X16_NARROW_I16X8 = "wasm_u8x16_narrow_i16x8" if DATATYPE == "QU8" else "wasm_i8x16_narrow_i16x8"

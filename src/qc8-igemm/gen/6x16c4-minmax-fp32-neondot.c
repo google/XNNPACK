@@ -28,7 +28,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_6x16c4__neondot(
     size_t cn_stride,
     size_t a_offset,
     const int8_t* zero,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 6);
@@ -316,7 +316,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_6x16c4__neondot(
     vacc5x89AB = vcvtnq_s32_f32(vfpacc5x89AB);
     vacc5xCDEF = vcvtnq_s32_f32(vfpacc5xCDEF);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
+    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
 #if XNN_ARCH_ARM64
     const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
     const int16x8_t vacc0x89ABCDEF = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x89AB), vacc0xCDEF), voutput_zero_point);
@@ -358,8 +358,8 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_6x16c4__neondot(
     int8x16_t vout4x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc4x01234567), vqmovn_s16(vacc4x89ABCDEF));
     int8x16_t vout5x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc5x01234567), vqmovn_s16(vacc5x89ABCDEF));
 #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->neonv8.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->neonv8.output_max);
+    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
+    const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neonv8.output_max);
 
     vout5x0123456789ABCDEF = vmaxq_s8(vout5x0123456789ABCDEF, voutput_min);
     vout4x0123456789ABCDEF = vmaxq_s8(vout4x0123456789ABCDEF, voutput_min);

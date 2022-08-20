@@ -25,7 +25,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal(
     int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -141,11 +141,11 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal(
     const float32x4_t vscale4567 = vld1q_f32(w); w = (const float*) w + 4;
     vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale4567);
 
-    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
+    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
     vacc0x0123 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x0123, vmagic_bias));
     vacc0x4567 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x4567, vmagic_bias));
 
-    const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_output_zero_point);
+    const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
     vacc0x0123 = vqsubq_s32(vacc0x0123, vmagic_bias_less_output_zero_point);
     vacc0x4567 = vqsubq_s32(vacc0x4567, vmagic_bias_less_output_zero_point);
 
@@ -161,10 +161,10 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neon_mlal(
     int8x8_t vout0x01234567 = vqmovn_s16(vacc0x01234567);
 #endif
 
-    const int8x8_t voutput_min = vld1_dup_s8(&params->neon.output_min);
+    const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neon.output_min);
     vout0x01234567 = vmax_s8(vout0x01234567, voutput_min);
 
-    const int8x8_t voutput_max = vld1_dup_s8(&params->neon.output_max);
+    const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neon.output_max);
     vout0x01234567 = vmin_s8(vout0x01234567, voutput_max);
 
     if (nc >= 8) {

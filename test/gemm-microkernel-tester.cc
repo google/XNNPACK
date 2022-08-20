@@ -237,7 +237,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_qc8_gemm_minmax_ukernel_function gemm,
-  xnn_init_qs8_minmax_params_fn init_params,
+  xnn_init_qc8_conv_minmax_params_fn init_params,
   xnn_qs8_requantize_fn requantize) const
 {
   ASSERT_LE(m(), mr());
@@ -320,7 +320,7 @@ void GemmMicrokernelTester::Test(
         (void*) ((uintptr_t) packed_w.data() + nr() * (packed_k() * sizeof(int8_t) + sizeof(int32_t))));
     }
 
-    union xnn_qs8_minmax_params minmax_params;
+    union xnn_qc8_conv_minmax_params minmax_params;
     init_params(&minmax_params,
       c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
@@ -355,7 +355,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_qc8_igemm_minmax_ukernel_function igemm,
-  xnn_init_qs8_minmax_params_fn init_params,
+  xnn_init_qc8_conv_minmax_params_fn init_params,
   xnn_qs8_requantize_fn requantize) const
 {
   ASSERT_LE(m(), mr());
@@ -455,7 +455,7 @@ void GemmMicrokernelTester::Test(
       nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))), scale.data(),
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(int32_t))));
 
-    union xnn_qs8_minmax_params minmax_params;
+    union xnn_qc8_conv_minmax_params minmax_params;
     init_params(&minmax_params,
       c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
@@ -1904,7 +1904,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_jit_gemm_code_generator_function gemm_generator,
-  xnn_init_qs8_minmax_params_fn init_params,
+  xnn_init_qc8_conv_minmax_params_fn init_params,
   xnn_qs8_requantize_fn requantize) const
 {
   ASSERT_LE(m(), mr());
@@ -1987,7 +1987,7 @@ void GemmMicrokernelTester::Test(
         (void*) ((uintptr_t) packed_w.data() + nr() * (packed_k() * sizeof(int8_t) + sizeof(int32_t))));
     }
 
-    union xnn_qs8_minmax_params minmax_params;
+    union xnn_qc8_conv_minmax_params minmax_params;
     init_params(&minmax_params,
       c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
@@ -2031,7 +2031,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_jit_igemm_code_generator_function igemm_generator,
-  xnn_init_qs8_minmax_params_fn init_params,
+  xnn_init_qc8_conv_minmax_params_fn init_params,
   xnn_qs8_requantize_fn requantize) const
 {
   ASSERT_LE(m(), mr());
@@ -2131,7 +2131,7 @@ void GemmMicrokernelTester::Test(
       nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(int32_t) + sizeof(float))), scale.data(),
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(int32_t))));
 
-    union xnn_qs8_minmax_params minmax_params;
+    union xnn_qc8_conv_minmax_params minmax_params;
     init_params(&minmax_params,
       c_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
