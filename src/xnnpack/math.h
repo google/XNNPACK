@@ -105,6 +105,14 @@ XNN_INLINE static uint64_t double_as_uint64(double f) {
   return bits.as_uint64;
 }
 
+XNN_INLINE static uint32_t math_abs_s32(int32_t n) {
+  #if defined(_MSC_VER)
+    return (uint32_t) abs((int) n);
+  #else
+    return XNN_UNPREDICTABLE(n >= 0) ? (uint32_t) n : -(uint32_t) n;
+  #endif
+}
+
 XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a < b) ? a : b;
 }

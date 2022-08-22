@@ -24,9 +24,9 @@ void xnn_s16_rmaxabs_ukernel__scalar_x3(
   assert(input != NULL);
   assert(output != NULL);
 
-  int32_t vmax0 = 0;
-  int32_t vmax1 = 0;
-  int32_t vmax2 = 0;
+  uint32_t vmax0 = 0;
+  uint32_t vmax1 = 0;
+  uint32_t vmax2 = 0;
 
   for (; batch >= 3; batch -= 3) {
     const int32_t vi0 = (int32_t) input[0];
@@ -34,23 +34,23 @@ void xnn_s16_rmaxabs_ukernel__scalar_x3(
     const int32_t vi2 = (int32_t) input[2];
     input += 3;
 
-    const int32_t vabs0 = vi0 >= 0 ? vi0 : -vi0;
-    const int32_t vabs1 = vi1 >= 0 ? vi1 : -vi1;
-    const int32_t vabs2 = vi2 >= 0 ? vi2 : -vi2;
+    const uint32_t vabs0 = math_abs_s32(vi0);
+    const uint32_t vabs1 = math_abs_s32(vi1);
+    const uint32_t vabs2 = math_abs_s32(vi2);
 
-    vmax0 = math_max_s32(vmax0, vabs0);
-    vmax1 = math_max_s32(vmax1, vabs1);
-    vmax2 = math_max_s32(vmax2, vabs2);
+    vmax0 = math_max_u32(vmax0, vabs0);
+    vmax1 = math_max_u32(vmax1, vabs1);
+    vmax2 = math_max_u32(vmax2, vabs2);
   }
 
-  vmax0 = math_max_s32(vmax0, vmax1);
-  vmax0 = math_max_s32(vmax0, vmax2);
+  vmax0 = math_max_u32(vmax0, vmax1);
+  vmax0 = math_max_u32(vmax0, vmax2);
 
   if (batch != 0) {
     do {
       const int32_t vi = (int32_t) *input++;
-      const int32_t vabs = vi >= 0 ? vi : -vi;
-      vmax0 = math_max_s32(vmax0, vabs);
+      const uint32_t vabs = math_abs_s32(vi);
+      vmax0 = math_max_u32(vmax0, vabs);
     } while (--batch != 0);
   }
   *output = (uint16_t) vmax0;

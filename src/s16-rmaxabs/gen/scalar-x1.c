@@ -24,14 +24,14 @@ void xnn_s16_rmaxabs_ukernel__scalar_x1(
   assert(input != NULL);
   assert(output != NULL);
 
-  int32_t vmax0 = 0;
+  uint32_t vmax0 = 0;
 
 
   if (batch != 0) {
     do {
       const int32_t vi = (int32_t) *input++;
-      const int32_t vabs = vi >= 0 ? vi : -vi;
-      vmax0 = math_max_s32(vmax0, vabs);
+      const uint32_t vabs = math_abs_s32(vi);
+      vmax0 = math_max_u32(vmax0, vabs);
     } while (--batch != 0);
   }
   *output = (uint16_t) vmax0;
