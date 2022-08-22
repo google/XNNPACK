@@ -26,7 +26,7 @@ DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x1)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x2)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x3)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x4)
-DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4m1_ukernel__scalar_x1)
+DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4m1_ukernel__scalar)
 
 #define DECLARE_CS16_FFTR_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \

@@ -28,11 +28,13 @@ parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
   m = 0
-  match = re.fullmatch(r"xnn_cs16_bfly4(m(\d+))?_ukernel__(.+)_x(\d+)", name)
+  samples_tile = 1
+  match = re.fullmatch(r"xnn_cs16_bfly4(m(\d+))?_ukernel__(.+)(_x(\d+))?", name)
   assert match is not None
   if match.group(2):
     m = int(match.group(2))
-  samples_tile = int(match.group(4))
+  if match.group(5):
+    samples_tile = int(match.group(5))
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
   return m, samples_tile, arch, isa

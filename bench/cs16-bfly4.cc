@@ -74,7 +74,7 @@ static void BenchmarkM1KernelSize(benchmark::internal::Benchmark* b)
   b->Args({1024, 1, 256});
 }
 
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_m1_x1, xnn_cs16_bfly4m1_ukernel__scalar_x1)->Apply(BenchmarkM1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_m1, xnn_cs16_bfly4m1_ukernel__scalar)->Apply(BenchmarkM1KernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
