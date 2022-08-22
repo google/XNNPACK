@@ -22,9 +22,6 @@ void xnn_cs16_bfly4m1_ukernel__scalar_x1(
     const int16_t* twiddle) {
 
   int16_t* out0 = data;
-  int16_t* out1 = data + samples * 2;
-  int16_t* out2 = data + samples * 4;
-  int16_t* out3 = data + samples * 6;
 
   assert(samples == 1);
   assert(data != NULL);
@@ -36,12 +33,12 @@ void xnn_cs16_bfly4m1_ukernel__scalar_x1(
     do {
       int32_t vout0r = (int32_t) out0[0];
       int32_t vout0i = (int32_t) out0[1];
-      int32_t vout1r = (int32_t) out1[0];
-      int32_t vout1i = (int32_t) out1[1];
-      int32_t vout2r = (int32_t) out2[0];
-      int32_t vout2i = (int32_t) out2[1];
-      int32_t vout3r = (int32_t) out3[0];
-      int32_t vout3i = (int32_t) out3[1];
+      int32_t vout1r = (int32_t) out0[2];
+      int32_t vout1i = (int32_t) out0[3];
+      int32_t vout2r = (int32_t) out0[4];
+      int32_t vout2i = (int32_t) out0[5];
+      int32_t vout3r = (int32_t) out0[6];
+      int32_t vout3i = (int32_t) out0[7];
 
 
       // Note 32767 / 4 = 8191.  Should be 8192.
@@ -54,6 +51,7 @@ void xnn_cs16_bfly4m1_ukernel__scalar_x1(
       vout3r = math_asr_s32(vout3r * 8191 + 16384, 15);
       vout3i = math_asr_s32(vout3i * 8191 + 16384, 15);
 
+      // Note 32767 should be 32768 representing a multiply by 1.
       const int32_t vtmp0r = math_asr_s32(vout1r * 32767 + 16384, 15);
       const int32_t vtmp0i = math_asr_s32(vout1i * 32767 + 16384, 15);
       const int32_t vtmp1r = math_asr_s32(vout2r * 32767 + 16384, 15);
@@ -82,16 +80,12 @@ void xnn_cs16_bfly4m1_ukernel__scalar_x1(
 
       out0[0] = (int16_t) vout0r;
       out0[1] = (int16_t) vout0i;
-      out1[0] = (int16_t) vout1r;
-      out1[1] = (int16_t) vout1i;
-      out2[0] = (int16_t) vout2r;
-      out2[1] = (int16_t) vout2i;
-      out3[0] = (int16_t) vout3r;
-      out3[1] = (int16_t) vout3i;
-      out0 += 2;
-      out1 += 2;
-      out2 += 2;
-      out3 += 2;
+      out0[2] = (int16_t) vout1r;
+      out0[3] = (int16_t) vout1i;
+      out0[4] = (int16_t) vout2r;
+      out0[5] = (int16_t) vout2i;
+      out0[6] = (int16_t) vout3r;
+      out0[7] = (int16_t) vout3i;
     } while(--samples != 0);
   }
 }
