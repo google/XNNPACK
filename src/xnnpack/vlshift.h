@@ -17,10 +17,10 @@ extern "C" {
 
 #define DECLARE_S16_VLSHIFT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                          \
-    size_t batch_size,                                \
+    size_t batch,                                     \
     const int16_t* input,                             \
-    uint32_t shift,                                   \
-    int16_t* output);
+    int16_t* output,                                  \
+    uint32_t shift);
 
 
 DECLARE_S16_VLSHIFT_UKERNEL_FUNCTION(xnn_s16_vlshift_ukernel__neon_x8)

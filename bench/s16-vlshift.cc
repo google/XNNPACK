@@ -36,7 +36,7 @@ void vlshift(
   std::iota(output.begin(), output.end(), 1);
 
   for (auto _ : state) {
-    vlshift(batch, input.data(), uint32_t(4), output.data());
+    vlshift(batch, input.data(), output.data(), 4 /* shift */);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

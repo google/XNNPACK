@@ -82,7 +82,7 @@ class VLShiftMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      vlshift(batch(), x_data, shift(), y.data());
+      vlshift(batch(), x_data, y.data(), shift());
 
       // Verify results.
       for (size_t n = 0; n < batch(); n++) {

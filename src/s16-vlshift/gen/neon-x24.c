@@ -20,15 +20,15 @@
 void xnn_s16_vlshift_ukernel__neon_x24(
     size_t batch,
     const int16_t* input,
-    uint32_t shift,
-    int16_t* output) {
-
+    int16_t* output,
+    uint32_t shift)
+{
   assert(batch > 0);
   assert(input != NULL);
-  assert(shift < 16);
   assert(output != NULL);
+  assert(shift < 16);
 
-  const int16x8_t vshift = vdupq_n_s16(shift);
+  const int16x8_t vshift = vdupq_n_s16((int16_t) shift);
 
   for (; batch >= 24; batch -= 24) {
     const int16x8_t vi0 = vld1q_s16(input); input += 8;

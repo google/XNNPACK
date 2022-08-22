@@ -15,13 +15,13 @@ $assert BATCH_TILE >= 1
 void xnn_s16_vlshift_ukernel__scalar_x${BATCH_TILE}(
     size_t batch,
     const int16_t* input,
-    uint32_t shift,
-    int16_t* output) {
-
+    int16_t* output,
+    uint32_t shift)
+{
   assert(batch != 0);
   assert(input != NULL);
-  assert(shift < 16);
   assert(output != NULL);
+  assert(shift < 16);
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE}; batch -= ${BATCH_TILE}) {
@@ -36,7 +36,6 @@ void xnn_s16_vlshift_ukernel__scalar_x${BATCH_TILE}(
         output[${C}] = (int16_t) vout${C};
       output += ${BATCH_TILE};
     }
-
  if XNN_UNLIKELY(batch != 0) {
    do {
      const uint16_t vi = (uint16_t) *input++;

@@ -1656,10 +1656,10 @@ typedef void (*xnn_u32_filterbank_subtract_ukernel_function)(
     uint32_t* output);
 
 typedef void (*xnn_s16_vlshift_ukernel_function)(
-    size_t batch_size,
+    size_t batch,
     const int16_t* input,
-    uint32_t shift,
-    int16_t* output);
+    int16_t* output,
+    uint32_t shift);
 
 typedef void (*xnn_cs16_vsquareabs_ukernel_function)(
     size_t batch_size,

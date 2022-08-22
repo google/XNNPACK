@@ -18,13 +18,13 @@
 void xnn_s16_vlshift_ukernel__scalar_x3(
     size_t batch,
     const int16_t* input,
-    uint32_t shift,
-    int16_t* output) {
-
+    int16_t* output,
+    uint32_t shift)
+{
   assert(batch != 0);
   assert(input != NULL);
-  assert(shift < 16);
   assert(output != NULL);
+  assert(shift < 16);
 
   for (; batch >= 3; batch -= 3) {
     const uint16_t vi0 = (uint16_t) input[0];
@@ -41,7 +41,6 @@ void xnn_s16_vlshift_ukernel__scalar_x3(
     output[2] = (int16_t) vout2;
     output += 3;
   }
-
  if XNN_UNLIKELY(batch != 0) {
    do {
      const uint16_t vi = (uint16_t) *input++;
