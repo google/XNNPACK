@@ -1085,7 +1085,7 @@ DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_x64)
       const union xnn_u64_u32_sqrtshift_params* params);
 
 
-DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtf64u32_x1)
+DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1)
 
 
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name) \
