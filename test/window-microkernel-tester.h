@@ -75,9 +75,9 @@ class WindowMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> x((batch() * rows()) + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> x(batch() * rows() + XNN_EXTRA_BYTES / sizeof(int16_t));
     std::vector<int16_t, AlignedAllocator<int16_t, 64>> w(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y((batch() * rows()) + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
+    std::vector<int16_t> y(batch() * rows() + (inplace() ? XNN_EXTRA_BYTES / sizeof(int16_t) : 0));
     std::vector<int16_t> y_ref(batch() * rows());
     const int16_t* x_data = inplace() ? y.data() : x.data();
 
@@ -99,7 +99,7 @@ class WindowMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      window(rows(), batch(), x_data, w.data(), shift(), y.data());
+      window(rows(), batch(), x_data, w.data(), y.data(), shift());
 
       // Verify results.
       for (size_t m = 0; m < rows(); m++) {

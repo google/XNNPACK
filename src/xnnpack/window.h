@@ -21,8 +21,8 @@ extern "C" {
     size_t batch_size,                               \
     const int16_t* input,                            \
     const int16_t* weights,                          \
-    uint32_t shift,                                  \
-    int16_t* output);
+    int16_t* output,                                 \
+    uint32_t shift);
 
 
 DECLARE_S16_WINDOW_UKERNEL_FUNCTION(xnn_s16_window_ukernel__neon_x8)

@@ -1628,8 +1628,8 @@ typedef void (*xnn_s16_window_ukernel_function)(
     size_t batch_size,
     const int16_t* input,
     const int16_t* weights,
-    uint32_t shift,
-    int16_t* output);
+    int16_t* output,
+    uint32_t shift);
 
 typedef void (*xnn_u32_filterbank_accumulate_ukernel_function)(
     size_t rows,

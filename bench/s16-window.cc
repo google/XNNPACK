@@ -41,7 +41,7 @@ void window(
   std::iota(output.begin(), output.end(), 0);
 
   for (auto _ : state) {
-    window(rows, batch, input.data(), weights.data(), 12, output.data());
+    window(rows, batch, input.data(), weights.data(), output.data(), 12 /* shift */);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

@@ -22,15 +22,15 @@ void xnn_s16_window_ukernel__neon_x16(
     size_t batch_size,
     const int16_t* input,
     const int16_t* weights,
-    uint32_t shift,
-    int16_t* output) {
-
+    int16_t* output,
+    uint32_t shift)
+{
   assert(rows != 0);
   assert(batch_size != 0);
   assert(input != NULL);
   assert(weights != NULL);
-  assert(shift < 32);
   assert(output != NULL);
+  assert(shift < 32);
 
   const int32x4_t vshift = vdupq_n_s32(-(int32_t)shift);  // negative to shift right.
 
