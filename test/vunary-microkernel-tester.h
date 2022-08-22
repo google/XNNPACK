@@ -1057,7 +1057,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift, xnn_init_u64_u32_sqrtshift_params_fn init_params) const {
+  void Test(xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift) const {
     ASSERT_FALSE(inplace());
 
     std::random_device random_device;
@@ -1096,12 +1096,8 @@ class VUnaryMicrokernelTester {
         y_ref[i] = y_value >> shift();
       }
 
-      // Prepare parameters.
-      union xnn_u64_u32_sqrtshift_params params;
-      init_params(&params, shift());
-
       // Call optimized micro-kernel.
-      vsqrtshift(batch_size() * sizeof(uint64_t), x.data(), y.data(), &params);
+      vsqrtshift(batch_size() * sizeof(uint64_t), x.data(), y.data(), shift());
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

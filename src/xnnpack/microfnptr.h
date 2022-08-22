@@ -1337,7 +1337,7 @@ typedef void (*xnn_u64_u32_vsqrtshift_ukernel_function)(
     size_t batch,
     const uint64_t* input,
     uint32_t* output,
-    const union xnn_u64_u32_sqrtshift_params* params);
+    uint32_t shift);
 
 // LUT: vector LookUp Table elementwise
 
@@ -2020,10 +2020,6 @@ typedef size_t (*xnn_init_f16_sqrt_params_fn)(
 
 typedef size_t (*xnn_init_f32_sqrt_params_fn)(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_u64_u32_sqrtshift_params_fn)(
-  union xnn_u64_u32_sqrtshift_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t shift);
 
 typedef void (*xnn_init_qc8_scale_params_fn)(
   size_t channels,

@@ -16,14 +16,13 @@ void xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1(
     size_t batch,
     const uint64_t* input,
     uint32_t* output,
-    const union xnn_u64_u32_sqrtshift_params params[restrict XNN_MIN_ELEMENTS(1)])
+    uint32_t shift)
 {
   assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
+  assert(shift < 32);
 
-  const uint32_t vshift = params->scalar.shift;
-  assert(vshift < 32);
   do {
     const uint64_t vx = *input++;
 
@@ -59,7 +58,7 @@ void xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1(
       }
     }
 
-    *output++ = vout >> vshift;
+    *output++ = vout >> shift;
 
     batch -= sizeof(uint64_t);
   } while (batch != 0);

@@ -1082,8 +1082,7 @@ DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_x64)
       size_t n,                                              \
       const uint64_t* x,                                     \
       uint32_t* y,                                           \
-      const union xnn_u64_u32_sqrtshift_params* params);
-
+      uint32_t shift);
 
 DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1)
 

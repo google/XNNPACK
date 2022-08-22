@@ -23,7 +23,6 @@
 static void u64_u32_vsqrtshift(
   benchmark::State& state,
   xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift,
-  xnn_init_u64_u32_sqrtshift_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -41,10 +40,8 @@ static void u64_u32_vsqrtshift(
   std::generate(x.begin(), x.end(), std::ref(u64rng));
   std::fill(y.begin(), y.end(), UINT32_C(0xDEADBEEF));
 
-  xnn_u64_u32_sqrtshift_params params;
-  init_params(&params, 1 /* shift */);
   for (auto _ : state) {
-    vsqrtshift(num_elements * sizeof(uint64_t), x.data(), y.data(), &params);
+    vsqrtshift(num_elements * sizeof(uint64_t), x.data(), y.data(), 1 /* shift */);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -62,8 +59,7 @@ static void u64_u32_vsqrtshift(
 }
 
 BENCHMARK_CAPTURE(u64_u32_vsqrtshift, scalar_cvtu32_sqrt_cvtu32f64_x1,
-                  xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1,
-                  xnn_init_u64_u32_sqrtshift_scalar_params)
+                  xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_x1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint64_t, uint32_t>)
   ->UseRealTime();
 
