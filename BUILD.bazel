@@ -1390,6 +1390,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/u32-vlog/gen/scalar-x2.c",
     "src/u32-vlog/gen/scalar-x3.c",
     "src/u32-vlog/gen/scalar-x4.c",
+    "src/u64-u32-vsqrtshift/scalar-cvtu32-sqrt-cvtu32f64-x1.c",
     "src/xx-copy/memcpy.c",
     "src/xx-fill/scalar-x16.c",
     "src/xx-pad/scalar.c",
@@ -11892,6 +11893,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "u64_u32_vsqrtshift_bench",
+    srcs = [
+        "bench/u64-u32-vsqrtshift.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "s16_vlshift_bench",
     srcs = [
         "bench/s16-vlshift.cc",
@@ -14394,6 +14403,15 @@ xnnpack_unit_test(
     name = "u8_vclamp_test",
     srcs = [
         "test/u8-vclamp.cc",
+        "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "u64_u32_vsqrtshift_test",
+    srcs = [
+        "test/u64-u32-vsqrtshift.cc",
         "test/vunary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

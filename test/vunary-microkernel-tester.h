@@ -91,6 +91,15 @@ class VUnaryMicrokernelTester {
     return this->beta_;
   }
 
+  inline VUnaryMicrokernelTester& shift(uint32_t shift) {
+    this->shift_ = shift;
+    return *this;
+  }
+
+  inline uint32_t shift() const {
+    return this->shift_;
+  }
+
   inline VUnaryMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -1048,6 +1057,62 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift, xnn_init_u64_u32_sqrtshift_params_fn init_params) const {
+    ASSERT_FALSE(inplace());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    auto u64rng = std::bind( std::uniform_int_distribution<uint64_t>(), std::ref(rng));
+
+    std::vector<uint64_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    std::vector<uint32_t> y(batch_size());
+    std::vector<uint32_t> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), std::ref(u64rng));
+      std::fill(y.begin(), y.end(), UINT32_C(0xDEADBEEF));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const uint64_t x_value = x[i];
+        uint32_t y_value = 0;
+        // Match TFLM semantics, including bugs
+        if (uint32_t(x_value) == x_value) {
+          y_value = (uint32_t) std::lrint(std::sqrt(double(int64_t(uint64_t(x_value)))));
+          y_value = std::min<uint32_t>(y_value, std::numeric_limits<uint16_t>::max());
+        } else if (x_value != 0) {
+          uint64_t y0 = x_value >> 1;
+          uint64_t y1 = (y0 + x_value / y0) >> 1;
+          do {
+            y0 = y1;
+            y1 = (y0 + x_value / y0) >> 1;
+          } while (y1 < y0);
+
+          // y0 is sqrt(x_value) rounded down, round up if needed
+          if (int64_t(y0 * y0 + y0 - x_value) < 0) {
+            y0 += 1;
+          }
+          y_value = static_cast<uint32_t>(std::min<uint64_t>(y0, std::numeric_limits<uint32_t>::max()));
+        }
+        y_ref[i] = y_value >> shift();
+      }
+
+      // Prepare parameters.
+      union xnn_u64_u32_sqrtshift_params params;
+      init_params(&params, shift());
+
+      // Call optimized micro-kernel.
+      vsqrtshift(batch_size() * sizeof(uint64_t), x.data(), y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        ASSERT_EQ(y_ref[i], y[i])
+          << "at " << i << " / " << batch_size()
+          << ", x[" << i << "]: " << x[i]
+          << ", shift: " << shift();
+      }
+    }
+  }
+
  private:
   size_t batch_size_ = 1;
   bool inplace_ = false;
@@ -1055,6 +1120,7 @@ class VUnaryMicrokernelTester {
   float prescale_ = 1.0f;
   float alpha_ = 1.0f;
   float beta_ = 1.0f;
+  uint32_t shift_ = 1;
   uint8_t qmin_ = 0;
   uint8_t qmax_ = 255;
   size_t iterations_ = 15;

@@ -1378,6 +1378,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u32-vlog/gen/scalar-x2.c
   src/u32-vlog/gen/scalar-x3.c
   src/u32-vlog/gen/scalar-x4.c
+  src/u64-u32-vsqrtshift/scalar-cvtu32-sqrt-cvtu32f64-x1.c
   src/xx-copy/memcpy.c
   src/xx-fill/scalar-x16.c
   src/xx-pad/scalar.c
@@ -9358,6 +9359,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(u32-vlog-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
+
+  ADD_EXECUTABLE(u64-u32-vsqrtshift-bench bench/f32-vsqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u64-u32-vsqrtshift-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(u64-u32-vsqrtshift-bench PRIVATE benchmark bench-utils fp16 pthreadpool microparams_init)
 
   ADD_EXECUTABLE(s16-vlshift-bench bench/s16-vlshift.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(s16-vlshift-bench PRIVATE . include src)

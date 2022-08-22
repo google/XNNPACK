@@ -4038,6 +4038,15 @@ size_t xnn_init_f32_sqrt_avx512_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+size_t xnn_init_u64_u32_sqrtshift_scalar_params(
+  union xnn_u64_u32_sqrtshift_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t shift)
+{
+  assert(shift < 32);
+  params->scalar.shift = shift;
+  return sizeof(params->scalar);
+}
+
 size_t xnn_init_f32_chw_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width,

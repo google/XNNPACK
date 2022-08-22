@@ -2391,6 +2391,14 @@ union xnn_f32_sqrt_params {
 };
 
 
+// SqrtShift (Square Root + Shift): used by VSQRTSHIFT microkernels.
+
+union xnn_u64_u32_sqrtshift_params {
+  struct {
+    uint32_t shift;
+  } scalar;
+};
+
 // CHW: used by CONV/DWCONV microkernels in CHW layout with Min+Max parameters.
 
 union xnn_f16_chw_params {
