@@ -51,6 +51,12 @@ typedef void (*xnn_f32_ext_unary_math_function)(
     const uint32_t* input,                       \
     uint32_t* output);
 
+#define DECLARE_U64_UNARY_MATH_FUNCTION(fn_name) \
+  void fn_name(                                  \
+    size_t n,                                    \
+    const uint64_t* input,                       \
+    uint64_t* output);
+
 #define DECLARE_F16_F32_CVT_MATH_FUNCTION(fn_name) \
   void fn_name(                                    \
     size_t n,                                      \
@@ -359,6 +365,10 @@ DECLARE_U32_UNARY_MATH_FUNCTION(xnn_math_u32_sqrt__scalar_cvti64_sqrtf_lrintf)
 DECLARE_U32_UNARY_MATH_FUNCTION(xnn_math_u32_sqrt__scalar_cvtu32_sqrtf_lrintf)
 DECLARE_U32_UNARY_MATH_FUNCTION(xnn_math_u32_sqrt__scalar_hashemian)
 DECLARE_U32_UNARY_MATH_FUNCTION(xnn_math_u32_sqrt__scalar_tflm)
+
+DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu32_sqrt_cvtsatu32f64)
+DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu32_sqrt_llrint)
+DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu64_sqrt_llrint)
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -89,6 +89,22 @@ XNN_INLINE static uint32_t float_as_uint32(float f) {
   return bits.as_uint32;
 }
 
+XNN_INLINE static double uint64_as_double(uint64_t i) {
+  union {
+    uint64_t as_uint64;
+    double as_double;
+  } bits = { i };
+  return bits.as_double;
+}
+
+XNN_INLINE static uint64_t double_as_uint64(double f) {
+  union {
+    double as_double;
+    uint64_t as_uint64;
+  } bits = { f };
+  return bits.as_uint64;
+}
+
 XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a < b) ? a : b;
 }
@@ -146,6 +162,26 @@ XNN_INLINE static float math_max_f32(float a, float b) {
     return __builtin_fmaxf(a, b);
   #elif defined(__clang__) && defined(__riscv)
     return __builtin_fmaxf(a, b);
+  #else
+    return XNN_UNPREDICTABLE(b < a) ? a : b;
+  #endif
+}
+
+XNN_INLINE static double math_min_f64(double a, double b) {
+  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+    return __builtin_fmin(a, b);
+  #elif defined(__clang__) && defined(__riscv)
+    return __builtin_fmin(a, b);
+  #else
+    return XNN_UNPREDICTABLE(b < a) ? b : a;
+  #endif
+}
+
+XNN_INLINE static double math_max_f64(double a, double b) {
+  #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
+    return __builtin_fmax(a, b);
+  #elif defined(__clang__) && defined(__riscv)
+    return __builtin_fmax(a, b);
   #else
     return XNN_UNPREDICTABLE(b < a) ? a : b;
   #endif
@@ -256,5 +292,25 @@ XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
     return _rotl((unsigned int) x, (int) r);
   #else
     return (x << r) | (x >> (32 - r));
+  #endif
+}
+
+XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
+  #if defined(__GNUC__) && defined(__arm__)
+    float i;  // float instead of uint32_t because vcvt.u32.f64 writes to an S register
+    __asm__ ("vcvt.u32.f64 %[i], %P[x]"
+      : [i] "=w" (i)
+      : [x] "w" (x));
+    return float_as_uint32(i);
+  #elif defined(__GNUC__) && defined(__aarch64__)
+    uint32_t i;
+    __asm__ ("fcvtnu %w[i], %d[x]"
+      : [i] "=r" (i)
+      : [x] "w" (x));
+    return i;
+  #else
+    x = math_max_f64(x, 0.0);
+    x = math_min_f64(x, 4294967295.0);
+    return (uint32_t) double_as_uint64(x + 0x1.0p+52);
   #endif
 }

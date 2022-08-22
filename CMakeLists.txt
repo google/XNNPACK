@@ -1043,6 +1043,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sqrt-u32-scalar-cvtu32-sqrtf-lrintf.c
   src/math/sqrt-u32-scalar-hashemian.c
   src/math/sqrt-u32-scalar-tflm.c
+  src/math/sqrt-u64-scalar-cvtu32-sqrt-cvtsatu32f64.c
+  src/math/sqrt-u64-scalar-cvtu32-sqrt-llrint.c
+  src/math/sqrt-u64-scalar-cvtu64-sqrt-llrint.c
   src/qc8-dwconv/gen/up1x3-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c
@@ -8999,6 +9002,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(u32-sqrt-eval eval/u32-sqrt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(u32-sqrt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(u32-sqrt-eval PRIVATE cpuinfo pthreadpool gtest gtest_main)
+
+  ADD_EXECUTABLE(u64-sqrt-eval eval/u64-sqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(u64-sqrt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(u64-sqrt-eval PRIVATE cpuinfo pthreadpool gtest gtest_main)
 
   # ---[ Build end-to-end microbenchmarks
   ADD_LIBRARY(bench-models STATIC
