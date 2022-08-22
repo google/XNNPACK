@@ -28,7 +28,7 @@
 #include <xnnpack/pack.h>
 
 
-static void DWConvBenchmark(benchmark::State& state,
+static void f16_dwconv(benchmark::State& state,
   xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv,
   xnn_init_f16_minmax_params_fn init_params,
   uint32_t cr, uint32_t kr,
@@ -161,126 +161,126 @@ static void DWConvBenchmark(benchmark::State& state,
 
 #if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void f16_dwconv_8x4__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       8, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_8x4__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       8, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_8x9__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       8, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_8x9__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       8, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_8x25__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       8, 25, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_8x25__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       8, 25, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x4__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       16, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x4__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       16, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x9__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       16, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x9__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       16, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x25__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       16, 25, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_16x25__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       16, 25, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x4__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x4__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       32, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x4__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x4__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       32, 4, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x9__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x9__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       32, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x9__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x9__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       32, 9, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x25__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x25__neonfp16arith_acc2,
       xnn_init_f16_minmax_neon_params,
       32, 25, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_32x25__neonfp16arith(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
+    f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up32x25__neonfp16arith,
       xnn_init_f16_minmax_neon_params,
       32, 25, benchmark::utils::CheckNEONFP16ARITH);

@@ -20,7 +20,7 @@
 #include <xnnpack/vsquareabs.h>
 
 
-void vsquareabs(
+void cs16_vsquareabs(
     benchmark::State& state,
     xnn_cs16_vsquareabs_ukernel_function vsquareabs,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -58,23 +58,23 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x4, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_neon_x4, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x8, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_neon_x8, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x12, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x12, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_neon_x12, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x12, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_neon_x16, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16, benchmark::utils::CheckNEON)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_neon_x16, xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x16, benchmark::utils::CheckNEON)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(vsquareabs, cs16_scalar_x1, xnn_cs16_vsquareabs_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_scalar_x1, xnn_cs16_vsquareabs_ukernel__scalar_x1)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_scalar_x2, xnn_cs16_vsquareabs_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_scalar_x2, xnn_cs16_vsquareabs_ukernel__scalar_x2)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_scalar_x3, xnn_cs16_vsquareabs_ukernel__scalar_x3)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_scalar_x3, xnn_cs16_vsquareabs_ukernel__scalar_x3)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(vsquareabs, cs16_scalar_x4, xnn_cs16_vsquareabs_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_scalar_x4, xnn_cs16_vsquareabs_ukernel__scalar_x4)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

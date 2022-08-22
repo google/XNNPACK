@@ -21,7 +21,7 @@
 #include <xnnpack/microparams-init.h>
 
 
-void bfly4(
+void cs16_bfly4(
     benchmark::State& state,
     xnn_cs16_bfly4_ukernel_function bfly4,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -74,11 +74,11 @@ static void BenchmarkM1KernelSize(benchmark::internal::Benchmark* b)
   b->Args({1024, 1, 256});
 }
 
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_m1_x1, xnn_cs16_bfly4m1_ukernel__scalar_x1)->Apply(BenchmarkM1KernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(bfly4, cs16_scalar_x4, xnn_cs16_bfly4_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_m1_x1, xnn_cs16_bfly4m1_ukernel__scalar_x1)->Apply(BenchmarkM1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x4, xnn_cs16_bfly4_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

@@ -20,7 +20,7 @@
 #include <xnnpack/microparams-init.h>
 
 
-void fftr(
+void cs16_fftr(
     benchmark::State& state,
     xnn_cs16_fftr_ukernel_function fftr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -59,10 +59,10 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({1024});
 }
 
-BENCHMARK_CAPTURE(fftr, cs16_scalar_x1, xnn_cs16_fftr_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(fftr, cs16_scalar_x2, xnn_cs16_fftr_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(fftr, cs16_scalar_x3, xnn_cs16_fftr_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(fftr, cs16_scalar_x4, xnn_cs16_fftr_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x1, xnn_cs16_fftr_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x2, xnn_cs16_fftr_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x3, xnn_cs16_fftr_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x4, xnn_cs16_fftr_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

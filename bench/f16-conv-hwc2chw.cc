@@ -26,7 +26,7 @@
 #include <xnnpack/pack.h>
 
 
-static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
+static void f16_conv_hwc2chw(benchmark::State& state,
   xnn_f16_conv_hwc2chw_ukernel_function conv,
   uint32_t output_channels_tile,
   xnn_init_f16_minmax_params_fn init_params,
@@ -120,7 +120,7 @@ static void DConvHWC2CHW3X3S2P1Benchmark(benchmark::State& state,
 
 #if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
   static void f16_conv_hwc2chw_3x3s2p1c3x4__neonfp16arith_2x2(benchmark::State& state, const char* net) {
-    DConvHWC2CHW3X3S2P1Benchmark(state, xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2, 4,
+    f16_conv_hwc2chw(state, xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2, 4,
       xnn_init_f16_minmax_neon_params, benchmark::utils::CheckNEONFP16ARITH);
   }
 
