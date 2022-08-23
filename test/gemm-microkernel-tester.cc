@@ -1052,7 +1052,7 @@ void GemmMicrokernelTester::Test(xnn_f32_ppmm_minmax_ukernel_function ppmm_minma
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1112,7 +1112,7 @@ void GemmMicrokernelTester::Test(xnn_f32_gemm_ukernel_function gemm) const {
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1176,7 +1176,7 @@ void GemmMicrokernelTester::Test(xnn_f32_gemm_relu_ukernel_function gemm_relu) c
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1263,7 +1263,7 @@ void GemmMicrokernelTester::Test(xnn_f32_gemm_minmax_ukernel_function gemm_minma
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1348,7 +1348,7 @@ void GemmMicrokernelTester::Test(xnn_f32_gemminc_minmax_ukernel_function gemminc
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1440,7 +1440,7 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_ukernel_function igemm) const {
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
@@ -1536,7 +1536,7 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_relu_ukernel_function igemm_relu)
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
@@ -1651,7 +1651,7 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_minmax_ukernel_function igemm_min
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
@@ -1758,7 +1758,7 @@ void GemmMicrokernelTester::Test(
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1893,7 +1893,7 @@ void GemmMicrokernelTester::Test(
         ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
