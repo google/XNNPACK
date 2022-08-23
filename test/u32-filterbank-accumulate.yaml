@@ -6,6 +6,7 @@
 
 # ARM NEON
 - name: xnn_u32_filterbank_accumulate_ukernel__neon_x1
+- name: xnn_u32_filterbank_accumulate_ukernel__neon_x2
 
 # Scalar
 - name: xnn_u32_filterbank_accumulate_ukernel__scalar_x1

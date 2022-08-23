@@ -2709,6 +2709,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
   src/u32-filterbank-accumulate/gen/neon-x1.c
+  src/u32-filterbank-accumulate/gen/neon-x2.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
   src/x8-transposec/gen/8x8-multi-dec-zip-neon.c

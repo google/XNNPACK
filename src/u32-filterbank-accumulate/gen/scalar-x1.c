@@ -19,18 +19,13 @@ void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(
     size_t rows,
     size_t batch_size,
     const uint32_t* input,
-    const uint16_t* input_offset,
-    const uint16_t* weight_offset,
-    const uint16_t* weight_widths,
+    const uint8_t* weight_widths,
     const uint16_t* weights,
-    const uint16_t* unweights,
     uint64_t* output) {
 
   assert(rows != 0);
   assert(batch_size != 0);
   assert(input != NULL);
-  assert(input_offset != NULL);
-  assert(weight_offset != NULL);
   assert(weight_widths != NULL);
   assert(weights != NULL);
   assert(output != NULL);
@@ -39,20 +34,13 @@ void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(
   uint64_t unweight_accumulator = 0;
 
   do {
-    const size_t io = (size_t) *input_offset++;
-    const size_t wo = (size_t) *weight_offset++;
     size_t n = (size_t) *weight_widths++;
-
-    const uint32_t* i = input + io;
-    const uint16_t* w = weights + wo;
-    const uint16_t* u = unweights + wo;
-
     assert(n != 0);
-
     do {
-      const uint32_t vi = *i++;
-      const uint32_t vw = (uint32_t) *w++;
-      const uint32_t vu = (uint32_t) *u++;
+      const uint32_t vi = *input++;
+      const uint32_t vw = (uint32_t) weights[0];  // weight
+      const uint32_t vu = (uint32_t) weights[1];  // unweight
+      weights += 2;
 
       const uint64_t vwacc = math_mulext_u32(vi, vw);
       const uint64_t vuacc = math_mulext_u32(vi, vu);

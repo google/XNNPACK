@@ -34,16 +34,57 @@
     }
   }
 
-  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X1, rows_gt_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X1, rows_eq_2) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 5; batch += 1) {
-        FilterbankAccumulateMicrokernelTester()
-          .rows(rows)
-          .batch(batch)
-          .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x1);
-      }
+    FilterbankAccumulateMicrokernelTester()
+      .rows(2)
+      .batch(1)
+      .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x1);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X2, batch_eq_2) {
+    TEST_REQUIRES_ARM_NEON;
+    FilterbankAccumulateMicrokernelTester()
+      .batch(2)
+      .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x2);
+  }
+
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X2, batch_div_2) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch = 4; batch < 20; batch += 2) {
+      FilterbankAccumulateMicrokernelTester()
+        .batch(batch)
+        .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x2);
     }
+  }
+
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X2, batch_lt_2) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch = 1; batch < 2; batch++) {
+      FilterbankAccumulateMicrokernelTester()
+        .batch(batch)
+        .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x2);
+    }
+  }
+
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X2, batch_gt_2) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch = 3; batch < 4; batch++) {
+      FilterbankAccumulateMicrokernelTester()
+        .batch(batch)
+        .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x2);
+    }
+  }
+
+  TEST(U32_FILTERBANK_ACCUMULATE__NEON_X2, rows_eq_2) {
+    TEST_REQUIRES_ARM_NEON;
+    FilterbankAccumulateMicrokernelTester()
+      .rows(2)
+      .batch(2)
+      .Test(xnn_u32_filterbank_accumulate_ukernel__neon_x2);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -62,13 +103,9 @@ TEST(U32_FILTERBANK_ACCUMULATE__SCALAR_X1, batch_gt_1) {
   }
 }
 
-TEST(U32_FILTERBANK_ACCUMULATE__SCALAR_X1, rows_gt_1) {
-  for (size_t rows = 2; rows < 2; rows++) {
-    for (size_t batch = 1; batch <= 5; batch += 1) {
-      FilterbankAccumulateMicrokernelTester()
-        .rows(rows)
-        .batch(batch)
-        .Test(xnn_u32_filterbank_accumulate_ukernel__scalar_x1);
-    }
-  }
+TEST(U32_FILTERBANK_ACCUMULATE__SCALAR_X1, rows_eq_2) {
+  FilterbankAccumulateMicrokernelTester()
+    .rows(2)
+    .batch(1)
+    .Test(xnn_u32_filterbank_accumulate_ukernel__scalar_x1);
 }

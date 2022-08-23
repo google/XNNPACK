@@ -17,7 +17,7 @@
 #include <xnnpack/filterbank.h>
 
 
-void xnn_u32_filterbank_accumulate_ukernel__neon_x1(
+void xnn_u32_filterbank_accumulate_ukernel__neon_x2(
     size_t rows,
     size_t batch_size,
     const uint32_t* input,
@@ -38,6 +38,17 @@ void xnn_u32_filterbank_accumulate_ukernel__neon_x1(
     size_t n = (size_t) *weight_widths++;
     assert(n != 0);
 
+    if (n >= 2) {
+      do {
+        const uint32x2_t vi = vld1_u32(input); input += 2;
+        const uint16x4_t vw = vld1_u16(weights); weights += 4;
+        const uint32x4_t vw32 = vmovl_u16(vw);
+
+        weight_accumulator = vmlal_lane_u32(weight_accumulator, vget_low_u32(vw32), vi, 0);
+        weight_accumulator = vmlal_lane_u32(weight_accumulator, vget_high_u32(vw32), vi, 1);
+        n -= 2;
+      } while (n >= 2);
+    }
     if (n != 0) {
       do {
         const uint32x2_t vi = vld1_dup_u32(input); input += 1;

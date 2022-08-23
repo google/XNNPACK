@@ -76,44 +76,13 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-$if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, rows_lt_${BATCH_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t rows = 1; rows < ${BATCH_TILE}; rows++) {
-      for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-        FilterbankAccumulateMicrokernelTester()
-          .rows(rows)
-          .batch(batch)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-  }
-
-  TEST(${TEST_NAME}, rows_div_${BATCH_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t rows = ${BATCH_TILE*2}; rows <= ${BATCH_TILE*4}; rows += ${BATCH_TILE}) {
-      for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-        FilterbankAccumulateMicrokernelTester()
-          .rows(rows)
-          .batch(batch)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-  }
-
-TEST(${TEST_NAME}, rows_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, rows_eq_2) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t rows = ${BATCH_TILE+1}; rows < ${BATCH_TILE*2}; rows++) {
-    for (size_t batch = 1; batch <= ${BATCH_TILE*5}; batch += ${max(1, BATCH_TILE-1)}) {
-      FilterbankAccumulateMicrokernelTester()
-        .rows(rows)
-        .batch(batch)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
+  FilterbankAccumulateMicrokernelTester()
+    .rows(2)
+    .batch(${BATCH_TILE})
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 
@@ -141,7 +110,7 @@ def generate_test_cases(ukernel, row_tile, batch_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
-      "BATCH_TILE": row_tile,
+      "ROW_TILE": row_tile,
       "BATCH_TILE": batch_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,

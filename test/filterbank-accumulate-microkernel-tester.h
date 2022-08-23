@@ -58,41 +58,33 @@ class FilterbankAccumulateMicrokernelTester {
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
     std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input_offset(rows());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weight_offset(rows());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weight_widths(rows());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(batch() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> unweights(batch() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> weight_widths(rows());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(batch() * 2 + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> output(rows());
     std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> output_ref(rows());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u32rng));
-      std::fill(input_offset.begin(), input_offset.end(), 0);
-      std::fill(weight_offset.begin(), weight_offset.end(), 0);
       std::fill(weight_widths.begin(), weight_widths.end(), rows());
       std::generate(weights.begin(), weights.end(), std::ref(u16rng));
-      std::generate(unweights.begin(), unweights.end(), std::ref(u16rng));
       std::iota(output.begin(), output.end(), 0);
       std::iota(output_ref.begin(), output_ref.end(), 1);
 
       uint64_t weight_accumulator = 0;
       uint64_t unweight_accumulator = 0;
-
+      size_t i = 0;
       for (size_t m = 0; m < rows(); m++) {
-        const size_t io = (size_t) input_offset[m];
-        const size_t wo = (size_t) weight_offset[m];
         const size_t weight_width = (size_t) weight_widths[m];
-        for (size_t n = 0; n < weight_width; n++) {
-          weight_accumulator += (uint64_t) input[io + n] * (uint64_t) weights[wo + n];
-          unweight_accumulator += (uint64_t) input[io + n] * (uint64_t) unweights[wo + n];
+        for (size_t n = 0; n < weight_width; n++, i++) {
+          weight_accumulator += (uint64_t) input[i] * (uint64_t) weights[i * 2];
+          unweight_accumulator += (uint64_t) input[i] * (uint64_t) weights[i * 2 + 1];
         }
         output_ref[m] = weight_accumulator;
         weight_accumulator = unweight_accumulator;
       }
 
       // Call optimized micro-kernel.
-      filterbank_accumulate(rows(), batch(), input.data(), input_offset.data(), weight_offset.data(), weight_widths.data(), weights.data(), unweights.data(), output.data());
+      filterbank_accumulate(rows(), batch(), input.data(), weight_widths.data(), weights.data(), output.data());
 
       // Verify results.
       for (size_t m = 0; m < rows(); m++) {
@@ -105,7 +97,5 @@ class FilterbankAccumulateMicrokernelTester {
  private:
   size_t rows_{1};
   size_t batch_{1};
-  uint32_t shift_{12};
-  bool inplace_{false};
   size_t iterations_{15};
 };
