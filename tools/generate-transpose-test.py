@@ -220,6 +220,49 @@ TEST(${TEST_NAME}, bh_${TILE_HEIGHT}_bw_${TILE_WIDTH}_is_${TILE_WIDTH * 2}_os_${
     .iterations(1)
     .Test(${KERNEL});
 }
+
+TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 17}_bw_${TILE_WIDTH * 19}_ies_${ELEMENT_SIZE + 11}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  TransposeMicrokernelTester()
+    .input_stride(${TILE_WIDTH * 19})
+    .output_stride(${TILE_HEIGHT * 17})
+    .block_width(${TILE_WIDTH * 19})
+    .block_height(${TILE_HEIGHT * 17})
+    .element_size(${ELEMENT_SIZE})
+    .input_element_stride(${ELEMENT_SIZE + 11})
+    .iterations(1)
+    .Test(${KERNEL});
+}
+
+TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 3}_bw_${TILE_WIDTH * 5}_oes_${ELEMENT_SIZE + 11}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  TransposeMicrokernelTester()
+    .input_stride(${TILE_WIDTH * 5})
+    .output_stride(${TILE_HEIGHT * 3})
+    .block_width(${TILE_WIDTH * 5})
+    .block_height(${TILE_HEIGHT * 3})
+    .element_size(${ELEMENT_SIZE})
+    .output_element_stride(${ELEMENT_SIZE + 11})
+    .iterations(1)
+    .Test(${KERNEL});
+}
+
+TEST(${TEST_NAME}, bh_${TILE_HEIGHT * 7}_bw_${TILE_WIDTH * 23}_ies_${ELEMENT_SIZE + 17}_oes_${ELEMENT_SIZE + 13}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  TransposeMicrokernelTester()
+    .input_stride(${TILE_WIDTH * 23 + 5})
+    .output_stride(${TILE_HEIGHT * 7 + 6})
+    .block_width(${TILE_WIDTH * 23})
+    .block_height(${TILE_HEIGHT * 7})
+    .element_size(${ELEMENT_SIZE})
+    .input_element_stride(${ELEMENT_SIZE + 17})
+    .output_element_stride(${ELEMENT_SIZE + 13})
+    .iterations(1)
+    .Test(${KERNEL});
+}
 """
 
 

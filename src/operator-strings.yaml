@@ -201,6 +201,12 @@
   string: "Softmax (NC, F32)"
 - name: xnn_operator_type_softmax_nc_qu8
   string: "Softmax (NC, QU8)"
+- name: xnn_operator_type_space_to_depth_nhwc_x8
+  string: "Space To Depth (NHWC, X8)"
+- name: xnn_operator_type_space_to_depth_nhwc_x16
+  string: "Space To Depth (NHWC, X16)"
+- name: xnn_operator_type_space_to_depth_nhwc_x32
+  string: "Space To Depth (NHWC, X32)"
 - name: xnn_operator_type_square_nc_f16
   string: "Square (NC, F16)"
 - name: xnn_operator_type_square_nc_f32

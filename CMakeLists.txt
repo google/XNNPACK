@@ -7604,6 +7604,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME softmax-nc-test COMMAND softmax-nc-test)
 
+  ADD_EXECUTABLE(space-to-depth-nhwc-test test/space-to-depth-nhwc.cc)
+  TARGET_INCLUDE_DIRECTORIES(space-to-depth-nhwc-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(space-to-depth-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME space-to-depth-nhwc-test COMMAND space-to-depth-nhwc-test)
+
   ADD_EXECUTABLE(square-nc-test test/square-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(square-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)

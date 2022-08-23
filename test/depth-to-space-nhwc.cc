@@ -99,7 +99,6 @@ TEST(DEPTH_TO_SPACE_NHWC_X8, output_channels_stride) {
     .TestNHWCxX8();
 }
 
-
 TEST(DEPTH_TO_SPACE_NHWC_X16, one_pixel) {
   DepthToSpaceOperatorTester()
     .input_size(1, 1)

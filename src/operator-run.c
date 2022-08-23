@@ -287,7 +287,7 @@ void xnn_compute_transposev_6d(
       ld_input,
       ld_output,
       context->input_stride[4],
-      context->output_stride[4],
+      context->output_stride[5],
       element_size,
       tile_m,
       tile_n);
