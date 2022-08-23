@@ -14889,15 +14889,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "space_to_depth_nhwc_test",
-    srcs = [
-        "test/space-to-depth-nhwc.cc",
-        "test/space-to-depth-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "square_nc_test",
     srcs = [
         "test/square-nc.cc",
