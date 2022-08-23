@@ -1009,8 +1009,10 @@ typedef void (*xnn_transposec_ukernel_function)(
 typedef void (*xnn_transposev_ukernel_function)(
     const void* input,
     void* output,
-    size_t input_stride,
-    size_t output_stride,
+    size_t input_row_stride,
+    size_t output_row_stride,
+    size_t input_element_stride,
+    size_t output_element_stride,
     size_t element_size,
     size_t block_width,
     size_t block_height);

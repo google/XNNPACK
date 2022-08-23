@@ -14,13 +14,15 @@
 extern "C" {
 #endif
 
-#define DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(const void* input,          \
-                            void* output,               \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t element_size,        \
-                            size_t block_width,         \
+#define DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(const void* input,            \
+                            void* output,                 \
+                            size_t input_row_stride,      \
+                            size_t output_row_stride,     \
+                            size_t input_element_stride,  \
+                            size_t output_element_stride, \
+                            size_t element_size,          \
+                            size_t block_width,           \
                             size_t block_height);
 
 DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_memcpy)

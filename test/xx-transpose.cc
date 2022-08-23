@@ -164,6 +164,43 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_1_bw_1_is_2_os_2) {
     .iterations(1)
     .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
 }
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_17_bw_19_ies_12) {
+  TransposeMicrokernelTester()
+    .input_stride(19)
+    .output_stride(17)
+    .block_width(19)
+    .block_height(17)
+    .element_size(1)
+    .input_element_stride(12)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_3_bw_5_oes_12) {
+  TransposeMicrokernelTester()
+    .input_stride(5)
+    .output_stride(3)
+    .block_width(5)
+    .block_height(3)
+    .element_size(1)
+    .output_element_stride(12)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_1, bh_7_bw_23_ies_18_oes_14) {
+  TransposeMicrokernelTester()
+    .input_stride(28)
+    .output_stride(13)
+    .block_width(23)
+    .block_height(7)
+    .element_size(1)
+    .input_element_stride(18)
+    .output_element_stride(14)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_bw_1) {
   TransposeMicrokernelTester()
     .input_stride(2)
@@ -311,6 +348,43 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_1_bw_1_is_2_os_2) {
     .iterations(1)
     .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
 }
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_17_bw_19_ies_14) {
+  TransposeMicrokernelTester()
+    .input_stride(19)
+    .output_stride(17)
+    .block_width(19)
+    .block_height(17)
+    .element_size(3)
+    .input_element_stride(14)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_3_bw_5_oes_14) {
+  TransposeMicrokernelTester()
+    .input_stride(5)
+    .output_stride(3)
+    .block_width(5)
+    .block_height(3)
+    .element_size(3)
+    .output_element_stride(14)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_3, bh_7_bw_23_ies_20_oes_16) {
+  TransposeMicrokernelTester()
+    .input_stride(28)
+    .output_stride(13)
+    .block_width(23)
+    .block_height(7)
+    .element_size(3)
+    .input_element_stride(20)
+    .output_element_stride(16)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
 TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_1_bw_1) {
   TransposeMicrokernelTester()
     .input_stride(2)
@@ -455,6 +529,43 @@ TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_1_bw_1_is_2_os_2) {
     .block_width(1)
     .block_height(1)
     .element_size(5)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_17_bw_19_ies_16) {
+  TransposeMicrokernelTester()
+    .input_stride(19)
+    .output_stride(17)
+    .block_width(19)
+    .block_height(17)
+    .element_size(5)
+    .input_element_stride(16)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_3_bw_5_oes_16) {
+  TransposeMicrokernelTester()
+    .input_stride(5)
+    .output_stride(3)
+    .block_width(5)
+    .block_height(3)
+    .element_size(5)
+    .output_element_stride(16)
+    .iterations(1)
+    .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
+}
+
+TEST(XX_TRANSPOSEV__1X1_MEMCPY_5, bh_7_bw_23_ies_22_oes_18) {
+  TransposeMicrokernelTester()
+    .input_stride(28)
+    .output_stride(13)
+    .block_width(23)
+    .block_height(7)
+    .element_size(5)
+    .input_element_stride(22)
+    .output_element_stride(18)
     .iterations(1)
     .Test(xnn_xx_transposev_ukernel__1x1_memcpy);
 }

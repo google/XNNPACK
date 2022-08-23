@@ -13,18 +13,16 @@
 void xnn_xx_transposev_ukernel__1x1_memcpy(
     const void* input,
     void* output,
-    size_t input_stride,
-    size_t output_stride,
+    size_t input_row_stride,
+    size_t output_row_stride,
+    size_t input_element_stride,
+    size_t output_element_stride,
     size_t element_size,
     size_t block_width,
     size_t block_height)
 {
-  const size_t tile_height = 1;
-  const size_t tile_width = 1;
-  const size_t tile_wbytes = tile_width * element_size;
-  const size_t input_reset = tile_wbytes - block_height * input_stride;
-  const size_t output_reset = tile_width * output_stride - block_height * element_size;
-  const size_t input_offset = tile_height * input_stride;
+  const size_t input_reset = input_element_stride - block_height * input_row_stride;
+  const size_t output_reset = output_row_stride - block_height * output_element_stride;
 
   const void* i = (const void*) input;
   void* o = (void*) output;
@@ -33,8 +31,8 @@ void xnn_xx_transposev_ukernel__1x1_memcpy(
     size_t bh = block_height;
     for (; bh >= 1; bh -= 1) {
       memcpy(o, i, element_size);
-      i = (const void*) ((uintptr_t) i + input_offset);
-      o = (void*) ((uintptr_t) o + element_size);
+      i = (const void*) ((uintptr_t) i + input_row_stride);
+      o = (void*) ((uintptr_t) o + output_element_stride);
     }
 
     i = (const void*) ((uintptr_t) i + input_reset);
