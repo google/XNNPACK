@@ -43,10 +43,6 @@ XNN_INLINE static size_t doz(size_t a, size_t b) {
   return XNN_UNPREDICTABLE(b < a) ? a - b : 0;
 }
 
-XNN_INLINE static uint32_t math_doz_u32(uint32_t a, uint32_t b) {
-  return XNN_UNPREDICTABLE(b < a) ? a - b : 0;
-}
-
 XNN_INLINE static size_t divide_round_up(size_t n, size_t q) {
   return XNN_UNPREDICTABLE(n % q == 0) ? n / q : n / q + 1;
 }
@@ -127,6 +123,10 @@ XNN_INLINE static uint32_t math_min_u32(uint32_t a, uint32_t b) {
 
 XNN_INLINE static uint32_t math_max_u32(uint32_t a, uint32_t b) {
   return XNN_UNPREDICTABLE(a > b) ? a : b;
+}
+
+XNN_INLINE static uint32_t math_doz_u32(uint32_t a, uint32_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a - b : 0;
 }
 
 XNN_INLINE static int64_t math_mulext_s32(int32_t a, int32_t b) {
