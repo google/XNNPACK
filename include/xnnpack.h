@@ -2876,6 +2876,12 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     const size_t* output_perm,
     pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_transpose_nd_x16(uint32_t flags, const void* input,
+                                         void* output, const size_t num_dims,
+                                         const size_t* input_shape,
+                                         const size_t* output_perm,
+                                         pthreadpool_t threadpool);
+
 #endif  // XNN_NO_X16_OPERATORS
 
 #ifndef XNN_NO_QC8_OPERATORS
@@ -3727,6 +3733,12 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     const size_t* input_shape,
     const size_t* output_perm,
     pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_transpose_nd_x8(uint32_t flags, const void* input,
+                                        void* output, const size_t num_dims,
+                                        const size_t* input_shape,
+                                        const size_t* output_perm,
+                                        pthreadpool_t threadpool);
 
 #endif  // XNN_NO_X8_OPERATORS
 
