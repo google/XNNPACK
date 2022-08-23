@@ -606,11 +606,11 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
-  src/cs16-bfly4/scalar-m1.c
   src/cs16-bfly4/gen/scalar-x1.c
   src/cs16-bfly4/gen/scalar-x2.c
   src/cs16-bfly4/gen/scalar-x3.c
   src/cs16-bfly4/gen/scalar-x4.c
+  src/cs16-bfly4/scalar-m1.c
   src/cs16-fftr/gen/scalar-x1.c
   src/cs16-fftr/gen/scalar-x2.c
   src/cs16-fftr/gen/scalar-x3.c
@@ -1038,8 +1038,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sqrt-u32-scalar-clz-newton.c
   src/math/sqrt-u32-scalar-cvti32-sqrt-lrint.c
   src/math/sqrt-u32-scalar-cvti64-sqrt-lrint.c
-  src/math/sqrt-u32-scalar-cvtu32-sqrt-lrint.c
   src/math/sqrt-u32-scalar-cvti64-sqrtf-lrintf.c
+  src/math/sqrt-u32-scalar-cvtu32-sqrt-lrint.c
   src/math/sqrt-u32-scalar-cvtu32-sqrtf-lrintf.c
   src/math/sqrt-u32-scalar-hashemian.c
   src/math/sqrt-u32-scalar-tflm.c
@@ -6750,7 +6750,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
-  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S)
+  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
+  src/u32-filterbank-accumulate/aarch32-neon-x1.S
+  src/u32-filterbank-accumulate/aarch32-neon-x2.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S

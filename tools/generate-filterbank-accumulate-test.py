@@ -27,10 +27,12 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_u32_filterbank_accumulate_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_u32_filterbank_accumulate_ukernel__(.+)(_x(\d+))?", name)
   assert match is not None
   row_tile = 1
-  batch_tile = int(match.group(2))
+  batch_tile = 1
+  if match.group(3):
+    batch_tile = int(match.group(3))
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
   return row_tile, batch_tile, arch, isa
@@ -45,14 +47,12 @@ TEST(${TEST_NAME}, rows_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, rows_gt_1) {
+TEST(${TEST_NAME}, rows_eq_2) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t rows = 2; rows <= 10; rows++) {
-    FilterbankAccumulateMicrokernelTester()
-      .rows(2)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  FilterbankAccumulateMicrokernelTester()
+    .rows(2)
+    .Test(${", ".join(TEST_ARGS)});
 }
 
 
