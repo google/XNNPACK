@@ -18,7 +18,6 @@ extern "C" {
 #define DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                        \
     size_t rows,                                                    \
-    size_t batch_size,                                              \
     const uint32_t* input,                                          \
     const uint8_t* weight_widths,                                   \
     const uint16_t* weights,                                        \

@@ -40,7 +40,7 @@ void filterbank_accumulate(
   std::iota(output.begin(), output.end(), 0);
 
   for (auto _ : state) {
-    filterbank_accumulate(rows, batch, input.data(), weight_widths.data(), weights.data(), output.data());
+    filterbank_accumulate(rows, input.data(), weight_widths.data(), weights.data(), output.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

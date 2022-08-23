@@ -17,14 +17,12 @@
 
 void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(
     size_t rows,
-    size_t batch_size,
     const uint32_t* input,
     const uint8_t* weight_widths,
     const uint16_t* weights,
     uint64_t* output) {
 
   assert(rows != 0);
-  assert(batch_size != 0);
   assert(input != NULL);
   assert(weight_widths != NULL);
   assert(weights != NULL);

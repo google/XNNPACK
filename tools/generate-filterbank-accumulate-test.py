@@ -37,52 +37,22 @@ def split_ukernel_name(name):
 
 
 FILTERBANK_ACCUMULATE_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
+TEST(${TEST_NAME}, rows_eq_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   FilterbankAccumulateMicrokernelTester()
-    .batch(${BATCH_TILE})
+    .rows(1)
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
-      FilterbankAccumulateMicrokernelTester()
-        .batch(batch)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
-      FilterbankAccumulateMicrokernelTester()
-        .batch(batch)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, rows_gt_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
+  for (size_t rows = 2; rows <= 10; rows++) {
     FilterbankAccumulateMicrokernelTester()
-      .batch(batch)
+      .rows(2)
       .Test(${", ".join(TEST_ARGS)});
   }
-}
-
-TEST(${TEST_NAME}, rows_eq_2) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  FilterbankAccumulateMicrokernelTester()
-    .rows(2)
-    .batch(${BATCH_TILE})
-    .Test(${", ".join(TEST_ARGS)});
 }
 
 
