@@ -486,6 +486,49 @@ enum xnn_status xnn_run_transpose_nd_x32(
     threadpool);
 }
 
+enum xnn_status xnn_run_transpose_nd_x16(
+    uint32_t flags,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    pthreadpool_t threadpool) {
+
+  return run_transpose_nd(
+    flags,
+    input,
+    output,
+    num_dims,
+    input_shape,
+    output_perm,
+    sizeof(uint16_t),
+    XNN_INIT_FLAG_X16,
+    xnn_operator_type_transpose_nd_x16,
+    threadpool);
+}
+
+enum xnn_status xnn_run_transpose_nd_x8(
+    uint32_t flags,
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    pthreadpool_t threadpool) {
+
+  return run_transpose_nd(
+    flags,
+    input,
+    output,
+    num_dims,
+    input_shape,
+    output_perm,
+    sizeof(uint8_t),
+    XNN_INIT_FLAG_X8,
+    xnn_operator_type_transpose_nd_x8,
+    threadpool);
+}
 
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
     size_t output_channels,
