@@ -7655,6 +7655,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK cache gtest gtest_main microparams_init logging subgraph operators)
   ADD_TEST(NAME subgraph-nchw-test COMMAND subgraph-nchw-test)
 
+  ADD_EXECUTABLE(subgraph-fp16-test test/subgraph-fp16.cc)
+  TARGET_INCLUDE_DIRECTORIES(subgraph-fp16-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(subgraph-fp16-test PRIVATE XNNPACK cache gtest gtest_main microparams_init logging subgraph operators)
+  ADD_TEST(NAME subgraph-fp16-test COMMAND subgraph-fp16-test)
+
   # ---[ Build subgraph-level unit tests
   ADD_EXECUTABLE(workspace-test test/workspace.cc)
   TARGET_INCLUDE_DIRECTORIES(workspace-test PRIVATE src test)

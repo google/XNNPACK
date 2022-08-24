@@ -887,8 +887,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         assert(value->data == NULL);
         assert(value->datatype == xnn_datatype_fp16);
         assert(subgraph->values[value->fp32_id].datatype == xnn_datatype_fp32);
-        assert(subgraph->values[value->fp32_id].flags & XNN_VALUE_FLAG_EXTERNAL_INPUT);
-        num_external_inputs += 1;
+        // This value isn't always an external input, it could be an external output of the current subgraph (due to
+        // partition), and be simultaneously consumed by the current node.
+        if (subgraph->values[value->fp32_id].flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
+          num_external_inputs += 1;
+        }
       }
     }
     for (uint32_t o = 0; o < node->num_outputs; o++) {
@@ -935,14 +938,18 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     for (uint32_t i = 0; i < node->num_inputs; i++) {
       const struct xnn_value* value = &subgraph->values[node->inputs[i]];
       if (value->fp32_id != XNN_INVALID_VALUE_ID && value->first_consumer == n - 1) {
-        xnn_log_debug("Inserted FP32->FP16 Convert Node from tensor #%"PRIu32" to tensor #%"PRIu32,
-          value->fp32_id, value->id);
-        const uint32_t output_node_id = output_node->id;
-        assert(output_node >= subgraph->nodes);
-        xnn_node_clear(output_node);
-        output_node->id = output_node_id;
-        xnn_init_convert_node(output_node, xnn_compute_type_fp32_to_fp16, value->fp32_id, value->id, 0 /* flags */);
-        output_node -= 1;
+        // Only insert convert nodes if the value actually is an external input. This value could be an external output,
+        // if that's the case, we have already inserted a convert node in loop above for outputs.
+        if (subgraph->values[value->fp32_id].flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) {
+          xnn_log_debug("Inserted FP32->FP16 Convert Node from tensor #%"PRIu32" to tensor #%"PRIu32,
+                        value->fp32_id, value->id);
+          const uint32_t output_node_id = output_node->id;
+          assert(output_node >= subgraph->nodes);
+          xnn_node_clear(output_node);
+          output_node->id = output_node_id;
+          xnn_init_convert_node(output_node, xnn_compute_type_fp32_to_fp16, value->fp32_id, value->id, 0 /* flags */);
+          output_node -= 1;
+        }
       }
     }
   }

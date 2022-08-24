@@ -373,6 +373,8 @@ size_t xnn_shape_multiply_non_channel_dims(
 enum xnn_status xnn_subgraph_optimize(xnn_subgraph_t subgraph, uint32_t flags);
 
 void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph);
+// Rewrites subgraph for FP16, returns true if success, false if rewrite failed.
+bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph);
 
 void xnn_node_clear(struct xnn_node* node);
 void xnn_value_clear(struct xnn_value* value);

@@ -349,8 +349,14 @@ class SubgraphTester {
     return *this;
   }
 
-  inline SubgraphTester& Rewrite() {
+  inline SubgraphTester& RewriteForNchw() {
     xnn_subgraph_rewrite_for_nchw(subgraph_.get());
+
+    return *this;
+  }
+
+  inline SubgraphTester& RewriteForFp16() {
+    EXPECT_TRUE(xnn_subgraph_rewrite_for_fp16(subgraph_.get()));
 
     return *this;
   }
@@ -359,8 +365,16 @@ class SubgraphTester {
     return subgraph_->values[value_id].layout;
   }
 
-  inline const xnn_node* const Node(uint32_t node_index) const {
-    return &subgraph_->nodes[node_index];
+  inline const xnn_value* const Value(uint32_t value_id) const {
+    return &subgraph_->values[value_id];
+  }
+
+  inline const xnn_node* const Node(uint32_t node_id) const {
+    return &subgraph_->nodes[node_id];
+  }
+
+  inline size_t NumNodes() const {
+    return subgraph_->num_nodes;
   }
 
  protected:

@@ -15657,6 +15657,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "subgraph_fp16_test",
+    srcs = [
+        "test/subgraph-fp16.cc",
+        "test/subgraph-tester.h",
+    ],
+    deps = [
+        ":XNNPACK",
+        ":node_type",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "jit_test",
     srcs = [
         "test/jit.cc",

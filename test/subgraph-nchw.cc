@@ -28,7 +28,7 @@ TEST(SUBGRAPH_NCHW, single_conv) {
           /*group_output_channels=*/ 32,
         }, 0, 1, 2, 3)
     .Optimize()
-    .Rewrite();
+    .RewriteForNchw();
 
   ASSERT_EQ(tester.GetLayout(0), xnn_layout_type_nhwc);
   ASSERT_EQ(tester.GetLayout(3), xnn_layout_type_nhwc);
@@ -54,7 +54,7 @@ TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
         }, 0, 1, 2, 3)
     .AddGlobalAveragePooling(3, 4)
     .Optimize()
-    .Rewrite();
+    .RewriteForNchw();
 
   ASSERT_EQ(tester.GetLayout(0), xnn_layout_type_nhwc);
   ASSERT_EQ(tester.GetLayout(3), xnn_layout_type_nhwc);
@@ -94,7 +94,7 @@ TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
         }, 3, 4, 5, 6)
     .AddGlobalAveragePooling(6, 7)
     .Optimize()
-    .Rewrite();
+    .RewriteForNchw();
 
   ASSERT_EQ(tester.GetLayout(0), xnn_layout_type_nhwc);
   ASSERT_EQ(tester.GetLayout(3), xnn_layout_type_nchw);
@@ -163,7 +163,7 @@ TEST(SUBGRAPH_NCHW, bottleneck) {
     .AddAddition(3, 12, 13)
     .AddGlobalAveragePooling(13, 14)
     .Optimize()
-    .Rewrite();
+    .RewriteForNchw();
 
   ASSERT_EQ(tester.GetLayout(0), xnn_layout_type_nhwc);
   ASSERT_EQ(tester.GetLayout(3), xnn_layout_type_nchw);
