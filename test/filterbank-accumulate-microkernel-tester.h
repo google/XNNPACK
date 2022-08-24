@@ -56,12 +56,10 @@ class FilterbankAccumulateMicrokernelTester {
       std::generate(filterbank_widths.begin(), filterbank_widths.end(), std::ref(u8rng));
       const size_t num_channels = std::accumulate(filterbank_widths.cbegin(), filterbank_widths.cend(), 0);
 
-      std::vector<uint32_t> input(num_channels + XNN_EXTRA_BYTES / sizeof(int16_t));
+      std::vector<uint32_t> input(num_channels);
+      std::vector<uint16_t> weights(num_channels * 2);
       std::generate(input.begin(), input.end(), std::ref(u32rng));
-
-      std::vector<uint16_t> weights(num_channels * 2 + XNN_EXTRA_BYTES / sizeof(uint16_t));
       std::generate(weights.begin(), weights.end(), std::ref(u16rng));
-
       std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));
 
       uint64_t weight_accumulator = 0;

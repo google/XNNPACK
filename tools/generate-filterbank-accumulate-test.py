@@ -47,15 +47,15 @@ TEST(${TEST_NAME}, rows_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, rows_eq_2) {
+TEST(${TEST_NAME}, rows_gt_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  FilterbankAccumulateMicrokernelTester()
-    .rows(2)
-    .Test(${", ".join(TEST_ARGS)});
+  for (size_t rows = 2; rows < 10; rows++) {
+    FilterbankAccumulateMicrokernelTester()
+      .rows(rows)
+      .Test(${", ".join(TEST_ARGS)});
+  }
 }
-
-
 """
 
 
@@ -96,7 +96,7 @@ def main(args):
       raise ValueError("expected a list of micro-kernels in the spec")
 
     tests = """\
-// Copyright 2019 Google LLC
+// Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
