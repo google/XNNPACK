@@ -16,44 +16,30 @@
 
 extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
-// Calculate integer logarithm, 32 Bit version
+#define LOG_SEGMENTS_LOG2 7
+#define LOG_SCALE 65536
+#define LOG_SCALE_LOG2 16
+#define LOG_COEFF 45426
+
 static uint32_t xnn_u32_log32(uint32_t x, uint32_t out_scale) {
-  const uint32_t log_scale = 65536;
-  const uint32_t log_scale_log2 = 16;
-  const uint32_t log_coeff = 45426;
-  const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;  // log2 of x
-  assert(log2x < 32);
+  const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;
+  int32_t frac = x - (UINT32_C(1) << log2x);
+  frac <<= math_doz_u32(LOG_SCALE_LOG2, log2x);
+  frac >>= math_doz_u32(log2x, LOG_SCALE_LOG2);
 
-  // Number of segments in the log lookup table. The table will be log_segments+1
-  // in length (with some padding).
-  const int log_segments_log2 = 7;
+  const uint32_t base_seg = frac >> (LOG_SCALE_LOG2 - LOG_SEGMENTS_LOG2);
+  const uint32_t seg_unit = (UINT32_C(1) << LOG_SCALE_LOG2) >> LOG_SEGMENTS_LOG2;
 
-  // Part 1
-  uint32_t frac = x - (UINT32_C(1) << log2x);
+  const int32_t c0 = xnn_table_vlog[base_seg];
+  const int32_t c1 = xnn_table_vlog[base_seg + 1];
+  const int32_t seg_base = seg_unit * base_seg;
+  const int32_t rel_pos = math_asr_s32((c1 - c0) * (frac - seg_base), LOG_SCALE_LOG2);
+  const uint32_t fraction = frac + c0 + rel_pos;
+  const uint32_t log2 = (log2x << LOG_SCALE_LOG2) + fraction;
+  const uint32_t round = LOG_SCALE >> 1;
+  const uint32_t loge = (math_mulext_u32(log2, LOG_COEFF) + round) >> LOG_SCALE_LOG2;
 
-  // Shift the fractional part into msb of 16 bits
-  frac =  XNN_UNPREDICTABLE(log2x < log_scale_log2) ?
-      (frac << (log_scale_log2 - log2x)) :
-      (frac >> (log2x - log_scale_log2));
-
-  // Part 2
-  const uint32_t base_seg = frac >> (log_scale_log2 - log_segments_log2);
-  const uint32_t seg_unit = (UINT32_C(1) << log_scale_log2) >> log_segments_log2;
-
-  assert(128 == (UINT32_C(1) << log_segments_log2));
-  assert(base_seg < (UINT32_C(1) << log_segments_log2));
-
-  const uint32_t c0 = xnn_table_vlog[base_seg];
-  const uint32_t c1 = xnn_table_vlog[base_seg + 1];
-  const uint32_t seg_base = seg_unit * base_seg;
-  const uint32_t rel_pos = ((c1 - c0) * (frac - seg_base)) >> log_scale_log2;
-  const uint32_t fraction =  frac + c0 + rel_pos;
-
-  const uint32_t log2 = (log2x << log_scale_log2) + fraction;
-  const uint32_t round = log_scale >> 1;
-  const uint32_t loge = (math_mulext_u32(log_coeff, log2) + round) >> log_scale_log2;
-  // Finally scale to our output scale
-  const uint32_t loge_scaled = (out_scale * loge + round) >> log_scale_log2;
+  const uint32_t loge_scaled = (out_scale * loge + round) >> LOG_SCALE_LOG2;
   return loge_scaled;
 }
 
@@ -75,7 +61,7 @@ void xnn_u32_vlog_ukernel__scalar_x1(
       const uint32_t vi = *input++;
       const uint32_t scaled = vi << input_lshift;
 
-      const uint32_t log_value = scaled ? xnn_u32_log32(scaled, output_scale) : 0;
+      const uint32_t log_value = XNN_LIKELY(scaled != 0) ? xnn_u32_log32(scaled, output_scale) : 0;
 
       const uint32_t vout = math_min_u32(log_value, (uint32_t) INT16_MAX);
       *output++ = (uint16_t) vout;

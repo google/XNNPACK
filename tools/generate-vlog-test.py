@@ -36,7 +36,7 @@ def split_ukernel_name(name):
 
 
 VLOG_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
+TEST(${TEST_NAME}, DISABLED_batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   VLogMicrokernelTester()
@@ -45,7 +45,7 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
 }
 
 $if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
+  TEST(${TEST_NAME}, DISABLED_batch_div_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
@@ -55,7 +55,7 @@ $if BATCH_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
+  TEST(${TEST_NAME}, DISABLED_batch_lt_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
@@ -65,7 +65,7 @@ $if BATCH_TILE > 1:
     }
   }
 
-TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, DISABLED_batch_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
@@ -75,7 +75,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   }
 }
 
-TEST(${TEST_NAME}, input_lshift) {
+TEST(${TEST_NAME}, DISABLED_input_lshift) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t input_lshift = 0; input_lshift < 32; input_lshift++) {
@@ -86,7 +86,7 @@ TEST(${TEST_NAME}, input_lshift) {
   }
 }
 
-TEST(${TEST_NAME}, output_scale) {
+TEST(${TEST_NAME}, DISABLED_output_scale) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t output_scale = 0; output_scale < 65536; output_scale += ${next_prime(BATCH_TILE + 1)}) {
@@ -97,7 +97,7 @@ TEST(${TEST_NAME}, output_scale) {
   }
 }
 
-TEST(${TEST_NAME}, inplace) {
+TEST(${TEST_NAME}, DISABLED_inplace) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
