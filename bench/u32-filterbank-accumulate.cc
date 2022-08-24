@@ -67,6 +67,16 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({1, 13});
 }
 
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+BENCHMARK_CAPTURE(filterbank_accumulate, u32_aarch32_neon_x1,  xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x1,  benchmark::utils::CheckNEON)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(filterbank_accumulate, u32_aarch32_neon_x2,  xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x2,  benchmark::utils::CheckNEON)->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+BENCHMARK_CAPTURE(filterbank_accumulate, u32_neon_x1,  xnn_u32_filterbank_accumulate_ukernel__neon_x1,  benchmark::utils::CheckNEON)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(filterbank_accumulate, u32_neon_x2,  xnn_u32_filterbank_accumulate_ukernel__neon_x2,  benchmark::utils::CheckNEON)->Apply(BenchmarkKernelSize)->UseRealTime();
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 BENCHMARK_CAPTURE(filterbank_accumulate, u32_scalar_x1, xnn_u32_filterbank_accumulate_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
