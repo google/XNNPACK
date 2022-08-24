@@ -2708,8 +2708,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/u8-maxpool/9p8x-minmax-neon-c16.c
   src/u8-rmax/neon.c
   src/u8-vclamp/neon-x64.c
-  src/u32-filterbank-accumulate/gen/neon-x1.c
-  src/u32-filterbank-accumulate/gen/neon-x2.c
   src/xx-fill/neon-x64.c
   src/xx-pad/neon.c
   src/x8-transposec/gen/8x8-multi-dec-zip-neon.c
@@ -6750,9 +6748,7 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
-  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
-  src/u32-filterbank-accumulate/aarch32-neon-x1.S
-  src/u32-filterbank-accumulate/aarch32-neon-x2.S)
+  src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen-inc/1x8inc-minmax-aarch64-neonfp16arith-ld64.S

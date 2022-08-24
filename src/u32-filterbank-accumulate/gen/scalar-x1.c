@@ -50,6 +50,7 @@ void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(
 
     *output++ = weight_accumulator;
     weight_accumulator = unweight_accumulator;
+    unweight_accumulator = 0;
 
   } while (--rows != 0);
 }

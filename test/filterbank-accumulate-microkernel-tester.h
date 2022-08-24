@@ -76,6 +76,7 @@ class FilterbankAccumulateMicrokernelTester {
         }
         output_ref[m] = weight_accumulator;
         weight_accumulator = unweight_accumulator;
+        unweight_accumulator = 0;
       }
 
       // Call optimized micro-kernel.
