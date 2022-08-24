@@ -1687,8 +1687,7 @@ typedef void (*xnn_cs16_bfly4_ukernel_function)(
 
 typedef void (*xnn_cs16_fftr_ukernel_function)(
     size_t samples,
-    const int16_t* input,
-    int16_t* output,
+    int16_t* data,
     const int16_t* twiddle);
 
 

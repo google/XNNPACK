@@ -33,17 +33,14 @@ void cs16_fftr(
   assert(samples % 2 == 0);
   const size_t sample_size = samples * 2 + 2;
 
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> input(
-      sample_size + XNN_EXTRA_BYTES / sizeof(int16_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> output(sample_size);
+  std::vector<int16_t, AlignedAllocator<int16_t, 64>> data(sample_size + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::vector<int16_t, AlignedAllocator<int16_t, 64>> twiddle(samples);
 
-  std::iota(input.begin(), input.end(), 0);
-  std::iota(output.begin(), output.end(), 1);
+  std::iota(data.begin(), data.end(), 0);
   std::iota(twiddle.begin(), twiddle.end(), 2);
 
   for (auto _ : state) {
-    fftr(samples, input.data(), output.data(), twiddle.data());
+    fftr(samples, data.data(), twiddle.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
