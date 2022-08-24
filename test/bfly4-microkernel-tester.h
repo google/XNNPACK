@@ -215,11 +215,11 @@ class BFly4MicrokernelTester {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
-    const size_t fft_size = samples() == 1 ? 1 : (samples() * stride()) * 4;  // 4 for bfly4.
+    const size_t fft_size = (samples() == 1 ? 1 : (samples() * stride())) * 4;  // 4 for bfly4.
 
     // 256 complex numbers = fft_size * 2 = 512
-    std::vector<int16_t> y(fft_size * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> y_ref(fft_size * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> y(fft_size * 2);
+    std::vector<int16_t> y_ref(fft_size * 2);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(y.begin(), y.end(), std::ref(i16rng));
