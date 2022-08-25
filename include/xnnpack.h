@@ -337,8 +337,9 @@ enum xnn_status xnn_define_convert(
 /// @param filter_id - Value ID for the filter tensor. The filter tensor must ge a 4D tensor defined in the @a subgraph
 ///                    with [groups * group_output_channels, kernel_height, kernel_width, group_input_channels]
 ///                    dimensions.
-/// @param bias_id - Value ID for the bias tensor. The bias tensor must be a 1D tensor defined in the @a subgraph with
-///                  [groups * group_output_channels] dimensions.
+/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for a 2D Convolution Node without a bias. If
+///                  present, the bias tensor must be a 1D tensor defined in the @a subgraph with [groups *
+///                  group_output_channels] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, OH, OW, groups * group_output_channels] dimensions.
 /// @param flags - binary features of the 2D Convolution Node. The only currently supported values is
