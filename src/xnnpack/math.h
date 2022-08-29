@@ -319,6 +319,6 @@ XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #else
     x = math_max_f64(x, 0.0);
     x = math_min_f64(x, 4294967295.0);
-    return (uint32_t) double_as_uint64(x + 0x1.0p+52);
+    return (uint32_t) double_as_uint64(x + 4503599627370496.0);  // 0x1.0p+52
   #endif
 }
