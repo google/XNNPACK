@@ -236,7 +236,7 @@ void xnn_pack_qs8_gemm_goi_w(
   assert(nr >= sr);
 
   const size_t skr = sr * kr;
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
@@ -257,16 +257,16 @@ void xnn_pack_qs8_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          int32_t ksum = 0;
+          uint32_t ksum = 0;
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
               const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ksum += (int32_t) kv;
+              ksum += (uint32_t) kv;
               ((int8_t*) packed_w)[kr_block_offset] = kv;
             }
           }
-          unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - ksum * izp);
+          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
           packed_w = (int8_t*) packed_w + kr;
         }
         packed_w = (int8_t*) packed_w + (nr - nr_block_size) * kr;
@@ -296,7 +296,7 @@ void xnn_pack_qs8_gemm_xw_goi_w(
   assert(nr >= sr);
 
   const size_t skr = sr * kr;
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
@@ -317,16 +317,16 @@ void xnn_pack_qs8_gemm_xw_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          int32_t ksum = 0;
+          uint32_t ksum = 0;
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
               const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ksum += (int32_t) kv;
+              ksum += (uint32_t) kv;
               ((int16_t*) packed_w)[kr_block_offset] = (int16_t) kv;
             }
           }
-          unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - ksum * izp);
+          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
           packed_w = (int16_t*) packed_w + kr;
         }
         packed_w = (int16_t*) packed_w + (nr - nr_block_size) * kr;
@@ -520,7 +520,7 @@ void xnn_pack_qs8_gemm_io_w(
   assert(nr >= sr);
 
   const size_t skr = sr * kr;
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
     const size_t nr_block_size = min(nc - nr_block_start, nr);
     int32_t* packed_b = (int32_t*) packed_w;
@@ -540,16 +540,16 @@ void xnn_pack_qs8_gemm_io_w(
 
     for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
       for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-        int32_t ksum = 0;
+        uint32_t ksum = 0;
         for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
           const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
           if (kc_idx < kc) {
             const int8_t kv = k[kc_idx * nc + (nr_block_start + nr_block_offset)];
-            ksum += (int32_t) kv;
+            ksum += (uint32_t) kv;
             ((int8_t*) packed_w)[kr_block_offset] = kv;
           }
         }
-        unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - ksum * izp);
+        unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
         packed_w = (int8_t*) packed_w + kr;
       }
       packed_w = (int8_t*) packed_w + (nr - nr_block_size) * kr;
@@ -788,7 +788,7 @@ void xnn_pack_qs8_conv_goki_w(
   assert(nr >= sr);
 
   const size_t skr = sr * kr;
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (int32_t) params->input_zero_point;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
@@ -810,16 +810,16 @@ void xnn_pack_qs8_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            int32_t ksum = 0;
+            uint32_t ksum = 0;
             for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
               const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
               if (kc_idx < kc) {
                 const int8_t kv = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-                ksum += (int32_t) kv;
+                ksum += (uint32_t) kv;
                 ((int8_t*) packed_w)[kr_block_offset] = kv;
               }
             }
-            unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - ksum * izp);
+            unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
             packed_w = (int8_t*) packed_w + kr;
           }
           packed_w = (int8_t*) packed_w + (nr - nr_block_size) * kr;
@@ -1029,7 +1029,7 @@ void xnn_pack_qs8_conv_kgo_w(
 {
   assert(nr >= sr);
 
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   for (size_t i = 0; i < g; i++) {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
@@ -1053,7 +1053,7 @@ void xnn_pack_qs8_conv_kgo_w(
           for (size_t nr_block_offset = (-sr_block_offset) & (sr - 1); nr_block_offset < nr_block_size; nr_block_offset += sr) {
             const int8_t kv = k[ki * g * nc + (nr_block_start + nr_block_offset)];
             ((int8_t*) packed_w)[nr_block_offset * kr] = kv;
-            unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - (int32_t) kv * izp);
+            unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - (uint32_t) kv * izp);
           }
           packed_w = (int8_t*) packed_w + nr * kr;
         }
@@ -1267,7 +1267,7 @@ void xnn_pack_qs8_deconv_goki_w(
   assert(nr >= sr);
 
   const size_t skr = sr * kr;
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   for (size_t i = 0; i < g; i++) {
     for (size_t oy = 0; oy < sh; oy++) {
       for (size_t ox = 0; ox < sw; ox++) {
@@ -1294,16 +1294,16 @@ void xnn_pack_qs8_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  int32_t ksum = 0;
+                  uint32_t ksum = 0;
                   for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
                     const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
                     if (kc_idx < kc) {
                       const int8_t kv = k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx];
-                      ksum += (int32_t) kv;
+                      ksum += (uint32_t) kv;
                       ((int8_t*) packed_w)[kr_block_offset] = kv;
                     }
                   }
-                  unaligned_indexed_store_s32(packed_b, nr_block_offset, unaligned_indexed_load_s32(packed_b, nr_block_offset) - ksum * izp);
+                  unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
                   packed_w = (int8_t*) packed_w + kr;
                 }
                 packed_w = (int8_t*) packed_w + (nr - nr_block_size) * kr;
@@ -1561,7 +1561,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (uint32_t) params->input_zero_point;
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
     int32_t* packed_b = (int32_t*) packed_w;
@@ -1582,7 +1582,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           const int8_t kv = k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          unaligned_indexed_store_s32(packed_b, cr_block_offset, unaligned_indexed_load_s32(packed_b, cr_block_offset) - (int32_t) kv * izp);
+          unaligned_indexed_store_u32(packed_b, cr_block_offset, unaligned_indexed_load_u32(packed_b, cr_block_offset) - (uint32_t) kv * izp);
           *((int8_t*) packed_w) = kv;
           packed_w = (void*) ((uintptr_t) packed_w + sizeof(int8_t));
         }
@@ -1759,7 +1759,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  const int32_t izp = (int32_t) params->input_zero_point;
+  const uint32_t izp = (int32_t) params->input_zero_point;
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
     int32_t* packed_b = (int32_t*) packed_w;
@@ -1780,7 +1780,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           const int8_t kv = k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          unaligned_indexed_store_s32(packed_b, cr_block_offset, unaligned_indexed_load_s32(packed_b, cr_block_offset) - (int32_t) kv * izp);
+          unaligned_indexed_store_u32(packed_b, cr_block_offset, unaligned_indexed_load_u32(packed_b, cr_block_offset) - (uint32_t) kv * izp);
           *((int8_t*) packed_w) = kv;
           packed_w = (void*) ((uintptr_t) packed_w + sizeof(int8_t));
         }
