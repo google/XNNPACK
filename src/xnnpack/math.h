@@ -303,6 +303,7 @@ XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
   #endif
 }
 
+#ifndef __cplusplus
 XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #if defined(__GNUC__) && defined(__arm__)
     float i;  // float instead of uint32_t because vcvt.u32.f64 writes to an S register
@@ -319,6 +320,7 @@ XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #else
     x = math_max_f64(x, 0.0);
     x = math_min_f64(x, 4294967295.0);
-    return (uint32_t) double_as_uint64(x + 4503599627370496.0);  // 0x1.0p+52
+    return (uint32_t) double_as_uint64(x + 0x1.0p+52);
   #endif
 }
+#endif
