@@ -30,12 +30,12 @@ void filterbank_accumulate(
   const size_t rows = state.range(0);
   const size_t batch = state.range(1);
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(batch + XNN_EXTRA_BYTES / sizeof(uint32_t));
+  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(batch);
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> weight_widths(rows);
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(batch * 2 + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(batch * 2);
   std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> output(rows);
   std::iota(input.begin(), input.end(), 0);
-  std::fill(weight_widths.begin(), weight_widths.end(), rows);
+  std::fill(weight_widths.begin(), weight_widths.end(), batch);
   std::iota(weights.begin(), weights.end(), 0);
   std::iota(output.begin(), output.end(), 0);
 
