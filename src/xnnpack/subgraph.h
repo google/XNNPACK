@@ -109,6 +109,19 @@ struct xnn_value {
   uint32_t fp32_id;
 };
 
+
+XNN_INLINE bool xnn_value_is_external(const struct xnn_value* value) {
+  return (value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0;
+}
+
+XNN_INLINE bool xnn_value_is_external_output(const struct xnn_value* value) {
+  return (value->flags & XNN_VALUE_FLAG_EXTERNAL_OUTPUT) != 0;
+}
+
+XNN_INLINE bool xnn_value_is_external_input(const struct xnn_value* value) {
+  return (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) != 0;
+}
+
 enum xnn_allocation_type {
   xnn_allocation_type_invalid = 0,
   /// Static data that is provided by caller, needs to outlive the xnn_runtime.
