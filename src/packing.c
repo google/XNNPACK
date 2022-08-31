@@ -1396,6 +1396,7 @@ void xnn_pack_qu8_deconv_goki_w(
 }
 
 void xnn_pack_f32_dwconv_ghw_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1428,11 +1429,13 @@ void xnn_pack_f32_dwconv_ghw_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_f16_dwconv_ghw_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1465,11 +1468,13 @@ void xnn_pack_f16_dwconv_ghw_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_f32_to_f16_dwconv_ghw_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1502,11 +1507,13 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_qu8_dwconv_ghw_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1546,11 +1553,13 @@ void xnn_pack_qu8_dwconv_ghw_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(uint8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
     packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_qs8_dwconv_ghw_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1589,11 +1598,13 @@ void xnn_pack_qs8_dwconv_ghw_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(int8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(int8_t));
     packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_f32_dwconv_hwg_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1626,11 +1637,13 @@ void xnn_pack_f32_dwconv_hwg_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_f16_dwconv_hwg_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1663,11 +1676,13 @@ void xnn_pack_f16_dwconv_hwg_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_f32_to_f16_dwconv_hwg_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1700,11 +1715,13 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
         packed_w += cr - cr_block_size;
       }
     }
+    packed_w += (primary_tile - (h * w)) * cr_block_size;
     packed_w = (uint16_t*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_qu8_dwconv_hwg_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1744,11 +1761,13 @@ void xnn_pack_qu8_dwconv_hwg_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(uint8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
     packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }
 
 void xnn_pack_qs8_dwconv_hwg_w(
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1787,6 +1806,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(int8_t));
       }
     }
+    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(int8_t));
     packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
   }
 }

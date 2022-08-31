@@ -443,6 +443,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         pack_dwconv_hwg_w(
+          dwconv_ukernel->primary_tile,
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
           kernel, bias, weights_ptr,
@@ -450,6 +451,7 @@ static enum xnn_status create_convolution2d_nhwc(
           packing_params);
       } else {
         pack_dwconv_ghw_w(
+          dwconv_ukernel->primary_tile,
           kernel_height, kernel_width,
           groups, dwconv_ukernel->channel_tile,
           kernel, bias, weights_ptr,
