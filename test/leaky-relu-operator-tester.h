@@ -23,6 +23,10 @@
 
 #include <xnnpack.h>
 
+static uint16_t flush_fp16_denormal_to_zero(uint16_t v) {
+  return (v & UINT16_C(0x7C00)) == 0 ? v & UINT16_C(0x8000) : v;
+};
+
 
 class LeakyReLUOperatorTester {
  public:
@@ -144,7 +148,9 @@ class LeakyReLUOperatorTester {
     std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() {
+        return flush_fp16_denormal_to_zero(fp16_ieee_from_fp32_value(f32dist(rng)));
+      });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
       const uint16_t negative_slope_as_half = fp16_ieee_from_fp32_value(negative_slope());
       const float negative_slope_as_float = fp16_ieee_to_fp32_value(negative_slope_as_half);
