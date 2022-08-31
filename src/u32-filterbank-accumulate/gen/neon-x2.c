@@ -30,12 +30,10 @@ void xnn_u32_filterbank_accumulate_ukernel__neon_x2(
   assert(weights != NULL);
   assert(output != NULL);
 
-  uint64x2_t weight_accumulator = vdupq_n_u64(0);
-
-
   // Compute unweight as initial weight
   size_t n = (size_t) *weight_widths++;
   assert(n != 0);
+  uint64x2_t weight_accumulator = vdupq_n_u64(0);
 
   do {
     const uint32x2_t vi = vld1_dup_u32(input); input += 1;
@@ -45,13 +43,12 @@ void xnn_u32_filterbank_accumulate_ukernel__neon_x2(
     weight_accumulator = vmlal_u32(weight_accumulator, vw32, vi);
   } while (--n != 0);
 
-  weight_accumulator = vcombine_u64(vget_high_u64(weight_accumulator), vdup_n_u64(0));
-
   do {
-    n = (size_t) *weight_widths++;
+    size_t n = (size_t) *weight_widths++;
     assert(n != 0);
+    weight_accumulator = vcombine_u64(vget_high_u64(weight_accumulator), vdup_n_u64(0));
 
-    for (;n >= 2; n -= 2) {
+    for (; n >= 2; n -= 2) {
       const uint32x2_t vi = vld1_u32(input); input += 2;
       const uint16x4_t vw = vld1_u16(weights); weights += 4;
       const uint32x4_t vw32 = vmovl_u16(vw);
@@ -69,7 +66,6 @@ void xnn_u32_filterbank_accumulate_ukernel__neon_x2(
     }
 
     vst1_u64(output, vget_low_u64(weight_accumulator));  output += 1;
-    weight_accumulator = vcombine_u64(vget_high_u64(weight_accumulator), vdup_n_u64(0));
 
   } while (--rows != 0);
 }
