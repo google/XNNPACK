@@ -48,7 +48,7 @@ class FilterbankAccumulateMicrokernelTester {
     auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
-    std::vector<uint8_t> filterbank_widths(rows());
+    std::vector<uint8_t> filterbank_widths(rows() + 1);
     std::vector<uint64_t> output(rows());
     std::vector<uint64_t> output_ref(rows());
 
@@ -65,14 +65,16 @@ class FilterbankAccumulateMicrokernelTester {
       uint64_t weight_accumulator = 0;
       uint64_t unweight_accumulator = 0;
       size_t i = 0;
-      for (size_t m = 0; m < rows(); m++) {
+      for (size_t m = 0; m <= rows(); m++) {
         const size_t weight_width = filterbank_widths[m];
         for (size_t n = 0; n < weight_width; n++) {
           weight_accumulator += uint64_t(input[i]) * uint64_t(weights[i * 2]);
           unweight_accumulator += uint64_t(input[i]) * uint64_t(weights[i * 2 + 1]);
           i += 1;
         }
-        output_ref[m] = weight_accumulator;
+        if (m != 0) {
+          output_ref[m - 1] = weight_accumulator;
+        }
         weight_accumulator = unweight_accumulator;
         unweight_accumulator = 0;
       }

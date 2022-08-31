@@ -31,6 +31,20 @@ void xnn_u32_filterbank_accumulate_ukernel__scalar_x1(
   uint64_t weight_accumulator = 0;
   uint64_t unweight_accumulator = 0;
 
+  // compute unweight as initial weight
+  size_t n = (size_t) *weight_widths++;
+  assert(n != 0);
+  do {
+    const uint32_t vi = *input++;
+    const uint32_t vu = (uint32_t) weights[1];  // unweight
+    weights += 2;
+
+    const uint64_t vuacc = math_mulext_u32(vi, vu);
+
+    weight_accumulator += vuacc;
+
+  } while (--n != 0);
+
   do {
     size_t n = (size_t) *weight_widths++;
     assert(n != 0);

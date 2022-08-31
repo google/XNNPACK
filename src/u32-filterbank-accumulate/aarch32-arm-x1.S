@@ -31,13 +31,29 @@ BEGIN_FUNCTION xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1
 #endif
         LDR     r12, [sp]               // output
         PUSH    {r4,r5,r6,r7,r8,r9,r10,r11}  // push 32 bytes
+
         MOV     r8, 0                   // weight_accumulator
         MOV     r9, 0
+
+        // Compute unweight as initial weight
+        LDRB    r4, [r2], #1            // weight_widths
 0:
+        LDR     r5, [r3], #4            // weight+unweight
+        LDR     r6, [r1], #4            // input
+        SUBS    r4, r4, #1
+        UXTH    r5, r5, ror #16         // unweight
+        UMLAL   r8, r9, r6, r5          // initial weight_accumulator
+        BHI     0b
+
+        SUBS    r0, r0, #1
+        BLS     3f
+
+1:
         LDRB    r4, [r2], #1            // weight_widths
         MOV     r10, 0                  // unweight_accumulator
         MOV     r11, 0
-1:
+
+2:
         LDR     r5, [r3], #4            // weight+unweight
         LDR     r6, [r1], #4            // input
         SUBS    r4, r4, #1
@@ -45,13 +61,25 @@ BEGIN_FUNCTION xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1
         UXTH    r5, r5, ror #16         // unweight
         UMLAL   r8,  r9,  r6, r7        // weight_accumulator
         UMLAL   r10, r11, r6, r5        // unweight_accumulator
-        BHI     1b
+        BHI     2b
 
         STMIA   r12!, {r8, r9}
         SUBS    r0, r0, #1
         MOV     r8, r10                 // weight_accumulator = unweight_accumulator
         MOV     r9, r11
-        BNE     0b
+        BHI     1b
+
+3:
+        LDRB    r4, [r2], #1            // weight_widths
+4:
+        LDR     r5, [r3], #4            // weight+unweight
+        LDR     r6, [r1], #4            // input
+        SUBS    r4, r4, #1
+        UXTH    r7, r5                  // weight
+        UMLAL   r8,  r9,  r6, r7        // weight_accumulator
+        BHI     4b
+
+        STMIA   r12!, {r8, r9}
 
         POP     {r4,r5,r6,r7,r8,r9,r10,r11}
         BX      lr

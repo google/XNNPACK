@@ -29,10 +29,11 @@ void filterbank_accumulate(
   }
   const size_t rows = state.range(0);
   const size_t batch = state.range(1);
+  const size_t input_size = (rows + 1) * batch;
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(batch);
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> weight_widths(rows);
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(batch * 2);
+  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(input_size);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> weight_widths(rows + 1);
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(input_size * 2);
   std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> output(rows);
   std::iota(input.begin(), input.end(), 0);
   std::fill(weight_widths.begin(), weight_widths.end(), batch);
