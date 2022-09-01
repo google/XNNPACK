@@ -327,13 +327,13 @@ enum xnn_status xnn_create_runtime_v4(
       blob->size = xnn_tensor_get_size(subgraph, i);
       blob->data = (void*) (uintptr_t) value->data;
       if (blob->data == NULL) {
-        if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) == 0) {
+        if (xnn_value_is_external(value)) {
+          // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
+          blob->allocation_type = xnn_allocation_type_external;
+        } else {
           // Value is purely internal to the runtime, and must be allocated in its workspace.
           xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
           blob->allocation_type = xnn_allocation_type_workspace;
-        } else {
-          // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
-          blob->allocation_type = xnn_allocation_type_external;
         }
       } else {
         blob->allocation_type = xnn_allocation_type_static;
