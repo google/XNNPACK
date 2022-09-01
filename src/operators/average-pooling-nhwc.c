@@ -740,7 +740,7 @@ static enum xnn_status setup_average_pooling2d(
       }
       average_pooling_op->indirection_buffer = indirection_buffer;
 
-      xnn_indirection_init_dwconv2d(average_pooling_op, step_height, step_width, log2_data_element_size);
+      xnn_indirection_init_dwconv2d(average_pooling_op, step_height, step_width, primary_tile, log2_data_element_size);
 
       average_pooling_op->last_input = input;
       average_pooling_op->last_input_height = input_height;

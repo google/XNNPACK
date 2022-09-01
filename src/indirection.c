@@ -202,6 +202,7 @@ void xnn_indirection_init_dwconv2d(
   xnn_operator_t op,
   size_t step_height,
   size_t step_width,
+  size_t primary_tile,
   uint32_t log2_element_size)
 {
   const void** indirection_buffer = op->indirection_buffer;
@@ -246,6 +247,12 @@ void xnn_indirection_init_dwconv2d(
         }
       }
     }
+  }
+
+  const void* last_output_pixel = indirection_buffer[output_height * step_height - 1];
+  const size_t last_kernel_index = output_height * step_height - (kernel_height * kernel_width);
+  for (size_t tile_index = kernel_height * kernel_width; tile_index < primary_tile; tile_index++) {
+    indirection_buffer[last_kernel_index + tile_index] = last_output_pixel;
   }
 }
 

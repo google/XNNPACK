@@ -1711,8 +1711,11 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t output_width = convolution_op->output_width;
       const size_t step_width = convolution_op->dilation_width == 1 ? convolution_op->stride_width : kernel_width;
       const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
+      const size_t primary_tile = convolution_op->ukernel.dwconv.primary_tile;
       if (input_height != convolution_op->last_input_height || input_width != convolution_op->last_input_width) {
-        const size_t indirection_buffer_size = sizeof(void*) * output_height * step_height;
+        // Micro-kernel will read (primary_tile - kernel_size) elements after the end of indirection buffer.
+        const size_t indirection_buffer_size =
+          sizeof(void*) * (primary_tile - kernel_size + output_height * step_height);
 
         const void** indirection_buffer =
           (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
@@ -1723,7 +1726,7 @@ static enum xnn_status setup_convolution2d_nhwc(
         }
         convolution_op->indirection_buffer = indirection_buffer;
 
-        xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, log2_input_element_size);
+        xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, primary_tile, log2_input_element_size);
 
         convolution_op->last_input = input;
         convolution_op->last_input_height = input_height;
