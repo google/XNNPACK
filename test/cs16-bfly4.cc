@@ -18,12 +18,12 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(CS16_BFLY4M1__NEON, samples_eq_1) {
+  TEST(CS16_BFLY4_SAMPLES1__NEON, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     BFly4MicrokernelTester()
       .samples(1)
       .stride(64)
-      .Test(xnn_cs16_bfly4m1_ukernel__neon);
+      .Test(xnn_cs16_bfly4_samples1_ukernel__neon);
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -144,9 +144,9 @@ TEST(CS16_BFLY4__SCALAR_X4, samples_eq_64) {
 }
 
 
-TEST(CS16_BFLY4M1__SCALAR, samples_eq_1) {
+TEST(CS16_BFLY4_SAMPLES1__SCALAR, samples_eq_1) {
   BFly4MicrokernelTester()
     .samples(1)
     .stride(64)
-    .Test(xnn_cs16_bfly4m1_ukernel__scalar);
+    .Test(xnn_cs16_bfly4_samples1_ukernel__scalar);
 }

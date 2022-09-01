@@ -11,12 +11,12 @@
 #include <xnnpack/fft.h>
 
 
-void xnn_cs16_bfly4m1_ukernel__scalar(
+void xnn_cs16_bfly4_samples1_ukernel__scalar(
     size_t samples,
     int16_t* data,
     const size_t stride,
-    const int16_t* twiddle) {
-
+    const int16_t* twiddle)
+{
   assert(samples == 1);
   assert(data != NULL);
   assert(stride != 0);

@@ -19,15 +19,15 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
     size_t samples,
     int16_t* data,
     const size_t stride,
-    const int16_t* twiddle) {
-
+    const int16_t* twiddle)
+{
   const int16_t* tw1 = twiddle;
-  const int16_t* tw2 = tw1;
-  const int16_t* tw3 = tw1;
-  int16_t* out0 = data;
-  int16_t* out1 = data + samples * 2;
-  int16_t* out2 = data + samples * 4;
-  int16_t* out3 = data + samples * 6;
+  const int16_t* tw2 = twiddle;
+  const int16_t* tw3 = twiddle;
+  int16_t* data0 = data;
+  int16_t* data1 = data + samples * 2;
+  int16_t* data2 = data + samples * 4;
+  int16_t* data3 = data + samples * 6;
 
   assert(samples != 0);
   assert(data != NULL);
@@ -35,38 +35,38 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
   assert(twiddle != NULL);
 
   for (; samples >= 4; samples -= 4) {
-    int32_t vout0r0 = (int32_t) out0[0];
-    int32_t vout0i0 = (int32_t) out0[1];
-    int32_t vout0r1 = (int32_t) out0[2];
-    int32_t vout0i1 = (int32_t) out0[3];
-    int32_t vout0r2 = (int32_t) out0[4];
-    int32_t vout0i2 = (int32_t) out0[5];
-    int32_t vout0r3 = (int32_t) out0[6];
-    int32_t vout0i3 = (int32_t) out0[7];
-    int32_t vout1r0 = (int32_t) out1[0];
-    int32_t vout1i0 = (int32_t) out1[1];
-    int32_t vout1r1 = (int32_t) out1[2];
-    int32_t vout1i1 = (int32_t) out1[3];
-    int32_t vout1r2 = (int32_t) out1[4];
-    int32_t vout1i2 = (int32_t) out1[5];
-    int32_t vout1r3 = (int32_t) out1[6];
-    int32_t vout1i3 = (int32_t) out1[7];
-    int32_t vout2r0 = (int32_t) out2[0];
-    int32_t vout2i0 = (int32_t) out2[1];
-    int32_t vout2r1 = (int32_t) out2[2];
-    int32_t vout2i1 = (int32_t) out2[3];
-    int32_t vout2r2 = (int32_t) out2[4];
-    int32_t vout2i2 = (int32_t) out2[5];
-    int32_t vout2r3 = (int32_t) out2[6];
-    int32_t vout2i3 = (int32_t) out2[7];
-    int32_t vout3r0 = (int32_t) out3[0];
-    int32_t vout3i0 = (int32_t) out3[1];
-    int32_t vout3r1 = (int32_t) out3[2];
-    int32_t vout3i1 = (int32_t) out3[3];
-    int32_t vout3r2 = (int32_t) out3[4];
-    int32_t vout3i2 = (int32_t) out3[5];
-    int32_t vout3r3 = (int32_t) out3[6];
-    int32_t vout3i3 = (int32_t) out3[7];
+    int32_t vout0r0 = (int32_t) data0[0];
+    int32_t vout0i0 = (int32_t) data0[1];
+    int32_t vout0r1 = (int32_t) data0[2];
+    int32_t vout0i1 = (int32_t) data0[3];
+    int32_t vout0r2 = (int32_t) data0[4];
+    int32_t vout0i2 = (int32_t) data0[5];
+    int32_t vout0r3 = (int32_t) data0[6];
+    int32_t vout0i3 = (int32_t) data0[7];
+    int32_t vout1r0 = (int32_t) data1[0];
+    int32_t vout1i0 = (int32_t) data1[1];
+    int32_t vout1r1 = (int32_t) data1[2];
+    int32_t vout1i1 = (int32_t) data1[3];
+    int32_t vout1r2 = (int32_t) data1[4];
+    int32_t vout1i2 = (int32_t) data1[5];
+    int32_t vout1r3 = (int32_t) data1[6];
+    int32_t vout1i3 = (int32_t) data1[7];
+    int32_t vout2r0 = (int32_t) data2[0];
+    int32_t vout2i0 = (int32_t) data2[1];
+    int32_t vout2r1 = (int32_t) data2[2];
+    int32_t vout2i1 = (int32_t) data2[3];
+    int32_t vout2r2 = (int32_t) data2[4];
+    int32_t vout2i2 = (int32_t) data2[5];
+    int32_t vout2r3 = (int32_t) data2[6];
+    int32_t vout2i3 = (int32_t) data2[7];
+    int32_t vout3r0 = (int32_t) data3[0];
+    int32_t vout3i0 = (int32_t) data3[1];
+    int32_t vout3r1 = (int32_t) data3[2];
+    int32_t vout3i1 = (int32_t) data3[3];
+    int32_t vout3r2 = (int32_t) data3[4];
+    int32_t vout3i2 = (int32_t) data3[5];
+    int32_t vout3r3 = (int32_t) data3[6];
+    int32_t vout3i3 = (int32_t) data3[7];
 
     const int32_t vtw1r0 = (const int32_t) tw1[0];
     const int32_t vtw1i0 = (const int32_t) tw1[1];
@@ -229,54 +229,54 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
     vout3i2 = vtmp5i2 + vtmp4r2;
     vout3i3 = vtmp5i3 + vtmp4r3;
 
-    out0[0] = (int16_t) vout0r0;
-    out0[1] = (int16_t) vout0i0;
-    out0[2] = (int16_t) vout0r1;
-    out0[3] = (int16_t) vout0i1;
-    out0[4] = (int16_t) vout0r2;
-    out0[5] = (int16_t) vout0i2;
-    out0[6] = (int16_t) vout0r3;
-    out0[7] = (int16_t) vout0i3;
-    out0 += 4 * 2;
-    out1[0] = (int16_t) vout1r0;
-    out1[1] = (int16_t) vout1i0;
-    out1[2] = (int16_t) vout1r1;
-    out1[3] = (int16_t) vout1i1;
-    out1[4] = (int16_t) vout1r2;
-    out1[5] = (int16_t) vout1i2;
-    out1[6] = (int16_t) vout1r3;
-    out1[7] = (int16_t) vout1i3;
-    out1 += 4 * 2;
-    out2[0] = (int16_t) vout2r0;
-    out2[1] = (int16_t) vout2i0;
-    out2[2] = (int16_t) vout2r1;
-    out2[3] = (int16_t) vout2i1;
-    out2[4] = (int16_t) vout2r2;
-    out2[5] = (int16_t) vout2i2;
-    out2[6] = (int16_t) vout2r3;
-    out2[7] = (int16_t) vout2i3;
-    out2 += 4 * 2;
-    out3[0] = (int16_t) vout3r0;
-    out3[1] = (int16_t) vout3i0;
-    out3[2] = (int16_t) vout3r1;
-    out3[3] = (int16_t) vout3i1;
-    out3[4] = (int16_t) vout3r2;
-    out3[5] = (int16_t) vout3i2;
-    out3[6] = (int16_t) vout3r3;
-    out3[7] = (int16_t) vout3i3;
-    out3 += 4 * 2;
+    data0[0] = (int16_t) vout0r0;
+    data0[1] = (int16_t) vout0i0;
+    data0[2] = (int16_t) vout0r1;
+    data0[3] = (int16_t) vout0i1;
+    data0[4] = (int16_t) vout0r2;
+    data0[5] = (int16_t) vout0i2;
+    data0[6] = (int16_t) vout0r3;
+    data0[7] = (int16_t) vout0i3;
+    data0 += 4 * 2;
+    data1[0] = (int16_t) vout1r0;
+    data1[1] = (int16_t) vout1i0;
+    data1[2] = (int16_t) vout1r1;
+    data1[3] = (int16_t) vout1i1;
+    data1[4] = (int16_t) vout1r2;
+    data1[5] = (int16_t) vout1i2;
+    data1[6] = (int16_t) vout1r3;
+    data1[7] = (int16_t) vout1i3;
+    data1 += 4 * 2;
+    data2[0] = (int16_t) vout2r0;
+    data2[1] = (int16_t) vout2i0;
+    data2[2] = (int16_t) vout2r1;
+    data2[3] = (int16_t) vout2i1;
+    data2[4] = (int16_t) vout2r2;
+    data2[5] = (int16_t) vout2i2;
+    data2[6] = (int16_t) vout2r3;
+    data2[7] = (int16_t) vout2i3;
+    data2 += 4 * 2;
+    data3[0] = (int16_t) vout3r0;
+    data3[1] = (int16_t) vout3i0;
+    data3[2] = (int16_t) vout3r1;
+    data3[3] = (int16_t) vout3i1;
+    data3[4] = (int16_t) vout3r2;
+    data3[5] = (int16_t) vout3i2;
+    data3[6] = (int16_t) vout3r3;
+    data3[7] = (int16_t) vout3i3;
+    data3 += 4 * 2;
   }
 
   if XNN_UNLIKELY(samples != 0) {
     do {
-      int32_t vout0r = (int32_t) out0[0];
-      int32_t vout0i = (int32_t) out0[1];
-      int32_t vout1r = (int32_t) out1[0];
-      int32_t vout1i = (int32_t) out1[1];
-      int32_t vout2r = (int32_t) out2[0];
-      int32_t vout2i = (int32_t) out2[1];
-      int32_t vout3r = (int32_t) out3[0];
-      int32_t vout3i = (int32_t) out3[1];
+      int32_t vout0r = (int32_t) data0[0];
+      int32_t vout0i = (int32_t) data0[1];
+      int32_t vout1r = (int32_t) data1[0];
+      int32_t vout1i = (int32_t) data1[1];
+      int32_t vout2r = (int32_t) data2[0];
+      int32_t vout2i = (int32_t) data2[1];
+      int32_t vout3r = (int32_t) data3[0];
+      int32_t vout3i = (int32_t) data3[1];
 
       const int32_t vtw1r = (const int32_t) tw1[0];
       const int32_t vtw1i = (const int32_t) tw1[1];
@@ -324,18 +324,18 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
       vout3r = vtmp5r - vtmp4i;
       vout3i = vtmp5i + vtmp4r;
 
-      out0[0] = (int16_t) vout0r;
-      out0[1] = (int16_t) vout0i;
-      out1[0] = (int16_t) vout1r;
-      out1[1] = (int16_t) vout1i;
-      out2[0] = (int16_t) vout2r;
-      out2[1] = (int16_t) vout2i;
-      out3[0] = (int16_t) vout3r;
-      out3[1] = (int16_t) vout3i;
-      out0 += 2;
-      out1 += 2;
-      out2 += 2;
-      out3 += 2;
+      data0[0] = (int16_t) vout0r;
+      data0[1] = (int16_t) vout0i;
+      data1[0] = (int16_t) vout1r;
+      data1[1] = (int16_t) vout1i;
+      data2[0] = (int16_t) vout2r;
+      data2[1] = (int16_t) vout2i;
+      data3[0] = (int16_t) vout3r;
+      data3[1] = (int16_t) vout3i;
+      data0 += 2;
+      data1 += 2;
+      data2 += 2;
+      data3 += 2;
     } while(--samples != 0);
   }
 }

@@ -27,17 +27,19 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  m = 0
-  samples_tile = 1
-  match = re.fullmatch(r"xnn_cs16_bfly4(m(\d+))?_ukernel__(.+)(_x(\d+))?", name)
-  assert match is not None
+  match = re.fullmatch(r"xnn_cs16_bfly4(_samples(\d+))?_ukernel__(.+)(_x(\d+))?", name)
+  assert match is not None, name
   if match.group(2):
-    m = int(match.group(2))
+    samples = int(match.group(2))
+  else:
+    samples = 0
   if match.group(5):
     samples_tile = int(match.group(5))
+  else:
+    samples_tile = 1
 
   arch, isa = xnncommon.parse_target_name(target_name=match.group(3))
-  return m, samples_tile, arch, isa
+  return samples, samples_tile, arch, isa
 
 
 BFLY4_TEST_TEMPLATE = """\
@@ -50,7 +52,7 @@ TEST(${TEST_NAME}, samples_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if M == 0:
+$if SAMPLES == 0:
   TEST(${TEST_NAME}, samples_eq_4) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -81,12 +83,12 @@ $if M == 0:
 """
 
 
-def generate_test_cases(ukernel, m, samples_tile, isa):
+def generate_test_cases(ukernel, samples, samples_tile, isa):
   """Generates all tests cases for a BFly4 micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
-    m: fixed number of samples for specialized m1 microkernel.
+    samples: fixed number of samples for specialized samples1 microkernel.
     samples_tile: Number of samples processed per one iteration of the inner
                   loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
@@ -101,7 +103,7 @@ def generate_test_cases(ukernel, m, samples_tile, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "DATATYPE": datatype,
-      "M": m,
+      "SAMPLES": samples,
       "SAMPLE_TILE": samples_tile,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
@@ -138,12 +140,12 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      m, samples_tile, arch, isa = split_ukernel_name(name)
+      samples, samples_tile, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
-      test_case = generate_test_cases(name, m, samples_tile, isa)
+      test_case = generate_test_cases(name, samples, samples_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

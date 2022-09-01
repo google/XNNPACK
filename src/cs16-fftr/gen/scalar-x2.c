@@ -18,8 +18,8 @@
 void xnn_cs16_fftr_ukernel__scalar_x2(
     size_t samples,
     int16_t* data,
-    const int16_t* twiddle) {
-
+    const int16_t* twiddle)
+{
   assert(samples >= 2);
   assert(samples % 2 == 0);
   assert(data != NULL);
