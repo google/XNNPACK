@@ -8593,10 +8593,9 @@ JIT_AARCH64_SRCS = [
     "src/f32-igemm/6x8-aarch64-neonfma-ld128.cc",
 ]
 
-INTERNAL_MICROKERNEL_HDRS = [
+MICROKERNEL_HDRS = [
     "src/xnnpack/argmaxpool.h",
     "src/xnnpack/avgpool.h",
-    "src/xnnpack/cache.h",
     "src/xnnpack/conv.h",
     "src/xnnpack/dwconv.h",
     "src/xnnpack/fft.h",
@@ -8606,9 +8605,7 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/gemm.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",
-    "src/xnnpack/intrinsics-polyfill.h",
     "src/xnnpack/lut.h",
-    "src/xnnpack/math-stubs.h",
     "src/xnnpack/maxpool.h",
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
@@ -8618,7 +8615,6 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/raddexpminusmax.h",
     "src/xnnpack/raddextexp.h",
     "src/xnnpack/raddstoreexpminusmax.h",
-    "src/xnnpack/requantization-stubs.h",
     "src/xnnpack/rmax.h",
     "src/xnnpack/rmaxabs.h",
     "src/xnnpack/spmm.h",
@@ -8639,6 +8635,25 @@ INTERNAL_MICROKERNEL_HDRS = [
     "src/xnnpack/window.h",
     "src/xnnpack/zip.h",
 ]
+
+INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
+    "src/xnnpack/cache.h",
+    "src/xnnpack/intrinsics-polyfill.h",
+    "src/xnnpack/math-stubs.h",
+    "src/xnnpack/requantization-stubs.h",
+]
+
+filegroup(
+    name = "microkernel_source_files",
+    data = ALL_SCALAR_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_AARCH64_NEON_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_XOP_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + ["src/microparams-init.c"],
+    visibility = xnnpack_visibility(),
+)
+
+filegroup(
+    name = "microkernel_header_files",
+    data = MICROKERNEL_HDRS + ["src/xnnpack/microparams.h"],
+    visibility = xnnpack_visibility(),
+)
 
 # Collection of internal microkernel related headers that declares all the microkernel functions.
 xnnpack_cc_library(
