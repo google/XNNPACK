@@ -610,7 +610,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-bfly4/gen/scalar-x2.c
   src/cs16-bfly4/gen/scalar-x3.c
   src/cs16-bfly4/gen/scalar-x4.c
-  src/cs16-bfly4/scalar-samples1.c
+  src/cs16-bfly4/samples1-scalar.c
   src/cs16-fftr/gen/scalar-x1.c
   src/cs16-fftr/gen/scalar-x2.c
   src/cs16-fftr/gen/scalar-x3.c
@@ -1647,7 +1647,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x32-zip/x4-neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
-  src/cs16-bfly4/neon-samples1.c
+  src/cs16-bfly4/samples1-neon.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x4.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x8.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x12.c
