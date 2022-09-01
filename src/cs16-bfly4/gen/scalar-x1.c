@@ -75,8 +75,8 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
 
       const int32_t vtmp5r = vout0r - vtmp1r;
       const int32_t vtmp5i = vout0i - vtmp1i;
-      vout0r  += vtmp1r;
-      vout0i  += vtmp1i;
+      vout0r += vtmp1r;
+      vout0i += vtmp1i;
       const int32_t vtmp3r = vtmp0r + vtmp2r;
       const int32_t vtmp3i = vtmp0i + vtmp2i;
       const int32_t vtmp4r = vtmp0r - vtmp2r;

@@ -139,12 +139,12 @@ void xnn_cs16_bfly4_ukernel__scalar_x3(
     const int32_t vtmp5i0 = vout0i0 - vtmp1i0;
     const int32_t vtmp5i1 = vout0i1 - vtmp1i1;
     const int32_t vtmp5i2 = vout0i2 - vtmp1i2;
-    vout0r0  += vtmp1r0;
-    vout0r1  += vtmp1r1;
-    vout0r2  += vtmp1r2;
-    vout0i0  += vtmp1i0;
-    vout0i1  += vtmp1i1;
-    vout0i2  += vtmp1i2;
+    vout0r0 += vtmp1r0;
+    vout0r1 += vtmp1r1;
+    vout0r2 += vtmp1r2;
+    vout0i0 += vtmp1i0;
+    vout0i1 += vtmp1i1;
+    vout0i2 += vtmp1i2;
     const int32_t vtmp3r0 = vtmp0r0 + vtmp2r0;
     const int32_t vtmp3r1 = vtmp0r1 + vtmp2r1;
     const int32_t vtmp3r2 = vtmp0r2 + vtmp2r2;
@@ -252,8 +252,8 @@ void xnn_cs16_bfly4_ukernel__scalar_x3(
 
       const int32_t vtmp5r = vout0r - vtmp1r;
       const int32_t vtmp5i = vout0i - vtmp1i;
-      vout0r  += vtmp1r;
-      vout0i  += vtmp1i;
+      vout0r += vtmp1r;
+      vout0i += vtmp1i;
       const int32_t vtmp3r = vtmp0r + vtmp2r;
       const int32_t vtmp3i = vtmp0i + vtmp2i;
       const int32_t vtmp4r = vtmp0r - vtmp2r;
