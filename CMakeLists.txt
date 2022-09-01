@@ -2692,18 +2692,18 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-vlshift/gen/neon-x16.c
   src/s16-vlshift/gen/neon-x24.c
   src/s16-vlshift/gen/neon-x32.c
-  src/s16-window/gen/neon-shift12-x8.c
-  src/s16-window/gen/neon-shift12-x16.c
-  src/s16-window/gen/neon-shift12-x24.c
-  src/s16-window/gen/neon-shift12-x32.c
-  src/s16-window/gen/neon-shift15-x8.c
-  src/s16-window/gen/neon-shift15-x16.c
-  src/s16-window/gen/neon-shift15-x24.c
-  src/s16-window/gen/neon-shift15-x32.c
   src/s16-window/gen/neon-x8.c
   src/s16-window/gen/neon-x16.c
   src/s16-window/gen/neon-x24.c
   src/s16-window/gen/neon-x32.c
+  src/s16-window/gen/shift12-neon-x8.c
+  src/s16-window/gen/shift12-neon-x16.c
+  src/s16-window/gen/shift12-neon-x24.c
+  src/s16-window/gen/shift12-neon-x32.c
+  src/s16-window/gen/shift15-neon-x8.c
+  src/s16-window/gen/shift15-neon-x16.c
+  src/s16-window/gen/shift15-neon-x24.c
+  src/s16-window/gen/shift15-neon-x32.c
   src/u8-ibilinear/gen/neon-c8.c
   src/u8-ibilinear/gen/neon-c16.c
   src/u8-maxpool/9p8x-minmax-neon-c16.c
