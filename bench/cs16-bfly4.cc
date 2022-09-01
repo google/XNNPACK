@@ -75,14 +75,20 @@ static void BenchmarkSamples1KernelSize(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_neon_m1, xnn_cs16_bfly4_samples1_ukernel__neon)->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, samples1__neon, xnn_cs16_bfly4_samples1_ukernel__neon)
+  ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_m1, xnn_cs16_bfly4_samples1_ukernel__scalar)->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_bfly4, cs16_scalar_x4, xnn_cs16_bfly4_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, samples1__scalar, xnn_cs16_bfly4_samples1_ukernel__scalar)
+  ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)
+  ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)
+  ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, scalar_x3, xnn_cs16_bfly4_ukernel__scalar_x3)
+  ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, scalar_x4, xnn_cs16_bfly4_ukernel__scalar_x4)
+  ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
