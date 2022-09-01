@@ -218,6 +218,27 @@ static enum xnn_status initialize_workspace_blobs(
   return xnn_status_success;
 }
 
+static void reuse_tensor_memory_for_in_place_node(
+  struct xnn_value_allocation_tracker* tracker,
+  xnn_subgraph_t subgraph,
+  struct xnn_value* value)
+{
+  // Check if value can be added to in-place.
+  struct xnn_node* producer = &subgraph->nodes[value->producer];
+  if (producer->type == xnn_node_type_leaky_relu || producer->type == xnn_node_type_hardswish) {
+    size_t producer_input = producer->inputs[0];
+    assert(producer->num_inputs == 1);
+    struct xnn_value_usage* usage = &tracker->usage[producer_input];
+    if (value->num_consumers == 1) {
+      // We only support when value has a single consumer because we cannot easily find all consumer nodes
+      // without traversing the entire graph.
+      assert(usage->last_node < value->first_consumer);
+      xnn_mark_in_place_node(tracker, value->id, producer_input, value->first_consumer);
+    } else {
+    }
+  }
+}
+
 enum xnn_status xnn_create_runtime_v4(
   xnn_subgraph_t subgraph,
   xnn_weights_cache_t weights_cache,
@@ -334,6 +355,7 @@ enum xnn_status xnn_create_runtime_v4(
           // Value is purely internal to the runtime, and must be allocated in its workspace.
           xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
           blob->allocation_type = xnn_allocation_type_workspace;
+          reuse_tensor_memory_for_in_place_node(&mem_alloc_tracker, subgraph, value);
         }
       } else {
         blob->allocation_type = xnn_allocation_type_static;

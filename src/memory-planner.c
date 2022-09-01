@@ -25,8 +25,23 @@ inline static bool value_lifecycle_overlap(const struct xnn_value_usage* a, cons
 // Use this comparison function to sort xnn_value_usage according to the
 // tensor_size in decreasing order.
 static inline int cmp_value_usage_tensor_size(const void* a, const void* b) {
-  const size_t tensor_size_a = (*(struct xnn_value_usage *const*)a)->tensor_size;
-  const size_t tensor_size_b = (*(struct xnn_value_usage *const*)b)->tensor_size;
+  struct xnn_value_usage * usage_a = (*(struct xnn_value_usage *const*)a);
+  struct xnn_value_usage * usage_b = (*(struct xnn_value_usage *const*)b);
+  const size_t tensor_size_a = usage_a->tensor_size;
+  const size_t tensor_size_b = usage_b->tensor_size;
+  // We need this ordering to handle in-place operations where the tensors overlap. Given 2 tensors of the same size, if
+  // they compare equal, the ordering is unspecified by qsort, but we need them to have a defined ordering based on
+  // topological sort, i.e. the earlier value should be processed first, in order to have a valid alloc_offset.
+  if (tensor_size_a == tensor_size_b) {
+    if (usage_a->first_node < usage_b->first_node) {
+      return -1;
+    } else if (usage_a->first_node > usage_b->first_node) {
+      return 1;
+    } else {
+      // If the size, first_node, and last_node are equal, this really is the same value.
+      return (usage_a->last_node - usage_b->last_node);
+    }
+  }
   return (tensor_size_b > tensor_size_a) - (tensor_size_b < tensor_size_a);
 }
 
@@ -133,6 +148,14 @@ void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   tracker->max_value_id = XNN_INVALID_VALUE_ID;
 }
 
+void xnn_mark_in_place_node(struct xnn_value_allocation_tracker* tracker,
+                              uint32_t value_id,
+                              uint32_t reuse_value_id,
+                              uint32_t new_last_node) {
+  tracker->usage[value_id].reuse_value_id = reuse_value_id;
+  tracker->usage[value_id].last_node = new_last_node;
+}
+
 void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
                                       uint32_t value_id,
                                       size_t tensor_size) {
@@ -146,6 +169,8 @@ void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* track
   }
 
   tracker->max_value_id = value_id;
+  tracker->usage[value_id].alloc_offset = SIZE_MAX;
+  tracker->usage[value_id].reuse_value_id = XNN_INVALID_VALUE_ID;
 }
 
 void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker) {
@@ -173,6 +198,11 @@ void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   for (size_t i = 0; i < num_values_to_alloc; ++i) {
     size_t num_live_mem_blocks = 0;
     struct xnn_value_usage* current = sorted_usage[i];
+    if (current->reuse_value_id != XNN_INVALID_VALUE_ID) {
+      assert(tracker->usage[current->reuse_value_id].alloc_offset != SIZE_MAX);
+      current->alloc_offset = tracker->usage[current->reuse_value_id].alloc_offset;
+      continue;
+    }
     for (size_t j = 0; j < i; ++j) {
       const struct xnn_value_usage* allocated = sorted_usage[j];
       if (value_lifecycle_overlap(current, allocated)) {

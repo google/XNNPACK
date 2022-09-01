@@ -26,6 +26,10 @@ struct xnn_value_usage {
   size_t tensor_size;
   // The memory offset of this xnn_value from the beginning of a memory buffer.
   size_t alloc_offset;
+  // When an operation is performed in place, its output value overlaps completely with the input value, i.e. their
+  // alloc_offset values are the same. This field is the input value who's alloc_offset this value usage can reuse.
+  // This field is an index into tracker->usage denoting the input value.
+  uint32_t reuse_value_id;
 };
 
 // Track the memory allocation in a memory arena for a subgraph.
@@ -52,6 +56,15 @@ inline static void xnn_release_value_allocation_tracker(struct xnn_value_allocat
 // iterating over 'subgraph->values'.
 XNN_INTERNAL void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
                                                    uint32_t value_id, size_t tensor_size);
+
+// Mark a node as being able to be performed in place, the node's output (value_id) can share the same memory as
+// reuse_value_id. The usage record of reuse_value_id needs to be expanded to include all consumers of
+// value_id, this is indicated by new_last_node.
+XNN_INTERNAL void xnn_mark_in_place_node(
+  struct xnn_value_allocation_tracker* tracker,
+  uint32_t value_id,
+  uint32_t reuse_value_id,
+  uint32_t new_last_node);
 
 // Plan the exact the memory allocation for intermediate tensors according to the xnn_value allocation tracker.
 XNN_INTERNAL void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker);
