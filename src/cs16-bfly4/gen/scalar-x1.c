@@ -19,8 +19,8 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
     size_t batch,
     size_t samples,
     int16_t* data,
-    const size_t stride,
-    const int16_t* twiddle)
+    const int16_t* twiddle,
+    size_t stride)
 {
   assert(batch != 0);
   assert(samples != 0);
@@ -57,9 +57,9 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
         const int32_t vtw2i = (const int32_t) tw2[1];
         const int32_t vtw3r = (const int32_t) tw3[0];
         const int32_t vtw3i = (const int32_t) tw3[1];
-        tw1 += stride * 2;
-        tw2 += stride * 4;
-        tw3 += stride * 6;
+        tw1 = (const int16_t*) ((uintptr_t) tw1 + stride);
+        tw2 = (const int16_t*) ((uintptr_t) tw2 + stride * 2);
+        tw3 = (const int16_t*) ((uintptr_t) tw3 + stride * 3);
 
         // Note 32767 / 4 = 8191.  Should be 8192.
         vout0r = math_asr_s32(vout0r * 8191 + 16384, 15);
@@ -109,12 +109,12 @@ void xnn_cs16_bfly4_ukernel__scalar_x1(
         data1 += 2;
         data2 += 2;
         data3 += 2;
-      } while(--s != 0);
+      } while (--s != 0);
     }
 
     data0 += samples * 6;
     data1 += samples * 6;
     data2 += samples * 6;
     data3 += samples * 6;
-  } while(--batch != 0);
+  } while (--batch != 0);
 }

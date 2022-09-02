@@ -20,8 +20,8 @@ extern "C" {
     size_t batch,                                    \
     size_t samples,                                  \
     int16_t* data,                                   \
-    const size_t stride,                             \
-    const int16_t* twiddle);
+    const int16_t* twiddle,                          \
+    size_t stride);
 
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__neon)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__scalar)

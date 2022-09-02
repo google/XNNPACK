@@ -1683,8 +1683,8 @@ typedef void (*xnn_cs16_bfly4_ukernel_function)(
     size_t batch,
     size_t samples,
     int16_t* data,
-    size_t stride,
-    const int16_t* twiddle);
+    const int16_t* twiddle,
+    size_t stride);
 
 typedef void (*xnn_cs16_fftr_ukernel_function)(
     size_t samples,

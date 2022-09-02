@@ -95,8 +95,8 @@ void xnn_cs16_bfly4_reference(
     size_t batch,
     size_t samples,
     int16_t* data,
-    const size_t stride,
-    const int16_t* twiddle)
+    const int16_t* twiddle,
+    size_t stride)
 {
   assert(batch != 0);
   assert(samples != 0);
@@ -150,8 +150,8 @@ void xnn_cs16_bfly4_reference(
 
       const int32_t vtmp5_r = vout0_r - vtmp1_r;
       const int32_t vtmp5_i = vout0_i - vtmp1_i;
-      vout0_r  += vtmp1_r;
-      vout0_i  += vtmp1_i;
+      vout0_r += vtmp1_r;
+      vout0_i += vtmp1_i;
       const int32_t vtmp3_r = vtmp0_r + vtmp2_r;
       const int32_t vtmp3_i = vtmp0_i + vtmp2_i;
       const int32_t vtmp4_r = vtmp0_r - vtmp2_r;
@@ -246,10 +246,10 @@ class BFly4MicrokernelTester {
       y_ref = y;
 
       // Compute reference results.
-      xnn_cs16_bfly4_reference(batch(), samples(), y_ref.data(), stride(), xnn_reference_table_fft256_twiddle);
+      xnn_cs16_bfly4_reference(batch(), samples(), y_ref.data(), xnn_reference_table_fft256_twiddle, stride());
 
       // Call optimized micro-kernel.
-      bfly4(batch(), samples(), y.data(), stride(), xnn_reference_table_fft256_twiddle);
+      bfly4(batch(), samples(), y.data(), xnn_reference_table_fft256_twiddle, stride() * sizeof(int16_t) * 2);
 
       // Verify results.
       for (size_t n = 0; n < fft_size * 2; n++) {

@@ -17,8 +17,8 @@ void xnn_cs16_bfly4_samples1_ukernel__neon(
     size_t batch,
     size_t samples,
     int16_t* data,
-    const size_t stride,
-    const int16_t* twiddle)
+    const int16_t* twiddle,
+    size_t stride)
 {
   assert(samples == 1);
   assert(data != NULL);
