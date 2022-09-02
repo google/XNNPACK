@@ -43,7 +43,7 @@ void cs16_bfly4(
   std::iota(twiddle.begin(), twiddle.end(), 0);
 
   for (auto _ : state) {
-    bfly4(batch, samples, output.data(), twiddle.data(), stride * sizeof(int16_t) * 2);
+    bfly4(batch, samples * sizeof(int16_t) * 2, output.data(), twiddle.data(), stride * sizeof(int16_t) * 2);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

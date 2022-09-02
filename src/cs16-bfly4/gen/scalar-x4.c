@@ -24,22 +24,25 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
 {
   assert(batch != 0);
   assert(samples != 0);
+  assert(samples % (sizeof(int16_t) * 2) == 0);
   assert(data != NULL);
   assert(stride != 0);
   assert(twiddle != NULL);
 
-  int16_t* data0 = data;
-  int16_t* data1 = data + samples * 2;
-  int16_t* data2 = data + samples * 4;
-  int16_t* data3 = data + samples * 6;
+  int16_t* data3 = data;
 
   do {
+    int16_t* data0 = data3;
+    int16_t* data1 = (int16_t*) ((uintptr_t) data0 + samples);
+    int16_t* data2 = (int16_t*) ((uintptr_t) data1 + samples);
+    data3 = (int16_t*) ((uintptr_t) data2 + samples);
+
     const int16_t* tw1 = twiddle;
     const int16_t* tw2 = twiddle;
     const int16_t* tw3 = twiddle;
-    size_t s = samples;
 
-    for (; s >= 4; s -= 4) {
+    size_t s = samples;
+    for (; s >= 4 * sizeof(int16_t) * 2; s -= 4 * sizeof(int16_t) * 2) {
       int32_t vout0r0 = (int32_t) data0[0];
       int32_t vout0i0 = (int32_t) data0[1];
       int32_t vout0r1 = (int32_t) data0[2];
@@ -271,7 +274,6 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
       data3[7] = (int16_t) vout3i3;
       data3 += 4 * 2;
     }
-
     if XNN_UNLIKELY(s != 0) {
       do {
         int32_t vout0r = (int32_t) data0[0];
@@ -341,12 +343,9 @@ void xnn_cs16_bfly4_ukernel__scalar_x4(
         data1 += 2;
         data2 += 2;
         data3 += 2;
-      } while (--s != 0);
-    }
 
-    data0 += samples * 6;
-    data1 += samples * 6;
-    data2 += samples * 6;
-    data3 += samples * 6;
+        s -= sizeof(int16_t) * 2;
+      } while (s != 0);
+    }
   } while (--batch != 0);
 }

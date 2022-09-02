@@ -233,7 +233,7 @@ class BFly4MicrokernelTester {
       xnn_cs16_bfly4_reference(batch(), samples(), y_ref.data(), xnn_reference_table_fft256_twiddle, stride());
 
       // Call optimized micro-kernel.
-      bfly4(batch(), samples(), y.data(), xnn_reference_table_fft256_twiddle, stride() * sizeof(int16_t) * 2);
+      bfly4(batch(), samples() * sizeof(int16_t) * 2, y.data(), xnn_reference_table_fft256_twiddle, stride() * sizeof(int16_t) * 2);
 
       // Verify results.
       for (size_t n = 0; n < fft_size * 2; n++) {

@@ -18,7 +18,7 @@ void xnn_cs16_bfly4_samples1_ukernel__scalar(
     const int16_t* twiddle,
     size_t stride)
 {
-  assert(samples == 1);
+  assert(samples == sizeof(int16_t) * 2);
   assert(data != NULL);
   assert(stride != 0);
   assert(twiddle != NULL);
