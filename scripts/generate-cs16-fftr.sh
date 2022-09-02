@@ -7,7 +7,6 @@
 ################################### SCALAR ###################################
 tools/xngen src/cs16-fftr/scalar.c.in -D SAMPLE_TILE=1 -o src/cs16-fftr/gen/scalar-x1.c &
 tools/xngen src/cs16-fftr/scalar.c.in -D SAMPLE_TILE=2 -o src/cs16-fftr/gen/scalar-x2.c &
-tools/xngen src/cs16-fftr/scalar.c.in -D SAMPLE_TILE=3 -o src/cs16-fftr/gen/scalar-x3.c &
 tools/xngen src/cs16-fftr/scalar.c.in -D SAMPLE_TILE=4 -o src/cs16-fftr/gen/scalar-x4.c &
 
 ################################## Unit tests #################################

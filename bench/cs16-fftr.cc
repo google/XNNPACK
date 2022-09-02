@@ -58,7 +58,6 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 
 BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x1, xnn_cs16_fftr_ukernel__scalar_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x2, xnn_cs16_fftr_ukernel__scalar_x2)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x3, xnn_cs16_fftr_ukernel__scalar_x3)->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_fftr, cs16_scalar_x4, xnn_cs16_fftr_ukernel__scalar_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

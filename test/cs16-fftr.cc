@@ -31,13 +31,6 @@ TEST(CS16_FFTR__SCALAR_X2, samples_eq_256) {
 }
 
 
-TEST(CS16_FFTR__SCALAR_X3, samples_eq_256) {
-  FftrMicrokernelTester()
-    .samples(256)
-    .Test(xnn_cs16_fftr_ukernel__scalar_x3);
-}
-
-
 TEST(CS16_FFTR__SCALAR_X4, samples_eq_256) {
   FftrMicrokernelTester()
     .samples(256)
