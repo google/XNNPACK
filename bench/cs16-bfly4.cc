@@ -36,10 +36,8 @@ void cs16_bfly4(
 
   assert(fft_size == samples * stride * 4);  // 4 for bfly4.
 
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> output(
-      fft_size * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> twiddle(
-      fft_size * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
+  std::vector<int16_t, AlignedAllocator<int16_t, 64>> output(fft_size * 2);
+  std::vector<int16_t, AlignedAllocator<int16_t, 64>> twiddle(fft_size * 3 / 4 * 2);
 
   std::iota(output.begin(), output.end(), 0);
   std::iota(twiddle.begin(), twiddle.end(), 0);
