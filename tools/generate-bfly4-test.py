@@ -52,6 +52,18 @@ TEST(${TEST_NAME}, samples_eq_1) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
+TEST(${TEST_NAME}, batch_gt_1) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t batch = 2; batch <= 16; batch++) {
+    BFly4MicrokernelTester()
+      .batch(batch)
+      .samples(1)
+      .stride(64)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
 $if SAMPLES == 0:
   TEST(${TEST_NAME}, samples_eq_4) {
     $if ISA_CHECK:
@@ -60,6 +72,18 @@ $if SAMPLES == 0:
       .samples(4)
       .stride(16)
       .Test(${", ".join(TEST_ARGS)});
+  }
+
+  TEST(${TEST_NAME}, samples_eq_4_batch_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch = 2; batch <= 4; batch++) {
+      BFly4MicrokernelTester()
+        .batch(batch)
+        .samples(4)
+        .stride(16)
+        .Test(${", ".join(TEST_ARGS)});
+    }
   }
 
   TEST(${TEST_NAME}, samples_eq_16) {

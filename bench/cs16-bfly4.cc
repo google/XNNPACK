@@ -30,8 +30,9 @@ void cs16_bfly4(
     return;
   }
   const size_t fft_size = state.range(0);
-  const size_t samples = state.range(1);
-  const size_t stride = state.range(2);
+  const size_t batch = state.range(1);
+  const size_t samples = state.range(2);
+  const size_t stride = state.range(3);
 
   assert(fft_size == samples * stride * 4);  // 4 for bfly4.
 
@@ -44,7 +45,7 @@ void cs16_bfly4(
   std::iota(twiddle.begin(), twiddle.end(), 0);
 
   for (auto _ : state) {
-    bfly4(samples, output.data(), stride, twiddle.data());
+    bfly4(batch, samples, output.data(), stride, twiddle.data());
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -55,23 +56,21 @@ void cs16_bfly4(
 
 static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"fft_size", "samples", "stride"});
-  b->Args({256, 64, 1});
-  b->Args({256, 16, 4});
-  b->Args({256, 4, 16});
-  b->Args({256, 1, 64});
-  b->Args({1024, 256, 1});
-  b->Args({1024, 64,  4});
-  b->Args({1024, 16, 16});
-  b->Args({1024, 4,  64});
-  b->Args({1024, 1, 256});
+  b->ArgNames({"fft_size", "batch", "samples", "stride"});
+  b->Args({256, 1, 1, 64});
+  b->Args({256, 4, 1, 64});
+  b->Args({256, 1, 4, 16});
+  b->Args({256, 4, 4, 16});
+  b->Args({256, 1, 16, 4});
+  b->Args({256, 4, 16, 4});
+  b->Args({256, 1, 64, 1});
 }
 
 static void BenchmarkSamples1KernelSize(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"fft_size", "samples", "stride"});
-  b->Args({256, 1, 64});
-  b->Args({1024, 1, 256});
+  b->ArgNames({"fft_size", "batch", "samples", "stride"});
+  b->Args({256, 1, 1, 64});
+  b->Args({256, 4, 1, 64});
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

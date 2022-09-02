@@ -1680,6 +1680,7 @@ typedef void (*xnn_u32_vlog_ukernel_function)(
     uint16_t* output);
 
 typedef void (*xnn_cs16_bfly4_ukernel_function)(
+    size_t batch,
     size_t samples,
     int16_t* data,
     size_t stride,

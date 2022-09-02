@@ -17,6 +17,7 @@ extern "C" {
 
 #define DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
+    size_t batch,                                    \
     size_t samples,                                  \
     int16_t* data,                                   \
     const size_t stride,                             \

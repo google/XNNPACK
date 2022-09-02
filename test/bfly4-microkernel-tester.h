@@ -92,33 +92,37 @@ static const int16_t xnn_reference_table_fft256_twiddle[512] = {
 };
 
 void xnn_cs16_bfly4_reference(
+    size_t batch,
     size_t samples,
     int16_t* data,
     const size_t stride,
-    const int16_t* twiddle) {
-
-  const int16_t* tw1 = twiddle;
-  const int16_t* tw2 = tw1;
-  const int16_t* tw3 = tw1;
-  int16_t* out0 = data;
-  int16_t* out1 = data + samples * 2;
-  int16_t* out2 = data + samples * 4;
-  int16_t* out3 = data + samples * 6;
-
+    const int16_t* twiddle)
+{
+  assert(batch != 0);
   assert(samples != 0);
+  assert(data != NULL);
   assert(stride != 0);
   assert(twiddle != NULL);
-  assert(data != NULL);
 
-  do {
-      int32_t vout0_r = (int32_t) out0[0];
-      int32_t vout0_i = (int32_t) out0[1];
-      int32_t vout1_r = (int32_t) out1[0];
-      int32_t vout1_i = (int32_t) out1[1];
-      int32_t vout2_r = (int32_t) out2[0];
-      int32_t vout2_i = (int32_t) out2[1];
-      int32_t vout3_r = (int32_t) out3[0];
-      int32_t vout3_i = (int32_t) out3[1];
+  int16_t* data0 = data;
+  int16_t* data1 = data + samples * 2;
+  int16_t* data2 = data + samples * 4;
+  int16_t* data3 = data + samples * 6;
+
+  for (size_t n = 0; n < batch; ++n) {
+    const int16_t* tw1 = twiddle;
+    const int16_t* tw2 = twiddle;
+    const int16_t* tw3 = twiddle;
+
+    for (size_t m = 0; m < samples; ++m) {
+      int32_t vout0_r = (int32_t) data0[0];
+      int32_t vout0_i = (int32_t) data0[1];
+      int32_t vout1_r = (int32_t) data1[0];
+      int32_t vout1_i = (int32_t) data1[1];
+      int32_t vout2_r = (int32_t) data2[0];
+      int32_t vout2_i = (int32_t) data2[1];
+      int32_t vout3_r = (int32_t) data3[0];
+      int32_t vout3_i = (int32_t) data3[1];
 
       const int32_t tw1_r = (const int32_t) tw1[0];
       const int32_t tw1_i = (const int32_t) tw1[1];
@@ -166,23 +170,39 @@ void xnn_cs16_bfly4_reference(
       vout3_r = vtmp5_r - vtmp4_i;
       vout3_i = vtmp5_i + vtmp4_r;
 
-      out0[0] = (int16_t) vout0_r;
-      out0[1] = (int16_t) vout0_i;
-      out1[0] = (int16_t) vout1_r;
-      out1[1] = (int16_t) vout1_i;
-      out2[0] = (int16_t) vout2_r;
-      out2[1] = (int16_t) vout2_i;
-      out3[0] = (int16_t) vout3_r;
-      out3[1] = (int16_t) vout3_i;
-      out0 += 2;
-      out1 += 2;
-      out2 += 2;
-      out3 += 2;
-  } while(--samples != 0);
+      data0[0] = (int16_t) vout0_r;
+      data0[1] = (int16_t) vout0_i;
+      data1[0] = (int16_t) vout1_r;
+      data1[1] = (int16_t) vout1_i;
+      data2[0] = (int16_t) vout2_r;
+      data2[1] = (int16_t) vout2_i;
+      data3[0] = (int16_t) vout3_r;
+      data3[1] = (int16_t) vout3_i;
+      data0 += 2;
+      data1 += 2;
+      data2 += 2;
+      data3 += 2;
+    }
+
+    data0 += samples * 6;
+    data1 += samples * 6;
+    data2 += samples * 6;
+    data3 += samples * 6;
+  } while(--batch != 0);
 }
 
 class BFly4MicrokernelTester {
  public:
+  inline BFly4MicrokernelTester& batch(size_t batch) {
+    assert(batch != 0);
+    this->batch_ = batch;
+    return *this;
+  }
+
+  inline size_t batch() const {
+    return this->batch_;
+  }
+
   inline BFly4MicrokernelTester& samples(size_t samples) {
     assert(samples != 0);
     this->samples_ = samples;
@@ -215,7 +235,7 @@ class BFly4MicrokernelTester {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
-    const size_t fft_size = (samples() == 1 ? 1 : (samples() * stride())) * 4;  // 4 for bfly4.
+    const size_t fft_size = samples() * stride() * 4;  // 4 for bfly4.
 
     // 256 complex numbers = fft_size * 2 = 512
     std::vector<int16_t> y(fft_size * 2);
@@ -226,10 +246,10 @@ class BFly4MicrokernelTester {
       y_ref = y;
 
       // Compute reference results.
-      xnn_cs16_bfly4_reference(samples(), y_ref.data(), stride(), xnn_reference_table_fft256_twiddle);
+      xnn_cs16_bfly4_reference(batch(), samples(), y_ref.data(), stride(), xnn_reference_table_fft256_twiddle);
 
       // Call optimized micro-kernel.
-      bfly4(samples(), y.data(), stride(), xnn_reference_table_fft256_twiddle);
+      bfly4(batch(), samples(), y.data(), stride(), xnn_reference_table_fft256_twiddle);
 
       // Verify results.
       for (size_t n = 0; n < fft_size * 2; n++) {
@@ -242,6 +262,7 @@ class BFly4MicrokernelTester {
   }
 
  private:
+  size_t batch_{1};
   size_t samples_{1};
   uint32_t stride_{1};
   size_t iterations_{15};
