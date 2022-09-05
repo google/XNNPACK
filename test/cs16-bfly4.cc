@@ -17,6 +17,28 @@
 #include "bfly4-microkernel-tester.h"
 
 
+#if XNN_ARCH_ARM
+  TEST(CS16_BFLY4_SAMPLES1__AARCH32_NEON, samples_eq_1) {
+    TEST_REQUIRES_ARM_NEON;
+    BFly4MicrokernelTester()
+      .samples(1)
+      .stride(64)
+      .Test(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon);
+  }
+
+  TEST(CS16_BFLY4_SAMPLES1__AARCH32_NEON, batch_gt_1) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch = 2; batch <= 16; batch++) {
+      BFly4MicrokernelTester()
+        .batch(batch)
+        .samples(1)
+        .stride(64)
+        .Test(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon);
+    }
+  }
+#endif  // XNN_ARCH_ARM
+
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(CS16_BFLY4_SAMPLES1__NEON, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
