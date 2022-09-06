@@ -43,10 +43,22 @@ def split_ukernel_name(name):
 
 
 BFLY4_TEST_TEMPLATE = """\
+
 TEST(${TEST_NAME}, samples_eq_1) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   BFly4MicrokernelTester()
+    .batch(1)
+    .samples(1)
+    .stride(64)
+    .Test(${", ".join(TEST_ARGS)});
+}
+
+TEST(${TEST_NAME}, batch_eq_4) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  BFly4MicrokernelTester()
+    .batch(4)
     .samples(1)
     .stride(64)
     .Test(${", ".join(TEST_ARGS)});

@@ -18,9 +18,20 @@
 
 
 #if XNN_ARCH_ARM
+
   TEST(CS16_BFLY4_SAMPLES1__AARCH32_NEON, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     BFly4MicrokernelTester()
+      .batch(1)
+      .samples(1)
+      .stride(64)
+      .Test(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon);
+  }
+
+  TEST(CS16_BFLY4_SAMPLES1__AARCH32_NEON, batch_eq_4) {
+    TEST_REQUIRES_ARM_NEON;
+    BFly4MicrokernelTester()
+      .batch(4)
       .samples(1)
       .stride(64)
       .Test(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon);
@@ -40,9 +51,20 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+
   TEST(CS16_BFLY4_SAMPLES1__NEON, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     BFly4MicrokernelTester()
+      .batch(1)
+      .samples(1)
+      .stride(64)
+      .Test(xnn_cs16_bfly4_samples1_ukernel__neon);
+  }
+
+  TEST(CS16_BFLY4_SAMPLES1__NEON, batch_eq_4) {
+    TEST_REQUIRES_ARM_NEON;
+    BFly4MicrokernelTester()
+      .batch(4)
       .samples(1)
       .stride(64)
       .Test(xnn_cs16_bfly4_samples1_ukernel__neon);
@@ -61,8 +83,18 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
+
 TEST(CS16_BFLY4_SAMPLES1__SCALAR, samples_eq_1) {
   BFly4MicrokernelTester()
+    .batch(1)
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_samples1_ukernel__scalar);
+}
+
+TEST(CS16_BFLY4_SAMPLES1__SCALAR, batch_eq_4) {
+  BFly4MicrokernelTester()
+    .batch(4)
     .samples(1)
     .stride(64)
     .Test(xnn_cs16_bfly4_samples1_ukernel__scalar);
@@ -79,8 +111,18 @@ TEST(CS16_BFLY4_SAMPLES1__SCALAR, batch_gt_1) {
 }
 
 
+
 TEST(CS16_BFLY4__SCALAR_X1, samples_eq_1) {
   BFly4MicrokernelTester()
+    .batch(1)
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x1);
+}
+
+TEST(CS16_BFLY4__SCALAR_X1, batch_eq_4) {
+  BFly4MicrokernelTester()
+    .batch(4)
     .samples(1)
     .stride(64)
     .Test(xnn_cs16_bfly4_ukernel__scalar_x1);
@@ -128,8 +170,18 @@ TEST(CS16_BFLY4__SCALAR_X1, samples_eq_64) {
 }
 
 
+
 TEST(CS16_BFLY4__SCALAR_X2, samples_eq_1) {
   BFly4MicrokernelTester()
+    .batch(1)
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
+}
+
+TEST(CS16_BFLY4__SCALAR_X2, batch_eq_4) {
+  BFly4MicrokernelTester()
+    .batch(4)
     .samples(1)
     .stride(64)
     .Test(xnn_cs16_bfly4_ukernel__scalar_x2);
@@ -177,8 +229,18 @@ TEST(CS16_BFLY4__SCALAR_X2, samples_eq_64) {
 }
 
 
+
 TEST(CS16_BFLY4__SCALAR_X4, samples_eq_1) {
   BFly4MicrokernelTester()
+    .batch(1)
+    .samples(1)
+    .stride(64)
+    .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
+}
+
+TEST(CS16_BFLY4__SCALAR_X4, batch_eq_4) {
+  BFly4MicrokernelTester()
+    .batch(4)
     .samples(1)
     .stride(64)
     .Test(xnn_cs16_bfly4_ukernel__scalar_x4);
