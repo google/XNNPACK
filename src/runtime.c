@@ -178,6 +178,7 @@ static enum xnn_status initialize_workspace_blobs(
     }
     runtime->workspace->data = new_workspace_data;
     runtime->workspace->size = mem_arena_size;
+    xnn_log_debug("created workspace of size %zu", mem_arena_size);
     // Keep track of how much the workspace data moved.
     if (old_workspace_data != NULL) {
       workspace_data_delta = (uintptr_t) new_workspace_data - (uintptr_t) old_workspace_data;
