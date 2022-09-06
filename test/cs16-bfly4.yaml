@@ -5,7 +5,7 @@
 
 
 # NEON
-- name: xnn_cs16_bfly4_samples1_ukernel__aarch32_neon
+- name: xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
 - name: xnn_cs16_bfly4_samples1_ukernel__neon
 
 # Scalar
