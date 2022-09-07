@@ -59,6 +59,12 @@ static void populate_value_lifecycle(const xnn_subgraph_t subgraph, struct xnn_v
   for (uint32_t i = 0; i < first_node->num_outputs; ++i) {
     usage[first_node->outputs[i]].first_node = 0;
   }
+  // Separate loop over all values to make sure we have usage records properly initialized with invalid reuse_value_id.
+  // Some usage records are not associated with any nodes, and they will not be visited by the loops over nodes above.
+  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+    usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
+    usage[i].alloc_offset = SIZE_MAX;
+  }
 }
 
 // Represent a memory block [start, end)
@@ -133,6 +139,17 @@ void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
   tracker->max_value_id = XNN_INVALID_VALUE_ID;
 }
 
+void xnn_mark_tensor_as_reuse(struct xnn_value_allocation_tracker* tracker,
+                              uint32_t value_id,
+                              uint32_t reuse_value_id,
+                              uint32_t new_last_node) {
+  // Set tensor_size to 0 so memory planner will not try to find memory for these tensors.
+  tracker->usage[value_id].tensor_size = 0;
+  tracker->usage[value_id].reuse_value_id = reuse_value_id;
+  // The reused tensor has an expanded live-range.
+  tracker->usage[reuse_value_id].last_node = new_last_node;
+}
+
 void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
                                       uint32_t value_id,
                                       size_t tensor_size) {
@@ -186,6 +203,17 @@ void xnn_plan_value_allocation_tracker(struct xnn_value_allocation_tracker* trac
     if (mem_arena_size < current->alloc_offset + current->tensor_size) {
       mem_arena_size = current->alloc_offset + current->tensor_size;
     }
+  }
+
+  // Walk through all tensors that are reusing memory, and update their usage records.
+  for (size_t i = tracker->min_value_id; i <= tracker->max_value_id; ++i) {
+    struct xnn_value_usage* usage = &tracker->usage[i];
+    uint32_t reuse_id = usage->reuse_value_id;
+    if (reuse_id == XNN_INVALID_VALUE_ID) {
+      continue;
+    }
+    assert(tracker->usage[reuse_id].alloc_offset != SIZE_MAX);
+    usage->alloc_offset = tracker->usage[reuse_id].alloc_offset;
   }
 
   tracker->mem_arena_size = mem_arena_size;

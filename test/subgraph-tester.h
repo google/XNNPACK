@@ -306,6 +306,22 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddHardSwish(uint32_t input_id, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_hardswish(subgraph_.get(), input_id, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddLeakyRelu(float negative_slope, uint32_t input_id, uint32_t output_id) {
+    const xnn_status status =
+        xnn_define_leaky_relu(subgraph_.get(), negative_slope, input_id, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
   inline SubgraphTester& AddMaxPooling2D(
       uint32_t input_padding_top, uint32_t input_padding_right,
       uint32_t input_padding_bottom, uint32_t input_padding_left,
@@ -375,6 +391,10 @@ class SubgraphTester {
 
   inline size_t NumNodes() const {
     return subgraph_->num_nodes;
+  }
+
+  inline xnn_subgraph* Subgraph() const {
+    return subgraph_.get();
   }
 
  protected:

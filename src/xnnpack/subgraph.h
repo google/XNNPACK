@@ -409,6 +409,8 @@ struct xnn_workspace {
   size_t ref_count;
 };
 
+void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

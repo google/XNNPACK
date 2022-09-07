@@ -11005,6 +11005,7 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging",
         ":math",
+        ":node_type",
         ":operators",
         ":params",
         ":requantization",
@@ -11040,6 +11041,7 @@ xnnpack_cc_library(
         ":enable_sparse",
         ":logging",
         ":math",
+        ":node_type",
         ":operators",
         ":params",
         ":requantization",
@@ -15659,9 +15661,12 @@ xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
         "test/memory-planner-test.cc",
+        "test/runtime-tester.h",
+        "test/subgraph-tester.h",
     ],
     deps = [
         ":XNNPACK",
+        ":math",
         ":subgraph_test_mode",
     ],
 )
