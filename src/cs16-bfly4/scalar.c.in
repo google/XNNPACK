@@ -45,56 +45,58 @@ void xnn_cs16_bfly4_ukernel__scalar_x${SAMPLE_TILE}(
 
     // First sample skips twiddle.
     // Same code as samples=1 but supports stride
-    int32_t vout0r = (int32_t) data0[0];
-    int32_t vout0i = (int32_t) data0[1];
-    int32_t vout1r = (int32_t) data1[0];
-    int32_t vout1i = (int32_t) data1[1];
-    int32_t vout2r = (int32_t) data2[0];
-    int32_t vout2i = (int32_t) data2[1];
-    int32_t vout3r = (int32_t) data3[0];
-    int32_t vout3i = (int32_t) data3[1];
+    {
+      int32_t vout0r = (int32_t) data0[0];
+      int32_t vout0i = (int32_t) data0[1];
+      int32_t vout1r = (int32_t) data1[0];
+      int32_t vout1i = (int32_t) data1[1];
+      int32_t vout2r = (int32_t) data2[0];
+      int32_t vout2i = (int32_t) data2[1];
+      int32_t vout3r = (int32_t) data3[0];
+      int32_t vout3i = (int32_t) data3[1];
 
-    // Note 32767 / 4 = 8191.  Should be 8192.
-    vout0r = math_asr_s32(vout0r * 8191 + 16384, 15);
-    vout0i = math_asr_s32(vout0i * 8191 + 16384, 15);
-    vout1r = math_asr_s32(vout1r * 8191 + 16384, 15);
-    vout1i = math_asr_s32(vout1i * 8191 + 16384, 15);
-    vout2r = math_asr_s32(vout2r * 8191 + 16384, 15);
-    vout2i = math_asr_s32(vout2i * 8191 + 16384, 15);
-    vout3r = math_asr_s32(vout3r * 8191 + 16384, 15);
-    vout3i = math_asr_s32(vout3i * 8191 + 16384, 15);
+      // Note 32767 / 4 = 8191.  Should be 8192.
+      vout0r = math_asr_s32(vout0r * 8191 + 16384, 15);
+      vout0i = math_asr_s32(vout0i * 8191 + 16384, 15);
+      vout1r = math_asr_s32(vout1r * 8191 + 16384, 15);
+      vout1i = math_asr_s32(vout1i * 8191 + 16384, 15);
+      vout2r = math_asr_s32(vout2r * 8191 + 16384, 15);
+      vout2i = math_asr_s32(vout2i * 8191 + 16384, 15);
+      vout3r = math_asr_s32(vout3r * 8191 + 16384, 15);
+      vout3i = math_asr_s32(vout3i * 8191 + 16384, 15);
 
-    const int32_t vtmp5r = vout0r - vout2r;
-    const int32_t vtmp5i = vout0i - vout2i;
-    vout0r += vout2r;
-    vout0i += vout2i;
-    const int32_t vtmp3r = vout1r + vout3r;
-    const int32_t vtmp3i = vout1i + vout3i;
-    const int32_t vtmp4r = vout1r - vout3r;
-    const int32_t vtmp4i = vout1i - vout3i;
-    vout2r = vout0r - vtmp3r;
-    vout2i = vout0i - vtmp3i;
+      const int32_t vtmp5r = vout0r - vout2r;
+      const int32_t vtmp5i = vout0i - vout2i;
+      vout0r += vout2r;
+      vout0i += vout2i;
+      const int32_t vtmp3r = vout1r + vout3r;
+      const int32_t vtmp3i = vout1i + vout3i;
+      const int32_t vtmp4r = vout1r - vout3r;
+      const int32_t vtmp4i = vout1i - vout3i;
+      vout2r = vout0r - vtmp3r;
+      vout2i = vout0i - vtmp3i;
 
-    vout0r += vtmp3r;
-    vout0i += vtmp3i;
+      vout0r += vtmp3r;
+      vout0i += vtmp3i;
 
-    vout1r = vtmp5r + vtmp4i;
-    vout1i = vtmp5i - vtmp4r;
-    vout3r = vtmp5r - vtmp4i;
-    vout3i = vtmp5i + vtmp4r;
+      vout1r = vtmp5r + vtmp4i;
+      vout1i = vtmp5i - vtmp4r;
+      vout3r = vtmp5r - vtmp4i;
+      vout3i = vtmp5i + vtmp4r;
 
-    data0[0] = (int16_t) vout0r;
-    data0[1] = (int16_t) vout0i;
-    data1[0] = (int16_t) vout1r;
-    data1[1] = (int16_t) vout1i;
-    data2[0] = (int16_t) vout2r;
-    data2[1] = (int16_t) vout2i;
-    data3[0] = (int16_t) vout3r;
-    data3[1] = (int16_t) vout3i;
-    data0 += 2;
-    data1 += 2;
-    data2 += 2;
-    data3 += 2;
+      data0[0] = (int16_t) vout0r;
+      data0[1] = (int16_t) vout0i;
+      data1[0] = (int16_t) vout1r;
+      data1[1] = (int16_t) vout1i;
+      data2[0] = (int16_t) vout2r;
+      data2[1] = (int16_t) vout2i;
+      data3[0] = (int16_t) vout3r;
+      data3[1] = (int16_t) vout3i;
+      data0 += 2;
+      data1 += 2;
+      data2 += 2;
+      data3 += 2;
+    }
 
     $if SAMPLE_TILE > 1:
       for (; s >= ${SAMPLE_TILE} * sizeof(int16_t) * 2; s -= ${SAMPLE_TILE} * sizeof(int16_t) * 2) {
