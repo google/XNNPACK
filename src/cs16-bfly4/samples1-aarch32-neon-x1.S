@@ -7,7 +7,7 @@
 
 .syntax unified
 
-// void xnn_cs16_bfly4_samples1_ukernel__aarch32_neon(
+// void xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1(
 //     size_t batch,                         r0
 //     size_t samples,                       (unused)
 //     int16_t* data,                        r2
@@ -16,7 +16,7 @@
 
 // d8-d15, r12-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
-BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon
+BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
         .arm
 #ifndef __APPLE__
         .arch   armv7-a
@@ -44,7 +44,7 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon
         BNE           0b
         BX            lr
 
-END_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon
+END_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

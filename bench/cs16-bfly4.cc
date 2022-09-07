@@ -71,7 +71,11 @@ static void BenchmarkSamples1KernelSize(benchmark::internal::Benchmark* b)
   b->Args({256, 4, 1, 64});
 }
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
-BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon, xnn_cs16_bfly4_samples1_ukernel__aarch32_neon)
+BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon_x1, xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1)
+  ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon_x2, xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x2)
+  ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon_x4, xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x4)
   ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
