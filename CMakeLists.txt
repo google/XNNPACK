@@ -1646,6 +1646,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
 
 SET(ALL_NEON_MICROKERNEL_SRCS
   src/cs16-bfly4/samples1-neon.c
+  src/cs16-fftr/neon-x4.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x4.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x8.c
   src/cs16-vsquareabs/gen/neon-mlal-ld128-x12.c

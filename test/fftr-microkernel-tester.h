@@ -106,15 +106,15 @@ void xnn_cs16_fftr_reference(
     const int16_t vacc2r = vilr - virr;
     const int16_t vacc2i = vili + viri;
 
-    const int32_t twr = math_asr_s32(vacc2r * vtwr - vacc2i * vtwi + 16384, 15);
-    const int32_t twi = math_asr_s32(vacc2r * vtwi + vacc2i * vtwr + 16384, 15);
+    const int32_t vaccr = math_asr_s32(vacc2r * vtwr - vacc2i * vtwi + 16384, 15);
+    const int32_t vacci = math_asr_s32(vacc2r * vtwi + vacc2i * vtwr + 16384, 15);
 
-    outl[0] = math_asr_s32(vacc1r + twr, 1);
-    outl[1] = math_asr_s32(vacc1i + twi, 1);
+    outl[0] = math_asr_s32(vacc1r + vaccr, 1);
+    outl[1] = math_asr_s32(vacc1i + vacci, 1);
     outl += 2;
     outr -= 2;
-    outr[0] = math_asr_s32(vacc1r - twr, 1);
-    outr[1] = math_asr_s32(twi - vacc1i, 1);
+    outr[0] = math_asr_s32(vacc1r - vaccr, 1);
+    outr[1] = math_asr_s32(vacci - vacc1i, 1);
 
   } while (--samples != 0);
 }
