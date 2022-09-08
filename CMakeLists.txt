@@ -6660,6 +6660,11 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/x8-lut/gen/lut-avx512skx-vpshufb-x256.c)
 
 SET(AARCH32_ASM_MICROKERNEL_SRCS
+  src/cs16-bfly4/samples1-aarch32-neon-x1.S
+  src/cs16-bfly4/samples1-aarch32-neon-x2.S
+  src/cs16-bfly4/samples1-aarch32-neon-x4.S
+  src/cs16-fftr/aarch32-neon-x1.S
+  src/cs16-fftr/aarch32-neon-x4.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a7.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-gemm/gen/4x8-minmax-aarch32-neon-cortex-a75.S
@@ -6750,9 +6755,6 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
   src/qu8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
-  src/cs16-bfly4/samples1-aarch32-neon-x1.S
-  src/cs16-bfly4/samples1-aarch32-neon-x2.S
-  src/cs16-bfly4/samples1-aarch32-neon-x4.S
   src/u32-filterbank-accumulate/aarch32-arm-x1.S
   src/u32-filterbank-accumulate/aarch32-neon-x1.S
   src/u32-filterbank-accumulate/aarch32-neon-x2.S)

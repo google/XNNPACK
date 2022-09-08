@@ -38,6 +38,8 @@ DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x4)
     int16_t* data,                                  \
     const int16_t* twiddle);
 
+DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__aarch32_neon_x1)
+DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__aarch32_neon_x4)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__scalar_x1)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__scalar_x2)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__scalar_x4)

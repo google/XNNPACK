@@ -69,7 +69,10 @@ static void BenchmarkSamples1KernelSize(benchmark::internal::Benchmark* b)
   b->ArgNames({"fft_size", "batch", "samples", "stride"});
   b->Args({256, 1, 1, 64});
   b->Args({256, 4, 1, 64});
+  b->Args({256, 16, 1, 64});
+  b->Args({256, 64, 1, 64});
 }
+
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon_x1, xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1)
   ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
