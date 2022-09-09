@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/math.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 
 
 void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf(

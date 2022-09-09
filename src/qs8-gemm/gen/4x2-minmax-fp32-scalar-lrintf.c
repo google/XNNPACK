@@ -10,8 +10,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <xnnpack/math.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
 
