@@ -37,6 +37,16 @@
 #endif  // XNN_ARCH_ARM
 
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  TEST(CS16_FFTR__NEON_X4, samples_eq_256) {
+    TEST_REQUIRES_ARM_NEON;
+    FftrMicrokernelTester()
+      .samples(256)
+      .Test(xnn_cs16_fftr_ukernel__neon_x4);
+  }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
 TEST(CS16_FFTR__SCALAR_X1, samples_eq_256) {
   FftrMicrokernelTester()
     .samples(256)

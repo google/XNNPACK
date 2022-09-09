@@ -9,6 +9,7 @@
   assembly: true
 - name: xnn_cs16_fftr_ukernel__aarch32_neon_x4
   assembly: true
+- name: xnn_cs16_fftr_ukernel__neon_x4
 
 # Scalar
 - name: xnn_cs16_fftr_ukernel__scalar_x1
