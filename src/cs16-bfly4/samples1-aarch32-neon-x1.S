@@ -26,6 +26,7 @@
 // vtmp3    d5
 // vtmp4    d6
 // vtmp5    d7
+// maski    d16
 
 BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
         .arm
@@ -33,7 +34,9 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
         .arch   armv7-a
         .fpu    neon
 #endif
+        VCEQ.I32 d16, d16               // generate mask 0xffff0000
         VMVN.U16 d4, 57344              // 8191
+        VSHL.U32 d16, d16, 16
 
         // Remainder batch of 1
 0:
@@ -51,14 +54,14 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
         VSUB.I16 d7, d0, d2             // vtmp5 = vout0 - vout2
         VADD.I16 d0, d0, d2             // vout0 = vout0 + vout2
 
-        VSUB.I16 d3, d7, d6             // vout3 = vtmp5 - vrev4
         VADD.I16 d1, d7, d6             // vout1 = vtmp5 + vrev4
+        VSUB.I16 d3, d7, d6             // vout3 = vtmp5 - vrev4
 
-        VREV32.16 d3, d3                // vout3 = 3r 1i -> 1i 3r
+        VMOV.I16 d6, d1                 // vout1 copy
         VSUB.I16 d2, d0, d5             // vout2 = vout0 - vtmp3
-        VTRN.I16 d1, d3                 // vout1 = 1r 3i x 1i 3r -> 1r 1i x 3i 3r
+        VBIT.I16 d1, d3, d16            // vout1 = 1r 3i x 3r 1i -> 1r 1i
         VADD.I16 d0, d0, d5             // vout0 = vout0 + vtmp3
-        VREV32.16 d3, d3                // vout3 = 3i 3r -> 3r 3i
+        VBIT.I16 d3, d6, d16            // vout3 = 3r 1i x 1r 3i -> 3r 3i
 
         VST4.32 {d0[0],d1[0],d2[0],d3[0]}, [r2]! // output 1 batch
         BHI     0b
