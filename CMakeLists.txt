@@ -1116,18 +1116,21 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up1x9-minmax-fp32-scalar-lrintf.c
+  src/qs8-dwconv/gen/up1x9-minmax-rndnu-scalar.c
   src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up1x25-minmax-fp32-scalar-lrintf.c
   src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up2x9-minmax-fp32-scalar-lrintf.c
+  src/qs8-dwconv/gen/up2x9-minmax-rndnu-scalar.c
   src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up2x25-minmax-fp32-scalar-lrintf.c
   src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up4x9-minmax-fp32-scalar-lrintf.c
+  src/qs8-dwconv/gen/up4x9-minmax-rndnu-scalar.c
   src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/up4x25-minmax-fp32-scalar-lrintf.c
@@ -1250,18 +1253,21 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up1x9-minmax-fp32-scalar-lrintf.c
+  src/qu8-dwconv/gen/up1x9-minmax-rndnu-scalar.c
   src/qu8-dwconv/gen/up1x25-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up1x25-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up1x25-minmax-fp32-scalar-lrintf.c
   src/qu8-dwconv/gen/up2x9-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up2x9-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up2x9-minmax-fp32-scalar-lrintf.c
+  src/qu8-dwconv/gen/up2x9-minmax-rndnu-scalar.c
   src/qu8-dwconv/gen/up2x25-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up2x25-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up2x25-minmax-fp32-scalar-lrintf.c
   src/qu8-dwconv/gen/up4x9-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up4x9-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up4x9-minmax-fp32-scalar-lrintf.c
+  src/qu8-dwconv/gen/up4x9-minmax-rndnu-scalar.c
   src/qu8-dwconv/gen/up4x25-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/up4x25-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/up4x25-minmax-fp32-scalar-lrintf.c

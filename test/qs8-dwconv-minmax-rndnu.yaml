@@ -44,3 +44,10 @@
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
 - name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul16
   init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+# Scalar
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up1x9__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up2x9__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+- name: xnn_qs8_dwconv_minmax_rndnu_ukernel_up4x9__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
