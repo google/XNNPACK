@@ -35,9 +35,8 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x2
         .fpu    neon
 #endif
         SUBS    r0, r0, 1               // batch
-        VCEQ.I32 d16, d16               // generate mask 0xffff0000
         VMVN.U16 d4, 57344              // 8191
-        VSHL.U32 d16, d16, 16
+        VMOV.I64 d16, 0xffff0000ffff0000 // mask 0xffff0000
         BLS     1f
 
         // Batch of 2 main loop

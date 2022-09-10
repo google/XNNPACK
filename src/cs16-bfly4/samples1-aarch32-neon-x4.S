@@ -34,12 +34,12 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x4
         .arch   armv7-a
         .fpu    neon
 #endif
-        MOV     r3, r2                  // output = input for post inc
-        VCEQ.I32 q12, q12               // generate mask 0xffff0000
         SUBS    r0, r0, 4               // batch
         VMVN.U16 q8, 57344              // 8191
-        VSHL.U32 q12, q12, 16
+        VMOV.I64 q12, 0xffff0000ffff0000 // mask 0xffff0000
         BLO     1f
+
+        MOV     r3, r2                  // output = input for post inc
 
         // batch of 4 main loop
 0:
@@ -78,7 +78,7 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x4
 
         // Remainder batch of 1 to 3
 2:
-        VLD4.32 {d0[0],d1[0],d2[0],d3[0]}, [r2]!  // input 1 batch
+        VLD4.32 {d0[0],d1[0],d2[0],d3[0]}, [r2]  // input 1 batch
         SUBS    r0, r0, 1               // batch
         VQRDMULH.S16 d1, d1, d16        // vout1 /= 4
         VQRDMULH.S16 d3, d3, d16        // vout3 /= 4
@@ -101,7 +101,7 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x4
         VADD.I16 d0, d0, d5             // vout0 = vout0 + vtmp3
         VBIT.I16 d3, d6, d24            // vout3 = 3r 1i x 1r 3i -> 3r 3i
 
-        VST4.32 {d0[0],d1[0],d2[0],d3[0]}, [r3]! // output 1 batch
+        VST4.32 {d0[0],d1[0],d2[0],d3[0]}, [r2]! // output 1 batch
         BHI     2b
 
         BX      lr

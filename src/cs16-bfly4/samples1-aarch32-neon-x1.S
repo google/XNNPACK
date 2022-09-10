@@ -34,9 +34,8 @@ BEGIN_FUNCTION xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1
         .arch   armv7-a
         .fpu    neon
 #endif
-        VCEQ.I32 d16, d16               // generate mask 0xffff0000
         VMVN.U16 d4, 57344              // 8191
-        VSHL.U32 d16, d16, 16
+        VMOV.I64 d16, 0xffff0000ffff0000 // mask 0xffff0000
 
         // Remainder batch of 1
 0:
