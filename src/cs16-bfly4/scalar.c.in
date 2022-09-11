@@ -71,18 +71,18 @@ void xnn_cs16_bfly4_ukernel__scalar_x${SAMPLE_TILE}(
       vout0i += vout2i;
       const int32_t vtmp3r = vout1r + vout3r;
       const int32_t vtmp3i = vout1i + vout3i;
-      const int32_t vtmp4r = vout1r - vout3r;
-      const int32_t vtmp4i = vout1i - vout3i;
+      const int32_t vtmp4r = vout1i - vout3i;
+      const int32_t vtmp4i = -(vout1r - vout3r);  // swap r,i and neg i
       vout2r = vout0r - vtmp3r;
       vout2i = vout0i - vtmp3i;
 
       vout0r += vtmp3r;
       vout0i += vtmp3i;
 
-      vout1r = vtmp5r + vtmp4i;
-      vout1i = vtmp5i - vtmp4r;
-      vout3r = vtmp5r - vtmp4i;
-      vout3i = vtmp5i + vtmp4r;
+      vout1r = vtmp5r + vtmp4r;
+      vout1i = vtmp5i + vtmp4i;
+      vout3r = vtmp5r - vtmp4r;
+      vout3i = vtmp5i - vtmp4i;
 
       data0[0] = (int16_t) vout0r;
       data0[1] = (int16_t) vout0i;
@@ -129,66 +129,51 @@ void xnn_cs16_bfly4_ukernel__scalar_x${SAMPLE_TILE}(
         // Note 32767 / 4 = 8191.  Should be 8192.
         $for C in range(SAMPLE_TILE):
           vout0r${C} = math_asr_s32(vout0r${C} * 8191 + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           vout0i${C} = math_asr_s32(vout0i${C} * 8191 + 16384, 15);
         $for C in range(SAMPLE_TILE):
           vout1r${C} = math_asr_s32(vout1r${C} * 8191 + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           vout1i${C} = math_asr_s32(vout1i${C} * 8191 + 16384, 15);
         $for C in range(SAMPLE_TILE):
           vout2r${C} = math_asr_s32(vout2r${C} * 8191 + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           vout2i${C} = math_asr_s32(vout2i${C} * 8191 + 16384, 15);
         $for C in range(SAMPLE_TILE):
           vout3r${C} = math_asr_s32(vout3r${C} * 8191 + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           vout3i${C} = math_asr_s32(vout3i${C} * 8191 + 16384, 15);
 
         $for C in range(SAMPLE_TILE):
           const int32_t vtmp0r${C} = math_asr_s32(vout1r${C} * vtw1r${C} - vout1i${C} * vtw1i${C} + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           const int32_t vtmp0i${C} = math_asr_s32(vout1r${C} * vtw1i${C} + vout1i${C} * vtw1r${C} + 16384, 15);
         $for C in range(SAMPLE_TILE):
           const int32_t vtmp1r${C} = math_asr_s32(vout2r${C} * vtw2r${C} - vout2i${C} * vtw2i${C} + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           const int32_t vtmp1i${C} = math_asr_s32(vout2r${C} * vtw2i${C} + vout2i${C} * vtw2r${C} + 16384, 15);
         $for C in range(SAMPLE_TILE):
           const int32_t vtmp2r${C} = math_asr_s32(vout3r${C} * vtw3r${C} - vout3i${C} * vtw3i${C} + 16384, 15);
-        $for C in range(SAMPLE_TILE):
           const int32_t vtmp2i${C} = math_asr_s32(vout3r${C} * vtw3i${C} + vout3i${C} * vtw3r${C} + 16384, 15);
 
         $for C in range(SAMPLE_TILE):
           const int32_t vtmp5r${C} = vout0r${C} - vtmp1r${C};
-        $for C in range(SAMPLE_TILE):
           const int32_t vtmp5i${C} = vout0i${C} - vtmp1i${C};
         $for C in range(SAMPLE_TILE):
           vout0r${C} += vtmp1r${C};
-        $for C in range(SAMPLE_TILE):
           vout0i${C} += vtmp1i${C};
         $for C in range(SAMPLE_TILE):
           const int32_t vtmp3r${C} = vtmp0r${C} + vtmp2r${C};
-        $for C in range(SAMPLE_TILE):
           const int32_t vtmp3i${C} = vtmp0i${C} + vtmp2i${C};
         $for C in range(SAMPLE_TILE):
-          const int32_t vtmp4r${C} = vtmp0r${C} - vtmp2r${C};
-        $for C in range(SAMPLE_TILE):
-          const int32_t vtmp4i${C} = vtmp0i${C} - vtmp2i${C};
+          const int32_t vtmp4r${C} = vtmp0i${C} - vtmp2i${C};
+          const int32_t vtmp4i${C} = -(vtmp0r${C} - vtmp2r${C});  // swap r,i and neg i
         $for C in range(SAMPLE_TILE):
           vout2r${C} = vout0r${C} - vtmp3r${C};
-        $for C in range(SAMPLE_TILE):
           vout2i${C} = vout0i${C} - vtmp3i${C};
         $for C in range(SAMPLE_TILE):
           vout0r${C} += vtmp3r${C};
-        $for C in range(SAMPLE_TILE):
           vout0i${C} += vtmp3i${C};
         $for C in range(SAMPLE_TILE):
-          vout1r${C} = vtmp5r${C} + vtmp4i${C};
+          vout1r${C} = vtmp5r${C} + vtmp4r${C};
+          vout1i${C} = vtmp5i${C} + vtmp4i${C};
         $for C in range(SAMPLE_TILE):
-          vout1i${C} = vtmp5i${C} - vtmp4r${C};
-        $for C in range(SAMPLE_TILE):
-          vout3r${C} = vtmp5r${C} - vtmp4i${C};
-        $for C in range(SAMPLE_TILE):
-          vout3i${C} = vtmp5i${C} + vtmp4r${C};
+          vout3r${C} = vtmp5r${C} - vtmp4r${C};
+          vout3i${C} = vtmp5i${C} - vtmp4i${C};
 
         $for C in range(SAMPLE_TILE):
           data0[${C * 2 + 0}] = (int16_t) vout0r${C};
@@ -251,18 +236,18 @@ void xnn_cs16_bfly4_ukernel__scalar_x${SAMPLE_TILE}(
         vout0i += vtmp1i;
         const int32_t vtmp3r = vtmp0r + vtmp2r;
         const int32_t vtmp3i = vtmp0i + vtmp2i;
-        const int32_t vtmp4r = vtmp0r - vtmp2r;
-        const int32_t vtmp4i = vtmp0i - vtmp2i;
+        const int32_t vtmp4r = vtmp0i - vtmp2i;
+        const int32_t vtmp4i = -(vtmp0r - vtmp2r);  // swap r,i and neg i
         vout2r = vout0r - vtmp3r;
         vout2i = vout0i - vtmp3i;
 
         vout0r += vtmp3r;
         vout0i += vtmp3i;
 
-        vout1r = vtmp5r + vtmp4i;
-        vout1i = vtmp5i - vtmp4r;
-        vout3r = vtmp5r - vtmp4i;
-        vout3i = vtmp5i + vtmp4r;
+        vout1r = vtmp5r + vtmp4r;
+        vout1i = vtmp5i + vtmp4i;
+        vout3r = vtmp5r - vtmp4r;
+        vout3i = vtmp5i - vtmp4i;
 
         data0[0] = (int16_t) vout0r;
         data0[1] = (int16_t) vout0i;

@@ -25,30 +25,32 @@ void xnn_cs16_bfly4_samples1_ukernel__neon(
   assert(stride != 0);
   assert(twiddle != NULL);
 
-  const int16x8_t vdiv4 = vdupq_n_s16(8191);
+  const int16x4_t vdiv4 = vdup_n_s16(8191);
+  const int16x4_t vnegr = vreinterpret_s16_u32(vdup_n_u32(0x0001ffff));
+  uint32x2x4_t vout;
 
   do {
-    const int16x8_t vi = vld1q_s16(data);
-    const int16x8_t vout = vqrdmulhq_s16(vi, vdiv4);
+    const uint32x2x4_t vi = (vld4_dup_u32((void*)data));
 
-    const int16x4_t vtmp5 = vsub_s16(vget_low_s16(vout), vget_high_s16(vout));
-    int16x4_t vout0 = vadd_s16(vget_low_s16(vout), vget_high_s16(vout));
+    int16x4_t vout1 = vqrdmulh_s16(vreinterpret_s16_u32(vi.val[1]), vdiv4);
+    int16x4_t vout3 = vqrdmulh_s16(vreinterpret_s16_u32(vi.val[3]), vdiv4);
+    int16x4_t vout0 = vqrdmulh_s16(vreinterpret_s16_u32(vi.val[0]), vdiv4);
+    int16x4_t vout2 = vqrdmulh_s16(vreinterpret_s16_u32(vi.val[2]), vdiv4);
 
-    const int16x4_t vtmp3 = vadd_s16(vget_low_s16(vout), vget_high_s16(vout));
-    const int16x4_t vtmp4 = vsub_s16(vget_low_s16(vout), vget_high_s16(vout));
+    const int16x4_t vtmp4 = vsub_s16(vout1, vout3);
+    const int16x4_t vtmp3 = vadd_s16(vout1, vout3);
 
-    const int16x4_t vtmp3hi = vext_s16(vtmp3, vtmp3, 2);
-    const int16x4_t vout2 = vsub_s16(vout0, vtmp3hi);
-    vout0 = vadd_s16(vout0, vtmp3hi);
-    const int16x4_t vtmp4rev = vrev64_s16(vtmp4);
-    const int16x4_t vout1r3i = vadd_s16(vtmp5, vtmp4rev);
-    const int16x4_t vout3r1i = vsub_s16(vtmp5, vtmp4rev);
+    int16x4_t vrev4 = vmul_s16(vtmp4, vnegr);   // vrev4 = vtmp4 -r, i
+    const int16x4_t vtmp5 = vsub_s16(vout0, vout2);
+    vout0 = vadd_s16(vout0, vout2);
+    vrev4 = vrev32_s16(vrev4);  // vrev4 = vtmp4 i, -r
 
-    vst1_lane_u32((void*) data, vreinterpret_u32_s16(vout0), 0); data += 2;
-    vst1_lane_s16(data, vout1r3i, 0); data += 1;
-    vst1_lane_s16(data, vout3r1i, 1); data += 1;
-    vst1_lane_u32((void*) data, vreinterpret_u32_s16(vout2), 0); data += 2;
-    vst1_lane_s16(data, vout3r1i, 0); data += 1;
-    vst1_lane_s16(data, vout1r3i, 1); data += 1;
+    vout.val[2] = vreinterpret_u32_s16(vsub_s16(vout0, vtmp3));
+    vout.val[0] = vreinterpret_u32_s16(vadd_s16(vout0, vtmp3));
+    vout.val[1] = vreinterpret_u32_s16(vadd_s16(vtmp5, vrev4));
+    vout.val[3] = vreinterpret_u32_s16(vsub_s16(vtmp5, vrev4));
+
+    vst4_lane_u32((void*)data, vout, 0);
+    data += 8;
   } while(--batch != 0);
 }
