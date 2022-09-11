@@ -85,6 +85,8 @@ BENCHMARK_CAPTURE(cs16_bfly4, samples1__aarch32_neon_x4, xnn_cs16_bfly4_samples1
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 BENCHMARK_CAPTURE(cs16_bfly4, samples1__neon, xnn_cs16_bfly4_samples1_ukernel__neon)
   ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, neon, xnn_cs16_bfly4_ukernel__neon)
+  ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 BENCHMARK_CAPTURE(cs16_bfly4, samples1__scalar, xnn_cs16_bfly4_samples1_ukernel__scalar)
