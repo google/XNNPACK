@@ -525,8 +525,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x25__scalar_lrintf(
       const int32_t vk24 = (int32_t) ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[48];
       vacc += vi24 * vk24;
 
-      typedef XNN_UNALIGNED float unaligned_float;
-      const float vscale = *((const unaligned_float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 50 * sizeof(int8_t)));
+      const float vscale = unaligned_load_f32((const void*) ((uintptr_t) w + 2 * sizeof(int32_t) + 50 * sizeof(int8_t)));
       float vfpacc = (float) vacc * vscale;
 
       vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);

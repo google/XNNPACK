@@ -129,8 +129,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up2x3__wasm_fmagic(
       const int32_t vk2 = (int32_t) ((const int8_t*) ((uintptr_t) w + 2 * sizeof(int32_t)))[4];
       vacc += vi2 * vk2;
 
-      typedef XNN_UNALIGNED float unaligned_float;
-      const float vscale = *((const unaligned_float*) ((uintptr_t) w + 2 * sizeof(int32_t) + 6 * sizeof(int8_t)));
+      const float vscale = unaligned_load_f32((const void*) ((uintptr_t) w + 2 * sizeof(int32_t) + 6 * sizeof(int8_t)));
       float vfpacc = (float) vacc * vscale;
 
       vfpacc = __builtin_wasm_max_f32(vfpacc, voutput_min_less_zero_point);
