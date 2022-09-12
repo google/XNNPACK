@@ -10728,6 +10728,7 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":operator_h",
+        ":xnnpack_h",
         "@FP16",
         "@FXdiv",
     ],
@@ -10918,9 +10919,11 @@ xnnpack_cc_library(
         ":math",
         ":microparams_init",
         ":normalization",
+        ":operator_type",
         ":packing",
         ":params",
         ":post_operation",
+        ":ukernel_type",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -11285,7 +11288,10 @@ xnnpack_cc_library(
         ":subgraph",
     ] + select({
         ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
+        "//conditions:default": [
+            "@cpuinfo",
+            "@pthreadpool",
+        ],
     }),
 )
 
