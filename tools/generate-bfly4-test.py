@@ -44,39 +44,40 @@ def split_ukernel_name(name):
 
 BFLY4_TEST_TEMPLATE = """\
 
-TEST(${TEST_NAME}, samples_eq_1) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  BFly4MicrokernelTester()
-    .batch(1)
-    .samples(1)
-    .stride(64)
-    .Test(${", ".join(TEST_ARGS)});
-}
-
-TEST(${TEST_NAME}, batch_eq_4) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  BFly4MicrokernelTester()
-    .batch(4)
-    .samples(1)
-    .stride(64)
-    .Test(${", ".join(TEST_ARGS)});
-}
-
-TEST(${TEST_NAME}, batch_gt_1) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t batch = 2; batch <= 16; batch++) {
+$if SAMPLES == 1:
+  TEST(${TEST_NAME}, samples_eq_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
     BFly4MicrokernelTester()
-      .batch(batch)
+      .batch(1)
       .samples(1)
       .stride(64)
       .Test(${", ".join(TEST_ARGS)});
   }
-}
 
-$if SAMPLES == 0:
+  TEST(${TEST_NAME}, batch_eq_4) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    BFly4MicrokernelTester()
+      .batch(4)
+      .samples(1)
+      .stride(64)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+
+  TEST(${TEST_NAME}, batch_gt_1) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch = 2; batch <= 16; batch++) {
+      BFly4MicrokernelTester()
+        .batch(batch)
+        .samples(1)
+        .stride(64)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+$if SAMPLES == 0 or SAMPLES == 4:
   TEST(${TEST_NAME}, samples_eq_4) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -98,6 +99,7 @@ $if SAMPLES == 0:
     }
   }
 
+$if SAMPLES == 0:
   TEST(${TEST_NAME}, samples_eq_16) {
     $if ISA_CHECK:
       ${ISA_CHECK};
