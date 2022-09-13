@@ -102,6 +102,8 @@ BENCHMARK_CAPTURE(cs16_bfly4, neon_x4, xnn_cs16_bfly4_ukernel__neon_x4)
 
 BENCHMARK_CAPTURE(cs16_bfly4, samples1__scalar, xnn_cs16_bfly4_samples1_ukernel__scalar)
   ->Apply(BenchmarkSamples1KernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_bfly4, samples4__scalar, xnn_cs16_bfly4_samples4_ukernel__scalar)
+  ->Apply(BenchmarkSamples4KernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_bfly4, scalar_x1, xnn_cs16_bfly4_ukernel__scalar_x1)
   ->Apply(BenchmarkKernelSize)->UseRealTime();
 BENCHMARK_CAPTURE(cs16_bfly4, scalar_x2, xnn_cs16_bfly4_ukernel__scalar_x2)

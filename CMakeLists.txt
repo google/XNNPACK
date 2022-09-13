@@ -610,6 +610,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/cs16-bfly4/gen/scalar-x2.c
   src/cs16-bfly4/gen/scalar-x4.c
   src/cs16-bfly4/samples1-scalar.c
+  src/cs16-bfly4/samples4-scalar.c
   src/cs16-fftr/gen/scalar-x1.c
   src/cs16-fftr/gen/scalar-x2.c
   src/cs16-fftr/gen/scalar-x4.c

@@ -279,6 +279,25 @@ TEST(CS16_BFLY4_SAMPLES1__SCALAR, batch_gt_1) {
 
 
 
+TEST(CS16_BFLY4_SAMPLES4__SCALAR, samples_eq_4) {
+  BFly4MicrokernelTester()
+    .samples(4)
+    .stride(16)
+    .Test(xnn_cs16_bfly4_samples4_ukernel__scalar);
+}
+
+TEST(CS16_BFLY4_SAMPLES4__SCALAR, samples_eq_4_batch_gt_1) {
+  for (size_t batch = 2; batch <= 4; batch++) {
+    BFly4MicrokernelTester()
+      .batch(batch)
+      .samples(4)
+      .stride(16)
+      .Test(xnn_cs16_bfly4_samples4_ukernel__scalar);
+  }
+}
+
+
+
 TEST(CS16_BFLY4__SCALAR_X1, samples_eq_4) {
   BFly4MicrokernelTester()
     .samples(4)

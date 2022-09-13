@@ -97,9 +97,9 @@ void xnn_cs16_bfly4_samples4_ukernel__neon(
     vout3.val[0] = vsub_s16(vtmp5r, vtmp4i);
     vout3.val[1] = vadd_s16(vtmp5i, vtmp4r);
 
-    vst2_s16(data0, vout0);  data0 += 8;
-    vst2_s16(data1, vout1);  data1 += 8;
-    vst2_s16(data2, vout2);  data2 += 8;
+    vst2_s16(data0, vout0);
+    vst2_s16(data1, vout1);
+    vst2_s16(data2, vout2);
     vst2_s16(data3, vout3);  data3 += 8;
 
   } while (--batch != 0);
