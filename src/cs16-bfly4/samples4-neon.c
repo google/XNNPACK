@@ -12,6 +12,12 @@
 
 #include <arm_neon.h>
 
+static const int16_t xnn_table_fft256_samples4_twiddle[24] = {
+   32767,0, 30273,-12539,  23170,-23170,  12539,-30273,
+   32767,0, 23170,-23170,      0,-32767, -23170,-23170,
+   32767,0, 12539,-30273, -23170,-23170, -30273, 12539,
+};
+
 void xnn_cs16_bfly4_samples4_ukernel__neon(
     size_t batch,
     size_t samples,
@@ -22,36 +28,13 @@ void xnn_cs16_bfly4_samples4_ukernel__neon(
   assert(batch != 0);
   assert(samples == sizeof(int16_t) * 8);
   assert(data != NULL);
-  assert(stride != 0);
+  assert(stride == sizeof(int16_t) * 2 * 16);
   assert(twiddle != NULL);
 
   const int16x4_t vdiv4 = vdup_n_s16(8191);
-
-  const int16_t* tw1 = twiddle;
-  const int16_t* tw2 = twiddle;
-  const int16_t* tw3 = twiddle;
-
-  int16x4x2_t vtw1 = vld2_dup_s16(tw1);
-  int16x4x2_t vtw2 = vld2_dup_s16(tw2);
-  int16x4x2_t vtw3 = vld2_dup_s16(tw3);
-  tw1 = (const int16_t*) ((uintptr_t) tw1 + stride);
-  tw2 = (const int16_t*) ((uintptr_t) tw2 + stride * 2);
-  tw3 = (const int16_t*) ((uintptr_t) tw3 + stride * 3);
-  vtw1 = vld2_lane_s16(tw1, vtw1, 1);
-  vtw2 = vld2_lane_s16(tw2, vtw2, 1);
-  vtw3 = vld2_lane_s16(tw3, vtw3, 1);
-  tw1 = (const int16_t*) ((uintptr_t) tw1 + stride);
-  tw2 = (const int16_t*) ((uintptr_t) tw2 + stride * 2);
-  tw3 = (const int16_t*) ((uintptr_t) tw3 + stride * 3);
-  vtw1 = vld2_lane_s16(tw1, vtw1, 2);
-  vtw2 = vld2_lane_s16(tw2, vtw2, 2);
-  vtw3 = vld2_lane_s16(tw3, vtw3, 2);
-  tw1 = (const int16_t*) ((uintptr_t) tw1 + stride);
-  tw2 = (const int16_t*) ((uintptr_t) tw2 + stride * 2);
-  tw3 = (const int16_t*) ((uintptr_t) tw3 + stride * 3);
-  vtw1 = vld2_lane_s16(tw1, vtw1, 3);
-  vtw2 = vld2_lane_s16(tw2, vtw2, 3);
-  vtw3 = vld2_lane_s16(tw3, vtw3, 3);
+  int16x4x2_t vtw1 = vld2_s16(xnn_table_fft256_samples4_twiddle);
+  int16x4x2_t vtw2 = vld2_s16(xnn_table_fft256_samples4_twiddle + 8);
+  int16x4x2_t vtw3 = vld2_s16(xnn_table_fft256_samples4_twiddle + 16);
 
   int16_t* data3 = data;
   do {
