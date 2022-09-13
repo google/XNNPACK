@@ -13,7 +13,7 @@
 #include <arm_neon.h>
 
 
-void xnn_cs16_bfly4_ukernel__neon(
+void xnn_cs16_bfly4_ukernel__neon_x1(
     size_t batch,
     size_t samples,
     int16_t* data,
