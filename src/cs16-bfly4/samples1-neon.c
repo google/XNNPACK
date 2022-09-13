@@ -20,6 +20,7 @@ void xnn_cs16_bfly4_samples1_ukernel__neon(
     const int16_t* twiddle,
     size_t stride)
 {
+  assert(batch != 0);
   assert(samples == sizeof(int16_t) * 2);
   assert(data != NULL);
   assert(stride != 0);
