@@ -18,24 +18,24 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_x${BATCH_TILE}(
-    size_t n,
-    const ${XINT8_T}* x,
-    float* y,
+    size_t batch,
+    const ${XINT8_T}* input,
+    float* output,
     const union xnn_${DATATYPE.lower()}_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(${XINT8_T}) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vminus_zero_point = wasm_v128_load64_splat(params->wasmsimd.minus_zero_point);
   const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd.scale);
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
-      v128_t vx${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(x);
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      v128_t vx${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(input);
       $for N in range(8, BATCH_TILE, 8):
-        v128_t vx${ABC[N:N+8]} = ${WASM_X16X8_LOAD8X8}(x + ${N});
-      x += ${BATCH_TILE};
+        v128_t vx${ABC[N:N+8]} = ${WASM_X16X8_LOAD8X8}(input + ${N});
+      input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 8):
         vx${ABC[N:N+8]} = wasm_i16x8_add(vx${ABC[N:N+8]}, vminus_zero_point);
@@ -50,15 +50,15 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_x${BATCH_TILE}(
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = wasm_f32x4_mul(vy${ABC[N:N+4]}, vscale);
 
-      wasm_v128_store(y, vy${ABC[0:4]});
+      wasm_v128_store(output, vy${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
-        wasm_v128_store(y + ${N}, vy${ABC[N:N+4]});
-      y += ${BATCH_TILE};
+        wasm_v128_store(output + ${N}, vy${ABC[N:N+4]});
+      output += ${BATCH_TILE};
     }
-  for (; n >= 8 * sizeof(${XINT8_T}); n -= 8 * sizeof(${XINT8_T})) {
-    v128_t vx = ${WASM_X16X8_LOAD8X8}(x);
+  for (; batch >= 8 * sizeof(${XINT8_T}); batch -= 8 * sizeof(${XINT8_T})) {
+    v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
     vx = wasm_i16x8_add(vx, vminus_zero_point);
-    x += 8;
+    input += 8;
 
     v128_t vy_lo = wasm_i32x4_extend_low_i16x8(vx);
     v128_t vy_hi = wasm_i32x4_extend_high_i16x8(vx);
@@ -69,35 +69,35 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_x${BATCH_TILE}(
     vy_lo = wasm_f32x4_mul(vy_lo, vscale);
     vy_hi = wasm_f32x4_mul(vy_hi, vscale);
 
-    wasm_v128_store(y, vy_lo);
-    wasm_v128_store(y + 4, vy_hi);
-    y += 8;
+    wasm_v128_store(output, vy_lo);
+    wasm_v128_store(output + 4, vy_hi);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(${XINT8_T}));
-    assert(n <= 7 * sizeof(${XINT8_T}));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(${XINT8_T}));
+    assert(batch <= 7 * sizeof(${XINT8_T}));
 
-    v128_t vx = ${WASM_X16X8_LOAD8X8}(x);
+    v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
     vx = wasm_i16x8_add(vx, vminus_zero_point);
-    x += 8;
+    input += 8;
 
     v128_t vy = wasm_i32x4_extend_low_i16x8(vx);
     vy = wasm_f32x4_convert_i32x4(vy);
     vy = wasm_f32x4_mul(vy, vscale);
 
-    if (n & (4 * sizeof(${XINT8_T}))) {
-      wasm_v128_store(y, vy); y += 4;
+    if (batch & (4 * sizeof(${XINT8_T}))) {
+      wasm_v128_store(output, vy); output += 4;
       vy = wasm_i32x4_extend_high_i16x8(vx);
       vy = wasm_f32x4_convert_i32x4(vy);
       vy = wasm_f32x4_mul(vy, vscale);
     }
-    if (n & (2 * sizeof(${XINT8_T}))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (2 * sizeof(${XINT8_T}))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(${XINT8_T}))) {
-      *y = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (1 * sizeof(${XINT8_T}))) {
+      *output = wasm_f32x4_extract_lane(vy, 0);
     }
   }
 }

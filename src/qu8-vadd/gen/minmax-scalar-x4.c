@@ -14,7 +14,7 @@
 
 
 void xnn_qu8_vadd_minmax_ukernel__scalar_x4(
-    size_t n,
+    size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
@@ -28,7 +28,7 @@ void xnn_qu8_vadd_minmax_ukernel__scalar_x4(
   const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
+  for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
     const int32_t va0 = input_a[0];
     const int32_t va1 = input_a[1];
     const int32_t va2 = input_a[2];
@@ -76,7 +76,7 @@ void xnn_qu8_vadd_minmax_ukernel__scalar_x4(
     output[3] = (uint8_t) vout3;
     output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const int32_t va = *input_a++;
       const int32_t vb = *input_b++;
@@ -87,7 +87,7 @@ void xnn_qu8_vadd_minmax_ukernel__scalar_x4(
       vout = math_min_s32(vout, voutput_max_less_zero_point);
       *output++ = (uint8_t) (vout + voutput_zero_point);
 
-      n -= sizeof(uint8_t);
-    } while (n != 0);
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
   }
 }

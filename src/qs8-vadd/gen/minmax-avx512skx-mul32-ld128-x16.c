@@ -16,7 +16,7 @@
 
 
 void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -30,7 +30,7 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);
 
-  for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
+  for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const __m512i va0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input_a));
     const __m512i vb0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input_b));
     input_a += 16;
@@ -53,9 +53,9 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
     _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
     output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     {
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << n) - UINT32_C(1)));
+      const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
       const __m512i va0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_maskz_loadu_epi8(vmask, input_a));
       const __m512i vb0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_maskz_loadu_epi8(vmask, input_b));
 

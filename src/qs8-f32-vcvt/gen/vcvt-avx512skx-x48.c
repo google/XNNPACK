@@ -17,23 +17,23 @@
 
 
 void xnn_qs8_f32_vcvt_ukernel__avx512skx_x48(
-    size_t n,
-    const int8_t* x,
-    float* y,
+    size_t batch,
+    const int8_t* input,
+    float* output,
     const union xnn_qs8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(int8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512i vminus_zero_point = _mm512_load_si512(params->avx512.minus_zero_point);
   const __m512 vscale = _mm512_load_ps(params->avx512.scale);
-  for (; n >= 48 * sizeof(int8_t); n -= 48 * sizeof(int8_t)) {
-    __m512i vx0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) x));
-    __m512i vxGHIJKLMNOPQRSTUV = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (x + 16)));
-    __m512i vxWXYZ = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (x + 32)));
-    x += 48;
+  for (; batch >= 48 * sizeof(int8_t); batch -= 48 * sizeof(int8_t)) {
+    __m512i vx0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input));
+    __m512i vxGHIJKLMNOPQRSTUV = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (input + 16)));
+    __m512i vxWXYZ = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (input + 32)));
+    input += 48;
 
     vx0123456789ABCDEF = _mm512_add_epi32(vx0123456789ABCDEF, vminus_zero_point);
     vxGHIJKLMNOPQRSTUV = _mm512_add_epi32(vxGHIJKLMNOPQRSTUV, vminus_zero_point);
@@ -47,35 +47,35 @@ void xnn_qs8_f32_vcvt_ukernel__avx512skx_x48(
     vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vyGHIJKLMNOPQRSTUV, vscale);
     vyWXYZ = _mm512_mul_ps(vyWXYZ, vscale);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    _mm512_storeu_ps(y + 32, vyWXYZ);
-    y += 48;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    _mm512_storeu_ps(output + 32, vyWXYZ);
+    output += 48;
   }
-  for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
-    __m512i vx = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) x));
+  for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
+    __m512i vx = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input));
     vx = _mm512_add_epi32(vx, vminus_zero_point);
-    x += 16;
+    input += 16;
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
     vy = _mm512_mul_ps(vy, vscale);
 
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(int8_t));
-    assert(n <= 15 * sizeof(int8_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(int8_t));
+    assert(batch <= 15 * sizeof(int8_t));
 
-    // Prepare mask for valid elements (depends on n).
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+    // Prepare mask for valid elements (depends on batch).
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512i vx = _mm512_cvtepi8_epi32(_mm_maskz_loadu_epi8(vmask, x));
+    __m512i vx = _mm512_cvtepi8_epi32(_mm_maskz_loadu_epi8(vmask, input));
     vx = _mm512_add_epi32(vx, vminus_zero_point);
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
     vy = _mm512_mul_ps(vy, vscale);
 
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }

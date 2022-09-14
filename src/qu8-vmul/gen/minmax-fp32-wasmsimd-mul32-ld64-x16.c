@@ -15,7 +15,7 @@
 
 
 void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16(
-    size_t n,
+    size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
@@ -30,7 +30,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16(
   const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
   const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
 
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const v128_t va01234567 = wasm_u16x8_load8x8(input_a);
     const v128_t vb01234567 = wasm_u16x8_load8x8(input_b);
     const v128_t va89ABCDEF = wasm_u16x8_load8x8(input_a + 8);
@@ -83,7 +83,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16(
     wasm_v128_store(output, vout0123456789ABCDEF);
     output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const v128_t va01234567 = wasm_u16x8_load8x8(input_a);
       const v128_t vb01234567 = wasm_u16x8_load8x8(input_b);
@@ -115,27 +115,27 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x16(
       v128_t vout0123456701234567 = wasm_u8x16_narrow_i16x8(vout01234567, vout01234567);
       vout0123456701234567 = wasm_u8x16_min(vout0123456701234567, voutput_max);
 
-      if XNN_LIKELY(n >= (8 * sizeof(uint8_t))) {
+      if XNN_LIKELY(batch >= (8 * sizeof(uint8_t))) {
         *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
         output += 8;
-        n -= 8 * sizeof(uint8_t);
+        batch -= 8 * sizeof(uint8_t);
       } else {
-        if (n & (4 * sizeof(uint8_t))) {
+        if (batch & (4 * sizeof(uint8_t))) {
           *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);
           vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
           output += 4;
         }
         uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
-        if (n & (2 * sizeof(uint8_t))) {
+        if (batch & (2 * sizeof(uint8_t))) {
           *((uint16_t*) output) = (uint16_t) vout0123;
           vout0123 >>= 16;
           output += 2;
         }
-        if (n & (1 * sizeof(uint8_t))) {
+        if (batch & (1 * sizeof(uint8_t))) {
           *output = (uint8_t) vout0123;
         }
-        n = 0;
+        batch = 0;
       }
-    } while (n != 0);
+    } while (batch != 0);
   }
 }

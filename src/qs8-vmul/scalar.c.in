@@ -14,7 +14,7 @@ $assert BATCH_TILE >= 1
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__scalar_x${BATCH_TILE}(
-    size_t n,
+    size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
@@ -41,10 +41,10 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__scal
       const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
       *output++ = (${XINT8_T}) vout;
 
-      n -= sizeof(${XINT8_T});
-    } while (n != 0);
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
   $else:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(BATCH_TILE):
         const int32_t va${N} = input_a[${N}] - va_zero_point;
       input_a += ${BATCH_TILE};
@@ -75,7 +75,7 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__scal
         output[${N}] = (${XINT8_T}) vout${N};
       output += ${BATCH_TILE};
     }
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:
         const int32_t va = (int32_t) *input_a - va_zero_point;
         const int32_t vb = (int32_t) *input_b - vb_zero_point;
@@ -100,7 +100,7 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__scal
           const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
           *output++ = (${XINT8_T}) vout;
 
-          n -= sizeof(${XINT8_T});
-        } while (n != 0);
+          batch -= sizeof(${XINT8_T});
+        } while (batch != 0);
     }
 }

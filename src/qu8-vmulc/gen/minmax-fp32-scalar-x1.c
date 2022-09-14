@@ -14,7 +14,7 @@
 
 
 void xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x1(
-    size_t n,
+    size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
@@ -39,6 +39,6 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x1(
     const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
     *output++ = (uint8_t) vout;
 
-    n -= sizeof(uint8_t);
-  } while (n != 0);
+    batch -= sizeof(uint8_t);
+  } while (batch != 0);
 }

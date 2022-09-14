@@ -17,22 +17,22 @@
 
 
 void xnn_qu8_f32_vcvt_ukernel__neon_x24(
-    size_t n,
-    const uint8_t* x,
-    float* y,
+    size_t batch,
+    const uint8_t* input,
+    float* output,
     const union xnn_qu8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int16x8_t vminus_zero_point = vreinterpretq_s16_u32(vld1q_dup_u32((const void*) params->neon.minus_zero_point));
   const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
-  for (; n >= 24 * sizeof(uint8_t); n -= 24 * sizeof(uint8_t)) {
-    const uint8x8_t vx01234567 = vld1_u8(x); x += 8;
-    const uint8x8_t vx89ABCDEF = vld1_u8(x); x += 8;
-    const uint8x8_t vxGHIJKLMN = vld1_u8(x); x += 8;
+  for (; batch >= 24 * sizeof(uint8_t); batch -= 24 * sizeof(uint8_t)) {
+    const uint8x8_t vx01234567 = vld1_u8(input); input += 8;
+    const uint8x8_t vx89ABCDEF = vld1_u8(input); input += 8;
+    const uint8x8_t vxGHIJKLMN = vld1_u8(input); input += 8;
 
     const int16x8_t vhx01234567 = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(vminus_zero_point), vx01234567));
     const int16x8_t vhx89ABCDEF = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(vminus_zero_point), vx89ABCDEF));
@@ -59,15 +59,15 @@ void xnn_qu8_f32_vcvt_ukernel__neon_x24(
     vyGHIJ = vmulq_f32(vyGHIJ, vscale);
     vyKLMN = vmulq_f32(vyKLMN, vscale);
 
-    vst1q_f32(y, vy0123); y += 4;
-    vst1q_f32(y, vy4567); y += 4;
-    vst1q_f32(y, vy89AB); y += 4;
-    vst1q_f32(y, vyCDEF); y += 4;
-    vst1q_f32(y, vyGHIJ); y += 4;
-    vst1q_f32(y, vyKLMN); y += 4;
+    vst1q_f32(output, vy0123); output += 4;
+    vst1q_f32(output, vy4567); output += 4;
+    vst1q_f32(output, vy89AB); output += 4;
+    vst1q_f32(output, vyCDEF); output += 4;
+    vst1q_f32(output, vyGHIJ); output += 4;
+    vst1q_f32(output, vyKLMN); output += 4;
   }
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
-    const uint8x8_t vx = vld1_u8(x); x += 8;
+  for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
+    const uint8x8_t vx = vld1_u8(input); input += 8;
 
     const int16x8_t vhx = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(vminus_zero_point), vx));
 
@@ -80,14 +80,14 @@ void xnn_qu8_f32_vcvt_ukernel__neon_x24(
     vy_lo = vmulq_f32(vy_lo, vscale);
     vy_hi = vmulq_f32(vy_hi, vscale);
 
-    vst1q_f32(y, vy_lo); y += 4;
-    vst1q_f32(y, vy_hi); y += 4;
+    vst1q_f32(output, vy_lo); output += 4;
+    vst1q_f32(output, vy_hi); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint8_t));
-    assert(n <= 7 * sizeof(uint8_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint8_t));
+    assert(batch <= 7 * sizeof(uint8_t));
 
-    const uint8x8_t vx = vld1_u8(x);
+    const uint8x8_t vx = vld1_u8(input);
 
     const int16x8_t vhx = vreinterpretq_s16_u16(vaddw_u8(vreinterpretq_u16_s16(vminus_zero_point), vx));
 
@@ -97,18 +97,18 @@ void xnn_qu8_f32_vcvt_ukernel__neon_x24(
     float32x4_t vy = vcvtq_f32_s32(vwx_lo);
     vy = vmulq_f32(vy, vscale);
 
-    if (n & (4 * sizeof(uint8_t))) {
-      vst1q_f32(y, vy); y += 4;
+    if (batch & (4 * sizeof(uint8_t))) {
+      vst1q_f32(output, vy); output += 4;
       vy = vcvtq_f32_s32(vwx_hi);
       vy = vmulq_f32(vy, vscale);
     }
     float32x2_t vy_lo = vget_low_f32(vy);
-    if (n & (2 * sizeof(uint8_t))) {
-      vst1_f32(y, vy_lo); y += 2;
+    if (batch & (2 * sizeof(uint8_t))) {
+      vst1_f32(output, vy_lo); output += 2;
       vy_lo = vget_high_f32(vy);
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      vst1_lane_f32(y, vy_lo, 0);
+    if (batch & (1 * sizeof(uint8_t))) {
+      vst1_lane_f32(output, vy_lo, 0);
     }
   }
 }

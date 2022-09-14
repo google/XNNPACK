@@ -1058,29 +1058,29 @@ typedef void (*xnn_pad_ukernel_function)(
 // RMAX: Reduce-MAX
 
 typedef void (*xnn_rmax_ukernel_function)(
-    size_t n,
-    const void* x,
-    void* y);
+    size_t batch,
+    const void* input,
+    void* output);
 
 typedef void (*xnn_f16_rmax_ukernel_function)(
-    size_t n,
-    const void* x,
-    void* y);
+    size_t batch,
+    const void* input,
+    void* output);
 
 typedef void (*xnn_f32_rmax_ukernel_function)(
-    size_t n,
-    const float* x,
-    float* y);
+    size_t batch,
+    const float* input,
+    float* output);
 
 typedef void (*xnn_u8_rmax_ukernel_function)(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y);
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output);
 
 // RADDSTOREEXPMINUSMAX: Reduce-ADD & STORE EXP(x_i MINUS MAX[x_i])
 
 typedef void (*xnn_raddstoreexpminusmax_ukernel_function)(
-    size_t n,
+    size_t batch,
     const void* input,
     const void* max,
     void* output,
@@ -1088,7 +1088,7 @@ typedef void (*xnn_raddstoreexpminusmax_ukernel_function)(
     const void* params);
 
 typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_function)(
-    size_t n,
+    size_t batch,
     const void* input,
     const void* max,
     void* output,
@@ -1096,7 +1096,7 @@ typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_function)(
     const union xnn_f16_expminus_params* params);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_function)(
-    size_t n,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
@@ -1586,21 +1586,21 @@ typedef void (*xnn_f32_ibilinear_chw_ukernel_function)(
 // GAVGPOOL-CW: Global AVeraGe POOLing in CW layout.
 
 typedef void (*xnn_gavgpool_cw_ukernel_function)(
-    size_t elements,
+    size_t batch,
     size_t channels,
     const float* input,
     float* output,
     const void* params);
 
 typedef void (*xnn_f16_gavgpool_cw_ukernel_function)(
-    size_t elements,
+    size_t batch,
     size_t channels,
     const void* input,
     void* output,
     const union xnn_f16_gavgpool_params* params);
 
 typedef void (*xnn_f32_gavgpool_cw_ukernel_function)(
-    size_t elements,
+    size_t batch,
     size_t channels,
     const float* input,
     float* output,

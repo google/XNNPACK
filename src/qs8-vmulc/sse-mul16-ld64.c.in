@@ -27,7 +27,7 @@ $_MM_MIN_EPX8 = {"QS8": "_mm_min_epi8", "QU8": "_mm_min_epu8"}[DATATYPE]
 $_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
 $ISA = "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
 void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${ISA}_mul16_ld64_x${BATCH_TILE}(
-    size_t n,
+    size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
@@ -43,7 +43,7 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
   __m128i vxb = _mm_sub_epi16(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b), 0),
     _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.b_zero_point));
-  for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+  for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     $if SSE == 4:
       const __m128i va${ABC[0:8]} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) input_a));
       $for N in range(8, BATCH_TILE, 8):
@@ -123,7 +123,7 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
         _mm_storel_epi64((__m128i*) (output + ${N}), vout${ABC[N:N+8]}${ABC[N:N+8]});
     output += ${BATCH_TILE};
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     ${"do " if BATCH_TILE > 8 else ""}{
       $if SSE == 4:
         const __m128i va${ABC[0:8]} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) input_a));
@@ -167,17 +167,17 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
         vout${ABC[0:8]}${ABC[0:8]} = ${_MM_MIN_EPX8}(vout${ABC[0:8]}${ABC[0:8]}, voutput_max);
 
       $if BATCH_TILE > 8:
-        if XNN_LIKELY(n >= (8 * sizeof(${XINT8_T}))) {
+        if XNN_LIKELY(batch >= (8 * sizeof(${XINT8_T}))) {
           _mm_storel_epi64((__m128i*) output, vout${ABC[0:8]}${ABC[0:8]});
           output += 8;
-          n -= 8 * sizeof(${XINT8_T});
+          batch -= 8 * sizeof(${XINT8_T});
         } else {
-          if (n & (4 * sizeof(${XINT8_T}))) {
+          if (batch & (4 * sizeof(${XINT8_T}))) {
             unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
-          if (n & (2 * sizeof(${XINT8_T}))) {
+          if (batch & (2 * sizeof(${XINT8_T}))) {
             $if SSE == 4:
               unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0));
             $else:
@@ -185,21 +185,21 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
             vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
             output += 2;
           }
-          if (n & (1 * sizeof(${XINT8_T}))) {
+          if (batch & (1 * sizeof(${XINT8_T}))) {
             $if SSE == 4:
               *output = (${XINT8_T}) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
             $else:
               *output = (int32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
           }
-          n = 0;
+          batch = 0;
         }
       $else:
-        if (n & (4 * sizeof(${XINT8_T}))) {
+        if (batch & (4 * sizeof(${XINT8_T}))) {
           unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]}));
           vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi64(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
-        if (n & (2 * sizeof(${XINT8_T}))) {
+        if (batch & (2 * sizeof(${XINT8_T}))) {
           $if SSE == 4:
             unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:8]}${ABC[0:8]}, 0));
           $else:
@@ -207,12 +207,12 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
           vout${ABC[0:8]}${ABC[0:8]} = _mm_srli_epi32(vout${ABC[0:8]}${ABC[0:8]}, 16);
           output += 2;
         }
-        if (n & (1 * sizeof(${XINT8_T}))) {
+        if (batch & (1 * sizeof(${XINT8_T}))) {
           $if SSE == 4:
             *output = (${XINT8_T}) _mm_extract_epi8(vout${ABC[0:8]}${ABC[0:8]}, 0);
           $else:
             *output = (${XINT8_T}) _mm_cvtsi128_si32(vout${ABC[0:8]}${ABC[0:8]});
         }
-    }${" while (n != 0);" if BATCH_TILE > 8 else ""}
+    }${" while (batch != 0);" if BATCH_TILE > 8 else ""}
   }
 }

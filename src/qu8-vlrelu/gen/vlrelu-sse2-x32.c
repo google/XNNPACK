@@ -17,25 +17,25 @@
 
 
 void xnn_qu8_vlrelu_ukernel__sse2_x32(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->sse2.input_zero_point);
   const __m128i vmultiplier_diff = _mm_load_si128((const __m128i*) params->sse2.multiplier_diff);
   const __m128i vmultiplier_base = _mm_load_si128((const __m128i*) params->sse2.multiplier_base);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
   const __m128i vzero = _mm_setzero_si128();
-  for (; n >= 32 * sizeof(uint8_t); n -= 32 * sizeof(uint8_t)) {
-    const __m128i vx0 = _mm_loadu_si128((const __m128i*) x);
-    const __m128i vx1 = _mm_loadu_si128((const __m128i*) (x + 16));
-    x += 32;
+  for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
+    const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
+    const __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));
+    input += 32;
 
     __m128i vextx0 = _mm_unpacklo_epi8(vx0, vzero);
     __m128i vextx1 = _mm_unpackhi_epi8(vx0, vzero);
@@ -97,13 +97,13 @@ void xnn_qu8_vlrelu_ukernel__sse2_x32(
     const __m128i vy0 = _mm_packus_epi16(vacc0, vacc1);
     const __m128i vy1 = _mm_packus_epi16(vacc2, vacc3);
 
-    _mm_storeu_si128((__m128i*) y, vy0);
-    _mm_storeu_si128((__m128i*) (y + 16), vy1);
-    y += 32;
+    _mm_storeu_si128((__m128i*) output, vy0);
+    _mm_storeu_si128((__m128i*) (output + 16), vy1);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    const __m128i vx = _mm_loadu_si128((const __m128i*) x);
-    x += 16;
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    input += 16;
 
     __m128i vextx0 = _mm_unpacklo_epi8(vx, vzero);
     __m128i vextx1 = _mm_unpackhi_epi8(vx, vzero);
@@ -139,14 +139,14 @@ void xnn_qu8_vlrelu_ukernel__sse2_x32(
     vacc1 = _mm_adds_epi16(vacc1, voutput_zero_point);
 
     const __m128i vy = _mm_packus_epi16(vacc0, vacc1);
-    _mm_storeu_si128((__m128i*) y, vy);
-    y += 16;
+    _mm_storeu_si128((__m128i*) output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint8_t));
-    assert(n <= 15 * sizeof(uint8_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint8_t));
+    assert(batch <= 15 * sizeof(uint8_t));
 
-    const __m128i vx = _mm_loadu_si128((const __m128i*) x);
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input);
 
     __m128i vextx0 = _mm_unpacklo_epi8(vx, vzero);
     __m128i vextx1 = _mm_unpackhi_epi8(vx, vzero);
@@ -182,24 +182,24 @@ void xnn_qu8_vlrelu_ukernel__sse2_x32(
     vacc1 = _mm_adds_epi16(vacc1, voutput_zero_point);
 
     __m128i vy = _mm_packus_epi16(vacc0, vacc1);
-    if (n & (8 * sizeof(uint8_t))) {
-      _mm_storel_epi64((__m128i*) y, vy);
+    if (batch & (8 * sizeof(uint8_t))) {
+      _mm_storel_epi64((__m128i*) output, vy);
       vy = _mm_unpackhi_epi64(vy, vy);
-      y += 8;
+      output += 8;
     }
-    if (n & (4 * sizeof(uint8_t))) {
-      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
+    if (batch & (4 * sizeof(uint8_t))) {
+      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
       vy = _mm_srli_epi64(vy, 32);
-      y += 4;
+      output += 4;
     }
     uint32_t vy0 = (uint32_t) _mm_cvtsi128_si32(vy);
-    if (n & (2 * sizeof(uint8_t))) {
-      unaligned_store_u16(y, (uint16_t) vy0);
+    if (batch & (2 * sizeof(uint8_t))) {
+      unaligned_store_u16(output, (uint16_t) vy0);
       vy0 >>= 16;
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      *y = (uint8_t) vy0;
+    if (batch & (1 * sizeof(uint8_t))) {
+      *output = (uint8_t) vy0;
     }
   }
 }

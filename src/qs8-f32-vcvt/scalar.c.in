@@ -13,24 +13,24 @@ $assert BATCH_TILE >= 1
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
-    size_t n,
-    const ${XINT8_T}* x,
-    float* y,
+    size_t batch,
+    const ${XINT8_T}* input,
+    float* output,
     const union xnn_${DATATYPE.lower()}_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(${XINT8_T}) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int32_t vzero_point = params->scalar.zero_point;
   const float vscale = params->scalar.scale;
 
   $if BATCH_TILE > 1:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(BATCH_TILE):
-        int32_t vx${N} = (int32_t) x[${N}];
-      x += ${BATCH_TILE};
+        int32_t vx${N} = (int32_t) input[${N}];
+      input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
         vx${N} -= vzero_point;
@@ -42,40 +42,40 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__scalar_x${BATCH_TILE}(
         vy${N} *= vscale;
 
       $for N in range(BATCH_TILE):
-        y[${N}] = vy${N};
-      y += ${BATCH_TILE};
+        output[${N}] = vy${N};
+      output += ${BATCH_TILE};
     }
   $if BATCH_TILE == 1:
     do {
-      int32_t vx = *x++;
+      int32_t vx = *input++;
       vx -= vzero_point;
 
       float vy = (float) vx;
       vy *= vscale;
-      *y++ = vy;
+      *output++ = vy;
 
-      n -= sizeof(${XINT8_T});
-    } while (n != 0);
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
   $elif BATCH_TILE == 2:
-    if XNN_UNLIKELY(n != 0) {
-      int32_t vx = *x;
+    if XNN_UNLIKELY(batch != 0) {
+      int32_t vx = *input;
       vx -= vzero_point;
 
       float vy = (float) vx;
       vy *= vscale;
-      *y = vy;
+      *output = vy;
     }
   $else:
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(batch != 0) {
       do {
-        int32_t vx = *x++;
+        int32_t vx = *input++;
         vx -= vzero_point;
 
         float vy = (float) vx;
         vy *= vscale;
-        *y++ = vy;
+        *output++ = vy;
 
-        n -= sizeof(${XINT8_T});
-      } while (n != 0);
+        batch -= sizeof(${XINT8_T});
+      } while (batch != 0);
     }
 }

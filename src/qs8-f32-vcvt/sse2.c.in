@@ -18,15 +18,15 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_CVTEPX8_EPI32 = {"QS8": "_mm_cvtepi8_epi32", "QU8": "_mm_cvtepu8_epi32"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_x${BATCH_TILE}(
-    size_t n,
-    const ${XINT8_T}* x,
-    float* y,
+    size_t batch,
+    const ${XINT8_T}* input,
+    float* output,
     const union xnn_${DATATYPE.lower()}_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(${XINT8_T}) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   $if DATATYPE == "QS8":
     const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
@@ -35,11 +35,11 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_x${BATCH_TILE}(
   const __m128 vscale = _mm_load_ps(params->sse2.scale);
   const __m128i vzero = _mm_setzero_si128();
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
-      __m128i vx${ABC[0:8]} = _mm_loadl_epi64((const __m128i*) x);
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      __m128i vx${ABC[0:8]} = _mm_loadl_epi64((const __m128i*) input);
       $for N in range(8, BATCH_TILE, 8):
-        __m128i vx${ABC[N:N+8]} = _mm_loadl_epi64((const __m128i*) (x + ${N}));
-      x += ${BATCH_TILE};
+        __m128i vx${ABC[N:N+8]} = _mm_loadl_epi64((const __m128i*) (input + ${N}));
+      input += ${BATCH_TILE};
 
       $if DATATYPE == "QS8":
         $for N in range(0, BATCH_TILE, 8):
@@ -58,17 +58,17 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_x${BATCH_TILE}(
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = _mm_mul_ps(vy${ABC[N:N+4]}, vscale);
 
-      _mm_storeu_ps(y, vy${ABC[0:4]});
+      _mm_storeu_ps(output, vy${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
-        _mm_storeu_ps(y + ${N}, vy${ABC[N:N+4]});
-      y += ${BATCH_TILE};
+        _mm_storeu_ps(output + ${N}, vy${ABC[N:N+4]});
+      output += ${BATCH_TILE};
     }
-  for (; n >= 8 * sizeof(${XINT8_T}); n -= 8 * sizeof(${XINT8_T})) {
-    __m128i vx = _mm_loadl_epi64((const __m128i*) x);
+  for (; batch >= 8 * sizeof(${XINT8_T}); batch -= 8 * sizeof(${XINT8_T})) {
+    __m128i vx = _mm_loadl_epi64((const __m128i*) input);
     $if DATATYPE == "QS8":
       vx = _mm_xor_si128(vx, vsign_mask);
     vx = _mm_unpacklo_epi8(vx, vzero);
-    x += 8;
+    input += 8;
 
     __m128 vy_lo = _mm_castsi128_ps(_mm_unpacklo_epi16(vx, vmagic_exp));
     __m128 vy_hi = _mm_castsi128_ps(_mm_unpackhi_epi16(vx, vmagic_exp));
@@ -79,15 +79,15 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_x${BATCH_TILE}(
     vy_lo = _mm_mul_ps(vy_lo, vscale);
     vy_hi = _mm_mul_ps(vy_hi, vscale);
 
-    _mm_storeu_ps(y, vy_lo);
-    _mm_storeu_ps(y + 4, vy_hi);
-    y += 8;
+    _mm_storeu_ps(output, vy_lo);
+    _mm_storeu_ps(output + 4, vy_hi);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(${XINT8_T}));
-    assert(n <= 7 * sizeof(${XINT8_T}));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(${XINT8_T}));
+    assert(batch <= 7 * sizeof(${XINT8_T}));
 
-    __m128i vx = _mm_loadl_epi64((const __m128i*) x);
+    __m128i vx = _mm_loadl_epi64((const __m128i*) input);
     $if DATATYPE == "QS8":
       vx = _mm_xor_si128(vx, vsign_mask);
     vx = _mm_unpacklo_epi8(vx, vzero);
@@ -96,20 +96,20 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_x${BATCH_TILE}(
     vy = _mm_sub_ps(vy, vmagic_bias);
     vy = _mm_mul_ps(vy, vscale);
 
-    if (n & (4 * sizeof(${XINT8_T}))) {
-      _mm_storeu_ps(y, vy);
+    if (batch & (4 * sizeof(${XINT8_T}))) {
+      _mm_storeu_ps(output, vy);
       vy = _mm_castsi128_ps(_mm_unpackhi_epi16(vx, vmagic_exp));
       vy = _mm_sub_ps(vy, vmagic_bias);
       vy = _mm_mul_ps(vy, vscale);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(${XINT8_T}))) {
-      _mm_storel_pi((__m64*) y, vy);
+    if (batch & (2 * sizeof(${XINT8_T}))) {
+      _mm_storel_pi((__m64*) output, vy);
       vy = _mm_movehl_ps(vy, vy);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(${XINT8_T}))) {
-      _mm_store_ss(y, vy);
+    if (batch & (1 * sizeof(${XINT8_T}))) {
+      _mm_store_ss(output, vy);
     }
   }
 }

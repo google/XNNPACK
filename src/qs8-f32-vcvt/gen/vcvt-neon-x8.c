@@ -17,20 +17,20 @@
 
 
 void xnn_qs8_f32_vcvt_ukernel__neon_x8(
-    size_t n,
-    const int8_t* x,
-    float* y,
+    size_t batch,
+    const int8_t* input,
+    float* output,
     const union xnn_qs8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(int8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int16x8_t vminus_zero_point = vreinterpretq_s16_u32(vld1q_dup_u32((const void*) params->neon.minus_zero_point));
   const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
-  for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
-    const int8x8_t vx = vld1_s8(x); x += 8;
+  for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
+    const int8x8_t vx = vld1_s8(input); input += 8;
 
     const int16x8_t vhx = vaddw_s8(vminus_zero_point, vx);
 
@@ -43,14 +43,14 @@ void xnn_qs8_f32_vcvt_ukernel__neon_x8(
     vy_lo = vmulq_f32(vy_lo, vscale);
     vy_hi = vmulq_f32(vy_hi, vscale);
 
-    vst1q_f32(y, vy_lo); y += 4;
-    vst1q_f32(y, vy_hi); y += 4;
+    vst1q_f32(output, vy_lo); output += 4;
+    vst1q_f32(output, vy_hi); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(int8_t));
-    assert(n <= 7 * sizeof(int8_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(int8_t));
+    assert(batch <= 7 * sizeof(int8_t));
 
-    const int8x8_t vx = vld1_s8(x);
+    const int8x8_t vx = vld1_s8(input);
 
     const int16x8_t vhx = vaddw_s8(vminus_zero_point, vx);
 
@@ -60,18 +60,18 @@ void xnn_qs8_f32_vcvt_ukernel__neon_x8(
     float32x4_t vy = vcvtq_f32_s32(vwx_lo);
     vy = vmulq_f32(vy, vscale);
 
-    if (n & (4 * sizeof(int8_t))) {
-      vst1q_f32(y, vy); y += 4;
+    if (batch & (4 * sizeof(int8_t))) {
+      vst1q_f32(output, vy); output += 4;
       vy = vcvtq_f32_s32(vwx_hi);
       vy = vmulq_f32(vy, vscale);
     }
     float32x2_t vy_lo = vget_low_f32(vy);
-    if (n & (2 * sizeof(int8_t))) {
-      vst1_f32(y, vy_lo); y += 2;
+    if (batch & (2 * sizeof(int8_t))) {
+      vst1_f32(output, vy_lo); output += 2;
       vy_lo = vget_high_f32(vy);
     }
-    if (n & (1 * sizeof(int8_t))) {
-      vst1_lane_f32(y, vy_lo, 0);
+    if (batch & (1 * sizeof(int8_t))) {
+      vst1_lane_f32(output, vy_lo, 0);
     }
   }
 }

@@ -14,7 +14,7 @@
 
 
 void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -28,7 +28,7 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
   const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
-  for (; n >= 2 * sizeof(int8_t); n -= 2 * sizeof(int8_t)) {
+  for (; batch >= 2 * sizeof(int8_t); batch -= 2 * sizeof(int8_t)) {
     const int32_t va0 = input_a[0];
     const int32_t va1 = input_a[1];
     input_a += 2;
@@ -58,7 +58,7 @@ void xnn_qs8_vadd_minmax_ukernel__scalar_x2(
     output[1] = (int8_t) vout1;
     output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     const int32_t va = *input_a;
     const int32_t vb = *input_b;
     const int32_t vacc = vbias + va * va_multiplier + vb * vb_multiplier;

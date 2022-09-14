@@ -18,19 +18,19 @@
 
 
 void xnn_qu8_vlrelu_ukernel__armsimd32_x8(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   const uint16x2_t vinput_zero_point = (uint16x2_t) params->armsimd32.input_zero_point;
   const int16x2_t vpositive_multiplier = (int16x2_t) params->armsimd32.positive_multiplier;
   const int16x2_t vnegative_multiplier = (int16x2_t) params->armsimd32.negative_multiplier;
   const int32_t vbias = params->armsimd32.bias;
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
-    const uint8x4_t vx0123 = (uint8x4_t) unaligned_indexed_load_u32(x, 0);
-    const uint8x4_t vx4567 = (uint8x4_t) unaligned_indexed_load_u32(x, 1);
-    x += 8;
+  for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
+    const uint8x4_t vx0123 = (uint8x4_t) unaligned_indexed_load_u32(input, 0);
+    const uint8x4_t vx4567 = (uint8x4_t) unaligned_indexed_load_u32(input, 1);
+    input += 8;
 
     uint16x2_t vx02 = __uxtb16(vx0123);
     uint16x2_t vx13 = __uxtb16(__ror(vx0123, 8));
@@ -64,19 +64,19 @@ void xnn_qu8_vlrelu_ukernel__armsimd32_x8(
     vacc6 = __usat(math_asr_s32(vacc6, 8), 8);
     vacc7 = __usat(math_asr_s32(vacc7, 8), 8);
 
-    y[0] = (uint8_t) vacc0;
-    y[1] = (uint8_t) vacc1;
-    y[2] = (uint8_t) vacc2;
-    y[3] = (uint8_t) vacc3;
-    y[4] = (uint8_t) vacc4;
-    y[5] = (uint8_t) vacc5;
-    y[6] = (uint8_t) vacc6;
-    y[7] = (uint8_t) vacc7;
-    y += 8;
+    output[0] = (uint8_t) vacc0;
+    output[1] = (uint8_t) vacc1;
+    output[2] = (uint8_t) vacc2;
+    output[3] = (uint8_t) vacc3;
+    output[4] = (uint8_t) vacc4;
+    output[5] = (uint8_t) vacc5;
+    output[6] = (uint8_t) vacc6;
+    output[7] = (uint8_t) vacc7;
+    output += 8;
   }
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    const uint8x4_t vx0123 = (uint8x4_t) unaligned_load_u32(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
+    const uint8x4_t vx0123 = (uint8x4_t) unaligned_load_u32(input);
+    input += 4;
 
     uint16x2_t vx02 = __uxtb16(vx0123);
     uint16x2_t vx13 = __uxtb16(__ror(vx0123, 8));
@@ -96,14 +96,14 @@ void xnn_qu8_vlrelu_ukernel__armsimd32_x8(
     vacc2 = __usat(math_asr_s32(vacc2, 8), 8);
     vacc3 = __usat(math_asr_s32(vacc3, 8), 8);
 
-    y[0] = (uint8_t) vacc0;
-    y[1] = (uint8_t) vacc1;
-    y[2] = (uint8_t) vacc2;
-    y[3] = (uint8_t) vacc3;
-    y += 4;
+    output[0] = (uint8_t) vacc0;
+    output[1] = (uint8_t) vacc1;
+    output[2] = (uint8_t) vacc2;
+    output[3] = (uint8_t) vacc3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const uint8x4_t vx0123 = (uint8x4_t) unaligned_load_u32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const uint8x4_t vx0123 = (uint8x4_t) unaligned_load_u32(input);
 
     uint16x2_t vx02 = __uxtb16(vx0123);
     uint16x2_t vx13 = __uxtb16(__ror(vx0123, 8));
@@ -120,14 +120,14 @@ void xnn_qu8_vlrelu_ukernel__armsimd32_x8(
     vacc0 = __usat(math_asr_s32(vacc0, 8), 8);
     vacc1 = __usat(math_asr_s32(vacc1, 8), 8);
 
-    if (n & (2 * sizeof(uint8_t))) {
-      y[0] = (uint8_t) vacc0;
-      y[1] = (uint8_t) vacc1;
+    if (batch & (2 * sizeof(uint8_t))) {
+      output[0] = (uint8_t) vacc0;
+      output[1] = (uint8_t) vacc1;
       vacc0 = __usat(math_asr_s32(vacc2, 8), 8);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      y[0] = (uint8_t) vacc0;
+    if (batch & (1 * sizeof(uint8_t))) {
+      output[0] = (uint8_t) vacc0;
     }
   }
 }

@@ -14,7 +14,7 @@
 
 
 void xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x1(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -40,6 +40,6 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x1(
     const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
     *output++ = (int8_t) vout;
 
-    n -= sizeof(int8_t);
-  } while (n != 0);
+    batch -= sizeof(int8_t);
+  } while (batch != 0);
 }

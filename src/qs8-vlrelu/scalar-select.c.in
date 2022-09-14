@@ -16,9 +16,9 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $OUTPUT_MIN = {"QS8": -128, "QU8": 0}[DATATYPE]
 $OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
-    size_t n,
-    const ${XINT8_T}* x,
-    ${XINT8_T}* y,
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
     const union xnn_${DATATYPE.lower()}_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
@@ -27,22 +27,22 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
   const int32_t vbias = params->scalar_select.bias;
   $if BATCH_TILE == 1:
     do {
-      int32_t vacc = (int32_t) *x++ - vinput_zero_point;
+      int32_t vacc = (int32_t) *input++ - vinput_zero_point;
       const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
       vacc = vbias + vacc * vmultiplier;
 
       int32_t vout = math_asr_s32(vacc, 8);
       vout = math_max_s32(vout, ${OUTPUT_MIN});
       vout = math_min_s32(vout, ${OUTPUT_MAX});
-      *y++ = (${XINT8_T}) vout;
+      *output++ = (${XINT8_T}) vout;
 
-      n -= sizeof(${XINT8_T});
-    } while (n != 0);
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
   $else:
-    for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(BATCH_TILE):
-        int32_t vacc${ABC[N]} = (int32_t) x[${N}];
-      x += ${BATCH_TILE};
+        int32_t vacc${ABC[N]} = (int32_t) input[${N}];
+      input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
         vacc${ABC[N]} -= vinput_zero_point;
@@ -63,31 +63,31 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__scalar_select_x${BATCH_TILE}(
         vout${ABC[N]} = math_min_s32(vout${ABC[N]}, ${OUTPUT_MAX});
 
       $for N in range(BATCH_TILE):
-        y[${N}] = (${XINT8_T}) vout${ABC[N]};
-      y += ${BATCH_TILE};
+        output[${N}] = (${XINT8_T}) vout${ABC[N]};
+      output += ${BATCH_TILE};
     }
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:
-        int32_t vacc = (int32_t) *x++ - vinput_zero_point;
+        int32_t vacc = (int32_t) *input++ - vinput_zero_point;
         const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
         vacc = vbias + vacc * vmultiplier;
 
         int32_t vout = math_asr_s32(vacc, 8);
         vout = math_max_s32(vout, ${OUTPUT_MIN});
         vout = math_min_s32(vout, ${OUTPUT_MAX});
-        *y = (${XINT8_T}) vout;
+        *output = (${XINT8_T}) vout;
       $else:
         do {
-          int32_t vacc = (int32_t) *x++ - vinput_zero_point;
+          int32_t vacc = (int32_t) *input++ - vinput_zero_point;
           const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
           vacc = vbias + vacc * vmultiplier;
 
           int32_t vout = math_asr_s32(vacc, 8);
           vout = math_max_s32(vout, ${OUTPUT_MIN});
           vout = math_min_s32(vout, ${OUTPUT_MAX});
-          *y++ = (${XINT8_T}) vout;
+          *output++ = (${XINT8_T}) vout;
 
-          n -= sizeof(${XINT8_T});
-        } while (n != 0);
+          batch -= sizeof(${XINT8_T});
+        } while (batch != 0);
     }
 }

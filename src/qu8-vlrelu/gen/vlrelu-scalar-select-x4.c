@@ -14,21 +14,21 @@
 
 
 void xnn_qu8_vlrelu_ukernel__scalar_select_x4(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
   const int32_t vpositive_multiplier = params->scalar_select.positive_multiplier;
   const int32_t vnegative_multiplier = params->scalar_select.negative_multiplier;
   const int32_t vbias = params->scalar_select.bias;
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    int32_t vacc0 = (int32_t) x[0];
-    int32_t vacc1 = (int32_t) x[1];
-    int32_t vacc2 = (int32_t) x[2];
-    int32_t vacc3 = (int32_t) x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
+    int32_t vacc0 = (int32_t) input[0];
+    int32_t vacc1 = (int32_t) input[1];
+    int32_t vacc2 = (int32_t) input[2];
+    int32_t vacc3 = (int32_t) input[3];
+    input += 4;
 
     vacc0 -= vinput_zero_point;
     vacc1 -= vinput_zero_point;
@@ -60,24 +60,24 @@ void xnn_qu8_vlrelu_ukernel__scalar_select_x4(
     vout2 = math_min_s32(vout2, 255);
     vout3 = math_min_s32(vout3, 255);
 
-    y[0] = (uint8_t) vout0;
-    y[1] = (uint8_t) vout1;
-    y[2] = (uint8_t) vout2;
-    y[3] = (uint8_t) vout3;
-    y += 4;
+    output[0] = (uint8_t) vout0;
+    output[1] = (uint8_t) vout1;
+    output[2] = (uint8_t) vout2;
+    output[3] = (uint8_t) vout3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      int32_t vacc = (int32_t) *x++ - vinput_zero_point;
+      int32_t vacc = (int32_t) *input++ - vinput_zero_point;
       const int32_t vmultiplier = XNN_UNPREDICTABLE(vacc >= 0) ? vpositive_multiplier : vnegative_multiplier;
       vacc = vbias + vacc * vmultiplier;
 
       int32_t vout = math_asr_s32(vacc, 8);
       vout = math_max_s32(vout, 0);
       vout = math_min_s32(vout, 255);
-      *y++ = (uint8_t) vout;
+      *output++ = (uint8_t) vout;
 
-      n -= sizeof(uint8_t);
-    } while (n != 0);
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
   }
 }

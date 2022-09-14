@@ -16,24 +16,24 @@
 
 
 void xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.input_zero_point);
   const v128_t vmultiplier_diff = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_diff);
   const v128_t vmultiplier_base = wasm_v128_load64_splat(params->wasmsimd_x86.multiplier_base);
   const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_x86.output_zero_point);
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    v128_t vacc0 = wasm_u16x8_load8x8(x);
-    v128_t vacc1 = wasm_u16x8_load8x8(x + 8);
-    x += 16;
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    v128_t vacc0 = wasm_u16x8_load8x8(input);
+    v128_t vacc1 = wasm_u16x8_load8x8(input + 8);
+    input += 16;
 
     v128_t vmultiplier0 = wasm_i16x8_gt(vacc0, vinput_zero_point);
     vacc0 = wasm_i16x8_sub(vinput_zero_point, vacc0);
@@ -55,11 +55,11 @@ void xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16(
 
     const v128_t vy0 = wasm_u8x16_narrow_i16x8(vacc0, vacc1);
 
-    wasm_v128_store(y, vy0);
-    y += 16;
+    wasm_v128_store(output, vy0);
+    output += 16;
   }
-  for (; n >= 8 * sizeof(uint8_t); n -= 8 * sizeof(uint8_t)) {
-    v128_t vacc = wasm_u16x8_load8x8(x);
+  for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
+    v128_t vacc = wasm_u16x8_load8x8(input);
     v128_t vmultiplier = wasm_i16x8_gt(vacc, vinput_zero_point);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
@@ -67,17 +67,17 @@ void xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16(
     vmultiplier = wasm_v128_xor(vmultiplier, vmultiplier_base);
     vacc = wasm_i16x8_q15mulr_sat(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
-    x += 8;
+    input += 8;
 
     const v128_t vy = wasm_u8x16_narrow_i16x8(vacc, vacc);
-    wasm_v128_store64_lane(y, vy, 0);
-    y += 8;
+    wasm_v128_store64_lane(output, vy, 0);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint8_t));
-    assert(n <= 7 * sizeof(uint8_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint8_t));
+    assert(batch <= 7 * sizeof(uint8_t));
 
-    v128_t vacc = wasm_u16x8_load8x8(x);
+    v128_t vacc = wasm_u16x8_load8x8(input);
     v128_t vmultiplier = wasm_i16x8_gt(vacc, vinput_zero_point);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
@@ -87,18 +87,18 @@ void xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16(
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = wasm_u8x16_narrow_i16x8(vacc, vacc);
-    if (n & (4 * sizeof(uint8_t))) {
-      wasm_v128_store32_lane(y, vy, 0);
+    if (batch & (4 * sizeof(uint8_t))) {
+      wasm_v128_store32_lane(output, vy, 0);
       vy = wasm_u64x2_shr(vy, 32);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(uint8_t))) {
-      wasm_v128_store16_lane(y, vy, 0);
+    if (batch & (2 * sizeof(uint8_t))) {
+      wasm_v128_store16_lane(output, vy, 0);
       vy = wasm_u32x4_shr(vy, 16);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      wasm_v128_store8_lane(y, vy, 0);
+    if (batch & (1 * sizeof(uint8_t))) {
+      wasm_v128_store8_lane(output, vy, 0);
     }
   }
 }

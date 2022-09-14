@@ -14,7 +14,7 @@
 
 
 void xnn_qu8_vadd_minmax_ukernel__scalar_x1(
-    size_t n,
+    size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
     uint8_t* output,
@@ -38,6 +38,6 @@ void xnn_qu8_vadd_minmax_ukernel__scalar_x1(
     vout = math_min_s32(vout, voutput_max_less_zero_point);
     *output++ = (uint8_t) (vout + voutput_zero_point);
 
-    n -= sizeof(uint8_t);
-  } while (n != 0);
+    batch -= sizeof(uint8_t);
+  } while (batch != 0);
 }

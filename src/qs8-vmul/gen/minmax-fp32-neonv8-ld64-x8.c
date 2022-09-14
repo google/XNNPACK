@@ -16,7 +16,7 @@
 
 
 void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x8(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -29,7 +29,7 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x8(
   const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neonv8.output_min);
   const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neonv8.output_max);
 
-  for (; n >= 8 * sizeof(int8_t); n -= 8 * sizeof(int8_t)) {
+  for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
     const int8x8_t vb01234567 = vld1_s8(input_b); input_b += 8;
 
@@ -68,7 +68,7 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x8(
 
     vst1_s8(output, vout01234567); output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     {
       const int8x8_t va01234567 = vld1_s8(input_a);
       const int8x8_t vb01234567 = vld1_s8(input_b);
@@ -100,15 +100,15 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__neonv8_ld64_x8(
 
       vout01234567 = vmax_s8(vout01234567, voutput_min);
       vout01234567 = vmin_s8(vout01234567, voutput_max);
-      if (n & (4 * sizeof(int8_t))) {
+      if (batch & (4 * sizeof(int8_t))) {
         vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout01234567), 0); output += 4;
         vout01234567 = vext_s8(vout01234567, vout01234567, 4);
       }
-      if (n & (2 * sizeof(int8_t))) {
+      if (batch & (2 * sizeof(int8_t))) {
         vst1_lane_u16((void*) output, vreinterpret_u16_s8(vout01234567), 0); output += 2;
         vout01234567 = vext_s8(vout01234567, vout01234567, 2);
       }
-      if (n & (1 * sizeof(int8_t))) {
+      if (batch & (1 * sizeof(int8_t))) {
         vst1_lane_s8(output, vout01234567, 0);
       }
     }

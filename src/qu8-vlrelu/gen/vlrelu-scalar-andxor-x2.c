@@ -14,19 +14,19 @@
 
 
 void xnn_qu8_vlrelu_ukernel__scalar_andxor_x2(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vinput_zero_point = params->scalar_andxor.input_zero_point;
   const int32_t vmultiplier_diff = params->scalar_andxor.multiplier_diff;
   const int32_t vmultiplier_base = params->scalar_andxor.multiplier_base;
   const int32_t vbias = params->scalar_andxor.bias;
-  for (; n >= 2 * sizeof(uint8_t); n -= 2 * sizeof(uint8_t)) {
-    int32_t vacc0 = (int32_t) x[0];
-    int32_t vacc1 = (int32_t) x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {
+    int32_t vacc0 = (int32_t) input[0];
+    int32_t vacc1 = (int32_t) input[1];
+    input += 2;
 
     vacc0 -= vinput_zero_point;
     vacc1 -= vinput_zero_point;
@@ -52,18 +52,18 @@ void xnn_qu8_vlrelu_ukernel__scalar_andxor_x2(
     vout0 = math_min_s32(vout0, 255);
     vout1 = math_min_s32(vout1, 255);
 
-    y[0] = (uint8_t) vout0;
-    y[1] = (uint8_t) vout1;
-    y += 2;
+    output[0] = (uint8_t) vout0;
+    output[1] = (uint8_t) vout1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    int32_t vacc = (int32_t) *x++ - vinput_zero_point;
+  if XNN_UNLIKELY(batch != 0) {
+    int32_t vacc = (int32_t) *input++ - vinput_zero_point;
     const int32_t vmultiplier = vmultiplier_base ^ (vmultiplier_diff & math_asr_s32(vacc, 31));
     vacc = vbias + vacc * vmultiplier;
 
     int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, 0);
     vout = math_min_s32(vout, 255);
-    *y = (uint8_t) vout;
+    *output = (uint8_t) vout;
   }
 }

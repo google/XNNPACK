@@ -15,23 +15,23 @@
 
 
 void xnn_qu8_f32_vcvt_ukernel__scalar_x2(
-    size_t n,
-    const uint8_t* x,
-    float* y,
+    size_t batch,
+    const uint8_t* input,
+    float* output,
     const union xnn_qu8_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(uint8_t) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int32_t vzero_point = params->scalar.zero_point;
   const float vscale = params->scalar.scale;
 
-  for (; n >= 2 * sizeof(uint8_t); n -= 2 * sizeof(uint8_t)) {
-    int32_t vx0 = (int32_t) x[0];
-    int32_t vx1 = (int32_t) x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {
+    int32_t vx0 = (int32_t) input[0];
+    int32_t vx1 = (int32_t) input[1];
+    input += 2;
 
     vx0 -= vzero_point;
     vx1 -= vzero_point;
@@ -42,16 +42,16 @@ void xnn_qu8_f32_vcvt_ukernel__scalar_x2(
     vy0 *= vscale;
     vy1 *= vscale;
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y += 2;
+    output[0] = vy0;
+    output[1] = vy1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    int32_t vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    int32_t vx = *input;
     vx -= vzero_point;
 
     float vy = (float) vx;
     vy *= vscale;
-    *y = vy;
+    *output = vy;
   }
 }

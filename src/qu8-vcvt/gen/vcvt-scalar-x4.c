@@ -14,19 +14,19 @@
 
 
 void xnn_qu8_vcvt_ukernel__scalar_x4(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
     const union xnn_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vbias = params->scalar.bias;
   const int32_t vmultiplier = params->scalar.multiplier;
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    int32_t vacc0 = x[0];
-    int32_t vacc1 = x[1];
-    int32_t vacc2 = x[2];
-    int32_t vacc3 = x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
+    int32_t vacc0 = input[0];
+    int32_t vacc1 = input[1];
+    int32_t vacc2 = input[2];
+    int32_t vacc3 = input[3];
+    input += 4;
 
     vacc0 = vbias + vacc0 * vmultiplier;
     vacc1 = vbias + vacc1 * vmultiplier;
@@ -48,23 +48,23 @@ void xnn_qu8_vcvt_ukernel__scalar_x4(
     vout2 = math_min_s32(vout2, 255);
     vout3 = math_min_s32(vout3, 255);
 
-    y[0] = (uint8_t) vout0;
-    y[1] = (uint8_t) vout1;
-    y[2] = (uint8_t) vout2;
-    y[3] = (uint8_t) vout3;
-    y += 4;
+    output[0] = (uint8_t) vout0;
+    output[1] = (uint8_t) vout1;
+    output[2] = (uint8_t) vout2;
+    output[3] = (uint8_t) vout3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      int32_t vacc = *x++;
+      int32_t vacc = *input++;
       vacc = vbias + vacc * vmultiplier;
 
       int32_t vout = math_asr_s32(vacc, 8);
       vout = math_max_s32(vout, 0);
       vout = math_min_s32(vout, 255);
-      *y++ = (uint8_t) vout;
+      *output++ = (uint8_t) vout;
 
-      n -= sizeof(uint8_t);
-    } while (n != 0);
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
   }
 }

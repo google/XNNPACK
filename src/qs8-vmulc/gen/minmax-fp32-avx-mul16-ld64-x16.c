@@ -16,7 +16,7 @@
 
 
 void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -32,7 +32,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
   __m128i vxb = _mm_sub_epi16(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b), 0),
     _mm_load_si128((const __m128i*) params->fp32_sse4.b_zero_point));
-  for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
+  for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const __m128i va01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_a));
     const __m128i va89ABCDEF = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) (input_a + 8)));
     input_a += 16;
@@ -79,7 +79,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
     _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
     output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const __m128i va01234567 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input_a));
       input_a += 8;
@@ -108,26 +108,26 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
       vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
       vout0123456701234567 = _mm_min_epi8(vout0123456701234567, voutput_max);
 
-      if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
+      if XNN_LIKELY(batch >= (8 * sizeof(int8_t))) {
         _mm_storel_epi64((__m128i*) output, vout0123456701234567);
         output += 8;
-        n -= 8 * sizeof(int8_t);
+        batch -= 8 * sizeof(int8_t);
       } else {
-        if (n & (4 * sizeof(int8_t))) {
+        if (batch & (4 * sizeof(int8_t))) {
           unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
-        if (n & (2 * sizeof(int8_t))) {
+        if (batch & (2 * sizeof(int8_t))) {
           unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456701234567, 0));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
-        if (n & (1 * sizeof(int8_t))) {
+        if (batch & (1 * sizeof(int8_t))) {
           *output = (int8_t) _mm_extract_epi8(vout0123456701234567, 0);
         }
-        n = 0;
+        batch = 0;
       }
-    } while (n != 0);
+    } while (batch != 0);
   }
 }

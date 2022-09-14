@@ -15,7 +15,7 @@
 
 
 void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -32,7 +32,7 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
   const int32_t vb = params->neon.b_multiplier;
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
-  for (; n >= 16 * sizeof(int8_t); n -= 16 * sizeof(int8_t)) {
+  for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
     const int8x8_t va89ABCDEF = vld1_s8(input_a); input_a += 8;
 
@@ -60,7 +60,7 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
 
     vst1q_s8(output, vout0123456789ABCDEF); output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
 
@@ -78,23 +78,23 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_x16(
       vout01234567 = vmax_s8(vout01234567, vget_low_s8(voutput_min));
       vout01234567 = vmin_s8(vout01234567, vget_low_s8(voutput_max));
 
-      if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
+      if XNN_LIKELY(batch >= (8 * sizeof(int8_t))) {
         vst1_s8(output, vout01234567); output += 8;
-        n -= 8 * sizeof(int8_t);
+        batch -= 8 * sizeof(int8_t);
       } else {
-        if (n & (4 * sizeof(int8_t))) {
+        if (batch & (4 * sizeof(int8_t))) {
           vst1_lane_u32((void*) output, vreinterpret_u32_s8(vout01234567), 0); output += 4;
           vout01234567 = vext_s8(vout01234567, vout01234567, 4);
         }
-        if (n & (2 * sizeof(int8_t))) {
+        if (batch & (2 * sizeof(int8_t))) {
           vst1_lane_u16((void*) output, vreinterpret_u16_s8(vout01234567), 0); output += 2;
           vout01234567 = vext_s8(vout01234567, vout01234567, 2);
         }
-        if (n & (1 * sizeof(int8_t))) {
+        if (batch & (1 * sizeof(int8_t))) {
           vst1_lane_s8(output, vout01234567, 0);
         }
-        n = 0;
+        batch = 0;
       }
-    } while (n != 0);
+    } while (batch != 0);
   }
 }

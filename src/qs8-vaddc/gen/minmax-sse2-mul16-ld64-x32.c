@@ -16,7 +16,7 @@
 
 
 void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -32,7 +32,7 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.output_max);
 
-  for (; n >= 32 * sizeof(int8_t); n -= 32 * sizeof(int8_t)) {
+  for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
     __m128i va89ABCDEF = _mm_loadl_epi64((const __m128i*) (input_a + 8));
     __m128i vaGHIJKLMN = _mm_loadl_epi64((const __m128i*) (input_a + 16));
@@ -104,7 +104,7 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
     _mm_storeu_si128((__m128i*) (output + 16), voutGHIJKLMNOPQRSTUV);
     output += 32;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
       input_a += 8;
@@ -130,26 +130,26 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x32(
 
       __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-      if XNN_LIKELY(n >= (8 * sizeof(int8_t))) {
+      if XNN_LIKELY(batch >= (8 * sizeof(int8_t))) {
         _mm_storel_epi64((__m128i*) output, vout0123456701234567);
         output += 8;
-        n -= 8 * sizeof(int8_t);
+        batch -= 8 * sizeof(int8_t);
       } else {
-        if (n & (4 * sizeof(int8_t))) {
+        if (batch & (4 * sizeof(int8_t))) {
           unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi64(vout0123456701234567, 32);
           output += 4;
         }
-        if (n & (2 * sizeof(int8_t))) {
+        if (batch & (2 * sizeof(int8_t))) {
           unaligned_store_u16(output, (uint16_t) _mm_cvtsi128_si32(vout0123456701234567));
           vout0123456701234567 = _mm_srli_epi32(vout0123456701234567, 16);
           output += 2;
         }
-        if (n & (1 * sizeof(int8_t))) {
+        if (batch & (1 * sizeof(int8_t))) {
           *output = (int8_t) _mm_cvtsi128_si32(vout0123456701234567);
         }
-        n = 0;
+        batch = 0;
       }
-    } while (n != 0);
+    } while (batch != 0);
   }
 }

@@ -24,7 +24,7 @@ $_MM256_MAX_EPX8 = {"QS8": "_mm256_max_epi8", "QU8": "_mm256_max_epu8"}[DATATYPE
 $_MM_MIN_EPX8 = {"QS8": "_mm_min_epi8", "QU8": "_mm_min_epu8"}[DATATYPE]
 $_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
 void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x${BATCH_TILE}(
-    size_t n,
+    size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,
     ${XINT8_T}* output,
@@ -44,7 +44,7 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x${BATC
   const __m512i vbias = _mm512_add_epi32(
     _mm512_broadcastd_epi32(_mm_cvtsi32_si128(params->avx512.b_multiplier[0] * (int32_t) *input_b)),
     _mm512_load_si512(params->avx512.bias));
-  for (; n >= ${BATCH_TILE} * sizeof(${XINT8_T}); n -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+  for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     const __m512i va${ABC[0:16]} = ${_MM512_CVTEPX8_EPI32}(_mm_loadu_si128((const __m128i*) input_a));
     $for N in range(16, BATCH_TILE, 16):
       const __m512i va${ABC[N:N+16]} = ${_MM512_CVTEPX8_EPI32}(_mm_loadu_si128((const __m128i*) (input_a + ${N})));
@@ -97,13 +97,13 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x${BATC
         _mm_storeu_si128((__m128i*) (output + ${N}), vout${ABC[N:N+16]});
     output += ${BATCH_TILE};
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     ${"do " if BATCH_TILE > 16 else ""}{
       $if BATCH_TILE > 16:
         const __m512i va${ABC[0:16]} = ${_MM512_CVTEPX8_EPI32}(_mm_loadu_si128((const __m128i*) input_a));
         input_a += 16;
       $else:
-        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << n) - UINT32_C(1)));
+        const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
         const __m512i va${ABC[0:16]} = ${_MM512_CVTEPX8_EPI32}(_mm_maskz_loadu_epi8(vmask, input_a));
 
       __m512i vacc${ABC[0:16]} = _mm512_add_epi32(vbias, _mm512_mullo_epi32(va${ABC[0:16]}, va_multiplier));
@@ -123,17 +123,17 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x${BATC
         vout${ABC[0:16]} = ${_MM_MIN_EPX8}(vout${ABC[0:16]}, voutput_max);
 
       $if BATCH_TILE > 16:
-        if XNN_LIKELY(n >= (16 * sizeof(${XINT8_T}))) {
+        if XNN_LIKELY(batch >= (16 * sizeof(${XINT8_T}))) {
           _mm_storeu_si128((__m128i*) output, vout${ABC[0:16]});
           output += 16;
-          n -= 16 * sizeof(${XINT8_T});
+          batch -= 16 * sizeof(${XINT8_T});
         } else {
-          const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << n) - UINT32_C(1)));
+          const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
           _mm_mask_storeu_epi8(output, vmask, vout${ABC[0:16]});
-          n = 0;
+          batch = 0;
         }
       $else:
         _mm_mask_storeu_epi8(output, vmask, vout${ABC[0:16]});
-    }${" while (n != 0);" if BATCH_TILE > 16 else ""}
+    }${" while (batch != 0);" if BATCH_TILE > 16 else ""}
   }
 }

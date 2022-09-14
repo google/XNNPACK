@@ -14,7 +14,7 @@
 
 
 void xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x2(
-    size_t n,
+    size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
     int8_t* output,
@@ -28,7 +28,7 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x2(
   const float vmagic_bias = params->fp32_scalar.magic_bias;
   const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar.magic_bias_less_output_zero_point;
 
-  for (; n >= 2 * sizeof(int8_t); n -= 2 * sizeof(int8_t)) {
+  for (; batch >= 2 * sizeof(int8_t); batch -= 2 * sizeof(int8_t)) {
     const int32_t va0 = input_a[0] - va_zero_point;
     const int32_t va1 = input_a[1] - va_zero_point;
     input_a += 2;
@@ -59,7 +59,7 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__scalar_x2(
     output[1] = (int8_t) vout1;
     output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     const int32_t va = (int32_t) *input_a - va_zero_point;
     const int32_t vb = (int32_t) *input_b - vb_zero_point;
     const int32_t vacc = va * vb;

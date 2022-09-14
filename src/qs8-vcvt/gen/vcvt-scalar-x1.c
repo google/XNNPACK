@@ -14,22 +14,22 @@
 
 
 void xnn_qs8_vcvt_ukernel__scalar_x1(
-    size_t n,
-    const int8_t* x,
-    int8_t* y,
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
     const union xnn_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   const int32_t vbias = params->scalar.bias;
   const int32_t vmultiplier = params->scalar.multiplier;
   do {
-    int32_t vacc = *x++;
+    int32_t vacc = *input++;
     vacc = vbias + vacc * vmultiplier;
 
     int32_t vout = math_asr_s32(vacc, 8);
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
-    *y++ = (int8_t) vout;
+    *output++ = (int8_t) vout;
 
-    n -= sizeof(int8_t);
-  } while (n != 0);
+    batch -= sizeof(int8_t);
+  } while (batch != 0);
 }
