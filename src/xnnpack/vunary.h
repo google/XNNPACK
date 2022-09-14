@@ -189,6 +189,10 @@ DECLARE_F16_VSQR_UKERNEL_FUNCTION(xnn_f16_vsqr_ukernel__f16c_x16)
       void* y,                                      \
       const union xnn_f16_sqrt_params* params);
 
+DECLARE_F16_VSQRT_UKERNEL_FUNCTION(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1)
+DECLARE_F16_VSQRT_UKERNEL_FUNCTION(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x2)
+DECLARE_F16_VSQRT_UKERNEL_FUNCTION(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x4)
+
 DECLARE_F16_VSQRT_UKERNEL_FUNCTION(xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x8)
 DECLARE_F16_VSQRT_UKERNEL_FUNCTION(xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x16)
 

@@ -3043,6 +3043,15 @@ ALL_ARMSIMD32_MICROKERNEL_SRCS = [
     "src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c",
 ]
 
+PROD_FP16ARITH_MICROKERNEL_SRCS = [
+]
+
+ALL_FP16ARITH_MICROKERNEL_SRCS = [
+    "src/f16-vsqrt/gen/fp16arith-sqrt-x1.c",
+    "src/f16-vsqrt/gen/fp16arith-sqrt-x2.c",
+    "src/f16-vsqrt/gen/fp16arith-sqrt-x4.c",
+]
+
 PROD_NEON_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/vcvt-neon-int16-x16.c",
     "src/f32-argmaxpool/4x-neon-c4.c",
@@ -8691,7 +8700,7 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
 
 filegroup(
     name = "microkernel_source_files",
-    data = ALL_SCALAR_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_AARCH64_NEON_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_XOP_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + ["src/microparams-init.c"],
+    data = ALL_SCALAR_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_FP16ARITH_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_AARCH64_NEON_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_XOP_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + ["src/microparams-init.c"],
     visibility = xnnpack_visibility(),
 )
 
@@ -9091,6 +9100,76 @@ xnnpack_cc_library(
         "-fno-fast-math",
         "-fno-math-errno",
     ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16arith_bench_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=fp-armv8",
+    ],
+    aarch32_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16arith_prod_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=fp-armv8",
+    ],
+    aarch32_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16arith_test_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=fp-armv8",
+    ],
+    aarch32_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
@@ -10481,7 +10560,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_prod_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        ":arm_fp16_enabled": [
+            ":fp16arith_prod_microkernels",
+            ":neonfp16arith_prod_microkernels",
+        ],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
@@ -10546,7 +10628,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_bench_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [":neonfp16arith_bench_microkernels"],
+        ":arm_fp16_enabled": [
+            ":fp16arith_bench_microkernels",
+            ":neonfp16arith_bench_microkernels",
+        ],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_bench_microkernels"],
@@ -10611,7 +10696,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_prod_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [":neonfp16arith_prod_microkernels"],
+        ":arm_fp16_enabled": [
+            ":fp16arith_prod_microkernels",
+            ":neonfp16arith_prod_microkernels",
+        ],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
@@ -10676,7 +10764,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_test_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [":neonfp16arith_test_microkernels"],
+        ":arm_fp16_enabled": [
+            ":fp16arith_test_microkernels",
+            ":neonfp16arith_test_microkernels",
+        ],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_test_microkernels"],

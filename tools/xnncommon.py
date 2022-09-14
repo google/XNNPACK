@@ -33,6 +33,7 @@ _ARCH_TO_MACRO_MAP = {
 # Mapping from ISA extension to macro guarding build-time enabled/disabled
 # status for the ISA. Only ISAs that can be enabled/disabled have an entry.
 _ISA_TO_MACRO_MAP = {
+  "fp16arith": "XNN_ENABLE_ARM_FP16",
   "neonfp16arith": "XNN_ENABLE_ARM_FP16",
   "neonbf16": "XNN_ENABLE_ARM_BF16",
   "neondot": "XNN_ENABLE_ARM_DOTPROD",
@@ -40,6 +41,7 @@ _ISA_TO_MACRO_MAP = {
 
 _ISA_TO_ARCH_MAP = {
   "armsimd32": ["aarch32"],
+  "fp16arith": ["aarch32", "aarch64"],
   "neon": ["aarch32", "aarch64"],
   "neonfp16": ["aarch32", "aarch64"],
   "neonfma": ["aarch32", "aarch64"],
@@ -66,6 +68,7 @@ _ISA_TO_ARCH_MAP = {
 
 _ISA_TO_CHECK_MAP = {
   "armsimd32": "TEST_REQUIRES_ARM_SIMD32",
+  "fp16arith": "TEST_REQUIRES_ARM_FP16_ARITH",
   "neon": "TEST_REQUIRES_ARM_NEON",
   "neonfp16": "TEST_REQUIRES_ARM_NEON_FP16",
   "neonfma": "TEST_REQUIRES_ARM_NEON_FMA",
