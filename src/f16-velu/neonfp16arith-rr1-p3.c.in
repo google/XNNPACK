@@ -23,15 +23,15 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x${BATCH_TILE}(
   assert(n != 0);
   assert(n % sizeof(__fp16) == 0);
 
-  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.prescale));
-  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.sat_cutoff));
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.magic_bias));
-  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.log2e));
-  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.minus_ln2));
-  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c3));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.c2));
-  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.minus_alpha));
-  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr1_p3.beta));
+  const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.prescale));
+  const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.sat_cutoff));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.magic_bias));
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.log2e));
+  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_ln2));
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c3));
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.c2));
+  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_alpha));
+  const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.beta));
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;

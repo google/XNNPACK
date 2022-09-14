@@ -25,8 +25,8 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
-  const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+  const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+  const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
   do {
     __fp16* o = output;
     {

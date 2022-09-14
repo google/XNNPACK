@@ -5,9 +5,9 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x8
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
 - name: xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
 
 # x86 F16C
 - name: xnn_f16_vrsubc_minmax_ukernel__f16c_x8

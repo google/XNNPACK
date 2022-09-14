@@ -113,12 +113,12 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     } while (p != 0);
 
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = vminq_f16(vacc${M}x${ABC[N:N+8]}, vmax);
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = vmaxq_f16(vacc${M}x${ABC[N:N+8]}, vmin);

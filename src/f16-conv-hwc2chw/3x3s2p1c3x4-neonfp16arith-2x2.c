@@ -49,8 +49,8 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
     i0 = zero;
   }
 
-  const float16x4_t vmax = vreinterpret_f16_u16(vld1_dup_u16(&params->neon.max));
-  const float16x4_t vmin = vreinterpret_f16_u16(vld1_dup_u16(&params->neon.min));
+  const float16x4_t vmax = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.max));
+  const float16x4_t vmin = vreinterpret_f16_u16(vld1_dup_u16(&params->fp16arith.min));
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;

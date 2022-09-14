@@ -195,9 +195,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c16(
     i6 = (const __fp16*) zero;
   }
 
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
   for (; channels >= 16; channels -= 16) {
     float16x8_t vacc01234567 = vld1q_f16(buffer); buffer = (__fp16*) buffer + 8;
     float16x8_t vacc89ABCDEF = vld1q_f16(buffer); buffer = (__fp16*) buffer + 8;

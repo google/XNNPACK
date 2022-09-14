@@ -5,66 +5,66 @@
 
 # AArch64 assembly
 - name: xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
   assembly: true
 - name: xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
   assembly: true
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_4x16__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 - name: xnn_f16_igemm_minmax_ukernel_8x16__neonfp16arith_ld64
-  init: xnn_init_f16_minmax_neon_params
+  init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
 
 # x86 AVX

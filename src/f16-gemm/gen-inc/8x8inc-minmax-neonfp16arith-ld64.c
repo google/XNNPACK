@@ -256,7 +256,7 @@ void xnn_f16_gemminc_minmax_ukernel_8x8__neonfp16arith_ld64(
     }
 
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
     vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
     vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
     vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
@@ -266,7 +266,7 @@ void xnn_f16_gemminc_minmax_ukernel_8x8__neonfp16arith_ld64(
     vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
     vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
     vacc1x01234567 = vmaxq_f16(vacc1x01234567, vmin);
     vacc2x01234567 = vmaxq_f16(vacc2x01234567, vmin);

@@ -1778,16 +1778,16 @@ void xnn_update_f32_scaleminmax_sse_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_scaleminmax_neon_params(
+size_t xnn_init_f16_scaleminmax_fp16arith_params(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max)
 {
-  params->neon.scale = scale;
-  params->neon.min = min;
-  params->neon.max = max;
-  return sizeof(params->neon);
+  params->fp16arith.scale = scale;
+  params->fp16arith.min = min;
+  params->fp16arith.max = max;
+  return sizeof(params->fp16arith);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -1811,11 +1811,11 @@ size_t xnn_init_f16_scaleminmax_avx_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-void xnn_update_f16_scaleminmax_neon_params(
+void xnn_update_f16_scaleminmax_fp16arith_params(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
-  params->neon.scale = scale;
+  params->fp16arith.scale = scale;
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -2018,14 +2018,14 @@ size_t xnn_init_bf16_minmax_scalar_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_minmax_neon_params(
+size_t xnn_init_f16_minmax_fp16arith_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max)
 {
-  params->neon.min = min;
-  params->neon.max = max;
-  return sizeof(params->neon);
+  params->fp16arith.min = min;
+  params->fp16arith.max = max;
+  return sizeof(params->fp16arith);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -2140,13 +2140,13 @@ size_t xnn_init_f32_minmax_scalar_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_hswish_neon_params(
+size_t xnn_init_f16_hswish_fp16arith_params(
   union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->neon.sixth = UINT16_C(0x3155);
-  params->neon.three = UINT16_C(0x4200);
-  params->neon.six = UINT16_C(0x4600);
-  return sizeof(params->neon);
+  params->fp16arith.sixth = UINT16_C(0x3155);
+  params->fp16arith.three = UINT16_C(0x4200);
+  params->fp16arith.six = UINT16_C(0x4600);
+  return sizeof(params->fp16arith);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -2225,17 +2225,17 @@ size_t xnn_init_f32_hswish_wasmsimd_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params(
+size_t xnn_init_f16_sigmoid_fp16arith_rr2_p2_params(
   union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->neonfp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->neonfp16arith_rr2_p2.minus_log2e = UINT16_C(0xBDC5);  // -0x1.714p+0h
-  params->neonfp16arith_rr2_p2.ln2_hi = UINT16_C(0x398C);  // 0x1.630p-1h
-  params->neonfp16arith_rr2_p2.ln2_lo = UINT16_C(0x8AF4);  // -0x1.BD0p-13h
-  params->neonfp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
-  params->neonfp16arith_rr2_p2.c1 = UINT16_C(0xBC0E);  // -0x1.038p+0h
-  params->neonfp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
-  return sizeof(params->neonfp16arith_rr2_p2);
+  params->fp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->fp16arith_rr2_p2.minus_log2e = UINT16_C(0xBDC5);  // -0x1.714p+0h
+  params->fp16arith_rr2_p2.ln2_hi = UINT16_C(0x398C);  // 0x1.630p-1h
+  params->fp16arith_rr2_p2.ln2_lo = UINT16_C(0x8AF4);  // -0x1.BD0p-13h
+  params->fp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
+  params->fp16arith_rr2_p2.c1 = UINT16_C(0xBC0E);  // -0x1.038p+0h
+  params->fp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
+  return sizeof(params->fp16arith_rr2_p2);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -2732,22 +2732,22 @@ size_t xnn_init_f32_rnd_avx_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_elu_neonfp16arith_rr1_p3_params(
+size_t xnn_init_f16_elu_fp16arith_rr1_p3_params(
   union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta)
 {
-  params->neonfp16arith_rr1_p3.prescale = prescale;
-  params->neonfp16arith_rr1_p3.sat_cutoff = UINT16_C(0xC829);  // -0x1.0A4p+3h;
-  params->neonfp16arith_rr1_p3.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->neonfp16arith_rr1_p3.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
-  params->neonfp16arith_rr1_p3.minus_ln2 = UINT16_C(0xB98C);  // -0x1.62E430p-1h
-  params->neonfp16arith_rr1_p3.c3 = UINT16_C(0x315B);  // 0x1.56Cp-3h
-  params->neonfp16arith_rr1_p3.c2 = UINT16_C(0x3808);  // 0x1.020p-1h
-  params->neonfp16arith_rr1_p3.minus_alpha = alpha ^ UINT16_C(0x8000);
-  params->neonfp16arith_rr1_p3.beta = beta;
-  return sizeof(params->neonfp16arith_rr1_p3);
+  params->fp16arith_rr1_p3.prescale = prescale;
+  params->fp16arith_rr1_p3.sat_cutoff = UINT16_C(0xC829);  // -0x1.0A4p+3h;
+  params->fp16arith_rr1_p3.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->fp16arith_rr1_p3.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
+  params->fp16arith_rr1_p3.minus_ln2 = UINT16_C(0xB98C);  // -0x1.62E430p-1h
+  params->fp16arith_rr1_p3.c3 = UINT16_C(0x315B);  // 0x1.56Cp-3h
+  params->fp16arith_rr1_p3.c2 = UINT16_C(0x3808);  // 0x1.020p-1h
+  params->fp16arith_rr1_p3.minus_alpha = alpha ^ UINT16_C(0x8000);
+  params->fp16arith_rr1_p3.beta = beta;
+  return sizeof(params->fp16arith_rr1_p3);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -3285,17 +3285,17 @@ size_t xnn_init_f32_elu_wasmsimd_rr2_p6_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_expminus_neonfp16arith_rr2_p2_params(
+size_t xnn_init_f16_expminus_fp16arith_rr2_p2_params(
   union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->neonfp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
-  params->neonfp16arith_rr2_p2.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
-  params->neonfp16arith_rr2_p2.minus_ln2_hi = UINT16_C(0xB98C);  // -0x1.630p-1h
-  params->neonfp16arith_rr2_p2.minus_ln2_lo = UINT16_C(0x0AF4);  // 0x1.BD0p-13h
-  params->neonfp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
-  params->neonfp16arith_rr2_p2.c1 = UINT16_C(0x3C0E);  // 0x1.038p+0h
-  params->neonfp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
-  return sizeof(params->neonfp16arith_rr2_p2);
+  params->fp16arith_rr2_p2.magic_bias = UINT16_C(0x660F);  // 0x1.83Cp+10h
+  params->fp16arith_rr2_p2.log2e = UINT16_C(0x3DC5);  // 0x1.714p+0h
+  params->fp16arith_rr2_p2.minus_ln2_hi = UINT16_C(0xB98C);  // -0x1.630p-1h
+  params->fp16arith_rr2_p2.minus_ln2_lo = UINT16_C(0x0AF4);  // 0x1.BD0p-13h
+  params->fp16arith_rr2_p2.c2 = UINT16_C(0x37F9);  // 0x1.FE4p-2h
+  params->fp16arith_rr2_p2.c1 = UINT16_C(0x3C0E);  // 0x1.038p+0h
+  params->fp16arith_rr2_p2.denorm_cutoff = UINT16_C(0xC8DA);  // -0x1.368p+3h
+  return sizeof(params->fp16arith_rr2_p2);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
@@ -3477,12 +3477,12 @@ size_t xnn_init_f32_expminus_wasmsimd_rr2_p5_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_lrelu_neon_params(
+size_t xnn_init_f16_lrelu_fp16arith_params(
   union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope)
 {
-  params->neon.slope = slope;
-  return sizeof(params->neon);
+  params->fp16arith.slope = slope;
+  return sizeof(params->fp16arith);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

@@ -43,7 +43,7 @@ union xnn_f16_scaleminmax_params {
     uint16_t scale;
     uint16_t min;
     uint16_t max;
-  } neon;
+  } fp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -85,7 +85,7 @@ union xnn_f16_minmax_params {
   struct {
     uint16_t min;
     uint16_t max;
-  } neon;
+  } fp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -1441,7 +1441,7 @@ union xnn_f16_elu_params {
     uint16_t c2;
     uint16_t minus_alpha;
     uint16_t beta;
-  } neonfp16arith_rr1_p3;
+  } fp16arith_rr1_p3;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -1754,7 +1754,7 @@ union xnn_f16_expminus_params {
     uint16_t c2;
     uint16_t c1;
     uint16_t denorm_cutoff;
-  } neonfp16arith_rr2_p2;
+  } fp16arith_rr2_p2;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -1891,7 +1891,7 @@ union xnn_f16_hswish_params {
     uint16_t three;
     uint16_t six;
     uint16_t pad;  // pad to 8 bytes for neonfp16arith assembly.
-  } neon;
+  } fp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -1942,7 +1942,7 @@ union xnn_f16_lrelu_params {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t slope;
-  } neon;
+  } fp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
@@ -2164,7 +2164,7 @@ union xnn_f16_sigmoid_params {
     uint16_t c2;
     uint16_t c1;
     uint16_t denorm_cutoff;
-  } neonfp16arith_rr2_p2;
+  } fp16arith_rr2_p2;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

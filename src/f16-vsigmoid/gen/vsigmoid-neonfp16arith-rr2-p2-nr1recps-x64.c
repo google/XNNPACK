@@ -23,14 +23,14 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x64(
 {
   assert(batch % sizeof(__fp16) == 0);
 
-  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.magic_bias));
-  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.minus_log2e));
-  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.ln2_hi));
-  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.ln2_lo));
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.c2));
-  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.c1));
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_log2e));
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_hi));
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_lo));
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
   const float16x8_t vone = vmovq_n_f16(1.0f);
-  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith_rr2_p2.denorm_cutoff));
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;

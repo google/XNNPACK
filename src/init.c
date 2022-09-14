@@ -2599,7 +2599,7 @@ static void init(void) {
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
-              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
               break;
@@ -2609,7 +2609,7 @@ static void init(void) {
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0);
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
-              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
               break;
@@ -2618,7 +2618,7 @@ static void init(void) {
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
-              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 4;
               xnn_params.f16.gemm.nr = 16;
               break;
@@ -2627,7 +2627,7 @@ static void init(void) {
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
-              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
               break;
@@ -2640,7 +2640,7 @@ static void init(void) {
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__aarch64_neonfp16arith_cortex_a75);
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
               xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld64);
-              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+              xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
               break;
@@ -2683,35 +2683,35 @@ static void init(void) {
           xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64);
           xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64);
           xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64);
-          xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_neon_params;
+          xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
           xnn_params.f16.gemm.mr = 6;
           xnn_params.f16.gemm.nr = 16;
         #endif  // XNN_ENABLE_ASSEMBLY
 
         xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x3__neonfp16arith;
-        xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_neon_params;
+        xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[0].channel_tile = 16;
         xnn_params.f16.dwconv[0].primary_tile = 3;
 
         xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith;
-        xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_neon_params;
+        xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[1].channel_tile = 16;
         xnn_params.f16.dwconv[1].primary_tile = 4;
 
         xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith;
-        xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_neon_params;
+        xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[2].channel_tile = 16;
         xnn_params.f16.dwconv[2].primary_tile = 9;
 
         xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_function) xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2;
-        xnn_params.f16.dwconv[3].init.f16 = xnn_init_f16_minmax_neon_params;
+        xnn_params.f16.dwconv[3].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[3].channel_tile = 8;
         xnn_params.f16.dwconv[3].primary_tile = 25;
 
         xnn_params.f16.avgpool = (struct avgpool_parameters) {
           .unipass = (xnn_avgpool_unipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9x__neonfp16arith_c8,
           .multipass = (xnn_avgpool_multipass_ukernel_function) xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8,
-          .init.f16 = xnn_init_f16_scaleminmax_neon_params,
+          .init.f16 = xnn_init_f16_scaleminmax_fp16arith_params,
           .primary_tile = 9,
           .incremental_tile = 8,
           .channel_tile = 8,
@@ -2719,7 +2719,7 @@ static void init(void) {
         xnn_params.f16.pavgpool = (struct pavgpool_parameters) {
           .unipass = (xnn_pavgpool_unipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8,
           .multipass = (xnn_pavgpool_multipass_ukernel_function) xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8,
-          .init.f16 = xnn_init_f16_minmax_neon_params,
+          .init.f16 = xnn_init_f16_minmax_fp16arith_params,
           .primary_tile = 9,
           .incremental_tile = 8,
           .channel_tile = 8,
@@ -2727,15 +2727,15 @@ static void init(void) {
         xnn_params.f16.gavgpool = (struct gavgpool_parameters) {
           .unipass = (xnn_gavgpool_unipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8,
           .multipass = (xnn_gavgpool_multipass_ukernel_function) xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c8,
-          .init.f16 = xnn_init_f16_scaleminmax_neon_params,
-          .update.f16 = xnn_update_f16_scaleminmax_neon_params,
+          .init.f16 = xnn_init_f16_scaleminmax_fp16arith_params,
+          .update.f16 = xnn_update_f16_scaleminmax_fp16arith_params,
           .row_tile = 7,
           .channel_tile = 8,
         };
 
         xnn_params.f16.maxpool = (struct maxpool_parameters) {
           .ukernel = (xnn_maxpool_ukernel_function) xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8,
-          .init.f16 = xnn_init_f16_minmax_neon_params,
+          .init.f16 = xnn_init_f16_minmax_fp16arith_params,
           .mr = 9,
           .qr = 8,
         };
@@ -2753,7 +2753,7 @@ static void init(void) {
 
         xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
           .ukernel = (xnn_raddstoreexpminusmax_ukernel_function) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40,
-          .init.f16 = xnn_init_f16_expminus_neonfp16arith_rr2_p2_params,
+          .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
           .element_tile = 40,
         };
         xnn_params.f16.rmax = (xnn_rmax_ukernel_function) xnn_f16_rmax_ukernel__neonfp16arith;
@@ -2762,14 +2762,14 @@ static void init(void) {
           .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16,
           .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
           .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.vdiv = (struct vbinary_parameters) {
           .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vdiv_minmax_ukernel__neonfp16arith_x8,
           .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vdivc_minmax_ukernel__neonfp16arith_x8,
           .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vrdivc_minmax_ukernel__neonfp16arith_x8,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 8,
         };
         xnn_params.f16.vmax = (struct vbinary_parameters) {
@@ -2788,27 +2788,27 @@ static void init(void) {
           .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmul_minmax_ukernel__neonfp16arith_x16,
           .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x16,
           .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x16,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.vsub = (struct vbinary_parameters) {
           .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vsub_minmax_ukernel__neonfp16arith_x16,
           .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16,
           .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.vsqrdiff = (struct vbinary_parameters) {
           .minmax.op_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vsqrdiff_ukernel__neonfp16arith_x16,
           .minmax.opc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vsqrdiffc_ukernel__neonfp16arith_x16,
           .minmax.ropc_ukernel = (xnn_vbinary_ukernel_function) xnn_f16_vsqrdiffc_ukernel__neonfp16arith_x16,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 16,
         };
 
         xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
           .ukernel = (xnn_vmulcaddc_ukernel_function) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x,
-          .init.f16 = xnn_init_f16_minmax_neon_params,
+          .init.f16 = xnn_init_f16_minmax_fp16arith_params,
           .channel_tile = 8,
           .row_tile = 2,
         };
@@ -2819,22 +2819,22 @@ static void init(void) {
         };
         xnn_params.f16.clamp = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_function) xnn_f16_vclamp_ukernel__neonfp16arith_x16,
-          .init.f16_minmax = xnn_init_f16_minmax_neon_params,
+          .init.f16_minmax = xnn_init_f16_minmax_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.elu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_function) xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16,
-          .init.f16_elu = xnn_init_f16_elu_neonfp16arith_rr1_p3_params,
+          .init.f16_elu = xnn_init_f16_elu_fp16arith_rr1_p3_params,
           .element_tile = 16,
         };
         xnn_params.f16.hswish = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_function) xnn_f16_vhswish_ukernel__neonfp16arith_x16,
-          .init.f16_hswish = xnn_init_f16_hswish_neon_params,
+          .init.f16_hswish = xnn_init_f16_hswish_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.lrelu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_function) xnn_f16_vlrelu_ukernel__neonfp16arith_x16,
-          .init.f16_lrelu = xnn_init_f16_lrelu_neon_params,
+          .init.f16_lrelu = xnn_init_f16_lrelu_fp16arith_params,
           .element_tile = 16,
         };
         xnn_params.f16.neg = (struct vunary_parameters) {
@@ -2859,7 +2859,7 @@ static void init(void) {
         };
         xnn_params.f16.sigmoid = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_function) xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40,
-          .init.f16_sigmoid = xnn_init_f16_sigmoid_neonfp16arith_rr2_p2_params,
+          .init.f16_sigmoid = xnn_init_f16_sigmoid_fp16arith_rr2_p2_params,
           .element_tile = 40,
         };
         xnn_params.f16.sqr = (struct vunary_parameters) {
