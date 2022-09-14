@@ -80,6 +80,16 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_transpose_nd_x64(
+  uint32_t flags,
+  xnn_operator_t* transpose_op_out)
+{
+  return create_transpose_nd(
+    flags,
+    xnn_operator_type_transpose_nd_x64,
+    transpose_op_out);
+}
+
 enum xnn_status xnn_create_transpose_nd_x32(
   uint32_t flags,
   xnn_operator_t* transpose_op_out)
@@ -361,6 +371,26 @@ error:
   return status;
 }
 
+enum xnn_status xnn_reshape_transpose_nd_x64(
+    xnn_operator_t transpose_op,
+    size_t num_dims,
+    const size_t* shape,
+    const size_t* perm,
+    pthreadpool_t threadpool)
+{
+  if (transpose_op->type != xnn_operator_type_transpose_nd_x64) {
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
+      xnn_operator_type_to_string(transpose_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return reshape_transpose_nd(
+    transpose_op,
+    num_dims, shape, perm, NULL, NULL,
+    sizeof(uint64_t));
+}
+
 enum xnn_status xnn_reshape_transpose_nd_x32(
     xnn_operator_t transpose_op,
     size_t num_dims,
@@ -461,6 +491,21 @@ static enum xnn_status setup_transpose_nd(
   transpose_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_transpose_nd_x64(
+    xnn_operator_t transpose_op,
+    const void* input,
+    void* output)
+{
+  if (transpose_op->type != xnn_operator_type_transpose_nd_x64) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_transpose_nd_x64),
+      xnn_operator_type_to_string(transpose_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return setup_transpose_nd(transpose_op, input, output);
 }
 
 enum xnn_status xnn_setup_transpose_nd_x32(
@@ -591,6 +636,23 @@ enum xnn_status xnn_run_transpose_nd_x32(
     input, output,
     num_dims, input_shape, output_perm,
     sizeof(uint32_t), xnn_operator_type_transpose_nd_x32,
+    threadpool);
+}
+
+enum xnn_status xnn_run_transpose_nd_x64(
+    const void* input,
+    void* output,
+    const size_t num_dims,
+    const size_t* input_shape,
+    const size_t* output_perm,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  return run_transpose_nd(
+    flags,
+    input, output,
+    num_dims, input_shape, output_perm,
+    sizeof(uint64_t), xnn_operator_type_transpose_nd_x64,
     threadpool);
 }
 
