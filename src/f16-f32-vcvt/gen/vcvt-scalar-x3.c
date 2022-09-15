@@ -15,13 +15,13 @@
 
 
 void xnn_f16_f32_vcvt_ukernel__scalar_x3(
-    size_t n,
+    size_t batch,
     const void* input,
     float* output,
     const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x3(
 
   const uint16_t* i = (const uint16_t*) input;
   uint32_t* o = (uint32_t*) output;
-  for (; n >= 3 * sizeof(uint16_t); n -= 3 * sizeof(uint16_t)) {
+  for (; batch >= 3 * sizeof(uint16_t); batch -= 3 * sizeof(uint16_t)) {
     const uint16_t vh0 = i[0];
     const uint16_t vh1 = i[1];
     const uint16_t vh2 = i[2];
@@ -69,7 +69,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x3(
     o[2] = vf2;
     o += 3;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const uint16_t vh = *i++;
 
@@ -82,7 +82,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x3(
 
       *o++ = vf;
 
-      n -= sizeof(uint16_t);
-    } while (n != 0);
+      batch -= sizeof(uint16_t);
+    } while (batch != 0);
   }
 }

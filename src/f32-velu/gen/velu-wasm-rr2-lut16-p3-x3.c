@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vprescale = params->scalar_rr2_lut16_p3.prescale;
   const float valpha = params->scalar_rr2_lut16_p3.alpha;
@@ -38,11 +38,11 @@ void xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3(
   const float vc2 = params->scalar_rr2_lut16_p3.c2;
   const float vone = params->scalar_rr2_lut16_p3.one;
 
-  for (; n >= 3 * sizeof(float); n -= 3 * sizeof(float)) {
-    float vx0 = x[0];
-    float vx1 = x[1];
-    float vx2 = x[2];
-    x += 3;
+  for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {
+    float vx0 = input[0];
+    float vx1 = input[1];
+    float vx2 = input[2];
+    input += 3;
 
     const float vz0 = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx0 * vprescale, vsat_cutoff), 0.0f);
     const float vz1 = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx1 * vprescale, vsat_cutoff), 0.0f);
@@ -103,14 +103,14 @@ void xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3(
     vy1 += __builtin_wasm_min_f32(ve1, 0.0f);
     vy2 += __builtin_wasm_min_f32(ve2, 0.0f);
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y[2] = vy2;
-    y += 3;
+    output[0] = vy0;
+    output[1] = vy1;
+    output[2] = vy2;
+    output += 3;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *x++;
+      float vx = *input++;
 
       const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
 
@@ -135,9 +135,9 @@ void xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3(
       float vy = __builtin_wasm_max_f32(vx * vbeta, 0.0f);
       vy += __builtin_wasm_min_f32(ve, 0.0f);
 
-      *y++ = vy;
+      *output++ = vy;
 
-      n -= sizeof(float);
-    } while (n != 0);
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

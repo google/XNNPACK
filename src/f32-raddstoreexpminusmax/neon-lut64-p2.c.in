@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE % 4 == 0
-$assert ELEMENTS_TILE >= 4
-$SIMD_TILE = ELEMENTS_TILE // 4
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 #include <assert.h>
@@ -19,15 +19,20 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 
 $PARAMS_STRUCT = "neonfma_rr1_lut64_p2" if FMA else "neon_rr2_lut64_p2"
-void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_lut64_p2_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
+void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_lut64_p2_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float32x4_t vi_max = vld1q_dup_f32(max);
   const float32x4_t vlog2e = vld1q_dup_f32(&params->${PARAMS_STRUCT}.log2e);
@@ -41,68 +46,68 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
   const float32x4_t vc2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c2);
   const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->${PARAMS_STRUCT}.denorm_cutoff);
 
-  $if ELEMENTS_TILE > 4:
+  $if BATCH_TILE > 4:
     $for K in range(ACCUMULATORS):
       float32x4_t vacc${K} = vmovq_n_f32(0.0f);
-    for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-      $for N in range(0, ELEMENTS_TILE, 4):
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      $for N in range(0, BATCH_TILE, 4):
         const float32x4_t vi${ABC[N:N+4]} = vld1q_f32(input); input += 4;
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         const float32x4_t vx${ABC[N:N+4]} = vsubq_f32(vi${ABC[N:N+4]}, vi_max);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         float32x4_t vn${ABC[N:N+4]} = ${VMULADDQ_F32}(vmagic_bias, vx${ABC[N:N+4]}, vlog2e);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         const int32x4_t ve${ABC[N:N+4]} = vshlq_n_s32(vbicq_s32(vreinterpretq_s32_f32(vn${ABC[N:N+4]}), vmovq_n_s32(INT32_C(0x3F))), 17);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         const uint64x2_t vidx${ABC[N:N+4]} = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn${ABC[N:N+4]}), vindex_mask));
         const uint64_t vidx${ABC[N:N+2]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 0);
         const uint64_t vidx${ABC[N+2:N+4]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 1);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         float32x2_t vl${ABC[N:N+2]} = vld1_dup_f32(&xnn_table_exp2_k_over_64[(uint32_t) vidx${ABC[N:N+2]}]);
         float32x2_t vl${ABC[N+2:N+4]} = vld1_dup_f32(&xnn_table_exp2_k_over_64[(uint32_t) vidx${ABC[N+2:N+4]}]);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vl${ABC[N:N+2]} = vld1_lane_f32(&xnn_table_exp2_k_over_64[(uint32_t) (vidx${ABC[N:N+2]} >> 32)], vl${ABC[N:N+2]}, 1);
         vl${ABC[N+2:N+4]} = vld1_lane_f32(&xnn_table_exp2_k_over_64[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)], vl${ABC[N+2:N+4]}, 1);
         const float32x4_t vl${ABC[N:N+4]} = vcombine_f32(vl${ABC[N:N+2]}, vl${ABC[N+2:N+4]});
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         const float32x4_t vs${ABC[N:N+4]} = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl${ABC[N:N+4]}), ve${ABC[N:N+4]}));
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vn${ABC[N:N+4]} = vsubq_f32(vn${ABC[N:N+4]}, vmagic_bias);
 
       $if FMA:
-        $for N in range(0, ELEMENTS_TILE, 4):
+        $for N in range(0, BATCH_TILE, 4):
           float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vx${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2);
       $else:
-        $for N in range(0, ELEMENTS_TILE, 4):
+        $for N in range(0, BATCH_TILE, 4):
           float32x4_t vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vx${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_hi);
 
-        $for N in range(0, ELEMENTS_TILE, 4):
+        $for N in range(0, BATCH_TILE, 4):
           vt${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_lo);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         float32x4_t vp${ABC[N:N+4]} = vmulq_f32(vt${ABC[N:N+4]}, vc2);
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vp${ABC[N:N+4]} = ${VMULADDQ_F32}(vt${ABC[N:N+4]}, vt${ABC[N:N+4]}, vp${ABC[N:N+4]});
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         float32x4_t vf${ABC[N:N+4]} = ${VMULADDQ_F32}(vs${ABC[N:N+4]}, vs${ABC[N:N+4]}, vp${ABC[N:N+4]});
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vf${ABC[N:N+4]} = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf${ABC[N:N+4]}), vcltq_f32(vx${ABC[N:N+4]}, vdenorm_cutoff)));
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vst1q_f32(output, vf${ABC[N:N+4]}); output += 4;
 
-      $for N in range(0, ELEMENTS_TILE, 4):
+      $for N in range(0, BATCH_TILE, 4):
         vacc${N % ACCUMULATORS} = vaddq_f32(vacc${N % ACCUMULATORS}, vf${ABC[N:N+4]});
     }
     $if ACCUMULATORS > 1:
@@ -116,7 +121,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
     float32x4_t vacc = vacc0;
   $else:
     float32x4_t vacc = vmovq_n_f32(0.0f);
-  for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vi = vld1q_f32(input); input += 4;
 
     const float32x4_t vx = vsubq_f32(vi, vi_max);
@@ -159,9 +164,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
 #else
   float32x2_t vacc_lo = vadd_f32(vget_high_f32(vacc), vget_low_f32(vacc));
 #endif
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 3 * sizeof(float));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
     const float32x4_t vi = vld1q_f32(input); input += 4;
 
     const float32x4_t vx = vsubq_f32(vi, vi_max);
@@ -196,7 +201,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcltq_f32(vx, vdenorm_cutoff)));
 
     float32x2_t vf_lo = vget_low_f32(vf);
-    if (elements & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       vst1_f32(output, vf_lo); output += 2;
 
       #if XNN_ARCH_ARM64
@@ -207,7 +212,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
 
       vf_lo = vget_high_f32(vf);
     }
-    if (elements & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       vst1_lane_f32(output, vf_lo, 0);
 
       #if XNN_ARCH_ARM64

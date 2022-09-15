@@ -16,24 +16,24 @@
 
 
 void xnn_f32_vhswish_ukernel__neon_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float32x4_t vsixth = vld1q_dup_f32(&params->scalar.sixth);
   const float32x4_t vthree = vld1q_dup_f32(&params->scalar.three);
   const int32x4_t vsix = vreinterpretq_s32_f32(vld1q_dup_f32(&params->scalar.six));
   const int32x4_t vzero = vdupq_n_s32(0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    float32x4_t vx4567 = vld1q_f32(x); x += 4;
-    float32x4_t vx89AB = vld1q_f32(x); x += 4;
-    float32x4_t vxCDEF = vld1q_f32(x); x += 4;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    float32x4_t vx0123 = vld1q_f32(input); input += 4;
+    float32x4_t vx4567 = vld1q_f32(input); input += 4;
+    float32x4_t vx89AB = vld1q_f32(input); input += 4;
+    float32x4_t vxCDEF = vld1q_f32(input); input += 4;
 
     float32x4_t vacc0123 = vaddq_f32(vx0123, vthree);
     vx0123 = vmulq_f32(vx0123, vsixth);
@@ -59,22 +59,22 @@ void xnn_f32_vhswish_ukernel__neon_x16(
     vacc89AB = vmulq_f32(vacc89AB, vx89AB);
     vaccCDEF = vmulq_f32(vaccCDEF, vxCDEF);
 
-    vst1q_f32(y, vacc0123); y += 4;
-    vst1q_f32(y, vacc4567); y += 4;
-    vst1q_f32(y, vacc89AB); y += 4;
-    vst1q_f32(y, vaccCDEF); y += 4;
+    vst1q_f32(output, vacc0123); output += 4;
+    vst1q_f32(output, vacc4567); output += 4;
+    vst1q_f32(output, vacc89AB); output += 4;
+    vst1q_f32(output, vaccCDEF); output += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float32x4_t vx = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float32x4_t vx = vld1q_f32(input); input += 4;
     float32x4_t vacc = vaddq_f32(vx, vthree);
     vx = vmulq_f32(vx, vsixth);
     vacc = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc), vzero));
     vacc = vreinterpretq_f32_s32(vminq_s32(vreinterpretq_s32_f32(vacc), vsix));
     vacc = vmulq_f32(vacc, vx);
-    vst1q_f32(y, vacc); y += 4;
+    vst1q_f32(output, vacc); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    float32x4_t vx = vld1q_f32(input);
     float32x4_t vacc = vaddq_f32(vx, vthree);
     vx = vmulq_f32(vx, vsixth);
     vacc = vreinterpretq_f32_s32(vmaxq_s32(vreinterpretq_s32_f32(vacc), vzero));
@@ -82,12 +82,12 @@ void xnn_f32_vhswish_ukernel__neon_x16(
     vacc = vmulq_f32(vacc, vx);
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vacc_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vacc_lo); output += 2;
       vacc_lo = vget_high_f32(vacc);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vacc_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vacc_lo, 0);
     }
   }
 }

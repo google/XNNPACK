@@ -19,15 +19,15 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 $WASM_X8X16_MIN = {"QS8": "wasm_i8x16_min", "QU8": "wasm_u8x16_min"}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_x${BATCH_TILE}(
-    size_t n,
-    const float* x,
-    ${XINT8_T}* y,
+    size_t batch,
+    const float* input,
+    ${XINT8_T}* output,
     const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd_magic.scale);
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_magic.magic_bias);
@@ -35,11 +35,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_x${BATCH_TILE}(
   const v128_t vmagic_bias_less_zero_point = wasm_v128_load64_splat(params->wasmsimd_magic.magic_bias_less_zero_point);
   const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_magic.output_max);
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-      v128_t vx${ABC[0:4]} = wasm_v128_load(x);
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      v128_t vx${ABC[0:4]} = wasm_v128_load(input);
       $for N in range(4, BATCH_TILE, 4):
-        v128_t vx${ABC[N:N+4]} = wasm_v128_load(x + ${N});
-      x += ${BATCH_TILE};
+        v128_t vx${ABC[N:N+4]} = wasm_v128_load(input + ${N});
+      input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
         vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vscale);
@@ -68,18 +68,18 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_x${BATCH_TILE}(
         $else:
           vy${ABC[N:N+8]} = ${WASM_X8X16_MIN}(vy${ABC[N:N+8]}, voutput_max);
 
-      wasm_v128_store(y, vy${ABC[0:16]});
+      wasm_v128_store(output, vy${ABC[0:16]});
       $for N in range(16, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
-          wasm_v128_store(y + ${N}, vy${ABC[N:N+16]});
+          wasm_v128_store(output + ${N}, vy${ABC[N:N+16]});
         $else:
-          *((double*) (y + ${N})) = wasm_f64x2_extract_lane(vy${ABC[N:N+8]}, 0);
-      y += ${BATCH_TILE};
+          *((double*) (output + ${N})) = wasm_f64x2_extract_lane(vy${ABC[N:N+8]}, 0);
+      output += ${BATCH_TILE};
     }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    v128_t vx_lo = wasm_v128_load(x);
-    v128_t vx_hi = wasm_v128_load(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    v128_t vx_lo = wasm_v128_load(input);
+    v128_t vx_hi = wasm_v128_load(input + 4);
+    input += 8;
 
     vx_lo = wasm_f32x4_mul(vx_lo, vscale);
     vx_hi = wasm_f32x4_mul(vx_hi, vscale);
@@ -97,14 +97,14 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_x${BATCH_TILE}(
 
     v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
     vy = ${WASM_X8X16_MIN}(vy, voutput_max);
-    *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
-    y += 8;
+    *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
-    v128_t vx_lo = wasm_v128_load(x);
-    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    v128_t vx_lo = wasm_v128_load(input);
+    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     v128_t vx_hi = wasm_v128_load(x_hi);
 
     vx_lo = wasm_f32x4_mul(vx_lo, vscale);
@@ -124,19 +124,19 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_x${BATCH_TILE}(
     v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
     vy = ${WASM_X8X16_MIN}(vy, voutput_max);
 
-    if (n & (4 * sizeof(float))) {
-      *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
-      y += 4;
+    if (batch & (4 * sizeof(float))) {
+      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
+      output += 4;
       vy = wasm_u64x2_shr(vy, 32);
     }
     uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
-    if (n & (2 * sizeof(float))) {
-      *((uint16_t*) y) = (uint16_t) vy_lo;
-      y += 2;
+    if (batch & (2 * sizeof(float))) {
+      *((uint16_t*) output) = (uint16_t) vy_lo;
+      output += 2;
       vy_lo >>= 16;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = (${XINT8_T}) vy_lo;
+    if (batch & (1 * sizeof(float))) {
+      *output = (${XINT8_T}) vy_lo;
     }
   }
 }

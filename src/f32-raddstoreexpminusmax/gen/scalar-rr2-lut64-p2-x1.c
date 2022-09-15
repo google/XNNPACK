@@ -18,14 +18,19 @@
 extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
 
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x1(
-    size_t elements,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float vi_max = *max;
   const float vlog2e = params->scalar_rr2_lut64_p2.log2e;
@@ -37,7 +42,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x1(
   const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
 
   float vacc = 0.0f;
-  for (; elements >= sizeof(float); elements -= sizeof(float)) {
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
     // Load 1 input at a time.
     const float vi = *input++;
 

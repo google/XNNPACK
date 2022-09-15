@@ -29,17 +29,17 @@ $ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] and OP not in ["MIN", "MAX
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_x${BATCH_TILE}(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   $if ACTIVATION == "MINMAX":
     const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
@@ -47,16 +47,16 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
   $elif ACTIVATION == "RELU":
     const v128_t vzero = wasm_i32x4_const_splat(0);
 
-  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-    const v128_t va${ABC[0:4]} = wasm_v128_load(a);
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const v128_t va${ABC[0:4]} = wasm_v128_load(input_a);
     $for N in range(4, BATCH_TILE, 4):
-      const v128_t va${ABC[N:N+4]} = wasm_v128_load(a + ${N});
-    a += ${BATCH_TILE};
+      const v128_t va${ABC[N:N+4]} = wasm_v128_load(input_a + ${N});
+    input_a += ${BATCH_TILE};
 
-    const v128_t vb${ABC[0:4]} = wasm_v128_load(b);
+    const v128_t vb${ABC[0:4]} = wasm_v128_load(input_b);
     $for N in range(4, BATCH_TILE, 4):
-      const v128_t vb${ABC[N:N+4]} = wasm_v128_load(b + ${N});
-    b += ${BATCH_TILE};
+      const v128_t vb${ABC[N:N+4]} = wasm_v128_load(input_b + ${N});
+    input_b += ${BATCH_TILE};
 
     $if OP == "MIN" and X86:
       $for N in range(0, BATCH_TILE, 4):
@@ -95,18 +95,18 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
       $for N in range(0, BATCH_TILE, 4):
         vy${ABC[N:N+4]} = wasm_i32x4_max(vy${ABC[N:N+4]}, vzero);
 
-    wasm_v128_store(y, vy${ABC[0:4]});
+    wasm_v128_store(output, vy${ABC[0:4]});
     $for N in range(4, BATCH_TILE, 4):
-      wasm_v128_store(y + ${N}, vy${ABC[N:N+4]});
-    y += ${BATCH_TILE};
+      wasm_v128_store(output + ${N}, vy${ABC[N:N+4]});
+    output += ${BATCH_TILE};
   }
   $if BATCH_TILE > 4:
-    for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-      const v128_t va = wasm_v128_load(a);
-      a += 4;
+    for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+      const v128_t va = wasm_v128_load(input_a);
+      input_a += 4;
 
-      const v128_t vb = wasm_v128_load(b);
-      b += 4;
+      const v128_t vb = wasm_v128_load(input_b);
+      input_b += 4;
 
       $if OP == "MIN" and X86:
         const v128_t vm = wasm_f32x4_lt(va, vb);
@@ -129,12 +129,12 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
       $elif ACTIVATION == "RELU":
         vy = wasm_i32x4_max(vy, vzero);
 
-      wasm_v128_store(y, vy);
-      y += 4;
+      wasm_v128_store(output, vy);
+      output += 4;
     }
-  if XNN_UNLIKELY(n != 0) {
-    const v128_t va = wasm_v128_load(a);
-    const v128_t vb = wasm_v128_load(b);
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t va = wasm_v128_load(input_a);
+    const v128_t vb = wasm_v128_load(input_b);
 
     $if OP == "MIN" and X86:
       const v128_t vm = wasm_f32x4_lt(va, vb);
@@ -157,13 +157,13 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
     $elif ACTIVATION == "RELU":
       vy = wasm_i32x4_max(vy, vzero);
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vy, 0);
     }
   }
 }

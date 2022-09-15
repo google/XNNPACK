@@ -16,15 +16,15 @@
 
 
 void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vprescale = wasm_v128_load64_splat(params->wasmsimd_rr2_p6.prescale);
   const v128_t valpha = wasm_v128_load64_splat(params->wasmsimd_rr2_p6.alpha);
@@ -41,14 +41,14 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24(
   const v128_t vc2 = wasm_v128_load64_splat(params->wasmsimd_rr2_p6.c2);
   const v128_t vone = wasm_v128_load64_splat(params->wasmsimd_rr2_p6.one);
 
-  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
-    v128_t vx0123 = wasm_v128_load(x);
-    v128_t vx4567 = wasm_v128_load(x + 4);
-    v128_t vx89AB = wasm_v128_load(x + 8);
-    v128_t vxCDEF = wasm_v128_load(x + 12);
-    v128_t vxGHIJ = wasm_v128_load(x + 16);
-    v128_t vxKLMN = wasm_v128_load(x + 20);
-    x += 24;
+  for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
+    v128_t vx0123 = wasm_v128_load(input);
+    v128_t vx4567 = wasm_v128_load(input + 4);
+    v128_t vx89AB = wasm_v128_load(input + 8);
+    v128_t vxCDEF = wasm_v128_load(input + 12);
+    v128_t vxGHIJ = wasm_v128_load(input + 16);
+    v128_t vxKLMN = wasm_v128_load(input + 20);
+    input += 24;
 
     const v128_t vz0123 = wasm_f32x4_mul(vx0123, vprescale);
     const v128_t vz4567 = wasm_f32x4_mul(vx4567, vprescale);
@@ -192,17 +192,17 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24(
     const v128_t vyGHIJ = wasm_v128_bitselect(veGHIJ, vxGHIJ, vsignmGHIJ);
     const v128_t vyKLMN = wasm_v128_bitselect(veKLMN, vxKLMN, vsignmKLMN);
 
-    wasm_v128_store(y, vy0123);
-    wasm_v128_store(y + 4, vy4567);
-    wasm_v128_store(y + 8, vy89AB);
-    wasm_v128_store(y + 12, vyCDEF);
-    wasm_v128_store(y + 16, vyGHIJ);
-    wasm_v128_store(y + 20, vyKLMN);
-    y += 24;
+    wasm_v128_store(output, vy0123);
+    wasm_v128_store(output + 4, vy4567);
+    wasm_v128_store(output + 8, vy89AB);
+    wasm_v128_store(output + 12, vyCDEF);
+    wasm_v128_store(output + 16, vyGHIJ);
+    wasm_v128_store(output + 20, vyKLMN);
+    output += 24;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    v128_t vx = wasm_v128_load(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    v128_t vx = wasm_v128_load(input);
+    input += 4;
 
     const v128_t vz = wasm_f32x4_mul(vx, vprescale);
 
@@ -231,11 +231,11 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24(
     vx = wasm_f32x4_mul(vx, vbeta);
     const v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
 
-    wasm_v128_store(y, vy);
-    y += 4;
+    wasm_v128_store(output, vy);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    v128_t vx = wasm_v128_load(input);
 
     const v128_t vz = wasm_f32x4_mul(vx, vprescale);
 
@@ -264,13 +264,13 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24(
     vx = wasm_f32x4_mul(vx, vbeta);
     v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vy, 0);
     }
   }
 }

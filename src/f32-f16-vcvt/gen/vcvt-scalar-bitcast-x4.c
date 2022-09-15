@@ -15,13 +15,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -37,7 +37,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
 
   const uint32_t* i = (const uint32_t*) input;
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const uint32_t vw0 = i[0];
     const uint32_t vw1 = i[1];
     const uint32_t vw2 = i[2];
@@ -130,7 +130,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
     o[3] = vh3;
     o += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const uint32_t vw = *i++;
 
@@ -162,7 +162,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
 
       *o++ = vh;
 
-      n -= sizeof(float);
-    } while (n != 0);
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

@@ -17,13 +17,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__sse2_x24(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -38,7 +38,7 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x24(
   const __m128i vnanh = _mm_load_si128((const __m128i*) params->sse2.nanh);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
+  for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);
     const __m128 vx1 = _mm_loadu_ps(input + 4);
     const __m128 vx2 = _mm_loadu_ps(input + 8);
@@ -167,7 +167,7 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x24(
     _mm_storeu_si128((__m128i*) (o + 16), vh2);
     o += 24;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx_lo = _mm_loadu_ps(input);
     const __m128 vx_hi = _mm_loadu_ps(input + 4);
     input += 8;
@@ -217,9 +217,9 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x24(
     _mm_storeu_si128((__m128i*) o, vh);
     o += 8;
   }
-  if XNN_UNPREDICTABLE(n != 0) {
+  if XNN_UNPREDICTABLE(batch != 0) {
     const __m128 vx_lo = _mm_loadu_ps(input);
-    const float* input_hi = (const float*) ((uintptr_t) input + (n & (4 * sizeof(float))));
+    const float* input_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     const __m128 vx_hi = _mm_loadu_ps(input_hi);
 
     const __m128 vabsx_lo = _mm_and_ps(vx_lo, vnonsign_mask);
@@ -264,17 +264,17 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x24(
 
     vh = _mm_or_si128(vh, _mm_andnot_si128(vnanmaskh, vnonsignh));
 
-    if (n & (4 * sizeof(float))) {
+    if (batch & (4 * sizeof(float))) {
       _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);
       o += 4;
     }
-    if (n & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vh));
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
-    if (n & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       *o = (uint16_t) _mm_cvtsi128_si32(vh);
     }
   }

@@ -52,53 +52,53 @@ $  "NEG": "xnn_f32_neg_params",
 $  "SQR": "xnn_f32_default_params",
 $}[OP]
 void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   $if OP == "ABS":
     const __m512i vnonsign_mask = _mm512_set1_epi32((int) params->avx512.nonsign_mask);
   $elif OP == "NEG":
     const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512.sign_mask);
-  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-    const ${__M512} vx${ABC[0:16]} = ${_MM512_LOADU}(x);
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const ${__M512} vx${ABC[0:16]} = ${_MM512_LOADU}(input);
     $for N in range(16, BATCH_TILE, 16):
-      const ${__M512} vx${ABC[N:N+16]} = ${_MM512_LOADU}(x + ${N});
-    x += ${BATCH_TILE};
+      const ${__M512} vx${ABC[N:N+16]} = ${_MM512_LOADU}(input + ${N});
+    input += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 16):
       const ${__M512} vy${ABC[N:N+16]} = ${_MM512_OP("vx" + ABC[N:N+16])};
 
-    ${_MM512_STOREU}(y, vy${ABC[0:16]});
+    ${_MM512_STOREU}(output, vy${ABC[0:16]});
     $for N in range(16, BATCH_TILE, 16):
-      ${_MM512_STOREU}(y + ${N}, vy${ABC[N:N+16]});
-    y += ${BATCH_TILE};
+      ${_MM512_STOREU}(output + ${N}, vy${ABC[N:N+16]});
+    output += ${BATCH_TILE};
   }
   $if BATCH_TILE > 16:
-    for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-      const ${__M512} vx = ${_MM512_LOADU}(x);
-      x += 16;
+    for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+      const ${__M512} vx = ${_MM512_LOADU}(input);
+      input += 16;
 
       const ${__M512} vy = ${_MM512_OP("vx")};
 
-      ${_MM512_STOREU}(y, vy);
-      y += 16;
+      ${_MM512_STOREU}(output, vy);
+      output += 16;
     }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const ${__M512} vx = ${_MM512_MASK_LOADU}(vmask, x);
+    const ${__M512} vx = ${_MM512_MASK_LOADU}(vmask, input);
     const ${__M512} vy = ${_MM512_OP("vx")};
-    ${_MM512_MASK_STOREU}(y, vmask, vy);
+    ${_MM512_MASK_STOREU}(output, vmask, vy);
   }
 }

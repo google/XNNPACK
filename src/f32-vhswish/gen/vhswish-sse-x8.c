@@ -16,23 +16,23 @@
 
 
 void xnn_f32_vhswish_ukernel__sse_x8(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m128 vsixth = _mm_load_ps(params->sse.sixth);
   const __m128 vhalf = _mm_load_ps(params->sse.half);
   const __m128 vone = _mm_load_ps(params->sse.one);
   const __m128 vzero = _mm_setzero_ps();
 
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    const __m128 vx4567 = _mm_loadu_ps(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    const __m128 vx4567 = _mm_loadu_ps(input + 4);
+    input += 8;
 
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
     __m128 vacc4567 = _mm_mul_ps(vx4567, vsixth);
@@ -49,36 +49,36 @@ void xnn_f32_vhswish_ukernel__sse_x8(
     vacc0123 = _mm_mul_ps(vacc0123, vx0123);
     vacc4567 = _mm_mul_ps(vacc4567, vx4567);
 
-    _mm_storeu_ps(y, vacc0123);
-    _mm_storeu_ps(y + 4, vacc4567);
-    y += 8;
+    _mm_storeu_ps(output, vacc0123);
+    _mm_storeu_ps(output + 4, vacc4567);
+    output += 8;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    input += 4;
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
     vacc0123 = _mm_add_ps(vacc0123, vhalf);
     vacc0123 = _mm_max_ps(vacc0123, vzero);
     vacc0123 = _mm_min_ps(vacc0123, vone);
     vacc0123 = _mm_mul_ps(vacc0123, vx0123);
-    _mm_storeu_ps(y, vacc0123);
-    y += 4;
+    _mm_storeu_ps(output, vacc0123);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
     __m128 vacc0123 = _mm_mul_ps(vx0123, vsixth);
     vacc0123 = _mm_add_ps(vacc0123, vhalf);
     vacc0123 = _mm_max_ps(vacc0123, vzero);
     vacc0123 = _mm_min_ps(vacc0123, vone);
     vacc0123 = _mm_mul_ps(vacc0123, vx0123);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vacc0123);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vacc0123);
       vacc0123 = _mm_movehl_ps(vacc0123, vacc0123);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vacc0123);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vacc0123);
     }
   }
 }

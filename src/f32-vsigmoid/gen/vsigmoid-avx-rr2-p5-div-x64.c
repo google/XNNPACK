@@ -16,12 +16,12 @@
 
 
 void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x64(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m256 vsign_mask = _mm256_load_ps(params->avx_rr2_p5.sign_mask);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx_rr2_p5.magic_bias);
@@ -36,16 +36,16 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x64(
   const __m256 vone = _mm256_load_ps(params->avx_rr2_p5.one);
   const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx_rr2_p5.denorm_cutoff);
 
-  for (; n >= 64 * sizeof(float); n -= 64 * sizeof(float)) {
-    const __m256 vx0 = _mm256_loadu_ps(x);
-    const __m256 vx1 = _mm256_loadu_ps(x + 8);
-    const __m256 vx2 = _mm256_loadu_ps(x + 16);
-    const __m256 vx3 = _mm256_loadu_ps(x + 24);
-    const __m256 vx4 = _mm256_loadu_ps(x + 32);
-    const __m256 vx5 = _mm256_loadu_ps(x + 40);
-    const __m256 vx6 = _mm256_loadu_ps(x + 48);
-    const __m256 vx7 = _mm256_loadu_ps(x + 56);
-    x += 64;
+  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+    const __m256 vx0 = _mm256_loadu_ps(input);
+    const __m256 vx1 = _mm256_loadu_ps(input + 8);
+    const __m256 vx2 = _mm256_loadu_ps(input + 16);
+    const __m256 vx3 = _mm256_loadu_ps(input + 24);
+    const __m256 vx4 = _mm256_loadu_ps(input + 32);
+    const __m256 vx5 = _mm256_loadu_ps(input + 40);
+    const __m256 vx6 = _mm256_loadu_ps(input + 48);
+    const __m256 vx7 = _mm256_loadu_ps(input + 56);
+    input += 64;
 
     const __m256 vz0 = _mm256_or_ps(vx0, vsign_mask);
     const __m256 vz1 = _mm256_or_ps(vx1, vsign_mask);
@@ -207,19 +207,19 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x64(
     vf6 = _mm256_blendv_ps(_mm256_sub_ps(vone, vf6), vf6, vx6);
     vf7 = _mm256_blendv_ps(_mm256_sub_ps(vone, vf7), vf7, vx7);
 
-    _mm256_storeu_ps(y, vf0);
-    _mm256_storeu_ps(y + 8, vf1);
-    _mm256_storeu_ps(y + 16, vf2);
-    _mm256_storeu_ps(y + 24, vf3);
-    _mm256_storeu_ps(y + 32, vf4);
-    _mm256_storeu_ps(y + 40, vf5);
-    _mm256_storeu_ps(y + 48, vf6);
-    _mm256_storeu_ps(y + 56, vf7);
-    y += 64;
+    _mm256_storeu_ps(output, vf0);
+    _mm256_storeu_ps(output + 8, vf1);
+    _mm256_storeu_ps(output + 16, vf2);
+    _mm256_storeu_ps(output + 24, vf3);
+    _mm256_storeu_ps(output + 32, vf4);
+    _mm256_storeu_ps(output + 40, vf5);
+    _mm256_storeu_ps(output + 48, vf6);
+    _mm256_storeu_ps(output + 56, vf7);
+    output += 64;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m256 vx = _mm256_loadu_ps(x);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
 
     const __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
@@ -248,15 +248,15 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x64(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    _mm256_storeu_ps(y, vf);
-    y += 8;
+    _mm256_storeu_ps(output, vf);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx_rr2_p5.mask_table[7] - n));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx_rr2_p5.mask_table[7] - batch));
 
-    const __m256 vx = _mm256_maskload_ps(x, vmask);
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
 
     const __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
@@ -285,18 +285,18 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_div_x64(
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
     __m128 vf_lo = _mm256_castps256_ps128(vf);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vf_lo);
+    if (batch & (4 * sizeof(float))) {
+      _mm_storeu_ps(output, vf_lo);
       vf_lo = _mm256_extractf128_ps(vf, 1);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vf_lo);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vf_lo);
       vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vf_lo);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vf_lo);
     }
   }
 }

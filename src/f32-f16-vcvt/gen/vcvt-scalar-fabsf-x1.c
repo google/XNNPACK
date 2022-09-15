@@ -16,13 +16,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -69,6 +69,6 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x1(
 
     *o++ = vh;
 
-    n -= sizeof(float);
-  } while (n != 0);
+    batch -= sizeof(float);
+  } while (batch != 0);
 }

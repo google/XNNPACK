@@ -16,13 +16,13 @@
 
 
 void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
-    size_t n,
+    size_t batch,
     const void* input,
     float* output,
     const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
   const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int16.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 16 * sizeof(uint16_t); n -= 16 * sizeof(uint16_t)) {
+  for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const v128_t vh0 = wasm_v128_load(i);
     const v128_t vh1 = wasm_v128_load(i + 8);
     i += 16;
@@ -84,7 +84,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
     wasm_v128_store(output + 12, vf3);
     output += 16;
   }
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const v128_t vh = wasm_v128_load(i);
     i += 8;
 
@@ -116,9 +116,9 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
     wasm_v128_store(output + 4, vf_hi);
     output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(uint16_t));
-    assert(n <= 7 * sizeof(uint16_t));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 7 * sizeof(uint16_t));
     const v128_t vh = wasm_v128_load(i);
 
     const v128_t vsign = wasm_v128_and(vh, vsign_mask);
@@ -141,7 +141,7 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
     v128_t vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 0, 8, 1, 9, 2, 10, 3, 11),
       wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo));
 
-    if (n & (4 * sizeof(uint16_t))) {
+    if (batch & (4 * sizeof(uint16_t))) {
       wasm_v128_store(output, vf);
       output += 4;
 
@@ -149,13 +149,13 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
       vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15),
         wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi));
     }
-    if (n & (2 * sizeof(uint16_t))) {
+    if (batch & (2 * sizeof(uint16_t))) {
       *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
       output += 2;
 
       vf = wasm_v64x2_shuffle(vf, vf, 1, 1);
     }
-    if (n & (1 * sizeof(uint16_t))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       *((float*) output) = wasm_f32x4_extract_lane(vf, 0);
     }
   }

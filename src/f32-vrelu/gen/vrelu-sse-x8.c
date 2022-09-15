@@ -16,50 +16,50 @@
 
 
 void xnn_f32_vrelu_ukernel__sse_x8(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vzero = _mm_setzero_ps();
 
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m128 vacc0123 = _mm_loadu_ps(x);
-    __m128 vacc4567 = _mm_loadu_ps(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    __m128 vacc0123 = _mm_loadu_ps(input);
+    __m128 vacc4567 = _mm_loadu_ps(input + 4);
+    input += 8;
 
     vacc0123 = _mm_max_ps(vacc0123, vzero);
     vacc4567 = _mm_max_ps(vacc4567, vzero);
 
-    _mm_storeu_ps(y, vacc0123);
-    _mm_storeu_ps(y + 4, vacc4567);
-    y += 8;
+    _mm_storeu_ps(output, vacc0123);
+    _mm_storeu_ps(output + 4, vacc4567);
+    output += 8;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    __m128 vacc = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    __m128 vacc = _mm_loadu_ps(input);
+    input += 4;
 
     vacc = _mm_max_ps(vacc, vzero);
 
-    _mm_storeu_ps(y, vacc);
-    y += 4;
+    _mm_storeu_ps(output, vacc);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128 vacc = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    __m128 vacc = _mm_loadu_ps(input);
     vacc = _mm_max_ps(vacc, vzero);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vacc);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vacc);
       vacc = _mm_movehl_ps(vacc, vacc);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vacc);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vacc);
     }
   }
 }

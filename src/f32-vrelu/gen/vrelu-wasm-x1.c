@@ -15,21 +15,21 @@
 
 
 void xnn_f32_vrelu_ukernel__wasm_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vzero = 0.0f;
 
-  for (; n >= sizeof(float); n -= sizeof(float)) {
-    float vacc = *x++;
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
+    float vacc = *input++;
     vacc = __builtin_wasm_max_f32(vacc, vzero);
-    *y++ = vacc;
+    *output++ = vacc;
   }
 }

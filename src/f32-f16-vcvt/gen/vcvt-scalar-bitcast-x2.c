@@ -15,13 +15,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -37,7 +37,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2(
 
   const uint32_t* i = (const uint32_t*) input;
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const uint32_t vw0 = i[0];
     const uint32_t vw1 = i[1];
     i += 2;
@@ -90,7 +90,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x2(
     o[1] = vh1;
     o += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     const uint32_t vw = *i;
 
     const uint32_t vnonsignw = vw & vnonsign_mask;

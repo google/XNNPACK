@@ -15,29 +15,29 @@
 
 
 void xnn_f32_vdiv_minmax_ukernel__wasm_x2(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    const float va0 = a[0];
-    const float va1 = a[1];
-    a += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    const float va0 = input_a[0];
+    const float va1 = input_a[1];
+    input_a += 2;
 
-    const float vb0 = b[0];
-    const float vb1 = b[1];
-    b += 2;
+    const float vb0 = input_b[0];
+    const float vb1 = input_b[1];
+    input_b += 2;
 
     float vy0 = va0 / vb0;
     float vy1 = va1 / vb1;
@@ -49,16 +49,16 @@ void xnn_f32_vdiv_minmax_ukernel__wasm_x2(
     vy0 = __builtin_wasm_min_f32(vy0, vy_max);
     vy1 = __builtin_wasm_min_f32(vy1, vy_max);
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y += 2;
+    output[0] = vy0;
+    output[1] = vy1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float va = *a;
-    const float vb = *b;
+  if XNN_UNLIKELY(batch != 0) {
+    const float va = *input_a;
+    const float vb = *input_b;
     float vy = va / vb;
     vy = __builtin_wasm_max_f32(vy, vy_min);
     vy = __builtin_wasm_min_f32(vy, vy_max);
-    *y = vy;
+    *output = vy;
   }
 }

@@ -16,12 +16,12 @@
 
 
 void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vmagic_bias = params->scalar_rr2_p5.magic_bias;
   const float vminus_log2e = params->scalar_rr2_p5.minus_log2e;
@@ -36,7 +36,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x1(
   const float vdenorm_cutoff = params->scalar_rr2_p5.denorm_cutoff;
 
   do {
-    const float vx = *x++;
+    const float vx = *input++;
 
     const float vz = fabsf(vx);
 
@@ -64,8 +64,8 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x1(
       vf = vone - vf;
     }
 
-    *y++ = vf;
+    *output++ = vf;
 
-    n -= sizeof(float);
-  } while (n != 0);
+    batch -= sizeof(float);
+  } while (batch != 0);
 }

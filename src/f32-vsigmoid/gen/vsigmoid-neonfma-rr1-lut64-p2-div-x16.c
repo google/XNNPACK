@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.magic_bias);
   const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.minus_log2e);
@@ -33,11 +33,11 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
   const float32x4_t vone = vmovq_n_f32(1.0f);
   const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->neonfma_rr1_lut64_p2.denorm_cutoff);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    const float32x4_t vx4567 = vld1q_f32(x); x += 4;
-    const float32x4_t vx89AB = vld1q_f32(x); x += 4;
-    const float32x4_t vxCDEF = vld1q_f32(x); x += 4;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const float32x4_t vx0123 = vld1q_f32(input); input += 4;
+    const float32x4_t vx4567 = vld1q_f32(input); input += 4;
+    const float32x4_t vx89AB = vld1q_f32(input); input += 4;
+    const float32x4_t vxCDEF = vld1q_f32(input); input += 4;
 
     const float32x4_t vz0123 = vabsq_f32(vx0123);
     const float32x4_t vz4567 = vabsq_f32(vx4567);
@@ -54,7 +54,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
     const int32x4_t ve89AB = vshlq_n_s32(vreinterpretq_s32_f32(vn89AB), 17);
     const int32x4_t veCDEF = vshlq_n_s32(vreinterpretq_s32_f32(vnCDEF), 17);
 
-    // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
+    // Use bits 0:6 bits of batch, as integer, as an index for table lookup of l := 2**(batch % 64).
     const uint64x2_t vidx0123 = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn0123), vindex_mask));
     const uint64x2_t vidx4567 = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn4567), vindex_mask));
     const uint64x2_t vidx89AB = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn89AB), vindex_mask));
@@ -145,13 +145,13 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
     vf89AB = vbslq_f32(vm89AB, vf89AB, vsubq_f32(vone, vf89AB));
     vfCDEF = vbslq_f32(vmCDEF, vfCDEF, vsubq_f32(vone, vfCDEF));
 
-    vst1q_f32(y, vf0123); y += 4;
-    vst1q_f32(y, vf4567); y += 4;
-    vst1q_f32(y, vf89AB); y += 4;
-    vst1q_f32(y, vfCDEF); y += 4;
+    vst1q_f32(output, vf0123); output += 4;
+    vst1q_f32(output, vf4567); output += 4;
+    vst1q_f32(output, vf89AB); output += 4;
+    vst1q_f32(output, vfCDEF); output += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vx = vld1q_f32(input); input += 4;
 
     const float32x4_t vz = vabsq_f32(vx);
 
@@ -182,10 +182,10 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
     const uint32x4_t vm = vcltq_f32(vx, vmovq_n_f32(0.0f));
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
-    vst1q_f32(y, vf); y += 4;
+    vst1q_f32(output, vf); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t vx = vld1q_f32(input);
 
     const float32x4_t vz = vabsq_f32(vx);
 
@@ -217,12 +217,12 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16(
     vf = vbslq_f32(vm, vf, vsubq_f32(vone, vf));
 
     float32x2_t vf_lo = vget_low_f32(vf);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vf_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vf_lo); output += 2;
       vf_lo = vget_high_f32(vf);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vf_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vf_lo, 0);
     }
   }
 }

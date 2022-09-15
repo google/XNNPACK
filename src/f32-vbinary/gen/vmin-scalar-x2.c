@@ -15,41 +15,41 @@
 
 
 void xnn_f32_vmin_ukernel__scalar_x2(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    const float va0 = a[0];
-    const float va1 = a[1];
-    a += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    const float va0 = input_a[0];
+    const float va1 = input_a[1];
+    input_a += 2;
 
-    const float vb0 = b[0];
-    const float vb1 = b[1];
-    b += 2;
+    const float vb0 = input_b[0];
+    const float vb1 = input_b[1];
+    input_b += 2;
 
     float vy0 = math_min_f32(va0, vb0);
     float vy1 = math_min_f32(va1, vb1);
 
 
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y += 2;
+    output[0] = vy0;
+    output[1] = vy1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float va = *a;
-    const float vb = *b;
+  if XNN_UNLIKELY(batch != 0) {
+    const float va = *input_a;
+    const float vb = *input_b;
     float vy = math_min_f32(va, vb);
-    *y = vy;
+    *output = vy;
   }
 }

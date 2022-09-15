@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE % 4 == 0
-$assert ELEMENTS_TILE >= 4
-$SIMD_TILE = ELEMENTS_TILE // 4
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -15,15 +15,20 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
+void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const v128_t vi_max = wasm_v128_load32_splat(max);
   const v128_t vlog2e = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.log2e);
@@ -40,74 +45,74 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
   v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   $for K in range(1, ACCUMULATORS):
     v128_t vacc${K} = vacc0;
-  for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-    // Load ${ELEMENTS_TILE} (${SIMD_TILE}x4) inputs at a time.
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    // Load ${BATCH_TILE} (${SIMD_TILE}x4) inputs at a time.
     const v128_t vi${ABC[0:4]} = wasm_v128_load(input);
-    $for N in range(4, ELEMENTS_TILE, 4):
+    $for N in range(4, BATCH_TILE, 4):
       const v128_t vi${ABC[N:N+4]} = wasm_v128_load(input + ${N});
-    input += ${ELEMENTS_TILE};
+    input += ${BATCH_TILE};
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       const v128_t vx${ABC[N:N+4]} = wasm_f32x4_sub(vi${ABC[N:N+4]}, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
-    $for N in range(0, ELEMENTS_TILE, 4):
+    // Compute reduced argument batch := round(x / log(2)).
+    $for N in range(0, BATCH_TILE, 4):
       v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx${ABC[N:N+4]}, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
-    $for N in range(0, ELEMENTS_TILE, 4):
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
+    $for N in range(0, BATCH_TILE, 4):
       const v128_t vs${ABC[N:N+4]} = wasm_i32x4_shl(vn${ABC[N:N+4]}, 23);
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
-    $for N in range(0, ELEMENTS_TILE, 4):
+    // Subtract the large number back to get final batch := round(x / log(2)).
+    $for N in range(0, BATCH_TILE, 4):
       vn${ABC[N:N+4]} = wasm_f32x4_sub(vn${ABC[N:N+4]}, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(vx${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi));
 
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vt${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo));
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt${ABC[N:N+4]}));
 
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vp${ABC[N:N+4]} = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
 
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vp${ABC[N:N+4]} = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
 
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vp${ABC[N:N+4]} = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vt${ABC[N:N+4]} = wasm_f32x4_mul(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
 
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       v128_t vf${ABC[N:N+4]} = wasm_f32x4_add(vs${ABC[N:N+4]}, wasm_f32x4_mul(vt${ABC[N:N+4]}, vp${ABC[N:N+4]}));
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vf${ABC[N:N+4]} = wasm_v128_andnot(vf${ABC[N:N+4]}, wasm_f32x4_lt(vx${ABC[N:N+4]}, vdenorm_cutoff));
 
-    // Store ${ELEMENTS_TILE} (${SIMD_TILE}x4) outputs at a time.
+    // Store ${BATCH_TILE} (${SIMD_TILE}x4) outputs at a time.
     wasm_v128_store(output, vf${ABC[0:4]});
-    $for N in range(4, ELEMENTS_TILE, 4):
+    $for N in range(4, BATCH_TILE, 4):
       wasm_v128_store(output + ${N}, vf${ABC[N:N+4]});
-    output += ${ELEMENTS_TILE};
+    output += ${BATCH_TILE};
 
     // Accumulate computed exponents.
-    $for N in range(0, ELEMENTS_TILE, 4):
+    $for N in range(0, BATCH_TILE, 4):
       vacc${N % ACCUMULATORS} = wasm_f32x4_add(vacc${N % ACCUMULATORS}, vf${ABC[N:N+4]});
   }
   $if ACCUMULATORS > 1:
@@ -120,7 +125,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
       $ACC_SLICE *= 2
 
   v128_t vacc = vacc0;
-  for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     // Load 4 inputs at a time.
     const v128_t vi = wasm_v128_load(input);
     input += 4;
@@ -128,17 +133,17 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
@@ -169,26 +174,26 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
   }
   vacc = wasm_f32x4_add(vacc, wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3));
   float vsum = wasm_f32x4_extract_lane(vacc, 0) + wasm_f32x4_extract_lane(vacc, 1);
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 3 * sizeof(float));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
     // Load 4 inputs at a time.
     const v128_t vi = wasm_v128_load(input);
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
     vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
@@ -210,7 +215,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = wasm_v128_andnot(vf, wasm_f32x4_lt(vx, vdenorm_cutoff));
 
-    if (elements & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       // Store and accumulate 2 outputs at a time.
       const float vf0 = wasm_f32x4_extract_lane(vf, 0);
       output[0] = vf0;
@@ -223,13 +228,13 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${ELEMENTS_TILE}${""
       vf = wasm_v32x4_shuffle(vf, vf, 2, 3, 2, 3);
       output += 2;
     }
-    if (elements & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       // Store 1 output at a time.
       const float vf0 = wasm_f32x4_extract_lane(vf, 0);
       *output = vf0;
       vsum += vf0;
     }
   }
-  // Reduce 4 elements in the SIMD register
+  // Reduce 4 batch in the SIMD register
   *sum = vsum;
 }

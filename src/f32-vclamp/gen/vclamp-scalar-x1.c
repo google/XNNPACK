@@ -15,23 +15,23 @@
 
 
 void xnn_f32_vclamp_ukernel__scalar_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;
 
-  for (; n >= sizeof(float); n -= sizeof(float)) {
-    float vacc = *x++;
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
+    float vacc = *input++;
     vacc = math_max_f32(vacc, vy_min);
     vacc = math_min_f32(vacc, vy_max);
-    *y++ = vacc;
+    *output++ = vacc;
   }
 }

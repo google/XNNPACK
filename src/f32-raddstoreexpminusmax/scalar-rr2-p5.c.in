@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE >= 1
+$assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -12,15 +12,20 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
+void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float vi_max = *max;
   const float vlog2e = params->scalar_rr2_p5.log2e;
@@ -34,17 +39,17 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" i
   const float vc1 = params->scalar_rr2_p5.c1;
   const float vdenorm_cutoff = params->scalar_rr2_p5.denorm_cutoff;
 
-  $if ELEMENTS_TILE > 1:
+  $if BATCH_TILE > 1:
     $for K in range(ACCUMULATORS):
       float vacc${K} = 0.0f;
-    for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-      // Load ${ELEMENTS_TILE} inputs at a time.
-      $for N in range(ELEMENTS_TILE):
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      // Load ${BATCH_TILE} inputs at a time.
+      $for N in range(BATCH_TILE):
         const float vi${N} = input[${N}];
-      input += ${ELEMENTS_TILE};
+      input += ${BATCH_TILE};
 
       // Subtract maximum input x := i - i_max. This implies x <= 0.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const float vx${N} = vi${N} - vi_max;
 
       // Compute reduced argument n := round(x / log(2)).
@@ -52,63 +57,63 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" i
       // to an integer, then subtracing the large number back. The trick with adding large number is valid only within
       // certain bounds (|x| <= 2**22), but that's ok, because inputs outside of [-87.336540, 0.0] underflow expf(x)
       // anyway. We fixup the result for such inputs at the very end of the algorithm.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vn${N} = vx${N} * vlog2e + vmagic_bias;
 
       // Create a floating-point number s (scale) such that s == 2**n for inputs which don't cause underflow, i.e.
       // -87.33642 <= x <= 0.0, and -126 <= n <= 0 accordingly.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const float vs${N} = uint32_as_float(float_as_uint32(vn${N}) << 23);
 
       // Subtract the large number back to get final n := round(x / log(2)).
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vn${N} -= vmagic_bias;
 
       // Compute reduced argument t := x - n * log(2).
       // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vt${N} = vn${N} * vminus_ln2_hi + vx${N};
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vt${N} = vn${N} * vminus_ln2_lo + vt${N};
 
       // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vp${N} = vc5 * vt${N} + vc4;
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vp${N} = vp${N} * vt${N} + vc3;
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vp${N} = vp${N} * vt${N} + vc2;
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vp${N} = vp${N} * vt${N} + vc1;
 
       // Reconstruct the final f value:
       //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
       //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
       //     = s + (t * s) * p
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vt${N} *= vs${N};
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vf${N} = vt${N} * vp${N} + vs${N};
 
       // For inputs below denormal cutoff, replace output with +0.0f.
       // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         if XNN_UNPREDICTABLE(vx${N} < vdenorm_cutoff) {
           vf${N} = 0.0f;
         }
 
-      // Store ${ELEMENTS_TILE} outputs at a time.
-      $for N in range(ELEMENTS_TILE):
+      // Store ${BATCH_TILE} outputs at a time.
+      $for N in range(BATCH_TILE):
         output[${N}] = vf${N};
-      output += ${ELEMENTS_TILE};
+      output += ${BATCH_TILE};
 
       // Accumulate computed exponents.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vacc${N % ACCUMULATORS} += vf${N};
     }
     $if ACCUMULATORS > 1:
@@ -123,7 +128,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x${ELEMENTS_TILE}${"" i
     float vacc = vacc0;
   $else:
     float vacc = 0.0f;
-  for (; elements >= sizeof(float); elements -= sizeof(float)) {
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
     // Load 1 input at a time.
     const float vi = *input++;
 

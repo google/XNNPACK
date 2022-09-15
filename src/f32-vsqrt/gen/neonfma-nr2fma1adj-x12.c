@@ -17,19 +17,19 @@
 
 
 void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x12(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float32x4_t vhalf = vmovq_n_f32(0.5f);
-  for (; n >= 12 * sizeof(float); n -= 12 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    const float32x4_t vx4567 = vld1q_f32(x); x += 4;
-    const float32x4_t vx89AB = vld1q_f32(x); x += 4;
+  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
+    const float32x4_t vx0123 = vld1q_f32(input); input += 4;
+    const float32x4_t vx4567 = vld1q_f32(input); input += 4;
+    const float32x4_t vx89AB = vld1q_f32(input); input += 4;
 
     const float32x4_t vrsqrtx0123 = vrsqrteq_f32(vx0123);
     const float32x4_t vrsqrtx4567 = vrsqrteq_f32(vx4567);
@@ -72,12 +72,12 @@ void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x12(
     const float32x4_t vy4567 = vfmaq_f32(vsqrtx4567, vhalfrsqrtx4567, vadjustment4567);
     const float32x4_t vy89AB = vfmaq_f32(vsqrtx89AB, vhalfrsqrtx89AB, vadjustment89AB);
 
-    vst1q_f32(y, vy0123); y += 4;
-    vst1q_f32(y, vy4567); y += 4;
-    vst1q_f32(y, vy89AB); y += 4;
+    vst1q_f32(output, vy0123); output += 4;
+    vst1q_f32(output, vy4567); output += 4;
+    vst1q_f32(output, vy89AB); output += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vx = vld1q_f32(input); input += 4;
     const float32x4_t vrsqrtx = vrsqrteq_f32(vx);
     float32x4_t vsqrtx = vmulq_f32(vrsqrtx, vx);
     float32x4_t vhalfrsqrtx = vmulq_f32(vrsqrtx, vhalf);
@@ -89,10 +89,10 @@ void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x12(
     vsqrtx = vfmaq_f32(vsqrtx, vresidual, vsqrtx);
     const float32x4_t vadjustment = vfmsq_f32(vx, vsqrtx, vsqrtx);
     const float32x4_t vy = vfmaq_f32(vsqrtx, vhalfrsqrtx, vadjustment);
-    vst1q_f32(y, vy); y += 4;
+    vst1q_f32(output, vy); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t vx = vld1q_f32(input);
     const float32x4_t vrsqrtx = vrsqrteq_f32(vx);
     float32x4_t vsqrtx = vmulq_f32(vrsqrtx, vx);
     float32x4_t vhalfrsqrtx = vmulq_f32(vrsqrtx, vhalf);
@@ -106,12 +106,12 @@ void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x12(
     const float32x4_t vy = vfmaq_f32(vsqrtx, vhalfrsqrtx, vadjustment);
 
     float32x2_t vy_lo = vget_low_f32(vy);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vy_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vy_lo); output += 2;
       vy_lo = vget_high_f32(vy);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vy_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vy_lo, 0);
     }
   }
 }

@@ -16,12 +16,12 @@
 
 
 void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.magic_bias);
   const v128_t vminus_log2e = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.minus_log2e);
@@ -35,12 +35,12 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
   const v128_t vone = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.one);
   const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.denorm_cutoff);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const v128_t vx0123 = wasm_v128_load(x);
-    const v128_t vx4567 = wasm_v128_load(x + 4);
-    const v128_t vx89AB = wasm_v128_load(x + 8);
-    const v128_t vxCDEF = wasm_v128_load(x + 12);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const v128_t vx0123 = wasm_v128_load(input);
+    const v128_t vx4567 = wasm_v128_load(input + 4);
+    const v128_t vx89AB = wasm_v128_load(input + 8);
+    const v128_t vxCDEF = wasm_v128_load(input + 12);
+    input += 16;
 
     const v128_t vz0123 = wasm_f32x4_abs(vx0123);
     const v128_t vz4567 = wasm_f32x4_abs(vx4567);
@@ -122,15 +122,15 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
     vf89AB = wasm_v128_bitselect(vf89AB, wasm_f32x4_sub(vone, vf89AB), wasm_i32x4_shr(vx89AB, 31));
     vfCDEF = wasm_v128_bitselect(vfCDEF, wasm_f32x4_sub(vone, vfCDEF), wasm_i32x4_shr(vxCDEF, 31));
 
-    wasm_v128_store(y, vf0123);
-    wasm_v128_store(y + 4, vf4567);
-    wasm_v128_store(y + 8, vf89AB);
-    wasm_v128_store(y + 12, vfCDEF);
-    y += 16;
+    wasm_v128_store(output, vf0123);
+    wasm_v128_store(output + 4, vf4567);
+    wasm_v128_store(output + 8, vf89AB);
+    wasm_v128_store(output + 12, vfCDEF);
+    output += 16;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t vx = wasm_v128_load(input);
+    input += 4;
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
@@ -154,11 +154,11 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
 
-    wasm_v128_store(y, vf);
-    y += 4;
+    wasm_v128_store(output, vf);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t vx = wasm_v128_load(input);
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
@@ -182,13 +182,13 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vf, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
       vf = wasm_v32x4_shuffle(vf, vf, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vf, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vf, 0);
     }
   }
 }

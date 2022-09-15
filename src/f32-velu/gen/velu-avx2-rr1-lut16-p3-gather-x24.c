@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const int xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_lut16_p3.prescale);
   const __m256 valpha = _mm256_load_ps(params->avx2_rr1_lut16_p3.alpha);
@@ -36,11 +36,11 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24(
   const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_lut16_p3.c3);
   const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_lut16_p3.c2);
 
-  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
-    __m256 vx0 = _mm256_loadu_ps(x);
-    __m256 vx1 = _mm256_loadu_ps(x + 8);
-    __m256 vx2 = _mm256_loadu_ps(x + 16);
-    x += 24;
+  for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
+    __m256 vx0 = _mm256_loadu_ps(input);
+    __m256 vx1 = _mm256_loadu_ps(input + 8);
+    __m256 vx2 = _mm256_loadu_ps(input + 16);
+    input += 24;
 
     const __m256 vz0 = _mm256_max_ps(vsat_cutoff, _mm256_mul_ps(vx0, vprescale));
     const __m256 vz1 = _mm256_max_ps(vsat_cutoff, _mm256_mul_ps(vx1, vprescale));
@@ -100,14 +100,14 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24(
     const __m256 vy1 = _mm256_blendv_ps(vx1, ve1, vx1);
     const __m256 vy2 = _mm256_blendv_ps(vx2, ve2, vx2);
 
-    _mm256_storeu_ps(y, vy0);
-    _mm256_storeu_ps(y + 8, vy1);
-    _mm256_storeu_ps(y + 16, vy2);
-    y += 24;
+    _mm256_storeu_ps(output, vy0);
+    _mm256_storeu_ps(output + 8, vy1);
+    _mm256_storeu_ps(output + 16, vy2);
+    output += 24;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m256 vx = _mm256_loadu_ps(x);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
 
     const __m256 vz = _mm256_max_ps(vsat_cutoff, _mm256_mul_ps(vx, vprescale));
 
@@ -132,15 +132,15 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24(
     vx = _mm256_mul_ps(vx, vbeta);
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
-    _mm256_storeu_ps(y, vy);
-    y += 8;
+    _mm256_storeu_ps(output, vy);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_lut16_p3.mask_table[7] - n));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_lut16_p3.mask_table[7] - batch));
 
-    __m256 vx = _mm256_maskload_ps(x, vmask);
+    __m256 vx = _mm256_maskload_ps(input, vmask);
 
     const __m256 vz = _mm256_max_ps(vsat_cutoff, _mm256_mul_ps(vx, vprescale));
 
@@ -166,18 +166,18 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24(
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
     __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vy_lo);
+    if (batch & (4 * sizeof(float))) {
+      _mm_storeu_ps(output, vy_lo);
       vy_lo = _mm256_extractf128_ps(vy, 1);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy_lo);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy_lo);
       vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy_lo);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy_lo);
     }
   }
 }

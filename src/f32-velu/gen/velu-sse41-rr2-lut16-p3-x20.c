@@ -18,15 +18,15 @@
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vprescale = _mm_load_ps(params->sse2_rr2_lut16_p3.prescale);
   const __m128 valpha = _mm_load_ps(params->sse2_rr2_lut16_p3.alpha);
@@ -41,13 +41,13 @@ void xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20(
   const __m128 vc2 = _mm_load_ps(params->sse2_rr2_lut16_p3.c2);
   const __m128 vone = _mm_load_ps(params->sse2_rr2_lut16_p3.one);
 
-  for (; n >= 20 * sizeof(float); n -= 20 * sizeof(float)) {
-    __m128 vx0123 = _mm_loadu_ps(x);
-    __m128 vx4567 = _mm_loadu_ps(x + 4);
-    __m128 vx89AB = _mm_loadu_ps(x + 8);
-    __m128 vxCDEF = _mm_loadu_ps(x + 12);
-    __m128 vxGHIJ = _mm_loadu_ps(x + 16);
-    x += 20;
+  for (; batch >= 20 * sizeof(float); batch -= 20 * sizeof(float)) {
+    __m128 vx0123 = _mm_loadu_ps(input);
+    __m128 vx4567 = _mm_loadu_ps(input + 4);
+    __m128 vx89AB = _mm_loadu_ps(input + 8);
+    __m128 vxCDEF = _mm_loadu_ps(input + 12);
+    __m128 vxGHIJ = _mm_loadu_ps(input + 16);
+    input += 20;
 
     const __m128 vz0123 = _mm_max_ps(vsat_cutoff, _mm_mul_ps(vx0123, vprescale));
     const __m128 vz4567 = _mm_max_ps(vsat_cutoff, _mm_mul_ps(vx4567, vprescale));
@@ -226,16 +226,16 @@ void xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20(
     const __m128 vyCDEF = _mm_blendv_ps(vxCDEF, veCDEF, vxCDEF);
     const __m128 vyGHIJ = _mm_blendv_ps(vxGHIJ, veGHIJ, vxGHIJ);
 
-    _mm_storeu_ps(y, vy0123);
-    _mm_storeu_ps(y + 4, vy4567);
-    _mm_storeu_ps(y + 8, vy89AB);
-    _mm_storeu_ps(y + 12, vyCDEF);
-    _mm_storeu_ps(y + 16, vyGHIJ);
-    y += 20;
+    _mm_storeu_ps(output, vy0123);
+    _mm_storeu_ps(output + 4, vy4567);
+    _mm_storeu_ps(output + 8, vy89AB);
+    _mm_storeu_ps(output + 12, vyCDEF);
+    _mm_storeu_ps(output + 16, vyGHIJ);
+    output += 20;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    __m128 vx = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    __m128 vx = _mm_loadu_ps(input);
+    input += 4;
 
     const __m128 vz = _mm_max_ps(vsat_cutoff, _mm_mul_ps(vx, vprescale));
 
@@ -274,11 +274,11 @@ void xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20(
     vx = _mm_mul_ps(vx, vbeta);
     const __m128 vy = _mm_blendv_ps(vx, ve, vx);
 
-    _mm_storeu_ps(y, vy);
-    y += 4;
+    _mm_storeu_ps(output, vy);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128 vx = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    __m128 vx = _mm_loadu_ps(input);
 
     const __m128 vz = _mm_max_ps(vsat_cutoff, _mm_mul_ps(vx, vprescale));
 
@@ -317,13 +317,13 @@ void xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20(
     vx = _mm_mul_ps(vx, vbeta);
     __m128 vy = _mm_blendv_ps(vx, ve, vx);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy);
       vy = _mm_movehl_ps(vy, vy);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy);
     }
   }
 }

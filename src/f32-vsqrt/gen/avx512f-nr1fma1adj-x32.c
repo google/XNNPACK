@@ -17,19 +17,19 @@
 
 
 void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 vx0 = _mm512_loadu_ps(x);
-    const __m512 vx1 = _mm512_loadu_ps(x + 16);
-    x += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 vx0 = _mm512_loadu_ps(input);
+    const __m512 vx1 = _mm512_loadu_ps(input + 16);
+    input += 32;
 
     const __m512 vrsqrtx0 = _mm512_rsqrt14_ps(vx0);
     const __m512 vrsqrtx1 = _mm512_rsqrt14_ps(vx1);
@@ -53,13 +53,13 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32(
     const __m512 vy0 = _mm512_fmadd_ps(vhalfrsqrtx0, vadjustment0, vsqrtx0);
     const __m512 vy1 = _mm512_fmadd_ps(vhalfrsqrtx1, vadjustment1, vsqrtx1);
 
-    _mm512_storeu_ps(y, vy0);
-    _mm512_storeu_ps(y + 16, vy1);
-    y += 32;
+    _mm512_storeu_ps(output, vy0);
+    _mm512_storeu_ps(output + 16, vy1);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vrsqrtx = _mm512_rsqrt14_ps(vx);
     __m512 vsqrtx = _mm512_mul_ps(vrsqrtx, vx);
@@ -70,17 +70,17 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32(
     const __m512 vadjustment = _mm512_fnmadd_ps(vsqrtx, vsqrtx, vx);
     const __m512 vy = _mm512_fmadd_ps(vhalfrsqrtx, vadjustment, vsqrtx);
 
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vrsqrtx = _mm512_maskz_rsqrt14_ps(vmask, vx);
     __m512 vsqrtx = _mm512_mul_ps(vrsqrtx, vx);
     __m512 vhalfrsqrtx = _mm512_mul_ps(vrsqrtx, vhalf);
@@ -90,6 +90,6 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32(
     const __m512 vadjustment = _mm512_fnmadd_ps(vsqrtx, vsqrtx, vx);
     const __m512 vy = _mm512_fmadd_ps(vhalfrsqrtx, vadjustment, vsqrtx);
 
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }

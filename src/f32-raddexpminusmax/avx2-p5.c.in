@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE % 8 == 0
-$assert ELEMENTS_TILE >= 8
-$SIMD_TILE = ELEMENTS_TILE // 8
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -16,13 +16,15 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
+void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
     const float* input,
     float* sum,
     float max)
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(sum != NULL);
 
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
   // The smallest x for which expf(x) is normalized.
@@ -41,31 +43,31 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
 
   $for K in range(ACCUMULATORS):
     __m256 vacc${K} = _mm256_setzero_ps();
-  for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-    // Load ${ELEMENTS_TILE} (${SIMD_TILE}x8) inputs at a time.
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    // Load ${BATCH_TILE} (${SIMD_TILE}x8) inputs at a time.
     const __m256 vi0 = _mm256_loadu_ps(input);
     $for N in range(1, SIMD_TILE):
       const __m256 vi${N} = _mm256_loadu_ps(input + ${N * 8});
-    input += ${ELEMENTS_TILE};
+    input += ${BATCH_TILE};
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     $for N in range(SIMD_TILE):
       const __m256 vx${N} = _mm256_sub_ps(vi${N}, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     $for N in range(SIMD_TILE):
       __m256 vn${N} = _mm256_fmadd_ps(vx${N}, vlog2e, vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     $for N in range(SIMD_TILE):
       const __m256 vs${N} = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn${N}), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     $for N in range(SIMD_TILE):
       vn${N} = _mm256_sub_ps(vn${N}, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     $for N in range(SIMD_TILE):
       __m256 vt${N} = _mm256_fmadd_ps(vn${N}, vminus_ln2_hi, vx${N});
@@ -115,7 +117,7 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
       $ACC_SLICE *= 2
 
   __m256 vacc = vacc0;
-  for (; elements >= 8 * sizeof(float); elements -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     // Load 8 inputs at a time.
     const __m256 vi = _mm256_loadu_ps(input);
     input += 8;
@@ -123,17 +125,17 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m256 vx = _mm256_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m256 vn = _mm256_fmadd_ps(vx, vlog2e, vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -158,10 +160,10 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
     // Accumulate computed exponents.
     vacc = _mm256_add_ps(vacc, vf);
   }
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - elements));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     // Load up to 7 inputs at a time.
     const __m256 vi = _mm256_maskload_ps(input, vmask);
@@ -169,17 +171,17 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m256 vx = _mm256_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m256 vn = _mm256_fmadd_ps(vx, vlog2e, vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -204,7 +206,7 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULAT
     // Accumulate computed exponents. And addend with mask to leave unmasked 32-bit lanes unchanged.
     vacc = _mm256_add_ps(vacc, _mm256_and_ps(vf, _mm256_castsi256_ps(vmask)));
   }
-  // Reduce 8 elements in the SIMD register
+  // Reduce 8 batch in the SIMD register
   __m128 vacc_lo = _mm_add_ps(_mm256_castps256_ps128(vacc), _mm256_extractf128_ps(vacc, 1));
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));
   vacc_lo = _mm_add_ss(vacc_lo, _mm_movehdup_ps(vacc_lo));

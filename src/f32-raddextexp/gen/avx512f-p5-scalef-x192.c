@@ -18,11 +18,13 @@
 
 
 void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
-    size_t elements,
-    const float* x,
+    size_t batch,
+    const float* input,
     float* sum)
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(sum != NULL);
 
   const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
   const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
@@ -39,23 +41,23 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
 
   __m512 vaccv0 = _mm512_setzero_ps();
   __m512 vacce0 = vminus_inf;
-  for (; elements >= 192 * sizeof(float); elements -= 192 * sizeof(float)) {
+  for (; batch >= 192 * sizeof(float); batch -= 192 * sizeof(float)) {
     // Load 192 (12x16) inputs at a time.
-    const __m512 vx0 = _mm512_loadu_ps(x);
-    const __m512 vx1 = _mm512_loadu_ps(x + 16);
-    const __m512 vx2 = _mm512_loadu_ps(x + 32);
-    const __m512 vx3 = _mm512_loadu_ps(x + 48);
-    const __m512 vx4 = _mm512_loadu_ps(x + 64);
-    const __m512 vx5 = _mm512_loadu_ps(x + 80);
-    const __m512 vx6 = _mm512_loadu_ps(x + 96);
-    const __m512 vx7 = _mm512_loadu_ps(x + 112);
-    const __m512 vx8 = _mm512_loadu_ps(x + 128);
-    const __m512 vx9 = _mm512_loadu_ps(x + 144);
-    const __m512 vx10 = _mm512_loadu_ps(x + 160);
-    const __m512 vx11 = _mm512_loadu_ps(x + 176);
-    x += 192;
+    const __m512 vx0 = _mm512_loadu_ps(input);
+    const __m512 vx1 = _mm512_loadu_ps(input + 16);
+    const __m512 vx2 = _mm512_loadu_ps(input + 32);
+    const __m512 vx3 = _mm512_loadu_ps(input + 48);
+    const __m512 vx4 = _mm512_loadu_ps(input + 64);
+    const __m512 vx5 = _mm512_loadu_ps(input + 80);
+    const __m512 vx6 = _mm512_loadu_ps(input + 96);
+    const __m512 vx7 = _mm512_loadu_ps(input + 112);
+    const __m512 vx8 = _mm512_loadu_ps(input + 128);
+    const __m512 vx9 = _mm512_loadu_ps(input + 144);
+    const __m512 vx10 = _mm512_loadu_ps(input + 160);
+    const __m512 vx11 = _mm512_loadu_ps(input + 176);
+    input += 192;
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m512 vn0 = _mm512_roundscale_ps(_mm512_mul_ps(vx0, vlog2e), 0);
     const __m512 vn1 = _mm512_roundscale_ps(_mm512_mul_ps(vx1, vlog2e), 0);
     const __m512 vn2 = _mm512_roundscale_ps(_mm512_mul_ps(vx2, vlog2e), 0);
@@ -69,7 +71,7 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
     const __m512 vn10 = _mm512_roundscale_ps(_mm512_mul_ps(vx10, vlog2e), 0);
     const __m512 vn11 = _mm512_roundscale_ps(_mm512_mul_ps(vx11, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt0 = _mm512_fmadd_ps(vn0, vminus_ln2_hi, vx0);
     __m512 vt1 = _mm512_fmadd_ps(vn1, vminus_ln2_hi, vx1);
@@ -222,15 +224,15 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
   __m512 vaccv = vaccv0;
   __m512 vacce = vacce0;
 
-  for (; elements >= 16 * sizeof(float); elements -= 16 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     // Load 16 inputs at a time.
-    const __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+    const __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -251,18 +253,18 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_x192(
 
     vacce = vmax_e;
   }
-  if XNN_UNLIKELY(elements != 0) {
-    // Prepare mask for valid 32-bit elements (depends on elements).
-    elements >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << elements) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    // Prepare mask for valid 32-bit batch (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     // Load up to 15 inputs at a time.
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);

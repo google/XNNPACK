@@ -16,18 +16,18 @@
 
 
 void xnn_f32_vrndd_ukernel__scalar_libm_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   do {
-    const float vx = *x++;
+    const float vx = *input++;
     const float vy = floorf(vx);
-    *y++ = vy;
-    n -= sizeof(float);
-  } while (n != 0);
+    *output++ = vy;
+    batch -= sizeof(float);
+  } while (batch != 0);
 }

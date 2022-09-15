@@ -17,18 +17,18 @@
 
 
 void xnn_f32_vrndne_ukernel__sse2_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    input += 4;
 
     const __m128i vintx0123 = _mm_cvtps_epi32(vx0123);
 
@@ -38,22 +38,22 @@ void xnn_f32_vrndne_ukernel__sse2_x4(
 
     const __m128 vy0123 = _mm_or_ps(_mm_and_ps(vx0123, vrndmask0123), _mm_andnot_ps(vrndmask0123, vrndx0123));
 
-    _mm_storeu_ps(y, vy0123);
-    y += 4;
+    _mm_storeu_ps(output, vy0123);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
     const __m128i vintx = _mm_cvtps_epi32(vx);
     const __m128 vrndmask = _mm_castsi128_ps(_mm_or_si128(vmagic, _mm_cmpeq_epi32(vintx, vmagic)));
     const __m128 vrndx = _mm_cvtepi32_ps(vintx);
     __m128 vy = _mm_or_ps(_mm_and_ps(vx, vrndmask), _mm_andnot_ps(vrndmask, vrndx));
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy);
       vy = _mm_movehl_ps(vy, vy);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy);
     }
   }
 }

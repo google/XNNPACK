@@ -17,12 +17,12 @@
 
 
 void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x128(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr1_lut16_p3.sign_mask);
   const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr1_lut16_p3.magic_bias);
@@ -33,16 +33,16 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x128(
   const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c2);
   const __m512 vone = _mm512_set1_ps(params->avx512_rr1_lut16_p3.one);
 
-  for (; n >= 128 * sizeof(float); n -= 128 * sizeof(float)) {
-    const __m512 vx0 = _mm512_loadu_ps(x);
-    const __m512 vx1 = _mm512_loadu_ps(x + 16);
-    const __m512 vx2 = _mm512_loadu_ps(x + 32);
-    const __m512 vx3 = _mm512_loadu_ps(x + 48);
-    const __m512 vx4 = _mm512_loadu_ps(x + 64);
-    const __m512 vx5 = _mm512_loadu_ps(x + 80);
-    const __m512 vx6 = _mm512_loadu_ps(x + 96);
-    const __m512 vx7 = _mm512_loadu_ps(x + 112);
-    x += 128;
+  for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
+    const __m512 vx0 = _mm512_loadu_ps(input);
+    const __m512 vx1 = _mm512_loadu_ps(input + 16);
+    const __m512 vx2 = _mm512_loadu_ps(input + 32);
+    const __m512 vx3 = _mm512_loadu_ps(input + 48);
+    const __m512 vx4 = _mm512_loadu_ps(input + 64);
+    const __m512 vx5 = _mm512_loadu_ps(input + 80);
+    const __m512 vx6 = _mm512_loadu_ps(input + 96);
+    const __m512 vx7 = _mm512_loadu_ps(input + 112);
+    input += 128;
 
     const __m512 vz0 = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx0), vsign_mask));
     const __m512 vz1 = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx1), vsign_mask));
@@ -180,19 +180,19 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x128(
     vf6 = _mm512_mask_sub_ps(vf6, _mm512_testn_epi32_mask(_mm512_castps_si512(vx6), vsign_mask), vone, vf6);
     vf7 = _mm512_mask_sub_ps(vf7, _mm512_testn_epi32_mask(_mm512_castps_si512(vx7), vsign_mask), vone, vf7);
 
-    _mm512_storeu_ps(y, vf0);
-    _mm512_storeu_ps(y + 16, vf1);
-    _mm512_storeu_ps(y + 32, vf2);
-    _mm512_storeu_ps(y + 48, vf3);
-    _mm512_storeu_ps(y + 64, vf4);
-    _mm512_storeu_ps(y + 80, vf5);
-    _mm512_storeu_ps(y + 96, vf6);
-    _mm512_storeu_ps(y + 112, vf7);
-    y += 128;
+    _mm512_storeu_ps(output, vf0);
+    _mm512_storeu_ps(output + 16, vf1);
+    _mm512_storeu_ps(output + 32, vf2);
+    _mm512_storeu_ps(output + 48, vf3);
+    _mm512_storeu_ps(output + 64, vf4);
+    _mm512_storeu_ps(output + 80, vf5);
+    _mm512_storeu_ps(output + 96, vf6);
+    _mm512_storeu_ps(output + 112, vf7);
+    output += 128;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
@@ -217,18 +217,18 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x128(
 
     vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
 
-    _mm512_storeu_ps(y, vf);
-    y += 16;
+    _mm512_storeu_ps(output, vf);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
 
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
@@ -252,6 +252,6 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x128(
 
     vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
 
-    _mm512_mask_storeu_ps(y, vmask, vf);
+    _mm512_mask_storeu_ps(output, vmask, vf);
   }
 }

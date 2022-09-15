@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.magic_bias);
   const v128_t vminus_log2e = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.minus_log2e);
@@ -34,14 +34,14 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24(
   const v128_t vone = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.one);
   const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.denorm_cutoff);
 
-  for (; n >= 24 * sizeof(float); n -= 24 * sizeof(float)) {
-    const v128_t vx0123 = wasm_v128_load(x);
-    const v128_t vx4567 = wasm_v128_load(x + 4);
-    const v128_t vx89AB = wasm_v128_load(x + 8);
-    const v128_t vxCDEF = wasm_v128_load(x + 12);
-    const v128_t vxGHIJ = wasm_v128_load(x + 16);
-    const v128_t vxKLMN = wasm_v128_load(x + 20);
-    x += 24;
+  for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
+    const v128_t vx0123 = wasm_v128_load(input);
+    const v128_t vx4567 = wasm_v128_load(input + 4);
+    const v128_t vx89AB = wasm_v128_load(input + 8);
+    const v128_t vxCDEF = wasm_v128_load(input + 12);
+    const v128_t vxGHIJ = wasm_v128_load(input + 16);
+    const v128_t vxKLMN = wasm_v128_load(input + 20);
+    input += 24;
 
     const v128_t vz0123 = wasm_f32x4_abs(vx0123);
     const v128_t vz4567 = wasm_f32x4_abs(vx4567);
@@ -191,17 +191,17 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24(
     vfGHIJ = wasm_v128_bitselect(vfGHIJ, wasm_f32x4_sub(vone, vfGHIJ), wasm_i32x4_shr(vxGHIJ, 31));
     vfKLMN = wasm_v128_bitselect(vfKLMN, wasm_f32x4_sub(vone, vfKLMN), wasm_i32x4_shr(vxKLMN, 31));
 
-    wasm_v128_store(y, vf0123);
-    wasm_v128_store(y + 4, vf4567);
-    wasm_v128_store(y + 8, vf89AB);
-    wasm_v128_store(y + 12, vfCDEF);
-    wasm_v128_store(y + 16, vfGHIJ);
-    wasm_v128_store(y + 20, vfKLMN);
-    y += 24;
+    wasm_v128_store(output, vf0123);
+    wasm_v128_store(output + 4, vf4567);
+    wasm_v128_store(output + 8, vf89AB);
+    wasm_v128_store(output + 12, vfCDEF);
+    wasm_v128_store(output + 16, vfGHIJ);
+    wasm_v128_store(output + 20, vfKLMN);
+    output += 24;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t vx = wasm_v128_load(input);
+    input += 4;
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
@@ -233,11 +233,11 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24(
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
 
-    wasm_v128_store(y, vf);
-    y += 4;
+    wasm_v128_store(output, vf);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t vx = wasm_v128_load(input);
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
@@ -269,13 +269,13 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x24(
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vf, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
       vf = wasm_v32x4_shuffle(vf, vf, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vf, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vf, 0);
     }
   }
 }

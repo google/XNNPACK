@@ -16,39 +16,39 @@
 
 
 void xnn_f32_vlrelu_ukernel__neon_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float32x4_t vslope = vld1q_dup_f32(&params->scalar.slope);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vx0123 = vld1q_f32(input); input += 4;
 
     float32x4_t vacc0123 = vmulq_f32(vx0123, vslope);
     const uint32x4_t vmask0123 = vcltq_s32(vreinterpretq_s32_f32(vx0123), vmovq_n_s32(0));
 
     vacc0123 = vbslq_f32(vmask0123, vacc0123, vx0123);
 
-    vst1q_f32(y, vacc0123); y += 4;
+    vst1q_f32(output, vacc0123); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t vx = vld1q_f32(input);
     float32x4_t vacc = vmulq_f32(vx, vslope);
     const uint32x4_t vmask = vcltq_s32(vreinterpretq_s32_f32(vx), vmovq_n_s32(0));
     vacc = vbslq_f32(vmask, vacc, vx);
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vacc_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vacc_lo); output += 2;
       vacc_lo = vget_high_f32(vacc);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vacc_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vacc_lo, 0);
     }
   }
 }

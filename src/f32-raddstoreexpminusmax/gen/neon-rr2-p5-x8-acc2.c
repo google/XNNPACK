@@ -16,14 +16,19 @@
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
-    size_t elements,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float32x4_t vi_max = vld1q_dup_f32(max);
   const float32x4_t vlog2e = vld1q_dup_f32(&params->neon_rr2_p5.log2e);
@@ -39,7 +44,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
 
   float32x4_t vacc0 = vmovq_n_f32(0.0f);
   float32x4_t vacc1 = vmovq_n_f32(0.0f);
-  for (; elements >= 8 * sizeof(float); elements -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float32x4_t vi0123 = vld1q_f32(input); input += 4;
     const float32x4_t vi4567 = vld1q_f32(input); input += 4;
 
@@ -91,7 +96,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
   vacc0 = vaddq_f32(vacc0, vacc1);
 
   float32x4_t vacc = vacc0;
-  for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vi = vld1q_f32(input); input += 4;
 
     const float32x4_t vx = vsubq_f32(vi, vi_max);
@@ -124,9 +129,9 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
 #else
   float32x2_t vacc_lo = vadd_f32(vget_high_f32(vacc), vget_low_f32(vacc));
 #endif
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 3 * sizeof(float));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
     const float32x4_t vi = vld1q_f32(input); input += 4;
 
     const float32x4_t vx = vsubq_f32(vi, vi_max);
@@ -151,7 +156,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
     vf = vreinterpretq_f32_u32(vbicq_u32(vreinterpretq_u32_f32(vf), vcltq_f32(vx, vdenorm_cutoff)));
 
     float32x2_t vf_lo = vget_low_f32(vf);
-    if (elements & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       vst1_f32(output, vf_lo); output += 2;
 
       #if XNN_ARCH_ARM64
@@ -162,7 +167,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_x8_acc2(
 
       vf_lo = vget_high_f32(vf);
     }
-    if (elements & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       vst1_lane_f32(output, vf_lo, 0);
 
       #if XNN_ARCH_ARM64

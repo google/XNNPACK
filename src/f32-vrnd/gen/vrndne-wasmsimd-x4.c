@@ -17,32 +17,32 @@
 
 
 void xnn_f32_vrndne_ukernel__wasmsimd_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx0123 = wasm_v128_load(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t vx0123 = wasm_v128_load(input); input += 4;
 
     const v128_t vy0123 = wasm_f32x4_nearest(vx0123);
 
-    wasm_v128_store(y, vy0123); y += 4;
+    wasm_v128_store(output, vy0123); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t vx = wasm_v128_load(input);
     v128_t vy = wasm_f32x4_nearest(vx);
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vy, 0);
     }
   }
 }

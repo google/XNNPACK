@@ -17,36 +17,36 @@
 
 
 void xnn_f32_vneg_ukernel__wasmsimd_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vsign_mask = wasm_v128_load64_splat(&params->wasmsimd.sign_mask);
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t vx = wasm_v128_load(input);
+    input += 4;
 
     const v128_t vy = wasm_v128_xor(vx, vsign_mask);
 
-    wasm_v128_store(y, vy);
-    y += 4;
+    wasm_v128_store(output, vy);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const v128_t vx = wasm_v128_load(input);
     v128_t vy = wasm_v128_xor(vx, vsign_mask);
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vy, 0);
     }
   }
 }

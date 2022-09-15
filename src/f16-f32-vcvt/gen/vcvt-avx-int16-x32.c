@@ -16,13 +16,13 @@
 
 
 void xnn_f16_f32_vcvt_ukernel__avx_int16_x32(
-    size_t n,
+    size_t batch,
     const void* input,
     float* output,
     const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -34,7 +34,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x32(
   const __m128i vdenorm_cutoff = _mm_load_si128((const __m128i*) params->sse_int16.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
-  for (; n >= 32 * sizeof(uint16_t); n -= 32 * sizeof(uint16_t)) {
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     const __m128i vh0 = _mm_loadu_si128((const __m128i*) i);
     const __m128i vh1 = _mm_loadu_si128((const __m128i*) (i + 8));
     const __m128i vh2 = _mm_loadu_si128((const __m128i*) (i + 16));
@@ -110,7 +110,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x32(
     _mm_storeu_ps(output + 28, _mm_castsi128_ps(vf7));
     output += 32;
   }
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m128i vh = _mm_loadu_si128((const __m128i*) i);
     i += 8;
 
@@ -139,7 +139,7 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x32(
     _mm_storeu_ps(output + 4, _mm_castsi128_ps(vf_hi));
     output += 8;
   }
-  if XNN_UNPREDICTABLE(n != 0) {
+  if XNN_UNPREDICTABLE(batch != 0) {
     const __m128i vh = _mm_loadu_si128((const __m128i*) i);
 
     const __m128i vsign = _mm_and_si128(vh, vsign_mask);
@@ -160,20 +160,20 @@ void xnn_f16_f32_vcvt_ukernel__avx_int16_x32(
     __m128i vf = _mm_or_si128(_mm_unpacklo_epi16(_mm_setzero_si128(), vsign),
       _mm_blendv_epi8(vdenorm_lo, vnorm_lo, _mm_cvtepi16_epi32(vmask)));
 
-    if (n & (4 * sizeof(uint16_t))) {
+    if (batch & (4 * sizeof(uint16_t))) {
       _mm_storeu_ps(output, _mm_castsi128_ps(vf));
       output += 4;
 
       vf = _mm_or_si128(_mm_unpackhi_epi16(_mm_setzero_si128(), vsign),
         _mm_blendv_epi8(vdenorm_hi, vnorm_hi, _mm_unpackhi_epi16(vmask, vmask)));
     }
-    if (n & (2 * sizeof(uint16_t))) {
+    if (batch & (2 * sizeof(uint16_t))) {
       _mm_storel_pi((__m64*) output, _mm_castsi128_ps(vf));
       output += 2;
 
       vf = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vf), _mm_castsi128_ps(vf)));
     }
-    if (n & (1 * sizeof(uint16_t))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       _mm_store_ss(output, _mm_castsi128_ps(vf));
     }
   }

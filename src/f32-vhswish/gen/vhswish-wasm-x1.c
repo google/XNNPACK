@@ -15,13 +15,13 @@
 
 
 void xnn_f32_vhswish_ukernel__wasm_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vsixth = params->scalar.sixth;
   const float vthree = params->scalar.three;
@@ -30,13 +30,13 @@ void xnn_f32_vhswish_ukernel__wasm_x1(
   assert(vthree == 3.0f);
   assert(vsix == 6.0f);
 
-  for (; n >= sizeof(float); n -= sizeof(float)) {
-    float vx = *x++;
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
+    float vx = *input++;
     float vacc = vx + vthree;
     vx *= vsixth;
     vacc = __builtin_wasm_max_f32(vacc, vzero);
     vacc = __builtin_wasm_min_f32(vacc, vsix);
     vacc *= vx;
-    *y++ = vacc;
+    *output++ = vacc;
   }
 }

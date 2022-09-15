@@ -14,21 +14,21 @@
 
 
 void xnn_f32_vlrelu_ukernel__wasm_x2(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vslope = params->scalar.slope;
   const float vzero = 0.0f;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    const float vx0 = x[0];
-    const float vx1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    input += 2;
 
     const float vnegx0 = __builtin_wasm_min_f32(vx0, vzero);
     const float vnegx1 = __builtin_wasm_min_f32(vx1, vzero);
@@ -41,16 +41,16 @@ void xnn_f32_vlrelu_ukernel__wasm_x2(
     vacc0 += vposx0;
     vacc1 += vposx1;
 
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y += 2;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    const float vx = *input;
     const float vnegx = __builtin_wasm_min_f32(vx, vzero);
     float vacc = vnegx * vslope;
     const float vposx = __builtin_wasm_max_f32(vx, vzero);
     vacc += vposx;
-    *y = vacc;
+    *output = vacc;
   }
 }

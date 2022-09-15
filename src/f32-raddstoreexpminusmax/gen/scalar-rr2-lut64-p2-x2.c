@@ -18,14 +18,19 @@
 extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
 
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x2(
-    size_t elements,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float vi_max = *max;
   const float vlog2e = params->scalar_rr2_lut64_p2.log2e;
@@ -37,7 +42,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x2(
   const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
 
   float vacc0 = 0.0f;
-  for (; elements >= 2 * sizeof(float); elements -= 2 * sizeof(float)) {
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     // Load 2 inputs at a time.
     const float vi0 = input[0];
     const float vi1 = input[1];
@@ -124,7 +129,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x2(
   }
 
   float vacc = vacc0;
-  for (; elements >= sizeof(float); elements -= sizeof(float)) {
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
     // Load 1 input at a time.
     const float vi = *input++;
 

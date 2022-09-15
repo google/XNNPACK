@@ -16,15 +16,15 @@
 
 
 void xnn_f32_velu_ukernel__neon_rr2_p6_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vprescale = vld1q_dup_f32(&params->neon_rr2_p6.prescale);
   const float32x4_t valpha = vld1q_dup_f32(&params->neon_rr2_p6.alpha);
@@ -41,8 +41,8 @@ void xnn_f32_velu_ukernel__neon_rr2_p6_x4(
   const float32x4_t vc2 = vld1q_dup_f32(&params->neon_rr2_p6.c2);
   const float32x4_t vone = vmovq_n_f32(1.0f);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float32x4_t vx = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float32x4_t vx = vld1q_f32(input); input += 4;
 
     const float32x4_t vz = vmaxq_f32(vmulq_f32(vx, vprescale), vsat_cutoff);
 
@@ -68,10 +68,10 @@ void xnn_f32_velu_ukernel__neon_rr2_p6_x4(
     vx = vmulq_f32(vx, vbeta);
     const float32x4_t vy = vbslq_f32(vm, ve, vx);
 
-    vst1q_f32(y, vy); y += 4;
+    vst1q_f32(output, vy); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    float32x4_t vx = vld1q_f32(input);
 
     const float32x4_t vz = vmaxq_f32(vmulq_f32(vx, vprescale), vsat_cutoff);
 
@@ -98,12 +98,12 @@ void xnn_f32_velu_ukernel__neon_rr2_p6_x4(
     const float32x4_t vy = vbslq_f32(vm, ve, vx);
 
     float32x2_t vy_lo = vget_low_f32(vy);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vy_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vy_lo); output += 2;
       vy_lo = vget_high_f32(vy);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vy_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vy_lo, 0);
     }
   }
 }

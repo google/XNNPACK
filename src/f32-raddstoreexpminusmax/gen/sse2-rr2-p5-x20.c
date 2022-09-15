@@ -16,14 +16,19 @@
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
-    size_t elements,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const __m128 vi_max = _mm_load1_ps(max);
   const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_p5.log2e);
@@ -38,7 +43,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
   const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_p5.denorm_cutoff);
 
   __m128 vacc0 = _mm_setzero_ps();
-  for (; elements >= 20 * sizeof(float); elements -= 20 * sizeof(float)) {
+  for (; batch >= 20 * sizeof(float); batch -= 20 * sizeof(float)) {
     // Load 20 (5x4) inputs at a time.
     const __m128 vi0123 = _mm_loadu_ps(input);
     const __m128 vi4567 = _mm_loadu_ps(input + 4);
@@ -54,29 +59,29 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
     const __m128 vxCDEF = _mm_sub_ps(viCDEF, vi_max);
     const __m128 vxGHIJ = _mm_sub_ps(viGHIJ, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m128 vn0123 = _mm_add_ps(_mm_mul_ps(vx0123, vlog2e), vmagic_bias);
     __m128 vn4567 = _mm_add_ps(_mm_mul_ps(vx4567, vlog2e), vmagic_bias);
     __m128 vn89AB = _mm_add_ps(_mm_mul_ps(vx89AB, vlog2e), vmagic_bias);
     __m128 vnCDEF = _mm_add_ps(_mm_mul_ps(vxCDEF, vlog2e), vmagic_bias);
     __m128 vnGHIJ = _mm_add_ps(_mm_mul_ps(vxGHIJ, vlog2e), vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const __m128 vs0123 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn0123), 23));
     const __m128 vs4567 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn4567), 23));
     const __m128 vs89AB = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn89AB), 23));
     const __m128 vsCDEF = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vnCDEF), 23));
     const __m128 vsGHIJ = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vnGHIJ), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn0123 = _mm_sub_ps(vn0123, vmagic_bias);
     vn4567 = _mm_sub_ps(vn4567, vmagic_bias);
     vn89AB = _mm_sub_ps(vn89AB, vmagic_bias);
     vnCDEF = _mm_sub_ps(vnCDEF, vmagic_bias);
     vnGHIJ = _mm_sub_ps(vnGHIJ, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m128 vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2_hi), vx0123);
     __m128 vt4567 = _mm_add_ps(_mm_mul_ps(vn4567, vminus_ln2_hi), vx4567);
@@ -156,7 +161,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
   }
 
   __m128 vacc = vacc0;
-  for (; elements >= 4 * sizeof(float); elements -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     // Load 4 inputs at a time.
     const __m128 vi = _mm_loadu_ps(input);
     input += 4;
@@ -164,17 +169,17 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m128 vx = _mm_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m128 vn = _mm_add_ps(_mm_mul_ps(vx, vlog2e), vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const __m128 vs = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = _mm_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vx);
     vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
@@ -203,26 +208,26 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
     // Accumulate computed exponents.
     vacc = _mm_add_ps(vacc, vf);
   }
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 3 * sizeof(float));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
     // Load 4 inputs at a time.
     const __m128 vi = _mm_loadu_ps(input);
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m128 vx = _mm_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m128 vn = _mm_add_ps(_mm_mul_ps(vx, vlog2e), vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s == 2**elements for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= elements <= 0 accordingly.
+    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
+    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const __m128 vs = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn), 23));
 
-    // Subtract the large number back to get final elements := round(x / log(2)).
+    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = _mm_sub_ps(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vx);
     vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
@@ -244,7 +249,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = _mm_andnot_ps(_mm_cmplt_ps(vx, vdenorm_cutoff), vf);
 
-    if (elements & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       // Store 2 outputs at a time.
       _mm_storel_pi((__m64*) output, vf);
       output += 2;
@@ -254,7 +259,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
 
       vf = _mm_movehl_ps(vf, vf);
     }
-    if (elements & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       // Store 1 output at a time.
       _mm_store_ss(output, vf);
 
@@ -262,7 +267,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20(
       vacc = _mm_add_ss(vacc, vf);
     }
   }
-  // Reduce 4 elements in the SIMD register
+  // Reduce 4 batch in the SIMD register
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_shuffle_ps(vacc, vacc, _MM_SHUFFLE(2, 3, 0, 1)));
   _mm_store_ss(sum, vacc);

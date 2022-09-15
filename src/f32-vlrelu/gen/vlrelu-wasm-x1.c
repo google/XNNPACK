@@ -14,24 +14,24 @@
 
 
 void xnn_f32_vlrelu_ukernel__wasm_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vslope = params->scalar.slope;
   const float vzero = 0.0f;
 
   do {
-    const float vx = *x++;
+    const float vx = *input++;
     const float vnegx = __builtin_wasm_min_f32(vx, vzero);
     float vacc = vnegx * vslope;
     const float vposx = __builtin_wasm_max_f32(vx, vzero);
     vacc += vposx;
-    *y++ = vacc;
-    n -= sizeof(float);
-  } while (n != 0);
+    *output++ = vacc;
+    batch -= sizeof(float);
+  } while (batch != 0);
 }

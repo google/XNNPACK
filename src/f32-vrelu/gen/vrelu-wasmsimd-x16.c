@@ -16,57 +16,57 @@
 
 
 void xnn_f32_vrelu_ukernel__wasmsimd_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vzero = wasm_i32x4_const_splat(0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    v128_t vacc0123 = wasm_v128_load(x);
-    v128_t vacc4567 = wasm_v128_load(x + 4);
-    v128_t vacc89AB = wasm_v128_load(x + 8);
-    v128_t vaccCDEF = wasm_v128_load(x + 12);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    v128_t vacc0123 = wasm_v128_load(input);
+    v128_t vacc4567 = wasm_v128_load(input + 4);
+    v128_t vacc89AB = wasm_v128_load(input + 8);
+    v128_t vaccCDEF = wasm_v128_load(input + 12);
+    input += 16;
 
     vacc0123 = wasm_i32x4_max(vacc0123, vzero);
     vacc4567 = wasm_i32x4_max(vacc4567, vzero);
     vacc89AB = wasm_i32x4_max(vacc89AB, vzero);
     vaccCDEF = wasm_i32x4_max(vaccCDEF, vzero);
 
-    wasm_v128_store(y, vacc0123);
-    wasm_v128_store(y + 4, vacc4567);
-    wasm_v128_store(y + 8, vacc89AB);
-    wasm_v128_store(y + 12, vaccCDEF);
-    y += 16;
+    wasm_v128_store(output, vacc0123);
+    wasm_v128_store(output + 4, vacc4567);
+    wasm_v128_store(output + 8, vacc89AB);
+    wasm_v128_store(output + 12, vaccCDEF);
+    output += 16;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    v128_t vacc = wasm_v128_load(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    v128_t vacc = wasm_v128_load(input);
+    input += 4;
 
     vacc = wasm_i32x4_max(vacc, vzero);
 
-    wasm_v128_store(y, vacc);
-    y += 4;
+    wasm_v128_store(output, vacc);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    v128_t vacc = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    v128_t vacc = wasm_v128_load(input);
 
     vacc = wasm_i32x4_max(vacc, vzero);
 
-    if (n & (2 * sizeof(float))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vacc, 0);
+    if (batch & (2 * sizeof(float))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vacc, 0);
       vacc = wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = wasm_f32x4_extract_lane(vacc, 0);
+    if (batch & (1 * sizeof(float))) {
+      *output = wasm_f32x4_extract_lane(vacc, 0);
     }
   }
 }

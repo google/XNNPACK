@@ -16,19 +16,19 @@
 
 
 void xnn_f32_vlrelu_ukernel__sse2_x8(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m128 vslope = _mm_load_ps(params->sse.slope);
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    const __m128 vx4567 = _mm_loadu_ps(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    const __m128 vx4567 = _mm_loadu_ps(input + 4);
+    input += 8;
 
     __m128 vacc0123 = _mm_mul_ps(vx0123, vslope);
     const __m128 vmask0123 = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx0123)));
@@ -38,35 +38,35 @@ void xnn_f32_vlrelu_ukernel__sse2_x8(
     vacc0123 = _mm_or_ps(_mm_and_ps(vacc0123, vmask0123), _mm_andnot_ps(vmask0123, vx0123));
     vacc4567 = _mm_or_ps(_mm_and_ps(vacc4567, vmask4567), _mm_andnot_ps(vmask4567, vx4567));
 
-    _mm_storeu_ps(y, vacc0123);
-    _mm_storeu_ps(y + 4, vacc4567);
-    y += 8;
+    _mm_storeu_ps(output, vacc0123);
+    _mm_storeu_ps(output + 4, vacc4567);
+    output += 8;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vx = _mm_loadu_ps(input);
+    input += 4;
 
     __m128 vacc = _mm_mul_ps(vx, vslope);
     const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx)));
     vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vx));
 
-    _mm_storeu_ps(y, vacc);
-    y += 4;
+    _mm_storeu_ps(output, vacc);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
 
     __m128 vacc = _mm_mul_ps(vx, vslope);
     const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vx)));
     vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vx));
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vacc);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vacc);
       vacc = _mm_movehl_ps(vacc, vacc);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vacc);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vacc);
     }
   }
 }

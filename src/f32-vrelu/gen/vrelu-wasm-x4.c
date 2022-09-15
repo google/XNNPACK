@@ -15,42 +15,42 @@
 
 
 void xnn_f32_vrelu_ukernel__wasm_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vzero = 0.0f;
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float vacc0 = x[0];
-    float vacc1 = x[1];
-    float vacc2 = x[2];
-    float vacc3 = x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float vacc0 = input[0];
+    float vacc1 = input[1];
+    float vacc2 = input[2];
+    float vacc3 = input[3];
+    input += 4;
 
     vacc0 = __builtin_wasm_max_f32(vacc0, vzero);
     vacc1 = __builtin_wasm_max_f32(vacc1, vzero);
     vacc2 = __builtin_wasm_max_f32(vacc2, vzero);
     vacc3 = __builtin_wasm_max_f32(vacc3, vzero);
 
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y[2] = vacc2;
-    y[3] = vacc3;
-    y += 4;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      float vacc = *x++;
+      float vacc = *input++;
       vacc = __builtin_wasm_max_f32(vacc, vzero);
-      *y++ = vacc;
-      n -= sizeof(float);
-    } while (n != 0);
+      *output++ = vacc;
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

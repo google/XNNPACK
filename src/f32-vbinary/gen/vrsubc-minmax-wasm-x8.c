@@ -15,32 +15,32 @@
 
 
 void xnn_f32_vrsubc_minmax_ukernel__wasm_x8(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const float vy_min = params->scalar.min;
   const float vy_max = params->scalar.max;
 
-  const float vb = *b;
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const float va0 = a[0];
-    const float va1 = a[1];
-    const float va2 = a[2];
-    const float va3 = a[3];
-    const float va4 = a[4];
-    const float va5 = a[5];
-    const float va6 = a[6];
-    const float va7 = a[7];
-    a += 8;
+  const float vb = *input_b;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const float va0 = input_a[0];
+    const float va1 = input_a[1];
+    const float va2 = input_a[2];
+    const float va3 = input_a[3];
+    const float va4 = input_a[4];
+    const float va5 = input_a[5];
+    const float va6 = input_a[6];
+    const float va7 = input_a[7];
+    input_a += 8;
 
     float vy0 = vb - va0;
     float vy1 = vb - va1;
@@ -70,24 +70,24 @@ void xnn_f32_vrsubc_minmax_ukernel__wasm_x8(
     vy6 = __builtin_wasm_min_f32(vy6, vy_max);
     vy7 = __builtin_wasm_min_f32(vy7, vy_max);
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y[2] = vy2;
-    y[3] = vy3;
-    y[4] = vy4;
-    y[5] = vy5;
-    y[6] = vy6;
-    y[7] = vy7;
-    y += 8;
+    output[0] = vy0;
+    output[1] = vy1;
+    output[2] = vy2;
+    output[3] = vy3;
+    output[4] = vy4;
+    output[5] = vy5;
+    output[6] = vy6;
+    output[7] = vy7;
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      const float va = *a++;
+      const float va = *input_a++;
       float vy = vb - va;
       vy = __builtin_wasm_max_f32(vy, vy_min);
       vy = __builtin_wasm_min_f32(vy, vy_max);
-      *y++ = vy;
-      n -= sizeof(float);
-    } while (n != 0);
+      *output++ = vy;
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

@@ -15,17 +15,17 @@
 
 
 void xnn_f32_vsqrt_ukernel__scalar_sqrt_x1(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= sizeof(float); n -= sizeof(float)) {
-    const float vx = *x++;
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
+    const float vx = *input++;
     const float vy = sqrtf(vx);
-    *y++ = vy;
+    *output++ = vy;
   }
 }

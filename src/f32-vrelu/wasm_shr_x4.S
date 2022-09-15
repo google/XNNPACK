@@ -6,9 +6,9 @@
 #include <xnnpack/assembly.h>
 
 # void xnn_f32_vrelu_ukernel__wasm32_shr_x4(
-#     size_t n,             0
-#     const float* x,       1
-#     float* y,             2
+#     size_t batch,             0
+#     const float* input,       1
+#     float* output,             2
 #     const union params)   3 unused
 
 # locals

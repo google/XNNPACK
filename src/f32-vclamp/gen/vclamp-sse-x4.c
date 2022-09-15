@@ -16,42 +16,42 @@
 
 
 void xnn_f32_vclamp_ukernel__sse_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vy_min = _mm_load_ps(params->sse.min);
   const __m128 vy_max = _mm_load_ps(params->sse.max);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    __m128 vacc0123 = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    __m128 vacc0123 = _mm_loadu_ps(input);
+    input += 4;
 
     vacc0123 = _mm_max_ps(vacc0123, vy_min);
 
     vacc0123 = _mm_min_ps(vacc0123, vy_max);
 
-    _mm_storeu_ps(y, vacc0123);
-    y += 4;
+    _mm_storeu_ps(output, vacc0123);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128 vacc = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    __m128 vacc = _mm_loadu_ps(input);
     vacc = _mm_max_ps(vacc, vy_min);
     vacc = _mm_min_ps(vacc, vy_max);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vacc);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vacc);
       vacc = _mm_movehl_ps(vacc, vacc);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vacc);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vacc);
     }
   }
 }

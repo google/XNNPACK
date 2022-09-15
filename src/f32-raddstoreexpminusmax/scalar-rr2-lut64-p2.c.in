@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE >= 1
+$assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -15,15 +15,20 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 // Note redefine as uint32[] to avoid redundant bitcasts.
 extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
 
-void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
+void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const float vi_max = *max;
   const float vlog2e = params->scalar_rr2_lut64_p2.log2e;
@@ -34,17 +39,17 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}
   const float vc2 = params->scalar_rr2_lut64_p2.c2;
   const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
 
-  $if ELEMENTS_TILE > 1:
+  $if BATCH_TILE > 1:
     $for K in range(ACCUMULATORS):
       float vacc${K} = 0.0f;
-    for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-      // Load ${ELEMENTS_TILE} inputs at a time.
-      $for N in range(ELEMENTS_TILE):
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      // Load ${BATCH_TILE} inputs at a time.
+      $for N in range(BATCH_TILE):
         const float vi${N} = input[${N}];
-      input += ${ELEMENTS_TILE};
+      input += ${BATCH_TILE};
 
       // Subtract maximum input x := i - i_max. This implies x <= 0.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const float vx${N} = vi${N} - vi_max;
 
       // Compute reduced argument n := round(x * 64 / log(2)).
@@ -54,7 +59,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}
       // |x| <= 0x1.62E43p+15 = 45426.09375), but that is acceptable, because inputs outside of [-87.336540, 0.0]
       // result in denormalized or underflown expf(x). We fixup the result for such inputs at the very end of the
       // algorithm.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vn${N} = vx${N} * vlog2e + vmagic_bias;
 
       // Create a floating-point number s (scale) such that s := 2**(n / 64) for such inputs that expf(x) is normalized,
@@ -67,33 +72,33 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}
       //    and thus the adjusted exponent is not lower than -126.
       //
       // Extract e from bits 6:14 of n and shift it into bits 23:31 (position of floating-point exponent).
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const uint32_t ve${N} = (float_as_uint32(vn${N}) & UINT32_C(0xFFFFFFC0)) << 17;
 
       // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const uint32_t vidx${N} = float_as_uint32(vn${N}) & vindex_mask;
       // Adjust exponent of the value l fetched from the table to get the final s value.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         const float vs${N} = uint32_as_float(xnn_table_exp2_k_over_64[vidx${N}] + ve${N});
 
       // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vn${N} -= vmagic_bias;
 
       // Compute reduced argument t := x - n * log(2) / 64.
       // Use Cody-Waite range reduction method (note the two constants representing log(2) / 64) to improve accuracy.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vt${N} = vn${N} * vminus_ln2_hi + vx${N};
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vt${N} = vn${N} * vminus_ln2_lo + vt${N};
 
       // Compute degree-2 polynomial approximation for exp(t) on [-log(2)/128, log(2)/128].
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vp${N} = vt${N} * vc2;
 
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vp${N} = vp${N} * vt${N} + vt${N};
 
       // Reconstruct the final f value:
@@ -101,23 +106,23 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}
       //     = s * (1 + t + t * (t * c2))
       //     = s + s * (t + t * (t * c2))
       //     = s + s * p
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         float vf${N} = vp${N} * vs${N} + vs${N};
 
       // For inputs below denormal cutoff, replace output with +0.0f.
       // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         if XNN_UNPREDICTABLE(vx${N} < vdenorm_cutoff) {
           vf${N} = 0.0f;
         }
 
-      // Store ${ELEMENTS_TILE} outputs at a time.
-      $for N in range(ELEMENTS_TILE):
+      // Store ${BATCH_TILE} outputs at a time.
+      $for N in range(BATCH_TILE):
         output[${N}] = vf${N};
-      output += ${ELEMENTS_TILE};
+      output += ${BATCH_TILE};
 
       // Accumulate computed exponents.
-      $for N in range(ELEMENTS_TILE):
+      $for N in range(BATCH_TILE):
         vacc${N % ACCUMULATORS} += vf${N};
     }
     $if ACCUMULATORS > 1:
@@ -132,7 +137,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_x${ELEMENTS_TILE}
     float vacc = vacc0;
   $else:
     float vacc = 0.0f;
-  for (; elements >= sizeof(float); elements -= sizeof(float)) {
+  for (; batch >= sizeof(float); batch -= sizeof(float)) {
     // Load 1 input at a time.
     const float vi = *input++;
 

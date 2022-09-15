@@ -16,13 +16,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -36,7 +36,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
   const v128_t vnanh = wasm_v128_load64_splat(params->wasmsimd.nanh);
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const v128_t vx0 = wasm_v128_load(input);
     const v128_t vx1 = wasm_v128_load(input + 4);
     const v128_t vx2 = wasm_v128_load(input + 8);
@@ -195,7 +195,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
     wasm_v128_store(o + 24, vh3);
     o += 32;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t vx_lo = wasm_v128_load(input);
     const v128_t vx_hi = wasm_v128_load(input + 4);
     input += 8;
@@ -245,9 +245,9 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
     wasm_v128_store(o, vh);
     o += 8;
   }
-  if XNN_UNPREDICTABLE(n != 0) {
+  if XNN_UNPREDICTABLE(batch != 0) {
     const v128_t vx_lo = wasm_v128_load(input);
-    const float* input_hi = (const float*) ((uintptr_t) input + (n & (4 * sizeof(float))));
+    const float* input_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     const v128_t vx_hi = wasm_v128_load(input_hi);
 
     const v128_t vabsx_lo = wasm_f32x4_abs(vx_lo);
@@ -292,18 +292,18 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
 
     v128_t vh = wasm_v128_or(vabsh, vsignh);
 
-    if (n & (4 * sizeof(float))) {
+    if (batch & (4 * sizeof(float))) {
       *((double*) o) = wasm_f64x2_extract_lane(vh, 0);
       vh = wasm_v64x2_shuffle(vh, vh, 1, 1);
       o += 4;
     }
-    if (n & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       *((float*) o) = (float) wasm_f32x4_extract_lane(vh, 0);
       vh = wasm_i64x2_shr(vh, 32);
       o += 2;
     }
     const uint32_t vh_lo = wasm_i32x4_extract_lane(vh, 0);
-    if (n & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       *o = (uint16_t) vh_lo;
     }
   }

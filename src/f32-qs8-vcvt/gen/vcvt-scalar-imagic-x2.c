@@ -15,15 +15,15 @@
 
 
 void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x2(
-    size_t n,
-    const float* x,
-    int8_t* y,
+    size_t batch,
+    const float* input,
+    int8_t* output,
     const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vscale = params->scalar_imagic.scale;
   const float vmagic_bias = params->scalar_imagic.magic_bias;
@@ -31,10 +31,10 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x2(
   const int32_t vmagic_max = params->scalar_imagic.magic_max;
   const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    float vx0 = x[0];
-    float vx1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    float vx0 = input[0];
+    float vx1 = input[1];
+    input += 2;
 
     vx0 *= vscale;
     vx1 *= vscale;
@@ -54,12 +54,12 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x2(
     vy0 -= vmagic_bias_less_zero_point;
     vy1 -= vmagic_bias_less_zero_point;
 
-    y[0] = (int8_t) vy0;
-    y[1] = (int8_t) vy1;
-    y += 2;
+    output[0] = (int8_t) vy0;
+    output[1] = (int8_t) vy1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    float vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    float vx = *input;
     vx *= vscale;
     vx += vmagic_bias;
 
@@ -68,6 +68,6 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x2(
     vy = math_min_s32(vy, vmagic_max);
     vy -= vmagic_bias_less_zero_point;
 
-    *y = (int8_t) vy;
+    *output = (int8_t) vy;
   }
 }

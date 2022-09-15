@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert ELEMENTS_TILE % 8 == 0
-$assert ELEMENTS_TILE >= 8
-$SIMD_TILE = ELEMENTS_TILE // 8
+$assert BATCH_TILE % 8 == 0
+$assert BATCH_TILE >= 8
+$SIMD_TILE = BATCH_TILE // 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <math.h>
@@ -17,19 +17,21 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-void xnn_f32_raddextexp_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
-    size_t elements,
-    const float* x,
+void xnn_f32_raddextexp_ukernel__avx2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t batch,
+    const float* input,
     float* sum)
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(sum != NULL);
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);
   const __m256 vminus_ln2_lo = _mm256_set1_ps(0x1.05C61p-29f);
 
-  // The smallest elements such that 2**elements is considered non-negligible.
-  // For smaller elements, 2**elements is replaced with zero.
+  // The smallest batch such that 2**batch is considered non-negligible.
+  // For smaller batch, 2**batch is replaced with zero.
   const __m256 vmin_exponent = _mm256_set1_ps(-127.0f);
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
   const __m256 vminus_inf = _mm256_set1_ps(-INFINITY);
@@ -45,18 +47,18 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS =
     __m256 vaccv${K} = _mm256_setzero_ps();
   $for K in range(ACCUMULATORS):
     __m256 vacce${K} = vminus_inf;
-  for (; elements >= ${ELEMENTS_TILE} * sizeof(float); elements -= ${ELEMENTS_TILE} * sizeof(float)) {
-    // Load ${ELEMENTS_TILE} (${SIMD_TILE}x8) inputs at a time.
-    const __m256 vx0 = _mm256_loadu_ps(x);
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    // Load ${BATCH_TILE} (${SIMD_TILE}x8) inputs at a time.
+    const __m256 vx0 = _mm256_loadu_ps(input);
     $for N in range(1, SIMD_TILE):
-      const __m256 vx${N} = _mm256_loadu_ps(x + ${N * 8});
-    x += ${ELEMENTS_TILE};
+      const __m256 vx${N} = _mm256_loadu_ps(input + ${N * 8});
+    input += ${BATCH_TILE};
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     $for N in range(SIMD_TILE):
       const __m256 vn${N} = _mm256_round_ps(_mm256_mul_ps(vx${N}, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     $for N in range(SIMD_TILE):
       __m256 vt${N} = _mm256_fmadd_ps(vn${N}, vminus_ln2_hi, vx${N});
@@ -153,15 +155,15 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS =
     __m256 vaccv = vaccv0;
     __m256 vacce = vacce0;
 
-  for (; elements >= 8 * sizeof(float); elements -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     // Load 8 inputs at a time.
-    const __m256 vx = _mm256_loadu_ps(x);
-    x += 8;
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -190,23 +192,23 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x${ELEMENTS_TILE}${"" if ACCUMULATORS =
 
     vacce = vmax_e;
   }
-  if XNN_UNLIKELY(elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - elements));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     // Load up to 7 inputs at a time.
-    const __m256 vx = _mm256_maskload_ps(x, vmask);
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Correct reduced argument elements for masked out elements.
+    // Correct reduced argument batch for masked out batch.
     vn = _mm256_blendv_ps(vacce, vn, _mm256_castsi256_ps(vmask));
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].

@@ -14,22 +14,22 @@
 #include <xnnpack/math.h>
 
 void xnn_f32_vrelu_ukernel__scalar_x1(
-    size_t n,
-    const float* x_ptr,
-    float* y_ptr,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x_ptr != NULL);
-  assert(y_ptr != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const uint32_t* x = (const uint32_t*)x_ptr;
-  uint32_t* y = (uint32_t*)y_ptr;
+  const uint32_t* i = (const uint32_t*) input;
+  uint32_t* o = (uint32_t*) output;
 
-  for (; n >= sizeof(uint32_t); n -= sizeof(uint32_t)) {
-    uint32_t vacc = *x++;
+  for (; batch >= sizeof(uint32_t); batch -= sizeof(uint32_t)) {
+    uint32_t vacc = *i++;
     vacc =  ((vacc >> 31) - 1) & vacc;
-    *y++ = vacc;
+    *o++ = vacc;
   }
 }

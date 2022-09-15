@@ -14,20 +14,20 @@
 
 
 void xnn_f32_vlrelu_ukernel__scalar_x2(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vslope = params->scalar.slope;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    const float vx0 = x[0];
-    const float vx1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    input += 2;
 
     float vacc0 = vx0 * vslope;
     float vacc1 = vx1 * vslope;
@@ -35,14 +35,14 @@ void xnn_f32_vlrelu_ukernel__scalar_x2(
     vacc0 = XNN_UNPREDICTABLE(vx0 < 0.0f) ? vacc0 : vx0;
     vacc1 = XNN_UNPREDICTABLE(vx1 < 0.0f) ? vacc1 : vx1;
 
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y += 2;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    const float vx = *input;
     float vacc = vx * vslope;
     vacc = XNN_UNPREDICTABLE(vx < 0.0f) ? vacc : vx;
-    *y = vacc;
+    *output = vacc;
   }
 }

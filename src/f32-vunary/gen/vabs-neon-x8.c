@@ -16,41 +16,41 @@
 
 
 void xnn_f32_vabs_ukernel__neon_x8(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    const float32x4_t vx0123 = vld1q_f32(x); x += 4;
-    const float32x4_t vx4567 = vld1q_f32(x); x += 4;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    const float32x4_t vx0123 = vld1q_f32(input); input += 4;
+    const float32x4_t vx4567 = vld1q_f32(input); input += 4;
 
     const float32x4_t vy0123 = vabsq_f32(vx0123);
     const float32x4_t vy4567 = vabsq_f32(vx4567);
 
-    vst1q_f32(y, vy0123); y += 4;
-    vst1q_f32(y, vy4567); y += 4;
+    vst1q_f32(output, vy0123); output += 4;
+    vst1q_f32(output, vy4567); output += 4;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const float32x4_t vx = vld1q_f32(x); x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float32x4_t vx = vld1q_f32(input); input += 4;
     const float32x4_t vy = vabsq_f32(vx);
-    vst1q_f32(y, vy); y += 4;
+    vst1q_f32(output, vy); output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float32x4_t vx = vld1q_f32(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const float32x4_t vx = vld1q_f32(input);
     const float32x4_t vy = vabsq_f32(vx);
     float32x2_t vy_lo = vget_low_f32(vy);
-    if (n & (2 * sizeof(float))) {
-      vst1_f32(y, vy_lo); y += 2;
+    if (batch & (2 * sizeof(float))) {
+      vst1_f32(output, vy_lo); output += 2;
       vy_lo = vget_high_f32(vy);
     }
-    if (n & (1 * sizeof(float))) {
-      vst1_lane_f32(y, vy_lo, 0);
+    if (batch & (1 * sizeof(float))) {
+      vst1_lane_f32(output, vy_lo, 0);
     }
   }
 }

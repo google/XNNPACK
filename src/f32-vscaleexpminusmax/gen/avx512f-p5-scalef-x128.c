@@ -16,13 +16,13 @@
 
 
 void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
-    size_t elements,
+    size_t batch,
     const float* input,
     float* output,
     float scale,
     float max)
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
   const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);
@@ -38,7 +38,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
   const __m512 vscale = _mm512_set1_ps(scale);
   const __m512 vi_max = _mm512_set1_ps(max);
 
-  for (; elements >= 128 * sizeof(float); elements -= 128 * sizeof(float)) {
+  for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     // Load 128 (8x16) inputs at a time.
     const __m512 vi0 = _mm512_loadu_ps(input);
     const __m512 vi1 = _mm512_loadu_ps(input + 16);
@@ -60,7 +60,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     const __m512 vx6 = _mm512_sub_ps(vi6, vi_max);
     const __m512 vx7 = _mm512_sub_ps(vi7, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m512 vn0 = _mm512_roundscale_ps(_mm512_mul_ps(vx0, vlog2e), 0);
     __m512 vn1 = _mm512_roundscale_ps(_mm512_mul_ps(vx1, vlog2e), 0);
     __m512 vn2 = _mm512_roundscale_ps(_mm512_mul_ps(vx2, vlog2e), 0);
@@ -70,7 +70,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     __m512 vn6 = _mm512_roundscale_ps(_mm512_mul_ps(vx6, vlog2e), 0);
     __m512 vn7 = _mm512_roundscale_ps(_mm512_mul_ps(vx7, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt0 = _mm512_fmadd_ps(vn0, vminus_ln2_hi, vx0);
     __m512 vt1 = _mm512_fmadd_ps(vn1, vminus_ln2_hi, vx1);
@@ -137,8 +137,8 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     vp7 = _mm512_fmadd_ps(vp7, vt7, vc0);
 
     // Reconstruct the final f value:
-    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = 2**elements * p
+    //   f = 2**batch * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**batch * p
     __m512 vf0 = _mm512_scalef_ps(vp0, vn0);
     __m512 vf1 = _mm512_scalef_ps(vp1, vn1);
     __m512 vf2 = _mm512_scalef_ps(vp2, vn2);
@@ -170,7 +170,7 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     _mm512_storeu_ps(output + 112, vf7);
     output += 128;
   }
-  for (; elements >= 16 * sizeof(float); elements -= 16 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     // Load 16 inputs at a time.
     const __m512 vi = _mm512_loadu_ps(input);
     input += 16;
@@ -178,10 +178,10 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     // Subtract maximum input x := i - i_max.
     const __m512 vx = _mm512_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -194,8 +194,8 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     vp = _mm512_fmadd_ps(vp, vt, vc0);
 
     // Reconstruct the final f value:
-    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = 2**elements * p
+    //   f = 2**batch * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**batch * p
     __m512 vf = _mm512_scalef_ps(vp, vn);
 
     // Multiply by scale.
@@ -205,10 +205,10 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     _mm512_storeu_ps(output, vf);
     output += 16;
   }
-  if (elements != 0) {
-    // Prepare mask for valid 32-bit elements (depends on elements).
-    elements >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << elements) - UINT32_C(1)));
+  if (batch != 0) {
+    // Prepare mask for valid 32-bit batch (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     // Load up to 15 inputs at a time.
     const __m512 vi = _mm512_mask_loadu_ps(_mm512_undefined_ps(), vmask, input);
@@ -216,10 +216,10 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     // Subtract maximum input x := i - i_max.
     const __m512 vx = _mm512_sub_ps(vi, vi_max);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(x / log(2)).
     __m512 vn = _mm512_roundscale_ps(_mm512_mul_ps(vx, vlog2e), 0);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -232,8 +232,8 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x128(
     vp = _mm512_fmadd_ps(vp, vt, vc0);
 
     // Reconstruct the final f value:
-    //   f = 2**elements * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = 2**elements * p
+    //   f = 2**batch * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
+    //     = 2**batch * p
     __m512 vf = _mm512_scalef_ps(vp, vn);
 
     // Multiply by scale.

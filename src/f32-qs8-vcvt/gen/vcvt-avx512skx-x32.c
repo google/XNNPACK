@@ -17,25 +17,25 @@
 
 
 void xnn_f32_qs8_vcvt_ukernel__avx512skx_x32(
-    size_t n,
-    const float* x,
-    int8_t* y,
+    size_t batch,
+    const float* input,
+    int8_t* output,
     const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vscale = _mm512_load_ps(params->avx2.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
   const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) params->avx512.shuffle256_mask);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx512.output_min);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    __m512 vx0123 = _mm512_loadu_ps(x);
-    __m512 vx4567 = _mm512_loadu_ps(x + 16);
-    x += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    __m512 vx0123 = _mm512_loadu_ps(input);
+    __m512 vx4567 = _mm512_loadu_ps(input + 16);
+    input += 32;
 
     vx0123 = _mm512_mul_ps(vx0123, vscale);
     vx4567 = _mm512_mul_ps(vx4567, vscale);
@@ -56,14 +56,14 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x32(
 
     const __m256i vy01234567 = _mm256_permutevar8x32_epi32(vy04261537, vshuffle256_mask);
 
-    _mm256_storeu_si256((__m256i*) y, vy01234567);
-    y += 32;
+    _mm256_storeu_si256((__m256i*) output, vy01234567);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    __m512 vx0123 = _mm512_loadu_ps(x);
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    __m512 vx0123 = _mm512_loadu_ps(input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
     vx0123 = _mm512_min_ps(vx0123, voutput_max_less_zero_point);
-    x += 16;
+    input += 16;
 
     const __m512i vacc0123 = _mm512_cvtps_epi32(vx0123);
 
@@ -73,18 +73,18 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x32(
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
     vy0123 = _mm_max_epi8(vy0123, _mm256_castsi256_si128(voutput_min));
 
-    _mm_storeu_si128((__m128i*) y, vy0123);
-    y += 16;
+    _mm_storeu_si128((__m128i*) output, vy0123);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
 
-    // Prepare mask for valid elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+    // Prepare mask for valid elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, x);
+    __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
     vx0123 = _mm512_mul_ps(vx0123, vscale);
     vx0123 = _mm512_min_ps(vx0123, voutput_max_less_zero_point);
 
@@ -96,6 +96,6 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x32(
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
     vy0123 = _mm_max_epi8(vy0123, _mm256_castsi256_si128(voutput_min));
 
-    _mm_mask_storeu_epi8(y, vmask, vy0123);
+    _mm_mask_storeu_epi8(output, vmask, vy0123);
   }
 }

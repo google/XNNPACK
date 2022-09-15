@@ -26,63 +26,63 @@ $  "NEG": "xnn_f32_neg_params",
 $  "SQR": "xnn_f32_default_params",
 $}[OP]
 void xnn_f32_v${OP.lower()}_ukernel__avx_x${BATCH_TILE}(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   $if OP == "ABS":
     const __m256 vnonsign_mask = _mm256_load_ps(params->avx.nonsign_mask);
   $elif OP == "NEG":
     const __m256 vsign_mask = _mm256_load_ps(params->sse.sign_mask);
-  for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-    const __m256 vx${ABC[0:8]} = _mm256_loadu_ps(x);
+  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+    const __m256 vx${ABC[0:8]} = _mm256_loadu_ps(input);
     $for N in range(8, BATCH_TILE, 8):
-      const __m256 vx${ABC[N:N+8]} = _mm256_loadu_ps(x + ${N});
-    x += ${BATCH_TILE};
+      const __m256 vx${ABC[N:N+8]} = _mm256_loadu_ps(input + ${N});
+    input += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 8):
       const __m256 vy${ABC[N:N+8]} = ${_MM256_OP_PS("vx" + ABC[N:N+8])};
 
-    _mm256_storeu_ps(y, vy${ABC[0:8]});
+    _mm256_storeu_ps(output, vy${ABC[0:8]});
     $for N in range(8, BATCH_TILE, 8):
-      _mm256_storeu_ps(y + ${N}, vy${ABC[N:N+8]});
-    y += ${BATCH_TILE};
+      _mm256_storeu_ps(output + ${N}, vy${ABC[N:N+8]});
+    output += ${BATCH_TILE};
   }
   $if BATCH_TILE > 8:
-    for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-      const __m256 vx = _mm256_loadu_ps(x);
-      x += 8;
+    for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+      const __m256 vx = _mm256_loadu_ps(input);
+      input += 8;
       const __m256 vy = ${_MM256_OP_PS("vx")};
-      _mm256_storeu_ps(y, vy);
-      y += 8;
+      _mm256_storeu_ps(output, vy);
+      output += 8;
     }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - n));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 vx = _mm256_maskload_ps(x, vmask);
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
     const __m256 vy = ${_MM256_OP_PS("vx")};
 
     __m128 vy_lo = _mm256_castps256_ps128(vy);
-    if (n & (4 * sizeof(float))) {
-      _mm_storeu_ps(y, vy_lo);
+    if (batch & (4 * sizeof(float))) {
+      _mm_storeu_ps(output, vy_lo);
       vy_lo = _mm256_extractf128_ps(vy, 1);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy_lo);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy_lo);
       vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy_lo);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy_lo);
     }
   }
 }

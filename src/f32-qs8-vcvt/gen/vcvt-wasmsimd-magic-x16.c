@@ -17,27 +17,27 @@
 
 
 void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
-    size_t n,
-    const float* x,
-    int8_t* y,
+    size_t batch,
+    const float* input,
+    int8_t* output,
     const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd_magic.scale);
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_magic.magic_bias);
   const v128_t vmagic_min = wasm_v128_load64_splat(params->wasmsimd_magic.magic_min);
   const v128_t vmagic_bias_less_zero_point = wasm_v128_load64_splat(params->wasmsimd_magic.magic_bias_less_zero_point);
   const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_magic.output_max);
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    v128_t vx0123 = wasm_v128_load(x);
-    v128_t vx4567 = wasm_v128_load(x + 4);
-    v128_t vx89AB = wasm_v128_load(x + 8);
-    v128_t vxCDEF = wasm_v128_load(x + 12);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    v128_t vx0123 = wasm_v128_load(input);
+    v128_t vx4567 = wasm_v128_load(input + 4);
+    v128_t vx89AB = wasm_v128_load(input + 8);
+    v128_t vxCDEF = wasm_v128_load(input + 12);
+    input += 16;
 
     vx0123 = wasm_f32x4_mul(vx0123, vscale);
     vx4567 = wasm_f32x4_mul(vx4567, vscale);
@@ -66,13 +66,13 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
 
     vy0123456789ABCDEF = wasm_i8x16_min(vy0123456789ABCDEF, voutput_max);
 
-    wasm_v128_store(y, vy0123456789ABCDEF);
-    y += 16;
+    wasm_v128_store(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    v128_t vx_lo = wasm_v128_load(x);
-    v128_t vx_hi = wasm_v128_load(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    v128_t vx_lo = wasm_v128_load(input);
+    v128_t vx_hi = wasm_v128_load(input + 4);
+    input += 8;
 
     vx_lo = wasm_f32x4_mul(vx_lo, vscale);
     vx_hi = wasm_f32x4_mul(vx_hi, vscale);
@@ -90,14 +90,14 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
     vy = wasm_i8x16_min(vy, voutput_max);
-    *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
-    y += 8;
+    *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 7 * sizeof(float));
-    v128_t vx_lo = wasm_v128_load(x);
-    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    v128_t vx_lo = wasm_v128_load(input);
+    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     v128_t vx_hi = wasm_v128_load(x_hi);
 
     vx_lo = wasm_f32x4_mul(vx_lo, vscale);
@@ -117,19 +117,19 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
     vy = wasm_i8x16_min(vy, voutput_max);
 
-    if (n & (4 * sizeof(float))) {
-      *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
-      y += 4;
+    if (batch & (4 * sizeof(float))) {
+      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
+      output += 4;
       vy = wasm_u64x2_shr(vy, 32);
     }
     uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
-    if (n & (2 * sizeof(float))) {
-      *((uint16_t*) y) = (uint16_t) vy_lo;
-      y += 2;
+    if (batch & (2 * sizeof(float))) {
+      *((uint16_t*) output) = (uint16_t) vy_lo;
+      output += 2;
       vy_lo >>= 16;
     }
-    if (n & (1 * sizeof(float))) {
-      *y = (int8_t) vy_lo;
+    if (batch & (1 * sizeof(float))) {
+      *output = (int8_t) vy_lo;
     }
   }
 }

@@ -16,12 +16,12 @@
 
 
 void xnn_f32_velu_ukernel__wasm_rr2_p6_x2(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vprescale = params->scalar_rr2_p6.prescale;
   const float valpha = params->scalar_rr2_p6.alpha;
@@ -38,10 +38,10 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x2(
   const float vc2 = params->scalar_rr2_p6.c2;
   const float vone = params->scalar_rr2_p6.one;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    float vx0 = x[0];
-    float vx1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    float vx0 = input[0];
+    float vx1 = input[1];
+    input += 2;
 
     const float vz0 = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx0 * vprescale, vsat_cutoff), 0.0f);
     const float vz1 = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx1 * vprescale, vsat_cutoff), 0.0f);
@@ -92,12 +92,12 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x2(
     vy0 += __builtin_wasm_min_f32(ve0, 0.0f);
     vy1 += __builtin_wasm_min_f32(ve1, 0.0f);
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y += 2;
+    output[0] = vy0;
+    output[1] = vy1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    float vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    float vx = *input;
 
     const float vz = __builtin_wasm_min_f32(__builtin_wasm_max_f32(vx * vprescale, vsat_cutoff), 0.0f);
 
@@ -123,6 +123,6 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x2(
     float vy = __builtin_wasm_max_f32(vx * vbeta, 0.0f);
     vy += __builtin_wasm_min_f32(ve, 0.0f);
 
-    *y = vy;
+    *output = vy;
   }
 }

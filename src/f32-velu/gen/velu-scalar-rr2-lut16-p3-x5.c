@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x5(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vprescale = params->scalar_rr2_lut16_p3.prescale;
   const float valpha = params->scalar_rr2_lut16_p3.alpha;
@@ -38,13 +38,13 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x5(
   const float vc2 = params->scalar_rr2_lut16_p3.c2;
   const float vone = params->scalar_rr2_lut16_p3.one;
 
-  for (; n >= 5 * sizeof(float); n -= 5 * sizeof(float)) {
-    float vx0 = x[0];
-    float vx1 = x[1];
-    float vx2 = x[2];
-    float vx3 = x[3];
-    float vx4 = x[4];
-    x += 5;
+  for (; batch >= 5 * sizeof(float); batch -= 5 * sizeof(float)) {
+    float vx0 = input[0];
+    float vx1 = input[1];
+    float vx2 = input[2];
+    float vx3 = input[3];
+    float vx4 = input[4];
+    input += 5;
 
     const float vz0 = vx0 * vprescale;
     const float vz1 = vx1 * vprescale;
@@ -167,16 +167,16 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x5(
       vy4 = ve4;
     }
 
-    y[0] = vy0;
-    y[1] = vy1;
-    y[2] = vy2;
-    y[3] = vy3;
-    y[4] = vy4;
-    y += 5;
+    output[0] = vy0;
+    output[1] = vy1;
+    output[2] = vy2;
+    output[3] = vy3;
+    output[4] = vy4;
+    output += 5;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *x++;
+      float vx = *input++;
 
       const float vz = vx * vprescale;
 
@@ -207,9 +207,9 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x5(
         vy = ve;
       }
 
-      *y++ = vy;
+      *output++ = vy;
 
-      n -= sizeof(float);
-    } while (n != 0);
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

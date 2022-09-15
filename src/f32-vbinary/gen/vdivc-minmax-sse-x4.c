@@ -17,25 +17,25 @@
 
 
 void xnn_f32_vdivc_minmax_ukernel__sse_x4(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m128 vy_min = _mm_load_ps(params->sse.min);
   const __m128 vy_max = _mm_load_ps(params->sse.max);
 
-  const __m128 vb = _mm_load1_ps(b);
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(a);
-    a += 4;
+  const __m128 vb = _mm_load1_ps(input_b);
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 va0123 = _mm_loadu_ps(input_a);
+    input_a += 4;
 
     __m128 vy0123 = _mm_div_ps(va0123, vb);
 
@@ -44,22 +44,22 @@ void xnn_f32_vdivc_minmax_ukernel__sse_x4(
 
     vy0123 = _mm_min_ps(vy0123, vy_max);
 
-    _mm_storeu_ps(y, vy0123);
-    y += 4;
+    _mm_storeu_ps(output, vy0123);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 va0123 = _mm_loadu_ps(a);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 va0123 = _mm_loadu_ps(input_a);
 
     __m128 vy0123 = _mm_div_ps(va0123, vb);
     vy0123 = _mm_max_ps(vy0123, vy_min);
     vy0123 = _mm_min_ps(vy0123, vy_max);
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vy0123);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vy0123);
       vy0123 = _mm_movehl_ps(vy0123, vy0123);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vy0123);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vy0123);
     }
   }
 }

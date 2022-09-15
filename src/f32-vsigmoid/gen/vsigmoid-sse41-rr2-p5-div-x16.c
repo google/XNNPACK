@@ -16,12 +16,12 @@
 
 
 void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_p5.sign_mask);
   const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_p5.magic_bias);
@@ -36,11 +36,11 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x16(
   const __m128 vone = _mm_load_ps(params->sse2_rr2_p5.one);
   const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_p5.denorm_cutoff);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m128 vx0123 = _mm_loadu_ps(x);
-    const __m128 vx4567 = _mm_loadu_ps(x + 4);
-    const __m128 vx89AB = _mm_loadu_ps(x + 8);
-    const __m128 vxCDEF = _mm_loadu_ps(x + 12);
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m128 vx0123 = _mm_loadu_ps(input);
+    const __m128 vx4567 = _mm_loadu_ps(input + 4);
+    const __m128 vx89AB = _mm_loadu_ps(input + 8);
+    const __m128 vxCDEF = _mm_loadu_ps(input + 12);
 
     const __m128 vz0123 = _mm_or_ps(vx0123, vsign_mask);
     const __m128 vz4567 = _mm_or_ps(vx4567, vsign_mask);
@@ -122,16 +122,16 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x16(
     vf89AB = _mm_blendv_ps(_mm_sub_ps(vone, vf89AB), vf89AB, vx89AB);
     vfCDEF = _mm_blendv_ps(_mm_sub_ps(vone, vfCDEF), vfCDEF, vxCDEF);
 
-    _mm_storeu_ps(y, vf0123);
-    _mm_storeu_ps(y + 4, vf4567);
-    _mm_storeu_ps(y + 8, vf89AB);
-    _mm_storeu_ps(y + 12, vfCDEF);
+    _mm_storeu_ps(output, vf0123);
+    _mm_storeu_ps(output + 4, vf4567);
+    _mm_storeu_ps(output + 8, vf89AB);
+    _mm_storeu_ps(output + 12, vfCDEF);
 
-    x += 16;
-    y += 16;
+    input += 16;
+    output += 16;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx = _mm_loadu_ps(x);
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vx = _mm_loadu_ps(input);
 
     const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
@@ -156,13 +156,13 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x16(
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
     vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
 
-    _mm_storeu_ps(y, vf);
+    _mm_storeu_ps(output, vf);
 
-    x += 4;
-    y += 4;
+    input += 4;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
 
     const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
@@ -187,13 +187,13 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x16(
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
     vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vf);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vf);
       vf = _mm_movehl_ps(vf, vf);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vf);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vf);
     }
   }
 }

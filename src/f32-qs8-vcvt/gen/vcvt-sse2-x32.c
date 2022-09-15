@@ -17,31 +17,31 @@
 
 
 void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
-    size_t n,
-    const float* x,
-    int8_t* y,
+    size_t batch,
+    const float* input,
+    int8_t* output,
     const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vscale = _mm_load_ps(params->sse2.scale);
   const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse2.output_max_less_zero_point);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    __m128 vx0123 = _mm_loadu_ps(x);
-    __m128 vx4567 = _mm_loadu_ps(x + 4);
-    __m128 vx89AB = _mm_loadu_ps(x + 8);
-    __m128 vxCDEF = _mm_loadu_ps(x + 12);
-    __m128 vxGHIJ = _mm_loadu_ps(x + 16);
-    __m128 vxKLMN = _mm_loadu_ps(x + 20);
-    __m128 vxOPQR = _mm_loadu_ps(x + 24);
-    __m128 vxSTUV = _mm_loadu_ps(x + 28);
-    x += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    __m128 vx0123 = _mm_loadu_ps(input);
+    __m128 vx4567 = _mm_loadu_ps(input + 4);
+    __m128 vx89AB = _mm_loadu_ps(input + 8);
+    __m128 vxCDEF = _mm_loadu_ps(input + 12);
+    __m128 vxGHIJ = _mm_loadu_ps(input + 16);
+    __m128 vxKLMN = _mm_loadu_ps(input + 20);
+    __m128 vxOPQR = _mm_loadu_ps(input + 24);
+    __m128 vxSTUV = _mm_loadu_ps(input + 28);
+    input += 32;
 
     vx0123 = _mm_mul_ps(vx0123, vscale);
     vx4567 = _mm_mul_ps(vx4567, vscale);
@@ -89,14 +89,14 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
     __m128i vyGHIJKLMNOPQRSTUV = _mm_packs_epi16(vyGHIJKLMN, vyOPQRSTUV);
 
 
-    _mm_storeu_si128((__m128i*) y, vy0123456789ABCDEF);
-    _mm_storeu_si128((__m128i*) (y + 16), vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm_storeu_si128((__m128i*) output, vy0123456789ABCDEF);
+    _mm_storeu_si128((__m128i*) (output + 16), vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m128 vx_lo = _mm_loadu_ps(x);
-    __m128 vx_hi = _mm_loadu_ps(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    __m128 vx_lo = _mm_loadu_ps(input);
+    __m128 vx_hi = _mm_loadu_ps(input + 4);
+    input += 8;
 
     vx_lo = _mm_mul_ps(vx_lo, vscale);
     vx_hi = _mm_mul_ps(vx_hi, vscale);
@@ -112,12 +112,12 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
     vy = _mm_max_epi16(vy, voutput_min);
     vy = _mm_packs_epi16(vy, vy);
 
-    _mm_storel_epi64((__m128i*) y, vy);
-    y += 8;
+    _mm_storel_epi64((__m128i*) output, vy);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128 vx_lo = _mm_loadu_ps(x);
-    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
+  if XNN_UNLIKELY(batch != 0) {
+    __m128 vx_lo = _mm_loadu_ps(input);
+    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     __m128 vx_hi = _mm_loadu_ps(x_hi);
 
     vx_lo = _mm_mul_ps(vx_lo, vscale);
@@ -134,20 +134,20 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
     vy = _mm_max_epi16(vy, voutput_min);
     vy = _mm_packs_epi16(vy, vy);
 
-    if (n & (4 * sizeof(float))) {
-      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
-      y += 4;
+    if (batch & (4 * sizeof(float))) {
+      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      output += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     {
       uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
-      if (n & (2 * sizeof(float))) {
-        unaligned_store_u16(y, (uint16_t) vy_lo);
-        y += 2;
+      if (batch & (2 * sizeof(float))) {
+        unaligned_store_u16(output, (uint16_t) vy_lo);
+        output += 2;
         vy_lo >>= 16;
       }
-      if (n & (1 * sizeof(float))) {
-        *y = (int8_t) vy_lo;
+      if (batch & (1 * sizeof(float))) {
+        *output = (int8_t) vy_lo;
       }
     }
   }

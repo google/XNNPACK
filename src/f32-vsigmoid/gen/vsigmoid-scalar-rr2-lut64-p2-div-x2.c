@@ -19,12 +19,12 @@
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
 void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vmagic_bias = params->scalar_rr2_lut64_p2.magic_bias;
   const float vminus_log2e = params->scalar_rr2_lut64_p2.minus_log2e;
@@ -35,10 +35,10 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
   const float vone = params->scalar_rr2_lut64_p2.one;
   const float vdenorm_cutoff = params->scalar_rr2_lut64_p2.denorm_cutoff;
 
-  for (; n >= 2 * sizeof(float); n -= 2 * sizeof(float)) {
-    const float vx0 = x[0];
-    const float vx1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    input += 2;
 
     const float vz0 = fabsf(vx0);
     const float vz1 = fabsf(vx1);
@@ -92,12 +92,12 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
       vf1 = vone - vf1;
     }
 
-    y[0] = vf0;
-    y[1] = vf1;
-    y += 2;
+    output[0] = vf0;
+    output[1] = vf1;
+    output += 2;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const float vx = *x;
+  if XNN_UNLIKELY(batch != 0) {
+    const float vx = *input;
 
     const float vz = fabsf(vx);
 
@@ -124,6 +124,6 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
       vf = vone - vf;
     }
 
-    *y = vf;
+    *output = vf;
   }
 }

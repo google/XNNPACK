@@ -18,18 +18,20 @@
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
 void xnn_f32_raddextexp_ukernel__avx2_p5_x80_acc5(
-    size_t elements,
-    const float* x,
+    size_t batch,
+    const float* input,
     float* sum)
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(sum != NULL);
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);
   const __m256 vminus_ln2_lo = _mm256_set1_ps(0x1.05C61p-29f);
 
-  // The smallest elements such that 2**elements is considered non-negligible.
-  // For smaller elements, 2**elements is replaced with zero.
+  // The smallest batch such that 2**batch is considered non-negligible.
+  // For smaller batch, 2**batch is replaced with zero.
   const __m256 vmin_exponent = _mm256_set1_ps(-127.0f);
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
   const __m256 vminus_inf = _mm256_set1_ps(-INFINITY);
@@ -51,21 +53,21 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x80_acc5(
   __m256 vacce2 = vminus_inf;
   __m256 vacce3 = vminus_inf;
   __m256 vacce4 = vminus_inf;
-  for (; elements >= 80 * sizeof(float); elements -= 80 * sizeof(float)) {
+  for (; batch >= 80 * sizeof(float); batch -= 80 * sizeof(float)) {
     // Load 80 (10x8) inputs at a time.
-    const __m256 vx0 = _mm256_loadu_ps(x);
-    const __m256 vx1 = _mm256_loadu_ps(x + 8);
-    const __m256 vx2 = _mm256_loadu_ps(x + 16);
-    const __m256 vx3 = _mm256_loadu_ps(x + 24);
-    const __m256 vx4 = _mm256_loadu_ps(x + 32);
-    const __m256 vx5 = _mm256_loadu_ps(x + 40);
-    const __m256 vx6 = _mm256_loadu_ps(x + 48);
-    const __m256 vx7 = _mm256_loadu_ps(x + 56);
-    const __m256 vx8 = _mm256_loadu_ps(x + 64);
-    const __m256 vx9 = _mm256_loadu_ps(x + 72);
-    x += 80;
+    const __m256 vx0 = _mm256_loadu_ps(input);
+    const __m256 vx1 = _mm256_loadu_ps(input + 8);
+    const __m256 vx2 = _mm256_loadu_ps(input + 16);
+    const __m256 vx3 = _mm256_loadu_ps(input + 24);
+    const __m256 vx4 = _mm256_loadu_ps(input + 32);
+    const __m256 vx5 = _mm256_loadu_ps(input + 40);
+    const __m256 vx6 = _mm256_loadu_ps(input + 48);
+    const __m256 vx7 = _mm256_loadu_ps(input + 56);
+    const __m256 vx8 = _mm256_loadu_ps(input + 64);
+    const __m256 vx9 = _mm256_loadu_ps(input + 72);
+    input += 80;
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn0 = _mm256_round_ps(_mm256_mul_ps(vx0, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn1 = _mm256_round_ps(_mm256_mul_ps(vx1, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn2 = _mm256_round_ps(_mm256_mul_ps(vx2, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
@@ -77,7 +79,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x80_acc5(
     const __m256 vn8 = _mm256_round_ps(_mm256_mul_ps(vx8, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn9 = _mm256_round_ps(_mm256_mul_ps(vx9, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2_hi, vx0);
     __m256 vt1 = _mm256_fmadd_ps(vn1, vminus_ln2_hi, vx1);
@@ -269,15 +271,15 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x80_acc5(
   vaccv = _mm256_fmadd_ps(vaccv4, vaccs4, vaccv);
   __m256 vacce = vmax_acce01234;
 
-  for (; elements >= 8 * sizeof(float); elements -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     // Load 8 inputs at a time.
-    const __m256 vx = _mm256_loadu_ps(x);
-    x += 8;
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -306,23 +308,23 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x80_acc5(
 
     vacce = vmax_e;
   }
-  if XNN_UNLIKELY(elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - elements));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     // Load up to 7 inputs at a time.
-    const __m256 vx = _mm256_maskload_ps(x, vmask);
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
 
-    // Compute reduced argument elements := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - elements * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
 
-    // Correct reduced argument elements for masked out elements.
+    // Correct reduced argument batch for masked out batch.
     vn = _mm256_blendv_ps(vacce, vn, _mm256_castsi256_ps(vmask));
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].

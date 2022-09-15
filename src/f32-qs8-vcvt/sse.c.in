@@ -23,15 +23,15 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
 $_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
-    size_t n,
-    const float* x,
-    ${XINT8_T}* y,
+    size_t batch,
+    const float* input,
+    ${XINT8_T}* output,
     const union xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vscale = _mm_load_ps(params->sse${SSE}.scale);
   const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse${SSE}.output_max_less_zero_point);
@@ -39,11 +39,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse${SSE}.output_min);
 
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(float); n -= ${BATCH_TILE} * sizeof(float)) {
-      __m128 vx${ABC[0:4]} = _mm_loadu_ps(x);
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      __m128 vx${ABC[0:4]} = _mm_loadu_ps(input);
       $for N in range(4, BATCH_TILE, 4):
-        __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(x + ${N});
-      x += ${BATCH_TILE};
+        __m128 vx${ABC[N:N+4]} = _mm_loadu_ps(input + ${N});
+      input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 4):
         vx${ABC[N:N+4]} = _mm_mul_ps(vx${ABC[N:N+4]}, vscale);
@@ -77,18 +77,18 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
           $else:
             vy${ABC[N:N+8]} = ${_MM_MAX_EPX8}(vy${ABC[N:N+8]}, voutput_min);
 
-      _mm_storeu_si128((__m128i*) y, vy${ABC[0:16]});
+      _mm_storeu_si128((__m128i*) output, vy${ABC[0:16]});
       $for N in range(16, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
-          _mm_storeu_si128((__m128i*) (y + ${N}), vy${ABC[N:N+16]});
+          _mm_storeu_si128((__m128i*) (output + ${N}), vy${ABC[N:N+16]});
         $else:
-          _mm_storel_epi64((__m128i*) (y + ${N}), vy${ABC[N:N+8]});
-      y += ${BATCH_TILE};
+          _mm_storel_epi64((__m128i*) (output + ${N}), vy${ABC[N:N+8]});
+      output += ${BATCH_TILE};
     }
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
-    __m128 vx_lo = _mm_loadu_ps(x);
-    __m128 vx_hi = _mm_loadu_ps(x + 4);
-    x += 8;
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
+    __m128 vx_lo = _mm_loadu_ps(input);
+    __m128 vx_hi = _mm_loadu_ps(input + 4);
+    input += 8;
 
     vx_lo = _mm_mul_ps(vx_lo, vscale);
     vx_hi = _mm_mul_ps(vx_hi, vscale);
@@ -107,12 +107,12 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
     $if DATATYPE == "QU8" or SSE == 4:
       vy = ${_MM_MAX_EPX8}(vy, voutput_min);
 
-    _mm_storel_epi64((__m128i*) y, vy);
-    y += 8;
+    _mm_storel_epi64((__m128i*) output, vy);
+    output += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128 vx_lo = _mm_loadu_ps(x);
-    const float* x_hi = (const float*) ((uintptr_t) x + (n & (4 * sizeof(float))));
+  if XNN_UNLIKELY(batch != 0) {
+    __m128 vx_lo = _mm_loadu_ps(input);
+    const float* x_hi = (const float*) ((uintptr_t) input + (batch & (4 * sizeof(float))));
     __m128 vx_hi = _mm_loadu_ps(x_hi);
 
     vx_lo = _mm_mul_ps(vx_lo, vscale);
@@ -132,30 +132,30 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
     $if DATATYPE == "QU8" or SSE == 4:
       vy = ${_MM_MAX_EPX8}(vy, voutput_min);
 
-    if (n & (4 * sizeof(float))) {
-      unaligned_store_u32(y, (uint32_t) _mm_cvtsi128_si32(vy));
-      y += 4;
+    if (batch & (4 * sizeof(float))) {
+      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      output += 4;
       vy = _mm_srli_epi64(vy, 32);
     }
     $if SSE == 4:
-      if (n & (2 * sizeof(float))) {
-        unaligned_store_u16(y, (uint16_t) _mm_extract_epi16(vy, 0));
-        y += 2;
+      if (batch & (2 * sizeof(float))) {
+        unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vy, 0));
+        output += 2;
         vy = _mm_srli_epi32(vy, 16);
       }
-      if (n & (1 * sizeof(float))) {
-        *y = (${XINT8_T}) _mm_extract_epi8(vy, 0);
+      if (batch & (1 * sizeof(float))) {
+        *output = (${XINT8_T}) _mm_extract_epi8(vy, 0);
       }
     $else:
       {
         uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
-        if (n & (2 * sizeof(float))) {
-          unaligned_store_u16(y, (uint16_t) vy_lo);
-          y += 2;
+        if (batch & (2 * sizeof(float))) {
+          unaligned_store_u16(output, (uint16_t) vy_lo);
+          output += 2;
           vy_lo >>= 16;
         }
-        if (n & (1 * sizeof(float))) {
-          *y = (${XINT8_T}) vy_lo;
+        if (batch & (1 * sizeof(float))) {
+          *output = (${XINT8_T}) vy_lo;
         }
       }
   }

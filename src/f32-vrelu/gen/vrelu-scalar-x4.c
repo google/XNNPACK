@@ -14,43 +14,43 @@
 #include <xnnpack/math.h>
 
 void xnn_f32_vrelu_ukernel__scalar_x4(
-    size_t n,
-    const float* x_ptr,
-    float* y_ptr,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x_ptr != NULL);
-  assert(y_ptr != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const uint32_t* x = (const uint32_t*)x_ptr;
-  uint32_t* y = (uint32_t*)y_ptr;
+  const uint32_t* i = (const uint32_t*) input;
+  uint32_t* o = (uint32_t*) output;
 
-  for (; n >= 4 * sizeof(uint32_t); n -= 4 * sizeof(uint32_t)) {
-    uint32_t vacc0 = x[0];
-    uint32_t vacc1 = x[1];
-    uint32_t vacc2 = x[2];
-    uint32_t vacc3 = x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(uint32_t); batch -= 4 * sizeof(uint32_t)) {
+    uint32_t vacc0 = i[0];
+    uint32_t vacc1 = i[1];
+    uint32_t vacc2 = i[2];
+    uint32_t vacc3 = i[3];
+    i += 4;
 
     vacc0 = ((vacc0 >> 31) - 1) & vacc0;
     vacc1 = ((vacc1 >> 31) - 1) & vacc1;
     vacc2 = ((vacc2 >> 31) - 1) & vacc2;
     vacc3 = ((vacc3 >> 31) - 1) & vacc3;
 
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y[2] = vacc2;
-    y[3] = vacc3;
-    y += 4;
+    o[0] = vacc0;
+    o[1] = vacc1;
+    o[2] = vacc2;
+    o[3] = vacc3;
+    o += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      uint32_t vacc = *x++;
+      uint32_t vacc = *i++;
       vacc =  ((vacc >> 31) - 1) & vacc;
-      *y++ = vacc;
-      n -= sizeof(uint32_t);
-    } while (n != 0);
+      *o++ = vacc;
+      batch -= sizeof(uint32_t);
+    } while (batch != 0);
   }
 }

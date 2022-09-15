@@ -10,23 +10,23 @@
 
 
 void xnn_f32_rmax_ukernel__scalar(
-    size_t n,
-    const float* x,
-    float* y)
+    size_t batch,
+    const float* input,
+    float* output)
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  float vmax0 = *x;
+  float vmax0 = *input;
   float vmax1 = vmax0;
   float vmax2 = vmax0;
   float vmax3 = vmax0;
-  for (; n >= 16; n -= 16) {
-    const float vx0 = x[0];
-    const float vx1 = x[1];
-    const float vx2 = x[2];
-    const float vx3 = x[3];
-    x += 4;
+  for (; batch >= 16; batch -= 16) {
+    const float vx0 = input[0];
+    const float vx1 = input[1];
+    const float vx2 = input[2];
+    const float vx3 = input[3];
+    input += 4;
 
     vmax0 = math_max_f32(vx0, vmax0);
     vmax1 = math_max_f32(vx1, vmax1);
@@ -36,12 +36,12 @@ void xnn_f32_rmax_ukernel__scalar(
   const float vmax01 = math_max_f32(vmax0, vmax1);
   const float vmax23 = math_max_f32(vmax2, vmax3);
   float vmax = math_max_f32(vmax01, vmax23);
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      const float vx = *x++;
+      const float vx = *input++;
       vmax = math_max_f32(vx, vmax);
-      n -= 4;
-    } while (n != 0);
+      batch -= 4;
+    } while (batch != 0);
   }
-  *y = vmax;
+  *output = vmax;
 }

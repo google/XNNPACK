@@ -16,13 +16,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -36,7 +36,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
   const uint16_t vnanh = params->scalar_fabsf.nanh;
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 3 * sizeof(float); n -= 3 * sizeof(float)) {
+  for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {
     const float vx0 = input[0];
     const float vx1 = input[1];
     const float vx2 = input[2];
@@ -113,7 +113,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
     o[2] = vh2;
     o += 3;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
       const float vx = *input++;
 
@@ -147,7 +147,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x3(
 
       *o++ = vh;
 
-      n -= sizeof(float);
-    } while (n != 0);
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

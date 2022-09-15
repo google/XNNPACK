@@ -15,13 +15,13 @@
 
 
 void xnn_f32_vhswish_ukernel__scalar_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const float vsixth = params->scalar.sixth;
   const float vthree = params->scalar.three;
@@ -30,12 +30,12 @@ void xnn_f32_vhswish_ukernel__scalar_x4(
   assert(vthree == 3.0f);
   assert(vsix == 6.0f);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    float vx0 = x[0];
-    float vx1 = x[1];
-    float vx2 = x[2];
-    float vx3 = x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float vx0 = input[0];
+    float vx1 = input[1];
+    float vx2 = input[2];
+    float vx3 = input[3];
+    input += 4;
 
     float vacc0 = vx0 + vthree;
     vx0 *= vsixth;
@@ -61,22 +61,22 @@ void xnn_f32_vhswish_ukernel__scalar_x4(
     vacc2 *= vx2;
     vacc3 *= vx3;
 
-    y[0] = vacc0;
-    y[1] = vacc1;
-    y[2] = vacc2;
-    y[3] = vacc3;
-    y += 4;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      float vx = *x++;
+      float vx = *input++;
       float vacc = vx + vthree;
       vx *= vsixth;
       vacc = math_max_f32(vacc, vzero);
       vacc = math_min_f32(vacc, vsix);
       vacc *= vx;
-      *y++ = vacc;
-      n -= sizeof(float);
-    } while (n != 0);
+      *output++ = vacc;
+      batch -= sizeof(float);
+    } while (batch != 0);
   }
 }

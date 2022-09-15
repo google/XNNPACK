@@ -18,12 +18,12 @@
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x4(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_lut64_p2.sign_mask);
   const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_lut64_p2.magic_bias);
@@ -35,9 +35,9 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x4(
   const __m128 vone = _mm_load_ps(params->sse2_rr2_lut64_p2.one);
   const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_lut64_p2.denorm_cutoff);
 
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
-    const __m128 vx = _mm_loadu_ps(x);
-    x += 4;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 vx = _mm_loadu_ps(input);
+    input += 4;
 
     const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
@@ -75,11 +75,11 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x4(
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
     vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
 
-    _mm_storeu_ps(y, vf);
-    y += 4;
+    _mm_storeu_ps(output, vf);
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    const __m128 vx = _mm_loadu_ps(x);
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 vx = _mm_loadu_ps(input);
 
     const __m128 vz = _mm_or_ps(vx, vsign_mask);
 
@@ -117,13 +117,13 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x4(
     vf = _mm_andnot_ps(_mm_cmplt_ps(vz, vdenorm_cutoff), vf);
     vf = _mm_blendv_ps(_mm_sub_ps(vone, vf), vf, vx);
 
-    if (n & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) y, vf);
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) output, vf);
       vf = _mm_movehl_ps(vf, vf);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(float))) {
-      _mm_store_ss(y, vf);
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(output, vf);
     }
   }
 }

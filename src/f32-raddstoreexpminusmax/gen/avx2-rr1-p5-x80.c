@@ -15,14 +15,19 @@
 
 
 void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x80(
-    size_t elements,
+    size_t batch,
     const float* input,
     const float* max,
     float* output,
     float* sum,
     const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(elements % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const __m256 vi_max = _mm256_broadcast_ss(max);
   const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p5.log2e);
@@ -36,7 +41,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x80(
   const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p5.denorm_cutoff);
 
   __m256 vacc0 = _mm256_setzero_ps();
-  for (; elements >= 80 * sizeof(float); elements -= 80 * sizeof(float)) {
+  for (; batch >= 80 * sizeof(float); batch -= 80 * sizeof(float)) {
     const __m256 vi0 = _mm256_loadu_ps(input);
     const __m256 vi1 = _mm256_loadu_ps(input + 8);
     const __m256 vi2 = _mm256_loadu_ps(input + 16);
@@ -206,7 +211,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x80(
   }
 
   __m256 vacc = vacc0;
-  for (; elements >= 8 * sizeof(float); elements -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vi = _mm256_loadu_ps(input);
     input += 8;
 
@@ -235,10 +240,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x80(
 
     vacc = _mm256_add_ps(vacc, vf);
   }
-  if (elements != 0) {
-    assert(elements >= 1 * sizeof(float));
-    assert(elements <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p5.mask_table[7] - elements));
+  if (batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 7 * sizeof(float));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p5.mask_table[7] - batch));
 
     const __m256 vi = _mm256_maskload_ps(input, vmask);
 
@@ -263,17 +268,17 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_x80(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
 
     __m128 vf_lo = _mm256_castps256_ps128(vf);
-    if (elements & (4 * sizeof(float))) {
+    if (batch & (4 * sizeof(float))) {
       _mm_storeu_ps(output, vf_lo);
       vf_lo = _mm256_extractf128_ps(vf, 1);
       output += 4;
     }
-    if (elements & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       _mm_storel_pi((__m64*) output, vf_lo);
       vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
       output += 2;
     }
-    if (elements & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       _mm_store_ss(output, vf_lo);
     }
 

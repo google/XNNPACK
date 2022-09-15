@@ -16,13 +16,13 @@
 
 
 void xnn_f32_f16_vcvt_ukernel__neon_x8(
-    size_t n,
+    size_t batch,
     const float* input,
     void* output,
     const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -37,7 +37,7 @@ void xnn_f32_f16_vcvt_ukernel__neon_x8(
   const uint16x8_t vnanh = vdupq_n_u16(UINT16_C(0x7E00));
 
   uint16_t* o = (uint16_t*) output;
-  for (; n >= 8 * sizeof(float); n -= 8 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float32x4_t vx0 = vld1q_f32(input); input += 4;
     const float32x4_t vx1 = vld1q_f32(input); input += 4;
 
@@ -80,7 +80,7 @@ void xnn_f32_f16_vcvt_ukernel__neon_x8(
 
     vst1q_u16(o, vh0); o += 8;
   }
-  for (; n >= 4 * sizeof(float); n -= 4 * sizeof(float)) {
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vx = vld1q_f32(input); input += 4;
 
     const float32x4_t vabsx = vabsq_f32(vx);
@@ -114,10 +114,10 @@ void xnn_f32_f16_vcvt_ukernel__neon_x8(
 
     vst1_u16(o, vh); o += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n % sizeof(float) == 0);
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 3 * sizeof(float));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch % sizeof(float) == 0);
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 3 * sizeof(float));
     const float32x4_t vx = vld1q_f32(input);
 
     const float32x4_t vabsx = vabsq_f32(vx);
@@ -149,11 +149,11 @@ void xnn_f32_f16_vcvt_ukernel__neon_x8(
 
     vh = vorr_u16(vh, vsignh);
 
-    if (n & (2 * sizeof(float))) {
+    if (batch & (2 * sizeof(float))) {
       vst1_lane_u32((void*) o, vreinterpret_u32_u16(vh), 0); o += 2;
       vh = vext_u16(vh, vh, 2);
     }
-    if (n & (1 * sizeof(float))) {
+    if (batch & (1 * sizeof(float))) {
       vst1_lane_u16(o, vh, 0);
     }
   }
