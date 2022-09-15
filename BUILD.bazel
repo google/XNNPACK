@@ -9161,12 +9161,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fp16arith_bench_microkernels",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+fp16",
-        "-mfpu=fp-armv8",
-    ],
-    aarch32_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -9183,12 +9177,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fp16arith_prod_microkernels",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+fp16",
-        "-mfpu=fp-armv8",
-    ],
-    aarch32_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -9205,12 +9193,6 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "fp16arith_test_microkernels",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+fp16",
-        "-mfpu=fp-armv8",
-    ],
-    aarch32_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = ALL_FP16ARITH_MICROKERNEL_SRCS,
     copts = [

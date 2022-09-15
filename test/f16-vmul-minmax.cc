@@ -194,7 +194,7 @@
 #endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
   TEST(F16_VMUL_MINMAX__FP16ARITH_X1, batch_eq_1) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -261,10 +261,10 @@
         .Test(xnn_f16_vmul_minmax_ukernel__fp16arith_x1, VBinaryMicrokernelTester::OpType::Mul, xnn_init_f16_minmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
   TEST(F16_VMUL_MINMAX__FP16ARITH_X2, batch_eq_2) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -349,10 +349,10 @@
         .Test(xnn_f16_vmul_minmax_ukernel__fp16arith_x2, VBinaryMicrokernelTester::OpType::Mul, xnn_init_f16_minmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
   TEST(F16_VMUL_MINMAX__FP16ARITH_X4, batch_eq_4) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -437,7 +437,7 @@
         .Test(xnn_f16_vmul_minmax_ukernel__fp16arith_x4, VBinaryMicrokernelTester::OpType::Mul, xnn_init_f16_minmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
