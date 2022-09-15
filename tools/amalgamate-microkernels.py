@@ -103,14 +103,13 @@ def main(args):
   amalgam_text += "\n".join(amalgam_lines)
 
 
-
   txt_changed = True
   if os.path.exists(options.output):
-    with open(options.output, "r", encoding="utf-8") as amalgam_file:
+    with codecs.open(options.output, "r", encoding="utf-8") as amalgam_file:
       txt_changed = amalgam_file.read() != amalgam_text
 
   if txt_changed:
-    with open(options.output, "w", encoding="utf-8") as amalgam_file:
+    with codecs.open(options.output, "w", encoding="utf-8") as amalgam_file:
       amalgam_file.write(amalgam_text)
 
 
