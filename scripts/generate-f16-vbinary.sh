@@ -39,6 +39,57 @@ tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=SUB      -D BATCH_TILE
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSUB     -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x8.c &
 tools/xngen src/f16-vbinary/vopc-neonfp16arith.c.in -D OP=RSUB     -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-neonfp16arith-x16.c &
 
+################################### ARM FP16 ##################################
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vadd-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vadd-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vadd-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdiv-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdiv-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdiv-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmin-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmin-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmin-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmul-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmul-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmul-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiff-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiff-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiff-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsub-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsub-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vop-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsub-minmax-fp16arith-x4.c &
+
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vaddc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vaddc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vaddc-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdivc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdivc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vdivc-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RDIV    -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RDIV    -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RDIV    -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmaxc-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmaxc-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MAX     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vmaxc-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vminc-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vminc-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MIN     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vminc-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmulc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmulc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=MUL     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vmulc-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=1 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiffc-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=2 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiffc-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SQRDIFF -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f16-vbinary/gen/vsqrdiffc-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsubc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsubc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=SUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vsubc-minmax-fp16arith-x4.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=1 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x1.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=2 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x2.c &
+tools/xngen src/f16-vbinary/vopc-fp16arith.c.in -D OP=RSUB    -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x4.c &
+
 ################################### x86 F16C ##################################
 tools/xngen src/f16-vbinary/vop-f16c.c.in -D OP=ADD      -D BATCH_TILE=8  -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vadd-minmax-f16c-x8.c &
 tools/xngen src/f16-vbinary/vop-f16c.c.in -D OP=ADD      -D BATCH_TILE=16 -D ACTIVATION=MINMAX -o src/f16-vbinary/gen/vadd-minmax-f16c-x16.c &

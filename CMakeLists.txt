@@ -1541,6 +1541,54 @@ SET(ALL_ARMSIMD32_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c)
 
 SET(ALL_FP16ARITH_MICROKERNEL_SRCS
+  src/f16-vbinary/gen/vadd-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vadd-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vadd-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vaddc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vaddc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vaddc-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vdiv-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vdiv-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vdiv-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vdivc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vdivc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vdivc-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vmaxc-fp16arith-x1.c
+  src/f16-vbinary/gen/vmaxc-fp16arith-x2.c
+  src/f16-vbinary/gen/vmaxc-fp16arith-x4.c
+  src/f16-vbinary/gen/vmin-fp16arith-x1.c
+  src/f16-vbinary/gen/vmin-fp16arith-x2.c
+  src/f16-vbinary/gen/vmin-fp16arith-x4.c
+  src/f16-vbinary/gen/vminc-fp16arith-x1.c
+  src/f16-vbinary/gen/vminc-fp16arith-x2.c
+  src/f16-vbinary/gen/vminc-fp16arith-x4.c
+  src/f16-vbinary/gen/vmul-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vmul-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vmul-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vmulc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vmulc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vmulc-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vrsubc-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vsqrdiff-fp16arith-x1.c
+  src/f16-vbinary/gen/vsqrdiff-fp16arith-x2.c
+  src/f16-vbinary/gen/vsqrdiff-fp16arith-x4.c
+  src/f16-vbinary/gen/vsqrdiffc-fp16arith-x1.c
+  src/f16-vbinary/gen/vsqrdiffc-fp16arith-x2.c
+  src/f16-vbinary/gen/vsqrdiffc-fp16arith-x4.c
+  src/f16-vbinary/gen/vsub-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vsub-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vsub-minmax-fp16arith-x4.c
+  src/f16-vbinary/gen/vsubc-minmax-fp16arith-x1.c
+  src/f16-vbinary/gen/vsubc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vsubc-minmax-fp16arith-x4.c
   src/f16-vsqrt/gen/fp16arith-sqrt-x1.c
   src/f16-vsqrt/gen/fp16arith-sqrt-x2.c
   src/f16-vsqrt/gen/fp16arith-sqrt-x4.c)
