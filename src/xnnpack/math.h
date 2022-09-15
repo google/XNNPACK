@@ -308,7 +308,7 @@ XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #if defined(__GNUC__) && defined(__arm__)
     float i;  // float instead of uint32_t because vcvt.u32.f64 writes to an S register
     __asm__ ("vcvt.u32.f64 %[i], %P[x]"
-      : [i] "=w" (i)
+      : [i] "=t" (i)
       : [x] "w" (x));
     return float_as_uint32(i);
   #elif defined(__GNUC__) && defined(__aarch64__)
