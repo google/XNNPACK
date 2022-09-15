@@ -8,11 +8,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <numeric>
 #include <random>
 #include <vector>
 

@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <numeric>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <numeric>
 #include <vector>
 
 #include <gtest/gtest.h>

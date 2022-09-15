@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <numeric>
 #include <random>
 #include <vector>
 
