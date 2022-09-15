@@ -6,7 +6,7 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-load("//tools/build_defs/testing:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_gcc_std_copts", "xnnpack_min_size_copts", "xnnpack_msvc_std_copts", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
 
@@ -16445,9 +16445,5 @@ alias(
 bzl_library(
     name = "build_defs_bzl",
     srcs = ["build_defs.bzl"],
-    parse_tests = False,
     visibility = ["//visibility:private"],
-    deps = [
-        "//devtools/build_cleaner/skylark:build_defs_lib",
-    ],
 )
