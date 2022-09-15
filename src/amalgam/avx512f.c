@@ -1434,29 +1434,29 @@ void xnn_f32_prelu_ukernel__avx512f_2x16(
 }
 
 void xnn_f32_vadd_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_add_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_add_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
@@ -1468,61 +1468,61 @@ void xnn_f32_vadd_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_add_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_add_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vaddc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_add_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_add_ps(vaGHIJKLMNOPQRSTUV, vb);
@@ -1534,60 +1534,60 @@ void xnn_f32_vaddc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_add_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_add_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vdiv_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_div_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_div_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
@@ -1599,61 +1599,61 @@ void xnn_f32_vdiv_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_div_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_div_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vdivc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_div_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_div_ps(vaGHIJKLMNOPQRSTUV, vb);
@@ -1665,278 +1665,278 @@ void xnn_f32_vdivc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_div_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_div_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_max_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
 
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_max_ps(va, vb);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_max_ps(va, vb);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vmaxc_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_max_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vaGHIJKLMNOPQRSTUV, vb);
 
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_max_ps(va, vb);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_max_ps(va, vb);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vmin_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_min_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
 
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_min_ps(va, vb);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_min_ps(va, vb);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vminc_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_min_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vaGHIJKLMNOPQRSTUV, vb);
 
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_min_ps(va, vb);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_min_ps(va, vb);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vmul_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_mul_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
@@ -1948,61 +1948,61 @@ void xnn_f32_vmul_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_mul_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_mul_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_mul_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vaGHIJKLMNOPQRSTUV, vb);
@@ -2014,57 +2014,57 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_mul_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_mul_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vrdivc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_div_ps(vb, va0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_div_ps(vb, vaGHIJKLMNOPQRSTUV);
@@ -2076,57 +2076,57 @@ void xnn_f32_vrdivc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_div_ps(vb, va);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_div_ps(vb, va);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_sub_ps(vb, va0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_sub_ps(vb, vaGHIJKLMNOPQRSTUV);
@@ -2138,58 +2138,58 @@ void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_sub_ps(vb, va);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_sub_ps(vb, va);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsqrdiff_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_sub_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_sub_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
@@ -2198,57 +2198,57 @@ void xnn_f32_vsqrdiff_ukernel__avx512f_x32(
     vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vyGHIJKLMNOPQRSTUV, vyGHIJKLMNOPQRSTUV);
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_mul_ps(vy, vy);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_mul_ps(vy, vy);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsqrdiffc_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_sub_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_sub_ps(vaGHIJKLMNOPQRSTUV, vb);
@@ -2257,58 +2257,58 @@ void xnn_f32_vsqrdiffc_ukernel__avx512f_x32(
     vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vyGHIJKLMNOPQRSTUV, vyGHIJKLMNOPQRSTUV);
 
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_mul_ps(vy, vy);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_mul_ps(vy, vy);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsub_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(b);
-    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(b + 16);
-    b += 32;
+    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    const __m512 vbGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_b + 16);
+    input_b += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_sub_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_sub_ps(vaGHIJKLMNOPQRSTUV, vbGHIJKLMNOPQRSTUV);
@@ -2320,61 +2320,61 @@ void xnn_f32_vsub_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
-    const __m512 vb = _mm512_loadu_ps(b);
-    b += 16;
+    const __m512 vb = _mm512_loadu_ps(input_b);
+    input_b += 16;
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, b);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsubc_minmax_ukernel__avx512f_x32(
-    size_t n,
-    const float* a,
-    const float* b,
-    float* y,
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(a != NULL);
-  assert(b != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  const __m512 vb = _mm512_set1_ps(*b);
-  for (; n >= 32 * sizeof(float); n -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(a + 16);
-    a += 32;
+  const __m512 vb = _mm512_set1_ps(*input_b);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    input_a += 32;
 
     __m512 vy0123456789ABCDEF = _mm512_sub_ps(va0123456789ABCDEF, vb);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_sub_ps(vaGHIJKLMNOPQRSTUV, vb);
@@ -2386,83 +2386,83 @@ void xnn_f32_vsubc_minmax_ukernel__avx512f_x32(
     vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
     vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    _mm512_storeu_ps(y + 16, vyGHIJKLMNOPQRSTUV);
-    y += 32;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    output += 32;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(a);
-    a += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 va = _mm512_loadu_ps(input_a);
+    input_a += 16;
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, a);
+    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
 
     __m512 vy = _mm512_sub_ps(va, vb);
     vy = _mm512_max_ps(vy, vy_min);
     vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vclamp_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
   const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    __m512 vacc0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    __m512 vacc0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEF, vy_min);
 
     vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vy_max);
 
-    _mm512_storeu_ps(y, vacc0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vacc0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vacc = _mm512_maskz_loadu_ps(vmask, x);
+    __m512 vacc = _mm512_maskz_loadu_ps(vmask, input);
     vacc = _mm512_max_ps(vacc, vy_min);
     vacc = _mm512_min_ps(vacc, vy_max);
-    _mm512_mask_storeu_ps(y, vmask, vacc);
+    _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }
 
 void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_lut16_p3.prescale);
   const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_lut16_p3.alpha);
@@ -2475,12 +2475,12 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
   const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c2);
   const __m512i vtable = _mm512_load_si512(params->avx512_rr1_lut16_p3.table);
 
-  for (; n >= 64 * sizeof(float); n -= 64 * sizeof(float)) {
-    __m512 vx0 = _mm512_loadu_ps(x);
-    __m512 vx1 = _mm512_loadu_ps(x + 16);
-    __m512 vx2 = _mm512_loadu_ps(x + 32);
-    __m512 vx3 = _mm512_loadu_ps(x + 48);
-    x += 64;
+  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+    __m512 vx0 = _mm512_loadu_ps(input);
+    __m512 vx1 = _mm512_loadu_ps(input + 16);
+    __m512 vx2 = _mm512_loadu_ps(input + 32);
+    __m512 vx3 = _mm512_loadu_ps(input + 48);
+    input += 64;
 
     const __m512 vz0 = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx0, vprescale));
     const __m512 vz1 = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx1, vprescale));
@@ -2554,15 +2554,15 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
     vy2 = _mm512_mask_mul_ps(vy2, vsign2, vx2, vbeta);
     vy3 = _mm512_mask_mul_ps(vy3, vsign3, vx3, vbeta);
 
-    _mm512_storeu_ps(y, vy0);
-    _mm512_storeu_ps(y + 16, vy1);
-    _mm512_storeu_ps(y + 32, vy2);
-    _mm512_storeu_ps(y + 48, vy3);
-    y += 64;
+    _mm512_storeu_ps(output, vy0);
+    _mm512_storeu_ps(output + 16, vy1);
+    _mm512_storeu_ps(output + 32, vy2);
+    _mm512_storeu_ps(output + 48, vy3);
+    output += 64;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
     const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
@@ -2585,17 +2585,17 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
 
     vy = _mm512_mask_mul_ps(vy, vsign, vx, vbeta);
 
-    _mm512_storeu_ps(y, vy);
-    y += 16;
+    _mm512_storeu_ps(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
 
     const __m512 vz = _mm512_max_ps(vsat_cutoff, _mm512_mul_ps(vx, vprescale));
     const __mmask16 vsign = _mm512_cmp_ps_mask(vx, _mm512_setzero_ps(), _CMP_NLT_US);
@@ -2618,218 +2618,218 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
 
     vy = _mm512_mask_mul_ps(vy, vsign, vx, vbeta);
 
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vhswish_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
   const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
   const __m512 vone = _mm512_set1_ps(params->avx512.one);
   const __m512 vzero = _mm512_setzero_ps();
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
     __m512 vacc = _mm512_fmadd_ps(vx, vsixth, vhalf);
     vacc = _mm512_max_ps(vacc, vzero);
     vacc = _mm512_min_ps(vacc, vone);
     vacc = _mm512_mul_ps(vacc, vx);
-    _mm512_storeu_ps(y, vacc);
-    y += 16;
+    _mm512_storeu_ps(output, vacc);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     __m512 vacc = _mm512_fmadd_ps(vx, vsixth, vhalf);
     vacc = _mm512_max_ps(vacc, vzero);
     vacc = _mm512_min_ps(vacc, vone);
     vacc = _mm512_mul_ps(vacc, vx);
-    _mm512_mask_storeu_ps(y, vmask, vacc);
+    _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }
 
 void xnn_f32_vlrelu_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512 vslope = _mm512_set1_ps(params->scalar.slope);
   const __m512 vzero = _mm512_setzero_ps();
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    __m512 vacc0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    __m512 vacc0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __mmask16 vsign0123456789ABCDEF = _mm512_cmp_ps_mask(vacc0123456789ABCDEF, vzero, _CMP_LT_OQ);
 
     vacc0123456789ABCDEF = _mm512_mask_mul_ps(vacc0123456789ABCDEF, vsign0123456789ABCDEF, vacc0123456789ABCDEF, vslope);
 
-    _mm512_storeu_ps(y, vacc0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vacc0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vacc = _mm512_maskz_loadu_ps(vmask, x);
+    __m512 vacc = _mm512_maskz_loadu_ps(vmask, input);
     const __mmask16 vsign = _mm512_mask_cmp_ps_mask(vmask, vacc, vzero, _CMP_LT_OQ);
     vacc = _mm512_mask_mul_ps(vacc, vsign, vacc, vslope);
-    _mm512_mask_storeu_ps(y, vmask, vacc);
+    _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }
 
 void xnn_f32_vrndd_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vy0123456789ABCDEF = _mm512_roundscale_ps(vx0123456789ABCDEF, _MM_FROUND_TO_NEG_INF);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vy = _mm512_maskz_roundscale_ps(vmask, vx, _MM_FROUND_TO_NEG_INF);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vrndne_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vy0123456789ABCDEF = _mm512_roundscale_ps(vx0123456789ABCDEF, _MM_FROUND_TO_NEAREST_INT);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vy = _mm512_maskz_roundscale_ps(vmask, vx, _MM_FROUND_TO_NEAREST_INT);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vrndu_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vy0123456789ABCDEF = _mm512_roundscale_ps(vx0123456789ABCDEF, _MM_FROUND_TO_POS_INF);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vy = _mm512_maskz_roundscale_ps(vmask, vx, _MM_FROUND_TO_POS_INF);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vrndz_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vy0123456789ABCDEF = _mm512_roundscale_ps(vx0123456789ABCDEF, _MM_FROUND_TO_ZERO);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vy = _mm512_maskz_roundscale_ps(vmask, vx, _MM_FROUND_TO_ZERO);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n % sizeof(float) == 0);
+  assert(batch % sizeof(float) == 0);
 
   const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr2_lut32_p2.sign_mask);
   const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr2_lut32_p2.magic_bias);
@@ -2842,12 +2842,12 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
   const __m512 vc1 = _mm512_set1_ps(params->avx512_rr2_lut32_p2.c1);
   const __m512 vone = _mm512_set1_ps(params->avx512_rr2_lut32_p2.one);
 
-  for (; n >= 64 * sizeof(float); n -= 64 * sizeof(float)) {
-    const __m512 vx0 = _mm512_loadu_ps(x);
-    const __m512 vx1 = _mm512_loadu_ps(x + 16);
-    const __m512 vx2 = _mm512_loadu_ps(x + 32);
-    const __m512 vx3 = _mm512_loadu_ps(x + 48);
-    x += 64;
+  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+    const __m512 vx0 = _mm512_loadu_ps(input);
+    const __m512 vx1 = _mm512_loadu_ps(input + 16);
+    const __m512 vx2 = _mm512_loadu_ps(input + 32);
+    const __m512 vx3 = _mm512_loadu_ps(input + 48);
+    input += 64;
 
     const __m512 vz0 = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx0), vsign_mask));
     const __m512 vz1 = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx1), vsign_mask));
@@ -2914,15 +2914,15 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
     vf2 = _mm512_mask_sub_ps(vf2, _mm512_testn_epi32_mask(_mm512_castps_si512(vx2), vsign_mask), vone, vf2);
     vf3 = _mm512_mask_sub_ps(vf3, _mm512_testn_epi32_mask(_mm512_castps_si512(vx3), vsign_mask), vone, vf3);
 
-    _mm512_storeu_ps(y, vf0);
-    _mm512_storeu_ps(y + 16, vf1);
-    _mm512_storeu_ps(y + 32, vf2);
-    _mm512_storeu_ps(y + 48, vf3);
-    y += 64;
+    _mm512_storeu_ps(output, vf0);
+    _mm512_storeu_ps(output + 16, vf1);
+    _mm512_storeu_ps(output + 32, vf2);
+    _mm512_storeu_ps(output + 48, vf3);
+    output += 64;
   }
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
@@ -2944,18 +2944,18 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
 
     vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
 
-    _mm512_storeu_ps(y, vf);
-    y += 16;
+    _mm512_storeu_ps(output, vf);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
 
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vz = _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(vx), vsign_mask));
 
     __m512 vn = _mm512_fmadd_ps(vz, vlog2e, vmagic_bias);
@@ -2976,107 +2976,107 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
 
     vf = _mm512_mask_sub_ps(vf, _mm512_testn_epi32_mask(_mm512_castps_si512(vx), vsign_mask), vone, vf);
 
-    _mm512_mask_storeu_ps(y, vmask, vf);
+    _mm512_mask_storeu_ps(output, vmask, vf);
   }
 }
 
 void xnn_f32_vabs_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_abs_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512i vnonsign_mask = _mm512_set1_epi32((int) params->avx512.nonsign_mask);
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(input);
+    input += 16;
 
     const __m512i vy0123456789ABCDEF = _mm512_and_epi32(vx0123456789ABCDEF, vnonsign_mask);
 
-    _mm512_storeu_si512(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_si512(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512i vx = _mm512_maskz_loadu_epi32(vmask, x);
+    const __m512i vx = _mm512_maskz_loadu_epi32(vmask, input);
     const __m512i vy = _mm512_and_epi32(vx, vnonsign_mask);
-    _mm512_mask_storeu_epi32(y, vmask, vy);
+    _mm512_mask_storeu_epi32(output, vmask, vy);
   }
 }
 
 void xnn_f32_vneg_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_neg_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512.sign_mask);
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512i vx0123456789ABCDEF = _mm512_loadu_si512(input);
+    input += 16;
 
     const __m512i vy0123456789ABCDEF = _mm512_xor_epi32(vx0123456789ABCDEF, vsign_mask);
 
-    _mm512_storeu_si512(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_si512(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512i vx = _mm512_maskz_loadu_epi32(vmask, x);
+    const __m512i vx = _mm512_maskz_loadu_epi32(vmask, input);
     const __m512i vy = _mm512_xor_epi32(vx, vsign_mask);
-    _mm512_mask_storeu_epi32(y, vmask, vy);
+    _mm512_mask_storeu_epi32(output, vmask, vy);
   }
 }
 
 void xnn_f32_vsqr_ukernel__avx512f_x16(
-    size_t n,
-    const float* x,
-    float* y,
+    size_t batch,
+    const float* input,
+    float* output,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
-  assert(n != 0);
-  assert(n % sizeof(float) == 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  for (; n >= 16 * sizeof(float); n -= 16 * sizeof(float)) {
-    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
+    input += 16;
 
     const __m512 vy0123456789ABCDEF = _mm512_mul_ps(vx0123456789ABCDEF, vx0123456789ABCDEF);
 
-    _mm512_storeu_ps(y, vy0123456789ABCDEF);
-    y += 16;
+    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n >= 1 * sizeof(float));
-    assert(n <= 15 * sizeof(float));
-    // Prepare mask for valid 32-bit elements (depends on n).
-    n >>= 2 /* log2(sizeof(float)) */;
-    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << n) - UINT32_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch >= 1 * sizeof(float));
+    assert(batch <= 15 * sizeof(float));
+    // Prepare mask for valid 32-bit elements (depends on batch).
+    batch >>= 2 /* log2(sizeof(float)) */;
+    const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 vx = _mm512_maskz_loadu_ps(vmask, x);
+    const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);
     const __m512 vy = _mm512_mul_ps(vx, vx);
-    _mm512_mask_storeu_ps(y, vmask, vy);
+    _mm512_mask_storeu_ps(output, vmask, vy);
   }
 }
