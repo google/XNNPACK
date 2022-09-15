@@ -55,6 +55,18 @@ XNNPACK implements the following neural network operators:
 
 All operators in XNNPACK support NHWC layout, but additionally allow custom stride along the **C**hannel dimension. Thus, operators can consume a subset of channels in the input tensor, and produce a subset of channels in the output tensor, providing a zero-cost Channel Split and Channel Concatenation operations.
 
+## Building using vcpkg
+
+You can build and install xnnpack using [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+- git clone https://github.com/Microsoft/vcpkg.git
+- cd vcpkg
+- ./bootstrap-vcpkg.sh  # ./bootstrap-vcpkg.bat for Windows
+- ./vcpkg integrate install
+- ./vcpkg install xnnpack
+
+The xnnpack port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ## Performance
 
 ### Mobile phones
