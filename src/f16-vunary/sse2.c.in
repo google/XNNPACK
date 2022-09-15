@@ -27,13 +27,13 @@ $  "ABS": "xnn_f16_abs_params",
 $  "NEG": "xnn_f16_neg_params",
 $}[OP]
 void xnn_f16_v${OP.lower()}_ukernel__sse2_x${BATCH_TILE}(
-    size_t n,
+    size_t batch,
     const void* input,
     void* output,
     const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -44,7 +44,7 @@ void xnn_f16_v${OP.lower()}_ukernel__sse2_x${BATCH_TILE}(
   $elif OP == "NEG":
     const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse.sign_mask);
   $if BATCH_TILE > 8:
-    for (; n >= ${BATCH_TILE} * sizeof(uint16_t); n -= ${BATCH_TILE} * sizeof(uint16_t)) {
+    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       __m128i vacc${ABC[0]} = _mm_loadu_si128((const __m128i*) i);
       $for N in range(1, SIMD_TILE):
         __m128i vacc${ABC[N]} = _mm_loadu_si128((const __m128i*) (i + ${N*8}));
@@ -58,27 +58,27 @@ void xnn_f16_v${OP.lower()}_ukernel__sse2_x${BATCH_TILE}(
         _mm_storeu_si128((__m128i*) (o + ${N*8}), vacc${ABC[N]});
       o += ${BATCH_TILE};
     }
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m128i vacc = _mm_loadu_si128((const __m128i*) i);
     i += 8;
     vacc = ${_MM_OP_SI128("vacc")};
     _mm_storeu_si128((__m128i*) o, vacc);
     o += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     __m128i vacc = _mm_loadu_si128((const __m128i*) i);
     vacc = ${_MM_OP_SI128("vacc")};
-    if (n & (4 * sizeof(uint16_t))) {
+    if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vacc);
       o += 4;
       vacc = _mm_unpackhi_epi64(vacc, vacc);
     }
-    if (n & (2 * sizeof(uint16_t))) {
+    if (batch & (2 * sizeof(uint16_t))) {
       unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vacc));
       o += 2;
       vacc = _mm_srli_epi64(vacc, 32);
     }
-    if (n & (1 * sizeof(uint16_t))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       *o = (uint16_t) _mm_extract_epi16(vacc, 0);
     }
   }

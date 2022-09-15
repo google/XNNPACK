@@ -17,27 +17,27 @@
 
 
 void xnn_f16_vmulc_minmax_ukernel__f16c_x8(
-    size_t n,
-    const void* restrict a_ptr,
-    const void* restrict b_ptr,
-    void* restrict y_ptr,
+    size_t batch,
+    const void* restrict input_a,
+    const void* restrict input_b,
+    void* restrict output,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(uint16_t) == 0);
-  assert(a_ptr != NULL);
-  assert(b_ptr != NULL);
-  assert(y_ptr != NULL);
+  assert(batch != 0);
+  assert(batch % sizeof(uint16_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
 
-  const uint16_t* a = (const uint16_t*) a_ptr;
-  const uint16_t* b = (const uint16_t*) b_ptr;
-  uint16_t* y = (uint16_t*) y_ptr;
+  const uint16_t* a = (const uint16_t*) input_a;
+  const uint16_t* b = (const uint16_t*) input_b;
+  uint16_t* o = (uint16_t*) output;
 
   const __m256 vy_min = _mm256_load_ps(params->avx.min);
   const __m256 vy_max = _mm256_load_ps(params->avx.max);
 
   const __m256 vb = _mm256_cvtph_ps(_mm_set1_epi16((short) *b));
-  for (; n >= 8 * sizeof(uint16_t); n -= 8 * sizeof(uint16_t)) {
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
     a += 8;
 
@@ -46,10 +46,10 @@ void xnn_f16_vmulc_minmax_ukernel__f16c_x8(
     vy = _mm256_max_ps(vy, vy_min);
     vy = _mm256_min_ps(vy, vy_max);
 
-    _mm_storeu_si128((__m128i*) y, _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC));
-    y += 8;
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC));
+    o += 8;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
 
     __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(va, vb), _MM_FROUND_NO_EXC));
@@ -58,18 +58,18 @@ void xnn_f16_vmulc_minmax_ukernel__f16c_x8(
     vy = _mm256_min_ps(vy, vy_max);
 
     __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC);
-    if (n & (4 * sizeof(uint16_t))) {
-      _mm_storel_epi64((__m128i*) y, vh);
+    if (batch & (4 * sizeof(uint16_t))) {
+      _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);
-      y += 4;
+      o += 4;
     }
-    if (n & (2 * sizeof(uint16_t))) {
-      _mm_storeu_si32(y, vh);
+    if (batch & (2 * sizeof(uint16_t))) {
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
-      y += 2;
+      o += 2;
     }
-    if (n & (1 * sizeof(uint16_t))) {
-      *y = (uint16_t) _mm_extract_epi16(vh, 0);
+    if (batch & (1 * sizeof(uint16_t))) {
+      *o = (uint16_t) _mm_extract_epi16(vh, 0);
     }
   }
 }

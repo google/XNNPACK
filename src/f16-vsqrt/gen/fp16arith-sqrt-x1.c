@@ -17,13 +17,13 @@
 
 
 void xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1(
-    size_t n,
+    size_t batch,
     const void* input,
     void* output,
     const union xnn_f16_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
-  assert(n != 0);
-  assert(n % sizeof(float16_t) == 0);
+  assert(batch != 0);
+  assert(batch % sizeof(float16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -33,6 +33,6 @@ void xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1(
     float16_t vacc = *i++;
     vacc = vsqrth_f16(vacc);
     *o++ = vacc;
-    n -= sizeof(float16_t);
-  } while (n != 0);
+    batch -= sizeof(float16_t);
+  } while (batch != 0);
 }
