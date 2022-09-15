@@ -42,6 +42,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Convert";
     case xnn_node_type_convolution_2d:
       return "Convolution 2D";
+    case xnn_node_type_copy:
+      return "Copy";
     case xnn_node_type_deconvolution_2d:
       return "Deconvolution 2D";
     case xnn_node_type_depth_to_space:

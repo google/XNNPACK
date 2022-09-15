@@ -118,6 +118,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/concatenate.c",
     "src/subgraph/convert.c",
     "src/subgraph/convolution-2d.c",
+    "src/subgraph/copy.c",
     "src/subgraph/deconvolution-2d.c",
     "src/subgraph/depth-to-space.c",
     "src/subgraph/depthwise-convolution-2d.c",
@@ -15375,6 +15376,20 @@ xnnpack_unit_test(
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "copy_test",
+    srcs = [
+        "test/copy.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
     ],
 )
 

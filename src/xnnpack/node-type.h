@@ -19,6 +19,7 @@ enum xnn_node_type {
   xnn_node_type_concatenate4,
   xnn_node_type_convert,
   xnn_node_type_convolution_2d,
+  xnn_node_type_copy,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depth_to_space,
   xnn_node_type_depthwise_convolution_2d,

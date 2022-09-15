@@ -206,6 +206,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
+  src/subgraph/copy.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/depth-to-space.c
   src/subgraph/depthwise-convolution-2d.c
@@ -7835,6 +7836,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(convolution-2d-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(convolution-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph convolution-test-helpers)
   ADD_TEST(NAME convolution-2d-test COMMAND convolution-2d-test)
+
+  ADD_EXECUTABLE(copy-test test/copy.cc)
+  TARGET_INCLUDE_DIRECTORIES(copy-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(copy-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+  ADD_TEST(NAME copy-test COMMAND copy-test)
 
   ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
   SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)

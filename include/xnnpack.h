@@ -1013,6 +1013,21 @@ enum xnn_status xnn_define_concatenate4(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Copy Node and add it to a Subgraph.
+///
+/// The Copy Node copies an input tensor to an output tensor.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the first input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Copy Node. No supported flags are currently defined.
+enum xnn_status xnn_define_copy(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2-Output Split Node and add it to a Subgraph.
 ///
 /// The 2-Output Split Node splits an input tensor into two output tensors along a specified axis evenly.
