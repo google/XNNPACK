@@ -24,6 +24,7 @@
     .text
     .p2align 4
     .global \name
+    .internal \name
     .type \name, %function
     \name:
   .endm
