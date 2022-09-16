@@ -133,10 +133,6 @@ static void bf16_gemm(benchmark::State& state,
     bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot, 2, 4, 8, 1,
       xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONBF16);
   }
-  static void bf16_gemm_3x4c8__neonbf16_bfdot(benchmark::State& state, const char* net) {
-    bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot, 3, 4, 8, 1,
-      xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONBF16);
-  }
   static void bf16_gemm_4x4c8__neonbf16_bfdot(benchmark::State& state, const char* net) {
     bf16_gemm(state, xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot, 4, 4, 8, 1,
       xnn_init_bf16_minmax_scalar_params, benchmark::utils::CheckNEONBF16);
@@ -174,7 +170,6 @@ static void bf16_gemm(benchmark::State& state,
 
   BENCHMARK_GEMM(bf16_gemm_1x4c8__neonbf16_bfdot)
   BENCHMARK_GEMM(bf16_gemm_2x4c8__neonbf16_bfdot)
-  BENCHMARK_GEMM(bf16_gemm_3x4c8__neonbf16_bfdot)
   BENCHMARK_GEMM(bf16_gemm_4x4c8__neonbf16_bfdot)
   BENCHMARK_GEMM(bf16_gemm_5x4c8__neonbf16_bfdot)
 

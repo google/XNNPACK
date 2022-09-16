@@ -65,9 +65,6 @@
 - name: xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot
   init: xnn_init_bf16_minmax_scalar_params
   k-block: 8
-- name: xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot
-  init: xnn_init_bf16_minmax_scalar_params
-  k-block: 8
 - name: xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot
   init: xnn_init_bf16_minmax_scalar_params
   k-block: 8

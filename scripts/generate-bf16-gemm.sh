@@ -25,7 +25,6 @@ tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=5 -D NR=4 -D EXTOPT=ZIP -o src/bf16
 
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=1 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfdot.c &
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=2 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/2x4c8-minmax-neonbf16-bfdot.c &
-tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=3 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/3x4c8-minmax-neonbf16-bfdot.c &
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=4 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/4x4c8-minmax-neonbf16-bfdot.c &
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=5 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/5x4c8-minmax-neonbf16-bfdot.c &
 
