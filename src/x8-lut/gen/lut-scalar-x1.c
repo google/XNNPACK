@@ -14,19 +14,19 @@
 
 
 void xnn_x8_lut_ukernel__scalar_x1(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   do {
-    const size_t vx = (size_t) *x++;
-    const uint32_t vt = (uint32_t) t[vx];
-    *y++ = (uint8_t) vt;
-    n -= sizeof(uint8_t);
-  } while (n != 0);
+    const size_t vx = (size_t) *input++;
+    const uint32_t vt = (uint32_t) table[vx];
+    *output++ = (uint8_t) vt;
+    batch -= sizeof(uint8_t);
+  } while (batch != 0);
 }

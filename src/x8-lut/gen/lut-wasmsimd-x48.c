@@ -17,37 +17,37 @@
 
 
 void xnn_x8_lut_ukernel__wasmsimd_x48(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const v128_t vtable0 = wasm_v128_load(t);
-  const v128_t vtable1 = wasm_v128_load(t + 16);
-  const v128_t vtable2 = wasm_v128_load(t + 32);
-  const v128_t vtable3 = wasm_v128_load(t + 48);
-  const v128_t vtable4 = wasm_v128_load(t + 64);
-  const v128_t vtable5 = wasm_v128_load(t + 80);
-  const v128_t vtable6 = wasm_v128_load(t + 96);
-  const v128_t vtable7 = wasm_v128_load(t + 112);
-  const v128_t vtable8 = wasm_v128_load(t + 128);
-  const v128_t vtable9 = wasm_v128_load(t + 144);
-  const v128_t vtable10 = wasm_v128_load(t + 160);
-  const v128_t vtable11 = wasm_v128_load(t + 176);
-  const v128_t vtable12 = wasm_v128_load(t + 192);
-  const v128_t vtable13 = wasm_v128_load(t + 208);
-  const v128_t vtable14 = wasm_v128_load(t + 224);
-  const v128_t vtable15 = wasm_v128_load(t + 240);
+  const v128_t vtable0 = wasm_v128_load(table);
+  const v128_t vtable1 = wasm_v128_load(table + 16);
+  const v128_t vtable2 = wasm_v128_load(table + 32);
+  const v128_t vtable3 = wasm_v128_load(table + 48);
+  const v128_t vtable4 = wasm_v128_load(table + 64);
+  const v128_t vtable5 = wasm_v128_load(table + 80);
+  const v128_t vtable6 = wasm_v128_load(table + 96);
+  const v128_t vtable7 = wasm_v128_load(table + 112);
+  const v128_t vtable8 = wasm_v128_load(table + 128);
+  const v128_t vtable9 = wasm_v128_load(table + 144);
+  const v128_t vtable10 = wasm_v128_load(table + 160);
+  const v128_t vtable11 = wasm_v128_load(table + 176);
+  const v128_t vtable12 = wasm_v128_load(table + 192);
+  const v128_t vtable13 = wasm_v128_load(table + 208);
+  const v128_t vtable14 = wasm_v128_load(table + 224);
+  const v128_t vtable15 = wasm_v128_load(table + 240);
   const v128_t voffset = wasm_i8x16_const_splat(16);
-  for (; n >= 48 * sizeof(uint8_t); n -= 48 * sizeof(uint8_t)) {
-    v128_t vx0 = wasm_v128_load(x);
-    v128_t vx1 = wasm_v128_load(x + 16);
-    v128_t vx2 = wasm_v128_load(x + 32);
-    x += 48;
+  for (; batch >= 48 * sizeof(uint8_t); batch -= 48 * sizeof(uint8_t)) {
+    v128_t vx0 = wasm_v128_load(input);
+    v128_t vx1 = wasm_v128_load(input + 16);
+    v128_t vx2 = wasm_v128_load(input + 32);
+    input += 48;
 
     v128_t vy0 = wasm_i8x16_swizzle(vtable0, vx0);
     v128_t vy1 = wasm_i8x16_swizzle(vtable0, vx1);
@@ -144,14 +144,14 @@ void xnn_x8_lut_ukernel__wasmsimd_x48(
     vx2 = wasm_i8x16_sub(vx2, voffset);
     vy2 = wasm_v128_or(vy2, wasm_i8x16_swizzle(vtable15, vx2));
 
-    wasm_v128_store(y, vy0);
-    wasm_v128_store(y + 16, vy1);
-    wasm_v128_store(y + 32, vy2);
-    y += 48;
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 16, vy1);
+    wasm_v128_store(output + 32, vy2);
+    output += 48;
   }
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    v128_t vx = wasm_v128_load(x);
-    x += 16;
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    v128_t vx = wasm_v128_load(input);
+    input += 16;
 
     v128_t vy = wasm_i8x16_swizzle(vtable0, vx);
 
@@ -186,11 +186,11 @@ void xnn_x8_lut_ukernel__wasmsimd_x48(
     vx = wasm_i8x16_sub(vx, voffset);
     vy = wasm_v128_or(vy, wasm_i8x16_swizzle(vtable15, vx));
 
-    wasm_v128_store(y, vy);
-    y += 16;
+    wasm_v128_store(output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    v128_t vx = wasm_v128_load(x);
+  if XNN_UNLIKELY(batch != 0) {
+    v128_t vx = wasm_v128_load(input);
 
     v128_t vy = wasm_i8x16_swizzle(vtable0, vx);
 
@@ -225,24 +225,24 @@ void xnn_x8_lut_ukernel__wasmsimd_x48(
     vx = wasm_i8x16_sub(vx, voffset);
     vy = wasm_v128_or(vy, wasm_i8x16_swizzle(vtable15, vx));
 
-    if (n & (8 * sizeof(uint8_t))) {
-      *((double*) y) = wasm_f64x2_extract_lane(vy, 0);
+    if (batch & (8 * sizeof(uint8_t))) {
+      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
       vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
-      y += 8;
+      output += 8;
     }
-    if (n & (4 * sizeof(uint8_t))) {
-      *((float*) y) = wasm_f32x4_extract_lane(vy, 0);
+    if (batch & (4 * sizeof(uint8_t))) {
+      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
       vy = wasm_u64x2_shr(vy, 32);
-      y += 4;
+      output += 4;
     }
     uint32_t vy_lo = wasm_i32x4_extract_lane(vy, 0);
-    if (n & (2 * sizeof(uint8_t))) {
-      *((uint16_t*) y) = (uint16_t) vy_lo;
+    if (batch & (2 * sizeof(uint8_t))) {
+      *((uint16_t*) output) = (uint16_t) vy_lo;
       vy_lo >>= 16;
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      *y = (uint8_t) vy_lo;
+    if (batch & (1 * sizeof(uint8_t))) {
+      *output = (uint8_t) vy_lo;
     }
   }
 }

@@ -17,31 +17,31 @@
 
 
 void xnn_x8_lut_ukernel__avx_x64(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const __m128i vt0 = _mm_load_si128((const __m128i*) t);
-  const __m128i vt1 = _mm_load_si128((const __m128i*) (t + 16));
-  const __m128i vt2 = _mm_load_si128((const __m128i*) (t + 32));
-  const __m128i vt3 = _mm_load_si128((const __m128i*) (t + 48));
-  const __m128i vt4 = _mm_load_si128((const __m128i*) (t + 64));
-  const __m128i vt5 = _mm_load_si128((const __m128i*) (t + 80));
-  const __m128i vt6 = _mm_load_si128((const __m128i*) (t + 96));
-  const __m128i vt7 = _mm_load_si128((const __m128i*) (t + 112));
-  const __m128i vt8 = _mm_load_si128((const __m128i*) (t + 128));
-  const __m128i vt9 = _mm_load_si128((const __m128i*) (t + 144));
-  const __m128i vtA = _mm_load_si128((const __m128i*) (t + 160));
-  const __m128i vtB = _mm_load_si128((const __m128i*) (t + 176));
-  const __m128i vtC = _mm_load_si128((const __m128i*) (t + 192));
-  const __m128i vtD = _mm_load_si128((const __m128i*) (t + 208));
-  const __m128i vtE = _mm_load_si128((const __m128i*) (t + 224));
-  const __m128i vtF = _mm_load_si128((const __m128i*) (t + 240));
+  const __m128i vt0 = _mm_load_si128((const __m128i*) table);
+  const __m128i vt1 = _mm_load_si128((const __m128i*) (table + 16));
+  const __m128i vt2 = _mm_load_si128((const __m128i*) (table + 32));
+  const __m128i vt3 = _mm_load_si128((const __m128i*) (table + 48));
+  const __m128i vt4 = _mm_load_si128((const __m128i*) (table + 64));
+  const __m128i vt5 = _mm_load_si128((const __m128i*) (table + 80));
+  const __m128i vt6 = _mm_load_si128((const __m128i*) (table + 96));
+  const __m128i vt7 = _mm_load_si128((const __m128i*) (table + 112));
+  const __m128i vt8 = _mm_load_si128((const __m128i*) (table + 128));
+  const __m128i vt9 = _mm_load_si128((const __m128i*) (table + 144));
+  const __m128i vtA = _mm_load_si128((const __m128i*) (table + 160));
+  const __m128i vtB = _mm_load_si128((const __m128i*) (table + 176));
+  const __m128i vtC = _mm_load_si128((const __m128i*) (table + 192));
+  const __m128i vtD = _mm_load_si128((const __m128i*) (table + 208));
+  const __m128i vtE = _mm_load_si128((const __m128i*) (table + 224));
+  const __m128i vtF = _mm_load_si128((const __m128i*) (table + 240));
 
   const __m128i vtable0 = vt0;
   const __m128i vtable1 = _mm_xor_si128(vt0, vt1);
@@ -61,12 +61,12 @@ void xnn_x8_lut_ukernel__avx_x64(
   const __m128i vtableF = _mm_xor_si128(_mm_xor_si128(vtE, vtF), vtable7);
 
   const __m128i voffset = _mm_set1_epi8(16);
-  for (; n >= 64 * sizeof(uint8_t); n -= 64 * sizeof(uint8_t)) {
-    __m128i vx0 = _mm_loadu_si128((const __m128i*) x);
-    __m128i vx1 = _mm_loadu_si128((const __m128i*) (x + 16));
-    __m128i vx2 = _mm_loadu_si128((const __m128i*) (x + 32));
-    __m128i vx3 = _mm_loadu_si128((const __m128i*) (x + 48));
-    x += 64;
+  for (; batch >= 64 * sizeof(uint8_t); batch -= 64 * sizeof(uint8_t)) {
+    __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
+    __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));
+    __m128i vx2 = _mm_loadu_si128((const __m128i*) (input + 32));
+    __m128i vx3 = _mm_loadu_si128((const __m128i*) (input + 48));
+    input += 64;
 
     __m128i vy0 = _mm_shuffle_epi8(vtable0, vx0);
     __m128i vy1 = _mm_shuffle_epi8(vtable0, vx1);
@@ -195,15 +195,15 @@ void xnn_x8_lut_ukernel__avx_x64(
     vy2 = _mm_xor_si128(vy2, _mm_shuffle_epi8(vtableF, vx2));
     vy3 = _mm_xor_si128(vy3, _mm_shuffle_epi8(vtableF, vx3));
 
-    _mm_storeu_si128((__m128i*) y, vy0);
-    _mm_storeu_si128((__m128i*) (y + 16), vy1);
-    _mm_storeu_si128((__m128i*) (y + 32), vy2);
-    _mm_storeu_si128((__m128i*) (y + 48), vy3);
-    y += 64;
+    _mm_storeu_si128((__m128i*) output, vy0);
+    _mm_storeu_si128((__m128i*) (output + 16), vy1);
+    _mm_storeu_si128((__m128i*) (output + 32), vy2);
+    _mm_storeu_si128((__m128i*) (output + 48), vy3);
+    output += 64;
   }
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    __m128i vx = _mm_loadu_si128((const __m128i*) x);
-    x += 16;
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    input += 16;
 
     __m128i vy = _mm_shuffle_epi8(vtable0, vx);
 
@@ -239,11 +239,11 @@ void xnn_x8_lut_ukernel__avx_x64(
     vx = _mm_subs_epi8(vx, voffset);
     vy = _mm_xor_si128(vy, _mm_shuffle_epi8(vtableF, vx));
 
-    _mm_storeu_si128((__m128i*) y, vy);
-    y += 16;
+    _mm_storeu_si128((__m128i*) output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128i vx = _mm_loadu_si128((const __m128i*) x);
+  if XNN_UNLIKELY(batch != 0) {
+    __m128i vx = _mm_loadu_si128((const __m128i*) input);
 
     __m128i vy = _mm_shuffle_epi8(vtable0, vx);
 
@@ -279,23 +279,23 @@ void xnn_x8_lut_ukernel__avx_x64(
     vx = _mm_subs_epi8(vx, voffset);
     vy = _mm_xor_si128(vy, _mm_shuffle_epi8(vtableF, vx));
 
-    if (n & (8 * sizeof(uint8_t))) {
-      _mm_storel_epi64((__m128i*) y, vy);
+    if (batch & (8 * sizeof(uint8_t))) {
+      _mm_storel_epi64((__m128i*) output, vy);
       vy = _mm_unpackhi_epi64(vy, vy);
-      y += 8;
+      output += 8;
     }
-    if (n & (4 * sizeof(uint8_t))) {
-      _mm_storeu_si32(y, vy);
+    if (batch & (4 * sizeof(uint8_t))) {
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(uint8_t))) {
-      _mm_storeu_si16(y, vy);
+    if (batch & (2 * sizeof(uint8_t))) {
+      _mm_storeu_si16(output, vy);
       vy = _mm_srli_epi32(vy, 16);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      *y = (uint8_t) _mm_extract_epi8(vy, 0);
+    if (batch & (1 * sizeof(uint8_t))) {
+      *output = (uint8_t) _mm_extract_epi8(vy, 0);
     }
   }
 }

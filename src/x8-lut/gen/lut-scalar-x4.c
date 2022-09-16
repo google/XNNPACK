@@ -14,39 +14,39 @@
 
 
 void xnn_x8_lut_ukernel__scalar_x4(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  for (; n >= 4 * sizeof(uint8_t); n -= 4 * sizeof(uint8_t)) {
-    const size_t vx0 = (size_t) x[0];
-    const size_t vx1 = (size_t) x[1];
-    const size_t vx2 = (size_t) x[2];
-    const size_t vx3 = (size_t) x[3];
-    x += 4;
+  for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
+    const size_t vx0 = (size_t) input[0];
+    const size_t vx1 = (size_t) input[1];
+    const size_t vx2 = (size_t) input[2];
+    const size_t vx3 = (size_t) input[3];
+    input += 4;
 
-    const uint32_t vt0 = (uint32_t) t[vx0];
-    const uint32_t vt1 = (uint32_t) t[vx1];
-    const uint32_t vt2 = (uint32_t) t[vx2];
-    const uint32_t vt3 = (uint32_t) t[vx3];
+    const uint32_t vt0 = (uint32_t) table[vx0];
+    const uint32_t vt1 = (uint32_t) table[vx1];
+    const uint32_t vt2 = (uint32_t) table[vx2];
+    const uint32_t vt3 = (uint32_t) table[vx3];
 
-    y[0] = (uint8_t) vt0;
-    y[1] = (uint8_t) vt1;
-    y[2] = (uint8_t) vt2;
-    y[3] = (uint8_t) vt3;
-    y += 4;
+    output[0] = (uint8_t) vt0;
+    output[1] = (uint8_t) vt1;
+    output[2] = (uint8_t) vt2;
+    output[3] = (uint8_t) vt3;
+    output += 4;
   }
-  if XNN_UNLIKELY(n != 0) {
+  if XNN_UNLIKELY(batch != 0) {
     do {
-      const size_t vx = (size_t) *x++;
-      const uint32_t vt = (uint32_t) t[vx];
-      *y++ = (uint8_t) vt;
-      n -= sizeof(uint8_t);
-    } while (n != 0);
+      const size_t vx = (size_t) *input++;
+      const uint32_t vt = (uint32_t) table[vx];
+      *output++ = (uint8_t) vt;
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
   }
 }

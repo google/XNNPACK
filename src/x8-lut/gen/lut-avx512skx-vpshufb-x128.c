@@ -17,31 +17,31 @@
 
 
 void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const __m512i vt0 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) t));
-  const __m512i vt1 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 16)));
-  const __m512i vt2 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 32)));
-  const __m512i vt3 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 48)));
-  const __m512i vt4 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 64)));
-  const __m512i vt5 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 80)));
-  const __m512i vt6 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 96)));
-  const __m512i vt7 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 112)));
-  const __m512i vt8 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 128)));
-  const __m512i vt9 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 144)));
-  const __m512i vtA = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 160)));
-  const __m512i vtB = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 176)));
-  const __m512i vtC = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 192)));
-  const __m512i vtD = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 208)));
-  const __m512i vtE = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 224)));
-  const __m512i vtF = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (t + 240)));
+  const __m512i vt0 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) table));
+  const __m512i vt1 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 16)));
+  const __m512i vt2 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 32)));
+  const __m512i vt3 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 48)));
+  const __m512i vt4 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 64)));
+  const __m512i vt5 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 80)));
+  const __m512i vt6 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 96)));
+  const __m512i vt7 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 112)));
+  const __m512i vt8 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 128)));
+  const __m512i vt9 = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 144)));
+  const __m512i vtA = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 160)));
+  const __m512i vtB = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 176)));
+  const __m512i vtC = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 192)));
+  const __m512i vtD = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 208)));
+  const __m512i vtE = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 224)));
+  const __m512i vtF = _mm512_broadcast_i32x4(_mm_load_si128((const __m128i*) (table + 240)));
 
   const __m512i vtable0 = vt0;
   const __m512i vtable1 = _mm512_xor_si512(vt0, vt1);
@@ -61,10 +61,10 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
   const __m512i vtableF = _mm512_xor_si512(_mm512_xor_si512(vtE, vtF), vtable7);
 
   const __m512i voffset = _mm512_set1_epi8(16);
-  for (; n >= 128 * sizeof(uint8_t); n -= 128 * sizeof(uint8_t)) {
-    __m512i vx0 = _mm512_loadu_si512(x);
-    __m512i vx1 = _mm512_loadu_si512(x + 64);
-    x += 128;
+  for (; batch >= 128 * sizeof(uint8_t); batch -= 128 * sizeof(uint8_t)) {
+    __m512i vx0 = _mm512_loadu_si512(input);
+    __m512i vx1 = _mm512_loadu_si512(input + 64);
+    input += 128;
 
     __m512i vy0 = _mm512_shuffle_epi8(vtable0, vx0);
     __m512i vy1 = _mm512_shuffle_epi8(vtable0, vx1);
@@ -131,13 +131,13 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
     vy0 = _mm512_xor_si512(vy0, _mm512_shuffle_epi8(vtableF, vx0));
     vy1 = _mm512_xor_si512(vy1, _mm512_shuffle_epi8(vtableF, vx1));
 
-    _mm512_storeu_si512(y, vy0);
-    _mm512_storeu_si512(y + 64, vy1);
-    y += 128;
+    _mm512_storeu_si512(output, vy0);
+    _mm512_storeu_si512(output + 64, vy1);
+    output += 128;
   }
-  for (; n >= 64 * sizeof(uint8_t); n -= 64 * sizeof(uint8_t)) {
-    __m512i vx = _mm512_loadu_si512(x);
-    x += 64;
+  for (; batch >= 64 * sizeof(uint8_t); batch -= 64 * sizeof(uint8_t)) {
+    __m512i vx = _mm512_loadu_si512(input);
+    input += 64;
 
     __m512i vy = _mm512_shuffle_epi8(vtable0, vx);
 
@@ -173,14 +173,14 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
     vx = _mm512_subs_epi8(vx, voffset);
     vy = _mm512_xor_si512(vy, _mm512_shuffle_epi8(vtableF, vx));
 
-    _mm512_storeu_si512(y, vy);
-    y += 64;
+    _mm512_storeu_si512(output, vy);
+    output += 64;
   }
-  if XNN_UNLIKELY(n != 0) {
-    assert(n < 64);
-    const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT64_C(1) << n) - UINT64_C(1)));
+  if XNN_UNLIKELY(batch != 0) {
+    assert(batch < 64);
+    const __mmask64 vmask = _cvtu64_mask64((uint64_t) ((UINT64_C(1) << batch) - UINT64_C(1)));
 
-    __m512i vx = _mm512_maskz_loadu_epi8(vmask, x);
+    __m512i vx = _mm512_maskz_loadu_epi8(vmask, input);
 
     __m512i vy = _mm512_shuffle_epi8(vtable0, vx);
 
@@ -216,6 +216,6 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
     vx = _mm512_subs_epi8(vx, voffset);
     vy = _mm512_xor_si512(vy, _mm512_shuffle_epi8(vtableF, vx));
 
-    _mm512_mask_storeu_epi8(y, vmask, vy);
+    _mm512_mask_storeu_epi8(output, vmask, vy);
   }
 }

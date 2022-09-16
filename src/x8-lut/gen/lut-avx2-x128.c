@@ -17,31 +17,31 @@
 
 
 void xnn_x8_lut_ukernel__avx2_x128(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
-  const __m256i vt0 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) t));
-  const __m256i vt1 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 16)));
-  const __m256i vt2 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 32)));
-  const __m256i vt3 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 48)));
-  const __m256i vt4 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 64)));
-  const __m256i vt5 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 80)));
-  const __m256i vt6 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 96)));
-  const __m256i vt7 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 112)));
-  const __m256i vt8 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 128)));
-  const __m256i vt9 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 144)));
-  const __m256i vtA = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 160)));
-  const __m256i vtB = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 176)));
-  const __m256i vtC = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 192)));
-  const __m256i vtD = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 208)));
-  const __m256i vtE = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 224)));
-  const __m256i vtF = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (t + 240)));
+  const __m256i vt0 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) table));
+  const __m256i vt1 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 16)));
+  const __m256i vt2 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 32)));
+  const __m256i vt3 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 48)));
+  const __m256i vt4 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 64)));
+  const __m256i vt5 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 80)));
+  const __m256i vt6 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 96)));
+  const __m256i vt7 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 112)));
+  const __m256i vt8 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 128)));
+  const __m256i vt9 = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 144)));
+  const __m256i vtA = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 160)));
+  const __m256i vtB = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 176)));
+  const __m256i vtC = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 192)));
+  const __m256i vtD = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 208)));
+  const __m256i vtE = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 224)));
+  const __m256i vtF = _mm256_broadcastsi128_si256(_mm_load_si128((const __m128i*) (table + 240)));
 
   const __m256i vtable0 = vt0;
   const __m256i vtable1 = _mm256_xor_si256(vt0, vt1);
@@ -61,12 +61,12 @@ void xnn_x8_lut_ukernel__avx2_x128(
   const __m256i vtableF = _mm256_xor_si256(_mm256_xor_si256(vtE, vtF), vtable7);
 
   const __m256i voffset = _mm256_set1_epi8(16);
-  for (; n >= 128 * sizeof(uint8_t); n -= 128 * sizeof(uint8_t)) {
-    __m256i vx0 = _mm256_loadu_si256((const __m256i*) x);
-    __m256i vx1 = _mm256_loadu_si256((const __m256i*) (x + 32));
-    __m256i vx2 = _mm256_loadu_si256((const __m256i*) (x + 64));
-    __m256i vx3 = _mm256_loadu_si256((const __m256i*) (x + 96));
-    x += 128;
+  for (; batch >= 128 * sizeof(uint8_t); batch -= 128 * sizeof(uint8_t)) {
+    __m256i vx0 = _mm256_loadu_si256((const __m256i*) input);
+    __m256i vx1 = _mm256_loadu_si256((const __m256i*) (input + 32));
+    __m256i vx2 = _mm256_loadu_si256((const __m256i*) (input + 64));
+    __m256i vx3 = _mm256_loadu_si256((const __m256i*) (input + 96));
+    input += 128;
 
     __m256i vy0 = _mm256_shuffle_epi8(vtable0, vx0);
     __m256i vy1 = _mm256_shuffle_epi8(vtable0, vx1);
@@ -195,15 +195,15 @@ void xnn_x8_lut_ukernel__avx2_x128(
     vy2 = _mm256_xor_si256(vy2, _mm256_shuffle_epi8(vtableF, vx2));
     vy3 = _mm256_xor_si256(vy3, _mm256_shuffle_epi8(vtableF, vx3));
 
-    _mm256_storeu_si256((__m256i*) y, vy0);
-    _mm256_storeu_si256((__m256i*) (y + 32), vy1);
-    _mm256_storeu_si256((__m256i*) (y + 64), vy2);
-    _mm256_storeu_si256((__m256i*) (y + 96), vy3);
-    y += 128;
+    _mm256_storeu_si256((__m256i*) output, vy0);
+    _mm256_storeu_si256((__m256i*) (output + 32), vy1);
+    _mm256_storeu_si256((__m256i*) (output + 64), vy2);
+    _mm256_storeu_si256((__m256i*) (output + 96), vy3);
+    output += 128;
   }
-  for (; n >= 16 * sizeof(uint8_t); n -= 16 * sizeof(uint8_t)) {
-    __m128i vx = _mm_loadu_si128((const __m128i*) x);
-    x += 16;
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    input += 16;
 
     __m128i vy = _mm_shuffle_epi8(_mm256_castsi256_si128(vtable0), vx);
 
@@ -239,11 +239,11 @@ void xnn_x8_lut_ukernel__avx2_x128(
     vx = _mm_subs_epi8(vx, _mm256_castsi256_si128(voffset));
     vy = _mm_xor_si128(vy, _mm_shuffle_epi8(_mm256_castsi256_si128(vtableF), vx));
 
-    _mm_storeu_si128((__m128i*) y, vy);
-    y += 16;
+    _mm_storeu_si128((__m128i*) output, vy);
+    output += 16;
   }
-  if XNN_UNLIKELY(n != 0) {
-    __m128i vx = _mm_loadu_si128((const __m128i*) x);
+  if XNN_UNLIKELY(batch != 0) {
+    __m128i vx = _mm_loadu_si128((const __m128i*) input);
 
     __m128i vy = _mm_shuffle_epi8(_mm256_castsi256_si128(vtable0), vx);
 
@@ -279,23 +279,23 @@ void xnn_x8_lut_ukernel__avx2_x128(
     vx = _mm_subs_epi8(vx, _mm256_castsi256_si128(voffset));
     vy = _mm_xor_si128(vy, _mm_shuffle_epi8(_mm256_castsi256_si128(vtableF), vx));
 
-    if (n & (8 * sizeof(uint8_t))) {
-      _mm_storel_epi64((__m128i*) y, vy);
+    if (batch & (8 * sizeof(uint8_t))) {
+      _mm_storel_epi64((__m128i*) output, vy);
       vy = _mm_unpackhi_epi64(vy, vy);
-      y += 8;
+      output += 8;
     }
-    if (n & (4 * sizeof(uint8_t))) {
-      _mm_storeu_si32(y, vy);
+    if (batch & (4 * sizeof(uint8_t))) {
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
-      y += 4;
+      output += 4;
     }
-    if (n & (2 * sizeof(uint8_t))) {
-      _mm_storeu_si16(y, vy);
+    if (batch & (2 * sizeof(uint8_t))) {
+      _mm_storeu_si16(output, vy);
       vy = _mm_srli_epi32(vy, 16);
-      y += 2;
+      output += 2;
     }
-    if (n & (1 * sizeof(uint8_t))) {
-      *y = (uint8_t) _mm_extract_epi8(vy, 0);
+    if (batch & (1 * sizeof(uint8_t))) {
+      *output = (uint8_t) _mm_extract_epi8(vy, 0);
     }
   }
 }
