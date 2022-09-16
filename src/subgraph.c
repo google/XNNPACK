@@ -1106,7 +1106,7 @@ enum xnn_status xnn_subgraph_optimize(
       continue;
     }
 
-    if (!xnn_value_is_external_input(value) && value->num_consumers == 0) {
+    if (!xnn_value_is_external_input(value) && value->num_consumers == 0 && !xnn_value_is_persistent(value)) {
       xnn_value_clear(value);
     }
   }

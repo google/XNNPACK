@@ -84,6 +84,7 @@ struct xnn_value {
   /// Binary features of the tensor. Supported values are any combination of:
   /// - XNN_VALUE_FLAG_EXTERNAL_INPUT
   /// - XNN_VALUE_FLAG_EXTERNAL_OUTPUT
+  /// - XNN_VALUE_FLAG_PERSISTENT
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   const void* data;
@@ -120,6 +121,10 @@ XNN_INLINE bool xnn_value_is_external_output(const struct xnn_value* value) {
 
 XNN_INLINE bool xnn_value_is_external_input(const struct xnn_value* value) {
   return (value->flags & XNN_VALUE_FLAG_EXTERNAL_INPUT) != 0;
+}
+
+XNN_INLINE bool xnn_value_is_persistent(const struct xnn_value* value) {
+  return (value->flags & XNN_VALUE_FLAG_PERSISTENT) != 0;
 }
 
 enum xnn_allocation_type {
