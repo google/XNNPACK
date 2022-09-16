@@ -18,40 +18,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT12__NEON_X8, batch_eq_8) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X8, channels_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(8)
+      .channels(8)
       .shift(12)
       .Test(xnn_s16_window_shift12_ukernel__neon_x8);
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X8, batch_div_8) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X8, channels_div_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 16; batch < 80; batch += 8) {
+    for (size_t channels = 16; channels < 80; channels += 8) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X8, batch_lt_8) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X8, channels_lt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 8; batch++) {
+    for (size_t channels = 1; channels < 8; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X8, batch_gt_8) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X8, channels_gt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 9; batch < 16; batch++) {
+    for (size_t channels = 9; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x8);
     }
@@ -60,10 +60,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X8, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .Test(xnn_s16_window_shift12_ukernel__neon_x8);
       }
@@ -73,10 +73,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X8, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .inplace(true)
           .iterations(1)
@@ -88,40 +88,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT12__NEON_X16, batch_eq_16) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X16, channels_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(16)
+      .channels(16)
       .shift(12)
       .Test(xnn_s16_window_shift12_ukernel__neon_x16);
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X16, batch_div_16) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X16, channels_div_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 32; batch < 160; batch += 16) {
+    for (size_t channels = 32; channels < 160; channels += 16) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X16, batch_lt_16) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X16, channels_lt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 16; batch++) {
+    for (size_t channels = 1; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X16, batch_gt_16) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X16, channels_gt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 17; batch < 32; batch++) {
+    for (size_t channels = 17; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x16);
     }
@@ -130,10 +130,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X16, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .Test(xnn_s16_window_shift12_ukernel__neon_x16);
       }
@@ -143,10 +143,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X16, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .inplace(true)
           .iterations(1)
@@ -158,40 +158,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT12__NEON_X24, batch_eq_24) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X24, channels_eq_24) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(24)
+      .channels(24)
       .shift(12)
       .Test(xnn_s16_window_shift12_ukernel__neon_x24);
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X24, batch_div_24) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X24, channels_div_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 48; batch < 240; batch += 24) {
+    for (size_t channels = 48; channels < 240; channels += 24) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X24, batch_lt_24) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X24, channels_lt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 24; batch++) {
+    for (size_t channels = 1; channels < 24; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X24, batch_gt_24) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X24, channels_gt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 25; batch < 48; batch++) {
+    for (size_t channels = 25; channels < 48; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x24);
     }
@@ -200,10 +200,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X24, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .Test(xnn_s16_window_shift12_ukernel__neon_x24);
       }
@@ -213,10 +213,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X24, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .inplace(true)
           .iterations(1)
@@ -228,40 +228,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT12__NEON_X32, batch_eq_32) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X32, channels_eq_32) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(32)
+      .channels(32)
       .shift(12)
       .Test(xnn_s16_window_shift12_ukernel__neon_x32);
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X32, batch_div_32) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X32, channels_div_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 64; batch < 320; batch += 32) {
+    for (size_t channels = 64; channels < 320; channels += 32) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X32, batch_lt_32) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X32, channels_lt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 32; batch++) {
+    for (size_t channels = 1; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT12__NEON_X32, batch_gt_32) {
+  TEST(S16_WINDOW_SHIFT12__NEON_X32, channels_gt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 33; batch < 64; batch++) {
+    for (size_t channels = 33; channels < 64; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(12)
         .Test(xnn_s16_window_shift12_ukernel__neon_x32);
     }
@@ -270,10 +270,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X32, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .Test(xnn_s16_window_shift12_ukernel__neon_x32);
       }
@@ -283,10 +283,10 @@
   TEST(S16_WINDOW_SHIFT12__NEON_X32, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(12)
           .inplace(true)
           .iterations(1)
@@ -298,40 +298,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT15__NEON_X8, batch_eq_8) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X8, channels_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(8)
+      .channels(8)
       .shift(15)
       .Test(xnn_s16_window_shift15_ukernel__neon_x8);
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X8, batch_div_8) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X8, channels_div_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 16; batch < 80; batch += 8) {
+    for (size_t channels = 16; channels < 80; channels += 8) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X8, batch_lt_8) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X8, channels_lt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 8; batch++) {
+    for (size_t channels = 1; channels < 8; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X8, batch_gt_8) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X8, channels_gt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 9; batch < 16; batch++) {
+    for (size_t channels = 9; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x8);
     }
@@ -340,10 +340,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X8, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .Test(xnn_s16_window_shift15_ukernel__neon_x8);
       }
@@ -353,10 +353,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X8, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .inplace(true)
           .iterations(1)
@@ -368,40 +368,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT15__NEON_X16, batch_eq_16) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X16, channels_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(16)
+      .channels(16)
       .shift(15)
       .Test(xnn_s16_window_shift15_ukernel__neon_x16);
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X16, batch_div_16) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X16, channels_div_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 32; batch < 160; batch += 16) {
+    for (size_t channels = 32; channels < 160; channels += 16) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X16, batch_lt_16) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X16, channels_lt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 16; batch++) {
+    for (size_t channels = 1; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X16, batch_gt_16) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X16, channels_gt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 17; batch < 32; batch++) {
+    for (size_t channels = 17; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x16);
     }
@@ -410,10 +410,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X16, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .Test(xnn_s16_window_shift15_ukernel__neon_x16);
       }
@@ -423,10 +423,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X16, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .inplace(true)
           .iterations(1)
@@ -438,40 +438,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT15__NEON_X24, batch_eq_24) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X24, channels_eq_24) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(24)
+      .channels(24)
       .shift(15)
       .Test(xnn_s16_window_shift15_ukernel__neon_x24);
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X24, batch_div_24) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X24, channels_div_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 48; batch < 240; batch += 24) {
+    for (size_t channels = 48; channels < 240; channels += 24) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X24, batch_lt_24) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X24, channels_lt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 24; batch++) {
+    for (size_t channels = 1; channels < 24; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X24, batch_gt_24) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X24, channels_gt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 25; batch < 48; batch++) {
+    for (size_t channels = 25; channels < 48; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x24);
     }
@@ -480,10 +480,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X24, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .Test(xnn_s16_window_shift15_ukernel__neon_x24);
       }
@@ -493,10 +493,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X24, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .inplace(true)
           .iterations(1)
@@ -508,40 +508,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW_SHIFT15__NEON_X32, batch_eq_32) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X32, channels_eq_32) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(32)
+      .channels(32)
       .shift(15)
       .Test(xnn_s16_window_shift15_ukernel__neon_x32);
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X32, batch_div_32) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X32, channels_div_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 64; batch < 320; batch += 32) {
+    for (size_t channels = 64; channels < 320; channels += 32) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X32, batch_lt_32) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X32, channels_lt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 32; batch++) {
+    for (size_t channels = 1; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW_SHIFT15__NEON_X32, batch_gt_32) {
+  TEST(S16_WINDOW_SHIFT15__NEON_X32, channels_gt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 33; batch < 64; batch++) {
+    for (size_t channels = 33; channels < 64; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(15)
         .Test(xnn_s16_window_shift15_ukernel__neon_x32);
     }
@@ -550,10 +550,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X32, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .Test(xnn_s16_window_shift15_ukernel__neon_x32);
       }
@@ -563,10 +563,10 @@
   TEST(S16_WINDOW_SHIFT15__NEON_X32, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(15)
           .inplace(true)
           .iterations(1)
@@ -578,40 +578,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW__NEON_X8, batch_eq_8) {
+  TEST(S16_WINDOW__NEON_X8, channels_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(8)
+      .channels(8)
       .shift(0)
       .Test(xnn_s16_window_ukernel__neon_x8);
   }
 
-  TEST(S16_WINDOW__NEON_X8, batch_div_8) {
+  TEST(S16_WINDOW__NEON_X8, channels_div_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 16; batch < 80; batch += 8) {
+    for (size_t channels = 16; channels < 80; channels += 8) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X8, batch_lt_8) {
+  TEST(S16_WINDOW__NEON_X8, channels_lt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 8; batch++) {
+    for (size_t channels = 1; channels < 8; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X8, batch_gt_8) {
+  TEST(S16_WINDOW__NEON_X8, channels_gt_8) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 9; batch < 16; batch++) {
+    for (size_t channels = 9; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
@@ -620,10 +620,10 @@
   TEST(S16_WINDOW__NEON_X8, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .Test(xnn_s16_window_ukernel__neon_x8);
       }
@@ -633,10 +633,10 @@
   TEST(S16_WINDOW__NEON_X8, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 40; batch += 7) {
+      for (size_t channels = 1; channels <= 40; channels += 7) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .inplace(true)
           .iterations(1)
@@ -650,7 +650,7 @@
     for (uint32_t shift = 0; shift < 32; shift++) {
       WindowMicrokernelTester()
         .rows(1)
-        .batch(8)
+        .channels(8)
         .shift(shift)
         .Test(xnn_s16_window_ukernel__neon_x8);
     }
@@ -659,40 +659,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW__NEON_X16, batch_eq_16) {
+  TEST(S16_WINDOW__NEON_X16, channels_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(16)
+      .channels(16)
       .shift(0)
       .Test(xnn_s16_window_ukernel__neon_x16);
   }
 
-  TEST(S16_WINDOW__NEON_X16, batch_div_16) {
+  TEST(S16_WINDOW__NEON_X16, channels_div_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 32; batch < 160; batch += 16) {
+    for (size_t channels = 32; channels < 160; channels += 16) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X16, batch_lt_16) {
+  TEST(S16_WINDOW__NEON_X16, channels_lt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 16; batch++) {
+    for (size_t channels = 1; channels < 16; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X16, batch_gt_16) {
+  TEST(S16_WINDOW__NEON_X16, channels_gt_16) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 17; batch < 32; batch++) {
+    for (size_t channels = 17; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
@@ -701,10 +701,10 @@
   TEST(S16_WINDOW__NEON_X16, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .Test(xnn_s16_window_ukernel__neon_x16);
       }
@@ -714,10 +714,10 @@
   TEST(S16_WINDOW__NEON_X16, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 80; batch += 15) {
+      for (size_t channels = 1; channels <= 80; channels += 15) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .inplace(true)
           .iterations(1)
@@ -731,7 +731,7 @@
     for (uint32_t shift = 0; shift < 32; shift++) {
       WindowMicrokernelTester()
         .rows(1)
-        .batch(16)
+        .channels(16)
         .shift(shift)
         .Test(xnn_s16_window_ukernel__neon_x16);
     }
@@ -740,40 +740,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW__NEON_X24, batch_eq_24) {
+  TEST(S16_WINDOW__NEON_X24, channels_eq_24) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(24)
+      .channels(24)
       .shift(0)
       .Test(xnn_s16_window_ukernel__neon_x24);
   }
 
-  TEST(S16_WINDOW__NEON_X24, batch_div_24) {
+  TEST(S16_WINDOW__NEON_X24, channels_div_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 48; batch < 240; batch += 24) {
+    for (size_t channels = 48; channels < 240; channels += 24) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X24, batch_lt_24) {
+  TEST(S16_WINDOW__NEON_X24, channels_lt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 24; batch++) {
+    for (size_t channels = 1; channels < 24; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X24, batch_gt_24) {
+  TEST(S16_WINDOW__NEON_X24, channels_gt_24) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 25; batch < 48; batch++) {
+    for (size_t channels = 25; channels < 48; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
@@ -782,10 +782,10 @@
   TEST(S16_WINDOW__NEON_X24, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .Test(xnn_s16_window_ukernel__neon_x24);
       }
@@ -795,10 +795,10 @@
   TEST(S16_WINDOW__NEON_X24, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 120; batch += 23) {
+      for (size_t channels = 1; channels <= 120; channels += 23) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .inplace(true)
           .iterations(1)
@@ -812,7 +812,7 @@
     for (uint32_t shift = 0; shift < 32; shift++) {
       WindowMicrokernelTester()
         .rows(1)
-        .batch(24)
+        .channels(24)
         .shift(shift)
         .Test(xnn_s16_window_ukernel__neon_x24);
     }
@@ -821,40 +821,40 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(S16_WINDOW__NEON_X32, batch_eq_32) {
+  TEST(S16_WINDOW__NEON_X32, channels_eq_32) {
     TEST_REQUIRES_ARM_NEON;
     WindowMicrokernelTester()
       .rows(1)
-      .batch(32)
+      .channels(32)
       .shift(0)
       .Test(xnn_s16_window_ukernel__neon_x32);
   }
 
-  TEST(S16_WINDOW__NEON_X32, batch_div_32) {
+  TEST(S16_WINDOW__NEON_X32, channels_div_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 64; batch < 320; batch += 32) {
+    for (size_t channels = 64; channels < 320; channels += 32) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X32, batch_lt_32) {
+  TEST(S16_WINDOW__NEON_X32, channels_lt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 1; batch < 32; batch++) {
+    for (size_t channels = 1; channels < 32; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
   }
 
-  TEST(S16_WINDOW__NEON_X32, batch_gt_32) {
+  TEST(S16_WINDOW__NEON_X32, channels_gt_32) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch = 33; batch < 64; batch++) {
+    for (size_t channels = 33; channels < 64; channels++) {
       WindowMicrokernelTester()
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
@@ -863,10 +863,10 @@
   TEST(S16_WINDOW__NEON_X32, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 2; rows++) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .Test(xnn_s16_window_ukernel__neon_x32);
       }
@@ -876,10 +876,10 @@
   TEST(S16_WINDOW__NEON_X32, inplace) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 1; rows <= 3; rows += 1) {
-      for (size_t batch = 1; batch <= 160; batch += 31) {
+      for (size_t channels = 1; channels <= 160; channels += 31) {
         WindowMicrokernelTester()
           .rows(rows)
-          .batch(batch)
+          .channels(channels)
           .shift(0)
           .inplace(true)
           .iterations(1)
@@ -893,7 +893,7 @@
     for (uint32_t shift = 0; shift < 32; shift++) {
       WindowMicrokernelTester()
         .rows(1)
-        .batch(32)
+        .channels(32)
         .shift(shift)
         .Test(xnn_s16_window_ukernel__neon_x32);
     }
@@ -901,18 +901,18 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-TEST(S16_WINDOW__SCALAR_X1, batch_eq_1) {
+TEST(S16_WINDOW__SCALAR_X1, channels_eq_1) {
   WindowMicrokernelTester()
     .rows(1)
-    .batch(1)
+    .channels(1)
     .shift(0)
     .Test(xnn_s16_window_ukernel__scalar_x1);
 }
 
-TEST(S16_WINDOW__SCALAR_X1, batch_gt_1) {
-  for (size_t batch = 2; batch < 10; batch++) {
+TEST(S16_WINDOW__SCALAR_X1, channels_gt_1) {
+  for (size_t channels = 2; channels < 10; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x1);
   }
@@ -920,10 +920,10 @@ TEST(S16_WINDOW__SCALAR_X1, batch_gt_1) {
 
 TEST(S16_WINDOW__SCALAR_X1, rows_gt_1) {
   for (size_t rows = 2; rows < 2; rows++) {
-    for (size_t batch = 1; batch <= 5; batch += 1) {
+    for (size_t channels = 1; channels <= 5; channels += 1) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__scalar_x1);
     }
@@ -932,10 +932,10 @@ TEST(S16_WINDOW__SCALAR_X1, rows_gt_1) {
 
 TEST(S16_WINDOW__SCALAR_X1, inplace) {
   for (size_t rows = 1; rows <= 3; rows += 1) {
-    for (size_t batch = 1; batch <= 5; batch += 1) {
+    for (size_t channels = 1; channels <= 5; channels += 1) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .inplace(true)
         .iterations(1)
@@ -948,43 +948,42 @@ TEST(S16_WINDOW__SCALAR_X1, shift) {
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
       .rows(1)
-      .batch(1)
+      .channels(1)
       .shift(shift)
       .Test(xnn_s16_window_ukernel__scalar_x1);
   }
 }
 
-
-TEST(S16_WINDOW__SCALAR_X2, batch_eq_2) {
+TEST(S16_WINDOW__SCALAR_X2, channels_eq_2) {
   WindowMicrokernelTester()
     .rows(1)
-    .batch(2)
+    .channels(2)
     .shift(0)
     .Test(xnn_s16_window_ukernel__scalar_x2);
 }
 
-TEST(S16_WINDOW__SCALAR_X2, batch_div_2) {
-  for (size_t batch = 4; batch < 20; batch += 2) {
+TEST(S16_WINDOW__SCALAR_X2, channels_div_2) {
+  for (size_t channels = 4; channels < 20; channels += 2) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X2, batch_lt_2) {
-  for (size_t batch = 1; batch < 2; batch++) {
+TEST(S16_WINDOW__SCALAR_X2, channels_lt_2) {
+  for (size_t channels = 1; channels < 2; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X2, batch_gt_2) {
-  for (size_t batch = 3; batch < 4; batch++) {
+TEST(S16_WINDOW__SCALAR_X2, channels_gt_2) {
+  for (size_t channels = 3; channels < 4; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
@@ -992,10 +991,10 @@ TEST(S16_WINDOW__SCALAR_X2, batch_gt_2) {
 
 TEST(S16_WINDOW__SCALAR_X2, rows_gt_1) {
   for (size_t rows = 2; rows < 2; rows++) {
-    for (size_t batch = 1; batch <= 10; batch += 1) {
+    for (size_t channels = 1; channels <= 10; channels += 1) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__scalar_x2);
     }
@@ -1004,10 +1003,10 @@ TEST(S16_WINDOW__SCALAR_X2, rows_gt_1) {
 
 TEST(S16_WINDOW__SCALAR_X2, inplace) {
   for (size_t rows = 1; rows <= 3; rows += 1) {
-    for (size_t batch = 1; batch <= 10; batch += 1) {
+    for (size_t channels = 1; channels <= 10; channels += 1) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .inplace(true)
         .iterations(1)
@@ -1020,43 +1019,42 @@ TEST(S16_WINDOW__SCALAR_X2, shift) {
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
       .rows(1)
-      .batch(2)
+      .channels(2)
       .shift(shift)
       .Test(xnn_s16_window_ukernel__scalar_x2);
   }
 }
 
-
-TEST(S16_WINDOW__SCALAR_X3, batch_eq_3) {
+TEST(S16_WINDOW__SCALAR_X3, channels_eq_3) {
   WindowMicrokernelTester()
     .rows(1)
-    .batch(3)
+    .channels(3)
     .shift(0)
     .Test(xnn_s16_window_ukernel__scalar_x3);
 }
 
-TEST(S16_WINDOW__SCALAR_X3, batch_div_3) {
-  for (size_t batch = 6; batch < 30; batch += 3) {
+TEST(S16_WINDOW__SCALAR_X3, channels_div_3) {
+  for (size_t channels = 6; channels < 30; channels += 3) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X3, batch_lt_3) {
-  for (size_t batch = 1; batch < 3; batch++) {
+TEST(S16_WINDOW__SCALAR_X3, channels_lt_3) {
+  for (size_t channels = 1; channels < 3; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X3, batch_gt_3) {
-  for (size_t batch = 4; batch < 6; batch++) {
+TEST(S16_WINDOW__SCALAR_X3, channels_gt_3) {
+  for (size_t channels = 4; channels < 6; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
@@ -1064,10 +1062,10 @@ TEST(S16_WINDOW__SCALAR_X3, batch_gt_3) {
 
 TEST(S16_WINDOW__SCALAR_X3, rows_gt_1) {
   for (size_t rows = 2; rows < 2; rows++) {
-    for (size_t batch = 1; batch <= 15; batch += 2) {
+    for (size_t channels = 1; channels <= 15; channels += 2) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__scalar_x3);
     }
@@ -1076,10 +1074,10 @@ TEST(S16_WINDOW__SCALAR_X3, rows_gt_1) {
 
 TEST(S16_WINDOW__SCALAR_X3, inplace) {
   for (size_t rows = 1; rows <= 3; rows += 1) {
-    for (size_t batch = 1; batch <= 15; batch += 2) {
+    for (size_t channels = 1; channels <= 15; channels += 2) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .inplace(true)
         .iterations(1)
@@ -1092,43 +1090,42 @@ TEST(S16_WINDOW__SCALAR_X3, shift) {
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
       .rows(1)
-      .batch(3)
+      .channels(3)
       .shift(shift)
       .Test(xnn_s16_window_ukernel__scalar_x3);
   }
 }
 
-
-TEST(S16_WINDOW__SCALAR_X4, batch_eq_4) {
+TEST(S16_WINDOW__SCALAR_X4, channels_eq_4) {
   WindowMicrokernelTester()
     .rows(1)
-    .batch(4)
+    .channels(4)
     .shift(0)
     .Test(xnn_s16_window_ukernel__scalar_x4);
 }
 
-TEST(S16_WINDOW__SCALAR_X4, batch_div_4) {
-  for (size_t batch = 8; batch < 40; batch += 4) {
+TEST(S16_WINDOW__SCALAR_X4, channels_div_4) {
+  for (size_t channels = 8; channels < 40; channels += 4) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X4, batch_lt_4) {
-  for (size_t batch = 1; batch < 4; batch++) {
+TEST(S16_WINDOW__SCALAR_X4, channels_lt_4) {
+  for (size_t channels = 1; channels < 4; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }
 }
 
-TEST(S16_WINDOW__SCALAR_X4, batch_gt_4) {
-  for (size_t batch = 5; batch < 8; batch++) {
+TEST(S16_WINDOW__SCALAR_X4, channels_gt_4) {
+  for (size_t channels = 5; channels < 8; channels++) {
     WindowMicrokernelTester()
-      .batch(batch)
+      .channels(channels)
       .shift(0)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }
@@ -1136,10 +1133,10 @@ TEST(S16_WINDOW__SCALAR_X4, batch_gt_4) {
 
 TEST(S16_WINDOW__SCALAR_X4, rows_gt_1) {
   for (size_t rows = 2; rows < 2; rows++) {
-    for (size_t batch = 1; batch <= 20; batch += 3) {
+    for (size_t channels = 1; channels <= 20; channels += 3) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .Test(xnn_s16_window_ukernel__scalar_x4);
     }
@@ -1148,10 +1145,10 @@ TEST(S16_WINDOW__SCALAR_X4, rows_gt_1) {
 
 TEST(S16_WINDOW__SCALAR_X4, inplace) {
   for (size_t rows = 1; rows <= 3; rows += 1) {
-    for (size_t batch = 1; batch <= 20; batch += 3) {
+    for (size_t channels = 1; channels <= 20; channels += 3) {
       WindowMicrokernelTester()
         .rows(rows)
-        .batch(batch)
+        .channels(channels)
         .shift(0)
         .inplace(true)
         .iterations(1)
@@ -1164,7 +1161,7 @@ TEST(S16_WINDOW__SCALAR_X4, shift) {
   for (uint32_t shift = 0; shift < 32; shift++) {
     WindowMicrokernelTester()
       .rows(1)
-      .batch(4)
+      .channels(4)
       .shift(shift)
       .Test(xnn_s16_window_ukernel__scalar_x4);
   }

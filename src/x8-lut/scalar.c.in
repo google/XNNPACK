@@ -12,46 +12,46 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 void xnn_x8_lut_ukernel__scalar_x${BATCH_TILE}(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y,
-    const uint8_t t[restrict XNN_MIN_ELEMENTS(256)])
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
-  assert(n != 0);
-  assert(x != NULL);
-  assert(y != NULL);
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   $if BATCH_TILE > 1:
-    for (; n >= ${BATCH_TILE} * sizeof(uint8_t); n -= ${BATCH_TILE} * sizeof(uint8_t)) {
+    for (; batch >= ${BATCH_TILE} * sizeof(uint8_t); batch -= ${BATCH_TILE} * sizeof(uint8_t)) {
       $for N in range(BATCH_TILE):
-        const size_t vx${N} = (size_t) x[${N}];
-      x += ${BATCH_TILE};
+        const size_t vx${N} = (size_t) input[${N}];
+      input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        const uint32_t vt${N} = (uint32_t) t[vx${N}];
+        const uint32_t vt${N} = (uint32_t) table[vx${N}];
 
       $for N in range(BATCH_TILE):
-        y[${N}] = (uint8_t) vt${N};
-      y += ${BATCH_TILE};
+        output[${N}] = (uint8_t) vt${N};
+      output += ${BATCH_TILE};
     }
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE > 2:
         do {
-          const size_t vx = (size_t) *x++;
-          const uint32_t vt = (uint32_t) t[vx];
-          *y++ = (uint8_t) vt;
-          n -= sizeof(uint8_t);
-        } while (n != 0);
+          const size_t vx = (size_t) *input++;
+          const uint32_t vt = (uint32_t) table[vx];
+          *output++ = (uint8_t) vt;
+          batch -= sizeof(uint8_t);
+        } while (batch != 0);
       $else:
-        const size_t vx = (size_t) *x;
-        const uint32_t vt = (uint32_t) t[vx];
-        *y = (uint8_t) vt;
+        const size_t vx = (size_t) *input;
+        const uint32_t vt = (uint32_t) table[vx];
+        *output = (uint8_t) vt;
     }
   $else:
     do {
-      const size_t vx = (size_t) *x++;
-      const uint32_t vt = (uint32_t) t[vx];
-      *y++ = (uint8_t) vt;
-      n -= sizeof(uint8_t);
-    } while (n != 0);
+      const size_t vx = (size_t) *input++;
+      const uint32_t vt = (uint32_t) table[vx];
+      *output++ = (uint8_t) vt;
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
 }

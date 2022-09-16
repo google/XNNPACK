@@ -17,23 +17,23 @@
 
 void xnn_s16_window_ukernel__scalar_x2(
     size_t rows,
-    size_t batch_size,
+    size_t channels,
     const int16_t* input,
     const int16_t* weights,
     int16_t* output,
     uint32_t shift)
 {
   assert(rows > 0);
-  assert(batch_size != 0);
+  assert(channels != 0);
   assert(input != NULL);
   assert(weights != NULL);
   assert(output != NULL);
   assert(shift < 32);
 
   do {
-    size_t n = batch_size;
+    size_t c = channels;
     const int16_t* w = weights;
-    for (; n >= 2; n -= 2) {
+    for (; c >= 2 * sizeof(int16_t); c -= 2 * sizeof(int16_t)) {
       const int16_t vi0 = input[0];
       const int16_t vi1 = input[1];
       input += 2;
@@ -60,7 +60,7 @@ void xnn_s16_window_ukernel__scalar_x2(
       output += 2;
     }
 
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(c != 0) {
       do {
         const int32_t vi = (int32_t) *input++;
         const int32_t vw = (int32_t) *w++;
@@ -69,7 +69,8 @@ void xnn_s16_window_ukernel__scalar_x2(
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         *output++ = (int16_t) vout;
-      } while (--n != 0);
+        c -= sizeof(int16_t);
+      } while (c != 0);
     }
   } while (--rows != 0);
 }

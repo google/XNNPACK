@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE >= 1
+$assert CHANNEL_TILE >= 1
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -12,53 +12,53 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/window.h>
 
 
-void xnn_s16_window_ukernel__scalar_x${BATCH_TILE}(
+void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
     size_t rows,
-    size_t batch_size,
+    size_t channels,
     const int16_t* input,
     const int16_t* weights,
     int16_t* output,
     uint32_t shift)
 {
   assert(rows > 0);
-  assert(batch_size != 0);
+  assert(channels != 0);
   assert(input != NULL);
   assert(weights != NULL);
   assert(output != NULL);
   assert(shift < 32);
 
   do {
-    size_t n = batch_size;
+    size_t c = channels;
     const int16_t* w = weights;
-    $if BATCH_TILE > 1:
-      for (; n >= ${BATCH_TILE}; n -= ${BATCH_TILE}) {
-        $for N in range(BATCH_TILE):
-          const int16_t vi${N} = input[${N}];
-        input += ${BATCH_TILE};
+    $if CHANNEL_TILE > 1:
+      for (; c >= ${CHANNEL_TILE} * sizeof(int16_t); c -= ${CHANNEL_TILE} * sizeof(int16_t)) {
+        $for C in range(CHANNEL_TILE):
+          const int16_t vi${C} = input[${C}];
+        input += ${CHANNEL_TILE};
 
-        $for N in range(BATCH_TILE):
-          const int16_t w${N} = w[${N}];
-        w += ${BATCH_TILE};
+        $for C in range(CHANNEL_TILE):
+          const int16_t w${C} = w[${C}];
+        w += ${CHANNEL_TILE};
 
-        $for N in range(BATCH_TILE):
-          int32_t vout${N} = (int32_t) vi${N} * (int32_t) w${N};
+        $for C in range(CHANNEL_TILE):
+          int32_t vout${C} = (int32_t) vi${C} * (int32_t) w${C};
 
-        $for N in range(BATCH_TILE):
-          vout${N} = math_asr_s32(vout${N}, shift);
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_asr_s32(vout${C}, shift);
 
-        $for N in range(BATCH_TILE):
-          vout${N} = math_max_s32(vout${N}, INT16_MIN);
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_max_s32(vout${C}, INT16_MIN);
 
-        $for N in range(BATCH_TILE):
-          vout${N} = math_min_s32(vout${N}, INT16_MAX);
+        $for C in range(CHANNEL_TILE):
+          vout${C} = math_min_s32(vout${C}, INT16_MAX);
 
-        $for N in range(BATCH_TILE):
-          output[${N}] = (int16_t) vout${N};
+        $for C in range(CHANNEL_TILE):
+          output[${C}] = (int16_t) vout${C};
 
-        output += ${BATCH_TILE};
+        output += ${CHANNEL_TILE};
       }
 
-    if XNN_UNLIKELY(n != 0) {
+    if XNN_UNLIKELY(c != 0) {
       do {
         const int32_t vi = (int32_t) *input++;
         const int32_t vw = (int32_t) *w++;
@@ -67,7 +67,8 @@ void xnn_s16_window_ukernel__scalar_x${BATCH_TILE}(
         vout = math_max_s32(vout, INT16_MIN);
         vout = math_min_s32(vout, INT16_MAX);
         *output++ = (int16_t) vout;
-      } while (--n != 0);
+        c -= sizeof(int16_t);
+      } while (c != 0);
     }
   } while (--rows != 0);
 }

@@ -9,26 +9,26 @@
 
 
 void xnn_u8_rmax_ukernel__scalar(
-    size_t n,
-    const uint8_t* x,
-    uint8_t* y)
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output)
 {
-  assert(n != 0);
+  assert(batch != 0);
 
   uint8_t vmax0 = 0;
   uint8_t vmax1 = 0;
-  for (; n >= 2 * sizeof(uint8_t); n -= 2 * sizeof(uint8_t)) {
-    const uint8_t vt0 = x[0];
-    const uint8_t vt1 = x[1];
-    x += 2;
+  for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {
+    const uint8_t vt0 = input[0];
+    const uint8_t vt1 = input[1];
+    input += 2;
 
     vmax0 = vt0 > vmax0 ? vt0 : vmax0;
     vmax1 = vt1 > vmax1 ? vt1 : vmax1;
   }
   uint8_t vmax = vmax0 > vmax1 ? vmax0 : vmax1;
-  if (n != 0) {
-    const uint8_t vt = *x++;
+  if (batch != 0) {
+    const uint8_t vt = *input++;
     vmax = vt > vmax ? vt : vmax;
   }
-  *y = vmax;
+  *output = vmax;
 }
