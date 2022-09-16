@@ -21,7 +21,7 @@
 #include <xnnpack/microfnptr.h>
 
 
-extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
+extern "C" XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
 class VLogMicrokernelTester {
  public:
