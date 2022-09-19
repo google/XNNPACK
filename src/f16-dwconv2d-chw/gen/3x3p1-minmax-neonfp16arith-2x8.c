@@ -36,7 +36,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8(
 
   const __fp16* w0 = (const __fp16*)weights;
   const float16x8_t vw01234567 = vld1q_f16(w0);
-  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_lane_u32((const void*)(w0 + 8), vmov_n_u32(0), 0));
+  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 8)));
 
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(__fp16));
 
@@ -138,6 +138,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8(
       vst1q_f16(o1, vo1); o1 += 8;
       vst1q_f16(o0, vo0); o0 += 8;
     }
+
     // Always process the last block of 1..8 pixels.
     assert(w >= 1 * sizeof(__fp16));
     assert(w <= 8 * sizeof(__fp16));

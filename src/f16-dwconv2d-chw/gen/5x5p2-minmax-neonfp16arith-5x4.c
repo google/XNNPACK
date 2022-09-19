@@ -38,7 +38,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
   const float16x8_t vw01234567 = vld1q_f16(w0);
   const float16x8_t vw89ABCDEF = vld1q_f16(w0 + 8);
   const float16x8_t vwGHIJKLMN = vld1q_f16(w0 + 16);
-  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_lane_u32((const void*)(w0 + 24), vmov_n_u32(0), 0));
+  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 24)));
 
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(__fp16));
 
@@ -121,6 +121,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       const float16x4_t vi7x89AB = vld1_f16(i7); i7 += 4;
       const float16x4_t vi8x89AB = vld1_f16(i8); i8 += 4;
 
+      // Center column
       vo0p0 = vfma_laneq_f16(vo0p0, vi0x4567, vw01234567, 3);
       vo1p0 = vfma_laneq_f16(vo1p0, vi1x4567, vw01234567, 3);
       vo2p0 = vfma_laneq_f16(vo2p0, vi2x4567, vw01234567, 3);
@@ -151,6 +152,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       vo3p0 = vfma_laneq_f16(vo3p0, vi7x4567, vwGHIJKLMN, 7);
       vo4p0 = vfma_laneq_f16(vo4p0, vi8x4567, vwGHIJKLMN, 7);
 
+      // Left by 1 column
       const float16x4_t vi0x3456 = vext_f16(vi0x0123, vi0x4567, 3);
       const float16x4_t vi1x3456 = vext_f16(vi1x0123, vi1x4567, 3);
       const float16x4_t vi2x3456 = vext_f16(vi2x0123, vi2x4567, 3);
@@ -191,6 +193,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       vo3p0 = vfma_laneq_f16(vo3p0, vi7x3456, vwGHIJKLMN, 6);
       vo4p0 = vfma_laneq_f16(vo4p0, vi8x3456, vwGHIJKLMN, 6);
 
+      // Left by 2 column
       const float16x4_t vi0x2345 = vext_f16(vi0x0123, vi0x4567, 2);
       vi0x0123 = vi0x4567;
       const float16x4_t vi1x2345 = vext_f16(vi1x0123, vi1x4567, 2);
@@ -240,6 +243,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       vo3p0 = vfma_laneq_f16(vo3p0, vi7x2345, vwGHIJKLMN, 5);
       vo4p0 = vfma_laneq_f16(vo4p0, vi8x2345, vwGHIJKLMN, 5);
 
+      // Right by 1 column
       const float16x4_t vi0x5678 = vext_f16(vi0x4567, vi0x89AB, 1);
       const float16x4_t vi1x5678 = vext_f16(vi1x4567, vi1x89AB, 1);
       const float16x4_t vi2x5678 = vext_f16(vi2x4567, vi2x89AB, 1);
@@ -280,6 +284,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       vo3p0 = vfma_lane_f16(vo3p0, vi7x5678, vwOP, 0);
       vo4p0 = vfma_lane_f16(vo4p0, vi8x5678, vwOP, 0);
 
+      // Right by 2 column
       const float16x4_t vi0x6789 = vext_f16(vi0x4567, vi0x89AB, 2);
       vi0x4567 = vi0x89AB;
       const float16x4_t vi1x6789 = vext_f16(vi1x4567, vi1x89AB, 2);
@@ -348,7 +353,9 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
       vst1_f16(o1, vo1); o1 += 4;
       vst1_f16(o0, vo0); o0 += 4;
     }
+
     // Always process the last block of 5..8 pixels.
+    assert(w <= 8 * sizeof(__fp16));
     if XNN_LIKELY(w > 4 * sizeof(__fp16)) {
       float16x4_t vo0p0 = vdup_laneq_f16(vw01234567, 0);
       float16x4_t vo1p0 = vdup_laneq_f16(vw01234567, 0);
@@ -605,6 +612,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x4(
 
       w -= 4 * sizeof(__fp16);
     }
+
     assert(w >= 1 * sizeof(__fp16));
     assert(w <= 4 * sizeof(__fp16));
     {

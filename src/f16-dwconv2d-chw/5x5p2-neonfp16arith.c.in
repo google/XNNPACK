@@ -36,7 +36,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
   const float16x8_t vw01234567 = vld1q_f16(w0);
   const float16x8_t vw89ABCDEF = vld1q_f16(w0 + 8);
   const float16x8_t vwGHIJKLMN = vld1q_f16(w0 + 16);
-  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_lane_u32((const void*)(w0 + 24), vmov_n_u32(0), 0));
+  const float16x4_t vwOP = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 24)));
 
   const size_t input_decrement = round_up_po2(input_width, 4 * sizeof(__fp16));
 
@@ -73,6 +73,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
       $for M in range(4 + ROW_TILE):
         const float16x4_t vi${M}x89AB = vld1_f16(i${M}); i${M} += 4;
 
+      // Center column
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:
           float16x4_t vo${M}p1 = vmul_laneq_f16(vi${M}x4567, vw01234567, 3);
@@ -103,6 +104,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
         $else:
           vo${M}p${6 % ACCUMULATORS} = vfma_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x4567, vwGHIJKLMN, 7);
 
+      // Left by 1 column
       $for M in range(4 + ROW_TILE):
         const float16x4_t vi${M}x3456 = vext_f16(vi${M}x0123, vi${M}x4567, 3);
 
@@ -121,6 +123,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
       $for M in range(ROW_TILE):
         vo${M}p${11 % ACCUMULATORS} = vfma_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x3456, vwGHIJKLMN, 6);
 
+      // Left by 2 column
       $for M in range(4 + ROW_TILE):
         const float16x4_t vi${M}x2345 = vext_f16(vi${M}x0123, vi${M}x4567, 2);
         vi${M}x0123 = vi${M}x4567;
@@ -140,6 +143,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
       $for M in range(ROW_TILE):
         vo${M}p${16 % ACCUMULATORS} = vfma_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x2345, vwGHIJKLMN, 5);
 
+      // Right by 1 column
       $for M in range(4 + ROW_TILE):
         const float16x4_t vi${M}x5678 = vext_f16(vi${M}x4567, vi${M}x89AB, 1);
 
@@ -158,6 +162,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
       $for M in range(ROW_TILE):
         vo${M}p${21 % ACCUMULATORS} = vfma_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x5678, vwOP, 0);
 
+      // Right by 2 column
       $for M in range(4 + ROW_TILE):
         const float16x4_t vi${M}x6789 = vext_f16(vi${M}x4567, vi${M}x89AB, 2);
         vi${M}x4567 = vi${M}x89AB;
@@ -195,7 +200,9 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
       $for M in reversed(range(ROW_TILE)):
         vst1_f16(o${M}, vo${M}); o${M} += 4;
     }
+
     // Always process the last block of 5..8 pixels.
+    assert(w <= 8 * sizeof(__fp16));
     if XNN_LIKELY(w > 4 * sizeof(__fp16)) {
       $for M in range(ROW_TILE):
         float16x4_t vo${M}p0 = vdup_laneq_f16(vw01234567, 0);
@@ -330,6 +337,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x4${"_acc%d" %
 
       w -= 4 * sizeof(__fp16);
     }
+
     assert(w >= 1 * sizeof(__fp16));
     assert(w <= 4 * sizeof(__fp16));
     {
