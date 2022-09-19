@@ -20,9 +20,10 @@
 void xnn_s16_rmaxabs_ukernel__neon_x24(
     size_t batch,
     const int16_t* input,
-    uint16_t* output) {
-
-  assert(batch > 0);
+    uint16_t* output)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -31,7 +32,7 @@ void xnn_s16_rmaxabs_ukernel__neon_x24(
   uint16x8_t vmax1 = vzero;
   uint16x8_t vmax2 = vzero;
 
-  for (; batch >= 24; batch -= 24) {
+  for (; batch >= 24 * sizeof(int16_t); batch -= 24 * sizeof(int16_t)) {
     const int16x8_t vi0 = vld1q_s16(input); input += 8;
     const int16x8_t vi1 = vld1q_s16(input); input += 8;
     const int16x8_t vi2 = vld1q_s16(input); input += 8;
@@ -49,7 +50,7 @@ void xnn_s16_rmaxabs_ukernel__neon_x24(
   vmax0 = vmaxq_u16(vmax0, vmax2);
 
   // Remainder of full vectors
-  for (; batch >= 8; batch -= 8) {
+  for (; batch >= 8 * sizeof(int16_t); batch -= 8 * sizeof(int16_t)) {
     const int16x8_t vi = vld1q_s16(input); input += 8;
     const uint16x8_t vabs = vreinterpretq_u16_s16(vabsq_s16(vi));
     vmax0 = vmaxq_u16(vmax0, vabs);
@@ -61,7 +62,8 @@ void xnn_s16_rmaxabs_ukernel__neon_x24(
       const int16x8_t vi = vld1q_dup_s16(input); input += 1;
       const uint16x8_t vabs = vreinterpretq_u16_s16(vabsq_s16(vi));
       vmax0 = vmaxq_u16(vmax0, vabs);
-    } while (--batch != 0);
+      batch -= sizeof(int16_t);
+    } while (batch != 0);
   }
 
   #if XNN_ARCH_ARM64

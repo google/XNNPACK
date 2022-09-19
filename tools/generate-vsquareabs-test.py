@@ -40,7 +40,7 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   VSquareAbsMicrokernelTester()
-    .batch_size(${BATCH_TILE})
+    .batch(${BATCH_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -48,9 +48,9 @@ $if BATCH_TILE > 1:
   TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
+    for (size_t batch = ${BATCH_TILE*2}; batch < ${BATCH_TILE*10}; batch += ${BATCH_TILE}) {
       VSquareAbsMicrokernelTester()
-        .batch_size(batch_size)
+        .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -58,9 +58,9 @@ $if BATCH_TILE > 1:
   TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
+    for (size_t batch = 1; batch < ${BATCH_TILE}; batch++) {
       VSquareAbsMicrokernelTester()
-        .batch_size(batch_size)
+        .batch(batch)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -68,9 +68,9 @@ $if BATCH_TILE > 1:
 TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
+  for (size_t batch = ${BATCH_TILE+1}; batch < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch++) {
     VSquareAbsMicrokernelTester()
-      .batch_size(batch_size)
+      .batch(batch)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -83,7 +83,7 @@ def generate_test_cases(ukernel, batch_tile, isa):
 
   Args:
     ukernel: C name of the micro-kernel function.
-    batch_tile: Number of batch_size processed per one iteration of the inner
+    batch_tile: Number of batch processed per one iteration of the inner
                   loop of the micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.

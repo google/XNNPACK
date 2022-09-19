@@ -18,9 +18,10 @@
 void xnn_s16_rmaxabs_ukernel__scalar_x3(
     size_t batch,
     const int16_t* input,
-    uint16_t* output) {
-
-  assert(batch > 0);
+    uint16_t* output)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -28,7 +29,7 @@ void xnn_s16_rmaxabs_ukernel__scalar_x3(
   uint32_t vmax1 = 0;
   uint32_t vmax2 = 0;
 
-  for (; batch >= 3; batch -= 3) {
+  for (; batch >= 3 * sizeof(int16_t); batch -= 3 * sizeof(int16_t)) {
     const int32_t vi0 = (int32_t) input[0];
     const int32_t vi1 = (int32_t) input[1];
     const int32_t vi2 = (int32_t) input[2];
@@ -51,7 +52,8 @@ void xnn_s16_rmaxabs_ukernel__scalar_x3(
       const int32_t vi = (int32_t) *input++;
       const uint32_t vabs = math_abs_s32(vi);
       vmax0 = math_max_u32(vmax0, vabs);
-    } while (--batch != 0);
+      batch -= sizeof(int16_t);
+    } while (batch != 0);
   }
   *output = (uint16_t) vmax0;
 }

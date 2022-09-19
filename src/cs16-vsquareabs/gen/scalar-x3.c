@@ -18,13 +18,14 @@
 void xnn_cs16_vsquareabs_ukernel__scalar_x3(
     size_t batch,
     const int16_t* input,
-    uint32_t* output) {
-
+    uint32_t* output)
+{
   assert(batch != 0);
+  assert(batch % (sizeof(int16_t) * 2) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  for (; batch >= 3; batch -= 3) {
+  for (; batch >= 6 * sizeof(int16_t); batch -= 6 * sizeof(int16_t)) {
     const int32_t vr0 = (int32_t) input[0];
     const int32_t vi0 = (int32_t) input[1];
     const int32_t vr1 = (int32_t) input[2];
@@ -49,7 +50,6 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x3(
     output[2] = vout2;
     output += 3;
   }
-
   if XNN_UNLIKELY(batch != 0) {
     do {
       const int32_t vr = (int32_t) input[0];
@@ -62,6 +62,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x3(
       const uint32_t vout = vrsquare + visquare;
 
       *output++ = vout;
-    } while (--batch != 0);
+      batch -= sizeof(int16_t) * 2;
+    } while (batch != 0);
   }
 }

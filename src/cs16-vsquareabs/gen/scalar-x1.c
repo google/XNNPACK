@@ -18,12 +18,12 @@
 void xnn_cs16_vsquareabs_ukernel__scalar_x1(
     size_t batch,
     const int16_t* input,
-    uint32_t* output) {
-
+    uint32_t* output)
+{
   assert(batch != 0);
+  assert(batch % (sizeof(int16_t) * 2) == 0);
   assert(input != NULL);
   assert(output != NULL);
-
 
   if XNN_UNLIKELY(batch != 0) {
     do {
@@ -37,6 +37,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x1(
       const uint32_t vout = vrsquare + visquare;
 
       *output++ = vout;
-    } while (--batch != 0);
+      batch -= sizeof(int16_t) * 2;
+    } while (batch != 0);
   }
 }

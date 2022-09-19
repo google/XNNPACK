@@ -21,13 +21,13 @@
 
 class VSquareAbsMicrokernelTester {
  public:
-  inline VSquareAbsMicrokernelTester& batch_size(size_t batch_size) {
-    assert(batch_size != 0);
-    this->batch_ = batch_size;
+  inline VSquareAbsMicrokernelTester& batch(size_t batch) {
+    assert(batch != 0);
+    this->batch_ = batch;
     return *this;
   }
 
-  inline size_t batch_size() const {
+  inline size_t batch() const {
     return this->batch_;
   }
 
@@ -45,31 +45,28 @@ class VSquareAbsMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> x(batch_size() * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<uint32_t> y(batch_size());
-    std::vector<uint32_t> y_ref(batch_size());
+    std::vector<int16_t> input(batch() * 2 + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<uint32_t> output(batch());
+    std::vector<uint32_t> output_ref(batch());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(i16rng));
-      std::fill(y.begin(), y.end(), INT32_C(0x12345678));
+      std::generate(input.begin(), input.end(), std::ref(i16rng));
+      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       // Compute reference results.
-      for (size_t n = 0; n < batch_size(); n++) {
-        const int16_t r = x[n * 2];
-        const int16_t i = x[n * 2 + 1];
-        uint32_t rsquare = static_cast<uint32_t>(static_cast<int32_t>(r) * static_cast<int32_t>(r));
-        uint32_t isquare = static_cast<uint32_t>(static_cast<int32_t>(i) * static_cast<int32_t>(i));
-        uint32_t value = rsquare + isquare;
-        y_ref[n] = value;
+      for (size_t n = 0; n < batch(); n++) {
+        const int32_t r = static_cast<int32_t>(input[n * 2]);
+        const int32_t i = static_cast<int32_t>(input[n * 2 + 1]);
+        output_ref[n] = static_cast<uint32_t>(r * r + i * i);
       }
 
       // Call optimized micro-kernel.
-      vsquareabs(batch_size(), x.data(), y.data());
+      vsquareabs(batch() * sizeof(int16_t) * 2, input.data(), output.data());
 
       // Verify results.
-      for (size_t n = 0; n < batch_size(); n++) {
-        ASSERT_EQ(y[n], y_ref[n])
-          << ", batch " << n << " / " << batch_size();
+      for (size_t n = 0; n < batch(); n++) {
+        ASSERT_EQ(output[n], output_ref[n])
+          << ", batch " << n << " / " << batch();
       }
     }
   }

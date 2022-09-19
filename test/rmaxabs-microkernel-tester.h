@@ -47,25 +47,26 @@ class RMaxAbsMicrokernelTester {
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> x(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int16_t> input(batch() + XNN_EXTRA_BYTES / sizeof(int16_t));
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(i16rng));
-      int32_t y_ref = 0;
+      std::generate(input.begin(), input.end(), std::ref(i16rng));
 
       // Compute reference results.
+      int32_t output_ref = 0;
       for (size_t n = 0; n < batch(); n++) {
-        const int32_t i = static_cast<int32_t>(x[n]);
-        const int32_t abs = std::abs(i);
-        y_ref = std::max(y_ref, abs);
+        const int32_t input_value = static_cast<int32_t>(input[n]);
+        const int32_t abs_value = std::abs(input_value);
+        output_ref = std::max(output_ref, abs_value);
       }
 
       // Call optimized micro-kernel.
-      uint16_t y = UINT16_C(0xDEAD);
-      rmaxabs(batch(), x.data(), &y);
+      uint16_t output = UINT16_C(0xDEAD);
+      rmaxabs(batch() * sizeof(int16_t), input.data(), &output);
 
       // Verify results.
-      ASSERT_EQ(static_cast<int32_t>(y), y_ref);
+      ASSERT_EQ(static_cast<int32_t>(output), output_ref)
+        << "batch " << batch();
     }
   }
 

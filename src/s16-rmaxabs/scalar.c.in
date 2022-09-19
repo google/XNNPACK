@@ -18,6 +18,7 @@ void xnn_s16_rmaxabs_ukernel__scalar_x${BATCH_TILE}(
     uint16_t* output)
 {
   assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -25,7 +26,7 @@ void xnn_s16_rmaxabs_ukernel__scalar_x${BATCH_TILE}(
     uint32_t vmax${N} = 0;
 
   $if BATCH_TILE > 1:
-    for (; batch >= ${BATCH_TILE}; batch -= ${BATCH_TILE}) {
+    for (; batch >= ${BATCH_TILE} * sizeof(int16_t); batch -= ${BATCH_TILE} * sizeof(int16_t)) {
       $for N in range(BATCH_TILE):
         const int32_t vi${N} = (int32_t) input[${N}];
       input += ${BATCH_TILE};
@@ -49,7 +50,8 @@ void xnn_s16_rmaxabs_ukernel__scalar_x${BATCH_TILE}(
       const int32_t vi = (int32_t) *input++;
       const uint32_t vabs = math_abs_s32(vi);
       vmax0 = math_max_u32(vmax0, vabs);
-    } while (--batch != 0);
+      batch -= sizeof(int16_t);
+    } while (batch != 0);
   }
   *output = (uint16_t) vmax0;
 }

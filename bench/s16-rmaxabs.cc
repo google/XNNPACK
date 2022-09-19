@@ -19,7 +19,7 @@
 #include <xnnpack/rmaxabs.h>
 
 
-void rmaxabs(
+void s16_rmaxabs(
     benchmark::State& state,
     xnn_s16_rmaxabs_ukernel_function rmaxabs,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -33,7 +33,7 @@ void rmaxabs(
       (channels) + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::iota(input.begin(), input.end(), 0);
 
-  uint16_t output = 0u;
+  uint16_t output = UINT16_C(0);
   for (auto _ : state) {
     rmaxabs(channels, input.data(), &output);
   }
@@ -44,9 +44,9 @@ void rmaxabs(
   }
 }
 
-static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
+static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 {
-  b->ArgNames({"rows", "channels"});
+  b->ArgNames({"batch"});
   b->Args({32});
   b->Args({64});
   b->Args({216});
@@ -57,24 +57,44 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-BENCHMARK_CAPTURE(rmaxabs, s16_neon_x8, xnn_s16_rmaxabs_ukernel__neon_x8, benchmark::utils::CheckNEON)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_neon_x16, xnn_s16_rmaxabs_ukernel__neon_x16, benchmark::utils::CheckNEON)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_neon_x24, xnn_s16_rmaxabs_ukernel__neon_x24, benchmark::utils::CheckNEON)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_neon_x32, xnn_s16_rmaxabs_ukernel__neon_x32, benchmark::utils::CheckNEON)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(s16_rmaxabs, s16_neon_x8,
+                    xnn_s16_rmaxabs_ukernel__neon_x8,
+                    benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(s16_rmaxabs, s16_neon_x16,
+                    xnn_s16_rmaxabs_ukernel__neon_x16,
+                    benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(s16_rmaxabs, s16_neon_x24,
+                    xnn_s16_rmaxabs_ukernel__neon_x24,
+                    benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(s16_rmaxabs, s16_neon_x32,
+                    xnn_s16_rmaxabs_ukernel__neon_x32,
+                    benchmark::utils::CheckNEON)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x1, xnn_s16_rmaxabs_ukernel__scalar_x1)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x2, xnn_s16_rmaxabs_ukernel__scalar_x2)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x3, xnn_s16_rmaxabs_ukernel__scalar_x3)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(rmaxabs, s16_scalar_x4, xnn_s16_rmaxabs_ukernel__scalar_x4)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(s16_rmaxabs, s16_scalar_x1,
+                  xnn_s16_rmaxabs_ukernel__scalar_x1)
+  ->Apply(BenchmarkBatch)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(s16_rmaxabs, s16_scalar_x2,
+                  xnn_s16_rmaxabs_ukernel__scalar_x2)
+  ->Apply(BenchmarkBatch)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(s16_rmaxabs, s16_scalar_x3,
+                  xnn_s16_rmaxabs_ukernel__scalar_x3)
+  ->Apply(BenchmarkBatch)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(s16_rmaxabs, s16_scalar_x4,
+                  xnn_s16_rmaxabs_ukernel__scalar_x4)
+  ->Apply(BenchmarkBatch)
+  ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
