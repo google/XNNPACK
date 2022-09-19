@@ -28,21 +28,20 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
+    const v128_t va = wasm_v128_load(input_a);
     input_a += 4;
 
-    v128_t vy0123 = wasm_f32x4_sub(va0123, vb);
+    v128_t vy = wasm_f32x4_sub(va, vb);
 
+    vy = wasm_f32x4_max(vy, voutput_min);
+    vy = wasm_f32x4_min(vy, voutput_max);
 
-    vy0123 = wasm_f32x4_max(vy0123, vy_min);
-
-    vy0123 = wasm_f32x4_min(vy0123, vy_max);
-
-    wasm_v128_store(output, vy0123);
+    wasm_v128_store(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -50,8 +49,8 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x4(
 
     v128_t vy = wasm_f32x4_sub(va, vb);
 
-    vy = wasm_f32x4_max(vy, vy_min);
-    vy = wasm_f32x4_min(vy, vy_max);
+    vy = wasm_f32x4_max(vy, voutput_min);
+    vy = wasm_f32x4_min(vy, voutput_max);
 
     if (batch & (2 * sizeof(float))) {
       *((double*) output) = wasm_f64x2_extract_lane(vy, 0);

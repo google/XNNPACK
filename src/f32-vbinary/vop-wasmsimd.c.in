@@ -5,6 +5,7 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
+$SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF"]
 $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
@@ -42,128 +43,101 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
   assert(output != NULL);
 
   $if ACTIVATION == "MINMAX":
-    const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
-    const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
+    const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+    const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
   $elif ACTIVATION == "RELU":
     const v128_t vzero = wasm_i32x4_const_splat(0);
 
-  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-    const v128_t va${ABC[0:4]} = wasm_v128_load(input_a);
-    $for N in range(4, BATCH_TILE, 4):
-      const v128_t va${ABC[N:N+4]} = wasm_v128_load(input_a + ${N});
-    input_a += ${BATCH_TILE};
+  $if BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const v128_t va${ABC[0]} = wasm_v128_load(input_a);
+      $for N in range(1, SIMD_TILE):
+        const v128_t va${ABC[N]} = wasm_v128_load(input_a + ${N * 4});
+      input_a += ${BATCH_TILE};
 
-    const v128_t vb${ABC[0:4]} = wasm_v128_load(input_b);
-    $for N in range(4, BATCH_TILE, 4):
-      const v128_t vb${ABC[N:N+4]} = wasm_v128_load(input_b + ${N});
-    input_b += ${BATCH_TILE};
+      const v128_t vb${ABC[0]} = wasm_v128_load(input_b);
+      $for N in range(1, SIMD_TILE):
+        const v128_t vb${ABC[N]} = wasm_v128_load(input_b + ${N * 4});
+      input_b += ${BATCH_TILE};
 
-    $if OP == "MIN" and X86:
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vm${ABC[N:N+4]} = wasm_f32x4_lt(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(va${ABC[N:N+4]}, vb${ABC[N:N+4]}, vm${ABC[N:N+4]});
-    $elif OP == "MAX" and X86:
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vm${ABC[N:N+4]} = wasm_f32x4_le(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(vb${ABC[N:N+4]}, va${ABC[N:N+4]}, vm${ABC[N:N+4]});
-    $else:
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vy${ABC[N:N+4]} = ${WASM_F32X4_OP}(va${ABC[N:N+4]}, vb${ABC[N:N+4]});
+      $for N in range(SIMD_TILE):
+        v128_t vacc${ABC[N]} = ${WASM_F32X4_OP}(va${ABC[N]}, vb${ABC[N]});
 
       $if OP == "SQRDIFF":
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_f32x4_mul(vy${ABC[N:N+4]}, vy${ABC[N:N+4]});
-
-    $if ACTIVATION == "MINMAX":
-      $if X86:
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_f32x4_pmax(vy_min, vy${ABC[N:N+4]});
-
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_f32x4_pmin(vy_max, vy${ABC[N:N+4]});
-      $else:
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_f32x4_max(vy${ABC[N:N+4]}, vy_min);
-
-        $for N in range(0, BATCH_TILE, 4):
-          vy${ABC[N:N+4]} = wasm_f32x4_min(vy${ABC[N:N+4]}, vy_max);
-    $elif ACTIVATION == "RELU":
-      $for N in range(0, BATCH_TILE, 4):
-        vy${ABC[N:N+4]} = wasm_i32x4_max(vy${ABC[N:N+4]}, vzero);
-
-    wasm_v128_store(output, vy${ABC[0:4]});
-    $for N in range(4, BATCH_TILE, 4):
-      wasm_v128_store(output + ${N}, vy${ABC[N:N+4]});
-    output += ${BATCH_TILE};
-  }
-  $if BATCH_TILE > 4:
-    for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-      const v128_t va = wasm_v128_load(input_a);
-      input_a += 4;
-
-      const v128_t vb = wasm_v128_load(input_b);
-      input_b += 4;
-
-      $if OP == "MIN" and X86:
-        const v128_t vm = wasm_f32x4_lt(va, vb);
-        v128_t vy = wasm_v128_bitselect(va, vb, vm);
-      $elif OP == "MAX" and X86:
-        const v128_t vm = wasm_f32x4_le(va, vb);
-        v128_t vy = wasm_v128_bitselect(vb, va, vm);
-      $else:
-        v128_t vy = ${WASM_F32X4_OP}(va, vb);
-        $if OP == "SQRDIFF":
-          vy = wasm_f32x4_mul(vy, vy);
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = wasm_f32x4_mul(vacc${ABC[N]}, vacc${ABC[N]});
 
       $if ACTIVATION == "MINMAX":
         $if X86:
-          vy = wasm_f32x4_pmax(vy_min, vy);
-          vy = wasm_f32x4_pmin(vy_max, vy);
-        $else:
-          vy = wasm_f32x4_max(vy, vy_min);
-          vy = wasm_f32x4_min(vy, vy_max);
-      $elif ACTIVATION == "RELU":
-        vy = wasm_i32x4_max(vy, vzero);
+          $for N in range(SIMD_TILE):
+            vacc${ABC[N]} = wasm_f32x4_pmax(voutput_min, vacc${ABC[N]});
 
-      wasm_v128_store(output, vy);
-      output += 4;
+          $for N in range(SIMD_TILE):
+            vacc${ABC[N]} = wasm_f32x4_pmin(voutput_max, vacc${ABC[N]});
+        $else:
+          $for N in range(SIMD_TILE):
+            vacc${ABC[N]} = wasm_f32x4_max(vacc${ABC[N]}, voutput_min);
+
+          $for N in range(SIMD_TILE):
+            vacc${ABC[N]} = wasm_f32x4_min(vacc${ABC[N]}, voutput_max);
+      $elif ACTIVATION == "RELU":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = wasm_i32x4_max(vacc${ABC[N]}, vzero);
+
+      wasm_v128_store(output, vacc${ABC[0]});
+      $for N in range(1, SIMD_TILE):
+        wasm_v128_store(output + ${N * 4}, vacc${ABC[N]});
+      output += ${BATCH_TILE};
     }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const v128_t va = wasm_v128_load(input_a);
+    input_a += 4;
+
+    const v128_t vb = wasm_v128_load(input_b);
+    input_b += 4;
+
+    v128_t vacc = ${WASM_F32X4_OP}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = wasm_f32x4_mul(vacc, vacc);
+
+    $if ACTIVATION == "MINMAX":
+      $if X86:
+        vacc = wasm_f32x4_pmax(voutput_min, vacc);
+        vacc = wasm_f32x4_pmin(voutput_max, vacc);
+      $else:
+        vacc = wasm_f32x4_max(vacc, voutput_min);
+        vacc = wasm_f32x4_min(vacc, voutput_max);
+    $elif ACTIVATION == "RELU":
+      vacc = wasm_i32x4_max(vacc, vzero);
+
+    wasm_v128_store(output, vacc);
+    output += 4;
+  }
   if XNN_UNLIKELY(batch != 0) {
     const v128_t va = wasm_v128_load(input_a);
     const v128_t vb = wasm_v128_load(input_b);
 
-    $if OP == "MIN" and X86:
-      const v128_t vm = wasm_f32x4_lt(va, vb);
-      v128_t vy = wasm_v128_bitselect(va, vb, vm);
-    $elif OP == "MAX" and X86:
-      const v128_t vm = wasm_f32x4_le(va, vb);
-      v128_t vy = wasm_v128_bitselect(vb, va, vm);
-    $else:
-      v128_t vy = ${WASM_F32X4_OP}(va, vb);
-      $if OP == "SQRDIFF":
-        vy = wasm_f32x4_mul(vy, vy);
+    v128_t vacc = ${WASM_F32X4_OP}(va, vb);
+    $if OP == "SQRDIFF":
+      vacc = wasm_f32x4_mul(vacc, vacc);
 
     $if ACTIVATION == "MINMAX":
       $if X86:
-        vy = wasm_f32x4_pmax(vy_min, vy);
-        vy = wasm_f32x4_pmin(vy_max, vy);
+        vacc = wasm_f32x4_pmax(voutput_min, vacc);
+        vacc = wasm_f32x4_pmin(voutput_max, vacc);
       $else:
-        vy = wasm_f32x4_max(vy, vy_min);
-        vy = wasm_f32x4_min(vy, vy_max);
+        vacc = wasm_f32x4_max(vacc, voutput_min);
+        vacc = wasm_f32x4_min(vacc, voutput_max);
     $elif ACTIVATION == "RELU":
-      vy = wasm_i32x4_max(vy, vzero);
+      vacc = wasm_i32x4_max(vacc, vzero);
 
     if (batch & (2 * sizeof(float))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
-      vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
+      *((double*) output) = wasm_f64x2_extract_lane(vacc, 0);
+      vacc = wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = wasm_f32x4_extract_lane(vy, 0);
+      *output = wasm_f32x4_extract_lane(vacc, 0);
     }
   }
 }

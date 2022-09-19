@@ -31,7 +31,7 @@ void xnn_f32_vmin_ukernel__scalar_x1(
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;
-    float vy = math_min_f32(va, vb);
-    *output++ = vy;
+    float vacc = math_min_f32(va, vb);
+    *output++ = vacc;
   }
 }

@@ -29,37 +29,34 @@ void xnn_f32_vrdivc_minmax_ukernel__sse_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128 vy_min = _mm_load_ps(params->sse.min);
-  const __m128 vy_max = _mm_load_ps(params->sse.max);
-
+  const __m128 voutput_min = _mm_load_ps(params->sse.min);
+  const __m128 voutput_max = _mm_load_ps(params->sse.max);
   const __m128 vb = _mm_load1_ps(input_b);
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
+    const __m128 va = _mm_loadu_ps(input_a);
     input_a += 4;
 
-    __m128 vy0123 = _mm_div_ps(vb, va0123);
+    __m128 vacc = _mm_div_ps(vb, va);
+    vacc = _mm_max_ps(vacc, voutput_min);
+    vacc = _mm_min_ps(vacc, voutput_max);
 
-
-    vy0123 = _mm_max_ps(vy0123, vy_min);
-
-    vy0123 = _mm_min_ps(vy0123, vy_max);
-
-    _mm_storeu_ps(output, vy0123);
+    _mm_storeu_ps(output, vacc);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
+    const __m128 va = _mm_loadu_ps(input_a);
 
-    __m128 vy0123 = _mm_div_ps(vb, va0123);
-    vy0123 = _mm_max_ps(vy0123, vy_min);
-    vy0123 = _mm_min_ps(vy0123, vy_max);
+    __m128 vacc = _mm_div_ps(vb, va);
+    vacc = _mm_max_ps(vacc, voutput_min);
+    vacc = _mm_min_ps(vacc, voutput_max);
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy0123);
-      vy0123 = _mm_movehl_ps(vy0123, vy0123);
+      _mm_storel_pi((__m64*) output, vacc);
+      vacc = _mm_movehl_ps(vacc, vacc);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy0123);
+      _mm_store_ss(output, vacc);
     }
   }
 }

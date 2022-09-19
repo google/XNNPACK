@@ -31,8 +31,8 @@ void xnn_f32_vsub_relu_ukernel__wasm_x1(
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;
-    float vy = va - vb;
-    vy = __builtin_wasm_max_f32(vy, 0.0f);
-    *output++ = vy;
+    float vacc = va - vb;
+    vacc = __builtin_wasm_max_f32(vacc, 0.0f);
+    *output++ = vacc;
   }
 }

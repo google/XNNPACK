@@ -29,37 +29,38 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m512 vy_min = _mm512_set1_ps(params->scalar.min);
-  const __m512 vy_max = _mm512_set1_ps(params->scalar.max);
-
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   const __m512 vb = _mm512_set1_ps(*input_b);
+
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
-    const __m512 vaGHIJKLMNOPQRSTUV = _mm512_loadu_ps(input_a + 16);
+    __m512 vacc0 = _mm512_loadu_ps(input_a);
+    __m512 vacc1 = _mm512_loadu_ps(input_a + 16);
     input_a += 32;
 
-    __m512 vy0123456789ABCDEF = _mm512_mul_ps(va0123456789ABCDEF, vb);
-    __m512 vyGHIJKLMNOPQRSTUV = _mm512_mul_ps(vaGHIJKLMNOPQRSTUV, vb);
+    vacc0 = _mm512_mul_ps(vacc0, vb);
+    vacc1 = _mm512_mul_ps(vacc1, vb);
 
 
-    vy0123456789ABCDEF = _mm512_max_ps(vy0123456789ABCDEF, vy_min);
-    vyGHIJKLMNOPQRSTUV = _mm512_max_ps(vyGHIJKLMNOPQRSTUV, vy_min);
+    vacc0 = _mm512_max_ps(vacc0, voutput_min);
+    vacc1 = _mm512_max_ps(vacc1, voutput_min);
 
-    vy0123456789ABCDEF = _mm512_min_ps(vy0123456789ABCDEF, vy_max);
-    vyGHIJKLMNOPQRSTUV = _mm512_min_ps(vyGHIJKLMNOPQRSTUV, vy_max);
+    vacc0 = _mm512_min_ps(vacc0, voutput_max);
+    vacc1 = _mm512_min_ps(vacc1, voutput_max);
 
-    _mm512_storeu_ps(output, vy0123456789ABCDEF);
-    _mm512_storeu_ps(output + 16, vyGHIJKLMNOPQRSTUV);
+    _mm512_storeu_ps(output, vacc0);
+    _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
   }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m512 va = _mm512_loadu_ps(input_a);
+    __m512 vacc = _mm512_loadu_ps(input_a);
     input_a += 16;
 
-    __m512 vy = _mm512_mul_ps(va, vb);
-    vy = _mm512_max_ps(vy, vy_min);
-    vy = _mm512_min_ps(vy, vy_max);
-    _mm512_storeu_ps(output, vy);
+    vacc = _mm512_mul_ps(vacc, vb);
+    vacc = _mm512_max_ps(vacc, voutput_min);
+    vacc = _mm512_min_ps(vacc, voutput_max);
+
+    _mm512_storeu_ps(output, vacc);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -69,11 +70,10 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
     batch >>= 2 /* log2(sizeof(float)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
-
-    __m512 vy = _mm512_mul_ps(va, vb);
-    vy = _mm512_max_ps(vy, vy_min);
-    vy = _mm512_min_ps(vy, vy_max);
-    _mm512_mask_storeu_ps(output, vmask, vy);
+    __m512 vacc = _mm512_maskz_loadu_ps(vmask, input_a);
+    vacc = _mm512_maskz_mul_ps(vmask, vacc, vb);
+    vacc = _mm512_maskz_max_ps(vmask, vacc, voutput_min);
+    vacc = _mm512_maskz_min_ps(vmask, vacc, voutput_max);
+    _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

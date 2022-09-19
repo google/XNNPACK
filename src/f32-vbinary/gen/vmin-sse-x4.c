@@ -37,22 +37,24 @@ void xnn_f32_vmin_ukernel__sse_x4(
     const __m128 vb = _mm_loadu_ps(input_b);
     input_b += 4;
 
-    __m128 vy = _mm_min_ps(va, vb);
-    _mm_storeu_ps(output, vy);
+    __m128 vacc = _mm_min_ps(va, vb);
+
+    _mm_storeu_ps(output, vacc);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const __m128 va = _mm_loadu_ps(input_a);
     const __m128 vb = _mm_loadu_ps(input_b);
 
-    __m128 vy = _mm_min_ps(va, vb);
+    __m128 vacc = _mm_min_ps(va, vb);
+
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy);
-      vy = _mm_movehl_ps(vy, vy);
+      _mm_storel_pi((__m64*) output, vacc);
+      vacc = _mm_movehl_ps(vacc, vacc);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy);
+      _mm_store_ss(output, vacc);
     }
   }
 }

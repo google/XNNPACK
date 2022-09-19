@@ -49,42 +49,42 @@ void xnn_f32_vadd_relu_ukernel__scalar_x8(
     const float vb7 = input_b[7];
     input_b += 8;
 
-    float vy0 = va0 + vb0;
-    float vy1 = va1 + vb1;
-    float vy2 = va2 + vb2;
-    float vy3 = va3 + vb3;
-    float vy4 = va4 + vb4;
-    float vy5 = va5 + vb5;
-    float vy6 = va6 + vb6;
-    float vy7 = va7 + vb7;
+    float vacc0 = va0 + vb0;
+    float vacc1 = va1 + vb1;
+    float vacc2 = va2 + vb2;
+    float vacc3 = va3 + vb3;
+    float vacc4 = va4 + vb4;
+    float vacc5 = va5 + vb5;
+    float vacc6 = va6 + vb6;
+    float vacc7 = va7 + vb7;
 
 
-    vy0 = math_max_f32(vy0, 0.0f);
-    vy1 = math_max_f32(vy1, 0.0f);
-    vy2 = math_max_f32(vy2, 0.0f);
-    vy3 = math_max_f32(vy3, 0.0f);
-    vy4 = math_max_f32(vy4, 0.0f);
-    vy5 = math_max_f32(vy5, 0.0f);
-    vy6 = math_max_f32(vy6, 0.0f);
-    vy7 = math_max_f32(vy7, 0.0f);
+    vacc0 = math_max_f32(vacc0, 0.0f);
+    vacc1 = math_max_f32(vacc1, 0.0f);
+    vacc2 = math_max_f32(vacc2, 0.0f);
+    vacc3 = math_max_f32(vacc3, 0.0f);
+    vacc4 = math_max_f32(vacc4, 0.0f);
+    vacc5 = math_max_f32(vacc5, 0.0f);
+    vacc6 = math_max_f32(vacc6, 0.0f);
+    vacc7 = math_max_f32(vacc7, 0.0f);
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output[4] = vy4;
-    output[5] = vy5;
-    output[6] = vy6;
-    output[7] = vy7;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
+    output[4] = vacc4;
+    output[5] = vacc5;
+    output[6] = vacc6;
+    output[7] = vacc7;
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
       const float vb = *input_b++;
-      float vy = va + vb;
-      vy = math_max_f32(vy, 0.0f);
-      *output++ = vy;
+      float vacc = va + vb;
+      vacc = math_max_f32(vacc, 0.0f);
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

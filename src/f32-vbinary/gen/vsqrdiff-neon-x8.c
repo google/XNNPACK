@@ -30,43 +30,44 @@ void xnn_f32_vsqrdiff_ukernel__neon_x8(
 
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const float32x4_t va0123 = vld1q_f32(input_a); input_a += 4;
-    const float32x4_t vb0123 = vld1q_f32(input_b); input_b += 4;
-    const float32x4_t va4567 = vld1q_f32(input_a); input_a += 4;
-    const float32x4_t vb4567 = vld1q_f32(input_b); input_b += 4;
+    const float32x4_t va0 = vld1q_f32(input_a); input_a += 4;
+    const float32x4_t vb0 = vld1q_f32(input_b); input_b += 4;
+    const float32x4_t va1 = vld1q_f32(input_a); input_a += 4;
+    const float32x4_t vb1 = vld1q_f32(input_b); input_b += 4;
 
-    float32x4_t vy0123 = vsubq_f32(va0123, vb0123);
-    float32x4_t vy4567 = vsubq_f32(va4567, vb4567);
+    float32x4_t vacc0 = vsubq_f32(va0, vb0);
+    float32x4_t vacc1 = vsubq_f32(va1, vb1);
 
-    vy0123 = vmulq_f32(vy0123, vy0123);
-    vy4567 = vmulq_f32(vy4567, vy4567);
+    vacc0 = vmulq_f32(vacc0, vacc0);
+    vacc1 = vmulq_f32(vacc1, vacc1);
 
 
-    vst1q_f32(output, vy0123); output += 4;
-    vst1q_f32(output, vy4567); output += 4;
+    vst1q_f32(output, vacc0); output += 4;
+    vst1q_f32(output, vacc1); output += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t va = vld1q_f32(input_a); input_a += 4;
     const float32x4_t vb = vld1q_f32(input_b); input_b += 4;
 
-    float32x4_t vy = vsubq_f32(va, vb);
-    vy = vmulq_f32(vy, vy);
-    vst1q_f32(output, vy); output += 4;
+    float32x4_t vacc = vsubq_f32(va, vb);
+    vacc = vmulq_f32(vacc, vacc);
+
+    vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const float32x4_t va = vld1q_f32(input_a);
     const float32x4_t vb = vld1q_f32(input_b);
 
-    float32x4_t vy = vsubq_f32(va, vb);
-    vy = vmulq_f32(vy, vy);
+    float32x4_t vacc = vsubq_f32(va, vb);
+    vacc = vmulq_f32(vacc, vacc);
 
-    float32x2_t vy_lo = vget_low_f32(vy);
+    float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
-      vst1_f32(output, vy_lo); output += 2;
-      vy_lo = vget_high_f32(vy);
+      vst1_f32(output, vacc_lo); output += 2;
+      vacc_lo = vget_high_f32(vacc);
     }
     if (batch & (1 * sizeof(float))) {
-      vst1_lane_f32(output, vy_lo, 0);
+      vst1_lane_f32(output, vacc_lo, 0);
     }
   }
 }

@@ -27,12 +27,12 @@ void xnn_f32_vsqrdiffc_ukernel__scalar_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = va - vb;
-    vy = vy * vy;
-    *output++ = vy;
+    float vacc = va - vb;
+    vacc = vacc * vacc;
+    *output++ = vacc;
   }
 }

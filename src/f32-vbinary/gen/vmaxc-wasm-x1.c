@@ -27,11 +27,11 @@ void xnn_f32_vmaxc_ukernel__wasm_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = __builtin_wasm_max_f32(va, vb);
-    *output++ = vy;
+    float vacc = __builtin_wasm_max_f32(va, vb);
+    *output++ = vacc;
   }
 }

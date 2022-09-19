@@ -27,28 +27,29 @@ void xnn_f32_vsqrdiffc_ukernel__scalar_x2(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
     input_a += 2;
 
-    float vy0 = va0 - vb;
-    float vy1 = va1 - vb;
+    float vacc0 = va0 - vb;
+    float vacc1 = va1 - vb;
 
-    vy0 = vy0 * vy0;
-    vy1 = vy1 * vy1;
+    vacc0 = vacc0 * vacc0;
+    vacc1 = vacc1 * vacc1;
 
 
-    output[0] = vy0;
-    output[1] = vy1;
+    output[0] = vacc0;
+    output[1] = vacc1;
     output += 2;
   }
   if XNN_UNLIKELY(batch != 0) {
+    assert(batch == sizeof(float));
     const float va = *input_a;
-    float vy = va - vb;
-    vy = vy * vy;
-    *output = vy;
+    float vacc = va - vb;
+    vacc = vacc * vacc;
+    *output = vacc;
   }
 }

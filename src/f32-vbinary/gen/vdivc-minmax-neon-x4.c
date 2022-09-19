@@ -2,7 +2,7 @@
 //   Template: src/f32-vbinary/vopc-neon.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2019 Google LLC
+// Copyright 2_lo9 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -28,36 +28,33 @@ void xnn_f32_vdivc_minmax_ukernel__neon_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
-
+  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
   const float32x4_t vb = vld1q_dup_f32(input_b);
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const float32x4_t va0123 = vld1q_f32(input_a); input_a += 4;
+    const float32x4_t va = vld1q_f32(input_a); input_a += 4;
 
-    float32x4_t vy0123 = vdivq_f32(va0123, vb);
+    float32x4_t vacc = vdivq_f32(va, vb);
+    vacc = vmaxq_f32(vacc, voutput_min);
+    vacc = vminq_f32(vacc, voutput_max);
 
-
-    vy0123 = vmaxq_f32(vy0123, vy_min);
-
-    vy0123 = vminq_f32(vy0123, vy_max);
-
-    vst1q_f32(output, vy0123); output += 4;
+    vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const float32x4_t va0123 = vld1q_f32(input_a);
+    const float32x4_t va = vld1q_f32(input_a);
 
-    float32x4_t vy0123 = vdivq_f32(va0123, vb);
-    vy0123 = vmaxq_f32(vy0123, vy_min);
-    vy0123 = vminq_f32(vy0123, vy_max);
+    float32x4_t vacc = vdivq_f32(va, vb);
+    vacc = vmaxq_f32(vacc, voutput_min);
+    vacc = vminq_f32(vacc, voutput_max);
 
-    float32x2_t vy01 = vget_low_f32(vy0123);
+    float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
-      vst1_f32(output, vy01); output += 2;
-      vy01 = vget_high_f32(vy0123);
+      vst1_f32(output, vacc_lo); output += 2;
+      vacc_lo = vget_high_f32(vacc);
     }
     if (batch & (1 * sizeof(float))) {
-      vst1_lane_f32(output, vy01, 0);
+      vst1_lane_f32(output, vacc_lo, 0);
     }
   }
 }

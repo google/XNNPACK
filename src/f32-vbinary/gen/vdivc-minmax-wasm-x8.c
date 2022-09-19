@@ -27,10 +27,10 @@ void xnn_f32_vdivc_minmax_ukernel__wasm_x8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
-
+  const float voutput_min = params->scalar.min;
+  const float voutput_max = params->scalar.max;
   const float vb = *input_b;
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -42,51 +42,51 @@ void xnn_f32_vdivc_minmax_ukernel__wasm_x8(
     const float va7 = input_a[7];
     input_a += 8;
 
-    float vy0 = va0 / vb;
-    float vy1 = va1 / vb;
-    float vy2 = va2 / vb;
-    float vy3 = va3 / vb;
-    float vy4 = va4 / vb;
-    float vy5 = va5 / vb;
-    float vy6 = va6 / vb;
-    float vy7 = va7 / vb;
+    float vacc0 = va0 / vb;
+    float vacc1 = va1 / vb;
+    float vacc2 = va2 / vb;
+    float vacc3 = va3 / vb;
+    float vacc4 = va4 / vb;
+    float vacc5 = va5 / vb;
+    float vacc6 = va6 / vb;
+    float vacc7 = va7 / vb;
 
 
-    vy0 = __builtin_wasm_max_f32(vy0, vy_min);
-    vy1 = __builtin_wasm_max_f32(vy1, vy_min);
-    vy2 = __builtin_wasm_max_f32(vy2, vy_min);
-    vy3 = __builtin_wasm_max_f32(vy3, vy_min);
-    vy4 = __builtin_wasm_max_f32(vy4, vy_min);
-    vy5 = __builtin_wasm_max_f32(vy5, vy_min);
-    vy6 = __builtin_wasm_max_f32(vy6, vy_min);
-    vy7 = __builtin_wasm_max_f32(vy7, vy_min);
+    vacc0 = __builtin_wasm_max_f32(vacc0, voutput_min);
+    vacc1 = __builtin_wasm_max_f32(vacc1, voutput_min);
+    vacc2 = __builtin_wasm_max_f32(vacc2, voutput_min);
+    vacc3 = __builtin_wasm_max_f32(vacc3, voutput_min);
+    vacc4 = __builtin_wasm_max_f32(vacc4, voutput_min);
+    vacc5 = __builtin_wasm_max_f32(vacc5, voutput_min);
+    vacc6 = __builtin_wasm_max_f32(vacc6, voutput_min);
+    vacc7 = __builtin_wasm_max_f32(vacc7, voutput_min);
 
-    vy0 = __builtin_wasm_min_f32(vy0, vy_max);
-    vy1 = __builtin_wasm_min_f32(vy1, vy_max);
-    vy2 = __builtin_wasm_min_f32(vy2, vy_max);
-    vy3 = __builtin_wasm_min_f32(vy3, vy_max);
-    vy4 = __builtin_wasm_min_f32(vy4, vy_max);
-    vy5 = __builtin_wasm_min_f32(vy5, vy_max);
-    vy6 = __builtin_wasm_min_f32(vy6, vy_max);
-    vy7 = __builtin_wasm_min_f32(vy7, vy_max);
+    vacc0 = __builtin_wasm_min_f32(vacc0, voutput_max);
+    vacc1 = __builtin_wasm_min_f32(vacc1, voutput_max);
+    vacc2 = __builtin_wasm_min_f32(vacc2, voutput_max);
+    vacc3 = __builtin_wasm_min_f32(vacc3, voutput_max);
+    vacc4 = __builtin_wasm_min_f32(vacc4, voutput_max);
+    vacc5 = __builtin_wasm_min_f32(vacc5, voutput_max);
+    vacc6 = __builtin_wasm_min_f32(vacc6, voutput_max);
+    vacc7 = __builtin_wasm_min_f32(vacc7, voutput_max);
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output[4] = vy4;
-    output[5] = vy5;
-    output[6] = vy6;
-    output[7] = vy7;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
+    output[4] = vacc4;
+    output[5] = vacc5;
+    output[6] = vacc6;
+    output[7] = vacc7;
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
-      float vy = va / vb;
-      vy = __builtin_wasm_max_f32(vy, vy_min);
-      vy = __builtin_wasm_min_f32(vy, vy_max);
-      *output++ = vy;
+      float vacc = va / vb;
+      vacc = __builtin_wasm_max_f32(vacc, voutput_min);
+      vacc = __builtin_wasm_min_f32(vacc, voutput_max);
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

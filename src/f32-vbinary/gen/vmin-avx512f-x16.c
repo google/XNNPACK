@@ -31,17 +31,14 @@ void xnn_f32_vmin_ukernel__avx512f_x16(
 
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m512 va0123456789ABCDEF = _mm512_loadu_ps(input_a);
+    __m512 vacc = _mm512_loadu_ps(input_a);
     input_a += 16;
 
-    const __m512 vb0123456789ABCDEF = _mm512_loadu_ps(input_b);
+    vacc = _mm512_min_ps(vacc, _mm512_loadu_ps(input_b));
     input_b += 16;
 
-    __m512 vy0123456789ABCDEF = _mm512_min_ps(va0123456789ABCDEF, vb0123456789ABCDEF);
 
-
-
-    _mm512_storeu_ps(output, vy0123456789ABCDEF);
+    _mm512_storeu_ps(output, vacc);
     output += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -51,10 +48,8 @@ void xnn_f32_vmin_ukernel__avx512f_x16(
     batch >>= 2 /* log2(sizeof(float)) */;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
-    const __m512 vb = _mm512_maskz_loadu_ps(vmask, input_b);
-
-    __m512 vy = _mm512_min_ps(va, vb);
-    _mm512_mask_storeu_ps(output, vmask, vy);
+    __m512 vacc = _mm512_maskz_loadu_ps(vmask, input_a);
+    vacc = _mm512_maskz_min_ps(vmask, vacc, _mm512_maskz_loadu_ps(vmask, input_b));
+    _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

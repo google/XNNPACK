@@ -29,28 +29,29 @@ void xnn_f32_vsqrdiffc_ukernel__wasmsimd_x16(
   assert(output != NULL);
 
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
-    const v128_t va4567 = wasm_v128_load(input_a + 4);
-    const v128_t va89AB = wasm_v128_load(input_a + 8);
-    const v128_t vaCDEF = wasm_v128_load(input_a + 12);
+    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va1 = wasm_v128_load(input_a + 4);
+    const v128_t va2 = wasm_v128_load(input_a + 8);
+    const v128_t va3 = wasm_v128_load(input_a + 12);
     input_a += 16;
 
-    v128_t vy0123 = wasm_f32x4_sub(va0123, vb);
-    v128_t vy4567 = wasm_f32x4_sub(va4567, vb);
-    v128_t vy89AB = wasm_f32x4_sub(va89AB, vb);
-    v128_t vyCDEF = wasm_f32x4_sub(vaCDEF, vb);
+    v128_t vy0 = wasm_f32x4_sub(va0, vb);
+    v128_t vy1 = wasm_f32x4_sub(va1, vb);
+    v128_t vy2 = wasm_f32x4_sub(va2, vb);
+    v128_t vy3 = wasm_f32x4_sub(va3, vb);
 
-    vy0123 = wasm_f32x4_mul(vy0123, vy0123);
-    vy4567 = wasm_f32x4_mul(vy4567, vy4567);
-    vy89AB = wasm_f32x4_mul(vy89AB, vy89AB);
-    vyCDEF = wasm_f32x4_mul(vyCDEF, vyCDEF);
+    vy0 = wasm_f32x4_mul(vy0, vy0);
+    vy1 = wasm_f32x4_mul(vy1, vy1);
+    vy2 = wasm_f32x4_mul(vy2, vy2);
+    vy3 = wasm_f32x4_mul(vy3, vy3);
 
 
-    wasm_v128_store(output, vy0123);
-    wasm_v128_store(output + 4, vy4567);
-    wasm_v128_store(output + 8, vy89AB);
-    wasm_v128_store(output + 12, vyCDEF);
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 4, vy1);
+    wasm_v128_store(output + 8, vy2);
+    wasm_v128_store(output + 12, vy3);
     output += 16;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

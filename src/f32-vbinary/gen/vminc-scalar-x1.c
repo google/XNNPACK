@@ -27,11 +27,11 @@ void xnn_f32_vminc_ukernel__scalar_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = math_min_f32(va, vb);
-    *output++ = vy;
+    float vacc = math_min_f32(va, vb);
+    *output++ = vacc;
   }
 }

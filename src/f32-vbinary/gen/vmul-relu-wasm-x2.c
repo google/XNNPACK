@@ -37,22 +37,23 @@ void xnn_f32_vmul_relu_ukernel__wasm_x2(
     const float vb1 = input_b[1];
     input_b += 2;
 
-    float vy0 = va0 * vb0;
-    float vy1 = va1 * vb1;
+    float vacc0 = va0 * vb0;
+    float vacc1 = va1 * vb1;
 
 
-    vy0 = __builtin_wasm_max_f32(vy0, 0.0f);
-    vy1 = __builtin_wasm_max_f32(vy1, 0.0f);
+    vacc0 = __builtin_wasm_max_f32(vacc0, 0.0f);
+    vacc1 = __builtin_wasm_max_f32(vacc1, 0.0f);
 
-    output[0] = vy0;
-    output[1] = vy1;
+    output[0] = vacc0;
+    output[1] = vacc1;
     output += 2;
   }
   if XNN_UNLIKELY(batch != 0) {
+    assert(batch == sizeof(float));
     const float va = *input_a;
     const float vb = *input_b;
-    float vy = va * vb;
-    vy = __builtin_wasm_max_f32(vy, 0.0f);
-    *output = vy;
+    float vacc = va * vb;
+    vacc = __builtin_wasm_max_f32(vacc, 0.0f);
+    *output = vacc;
   }
 }

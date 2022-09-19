@@ -29,18 +29,19 @@ void xnn_f32_vrdivc_ukernel__wasmsimd_x8(
   assert(output != NULL);
 
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
-    const v128_t va4567 = wasm_v128_load(input_a + 4);
+    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va1 = wasm_v128_load(input_a + 4);
     input_a += 8;
 
-    v128_t vy0123 = wasm_f32x4_div(vb, va0123);
-    v128_t vy4567 = wasm_f32x4_div(vb, va4567);
+    v128_t vy0 = wasm_f32x4_div(vb, va0);
+    v128_t vy1 = wasm_f32x4_div(vb, va1);
 
 
 
-    wasm_v128_store(output, vy0123);
-    wasm_v128_store(output + 4, vy4567);
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 4, vy1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

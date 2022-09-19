@@ -28,33 +28,34 @@ void xnn_f32_vsub_minmax_ukernel__neon_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float32x4_t vy_min = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vy_max = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t va = vld1q_f32(input_a); input_a += 4;
     const float32x4_t vb = vld1q_f32(input_b); input_b += 4;
 
-    float32x4_t vy = vsubq_f32(va, vb);
-    vy = vmaxq_f32(vy, vy_min);
-    vy = vminq_f32(vy, vy_max);
-    vst1q_f32(output, vy); output += 4;
+    float32x4_t vacc = vsubq_f32(va, vb);
+    vacc = vmaxq_f32(vacc, voutput_min);
+    vacc = vminq_f32(vacc, voutput_max);
+
+    vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const float32x4_t va = vld1q_f32(input_a);
     const float32x4_t vb = vld1q_f32(input_b);
 
-    float32x4_t vy = vsubq_f32(va, vb);
-    vy = vmaxq_f32(vy, vy_min);
-    vy = vminq_f32(vy, vy_max);
+    float32x4_t vacc = vsubq_f32(va, vb);
+    vacc = vmaxq_f32(vacc, voutput_min);
+    vacc = vminq_f32(vacc, voutput_max);
 
-    float32x2_t vy_lo = vget_low_f32(vy);
+    float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
-      vst1_f32(output, vy_lo); output += 2;
-      vy_lo = vget_high_f32(vy);
+      vst1_f32(output, vacc_lo); output += 2;
+      vacc_lo = vget_high_f32(vacc);
     }
     if (batch & (1 * sizeof(float))) {
-      vst1_lane_f32(output, vy_lo, 0);
+      vst1_lane_f32(output, vacc_lo, 0);
     }
   }
 }

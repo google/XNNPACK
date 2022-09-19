@@ -27,10 +27,10 @@ void xnn_f32_vrdivc_minmax_ukernel__wasm_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
-
+  const float voutput_min = params->scalar.min;
+  const float voutput_max = params->scalar.max;
   const float vb = *input_b;
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -38,35 +38,35 @@ void xnn_f32_vrdivc_minmax_ukernel__wasm_x4(
     const float va3 = input_a[3];
     input_a += 4;
 
-    float vy0 = vb / va0;
-    float vy1 = vb / va1;
-    float vy2 = vb / va2;
-    float vy3 = vb / va3;
+    float vacc0 = vb / va0;
+    float vacc1 = vb / va1;
+    float vacc2 = vb / va2;
+    float vacc3 = vb / va3;
 
 
-    vy0 = __builtin_wasm_max_f32(vy0, vy_min);
-    vy1 = __builtin_wasm_max_f32(vy1, vy_min);
-    vy2 = __builtin_wasm_max_f32(vy2, vy_min);
-    vy3 = __builtin_wasm_max_f32(vy3, vy_min);
+    vacc0 = __builtin_wasm_max_f32(vacc0, voutput_min);
+    vacc1 = __builtin_wasm_max_f32(vacc1, voutput_min);
+    vacc2 = __builtin_wasm_max_f32(vacc2, voutput_min);
+    vacc3 = __builtin_wasm_max_f32(vacc3, voutput_min);
 
-    vy0 = __builtin_wasm_min_f32(vy0, vy_max);
-    vy1 = __builtin_wasm_min_f32(vy1, vy_max);
-    vy2 = __builtin_wasm_min_f32(vy2, vy_max);
-    vy3 = __builtin_wasm_min_f32(vy3, vy_max);
+    vacc0 = __builtin_wasm_min_f32(vacc0, voutput_max);
+    vacc1 = __builtin_wasm_min_f32(vacc1, voutput_max);
+    vacc2 = __builtin_wasm_min_f32(vacc2, voutput_max);
+    vacc3 = __builtin_wasm_min_f32(vacc3, voutput_max);
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
-      float vy = vb / va;
-      vy = __builtin_wasm_max_f32(vy, vy_min);
-      vy = __builtin_wasm_min_f32(vy, vy_max);
-      *output++ = vy;
+      float vacc = vb / va;
+      vacc = __builtin_wasm_max_f32(vacc, voutput_min);
+      vacc = __builtin_wasm_min_f32(vacc, voutput_max);
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

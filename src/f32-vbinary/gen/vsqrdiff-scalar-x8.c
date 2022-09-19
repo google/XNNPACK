@@ -49,42 +49,42 @@ void xnn_f32_vsqrdiff_ukernel__scalar_x8(
     const float vb7 = input_b[7];
     input_b += 8;
 
-    float vy0 = va0 - vb0;
-    float vy1 = va1 - vb1;
-    float vy2 = va2 - vb2;
-    float vy3 = va3 - vb3;
-    float vy4 = va4 - vb4;
-    float vy5 = va5 - vb5;
-    float vy6 = va6 - vb6;
-    float vy7 = va7 - vb7;
+    float vacc0 = va0 - vb0;
+    float vacc1 = va1 - vb1;
+    float vacc2 = va2 - vb2;
+    float vacc3 = va3 - vb3;
+    float vacc4 = va4 - vb4;
+    float vacc5 = va5 - vb5;
+    float vacc6 = va6 - vb6;
+    float vacc7 = va7 - vb7;
 
-    vy0 = vy0 * vy0;
-    vy1 = vy1 * vy1;
-    vy2 = vy2 * vy2;
-    vy3 = vy3 * vy3;
-    vy4 = vy4 * vy4;
-    vy5 = vy5 * vy5;
-    vy6 = vy6 * vy6;
-    vy7 = vy7 * vy7;
+    vacc0 = vacc0 * vacc0;
+    vacc1 = vacc1 * vacc1;
+    vacc2 = vacc2 * vacc2;
+    vacc3 = vacc3 * vacc3;
+    vacc4 = vacc4 * vacc4;
+    vacc5 = vacc5 * vacc5;
+    vacc6 = vacc6 * vacc6;
+    vacc7 = vacc7 * vacc7;
 
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
-    output[4] = vy4;
-    output[5] = vy5;
-    output[6] = vy6;
-    output[7] = vy7;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
+    output[4] = vacc4;
+    output[5] = vacc5;
+    output[6] = vacc6;
+    output[7] = vacc7;
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
       const float vb = *input_b++;
-      float vy = va - vb;
-      vy = vy * vy;
-      *output++ = vy;
+      float vacc = va - vb;
+      vacc = vacc * vacc;
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

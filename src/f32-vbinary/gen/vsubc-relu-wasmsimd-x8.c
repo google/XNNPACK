@@ -30,20 +30,21 @@ void xnn_f32_vsubc_relu_ukernel__wasmsimd_x8(
 
   const v128_t vzero = wasm_i32x4_const_splat(0);
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
-    const v128_t va4567 = wasm_v128_load(input_a + 4);
+    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va1 = wasm_v128_load(input_a + 4);
     input_a += 8;
 
-    v128_t vy0123 = wasm_f32x4_sub(va0123, vb);
-    v128_t vy4567 = wasm_f32x4_sub(va4567, vb);
+    v128_t vy0 = wasm_f32x4_sub(va0, vb);
+    v128_t vy1 = wasm_f32x4_sub(va1, vb);
 
 
-    vy0123 = wasm_i32x4_max(vy0123, vzero);
-    vy4567 = wasm_i32x4_max(vy4567, vzero);
+    vy0 = wasm_i32x4_max(vy0, vzero);
+    vy1 = wasm_i32x4_max(vy1, vzero);
 
-    wasm_v128_store(output, vy0123);
-    wasm_v128_store(output + 4, vy4567);
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 4, vy1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

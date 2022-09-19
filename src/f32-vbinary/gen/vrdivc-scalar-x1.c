@@ -27,11 +27,11 @@ void xnn_f32_vrdivc_ukernel__scalar_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = vb / va;
-    *output++ = vy;
+    float vacc = vb / va;
+    *output++ = vacc;
   }
 }

@@ -27,15 +27,15 @@ void xnn_f32_vmulc_minmax_ukernel__scalar_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
-
+  const float voutput_min = params->scalar.min;
+  const float voutput_max = params->scalar.max;
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = va * vb;
-    vy = math_max_f32(vy, vy_min);
-    vy = math_min_f32(vy, vy_max);
-    *output++ = vy;
+    float vacc = va * vb;
+    vacc = math_max_f32(vacc, voutput_min);
+    vacc = math_min_f32(vacc, voutput_max);
+    *output++ = vacc;
   }
 }

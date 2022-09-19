@@ -41,25 +41,25 @@ void xnn_f32_vmax_ukernel__wasm_x4(
     const float vb3 = input_b[3];
     input_b += 4;
 
-    float vy0 = __builtin_wasm_max_f32(va0, vb0);
-    float vy1 = __builtin_wasm_max_f32(va1, vb1);
-    float vy2 = __builtin_wasm_max_f32(va2, vb2);
-    float vy3 = __builtin_wasm_max_f32(va3, vb3);
+    float vacc0 = __builtin_wasm_max_f32(va0, vb0);
+    float vacc1 = __builtin_wasm_max_f32(va1, vb1);
+    float vacc2 = __builtin_wasm_max_f32(va2, vb2);
+    float vacc3 = __builtin_wasm_max_f32(va3, vb3);
 
 
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
       const float vb = *input_b++;
-      float vy = __builtin_wasm_max_f32(va, vb);
-      *output++ = vy;
+      float vacc = __builtin_wasm_max_f32(va, vb);
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

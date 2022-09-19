@@ -31,7 +31,7 @@ void xnn_f32_vmin_ukernel__wasm_x1(
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;
-    float vy = __builtin_wasm_min_f32(va, vb);
-    *output++ = vy;
+    float vacc = __builtin_wasm_min_f32(va, vb);
+    *output++ = vacc;
   }
 }

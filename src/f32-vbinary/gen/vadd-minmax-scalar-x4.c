@@ -27,8 +27,8 @@ void xnn_f32_vadd_minmax_ukernel__scalar_x4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
+  const float voutput_min = params->scalar.min;
+  const float voutput_max = params->scalar.max;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float va0 = input_a[0];
@@ -43,36 +43,36 @@ void xnn_f32_vadd_minmax_ukernel__scalar_x4(
     const float vb3 = input_b[3];
     input_b += 4;
 
-    float vy0 = va0 + vb0;
-    float vy1 = va1 + vb1;
-    float vy2 = va2 + vb2;
-    float vy3 = va3 + vb3;
+    float vacc0 = va0 + vb0;
+    float vacc1 = va1 + vb1;
+    float vacc2 = va2 + vb2;
+    float vacc3 = va3 + vb3;
 
 
-    vy0 = math_max_f32(vy0, vy_min);
-    vy1 = math_max_f32(vy1, vy_min);
-    vy2 = math_max_f32(vy2, vy_min);
-    vy3 = math_max_f32(vy3, vy_min);
+    vacc0 = math_max_f32(vacc0, voutput_min);
+    vacc1 = math_max_f32(vacc1, voutput_min);
+    vacc2 = math_max_f32(vacc2, voutput_min);
+    vacc3 = math_max_f32(vacc3, voutput_min);
 
-    vy0 = math_min_f32(vy0, vy_max);
-    vy1 = math_min_f32(vy1, vy_max);
-    vy2 = math_min_f32(vy2, vy_max);
-    vy3 = math_min_f32(vy3, vy_max);
+    vacc0 = math_min_f32(vacc0, voutput_max);
+    vacc1 = math_min_f32(vacc1, voutput_max);
+    vacc2 = math_min_f32(vacc2, voutput_max);
+    vacc3 = math_min_f32(vacc3, voutput_max);
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
       const float vb = *input_b++;
-      float vy = va + vb;
-      vy = math_max_f32(vy, vy_min);
-      vy = math_min_f32(vy, vy_max);
-      *output++ = vy;
+      float vacc = va + vb;
+      vacc = math_max_f32(vacc, voutput_min);
+      vacc = math_min_f32(vacc, voutput_max);
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

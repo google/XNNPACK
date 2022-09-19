@@ -31,8 +31,8 @@ void xnn_f32_vsqrdiff_ukernel__scalar_x1(
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;
-    float vy = va - vb;
-    vy = vy * vy;
-    *output++ = vy;
+    float vacc = va - vb;
+    vacc = vacc * vacc;
+    *output++ = vacc;
   }
 }

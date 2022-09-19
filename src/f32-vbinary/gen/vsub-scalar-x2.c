@@ -37,19 +37,20 @@ void xnn_f32_vsub_ukernel__scalar_x2(
     const float vb1 = input_b[1];
     input_b += 2;
 
-    float vy0 = va0 - vb0;
-    float vy1 = va1 - vb1;
+    float vacc0 = va0 - vb0;
+    float vacc1 = va1 - vb1;
 
 
 
-    output[0] = vy0;
-    output[1] = vy1;
+    output[0] = vacc0;
+    output[1] = vacc1;
     output += 2;
   }
   if XNN_UNLIKELY(batch != 0) {
+    assert(batch == sizeof(float));
     const float va = *input_a;
     const float vb = *input_b;
-    float vy = va - vb;
-    *output = vy;
+    float vacc = va - vb;
+    *output = vacc;
   }
 }

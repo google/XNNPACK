@@ -31,7 +31,7 @@ void xnn_f32_vmul_ukernel__scalar_x1(
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;
-    float vy = va * vb;
-    *output++ = vy;
+    float vacc = va * vb;
+    *output++ = vacc;
   }
 }

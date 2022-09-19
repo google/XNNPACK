@@ -30,16 +30,16 @@ void xnn_f32_vsubc_relu_ukernel__wasmsimd_x4(
 
   const v128_t vzero = wasm_i32x4_const_splat(0);
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
+    const v128_t va = wasm_v128_load(input_a);
     input_a += 4;
 
-    v128_t vy0123 = wasm_f32x4_sub(va0123, vb);
+    v128_t vy = wasm_f32x4_sub(va, vb);
 
+    vy = wasm_i32x4_max(vy, vzero);
 
-    vy0123 = wasm_i32x4_max(vy0123, vzero);
-
-    wasm_v128_store(output, vy0123);
+    wasm_v128_store(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {

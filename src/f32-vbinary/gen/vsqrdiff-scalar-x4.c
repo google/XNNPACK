@@ -41,30 +41,30 @@ void xnn_f32_vsqrdiff_ukernel__scalar_x4(
     const float vb3 = input_b[3];
     input_b += 4;
 
-    float vy0 = va0 - vb0;
-    float vy1 = va1 - vb1;
-    float vy2 = va2 - vb2;
-    float vy3 = va3 - vb3;
+    float vacc0 = va0 - vb0;
+    float vacc1 = va1 - vb1;
+    float vacc2 = va2 - vb2;
+    float vacc3 = va3 - vb3;
 
-    vy0 = vy0 * vy0;
-    vy1 = vy1 * vy1;
-    vy2 = vy2 * vy2;
-    vy3 = vy3 * vy3;
+    vacc0 = vacc0 * vacc0;
+    vacc1 = vacc1 * vacc1;
+    vacc2 = vacc2 * vacc2;
+    vacc3 = vacc3 * vacc3;
 
 
-    output[0] = vy0;
-    output[1] = vy1;
-    output[2] = vy2;
-    output[3] = vy3;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
+    output[3] = vacc3;
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float va = *input_a++;
       const float vb = *input_b++;
-      float vy = va - vb;
-      vy = vy * vy;
-      *output++ = vy;
+      float vacc = va - vb;
+      vacc = vacc * vacc;
+      *output++ = vacc;
       batch -= sizeof(float);
     } while (batch != 0);
   }

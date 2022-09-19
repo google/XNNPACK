@@ -29,15 +29,15 @@ void xnn_f32_vaddc_ukernel__wasmsimd_x4(
   assert(output != NULL);
 
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
+    const v128_t va = wasm_v128_load(input_a);
     input_a += 4;
 
-    v128_t vy0123 = wasm_f32x4_add(va0123, vb);
+    v128_t vy = wasm_f32x4_add(va, vb);
 
 
-
-    wasm_v128_store(output, vy0123);
+    wasm_v128_store(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {

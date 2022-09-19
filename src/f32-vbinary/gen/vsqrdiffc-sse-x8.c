@@ -29,45 +29,46 @@ void xnn_f32_vsqrdiffc_ukernel__sse_x8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const __m128 vb = _mm_load1_ps(input_b);
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
-    const __m128 va4567 = _mm_loadu_ps(input_a + 4);
+    const __m128 va0 = _mm_loadu_ps(input_a);
+    const __m128 va1 = _mm_loadu_ps(input_a + 4);
     input_a += 8;
 
-    __m128 vy0123 = _mm_sub_ps(va0123, vb);
-    __m128 vy4567 = _mm_sub_ps(va4567, vb);
+    __m128 vacc0 = _mm_sub_ps(va0, vb);
+    __m128 vacc1 = _mm_sub_ps(va1, vb);
 
-    vy0123 = _mm_mul_ps(vy0123, vy0123);
-    vy4567 = _mm_mul_ps(vy4567, vy4567);
+    vacc0 = _mm_mul_ps(vacc0, vacc0);
+    vacc1 = _mm_mul_ps(vacc1, vacc1);
 
 
-    _mm_storeu_ps(output, vy0123);
-    _mm_storeu_ps(output + 4, vy4567);
+    _mm_storeu_ps(output, vacc0);
+    _mm_storeu_ps(output + 4, vacc1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
+    const __m128 va = _mm_loadu_ps(input_a);
     input_a += 4;
 
-    __m128 vy0123 = _mm_sub_ps(va0123, vb);
-    vy0123 = _mm_mul_ps(vy0123, vy0123);
-    _mm_storeu_ps(output, vy0123);
+    __m128 vacc = _mm_sub_ps(va, vb);
+    vacc = _mm_mul_ps(vacc, vacc);
+
+    _mm_storeu_ps(output, vacc);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
+    const __m128 va = _mm_loadu_ps(input_a);
 
-    __m128 vy0123 = _mm_sub_ps(va0123, vb);
-    vy0123 = _mm_mul_ps(vy0123, vy0123);
+    __m128 vacc = _mm_sub_ps(va, vb);
+    vacc = _mm_mul_ps(vacc, vacc);
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy0123);
-      vy0123 = _mm_movehl_ps(vy0123, vy0123);
+      _mm_storel_pi((__m64*) output, vacc);
+      vacc = _mm_movehl_ps(vacc, vacc);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy0123);
+      _mm_store_ss(output, vacc);
     }
   }
 }

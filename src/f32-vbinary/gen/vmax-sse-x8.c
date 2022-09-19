@@ -31,21 +31,21 @@ void xnn_f32_vmax_ukernel__sse_x8(
 
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m128 va0123 = _mm_loadu_ps(input_a);
-    const __m128 va4567 = _mm_loadu_ps(input_a + 4);
+    const __m128 va0 = _mm_loadu_ps(input_a);
+    const __m128 va1 = _mm_loadu_ps(input_a + 4);
     input_a += 8;
 
-    const __m128 vb0123 = _mm_loadu_ps(input_b);
-    const __m128 vb4567 = _mm_loadu_ps(input_b + 4);
+    const __m128 vb0 = _mm_loadu_ps(input_b);
+    const __m128 vb1 = _mm_loadu_ps(input_b + 4);
     input_b += 8;
 
-    __m128 vy0123 = _mm_max_ps(va0123, vb0123);
-    __m128 vy4567 = _mm_max_ps(va4567, vb4567);
+    __m128 vacc0 = _mm_max_ps(va0, vb0);
+    __m128 vacc1 = _mm_max_ps(va1, vb1);
 
 
 
-    _mm_storeu_ps(output, vy0123);
-    _mm_storeu_ps(output + 4, vy4567);
+    _mm_storeu_ps(output, vacc0);
+    _mm_storeu_ps(output + 4, vacc1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
@@ -55,22 +55,24 @@ void xnn_f32_vmax_ukernel__sse_x8(
     const __m128 vb = _mm_loadu_ps(input_b);
     input_b += 4;
 
-    __m128 vy = _mm_max_ps(va, vb);
-    _mm_storeu_ps(output, vy);
+    __m128 vacc = _mm_max_ps(va, vb);
+
+    _mm_storeu_ps(output, vacc);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const __m128 va = _mm_loadu_ps(input_a);
     const __m128 vb = _mm_loadu_ps(input_b);
 
-    __m128 vy = _mm_max_ps(va, vb);
+    __m128 vacc = _mm_max_ps(va, vb);
+
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy);
-      vy = _mm_movehl_ps(vy, vy);
+      _mm_storel_pi((__m64*) output, vacc);
+      vacc = _mm_movehl_ps(vacc, vacc);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy);
+      _mm_store_ss(output, vacc);
     }
   }
 }

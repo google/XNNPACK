@@ -29,7 +29,22 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_x${BATCH_TILE}(
   const int32_t vmagic_max = params->scalar_imagic.magic_max;
   const int32_t vmagic_bias_less_zero_point = params->scalar_imagic.magic_bias_less_zero_point;
 
-  $if BATCH_TILE > 1:
+  $if BATCH_TILE == 1:
+    do {
+      float vx = *input++;
+      vx *= vscale;
+      vx += vmagic_bias;
+
+      int32_t vy = (int32_t) float_as_uint32(vx);
+      vy = math_max_s32(vy, vmagic_min);
+      vy = math_min_s32(vy, vmagic_max);
+      vy -= vmagic_bias_less_zero_point;
+
+      *output++ = (${XINT8_T}) vy;
+
+      batch -= sizeof(float);
+    } while (batch != 0);
+  $else:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(BATCH_TILE):
         float vx${N} = input[${N}];
@@ -57,38 +72,9 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_x${BATCH_TILE}(
         output[${N}] = (${XINT8_T}) vy${N};
       output += ${BATCH_TILE};
     }
-  $if BATCH_TILE == 1:
-    do {
-      float vx = *input++;
-      vx *= vscale;
-      vx += vmagic_bias;
-
-      int32_t vy = (int32_t) float_as_uint32(vx);
-      vy = math_max_s32(vy, vmagic_min);
-      vy = math_min_s32(vy, vmagic_max);
-      vy -= vmagic_bias_less_zero_point;
-
-      *output++ = (${XINT8_T}) vy;
-
-      batch -= sizeof(float);
-    } while (batch != 0);
-  $elif BATCH_TILE == 2:
-    if XNN_UNLIKELY(batch != 0) {
-      float vx = *input;
-      vx *= vscale;
-      vx += vmagic_bias;
-
-      int32_t vy = (int32_t) float_as_uint32(vx);
-      vy = math_max_s32(vy, vmagic_min);
-      vy = math_min_s32(vy, vmagic_max);
-      vy -= vmagic_bias_less_zero_point;
-
-      *output = (${XINT8_T}) vy;
-    }
-  $else:
-    if XNN_UNLIKELY(batch != 0) {
-      do {
-        float vx = *input++;
+    $if BATCH_TILE == 2:
+      if XNN_UNLIKELY(batch != 0) {
+        float vx = *input;
         vx *= vscale;
         vx += vmagic_bias;
 
@@ -97,9 +83,23 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__scalar_imagic_x${BATCH_TILE}(
         vy = math_min_s32(vy, vmagic_max);
         vy -= vmagic_bias_less_zero_point;
 
-        *output++ = (${XINT8_T}) vy;
+        *output = (${XINT8_T}) vy;
+      }
+    $else:
+      if XNN_UNLIKELY(batch != 0) {
+        do {
+          float vx = *input++;
+          vx *= vscale;
+          vx += vmagic_bias;
 
-        batch -= sizeof(float);
-      } while (batch != 0);
-    }
+          int32_t vy = (int32_t) float_as_uint32(vx);
+          vy = math_max_s32(vy, vmagic_min);
+          vy = math_min_s32(vy, vmagic_max);
+          vy -= vmagic_bias_less_zero_point;
+
+          *output++ = (${XINT8_T}) vy;
+
+          batch -= sizeof(float);
+        } while (batch != 0);
+      }
 }

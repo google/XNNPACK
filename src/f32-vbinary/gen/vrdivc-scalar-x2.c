@@ -27,25 +27,26 @@ void xnn_f32_vrdivc_ukernel__scalar_x2(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
     input_a += 2;
 
-    float vy0 = vb / va0;
-    float vy1 = vb / va1;
+    float vacc0 = vb / va0;
+    float vacc1 = vb / va1;
 
 
 
-    output[0] = vy0;
-    output[1] = vy1;
+    output[0] = vacc0;
+    output[1] = vacc1;
     output += 2;
   }
   if XNN_UNLIKELY(batch != 0) {
+    assert(batch == sizeof(float));
     const float va = *input_a;
-    float vy = vb / va;
-    *output = vy;
+    float vacc = vb / va;
+    *output = vacc;
   }
 }

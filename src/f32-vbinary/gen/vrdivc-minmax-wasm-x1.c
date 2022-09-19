@@ -27,15 +27,15 @@ void xnn_f32_vrdivc_minmax_ukernel__wasm_x1(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const float vy_min = params->scalar.min;
-  const float vy_max = params->scalar.max;
-
+  const float voutput_min = params->scalar.min;
+  const float voutput_max = params->scalar.max;
   const float vb = *input_b;
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
-    float vy = vb / va;
-    vy = __builtin_wasm_max_f32(vy, vy_min);
-    vy = __builtin_wasm_min_f32(vy, vy_max);
-    *output++ = vy;
+    float vacc = vb / va;
+    vacc = __builtin_wasm_max_f32(vacc, voutput_min);
+    vacc = __builtin_wasm_min_f32(vacc, voutput_max);
+    *output++ = vacc;
   }
 }

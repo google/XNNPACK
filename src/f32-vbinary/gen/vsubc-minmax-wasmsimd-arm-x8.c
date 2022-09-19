@@ -28,26 +28,27 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
-    const v128_t va4567 = wasm_v128_load(input_a + 4);
+    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va1 = wasm_v128_load(input_a + 4);
     input_a += 8;
 
-    v128_t vy0123 = wasm_f32x4_sub(va0123, vb);
-    v128_t vy4567 = wasm_f32x4_sub(va4567, vb);
+    v128_t vy0 = wasm_f32x4_sub(va0, vb);
+    v128_t vy1 = wasm_f32x4_sub(va1, vb);
 
 
-    vy0123 = wasm_f32x4_max(vy0123, vy_min);
-    vy4567 = wasm_f32x4_max(vy4567, vy_min);
+    vy0 = wasm_f32x4_max(vy0, voutput_min);
+    vy1 = wasm_f32x4_max(vy1, voutput_min);
 
-    vy0123 = wasm_f32x4_min(vy0123, vy_max);
-    vy4567 = wasm_f32x4_min(vy4567, vy_max);
+    vy0 = wasm_f32x4_min(vy0, voutput_max);
+    vy1 = wasm_f32x4_min(vy1, voutput_max);
 
-    wasm_v128_store(output, vy0123);
-    wasm_v128_store(output + 4, vy4567);
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 4, vy1);
     output += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
@@ -56,8 +57,8 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x8(
 
     v128_t vy = wasm_f32x4_sub(va, vb);
 
-    vy = wasm_f32x4_max(vy, vy_min);
-    vy = wasm_f32x4_min(vy, vy_max);
+    vy = wasm_f32x4_max(vy, voutput_min);
+    vy = wasm_f32x4_min(vy, voutput_max);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -67,8 +68,8 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x8(
 
     v128_t vy = wasm_f32x4_sub(va, vb);
 
-    vy = wasm_f32x4_max(vy, vy_min);
-    vy = wasm_f32x4_min(vy, vy_max);
+    vy = wasm_f32x4_max(vy, voutput_min);
+    vy = wasm_f32x4_min(vy, voutput_max);
 
     if (batch & (2 * sizeof(float))) {
       *((double*) output) = wasm_f64x2_extract_lane(vy, 0);

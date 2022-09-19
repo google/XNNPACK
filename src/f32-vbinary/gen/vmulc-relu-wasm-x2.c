@@ -27,28 +27,29 @@ void xnn_f32_vmulc_relu_ukernel__wasm_x2(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const float vb = *input_b;
+
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
     input_a += 2;
 
-    float vy0 = va0 * vb;
-    float vy1 = va1 * vb;
+    float vacc0 = va0 * vb;
+    float vacc1 = va1 * vb;
 
 
-    vy0 = __builtin_wasm_max_f32(vy0, 0.0f);
-    vy1 = __builtin_wasm_max_f32(vy1, 0.0f);
+    vacc0 = __builtin_wasm_max_f32(vacc0, 0.0f);
+    vacc1 = __builtin_wasm_max_f32(vacc1, 0.0f);
 
-    output[0] = vy0;
-    output[1] = vy1;
+    output[0] = vacc0;
+    output[1] = vacc1;
     output += 2;
   }
   if XNN_UNLIKELY(batch != 0) {
+    assert(batch == sizeof(float));
     const float va = *input_a;
-    float vy = va * vb;
-    vy = __builtin_wasm_max_f32(vy, 0.0f);
-    *output = vy;
+    float vacc = va * vb;
+    vacc = __builtin_wasm_max_f32(vacc, 0.0f);
+    *output = vacc;
   }
 }

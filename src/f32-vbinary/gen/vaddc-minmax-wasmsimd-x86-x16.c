@@ -28,36 +28,37 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t vy_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vy_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
   const v128_t vb = wasm_v128_load32_splat(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const v128_t va0123 = wasm_v128_load(input_a);
-    const v128_t va4567 = wasm_v128_load(input_a + 4);
-    const v128_t va89AB = wasm_v128_load(input_a + 8);
-    const v128_t vaCDEF = wasm_v128_load(input_a + 12);
+    const v128_t va0 = wasm_v128_load(input_a);
+    const v128_t va1 = wasm_v128_load(input_a + 4);
+    const v128_t va2 = wasm_v128_load(input_a + 8);
+    const v128_t va3 = wasm_v128_load(input_a + 12);
     input_a += 16;
 
-    v128_t vy0123 = wasm_f32x4_add(va0123, vb);
-    v128_t vy4567 = wasm_f32x4_add(va4567, vb);
-    v128_t vy89AB = wasm_f32x4_add(va89AB, vb);
-    v128_t vyCDEF = wasm_f32x4_add(vaCDEF, vb);
+    v128_t vy0 = wasm_f32x4_add(va0, vb);
+    v128_t vy1 = wasm_f32x4_add(va1, vb);
+    v128_t vy2 = wasm_f32x4_add(va2, vb);
+    v128_t vy3 = wasm_f32x4_add(va3, vb);
 
 
-    vy0123 = wasm_f32x4_pmax(vy_min, vy0123);
-    vy4567 = wasm_f32x4_pmax(vy_min, vy4567);
-    vy89AB = wasm_f32x4_pmax(vy_min, vy89AB);
-    vyCDEF = wasm_f32x4_pmax(vy_min, vyCDEF);
+    vy0 = wasm_f32x4_pmax(voutput_min, vy0);
+    vy1 = wasm_f32x4_pmax(voutput_min, vy1);
+    vy2 = wasm_f32x4_pmax(voutput_min, vy2);
+    vy3 = wasm_f32x4_pmax(voutput_min, vy3);
 
-    vy0123 = wasm_f32x4_pmin(vy_max, vy0123);
-    vy4567 = wasm_f32x4_pmin(vy_max, vy4567);
-    vy89AB = wasm_f32x4_pmin(vy_max, vy89AB);
-    vyCDEF = wasm_f32x4_pmin(vy_max, vyCDEF);
+    vy0 = wasm_f32x4_pmin(voutput_max, vy0);
+    vy1 = wasm_f32x4_pmin(voutput_max, vy1);
+    vy2 = wasm_f32x4_pmin(voutput_max, vy2);
+    vy3 = wasm_f32x4_pmin(voutput_max, vy3);
 
-    wasm_v128_store(output, vy0123);
-    wasm_v128_store(output + 4, vy4567);
-    wasm_v128_store(output + 8, vy89AB);
-    wasm_v128_store(output + 12, vyCDEF);
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 4, vy1);
+    wasm_v128_store(output + 8, vy2);
+    wasm_v128_store(output + 12, vy3);
     output += 16;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
@@ -66,8 +67,8 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16(
 
     v128_t vy = wasm_f32x4_add(va, vb);
 
-    vy = wasm_f32x4_pmax(vy_min, vy);
-    vy = wasm_f32x4_pmin(vy_max, vy);
+    vy = wasm_f32x4_pmax(voutput_min, vy);
+    vy = wasm_f32x4_pmin(voutput_max, vy);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -77,8 +78,8 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16(
 
     v128_t vy = wasm_f32x4_add(va, vb);
 
-    vy = wasm_f32x4_pmax(vy_min, vy);
-    vy = wasm_f32x4_pmin(vy_max, vy);
+    vy = wasm_f32x4_pmax(voutput_min, vy);
+    vy = wasm_f32x4_pmin(voutput_max, vy);
 
     if (batch & (2 * sizeof(float))) {
       *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
