@@ -16,6 +16,8 @@ void xnn_f32_rmax_ukernel__scalar(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   float vmax0 = *input;
   float vmax1 = vmax0;

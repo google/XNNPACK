@@ -16,6 +16,9 @@ void xnn_s8_vclamp_ukernel__scalar_x4(
     const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int32_t voutput_max = params->scalar.max;
   const int32_t voutput_min = params->scalar.min;

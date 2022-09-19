@@ -17,6 +17,9 @@ void xnn_s8_vclamp_ukernel__wasmsimd_x64(
     const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
   const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);

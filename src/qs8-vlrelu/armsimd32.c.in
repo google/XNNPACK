@@ -29,6 +29,11 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armsimd32_x${BATCH_TILE}(
     ${XINT8_T}* output,
     const union xnn_${DATATYPE.lower()}_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const ${XINT16X2_T} vinput_zero_point = (${XINT16X2_T}) params->armsimd32.input_zero_point;
   const int16x2_t vpositive_multiplier = (int16x2_t) params->armsimd32.positive_multiplier;
   const int16x2_t vnegative_multiplier = (int16x2_t) params->armsimd32.negative_multiplier;

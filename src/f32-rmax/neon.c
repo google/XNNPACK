@@ -18,6 +18,8 @@ void xnn_f32_rmax_ukernel__neon(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   float32x4_t vmax0 = vld1q_dup_f32(input);
   float32x4_t vmax1 = vmax0;

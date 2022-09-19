@@ -22,6 +22,8 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
   const v128_t vzero = wasm_i32x4_const_splat(0);

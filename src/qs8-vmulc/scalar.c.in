@@ -20,6 +20,12 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__sca
     ${XINT8_T}* output,
     const union xnn_${DATATYPE.lower()}_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const int32_t va_zero_point = params->fp32_scalar.a_zero_point;
   const float vscale = params->fp32_scalar.scale;
   const float voutput_min_less_zero_point = params->fp32_scalar.output_min_less_zero_point;

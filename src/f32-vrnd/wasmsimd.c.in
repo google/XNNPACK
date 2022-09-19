@@ -30,6 +30,8 @@ void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
     $for N in range(0, BATCH_TILE, 4):

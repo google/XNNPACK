@@ -22,6 +22,8 @@ void xnn_f32_vhswish_ukernel__neon_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vsixth = vld1q_dup_f32(&params->scalar.sixth);
   const float32x4_t vthree = vld1q_dup_f32(&params->scalar.three);

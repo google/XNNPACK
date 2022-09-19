@@ -24,7 +24,10 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_x${BATCH_TILE}(
     float scale,
     float max)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
   // The smallest x for which expf(x) is normalized.

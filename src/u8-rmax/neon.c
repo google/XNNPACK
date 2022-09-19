@@ -19,6 +19,9 @@ void xnn_u8_rmax_ukernel__neon(
     uint8_t* output)
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   if XNN_LIKELY(batch >= 16) {
     uint8x16_t vmax = vmovq_n_u8(0);

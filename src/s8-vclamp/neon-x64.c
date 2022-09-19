@@ -17,6 +17,9 @@ void xnn_s8_vclamp_ukernel__neon_x64(
     const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.max);
   const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.min);

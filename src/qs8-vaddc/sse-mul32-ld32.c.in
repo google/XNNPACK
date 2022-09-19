@@ -40,6 +40,12 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul32_ld32_x${BATCH_TI
     ${XINT8_T}* output,
     const union xnn_${DATATYPE.lower()}_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);

@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__avx512f_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vslope = _mm512_set1_ps(params->scalar.slope);
   const __m512 vzero = _mm512_setzero_ps();

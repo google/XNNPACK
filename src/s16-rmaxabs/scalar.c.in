@@ -15,9 +15,9 @@ $assert BATCH_TILE >= 1
 void xnn_s16_rmaxabs_ukernel__scalar_x${BATCH_TILE}(
     size_t batch,
     const int16_t* input,
-    uint16_t* output) {
-
-  assert(batch > 0);
+    uint16_t* output)
+{
+  assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
 

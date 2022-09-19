@@ -31,6 +31,8 @@ void xnn_f32_v${OP.lower()}_ukernel__avx512f_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
     const __m512 vx${ABC[0:16]} = _mm512_loadu_ps(input);

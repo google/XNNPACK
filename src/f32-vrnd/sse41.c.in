@@ -30,6 +30,8 @@ void xnn_f32_v${OP.lower()}_ukernel__sse41_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
     const __m128 vx${ABC[0:4]} = _mm_loadu_ps(input);

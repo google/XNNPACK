@@ -19,6 +19,9 @@ void xnn_u8_rmax_ukernel__sse2(
     uint8_t* output)
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   if XNN_LIKELY(batch >= 16) {
     __m128i vmax = _mm_setzero_si128();

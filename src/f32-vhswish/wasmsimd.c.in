@@ -22,6 +22,8 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vsixth = wasm_v128_load64_splat(params->wasmsimd.sixth);
   const v128_t vthree = wasm_v128_load64_splat(params->wasmsimd.three);

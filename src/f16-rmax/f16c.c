@@ -18,6 +18,8 @@ void xnn_f16_rmax_ukernel__f16c(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != 0);
+  assert(output != 0);
 
   const uint16_t* i = (const uint16_t*) input;
   __m128i vmax_init = _mm_shufflelo_epi16(_mm_loadl_epi64((const __m128i*) i), _MM_SHUFFLE(0, 0, 0, 0));

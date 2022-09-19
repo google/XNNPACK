@@ -28,6 +28,8 @@ void xnn_f32_v${OP.lower()}_ukernel__scalar_libm_x${BATCH_TILE}(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

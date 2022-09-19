@@ -6505,6 +6505,8 @@ void xnn_f32_rmax_ukernel__sse(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   __m128 vmax0 = _mm_load_ss(input);
   vmax0 = _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(0, 0, 0, 0));

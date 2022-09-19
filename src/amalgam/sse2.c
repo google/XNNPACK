@@ -12059,6 +12059,9 @@ void xnn_s8_vclamp_ukernel__sse2_x64(
     const union xnn_s8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   const __m128i voutput_max_with_bias = _mm_load_si128((const __m128i*) params->sse2.max_with_bias);
@@ -12521,6 +12524,9 @@ void xnn_u8_rmax_ukernel__sse2(
     uint8_t* output)
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   if XNN_LIKELY(batch >= 16) {
     __m128i vmax = _mm_setzero_si128();
@@ -12558,6 +12564,9 @@ void xnn_u8_vclamp_ukernel__sse2_x64(
     const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.max);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.min);

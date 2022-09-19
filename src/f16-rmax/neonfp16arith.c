@@ -18,6 +18,8 @@ void xnn_f16_rmax_ukernel__neonfp16arith(
 {
   assert(batch != 0);
   assert(batch % sizeof(__fp16) == 0);
+  assert(input != 0);
+  assert(output != 0);
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;

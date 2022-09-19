@@ -18,6 +18,8 @@ void xnn_f32_rmax_ukernel__wasmsimd_x86(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   v128_t vmax0 = wasm_v128_load32_splat(input);
   v128_t vmax1 = vmax0;

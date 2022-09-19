@@ -14,6 +14,9 @@ void xnn_u8_rmax_ukernel__scalar(
     uint8_t* output)
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   uint8_t vmax0 = 0;
   uint8_t vmax1 = 0;

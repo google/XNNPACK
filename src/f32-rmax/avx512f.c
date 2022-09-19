@@ -18,6 +18,8 @@ void xnn_f32_rmax_ukernel__avx512f(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   __m512 vmax0 = _mm512_broadcastss_ps(_mm_load_ss(input));
   __m512 vmax1 = vmax0;

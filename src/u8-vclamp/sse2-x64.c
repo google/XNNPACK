@@ -18,6 +18,9 @@ void xnn_u8_vclamp_ukernel__sse2_x64(
     const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.max);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.min);
