@@ -23,7 +23,7 @@ void xnn_s16_window${SHIFT_VARIANT}_ukernel__neon_x${CHANNEL_TILE}(
     const int16_t* input,
     const int16_t* weights,
     int16_t* output,
-    uint32_t shift)
+    uint32_t shift) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

@@ -73,7 +73,6 @@ void xnn_s16_window_ukernel__scalar_x4(
 
       output += 4;
     }
-
     if XNN_UNLIKELY(c != 0) {
       do {
         const int32_t vi = (int32_t) *input++;

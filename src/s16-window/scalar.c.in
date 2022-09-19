@@ -30,7 +30,18 @@ void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
   do {
     size_t c = channels;
     const int16_t* w = weights;
-    $if CHANNEL_TILE > 1:
+    $if CHANNEL_TILE == 1:
+      do {
+        const int32_t vi = (int32_t) *input++;
+        const int32_t vw = (int32_t) *w++;
+        int32_t vout = vi * vw;
+        vout = math_asr_s32(vout, shift);
+        vout = math_max_s32(vout, INT16_MIN);
+        vout = math_min_s32(vout, INT16_MAX);
+        *output++ = (int16_t) vout;
+        c -= sizeof(int16_t);
+      } while (c != 0);
+    $else:
       for (; c >= ${CHANNEL_TILE} * sizeof(int16_t); c -= ${CHANNEL_TILE} * sizeof(int16_t)) {
         $for C in range(CHANNEL_TILE):
           const int16_t vi${C} = input[${C}];
@@ -57,18 +68,29 @@ void xnn_s16_window_ukernel__scalar_x${CHANNEL_TILE}(
 
         output += ${CHANNEL_TILE};
       }
-
-    if XNN_UNLIKELY(c != 0) {
-      do {
-        const int32_t vi = (int32_t) *input++;
-        const int32_t vw = (int32_t) *w++;
-        int32_t vout = vi * vw;
-        vout = math_asr_s32(vout, shift);
-        vout = math_max_s32(vout, INT16_MIN);
-        vout = math_min_s32(vout, INT16_MAX);
-        *output++ = (int16_t) vout;
-        c -= sizeof(int16_t);
-      } while (c != 0);
-    }
+      $if CHANNEL_TILE == 2:
+        if XNN_UNLIKELY(c != 0) {
+          assert(c == sizeof(int16_t));
+          const int32_t vi = (int32_t) *input++;
+          const int32_t vw = (int32_t) *w;
+          int32_t vout = vi * vw;
+          vout = math_asr_s32(vout, shift);
+          vout = math_max_s32(vout, INT16_MIN);
+          vout = math_min_s32(vout, INT16_MAX);
+          *output++ = (int16_t) vout;
+        }
+      $else:
+        if XNN_UNLIKELY(c != 0) {
+          do {
+            const int32_t vi = (int32_t) *input++;
+            const int32_t vw = (int32_t) *w++;
+            int32_t vout = vi * vw;
+            vout = math_asr_s32(vout, shift);
+            vout = math_max_s32(vout, INT16_MIN);
+            vout = math_min_s32(vout, INT16_MAX);
+            *output++ = (int16_t) vout;
+            c -= sizeof(int16_t);
+          } while (c != 0);
+        }
   } while (--rows != 0);
 }
