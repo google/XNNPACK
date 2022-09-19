@@ -198,7 +198,9 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
       const uint32_t output_id = node->outputs[o];
       assert(output_id < subgraph->num_values);
 
-      assert(subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
+      // Persistent values can be produced by multiple nodes, e.g. copy nodes writing to the same persistent value.
+      assert(xnn_value_is_persistent(&subgraph->values[output_id]) ||
+             subgraph->values[output_id].producer == XNN_INVALID_NODE_ID);
       subgraph->values[output_id].producer = n;
     }
   }
