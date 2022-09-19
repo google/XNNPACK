@@ -270,8 +270,8 @@ static void optimize_tensor_allocation_for_in_place_operations(
       // We only support when output has a single consumer because we cannot easily find all consumer nodes
       // without traversing the entire graph. This will require tracking output->last_consumer in the future.
       assert(tracker->usage[reuse_id].last_node < output->first_consumer);
-      xnn_log_debug("reusing tensor id #%" PRIu32 " memory for tensor id #%" PRIu32,
-                    reuse_id, output->id);
+      xnn_log_debug("reusing tensor id #%" PRIu32 " memory for tensor id #%" PRIu32 " Node #%" PRIu32 " %s",
+                    reuse_id, output->id, node->id, xnn_node_type_to_string(node->type));
       xnn_mark_tensor_as_reuse(tracker, output->id, reuse_id, output->first_consumer);
     }
   }
