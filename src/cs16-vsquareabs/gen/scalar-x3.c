@@ -34,20 +34,17 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x3(
     const int32_t vi2 = (int32_t) input[5];
     input += 3 * 2;
 
-    const uint32_t vrsquare0 = (uint32_t) (vr0 * vr0);
-    const uint32_t visquare0 = (uint32_t) (vi0 * vi0);
-    const uint32_t vrsquare1 = (uint32_t) (vr1 * vr1);
-    const uint32_t visquare1 = (uint32_t) (vi1 * vi1);
-    const uint32_t vrsquare2 = (uint32_t) (vr2 * vr2);
-    const uint32_t visquare2 = (uint32_t) (vi2 * vi2);
+    uint32_t vacc0 = (uint32_t) (vr0 * vr0);
+    uint32_t vacc1 = (uint32_t) (vr1 * vr1);
+    uint32_t vacc2 = (uint32_t) (vr2 * vr2);
 
-    const uint32_t vout0 = vrsquare0 + visquare0;
-    const uint32_t vout1 = vrsquare1 + visquare1;
-    const uint32_t vout2 = vrsquare2 + visquare2;
+    vacc0 += (uint32_t) (vi0 * vi0);
+    vacc1 += (uint32_t) (vi1 * vi1);
+    vacc2 += (uint32_t) (vi2 * vi2);
 
-    output[0] = vout0;
-    output[1] = vout1;
-    output[2] = vout2;
+    output[0] = vacc0;
+    output[1] = vacc1;
+    output[2] = vacc2;
     output += 3;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -56,12 +53,10 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x3(
       const int32_t vi = (int32_t) input[1];
       input += 2;
 
-      const uint32_t vrsquare = (uint32_t) (vr * vr);
-      const uint32_t visquare = (uint32_t) (vi * vi);
+      uint32_t vacc = (uint32_t) (vr * vr);
+      vacc += (uint32_t) (vi * vi);
 
-      const uint32_t vout = vrsquare + visquare;
-
-      *output++ = vout;
+      *output++ = vacc;
       batch -= sizeof(int16_t) * 2;
     } while (batch != 0);
   }

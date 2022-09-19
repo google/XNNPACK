@@ -19,7 +19,7 @@
 void xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x8(
     size_t batch,
     const int16_t* input,
-    uint32_t* output)
+    uint32_t* output) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % (sizeof(int16_t) * 2) == 0);
