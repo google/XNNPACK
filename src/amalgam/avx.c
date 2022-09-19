@@ -2504,43 +2504,38 @@ void xnn_f32_vadd_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_add_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_add_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_add_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_add_ps(va89ABCDEF, vb89ABCDEF);
 
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_add_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_add_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2548,26 +2543,26 @@ void xnn_f32_vadd_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_add_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_add_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2585,37 +2580,37 @@ void xnn_f32_vaddc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_add_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_add_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_add_ps(vacc0, vb);
+    vacc1 = _mm256_add_ps(vacc1, vb);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_add_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_add_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2623,25 +2618,25 @@ void xnn_f32_vaddc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_add_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_add_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2659,43 +2654,38 @@ void xnn_f32_vdiv_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_div_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_div_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_div_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_div_ps(va89ABCDEF, vb89ABCDEF);
 
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_div_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_div_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2703,26 +2693,26 @@ void xnn_f32_vdiv_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_div_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_div_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2740,37 +2730,37 @@ void xnn_f32_vdivc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_div_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_div_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_div_ps(vacc0, vb);
+    vacc1 = _mm256_div_ps(vacc1, vb);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_div_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_div_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2778,25 +2768,25 @@ void xnn_f32_vdivc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_div_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_div_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2816,32 +2806,27 @@ void xnn_f32_vmax_ukernel__avx_x16(
 
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_max_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_max_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_max_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_max_ps(va89ABCDEF, vb89ABCDEF);
 
 
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_max_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_max_ps(va, vb);
-    _mm256_storeu_ps(output, vy);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2849,24 +2834,24 @@ void xnn_f32_vmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_max_ps(va, vb);
+    vacc = _mm256_max_ps(vacc, vb);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2884,28 +2869,28 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_max_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_max_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_max_ps(vacc0, vb);
+    vacc1 = _mm256_max_ps(vacc1, vb);
 
 
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_max_ps(va, vb);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_max_ps(vacc, vb);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2913,23 +2898,23 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_max_ps(va, vb);
+    vacc = _mm256_max_ps(vacc, vb);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -2949,32 +2934,27 @@ void xnn_f32_vmin_ukernel__avx_x16(
 
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_min_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_min_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_min_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_min_ps(va89ABCDEF, vb89ABCDEF);
 
 
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_min_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_min_ps(va, vb);
-    _mm256_storeu_ps(output, vy);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -2982,24 +2962,24 @@ void xnn_f32_vmin_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_min_ps(va, vb);
+    vacc = _mm256_min_ps(vacc, vb);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3017,28 +2997,28 @@ void xnn_f32_vminc_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_min_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_min_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_min_ps(vacc0, vb);
+    vacc1 = _mm256_min_ps(vacc1, vb);
 
 
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_min_ps(va, vb);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_min_ps(vacc, vb);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3046,23 +3026,23 @@ void xnn_f32_vminc_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_min_ps(va, vb);
+    vacc = _mm256_min_ps(vacc, vb);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3080,43 +3060,38 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_mul_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_mul_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_mul_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_mul_ps(va89ABCDEF, vb89ABCDEF);
 
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_mul_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_mul_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3124,26 +3099,26 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_mul_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_mul_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3161,37 +3136,37 @@ void xnn_f32_vmulc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_mul_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_mul_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_mul_ps(vacc0, vb);
+    vacc1 = _mm256_mul_ps(vacc1, vb);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_mul_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_mul_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3199,25 +3174,25 @@ void xnn_f32_vmulc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_mul_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_mul_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3235,37 +3210,37 @@ void xnn_f32_vrdivc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_div_ps(vb, va01234567);
-    __m256 vy89ABCDEF = _mm256_div_ps(vb, va89ABCDEF);
+    vacc0 = _mm256_div_ps(vb, vacc0);
+    vacc1 = _mm256_div_ps(vb, vacc1);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_div_ps(vb, va);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_div_ps(vb, vacc);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3273,25 +3248,25 @@ void xnn_f32_vrdivc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_div_ps(vb, va);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_div_ps(vb, vacc);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3309,37 +3284,37 @@ void xnn_f32_vrsubc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_sub_ps(vb, va01234567);
-    __m256 vy89ABCDEF = _mm256_sub_ps(vb, va89ABCDEF);
+    vacc0 = _mm256_sub_ps(vb, vacc0);
+    vacc1 = _mm256_sub_ps(vb, vacc1);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_sub_ps(vb, va);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_sub_ps(vb, vacc);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3347,25 +3322,25 @@ void xnn_f32_vrsubc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_sub_ps(vb, va);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_sub_ps(vb, vacc);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3385,35 +3360,30 @@ void xnn_f32_vsqrdiff_ukernel__avx_x16(
 
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_sub_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_sub_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_sub_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb89ABCDEF);
-
-    vy01234567 = _mm256_mul_ps(vy01234567, vy01234567);
-    vy89ABCDEF = _mm256_mul_ps(vy89ABCDEF, vy89ABCDEF);
+    vacc0 = _mm256_mul_ps(vacc0, vacc0);
+    vacc1 = _mm256_mul_ps(vacc1, vacc1);
 
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_sub_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_mul_ps(vy, vy);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_mul_ps(vacc, vacc);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3421,25 +3391,25 @@ void xnn_f32_vsqrdiff_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_mul_ps(vy, vy);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_mul_ps(vacc, vacc);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3457,31 +3427,31 @@ void xnn_f32_vsqrdiffc_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_sub_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_sub_ps(vacc0, vb);
+    vacc1 = _mm256_sub_ps(vacc1, vb);
 
-    vy01234567 = _mm256_mul_ps(vy01234567, vy01234567);
-    vy89ABCDEF = _mm256_mul_ps(vy89ABCDEF, vy89ABCDEF);
+    vacc0 = _mm256_mul_ps(vacc0, vacc0);
+    vacc1 = _mm256_mul_ps(vacc1, vacc1);
 
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_mul_ps(vy, vy);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_mul_ps(vacc, vacc);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3489,24 +3459,24 @@ void xnn_f32_vsqrdiffc_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_mul_ps(vy, vy);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_mul_ps(vacc, vacc);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3524,43 +3494,38 @@ void xnn_f32_vsub_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    const __m256 vb01234567 = _mm256_loadu_ps(input_b);
-    const __m256 vb89ABCDEF = _mm256_loadu_ps(input_b + 8);
+    vacc0 = _mm256_sub_ps(vacc0, _mm256_loadu_ps(input_b));
+    vacc1 = _mm256_sub_ps(vacc1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
-    __m256 vy01234567 = _mm256_sub_ps(va01234567, vb01234567);
-    __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb89ABCDEF);
 
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
-
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    const __m256 vb = _mm256_loadu_ps(input_b);
+    vacc = _mm256_sub_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3568,26 +3533,26 @@ void xnn_f32_vsub_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
@@ -3605,37 +3570,37 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
-
+  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
+  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    const __m256 va01234567 = _mm256_loadu_ps(input_a);
-    const __m256 va89ABCDEF = _mm256_loadu_ps(input_a + 8);
+    __m256 vacc0 = _mm256_loadu_ps(input_a);
+    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    __m256 vy01234567 = _mm256_sub_ps(va01234567, vb);
-    __m256 vy89ABCDEF = _mm256_sub_ps(va89ABCDEF, vb);
+    vacc0 = _mm256_sub_ps(vacc0, vb);
+    vacc1 = _mm256_sub_ps(vacc1, vb);
 
 
-    vy01234567 = _mm256_max_ps(vy01234567, vy_min);
-    vy89ABCDEF = _mm256_max_ps(vy89ABCDEF, vy_min);
+    vacc0 = _mm256_max_ps(vacc0, voutput_min);
+    vacc1 = _mm256_max_ps(vacc1, voutput_min);
 
-    vy01234567 = _mm256_min_ps(vy01234567, vy_max);
-    vy89ABCDEF = _mm256_min_ps(vy89ABCDEF, vy_max);
+    vacc0 = _mm256_min_ps(vacc0, voutput_max);
+    vacc1 = _mm256_min_ps(vacc1, voutput_max);
 
-    _mm256_storeu_ps(output, vy01234567);
-    _mm256_storeu_ps(output + 8, vy89ABCDEF);
+    _mm256_storeu_ps(output, vacc0);
+    _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    const __m256 va = _mm256_loadu_ps(input_a);
+    __m256 vacc = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
-    _mm256_storeu_ps(output, vy);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
+    _mm256_storeu_ps(output, vacc);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -3643,25 +3608,25 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
-    const __m256 va = _mm256_maskload_ps(input_a, vmask);
+    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
-    __m256 vy = _mm256_sub_ps(va, vb);
-    vy = _mm256_max_ps(vy, vy_min);
-    vy = _mm256_min_ps(vy, vy_max);
+    vacc = _mm256_sub_ps(vacc, vb);
+    vacc = _mm256_max_ps(vacc, voutput_min);
+    vacc = _mm256_min_ps(vacc, voutput_max);
 
-    __m128 vy_lo = _mm256_castps256_ps128(vy);
+    __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vy_lo);
-      vy_lo = _mm256_extractf128_ps(vy, 1);
+      _mm_storeu_ps(output, vacc_lo);
+      vacc_lo = _mm256_extractf128_ps(vacc, 1);
       output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vy_lo);
-      vy_lo = _mm_movehl_ps(vy_lo, vy_lo);
+      _mm_storel_pi((__m64*) output, vacc_lo);
+      vacc_lo = _mm_movehl_ps(vacc_lo, vacc_lo);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vy_lo);
+      _mm_store_ss(output, vacc_lo);
     }
   }
 }
