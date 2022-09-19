@@ -24,6 +24,8 @@ void xnn_f32_vrndz_ukernel__sse41_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);

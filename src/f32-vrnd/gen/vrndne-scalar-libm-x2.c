@@ -23,6 +23,8 @@ void xnn_f32_vrndne_ukernel__scalar_libm_x2(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float vx0 = input[0];

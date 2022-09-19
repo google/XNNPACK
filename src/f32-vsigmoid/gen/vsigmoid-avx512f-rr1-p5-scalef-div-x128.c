@@ -22,7 +22,10 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_p5_scalef_div_x128(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr1_p5.sign_mask);
   const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_p5.log2e);

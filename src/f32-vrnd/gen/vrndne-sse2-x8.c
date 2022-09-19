@@ -24,6 +24,8 @@ void xnn_f32_vrndne_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

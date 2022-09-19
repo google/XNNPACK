@@ -181,27 +181,27 @@ void xnn_x16_transposec_ukernel__8x8_multi_switch_wasmsimd(
         uint16_t* oN = (uint16_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           case 7:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_7, 0);
+            wasm_v128_store64_lane(oN, v0_7, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 6:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_6, 0);
+            wasm_v128_store64_lane(oN, v0_6, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 5:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_5, 0);
+            wasm_v128_store64_lane(oN, v0_5, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 4:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_4, 0);
+            wasm_v128_store64_lane(oN, v0_4, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 3:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_3, 0);
+            wasm_v128_store64_lane(oN, v0_3, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_2, 0);
+            wasm_v128_store64_lane(oN, v0_2, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
-            *((double*) oN) = wasm_f64x2_extract_lane(v0_1, 0);
+            wasm_v128_store64_lane(oN, v0_1, 0);
           case 0:
-            *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
+            wasm_v128_store64_lane(o, v0_0, 0);
             o += 4;
             break;
           default:
@@ -221,27 +221,27 @@ void xnn_x16_transposec_ukernel__8x8_multi_switch_wasmsimd(
         uint16_t* oN = (uint16_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           case 7:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_7, 0);
+            wasm_v128_store32_lane(oN, v0_7, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 6:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_6, 0);
+            wasm_v128_store32_lane(oN, v0_6, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 5:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_5, 0);
+            wasm_v128_store32_lane(oN, v0_5, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 4:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_4, 0);
+            wasm_v128_store32_lane(oN, v0_4, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 3:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_3, 0);
+            wasm_v128_store32_lane(oN, v0_3, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_2, 0);
+            wasm_v128_store32_lane(oN, v0_2, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
-            *((float*) oN) = wasm_f32x4_extract_lane(v0_1, 0);
+            wasm_v128_store32_lane(oN, v0_1, 0);
           case 0:
-            *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+            wasm_v128_store32_lane(o, v0_0, 0);
             o += 2;
             break;
           default:
@@ -260,27 +260,27 @@ void xnn_x16_transposec_ukernel__8x8_multi_switch_wasmsimd(
         uint16_t* oN = (uint16_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
           case 7:
-            *oN = wasm_i16x8_extract_lane(v0_7, 0);
+            wasm_v128_store16_lane(oN, v0_7, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 6:
-            *oN = wasm_i16x8_extract_lane(v0_6, 0);
+            wasm_v128_store16_lane(oN, v0_6, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 5:
-            *oN = wasm_i16x8_extract_lane(v0_5, 0);
+            wasm_v128_store16_lane(oN, v0_5, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 4:
-            *oN = wasm_i16x8_extract_lane(v0_4, 0);
+            wasm_v128_store16_lane(oN, v0_4, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 3:
-            *oN = wasm_i16x8_extract_lane(v0_3, 0);
+            wasm_v128_store16_lane(oN, v0_3, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 2:
-            *oN = wasm_i16x8_extract_lane(v0_2, 0);
+            wasm_v128_store16_lane(oN, v0_2, 0);
             oN = (uint16_t*) ((uintptr_t) oN + minus_output_stride);
           case 1:
-            *oN = wasm_i16x8_extract_lane(v0_1, 0);
+            wasm_v128_store16_lane(oN, v0_1, 0);
           case 0:
-            *o = wasm_i16x8_extract_lane(v0_0, 0);
+            wasm_v128_store16_lane(o, v0_0, 0);
             break;
           default:
             XNN_UNREACHABLE;

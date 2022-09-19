@@ -20,8 +20,13 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const v128_t va_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.a_zero_point);
   const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
@@ -63,7 +68,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
 
     vout0123456701234567 = wasm_u8x16_min(vout0123456701234567, voutput_max);
 
-    *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
+    wasm_v128_store64_lane(output, vout0123456701234567, 0);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -95,18 +100,17 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
       vout0123456701234567 = wasm_u8x16_min(vout0123456701234567, voutput_max);
 
       if (batch & (4 * sizeof(uint8_t))) {
-        *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);
+        wasm_v128_store32_lane(output, vout0123456701234567, 0);
         vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
         output += 4;
       }
-      uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
       if (batch & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
-        vout0123 >>= 16;
+        wasm_v128_store16_lane(output, vout0123456701234567, 0);
+        vout0123456701234567 = wasm_u32x4_shr(vout0123456701234567, 16);
         output += 2;
       }
       if (batch & (1 * sizeof(uint8_t))) {
-        *output = (uint8_t) vout0123;
+        wasm_v128_store8_lane(output, vout0123456701234567, 0);
       }
     }
   }

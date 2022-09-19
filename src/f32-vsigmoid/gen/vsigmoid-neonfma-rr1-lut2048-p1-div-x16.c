@@ -23,7 +23,10 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x16(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neonfma_rr1_lut2048_p1.magic_bias);
   const float32x4_t vminus_log2e = vld1q_dup_f32(&params->neonfma_rr1_lut2048_p1.minus_log2e);

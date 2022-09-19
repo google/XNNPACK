@@ -139,10 +139,10 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(0, MR, 2)):
-        *((double*) c${M}) = wasm_f64x2_extract_lane(vacc${M}${M+1}x01, 0);
+        wasm_v128_store64_lane(c${M}, vacc${M}${M+1}x01, 0);
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
-        *((double*) c${M+1}) = wasm_f64x2_extract_lane(vacc${M}${M+1}x01, 1);
+        wasm_v128_store64_lane(c${M+1}, vacc${M}${M+1}x01, 1);
         c${M+1} = (float*) ((uintptr_t) c${M+1} + cn_stride);
         a${M+1} = (const float*) ((uintptr_t) a${M+1} - kc);
 
@@ -150,8 +150,8 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
     } else {
       assert(nc == 1);
       $for M in reversed(range(0, MR, 2)):
-        *c${M} = wasm_f32x4_extract_lane(vacc${M}${M+1}x01, 0);
-        *c${M+1} = wasm_f32x4_extract_lane(vacc${M}${M+1}x01, 2);
+        wasm_v128_store32_lane(c${M}, vacc${M}${M+1}x01, 0);
+        wasm_v128_store32_lane(c${M+1}, vacc${M}${M+1}x01, 2);
 
       nc = 0;
     }

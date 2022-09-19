@@ -363,82 +363,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
 
       if (bh & 8) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *((double*) o) = wasm_f64x2_extract_lane(v0_15, 0);
+        wasm_v128_store64_lane(o, v0_15, 0);
         uint8_t *oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_14, 0);
+        wasm_v128_store64_lane(o, v0_14, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_13, 0);
+        wasm_v128_store64_lane(o, v0_13, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_12, 0);
+        wasm_v128_store64_lane(o, v0_12, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_11, 0);
+        wasm_v128_store64_lane(o, v0_11, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_10, 0);
+        wasm_v128_store64_lane(o, v0_10, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_9, 0);
+        wasm_v128_store64_lane(o, v0_9, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_8, 0);
+        wasm_v128_store64_lane(o, v0_8, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_7, 0);
+        wasm_v128_store64_lane(o, v0_7, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_6, 0);
+        wasm_v128_store64_lane(o, v0_6, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_5, 0);
+        wasm_v128_store64_lane(o, v0_5, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_4, 0);
+        wasm_v128_store64_lane(o, v0_4, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_3, 0);
+        wasm_v128_store64_lane(o, v0_3, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_2, 0);
+        wasm_v128_store64_lane(o, v0_2, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_1, 0);
+        wasm_v128_store64_lane(o, v0_1, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
+        wasm_v128_store64_lane(o, v0_0, 0);
         o += 8;
         v0_0 = wasm_v64x2_shuffle(v0_0, v0_0, 1, 1);
         v0_1 = wasm_v64x2_shuffle(v0_1, v0_1, 1, 1);
@@ -460,82 +460,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
 
       if (bh & 4) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *((float*) o) = wasm_f32x4_extract_lane(v0_15, 0);
+        wasm_v128_store32_lane(o, v0_15, 0);
         uint8_t *oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_14, 0);
+        wasm_v128_store32_lane(o, v0_14, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_13, 0);
+        wasm_v128_store32_lane(o, v0_13, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_12, 0);
+        wasm_v128_store32_lane(o, v0_12, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_11, 0);
+        wasm_v128_store32_lane(o, v0_11, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_10, 0);
+        wasm_v128_store32_lane(o, v0_10, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_9, 0);
+        wasm_v128_store32_lane(o, v0_9, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_8, 0);
+        wasm_v128_store32_lane(o, v0_8, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_7, 0);
+        wasm_v128_store32_lane(o, v0_7, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_6, 0);
+        wasm_v128_store32_lane(o, v0_6, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_5, 0);
+        wasm_v128_store32_lane(o, v0_5, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_4, 0);
+        wasm_v128_store32_lane(o, v0_4, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_3, 0);
+        wasm_v128_store32_lane(o, v0_3, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_2, 0);
+        wasm_v128_store32_lane(o, v0_2, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_1, 0);
+        wasm_v128_store32_lane(o, v0_1, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+        wasm_v128_store32_lane(o, v0_0, 0);
         o += 4;
         v0_0 = wasm_u64x2_shr(v0_0, 32);
         v0_1 = wasm_u64x2_shr(v0_1, 32);
@@ -556,82 +556,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
       }
       if (bh & 2) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_15, 0);
+        wasm_v128_store16_lane(o, v0_15, 0);
         uint8_t *oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_14, 0);
+        wasm_v128_store16_lane(o, v0_14, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_13, 0);
+        wasm_v128_store16_lane(o, v0_13, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_12, 0);
+        wasm_v128_store16_lane(o, v0_12, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_11, 0);
+        wasm_v128_store16_lane(o, v0_11, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_10, 0);
+        wasm_v128_store16_lane(o, v0_10, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_9, 0);
+        wasm_v128_store16_lane(o, v0_9, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_8, 0);
+        wasm_v128_store16_lane(o, v0_8, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_7, 0);
+        wasm_v128_store16_lane(o, v0_7, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_6, 0);
+        wasm_v128_store16_lane(o, v0_6, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_5, 0);
+        wasm_v128_store16_lane(o, v0_5, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_4, 0);
+        wasm_v128_store16_lane(o, v0_4, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_3, 0);
+        wasm_v128_store16_lane(o, v0_3, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_2, 0);
+        wasm_v128_store16_lane(o, v0_2, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_1, 0);
+        wasm_v128_store16_lane(o, v0_1, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_0, 0);
+        wasm_v128_store16_lane(o, v0_0, 0);
         o += 2;
         v0_0 = wasm_u32x4_shr(v0_0, 16);
         v0_1 = wasm_u32x4_shr(v0_1, 16);
@@ -652,82 +652,82 @@ void xnn_x8_transposec_ukernel__16x16_reuse_mov_wasmsimd(
       }
       if (bh & 1) {
         o = (uint8_t*) ((uintptr_t) o + oN_stride);
-        *o = wasm_i8x16_extract_lane(v0_15, 0);
+        wasm_v128_store8_lane(o, v0_15, 0);
         uint8_t *oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 15) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_14, 0);
+        wasm_v128_store8_lane(o, v0_14, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 15) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_13, 0);
+        wasm_v128_store8_lane(o, v0_13, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 13) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_12, 0);
+        wasm_v128_store8_lane(o, v0_12, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 13) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_11, 0);
+        wasm_v128_store8_lane(o, v0_11, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 11) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_10, 0);
+        wasm_v128_store8_lane(o, v0_10, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 11) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_9, 0);
+        wasm_v128_store8_lane(o, v0_9, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 9) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_8, 0);
+        wasm_v128_store8_lane(o, v0_8, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 9) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_7, 0);
+        wasm_v128_store8_lane(o, v0_7, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_6, 0);
+        wasm_v128_store8_lane(o, v0_6, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_5, 0);
+        wasm_v128_store8_lane(o, v0_5, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_4, 0);
+        wasm_v128_store8_lane(o, v0_4, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_3, 0);
+        wasm_v128_store8_lane(o, v0_3, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_2, 0);
+        wasm_v128_store8_lane(o, v0_2, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_1, 0);
+        wasm_v128_store8_lane(o, v0_1, 0);
         oN = (uint8_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *o = wasm_i8x16_extract_lane(v0_0, 0);
+        wasm_v128_store8_lane(o, v0_0, 0);
       }
     }
 

@@ -90,7 +90,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
     vy = wasm_i8x16_min(vy, voutput_max);
-    *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+    wasm_v128_store64_lane(output, vy, 0);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -118,18 +118,17 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x16(
     vy = wasm_i8x16_min(vy, voutput_max);
 
     if (batch & (4 * sizeof(float))) {
-      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
-      output += 4;
+      wasm_v128_store32_lane(output, vy, 0);
       vy = wasm_u64x2_shr(vy, 32);
+      output += 4;
     }
-    uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
     if (batch & (2 * sizeof(float))) {
-      *((uint16_t*) output) = (uint16_t) vy_lo;
+      wasm_v128_store16_lane(output, vy, 0);
+      vy = wasm_u32x4_shr(vy, 16);
       output += 2;
-      vy_lo >>= 16;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = (int8_t) vy_lo;
+      wasm_v128_store8_lane(output, vy, 0);
     }
   }
 }

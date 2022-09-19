@@ -8,6 +8,7 @@
 #include <wasm_simd128.h>
 
 #include <xnnpack/fill.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_xx_fill_ukernel__wasmsimd_x64(
@@ -38,16 +39,16 @@ void xnn_xx_fill_ukernel__wasmsimd_x64(
     }
     if XNN_UNLIKELY(c != 0) {
       if XNN_LIKELY(c & (8 * sizeof(uint8_t))) {
-        *((double*) output) = wasm_f64x2_extract_lane(vfill_pattern, 0);
+        wasm_v128_store64_lane(output, vfill_pattern, 0);
         output = ((uint8_t*) output + 8);
       }
-      uint32_t vfill_subpattern = fill_pattern;
       if XNN_LIKELY(c & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, fill_pattern);
         output = ((uint8_t*) output + 4);
       }
+      uint32_t vfill_subpattern = fill_pattern;
       if XNN_LIKELY(c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = ((uint8_t*) output + 2);
       }

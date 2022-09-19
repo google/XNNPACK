@@ -23,6 +23,7 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x128(
     const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 

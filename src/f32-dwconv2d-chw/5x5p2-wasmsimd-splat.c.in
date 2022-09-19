@@ -482,14 +482,16 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd${ARCH_SUFFIX}_splat_${ROW_TILE
       } else {
         if (w & (2 * sizeof(float))) {
           $for M in reversed(range(ROW_TILE)):
-            *((double*) o${M}) = wasm_f64x2_extract_lane(vo${M}, 0); o${M} += 2;
+            wasm_v128_store64_lane(o${M}, vo${M}, 0);
+            o${M} += 2;
 
           $for M in range(ROW_TILE):
-            vo${M} = wasm_v32x4_shuffle(vo${M}, vo${M}, 2, 3, 0, 1);
+            vo${M} = wasm_v64x2_shuffle(vo${M}, vo${M}, 1, 1);
         }
         if (w & (1 * sizeof(float))) {
           $for M in reversed(range(ROW_TILE)):
-            *o${M} = wasm_f32x4_extract_lane(vo${M}, 0); o${M} += 1;
+            wasm_v128_store32_lane(o${M}, vo${M}, 0);
+            o${M} += 1;
         }
       }
     }

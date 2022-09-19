@@ -21,8 +21,13 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_x8(
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.a_zero_point);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.b_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse4.scale);

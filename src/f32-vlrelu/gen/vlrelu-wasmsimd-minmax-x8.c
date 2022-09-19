@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
   const v128_t vzero = wasm_i32x4_const_splat(0);
@@ -59,12 +61,12 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8(
     vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
 
     if (batch & (2 * sizeof(float))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vacc, 0);
-      vacc = wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3);
+      wasm_v128_store64_lane(output, vacc, 0);
+      vacc = wasm_v64x2_shuffle(vacc, vacc, 1, 1);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = wasm_f32x4_extract_lane(vacc, 0);
+      wasm_v128_store32_lane(output, vacc, 0);
     }
   }
 }

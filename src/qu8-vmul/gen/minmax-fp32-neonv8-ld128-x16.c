@@ -22,6 +22,12 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__neonv8_ld128_x16(
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   #if XNN_ARCH_ARM64
     const uint8x16_t va_zero_point = vld1q_dup_u8(params->fp32_neonv8.a_zero_point);
     const uint8x16_t vb_zero_point = vld1q_dup_u8(params->fp32_neonv8.b_zero_point);

@@ -24,6 +24,8 @@ void xnn_f32_vrndne_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);

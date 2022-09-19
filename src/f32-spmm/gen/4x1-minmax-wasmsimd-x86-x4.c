@@ -114,7 +114,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4(
         }
         v128_t vout01 = wasm_f32x4_pmin(vmax, vacc01);
         vout01 = wasm_f32x4_pmax(vmin, vout01);
-        *((double*) output) = wasm_f64x2_extract_lane(vout01, 0);
+        wasm_v128_store64_lane(output, vout01, 0);
 
         output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--n != 0);
@@ -141,7 +141,7 @@ void xnn_f32_spmm_minmax_ukernel_4x1__wasmsimd_x86_x4(
         }
         v128_t vout0 = wasm_f32x4_pmin(vmax, vacc0);
         vout0 = wasm_f32x4_pmax(vmin, vout0);
-        *output = wasm_f32x4_extract_lane(vout0, 0);
+        wasm_v128_store32_lane(output, vout0, 0);
 
         output = (float*restrict) ((uintptr_t) output + output_stride);
       } while (--n != 0);

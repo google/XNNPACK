@@ -293,18 +293,17 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_x32(
     v128_t vh = wasm_v128_or(vabsh, vsignh);
 
     if (batch & (4 * sizeof(float))) {
-      *((double*) o) = wasm_f64x2_extract_lane(vh, 0);
+      wasm_v128_store64_lane(o, vh, 0);
       vh = wasm_v64x2_shuffle(vh, vh, 1, 1);
       o += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      *((float*) o) = (float) wasm_f32x4_extract_lane(vh, 0);
+      wasm_v128_store32_lane(o, vh, 0);
       vh = wasm_i64x2_shr(vh, 32);
       o += 2;
     }
-    const uint32_t vh_lo = wasm_i32x4_extract_lane(vh, 0);
     if (batch & (1 * sizeof(float))) {
-      *o = (uint16_t) vh_lo;
+      wasm_v128_store16_lane(o, vh, 0);
     }
   }
 }

@@ -22,6 +22,12 @@ void xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_add_epi32(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(params->sse4_mul16.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),
     _mm_load_si128((const __m128i*) params->sse4_mul16.bias));

@@ -23,7 +23,10 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x16(
     float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_lut16_p3.prescale);
   const __m256 valpha = _mm256_load_ps(params->avx2_rr1_lut16_p3.alpha);

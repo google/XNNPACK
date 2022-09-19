@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vslope = _mm256_load_ps(params->avx.slope);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {

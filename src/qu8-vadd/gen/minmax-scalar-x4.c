@@ -20,6 +20,12 @@ void xnn_qu8_vadd_minmax_ukernel__scalar_x4(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const int32_t vbias = params->scalar.bias;
   const int32_t va_multiplier = params->scalar.a_multiplier;
   const int32_t vb_multiplier = params->scalar.b_multiplier;

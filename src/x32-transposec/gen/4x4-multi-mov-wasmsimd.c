@@ -109,22 +109,22 @@ void xnn_x32_transposec_ukernel__4x4_multi_mov_wasmsimd(
 
       if (bh & 2) {
         o = (uint32_t*) ((uintptr_t) o + oN_stride);
-        *((double*) o) = wasm_f64x2_extract_lane(v0_3, 0);
+        wasm_v128_store64_lane(o, v0_3, 0);
         uint32_t *oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_2, 0);
+        wasm_v128_store64_lane(o, v0_2, 0);
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_1, 0);
+        wasm_v128_store64_lane(o, v0_1, 0);
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
+        wasm_v128_store64_lane(o, v0_0, 0);
         o += 2;
         v0_0 = wasm_v64x2_shuffle(v0_0, v0_0, 1, 1);
         v0_1 = wasm_v64x2_shuffle(v0_1, v0_1, 1, 1);
@@ -134,22 +134,22 @@ void xnn_x32_transposec_ukernel__4x4_multi_mov_wasmsimd(
 
       if (bh & 1) {
         o = (uint32_t*) ((uintptr_t) o + oN_stride);
-        *((float*) o) = wasm_f32x4_extract_lane(v0_3, 0);
+        wasm_v128_store32_lane(o, v0_3, 0);
         uint32_t *oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_2, 0);
+        wasm_v128_store32_lane(o, v0_2, 0);
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_1, 0);
+        wasm_v128_store32_lane(o, v0_1, 0);
         oN = (uint32_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+        wasm_v128_store32_lane(o, v0_0, 0);
       }
     }
 

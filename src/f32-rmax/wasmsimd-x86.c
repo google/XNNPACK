@@ -52,7 +52,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_x86(
     do {
       const float vx = *input++;
       vmax = math_max_f32(vx, vmax);
-      batch -= 4;
+      batch -= sizeof(float);
     } while (batch != 0);
   }
   *output = vmax;

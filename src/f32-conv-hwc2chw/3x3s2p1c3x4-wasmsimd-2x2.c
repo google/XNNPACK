@@ -332,20 +332,20 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
         vo0x1 = wasm_f32x4_pmin(vmax, vo0x1);
         vo1x1 = wasm_f32x4_pmin(vmax, vo1x1);
 
-        const v128_t vo0c01 = wasm_v32x4_shuffle(vo0x0, vo0x1, 0, 4 + 0, 1, 4 + 1);
-        const v128_t vo0c23 = wasm_v32x4_shuffle(vo0x0, vo0x1, 2, 4 + 2, 3, 4 + 3);
-        const v128_t vo1c01 = wasm_v32x4_shuffle(vo1x0, vo1x1, 0, 4 + 0, 1, 4 + 1);
-        const v128_t vo1c23 = wasm_v32x4_shuffle(vo1x0, vo1x1, 2, 4 + 2, 3, 4 + 3);
+        const v128_t vo0c01 = wasm_v32x4_shuffle(vo0x0, vo0x1, 0, 4, 1, 5);
+        const v128_t vo0c23 = wasm_v32x4_shuffle(vo0x0, vo0x1, 2, 6, 3, 7);
+        const v128_t vo1c01 = wasm_v32x4_shuffle(vo1x0, vo1x1, 0, 4, 1, 5);
+        const v128_t vo1c23 = wasm_v32x4_shuffle(vo1x0, vo1x1, 2, 6, 3, 7);
 
         // Always 2+ output width elements remaining
-        *((double*) o1c0) = wasm_f64x2_extract_lane(vo1c01, 0); o1c0 += 2;
-        *((double*) o1c1) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo1c01, vo1c01, 2, 3, 2, 3), 0); o1c1 += 2;
-        *((double*) o1c2) = wasm_f64x2_extract_lane(vo1c23, 0); o1c2 += 2;
-        *((double*) o1c3) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo1c23, vo1c23, 2, 3, 2, 3), 0); o1c3 += 2;
-        *((double*) o0c0) = wasm_f64x2_extract_lane(vo0c01, 0); o0c0 += 2;
-        *((double*) o0c1) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo0c01, vo0c01, 2, 3, 2, 3), 0); o0c1 += 2;
-        *((double*) o0c2) = wasm_f64x2_extract_lane(vo0c23, 0); o0c2 += 2;
-        *((double*) o0c3) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo0c23, vo0c23, 2, 3, 2, 3), 0); o0c3 += 2;
+        wasm_v128_store64_lane(o1c0, vo1c01, 0); o1c0 += 2;
+        wasm_v128_store64_lane(o1c1, vo1c01, 1); o1c1 += 2;
+        wasm_v128_store64_lane(o1c2, vo1c23, 0); o1c2 += 2;
+        wasm_v128_store64_lane(o1c3, vo1c23, 1); o1c3 += 2;
+        wasm_v128_store64_lane(o0c0, vo0c01, 0); o0c0 += 2;
+        wasm_v128_store64_lane(o0c1, vo0c01, 1); o0c1 += 2;
+        wasm_v128_store64_lane(o0c2, vo0c23, 0); o0c2 += 2;
+        wasm_v128_store64_lane(o0c3, vo0c23, 1); o0c3 += 2;
       }
       assert(iw < 4);
       if XNN_UNLIKELY(iw != 0) {
@@ -592,31 +592,31 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
 
         if (iw == 3) {
           // Exactly 2 output width elements remaining
-          const v128_t vo0c01 = wasm_v32x4_shuffle(vo0x0, vo0x1, 0, 4 + 0, 1, 4 + 1);
-          const v128_t vo0c23 = wasm_v32x4_shuffle(vo0x0, vo0x1, 2, 4 + 2, 3, 4 + 3);
-          const v128_t vo1c01 = wasm_v32x4_shuffle(vo1x0, vo1x1, 0, 4 + 0, 1, 4 + 1);
-          const v128_t vo1c23 = wasm_v32x4_shuffle(vo1x0, vo1x1, 2, 4 + 2, 3, 4 + 3);
+          const v128_t vo0c01 = wasm_v32x4_shuffle(vo0x0, vo0x1, 0, 4, 1, 5);
+          const v128_t vo0c23 = wasm_v32x4_shuffle(vo0x0, vo0x1, 2, 6, 3, 7);
+          const v128_t vo1c01 = wasm_v32x4_shuffle(vo1x0, vo1x1, 0, 4, 1, 5);
+          const v128_t vo1c23 = wasm_v32x4_shuffle(vo1x0, vo1x1, 2, 6, 3, 7);
 
-          *((double*) o1c0) = wasm_f64x2_extract_lane(vo1c01, 0); o1c0 += 2;
-          *((double*) o1c1) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo1c01, vo1c01, 2, 3, 2, 3), 0); o1c1 += 2;
-          *((double*) o1c2) = wasm_f64x2_extract_lane(vo1c23, 0); o1c2 += 2;
-          *((double*) o1c3) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo1c23, vo1c23, 2, 3, 2, 3), 0); o1c3 += 2;
+          wasm_v128_store64_lane(o1c0, vo1c01, 0); o1c0 += 2;
+          wasm_v128_store64_lane(o1c1, vo1c01, 1); o1c1 += 2;
+          wasm_v128_store64_lane(o1c2, vo1c23, 0); o1c2 += 2;
+          wasm_v128_store64_lane(o1c3, vo1c23, 1); o1c3 += 2;
 
-          *((double*) o0c0) = wasm_f64x2_extract_lane(vo0c01, 0); o0c0 += 2;
-          *((double*) o0c1) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo0c01, vo0c01, 2, 3, 2, 3), 0); o0c1 += 2;
-          *((double*) o0c2) = wasm_f64x2_extract_lane(vo0c23, 0); o0c2 += 2;
-          *((double*) o0c3) = wasm_f64x2_extract_lane(wasm_v32x4_shuffle(vo0c23, vo0c23, 2, 3, 2, 3), 0); o0c3 += 2;
+          wasm_v128_store64_lane(o0c0, vo0c01, 0); o0c0 += 2;
+          wasm_v128_store64_lane(o0c1, vo0c01, 1); o0c1 += 2;
+          wasm_v128_store64_lane(o0c2, vo0c23, 0); o0c2 += 2;
+          wasm_v128_store64_lane(o0c3, vo0c23, 1); o0c3 += 2;
         } else {
           // Exactly 1 output width element remaining
 
-          *o1c0 = wasm_f32x4_extract_lane(vo1x0, 0); o1c0 += 1;
-          *o1c1 = wasm_f32x4_extract_lane(vo1x0, 1); o1c1 += 1;
-          *o1c2 = wasm_f32x4_extract_lane(vo1x0, 2); o1c2 += 1;
-          *o1c3 = wasm_f32x4_extract_lane(vo1x0, 3); o1c3 += 1;
-          *o0c0 = wasm_f32x4_extract_lane(vo0x0, 0); o0c0 += 1;
-          *o0c1 = wasm_f32x4_extract_lane(vo0x0, 1); o0c1 += 1;
-          *o0c2 = wasm_f32x4_extract_lane(vo0x0, 2); o0c2 += 1;
-          *o0c3 = wasm_f32x4_extract_lane(vo0x0, 3); o0c3 += 1;
+          wasm_v128_store32_lane(o1c0, vo1x0, 0); o1c0 += 1;
+          wasm_v128_store32_lane(o1c1, vo1x0, 1); o1c1 += 1;
+          wasm_v128_store32_lane(o1c2, vo1x0, 2); o1c2 += 1;
+          wasm_v128_store32_lane(o1c3, vo1x0, 3); o1c3 += 1;
+          wasm_v128_store32_lane(o0c0, vo0x0, 0); o0c0 += 1;
+          wasm_v128_store32_lane(o0c1, vo0x0, 1); o0c1 += 1;
+          wasm_v128_store32_lane(o0c2, vo0x0, 2); o0c2 += 1;
+          wasm_v128_store32_lane(o0c3, vo0x0, 3); o0c3 += 1;
         }
       }
       // Move output pointers back to the position of the first pixel in a row,

@@ -583,18 +583,24 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_arm_loadsplat_3x4(
         wasm_v128_store(o0, vo0); o0 += 4;
       } else {
         if (w_tmp & 2) {
-          *((double*) o2) = wasm_f64x2_extract_lane(vo2, 0); o2 += 2;
-          *((double*) o1) = wasm_f64x2_extract_lane(vo1, 0); o1 += 2;
-          *((double*) o0) = wasm_f64x2_extract_lane(vo0, 0); o0 += 2;
+          wasm_v128_store64_lane(o2, vo2, 0);
+          o2 += 2;
+          wasm_v128_store64_lane(o1, vo1, 0);
+          o1 += 2;
+          wasm_v128_store64_lane(o0, vo0, 0);
+          o0 += 2;
 
-          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 3, 0, 1);
-          vo1 = wasm_v32x4_shuffle(vo1, vo1, 2, 3, 0, 1);
-          vo2 = wasm_v32x4_shuffle(vo2, vo2, 2, 3, 0, 1);
+          vo0 = wasm_v64x2_shuffle(vo0, vo0, 1, 1);
+          vo1 = wasm_v64x2_shuffle(vo1, vo1, 1, 1);
+          vo2 = wasm_v64x2_shuffle(vo2, vo2, 1, 1);
         }
         if (w_tmp & 1) {
-          *o2 = wasm_f32x4_extract_lane(vo2, 0); o2 += 1;
-          *o1 = wasm_f32x4_extract_lane(vo1, 0); o1 += 1;
-          *o0 = wasm_f32x4_extract_lane(vo0, 0); o0 += 1;
+          wasm_v128_store32_lane(o2, vo2, 0);
+          o2 += 1;
+          wasm_v128_store32_lane(o1, vo1, 0);
+          o1 += 1;
+          wasm_v128_store32_lane(o0, vo0, 0);
+          o0 += 1;
         }
       }
     }

@@ -21,6 +21,12 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld128_x32(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   #if XNN_ARCH_ARM64
     const int8x16_t va_zero_point = vld1q_dup_s8(&params->neon.a_zero_point);
   #else

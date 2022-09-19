@@ -21,6 +21,12 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld64_x32(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
   const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);
   const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);

@@ -187,42 +187,42 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
 
       if (bh & 4) {
         o = (uint16_t*) ((uintptr_t) o + oN_stride);
-        *((double*) o) = wasm_f64x2_extract_lane(v0_7, 0);
+        wasm_v128_store64_lane(o, v0_7, 0);
         uint16_t *oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_6, 0);
+        wasm_v128_store64_lane(o, v0_6, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_5, 0);
+        wasm_v128_store64_lane(o, v0_5, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_4, 0);
+        wasm_v128_store64_lane(o, v0_4, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_3, 0);
+        wasm_v128_store64_lane(o, v0_3, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_2, 0);
+        wasm_v128_store64_lane(o, v0_2, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_1, 0);
+        wasm_v128_store64_lane(o, v0_1, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
+        wasm_v128_store64_lane(o, v0_0, 0);
         o += 4;
         v0_0 = wasm_v64x2_shuffle(v0_0, v0_0, 1, 1);
         v0_1 = wasm_v64x2_shuffle(v0_1, v0_1, 1, 1);
@@ -236,42 +236,42 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
 
       if (bh & 2) {
         o = (uint16_t*) ((uintptr_t) o + oN_stride);
-        *((float*) o) = wasm_f32x4_extract_lane(v0_7, 0);
+        wasm_v128_store32_lane(o, v0_7, 0);
         uint16_t *oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_6, 0);
+        wasm_v128_store32_lane(o, v0_6, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_5, 0);
+        wasm_v128_store32_lane(o, v0_5, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_4, 0);
+        wasm_v128_store32_lane(o, v0_4, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_3, 0);
+        wasm_v128_store32_lane(o, v0_3, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_2, 0);
+        wasm_v128_store32_lane(o, v0_2, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_1, 0);
+        wasm_v128_store32_lane(o, v0_1, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+        wasm_v128_store32_lane(o, v0_0, 0);
         o += 2;
         v0_0 = wasm_u64x2_shr(v0_0, 32);
         v0_1 = wasm_u64x2_shr(v0_1, 32);
@@ -284,42 +284,42 @@ void xnn_x16_transposec_ukernel__8x8_reuse_mov_wasmsimd(
       }
       if (bh & 1) {
         o = (uint16_t*) ((uintptr_t) o + oN_stride);
-        *o = wasm_i16x8_extract_lane(v0_7, 0);
+        wasm_v128_store16_lane(o, v0_7, 0);
         uint16_t *oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 7) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_6, 0);
+        wasm_v128_store16_lane(o, v0_6, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 7) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_5, 0);
+        wasm_v128_store16_lane(o, v0_5, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 5) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_4, 0);
+        wasm_v128_store16_lane(o, v0_4, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 5) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_3, 0);
+        wasm_v128_store16_lane(o, v0_3, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 3) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_2, 0);
+        wasm_v128_store16_lane(o, v0_2, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width >= 3) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_1, 0);
+        wasm_v128_store16_lane(o, v0_1, 0);
         oN = (uint16_t*) ((uintptr_t) o + minus_output_stride);
         if XNN_UNPREDICTABLE(block_width > 1) {
           o = oN;
         }
-        *o = wasm_i16x8_extract_lane(v0_0, 0);
+        wasm_v128_store16_lane(o, v0_0, 0);
       }
     }
 

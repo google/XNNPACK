@@ -21,6 +21,12 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neon_ld64_x8(
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const uint8x8_t va_zero_point = vld1_dup_u8(params->fp32_neon.a_zero_point);
   const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
   const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);

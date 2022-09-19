@@ -206,7 +206,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c2__wasmsimd_dot16
 
     if (nc >= 4) {
       $for M in reversed(range(MR)):
-        *((float*) c${M}) = (float) wasm_f32x4_extract_lane(vout, ${M});
+        wasm_v128_store32_lane(c${M}, vout, ${M});
 
       $for M in reversed(range(MR)):
         c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
@@ -215,17 +215,15 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c2__wasmsimd_dot16
 
       nc -= 4;
     } else {
-      $for M in reversed(range(MR)):
-        uint32_t vout${M} = wasm_i32x4_extract_lane(vout, ${M});
       if (nc & 2) {
         $for M in reversed(range(MR)):
-          *((uint16_t*) c${M}) = (uint16_t) vout${M};
-          vout${M} >>= 16;
+          wasm_v128_store16_lane(c${M}, vout, ${2 * M});
+          vout = wasm_u32x4_shr(vout, 16);
           c${M} += 2;
       }
       if (nc & 1) {
         $for M in reversed(range(MR)):
-          *c${M} = (${XINT8_T}) vout${M};
+          wasm_v128_store8_lane(c${M}, vout, ${4 * M});
       }
 
       nc = 0;

@@ -167,12 +167,13 @@ void xnn_f32_avgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
       vout = wasm_f32x4_pmin(vmax, vout);
 
       if (c & 2) {
-        *((double*) output) = wasm_f64x2_extract_lane(vout, 0);
+        wasm_v128_store64_lane(output, vout, 0);
+        vout = wasm_v64x2_shuffle(vout, vout, 1, 1);
         output += 2;
-        vout = wasm_v32x4_shuffle(vout, vout, 2, 3, 2, 3);
       }
       if (c & 1) {
-        *output++ = wasm_f32x4_extract_lane(vout, 0);
+        wasm_v128_store32_lane(output, vout, 0);
+        output += 1;
       }
     }
     output = (float*) ((uintptr_t) output + output_increment);

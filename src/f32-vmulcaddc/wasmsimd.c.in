@@ -149,17 +149,18 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
 
       if (c & (2 * sizeof(float))) {
         $for M in range(ROW_TILE):
-          *((double*) o${M}) = wasm_f64x2_extract_lane(vacc${M}, 0);
+          wasm_v128_store64_lane(o${M}, vacc${M}, 0);
 
         $for M in range(ROW_TILE):
-          vacc${M} = wasm_v32x4_shuffle(vacc${M}, vacc${M}, 2, 3, 2, 3);
+          vacc${M} = wasm_v64x2_shuffle(vacc${M}, vacc${M}, 1, 1);
 
         $for M in range(ROW_TILE):
           o${M} += 2;
       }
       if (c & (1 * sizeof(float))) {
         $for M in range(ROW_TILE):
-          *o${M}++ = wasm_f32x4_extract_lane(vacc${M}, 0);
+          wasm_v128_store32_lane(o${M}, vacc${M}, 0);
+          o${M} += 1;
       }
     }
     $for M in range(ROW_TILE):

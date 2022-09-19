@@ -191,23 +191,21 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
           switch (rem) {
             $for N in reversed(range(2, TILE_SIZE)):
               case ${N}:
-                *((double*) oN) = wasm_f64x2_extract_lane(v0_${N}, 0);
+                wasm_v128_store64_lane(oN, v0_${N}, 0);
                 oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
             case 1:
-              *((double*) oN) = wasm_f64x2_extract_lane(v0_1, 0);
+              wasm_v128_store64_lane(oN, v0_1, 0);
             case 0:
+              wasm_v128_store64_lane(o, v0_0, 0);
               $if NUM_ITERS > 1:
-                *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
                 o += ${TILE_SIZE>>1};
-              $else:
-                *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
               break;
             default:
               XNN_UNREACHABLE;
           }
         $elif OUT_PTRS in ["MOV", "DEC"]:
           o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-          *((double*) o) = wasm_f64x2_extract_lane(v0_${TILE_SIZE-1}, 0);
+          wasm_v128_store64_lane(o, v0_${TILE_SIZE-1}, 0);
           $if OUT_PTRS == "MOV":
             uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
           $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -217,7 +215,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               $else:
                 o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             }
-            *((double*) o) = wasm_f64x2_extract_lane(v0_${N}, 0);
+            wasm_v128_store64_lane(o, v0_${N}, 0);
             $if OUT_PTRS == "MOV":
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
@@ -226,7 +224,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               $else:
                 o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             }
-            *((double*) o) = wasm_f64x2_extract_lane(v0_${N-1}, 0);
+            wasm_v128_store64_lane(o, v0_${N-1}, 0);
             $if OUT_PTRS == "MOV":
               oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
           if XNN_UNPREDICTABLE(block_width > 1) {
@@ -235,18 +233,14 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             $else:
               o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
           }
+          wasm_v128_store64_lane(o, v0_0, 0);
           $if NUM_ITERS > 1:
-            *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
             o += ${TILE_SIZE>>1};
-          $else:
-            *((double*) o) = wasm_f64x2_extract_lane(v0_0, 0);
         $else:
           $for N in reversed(range(TILE_SIZE)):
+            wasm_v128_store64_lane(o${N}, v0_${N}, 0);
             $if NUM_ITERS>1:
-              *((double*) o${N}) = wasm_f64x2_extract_lane(v0_${N}, 0);
               o${N} += ${TILE_SIZE>>1};
-            $else:
-              *((double*) o${N}) = wasm_f64x2_extract_lane(v0_${N}, 0);
         $if NUM_ITERS > 1:
           $for N in range(TILE_SIZE):
             v0_${N} = wasm_v64x2_shuffle(v0_${N}, v0_${N}, 1, 1);
@@ -259,12 +253,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             switch (rem) {
               $for N in reversed(range(2, TILE_SIZE)):
                 case ${N}:
-                  *((float*) oN) = wasm_f32x4_extract_lane(v0_${N}, 0);
+                  wasm_v128_store32_lane(oN, v0_${N}, 0);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
               case 1:
-                *((float*) oN) = wasm_f32x4_extract_lane(v0_1, 0);
+                wasm_v128_store32_lane(oN, v0_1, 0);
               case 0:
-                *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+                wasm_v128_store32_lane(o, v0_0, 0);
                 $if SIZE < 32:
                   o += ${TILE_SIZE>>2};
                 break;
@@ -273,7 +267,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             }
           $elif OUT_PTRS in ["MOV", "DEC"]:
             o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-            *((float*) o) = wasm_f32x4_extract_lane(v0_${TILE_SIZE-1}, 0);
+            wasm_v128_store32_lane(o, v0_${TILE_SIZE-1}, 0);
             $if OUT_PTRS == "MOV":
               uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -283,7 +277,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              *((float*) o) = wasm_f32x4_extract_lane(v0_${N}, 0);
+              wasm_v128_store32_lane(o, v0_${N}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
@@ -292,7 +286,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              *((float*) o) = wasm_f32x4_extract_lane(v0_${N-1}, 0);
+              wasm_v128_store32_lane(o, v0_${N-1}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width > 1) {
@@ -301,12 +295,12 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               $else:
                 o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             }
-            *((float*) o) = wasm_f32x4_extract_lane(v0_0, 0);
+            wasm_v128_store32_lane(o, v0_0, 0);
             $if SIZE < 32:
               o += ${TILE_SIZE>>2};
           $else:
             $for N in reversed(range(TILE_SIZE)):
-              *((float*) o${N}) = wasm_f32x4_extract_lane(v0_${N}, 0);
+              wasm_v128_store32_lane(o${N}, v0_${N}, 0);
               $if SIZE < 32:
                 o${N} += ${TILE_SIZE>>2};
           $if NUM_ITERS > 2:
@@ -320,22 +314,13 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             switch (rem) {
               $for N in reversed(range(2, TILE_SIZE)):
                 case ${N}:
-                  $if SIZE == 16:
-                    *oN = wasm_i16x8_extract_lane(v0_${N}, 0);
-                    oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
-                  $else:
-                    *((uint16_t*) oN) = wasm_i16x8_extract_lane(v0_${N}, 0);
-                    oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
+                  wasm_v128_store16_lane(oN, v0_${N}, 0);
+                  oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
               case 1:
-                $if SIZE == 16:
-                  *oN = wasm_i16x8_extract_lane(v0_1, 0);
-                $else:
-                  *((uint16_t*) oN) = wasm_i16x8_extract_lane(v0_1, 0);
+                wasm_v128_store16_lane(oN, v0_1, 0);
               case 0:
-                $if SIZE == 16:
-                  *o = wasm_i16x8_extract_lane(v0_0, 0);
-                $else:
-                  *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_0, 0);
+                wasm_v128_store16_lane(o, v0_0, 0);
+                $if SIZE != 16:
                   o += ${TILE_SIZE>>3};
                 break;
               default:
@@ -343,10 +328,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             }
           $elif OUT_PTRS in ["MOV", "DEC"]:
             o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-            $if SIZE == 16:
-              *o = wasm_i16x8_extract_lane(v0_${TILE_SIZE-1}, 0);
-            $else:
-              *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_${TILE_SIZE-1}, 0);
+            wasm_v128_store16_lane(o, v0_${TILE_SIZE-1}, 0);
             $if OUT_PTRS == "MOV":
               uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -356,10 +338,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              $if SIZE == 16:
-                *o = wasm_i16x8_extract_lane(v0_${N}, 0);
-              $else:
-                *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_${N}, 0);
+              wasm_v128_store16_lane(o, v0_${N}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
@@ -368,10 +347,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              $if SIZE == 16:
-                *o = wasm_i16x8_extract_lane(v0_${N-1}, 0);
-              $else:
-                *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_${N-1}, 0);
+              wasm_v128_store16_lane(o, v0_${N-1}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width > 1) {
@@ -380,17 +356,13 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               $else:
                 o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             }
-            $if SIZE == 16:
-              *o = wasm_i16x8_extract_lane(v0_0, 0);
-            $else:
-              *((uint16_t*) o) = wasm_i16x8_extract_lane(v0_0, 0);
+            wasm_v128_store16_lane(o, v0_0, 0);
+            $if SIZE != 16:
               o += ${TILE_SIZE>>3};
           $else:
             $for N in reversed(range(TILE_SIZE)):
-              $if SIZE == 16:
-                *o${N} = wasm_i16x8_extract_lane(v0_${N}, 0);
-              $else:
-                *((uint16_t*) o${N}) = wasm_i16x8_extract_lane(v0_${N}, 0);
+              wasm_v128_store16_lane(o${N}, v0_${N}, 0);
+              $if SIZE != 16:
                 o${N} += ${TILE_SIZE>>3};
           $if NUM_ITERS>3:
             $for N in range(TILE_SIZE):
@@ -403,19 +375,19 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
             switch (rem) {
               $for N in reversed(range(2, TILE_SIZE)):
                 case ${N}:
-                  *oN = wasm_i8x16_extract_lane(v0_${N}, 0);
+                  wasm_v128_store8_lane(oN, v0_${N}, 0);
                   oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
               case 1:
-                *oN = wasm_i8x16_extract_lane(v0_1, 0);
+                wasm_v128_store8_lane(oN, v0_1, 0);
               case 0:
-                *o = wasm_i8x16_extract_lane(v0_0, 0);
+                wasm_v128_store8_lane(o, v0_0, 0);
                 break;
               default:
                 XNN_UNREACHABLE;
             }
           $elif OUT_PTRS in ["MOV", "DEC"]:
             o = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
-            *o = wasm_i8x16_extract_lane(v0_${TILE_SIZE-1}, 0);
+            wasm_v128_store8_lane(o, v0_${TILE_SIZE-1}, 0);
             $if OUT_PTRS == "MOV":
               uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -425,7 +397,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              *o = wasm_i8x16_extract_lane(v0_${N}, 0);
+              wasm_v128_store8_lane(o, v0_${N}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
@@ -434,7 +406,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
                 $else:
                   o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
               }
-              *o = wasm_i8x16_extract_lane(v0_${N-1}, 0);
+              wasm_v128_store8_lane(o, v0_${N-1}, 0);
               $if OUT_PTRS == "MOV":
                 oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             if XNN_UNPREDICTABLE(block_width > 1) {
@@ -443,10 +415,10 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
               $else:
                 o = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
             }
-            *o = wasm_i8x16_extract_lane(v0_0, 0);
+            wasm_v128_store8_lane(o, v0_0, 0);
           $else:
             $for N in reversed(range(TILE_SIZE)):
-              *o${N} = wasm_i8x16_extract_lane(v0_${N}, 0);
+              wasm_v128_store8_lane(o${N}, v0_${N}, 0);
         }
     }
 

@@ -67,12 +67,12 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_x16(
 
 
     if (batch & (2 * sizeof(float))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
-      vy = wasm_v32x4_shuffle(vy, vy, 2, 3, 2, 3);
+      wasm_v128_store64_lane(output, vy, 0);
+      vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = wasm_f32x4_extract_lane(vy, 0);
+      wasm_v128_store32_lane(output, vy, 0);
     }
   }
 }

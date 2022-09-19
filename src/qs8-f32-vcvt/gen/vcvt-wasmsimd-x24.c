@@ -105,12 +105,12 @@ void xnn_qs8_f32_vcvt_ukernel__wasmsimd_x24(
       vy = wasm_f32x4_mul(vy, vscale);
     }
     if (batch & (2 * sizeof(int8_t))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+      wasm_v128_store64_lane(output, vy, 0);
       vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
       output += 2;
     }
     if (batch & (1 * sizeof(int8_t))) {
-      *output = wasm_f32x4_extract_lane(vy, 0);
+      wasm_v128_store32_lane(output, vy, 0);
     }
   }
 }

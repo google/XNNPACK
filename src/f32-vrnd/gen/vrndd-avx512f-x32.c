@@ -25,6 +25,8 @@ void xnn_f32_vrndd_ukernel__avx512f_x32(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);

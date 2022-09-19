@@ -131,18 +131,20 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_fma_2x(
       vacc1 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc1);
 
       if (c & (2 * sizeof(float))) {
-        *((double*) o0) = wasm_f64x2_extract_lane(vacc0, 0);
-        *((double*) o1) = wasm_f64x2_extract_lane(vacc1, 0);
+        wasm_v128_store64_lane(o0, vacc0, 0);
+        wasm_v128_store64_lane(o1, vacc1, 0);
 
-        vacc0 = wasm_v32x4_shuffle(vacc0, vacc0, 2, 3, 2, 3);
-        vacc1 = wasm_v32x4_shuffle(vacc1, vacc1, 2, 3, 2, 3);
+        vacc0 = wasm_v64x2_shuffle(vacc0, vacc0, 1, 1);
+        vacc1 = wasm_v64x2_shuffle(vacc1, vacc1, 1, 1);
 
         o0 += 2;
         o1 += 2;
       }
       if (c & (1 * sizeof(float))) {
-        *o0++ = wasm_f32x4_extract_lane(vacc0, 0);
-        *o1++ = wasm_f32x4_extract_lane(vacc1, 0);
+        wasm_v128_store32_lane(o0, vacc0, 0);
+        o0 += 1;
+        wasm_v128_store32_lane(o1, vacc1, 0);
+        o1 += 1;
       }
     }
     i0 = (const float*) ((uintptr_t) i0 + input_increment);

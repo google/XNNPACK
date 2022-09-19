@@ -273,12 +273,12 @@ void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBT
     $if CHANNEL_TILE > 8:
       wasm_v128_store(output, vout${ABC[0:16]});
     $else:
-      *((double*) output) = wasm_f64x2_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+      wasm_v128_store64_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
     $for C in range(16, CHANNEL_TILE, 16):
       $if C + 8 < CHANNEL_TILE:
         wasm_v128_store(output + ${C}, vout${ABC[C:C+16]});
       $else:
-        *((double*) (output + ${C})) = wasm_f64x2_extract_lane(vout${ABC[C:C+8]}${ABC[C:C+8]}, 0);
+        wasm_v128_store64_lane(output + ${C}, vout${ABC[C:C+8]}${ABC[C:C+8]}, 0);
     output += ${CHANNEL_TILE};
   }
   if XNN_UNLIKELY(channels != 0) {
@@ -326,41 +326,39 @@ void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}p${ROW_SUBT
 
       $if CHANNEL_TILE > 8:
         if XNN_LIKELY(channels >= 8) {
-          *((double*) output) = wasm_f64x2_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          wasm_v128_store64_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
           output += 8;
           channels -= 8;
         } else {
           if (channels & 4) {
-            *((float*) output) = wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+            wasm_v128_store32_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
             vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
             output += 4;
           }
-          uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
           if (channels & 2) {
-            *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
-            vout${ABC[0:4]} >>= 16;
+            wasm_v128_store16_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
+            vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
             output += 2;
           }
           if (channels & 1) {
-            *output = (${XINT8_T}) vout${ABC[0:4]};
+            wasm_v128_store8_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
             output += 1;
           }
           channels = 0;
         }
       $else:
         if (channels & 4) {
-          *((float*) output) = wasm_f32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
+          wasm_v128_store32_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
           vout${ABC[0:8]}${ABC[0:8]} = wasm_u64x2_shr(vout${ABC[0:8]}${ABC[0:8]}, 32);
           output += 4;
         }
-        uint32_t vout${ABC[0:4]} = wasm_i32x4_extract_lane(vout${ABC[0:8]}${ABC[0:8]}, 0);
         if (channels & 2) {
-          *((uint16_t*) output) = (uint16_t) vout${ABC[0:4]};
-          vout${ABC[0:4]} >>= 16;
+          wasm_v128_store16_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
+          vout${ABC[0:8]}${ABC[0:8]} = wasm_u32x4_shr(vout${ABC[0:8]}${ABC[0:8]}, 16);
           output += 2;
         }
         if (channels & 1) {
-          *output = (${XINT8_T}) vout${ABC[0:4]};
+          wasm_v128_store8_lane(output, vout${ABC[0:8]}${ABC[0:8]}, 0);
         }
     }${" while (channels != 0);" if CHANNEL_TILE > 8 else ""}
   }

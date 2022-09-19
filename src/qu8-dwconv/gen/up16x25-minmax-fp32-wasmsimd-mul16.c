@@ -901,23 +901,22 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__wasmsimd_mul16(
       w = (const void*) ((uintptr_t) w + 8 * sizeof(int32_t));
 
       if XNN_LIKELY(c >= 8) {
-        *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
+        wasm_v128_store64_lane(output, vout0123456701234567, 0);
         output += 8;
         c -= 8;
       } else {
         if (c & 4) {
-          *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);
+          wasm_v128_store32_lane(output, vout0123456701234567, 0);
           vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
           output += 4;
         }
-        uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
         if (c & 2) {
-          *((uint16_t*) output) = (uint16_t) vout0123;
-          vout0123 >>= 16;
+          wasm_v128_store16_lane(output, vout0123456701234567, 0);
+          vout0123456701234567 = wasm_u32x4_shr(vout0123456701234567, 16);
           output += 2;
         }
         if (c & 1) {
-          *output = (uint8_t) vout0123;
+          wasm_v128_store8_lane(output, vout0123456701234567, 0);
           output += 1;
         }
         c = 0;

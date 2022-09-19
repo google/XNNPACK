@@ -199,7 +199,7 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         const v128_t vd = wasm_f32x4_sub(vr, vl);
         const v128_t vo = wasm_f32x4_add(vl, wasm_f32x4_mul(vd, valphah));
 
-        *((double*) output) = wasm_f64x2_extract_lane(vo, 0);
+        wasm_v128_store64_lane(output, vo, 0);
         output += 2;
       }
 

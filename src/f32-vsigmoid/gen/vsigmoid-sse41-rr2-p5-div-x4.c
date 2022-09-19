@@ -21,7 +21,10 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_p5_div_x4(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_p5.sign_mask);
   const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_p5.magic_bias);

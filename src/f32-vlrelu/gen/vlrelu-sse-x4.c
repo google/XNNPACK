@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__sse_x4(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vslope = _mm_load_ps(params->sse.slope);
   const __m128 vzero = _mm_setzero_ps();

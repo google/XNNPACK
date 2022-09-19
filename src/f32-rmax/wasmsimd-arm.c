@@ -48,7 +48,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_arm(
     do {
       const float vx = *input++;
       vmax = __builtin_wasm_max_f32(vx, vmax);
-      batch -= 4;
+      batch -= sizeof(float);
     } while (batch != 0);
   }
   *output = vmax;

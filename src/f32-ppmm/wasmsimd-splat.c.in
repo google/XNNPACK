@@ -122,16 +122,16 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_splat(
                 c${M} += ${1 << LOG2N};
             $elif LOG2N == 1:
               $for M in reversed(range(MR)):
-                *((double*) c${M}) = wasm_f64x2_extract_lane(vacc${M}x${ABC[0:4]}, 0);
+                wasm_v128_store64_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
 
               $for M in reversed(range(MR)):
-                vacc${M}x${ABC[0:4]} = wasm_v32x4_shuffle(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 2, 3, 2, 3);
+                vacc${M}x${ABC[0:4]} = wasm_v64x2_shuffle(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 1, 1);
 
               $for M in reversed(range(MR)):
                 c${M} += 2;
             $elif LOG2N == 0:
               $for M in reversed(range(MR)):
-                *c${M} = wasm_f32x4_extract_lane(vacc${M}x${ABC[0:4]}, 0);
+                wasm_v128_store32_lane(c${M}, vacc${M}x${ABC[0:4]}, 0);
           }
 
       nc = 0;

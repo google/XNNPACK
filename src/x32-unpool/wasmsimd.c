@@ -30,11 +30,11 @@ void xnn_x32_unpool_ukernel__wasmsimd(
     }
     if (c != 0) {
       if (c & 2) {
-        *((double*) o) = wasm_f64x2_extract_lane(vfill, 0);
+        wasm_v128_store64_lane(o, vfill, 0);
         o += 2;
       }
       if (c & 1) {
-        *o = wasm_f32x4_extract_lane(vfill, 0);
+        wasm_v128_store32_lane(o, vfill, 0);
       }
     }
   } while (--kernel_elements != 0);

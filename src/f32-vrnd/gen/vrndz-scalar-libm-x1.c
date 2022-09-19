@@ -23,6 +23,8 @@ void xnn_f32_vrndz_ukernel__scalar_libm_x1(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   do {
     const float vx = *input++;

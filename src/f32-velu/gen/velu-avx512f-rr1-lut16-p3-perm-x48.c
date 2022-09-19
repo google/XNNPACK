@@ -24,6 +24,8 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x48(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_lut16_p3.prescale);
   const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_lut16_p3.alpha);

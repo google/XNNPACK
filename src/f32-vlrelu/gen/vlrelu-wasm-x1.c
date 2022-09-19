@@ -21,6 +21,8 @@ void xnn_f32_vlrelu_ukernel__wasm_x1(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vslope = params->scalar.slope;
   const float vzero = 0.0f;

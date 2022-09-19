@@ -23,6 +23,8 @@ void xnn_f32_vhswish_ukernel__fma3_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
   const __m256 vhalf = _mm256_load_ps(params->avx.half);

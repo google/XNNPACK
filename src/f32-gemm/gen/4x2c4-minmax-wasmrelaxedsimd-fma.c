@@ -148,26 +148,26 @@ void xnn_f32_gemm_minmax_ukernel_4x2c4__wasmrelaxedsimd_fma(
     vacc23x01 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
-      *((double*) c2) = wasm_f64x2_extract_lane(vacc23x01, 0);
+      wasm_v128_store64_lane(c2, vacc23x01, 0);
       c2 = (float*) ((uintptr_t) c2 + cn_stride);
       a2 = (const float*) ((uintptr_t) a2 - kc);
-      *((double*) c3) = wasm_f64x2_extract_lane(vacc23x01, 1);
+      wasm_v128_store64_lane(c3, vacc23x01, 1);
       c3 = (float*) ((uintptr_t) c3 + cn_stride);
       a3 = (const float*) ((uintptr_t) a3 - kc);
-      *((double*) c0) = wasm_f64x2_extract_lane(vacc01x01, 0);
+      wasm_v128_store64_lane(c0, vacc01x01, 0);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
       a0 = (const float*) ((uintptr_t) a0 - kc);
-      *((double*) c1) = wasm_f64x2_extract_lane(vacc01x01, 1);
+      wasm_v128_store64_lane(c1, vacc01x01, 1);
       c1 = (float*) ((uintptr_t) c1 + cn_stride);
       a1 = (const float*) ((uintptr_t) a1 - kc);
 
       nc -= 2;
     } else {
       assert(nc == 1);
-      *c2 = wasm_f32x4_extract_lane(vacc23x01, 0);
-      *c3 = wasm_f32x4_extract_lane(vacc23x01, 2);
-      *c0 = wasm_f32x4_extract_lane(vacc01x01, 0);
-      *c1 = wasm_f32x4_extract_lane(vacc01x01, 2);
+      wasm_v128_store32_lane(c2, vacc23x01, 0);
+      wasm_v128_store32_lane(c3, vacc23x01, 2);
+      wasm_v128_store32_lane(c0, vacc01x01, 0);
+      wasm_v128_store32_lane(c1, vacc01x01, 2);
 
       nc = 0;
     }

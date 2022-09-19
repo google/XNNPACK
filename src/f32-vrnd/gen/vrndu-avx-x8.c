@@ -24,6 +24,8 @@ void xnn_f32_vrndu_ukernel__avx_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);

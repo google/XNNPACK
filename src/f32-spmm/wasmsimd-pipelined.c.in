@@ -139,9 +139,9 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_pipelined${
           $if SUBMR >= 4:
             wasm_v128_store(output, vout0123);
           $elif SUBMR == 2:
-            *((double*) output) = wasm_f64x2_extract_lane(vout01, 0);
+            wasm_v128_store64_lane(output, vout01, 0);
           $elif SUBMR == 1:
-            *output = wasm_f32x4_extract_lane(vout0, 0);
+            wasm_v128_store32_lane(output, vout0, 0);
 
           $for M in range(4, SUBMR, 4):
             wasm_v128_store(output + ${M}, vout${ABC[M:M+4]});

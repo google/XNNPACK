@@ -188,21 +188,21 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_wasmsimd(
       v128_t v0_7 = wasm_v16x8_shuffle(v1_3, v1_7, 4, 12, 5, 13, 6, 14, 7, 15);
 
       if (bh & 4) {
-        *((double*) o7) = wasm_f64x2_extract_lane(v0_7, 0);
+        wasm_v128_store64_lane(o7, v0_7, 0);
         o7 += 4;
-        *((double*) o6) = wasm_f64x2_extract_lane(v0_6, 0);
+        wasm_v128_store64_lane(o6, v0_6, 0);
         o6 += 4;
-        *((double*) o5) = wasm_f64x2_extract_lane(v0_5, 0);
+        wasm_v128_store64_lane(o5, v0_5, 0);
         o5 += 4;
-        *((double*) o4) = wasm_f64x2_extract_lane(v0_4, 0);
+        wasm_v128_store64_lane(o4, v0_4, 0);
         o4 += 4;
-        *((double*) o3) = wasm_f64x2_extract_lane(v0_3, 0);
+        wasm_v128_store64_lane(o3, v0_3, 0);
         o3 += 4;
-        *((double*) o2) = wasm_f64x2_extract_lane(v0_2, 0);
+        wasm_v128_store64_lane(o2, v0_2, 0);
         o2 += 4;
-        *((double*) o1) = wasm_f64x2_extract_lane(v0_1, 0);
+        wasm_v128_store64_lane(o1, v0_1, 0);
         o1 += 4;
-        *((double*) o0) = wasm_f64x2_extract_lane(v0_0, 0);
+        wasm_v128_store64_lane(o0, v0_0, 0);
         o0 += 4;
         v0_0 = wasm_v64x2_shuffle(v0_0, v0_0, 1, 1);
         v0_1 = wasm_v64x2_shuffle(v0_1, v0_1, 1, 1);
@@ -215,21 +215,21 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_wasmsimd(
       }
 
       if (bh & 2) {
-        *((float*) o7) = wasm_f32x4_extract_lane(v0_7, 0);
+        wasm_v128_store32_lane(o7, v0_7, 0);
         o7 += 2;
-        *((float*) o6) = wasm_f32x4_extract_lane(v0_6, 0);
+        wasm_v128_store32_lane(o6, v0_6, 0);
         o6 += 2;
-        *((float*) o5) = wasm_f32x4_extract_lane(v0_5, 0);
+        wasm_v128_store32_lane(o5, v0_5, 0);
         o5 += 2;
-        *((float*) o4) = wasm_f32x4_extract_lane(v0_4, 0);
+        wasm_v128_store32_lane(o4, v0_4, 0);
         o4 += 2;
-        *((float*) o3) = wasm_f32x4_extract_lane(v0_3, 0);
+        wasm_v128_store32_lane(o3, v0_3, 0);
         o3 += 2;
-        *((float*) o2) = wasm_f32x4_extract_lane(v0_2, 0);
+        wasm_v128_store32_lane(o2, v0_2, 0);
         o2 += 2;
-        *((float*) o1) = wasm_f32x4_extract_lane(v0_1, 0);
+        wasm_v128_store32_lane(o1, v0_1, 0);
         o1 += 2;
-        *((float*) o0) = wasm_f32x4_extract_lane(v0_0, 0);
+        wasm_v128_store32_lane(o0, v0_0, 0);
         o0 += 2;
         v0_0 = wasm_u64x2_shr(v0_0, 32);
         v0_1 = wasm_u64x2_shr(v0_1, 32);
@@ -241,14 +241,14 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_wasmsimd(
         v0_7 = wasm_u64x2_shr(v0_7, 32);
       }
       if (bh & 1) {
-        *o7 = wasm_i16x8_extract_lane(v0_7, 0);
-        *o6 = wasm_i16x8_extract_lane(v0_6, 0);
-        *o5 = wasm_i16x8_extract_lane(v0_5, 0);
-        *o4 = wasm_i16x8_extract_lane(v0_4, 0);
-        *o3 = wasm_i16x8_extract_lane(v0_3, 0);
-        *o2 = wasm_i16x8_extract_lane(v0_2, 0);
-        *o1 = wasm_i16x8_extract_lane(v0_1, 0);
-        *o0 = wasm_i16x8_extract_lane(v0_0, 0);
+        wasm_v128_store16_lane(o7, v0_7, 0);
+        wasm_v128_store16_lane(o6, v0_6, 0);
+        wasm_v128_store16_lane(o5, v0_5, 0);
+        wasm_v128_store16_lane(o4, v0_4, 0);
+        wasm_v128_store16_lane(o3, v0_3, 0);
+        wasm_v128_store16_lane(o2, v0_2, 0);
+        wasm_v128_store16_lane(o1, v0_1, 0);
+        wasm_v128_store16_lane(o0, v0_0, 0);
       }
     }
 

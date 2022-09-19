@@ -87,14 +87,14 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
       vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
 
       if (c & (2 * sizeof(float))) {
-        *((double*) o0) = wasm_f64x2_extract_lane(vacc0x0123, 0);
+        wasm_v128_store64_lane(o0, vacc0x0123, 0);
 
-        vacc0x0123 = wasm_v32x4_shuffle(vacc0x0123, vacc0x0123, 2, 3, 2, 3);
+        vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
 
         o0 += 2;
       }
       if (c & (1 * sizeof(float))) {
-        *o0 = wasm_f32x4_extract_lane(vacc0x0123, 0);
+        wasm_v128_store32_lane(o0, vacc0x0123, 0);
 
         o0 += 1;
       }

@@ -22,6 +22,12 @@ void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x8(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m256i vbias = _mm256_load_si256((const __m256i*) params->avx2.bias);
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vb_multiplier = _mm256_load_si256((const __m256i*) params->avx2.b_multiplier);

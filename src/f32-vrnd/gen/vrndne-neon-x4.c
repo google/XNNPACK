@@ -24,6 +24,8 @@ void xnn_f32_vrndne_ukernel__neon_x4(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vmagic_number = vreinterpretq_f32_u32(vmovq_n_u32(UINT32_C(0x4B000000)));
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

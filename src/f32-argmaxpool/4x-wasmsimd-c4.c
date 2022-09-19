@@ -99,16 +99,18 @@ void xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4(
       vidx = wasm_v128_bitselect(wasm_i32x4_const_splat(3), vidx, vm3);
 
       if (c & 2) {
-        *((double*) output) = wasm_f64x2_extract_lane(vmax, 0);
-        *((double*) index) = wasm_f64x2_extract_lane(vidx, 0);
-        vmax = wasm_v32x4_shuffle(vmax, vmax, 2, 3, 2, 3);
-        vidx = wasm_v32x4_shuffle(vidx, vidx, 2, 3, 2, 3);
+        wasm_v128_store64_lane(output, vmax, 0);
+        wasm_v128_store64_lane(index, vidx, 0);
+        vmax = wasm_v64x2_shuffle(vmax, vmax, 1, 1);
+        vidx = wasm_v64x2_shuffle(vidx, vidx, 1, 1);
         output += 2;
         index += 2;
       }
       if (c & 1) {
-        *output++ = wasm_f32x4_extract_lane(vmax, 0);
-        *index++ = wasm_f32x4_extract_lane(vidx, 0);
+        wasm_v128_store32_lane(output, vmax, 0);
+        wasm_v128_store32_lane(index, vidx, 0);
+        output += 1;
+        index += 1;
       }
     }
     input = (const float**) ((uintptr_t) input + input_increment);

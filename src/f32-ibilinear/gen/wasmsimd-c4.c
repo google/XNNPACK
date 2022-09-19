@@ -73,12 +73,13 @@ void xnn_f32_ibilinear_ukernel__wasmsimd_c4(
       v128_t vo = wasm_f32x4_add(vt, wasm_f32x4_mul(vd, valphav));
 
       if (c & (2 * sizeof(float))) {
-        *((double*) output) = wasm_f64x2_extract_lane(vo, 0);
-        vo = wasm_v32x4_shuffle(vo, vo, 2, 3, 2, 3);
+        wasm_v128_store64_lane(output, vo, 0);
+        vo = wasm_v64x2_shuffle(vo, vo, 1, 1);
         output += 2;
       }
       if (c & (1 * sizeof(float))) {
-        *output++ = wasm_f32x4_extract_lane(vo, 0);
+        wasm_v128_store32_lane(output, vo, 0);
+        output += 1;
       }
     }
 

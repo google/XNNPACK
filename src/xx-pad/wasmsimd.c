@@ -8,6 +8,7 @@
 #include <wasm_simd128.h>
 
 #include <xnnpack/pad.h>
+#include <xnnpack/unaligned.h>
 
 
 void xnn_xx_pad_ukernel__wasmsimd(
@@ -34,16 +35,16 @@ void xnn_xx_pad_ukernel__wasmsimd(
         output = (uint8_t*) output + 16;
       }
       if (l & (8 * sizeof(uint8_t))) {
-        *((double*) output) = wasm_f64x2_extract_lane(vfill_pattern, 0);
+        wasm_v128_store64_lane(output, vfill_pattern, 0);
         output = (uint8_t*) output + 8;
       }
-      uint32_t vfill_subpattern = fill_pattern;
       if (l & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, fill_pattern);
         output = (uint8_t*) output + 4;
       }
+      uint32_t vfill_subpattern = fill_pattern;
       if (l & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }
@@ -66,23 +67,22 @@ void xnn_xx_pad_ukernel__wasmsimd(
       v128_t vdata = wasm_v128_load(input);
       input = (const void*) ((uintptr_t) input + c);
       if (c & (8 * sizeof(uint8_t))) {
-        *((double*) output) = wasm_f64x2_extract_lane(vdata, 0);
+        wasm_v128_store64_lane(output, vdata, 0);
         vdata = wasm_v64x2_shuffle(vdata, vdata, 1, 1);
         output = (uint8_t*) output + 8;
       }
       if (c & (4 * sizeof(uint8_t))) {
-        *((float*) output) = wasm_f32x4_extract_lane(vdata, 0);
+        wasm_v128_store32_lane(output, vdata, 0);
         vdata = wasm_u64x2_shr(vdata, 32);
         output = (uint8_t*) output + 4;
       }
-      uint32_t vsubdata = (uint32_t) wasm_i32x4_extract_lane(vdata, 0);
       if (c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vsubdata;
-        vsubdata >>= 16;
+        wasm_v128_store16_lane(output, vdata, 0);
+        vdata = wasm_u32x4_shr(vdata, 16);
         output = (uint8_t*) output + 2;
       }
       if (c & (1 * sizeof(uint8_t))) {
-        *((uint8_t*) output) = (uint8_t) vsubdata;
+        wasm_v128_store8_lane(output, vdata, 0);
         output = (uint8_t*) output + 1;
       }
     }
@@ -95,16 +95,16 @@ void xnn_xx_pad_ukernel__wasmsimd(
         output = (uint8_t*) output + 16;
       }
       if (r & (8 * sizeof(uint8_t))) {
-        *((double*) output) = wasm_f64x2_extract_lane(vfill_pattern, 0);
+        wasm_v128_store64_lane(output, vfill_pattern, 0);
         output = (uint8_t*) output + 8;
       }
-      uint32_t vfill_subpattern = fill_pattern;
       if (r & (4 * sizeof(uint8_t))) {
-        *((uint32_t*) output) = vfill_subpattern;
+        unaligned_store_u32(output, fill_pattern);
         output = (uint8_t*) output + 4;
       }
+      uint32_t vfill_subpattern = fill_pattern;
       if (r & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vfill_subpattern;
+        unaligned_store_u16(output, (uint16_t) vfill_subpattern);
         vfill_subpattern >>= 16;
         output = (uint8_t*) output + 2;
       }

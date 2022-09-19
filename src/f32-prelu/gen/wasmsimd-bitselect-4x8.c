@@ -177,15 +177,15 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x8(
       vacc3x0123 = wasm_v128_bitselect(vacc3x0123, vi3x0123, vmask3x0123);
 
       if (c & (2 * sizeof(float))) {
-        *((double*) o0) = wasm_f64x2_extract_lane(vacc0x0123, 0);
-        *((double*) o1) = wasm_f64x2_extract_lane(vacc1x0123, 0);
-        *((double*) o2) = wasm_f64x2_extract_lane(vacc2x0123, 0);
-        *((double*) o3) = wasm_f64x2_extract_lane(vacc3x0123, 0);
+        wasm_v128_store64_lane(o0, vacc0x0123, 0);
+        wasm_v128_store64_lane(o1, vacc1x0123, 0);
+        wasm_v128_store64_lane(o2, vacc2x0123, 0);
+        wasm_v128_store64_lane(o3, vacc3x0123, 0);
 
-        vacc0x0123 = wasm_v32x4_shuffle(vacc0x0123, vacc0x0123, 2, 3, 2, 3);
-        vacc1x0123 = wasm_v32x4_shuffle(vacc1x0123, vacc1x0123, 2, 3, 2, 3);
-        vacc2x0123 = wasm_v32x4_shuffle(vacc2x0123, vacc2x0123, 2, 3, 2, 3);
-        vacc3x0123 = wasm_v32x4_shuffle(vacc3x0123, vacc3x0123, 2, 3, 2, 3);
+        vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
+        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
+        vacc2x0123 = wasm_v64x2_shuffle(vacc2x0123, vacc2x0123, 1, 1);
+        vacc3x0123 = wasm_v64x2_shuffle(vacc3x0123, vacc3x0123, 1, 1);
 
         o0 += 2;
         o1 += 2;
@@ -193,10 +193,10 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_4x8(
         o3 += 2;
       }
       if (c & (1 * sizeof(float))) {
-        *o0 = wasm_f32x4_extract_lane(vacc0x0123, 0);
-        *o1 = wasm_f32x4_extract_lane(vacc1x0123, 0);
-        *o2 = wasm_f32x4_extract_lane(vacc2x0123, 0);
-        *o3 = wasm_f32x4_extract_lane(vacc3x0123, 0);
+        wasm_v128_store32_lane(o0, vacc0x0123, 0);
+        wasm_v128_store32_lane(o1, vacc1x0123, 0);
+        wasm_v128_store32_lane(o2, vacc2x0123, 0);
+        wasm_v128_store32_lane(o3, vacc3x0123, 0);
 
         o0 += 1;
         o1 += 1;

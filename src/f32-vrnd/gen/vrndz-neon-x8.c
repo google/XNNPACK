@@ -24,6 +24,8 @@ void xnn_f32_vrndz_ukernel__neon_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vintegral_threshold = vreinterpretq_f32_u32(vmovq_n_u32(UINT32_C(0x4B000000)));
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

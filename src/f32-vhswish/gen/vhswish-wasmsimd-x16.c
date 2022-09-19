@@ -23,6 +23,8 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vsixth = wasm_v128_load64_splat(params->wasmsimd.sixth);
   const v128_t vthree = wasm_v128_load64_splat(params->wasmsimd.three);
@@ -89,12 +91,12 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x16(
     vacc = wasm_f32x4_mul(vacc, vx);
 
     if (batch & (2 * sizeof(float))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vacc, 0);
-      vacc = wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3);
+      wasm_v128_store64_lane(output, vacc, 0);
+      vacc = wasm_v64x2_shuffle(vacc, vacc, 1, 1);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = wasm_f32x4_extract_lane(vacc, 0);
+      wasm_v128_store32_lane(output, vacc, 0);
     }
   }
 }

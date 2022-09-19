@@ -129,7 +129,7 @@ void xnn_u8_ibilinear_ukernel__wasmsimd_mul32_c16(
 
       const v128_t vo01234567 = wasm_u8x16_narrow_i16x8(vacc01234567, vacc01234567);
 
-      *((double*) output) = wasm_f64x2_extract_lane(vo01234567, 0);
+      wasm_v128_store64_lane(output, vo01234567, 0);
       output += 8;
     }
     if XNN_UNLIKELY(c != 0) {
@@ -162,18 +162,18 @@ void xnn_u8_ibilinear_ukernel__wasmsimd_mul32_c16(
       v128_t vo01234567 = wasm_u8x16_narrow_i16x8(vacc01234567, vacc01234567);
 
       if (c & (4 * sizeof(uint8_t))) {
-        *((float*) output) = wasm_f32x4_extract_lane(vo01234567, 0);
-        output += 4;
+        wasm_v128_store32_lane(output, vo01234567, 0);
         vo01234567 = wasm_u64x2_shr(vo01234567, 32);
+        output += 4;
       }
-      uint32_t vo0123 = (uint32_t) wasm_i32x4_extract_lane(vo01234567, 0);
       if (c & (2 * sizeof(uint8_t))) {
-        *((uint16_t*) output) = (uint16_t) vo0123;
+        wasm_v128_store16_lane(output, vo01234567, 0);
+        vo01234567 = wasm_u32x4_shr(vo01234567, 16);
         output += 2;
-        vo0123 >>= 16;
       }
       if (c & (1 * sizeof(uint8_t))) {
-        *output++ = (uint8_t) vo0123;
+        wasm_v128_store8_lane(output, vo01234567, 0);
+        output += 1;
       }
     }
 

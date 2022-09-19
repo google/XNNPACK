@@ -22,6 +22,8 @@ void xnn_f32_vhswish_ukernel__scalar_x1(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vsixth = params->scalar.sixth;
   const float vthree = params->scalar.three;

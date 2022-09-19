@@ -20,6 +20,12 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_x2(
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const int32_t va_zero_point = params->fp32_scalar.a_zero_point;
   const float vscale = params->fp32_scalar.scale;
   const float voutput_min_less_zero_point = params->fp32_scalar.output_min_less_zero_point;

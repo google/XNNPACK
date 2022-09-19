@@ -24,6 +24,8 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x32(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

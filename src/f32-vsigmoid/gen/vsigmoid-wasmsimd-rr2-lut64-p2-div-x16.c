@@ -23,7 +23,10 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x16(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.magic_bias);
   const v128_t vminus_log2e = wasm_v128_load64_splat(params->wasmsimd_rr2_lut64_p2.minus_log2e);
@@ -222,12 +225,12 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x16(
     vf = wasm_v128_bitselect(vf, wasm_f32x4_sub(vone, vf), wasm_i32x4_shr(vx, 31));
 
     if (batch & (2 * sizeof(float))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
-      vf = wasm_v32x4_shuffle(vf, vf, 2, 3, 2, 3);
+      wasm_v128_store64_lane(output, vf, 0);
+      vf = wasm_v64x2_shuffle(vf, vf, 1, 1);
       output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = wasm_f32x4_extract_lane(vf, 0);
+      wasm_v128_store32_lane(output, vf, 0);
     }
   }
 }

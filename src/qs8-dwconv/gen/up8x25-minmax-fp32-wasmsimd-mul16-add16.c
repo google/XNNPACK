@@ -394,7 +394,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16_add16(
       const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
       vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
-      *((double*) output) = wasm_f64x2_extract_lane(vout0123456701234567, 0);
+      wasm_v128_store64_lane(output, vout0123456701234567, 0);
       output += 8;
     }
     if XNN_UNLIKELY(c != 0) {
@@ -608,18 +608,17 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up8x25__wasmsimd_mul16_add16(
 
 
       if (c & 4) {
-        *((float*) output) = wasm_f32x4_extract_lane(vout0123456701234567, 0);
+        wasm_v128_store32_lane(output, vout0123456701234567, 0);
         vout0123456701234567 = wasm_u64x2_shr(vout0123456701234567, 32);
         output += 4;
       }
-      uint32_t vout0123 = wasm_i32x4_extract_lane(vout0123456701234567, 0);
       if (c & 2) {
-        *((uint16_t*) output) = (uint16_t) vout0123;
-        vout0123 >>= 16;
+        wasm_v128_store16_lane(output, vout0123456701234567, 0);
+        vout0123456701234567 = wasm_u32x4_shr(vout0123456701234567, 16);
         output += 2;
       }
       if (c & 1) {
-        *output = (int8_t) vout0123;
+        wasm_v128_store8_lane(output, vout0123456701234567, 0);
         output += 1;
       }
       }

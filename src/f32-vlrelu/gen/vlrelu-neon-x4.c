@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__neon_x4(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vslope = vld1q_dup_f32(&params->scalar.slope);
 

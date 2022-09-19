@@ -156,10 +156,10 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2s4__wasmsimd_dot16x2_ld64(
     vout = wasm_i8x16_min(vout, voutput_max);
 
     if (nc >= 4) {
-      *((float*) c0) = (float) wasm_f32x4_extract_lane(vout, 0);
-      *((float*) c1) = (float) wasm_f32x4_extract_lane(vout, 1);
-      *((float*) c2) = (float) wasm_f32x4_extract_lane(vout, 2);
-      *((float*) c3) = (float) wasm_f32x4_extract_lane(vout, 3);
+      wasm_v128_store32_lane(c0, vout, 0);
+      wasm_v128_store32_lane(c1, vout, 1);
+      wasm_v128_store32_lane(c2, vout, 2);
+      wasm_v128_store32_lane(c3, vout, 3);
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -173,29 +173,25 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x4c2s4__wasmsimd_dot16x2_ld64(
 
       nc -= 4;
     } else {
-      uint32_t vout0 = wasm_i32x4_extract_lane(vout, 0);
-      uint32_t vout1 = wasm_i32x4_extract_lane(vout, 1);
-      uint32_t vout2 = wasm_i32x4_extract_lane(vout, 2);
-      uint32_t vout3 = wasm_i32x4_extract_lane(vout, 3);
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) vout0;
-        vout0 >>= 16;
+        wasm_v128_store16_lane(c0, vout, 0);
+        vout = wasm_u32x4_shr(vout, 16);
         c0 += 2;
-        *((uint16_t*) c1) = (uint16_t) vout1;
-        vout1 >>= 16;
+        wasm_v128_store16_lane(c1, vout, 2);
+        vout = wasm_u32x4_shr(vout, 16);
         c1 += 2;
-        *((uint16_t*) c2) = (uint16_t) vout2;
-        vout2 >>= 16;
+        wasm_v128_store16_lane(c2, vout, 4);
+        vout = wasm_u32x4_shr(vout, 16);
         c2 += 2;
-        *((uint16_t*) c3) = (uint16_t) vout3;
-        vout3 >>= 16;
+        wasm_v128_store16_lane(c3, vout, 6);
+        vout = wasm_u32x4_shr(vout, 16);
         c3 += 2;
       }
       if (nc & 1) {
-        *c0 = (int8_t) vout0;
-        *c1 = (int8_t) vout1;
-        *c2 = (int8_t) vout2;
-        *c3 = (int8_t) vout3;
+        wasm_v128_store8_lane(c0, vout, 0);
+        wasm_v128_store8_lane(c1, vout, 4);
+        wasm_v128_store8_lane(c2, vout, 8);
+        wasm_v128_store8_lane(c3, vout, 12);
       }
 
       nc = 0;

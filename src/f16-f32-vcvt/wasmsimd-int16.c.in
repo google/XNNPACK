@@ -144,13 +144,12 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x${BATCH_TILE}(
         wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi));
     }
     if (batch & (2 * sizeof(uint16_t))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vf, 0);
-      output += 2;
-
+      wasm_v128_store64_lane(output, vf, 0);
       vf = wasm_v64x2_shuffle(vf, vf, 1, 1);
+      output += 2;
     }
     if (batch & (1 * sizeof(uint16_t))) {
-      *((float*) output) = wasm_f32x4_extract_lane(vf, 0);
+      wasm_v128_store32_lane(output, vf, 0);
     }
   }
 }

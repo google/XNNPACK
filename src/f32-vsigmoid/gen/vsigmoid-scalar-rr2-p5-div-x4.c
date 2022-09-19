@@ -21,7 +21,10 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_p5_div_x4(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vmagic_bias = params->scalar_rr2_p5.magic_bias;
   const float vminus_log2e = params->scalar_rr2_p5.minus_log2e;

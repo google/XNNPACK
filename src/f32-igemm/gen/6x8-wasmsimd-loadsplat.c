@@ -194,19 +194,19 @@ void xnn_f32_igemm_ukernel_6x8__wasmsimd_loadsplat(
         c0 += 4;
       }
       if (nc & 2) {
-        *((double*) c5) = wasm_f64x2_extract_lane(vacc5x0123, 0);
-        *((double*) c4) = wasm_f64x2_extract_lane(vacc4x0123, 0);
-        *((double*) c3) = wasm_f64x2_extract_lane(vacc3x0123, 0);
-        *((double*) c2) = wasm_f64x2_extract_lane(vacc2x0123, 0);
-        *((double*) c1) = wasm_f64x2_extract_lane(vacc1x0123, 0);
-        *((double*) c0) = wasm_f64x2_extract_lane(vacc0x0123, 0);
+        wasm_v128_store64_lane(c5, vacc5x0123, 0);
+        wasm_v128_store64_lane(c4, vacc4x0123, 0);
+        wasm_v128_store64_lane(c3, vacc3x0123, 0);
+        wasm_v128_store64_lane(c2, vacc2x0123, 0);
+        wasm_v128_store64_lane(c1, vacc1x0123, 0);
+        wasm_v128_store64_lane(c0, vacc0x0123, 0);
 
-        vacc5x0123 = wasm_v32x4_shuffle(vacc5x0123, vacc5x0123, 2, 3, 2, 3);
-        vacc4x0123 = wasm_v32x4_shuffle(vacc4x0123, vacc4x0123, 2, 3, 2, 3);
-        vacc3x0123 = wasm_v32x4_shuffle(vacc3x0123, vacc3x0123, 2, 3, 2, 3);
-        vacc2x0123 = wasm_v32x4_shuffle(vacc2x0123, vacc2x0123, 2, 3, 2, 3);
-        vacc1x0123 = wasm_v32x4_shuffle(vacc1x0123, vacc1x0123, 2, 3, 2, 3);
-        vacc0x0123 = wasm_v32x4_shuffle(vacc0x0123, vacc0x0123, 2, 3, 2, 3);
+        vacc5x0123 = wasm_v64x2_shuffle(vacc5x0123, vacc5x0123, 1, 1);
+        vacc4x0123 = wasm_v64x2_shuffle(vacc4x0123, vacc4x0123, 1, 1);
+        vacc3x0123 = wasm_v64x2_shuffle(vacc3x0123, vacc3x0123, 1, 1);
+        vacc2x0123 = wasm_v64x2_shuffle(vacc2x0123, vacc2x0123, 1, 1);
+        vacc1x0123 = wasm_v64x2_shuffle(vacc1x0123, vacc1x0123, 1, 1);
+        vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
 
         c5 += 2;
         c4 += 2;
@@ -216,12 +216,12 @@ void xnn_f32_igemm_ukernel_6x8__wasmsimd_loadsplat(
         c0 += 2;
       }
       if (nc & 1) {
-        *c5 = wasm_f32x4_extract_lane(vacc5x0123, 0);
-        *c4 = wasm_f32x4_extract_lane(vacc4x0123, 0);
-        *c3 = wasm_f32x4_extract_lane(vacc3x0123, 0);
-        *c2 = wasm_f32x4_extract_lane(vacc2x0123, 0);
-        *c1 = wasm_f32x4_extract_lane(vacc1x0123, 0);
-        *c0 = wasm_f32x4_extract_lane(vacc0x0123, 0);
+        wasm_v128_store32_lane(c5, vacc5x0123, 0);
+        wasm_v128_store32_lane(c4, vacc4x0123, 0);
+        wasm_v128_store32_lane(c3, vacc3x0123, 0);
+        wasm_v128_store32_lane(c2, vacc2x0123, 0);
+        wasm_v128_store32_lane(c1, vacc1x0123, 0);
+        wasm_v128_store32_lane(c0, vacc0x0123, 0);
       }
 
       nc = 0;

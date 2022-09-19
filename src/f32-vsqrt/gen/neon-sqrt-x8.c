@@ -24,6 +24,8 @@ void xnn_f32_vsqrt_ukernel__neon_sqrt_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float32x4_t vx0123 = vld1q_f32(input); input += 4;

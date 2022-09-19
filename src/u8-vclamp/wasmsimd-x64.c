@@ -63,23 +63,22 @@ void xnn_u8_vclamp_ukernel__wasmsimd_x64(
     vacc = wasm_u8x16_max(vacc, voutput_min);
 
     if (batch & 8) {
-      *((double*) output) = wasm_f64x2_extract_lane(vacc, 0);
-      output += 8;
+      wasm_v128_store64_lane(output, vacc, 0);
       vacc = wasm_v64x2_shuffle(vacc, vacc, 1, 1);
+      output += 8;
     }
     if (batch & 4) {
-      *((float*) output) = wasm_f32x4_extract_lane(vacc, 0);
-      output += 4;
+      wasm_v128_store32_lane(output, vacc, 0);
       vacc = wasm_u64x2_shr(vacc, 32);
+      output += 4;
     }
-    uint32_t vacc_lo = wasm_i32x4_extract_lane(vacc, 0);
     if (batch & 2) {
-      *((uint16_t*) output) = (uint16_t) vacc_lo;
-      vacc_lo >>= 16;
+      wasm_v128_store16_lane(output, vacc, 0);
+      vacc = wasm_u32x4_shr(vacc, 16);
       output += 2;
     }
     if (batch & 1) {
-      *output = (uint8_t) vacc_lo;
+      wasm_v128_store8_lane(output, vacc, 0);
     }
   }
 }

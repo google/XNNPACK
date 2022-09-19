@@ -79,7 +79,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x24(
     vyGHIJKLMN = wasm_i8x16_min(vyGHIJKLMN, voutput_max);
 
     wasm_v128_store(output, vy0123456789ABCDEF);
-    *((double*) (output + 16)) = wasm_f64x2_extract_lane(vyGHIJKLMN, 0);
+    wasm_v128_store64_lane(output + 16, vyGHIJKLMN, 0);
     output += 24;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -103,7 +103,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x24(
     vy = wasm_i8x16_max(vy, voutput_min);
     vy = wasm_i8x16_min(vy, voutput_max);
 
-    *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+    wasm_v128_store64_lane(output, vy, 0);
     output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -130,18 +130,17 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_x24(
     vy = wasm_i8x16_min(vy, voutput_max);
 
     if (batch & (4 * sizeof(float))) {
-      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
-      output += 4;
+      wasm_v128_store32_lane(output, vy, 0);
       vy = wasm_u64x2_shr(vy, 32);
+      output += 4;
     }
-    uint32_t vy_lo = (uint32_t) wasm_i32x4_extract_lane(vy, 0);
     if (batch & (2 * sizeof(float))) {
-      *((uint16_t*) output) = (uint16_t) vy_lo;
+      wasm_v128_store16_lane(output, vy, 0);
+      vy = wasm_u32x4_shr(vy, 16);
       output += 2;
-      vy_lo >>= 16;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = (int8_t) vy_lo;
+      wasm_v128_store8_lane(output, vy, 0);
     }
   }
 }

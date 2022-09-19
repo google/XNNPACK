@@ -24,6 +24,8 @@ void xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x32(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float32x4_t vhalf = vmovq_n_f32(0.5f);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

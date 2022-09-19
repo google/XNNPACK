@@ -24,6 +24,8 @@ void xnn_f32_vrndne_ukernel__sse41_x4(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);

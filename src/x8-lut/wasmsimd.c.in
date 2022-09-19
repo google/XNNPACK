@@ -74,23 +74,22 @@ void xnn_x8_lut_ukernel__wasmsimd_x${BATCH_TILE}(
       vy = wasm_v128_or(vy, wasm_i8x16_swizzle(vtable${T}, vx));
 
     if (batch & (8 * sizeof(uint8_t))) {
-      *((double*) output) = wasm_f64x2_extract_lane(vy, 0);
+      wasm_v128_store64_lane(output, vy, 0);
       vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
       output += 8;
     }
     if (batch & (4 * sizeof(uint8_t))) {
-      *((float*) output) = wasm_f32x4_extract_lane(vy, 0);
+      wasm_v128_store32_lane(output, vy, 0);
       vy = wasm_u64x2_shr(vy, 32);
       output += 4;
     }
-    uint32_t vy_lo = wasm_i32x4_extract_lane(vy, 0);
     if (batch & (2 * sizeof(uint8_t))) {
-      *((uint16_t*) output) = (uint16_t) vy_lo;
-      vy_lo >>= 16;
+      wasm_v128_store16_lane(output, vy, 0);
+      vy = wasm_u32x4_shr(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(uint8_t))) {
-      *output = (uint8_t) vy_lo;
+      wasm_v128_store8_lane(output, vy, 0);
     }
   }
 }

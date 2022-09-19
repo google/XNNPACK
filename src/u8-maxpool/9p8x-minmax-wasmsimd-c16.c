@@ -131,23 +131,22 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
         vout = wasm_u8x16_max(vout, voutput_min);
 
         if (c & 8) {
-          *((double*) o) = wasm_f64x2_extract_lane(vout, 0);
+          wasm_v128_store64_lane(o, vout, 0);
           vout = wasm_v64x2_shuffle(vout, vout, 1, 1);
           o += 8;
         }
         if (c & 4) {
-          *((float*) o) = wasm_f32x4_extract_lane(vout, 0);
+          wasm_v128_store32_lane(o, vout, 0);
           vout = wasm_u64x2_shr(vout, 32);
           o += 4;
         }
-        uint32_t vout_lo = wasm_i32x4_extract_lane(vout, 0);
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) vout_lo;
-          vout_lo >>= 16;
+          wasm_v128_store16_lane(o, vout, 0);
+          vout = wasm_u32x4_shr(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *o = (uint8_t) vout_lo;
+          wasm_v128_store8_lane(o, vout, 0);
           o += 1;
         }
       }
@@ -250,23 +249,22 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
         vout = wasm_u8x16_max(vout, voutput_min);
 
         if (c & 8) {
-          *((double*) o) = wasm_f64x2_extract_lane(vout, 0);
+          wasm_v128_store64_lane(o, vout, 0);
           vout = wasm_v64x2_shuffle(vout, vout, 1, 1);
           o += 8;
         }
         if (c & 4) {
-          *((float*) o) = wasm_f32x4_extract_lane(vout, 0);
+          wasm_v128_store32_lane(o, vout, 0);
           vout = wasm_u64x2_shr(vout, 32);
           o += 4;
         }
-        uint32_t vout_lo = wasm_i32x4_extract_lane(vout, 0);
         if (c & 2) {
-          *((uint16_t*) o) = (uint16_t) vout_lo;
-          vout_lo >>= 16;
+          wasm_v128_store16_lane(o, vout, 0);
+          vout = wasm_u32x4_shr(vout, 16);
           o += 2;
         }
         if (c & 1) {
-          *o = (uint8_t) vout_lo;
+          wasm_v128_store8_lane(o, vout, 0);
           o += 1;
         }
       }

@@ -23,6 +23,8 @@ void xnn_f32_vlrelu_ukernel__avx_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vslope = _mm256_load_ps(params->avx.slope);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

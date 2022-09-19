@@ -23,6 +23,8 @@ void xnn_f32_vhswish_ukernel__sse_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vsixth = _mm_load_ps(params->sse.sixth);
   const __m128 vhalf = _mm_load_ps(params->sse.half);

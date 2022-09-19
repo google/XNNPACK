@@ -21,7 +21,10 @@ void xnn_f32_velu_ukernel__wasm_rr2_p6_x3(
     float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float vprescale = params->scalar_rr2_p6.prescale;
   const float valpha = params->scalar_rr2_p6.alpha;

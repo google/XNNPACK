@@ -97,7 +97,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
     vout = wasm_u8x16_min(vout, voutput_max);
 
     if (nc >= 4) {
-      *((float*) c0) = (float) wasm_f32x4_extract_lane(vout, 0);
+      wasm_v128_store32_lane(c0, vout, 0);
 
       c0 = (uint8_t*) ((uintptr_t) c0 + cn_stride);
 
@@ -105,14 +105,13 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld128(
 
       nc -= 4;
     } else {
-      uint32_t vout0 = wasm_i32x4_extract_lane(vout, 0);
       if (nc & 2) {
-        *((uint16_t*) c0) = (uint16_t) vout0;
-        vout0 >>= 16;
+        wasm_v128_store16_lane(c0, vout, 0);
+        vout = wasm_u32x4_shr(vout, 16);
         c0 += 2;
       }
       if (nc & 1) {
-        *c0 = (uint8_t) vout0;
+        wasm_v128_store8_lane(c0, vout, 0);
       }
 
       nc = 0;

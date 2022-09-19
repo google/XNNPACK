@@ -193,12 +193,12 @@ void xnn_f32_dwconv_minmax_ukernel_up4x9__wasmsimd_x86(
       vacc0123 = wasm_f32x4_pmin(vmax, vacc0123);
 
       if (c & 2) {
-        *((double*) output) = wasm_f64x2_extract_lane(vacc0123, 0);
-        vacc0123 = wasm_v32x4_shuffle(vacc0123, vacc0123, 2, 3, 2, 3);
+        wasm_v128_store64_lane(output, vacc0123, 0);
+        vacc0123 = wasm_v64x2_shuffle(vacc0123, vacc0123, 1, 1);
         output += 2;
       }
       if (c & 1) {
-        *output = wasm_f32x4_extract_lane(vacc0123, 0);
+        wasm_v128_store32_lane(output, vacc0123, 0);
         output += 1;
       }
     }

@@ -179,12 +179,14 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_arm_loadsplat_1x4_acc3(
         wasm_v128_store(o0, vo0); o0 += 4;
       } else {
         if (w & (4 * sizeof(float))) {
-          *((double*) o0) = wasm_f64x2_extract_lane(vo0, 0); o0 += 2;
+          wasm_v128_store64_lane(o0, vo0, 0);
+          o0 += 2;
 
-          vo0 = wasm_v32x4_shuffle(vo0, vo0, 2, 3, 0, 1);
+          vo0 = wasm_v64x2_shuffle(vo0, vo0, 1, 1);
         }
         if (w & (2 * sizeof(float))) {
-          *o0 = wasm_f32x4_extract_lane(vo0, 0); o0 += 1;
+          wasm_v128_store32_lane(o0, vo0, 0);
+          o0 += 1;
         }
       }
     }

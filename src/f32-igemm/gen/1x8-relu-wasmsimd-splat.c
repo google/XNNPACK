@@ -130,14 +130,14 @@ void xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat(
         c0 += 4;
       }
       if (nc & 2) {
-        *((double*) c0) = wasm_f64x2_extract_lane(vacc0x0123, 0);
+        wasm_v128_store64_lane(c0, vacc0x0123, 0);
 
-        vacc0x0123 = wasm_v32x4_shuffle(vacc0x0123, vacc0x0123, 2, 3, 2, 3);
+        vacc0x0123 = wasm_v64x2_shuffle(vacc0x0123, vacc0x0123, 1, 1);
 
         c0 += 2;
       }
       if (nc & 1) {
-        *c0 = wasm_f32x4_extract_lane(vacc0x0123, 0);
+        wasm_v128_store32_lane(c0, vacc0x0123, 0);
       }
 
       nc = 0;
