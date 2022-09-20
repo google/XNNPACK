@@ -41,11 +41,9 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__was
   const v128_t vmagic_min = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_min);
   const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
   const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
-
   const v128_t vxb = wasm_i16x8_sub(
     wasm_i16x8_splat((int16_t) *input_b), wasm_v128_load64_splat(params->${PARAMS_STRUCT}.b_zero_point));
-  const v128_t vxblo = wasm_i32x4_extend_low_i16x8(vxb);
-  const v128_t vxbhi = wasm_i32x4_extend_high_i16x8(vxb);
+
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     const v128_t va${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(input_a);
     $for N in range(8, BATCH_TILE, 8):
@@ -56,8 +54,8 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__was
       const v128_t vxa${ABC[N:N+8]} = wasm_i16x8_sub(va${ABC[N:N+8]}, va_zero_point);
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${ABC[N:N+8]}), vxblo);
-      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${ABC[N:N+8]}), vxbhi);
+      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_extmul_low_i16x8(vxa${ABC[N:N+8]}, vxb);
+      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_extmul_high_i16x8(vxa${ABC[N:N+8]}, vxb);
 
     $for N in range(0, BATCH_TILE, 4):
       vacc${ABC[N:N+4]} = wasm_f32x4_convert_i32x4(vacc${ABC[N:N+4]});
@@ -108,8 +106,8 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__was
 
       const v128_t vxa${ABC[0:8]} = wasm_i16x8_sub(va${ABC[0:8]}, va_zero_point);
 
-      v128_t vacc${ABC[0:4]} = wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${ABC[0:8]}), vxblo);
-      v128_t vacc${ABC[4:8]} = wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${ABC[0:8]}), vxbhi);
+      v128_t vacc${ABC[0:4]} = wasm_i32x4_extmul_low_i16x8(vxa${ABC[0:8]}, vxb);
+      v128_t vacc${ABC[4:8]} = wasm_i32x4_extmul_high_i16x8(vxa${ABC[0:8]}, vxb);
 
       vacc${ABC[0:4]} = wasm_f32x4_convert_i32x4(vacc${ABC[0:4]});
       vacc${ABC[4:8]} = wasm_f32x4_convert_i32x4(vacc${ABC[4:8]});

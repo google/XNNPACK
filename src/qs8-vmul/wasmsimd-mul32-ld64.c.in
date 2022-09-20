@@ -57,8 +57,8 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
       const v128_t vxb${ABC[N:N+8]} = wasm_i16x8_sub(vb${ABC[N:N+8]}, vb_zero_point);
 
     $for N in range(0, BATCH_TILE, 8):
-      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${ABC[N:N+8]}), wasm_i32x4_extend_low_i16x8(vxb${ABC[N:N+8]}));
-      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${ABC[N:N+8]}), wasm_i32x4_extend_high_i16x8(vxb${ABC[N:N+8]}));
+      v128_t vacc${ABC[N:N+4]} = wasm_i32x4_extmul_low_i16x8(vxa${ABC[N:N+8]}, vxb${ABC[N:N+8]});
+      v128_t vacc${ABC[N+4:N+8]} = wasm_i32x4_extmul_high_i16x8(vxa${ABC[N:N+8]}, vxb${ABC[N:N+8]});
 
     $for N in range(0, BATCH_TILE, 4):
       vacc${ABC[N:N+4]} = wasm_f32x4_convert_i32x4(vacc${ABC[N:N+4]});
@@ -112,8 +112,8 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
       const v128_t vxa${ABC[0:8]} = wasm_i16x8_sub(va${ABC[0:8]}, va_zero_point);
       const v128_t vxb${ABC[0:8]} = wasm_i16x8_sub(vb${ABC[0:8]}, vb_zero_point);
 
-      v128_t vacc${ABC[0:4]} = wasm_i32x4_mul(wasm_i32x4_extend_low_i16x8(vxa${ABC[0:8]}), wasm_i32x4_extend_low_i16x8(vxb${ABC[0:8]}));
-      v128_t vacc${ABC[4:8]} = wasm_i32x4_mul(wasm_i32x4_extend_high_i16x8(vxa${ABC[0:8]}), wasm_i32x4_extend_high_i16x8(vxb${ABC[0:8]}));
+      v128_t vacc${ABC[0:4]} = wasm_i32x4_extmul_low_i16x8(vxa${ABC[0:8]}, vxb${ABC[0:8]});
+      v128_t vacc${ABC[4:8]} = wasm_i32x4_extmul_high_i16x8(vxa${ABC[0:8]}, vxb${ABC[0:8]});
 
       vacc${ABC[0:4]} = wasm_f32x4_convert_i32x4(vacc${ABC[0:4]});
       vacc${ABC[4:8]} = wasm_f32x4_convert_i32x4(vacc${ABC[4:8]});
