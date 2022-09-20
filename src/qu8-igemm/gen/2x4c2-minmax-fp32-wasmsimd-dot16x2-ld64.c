@@ -176,11 +176,11 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64(
     } else {
       if (nc & 2) {
         wasm_v128_store16_lane(c1, vout, 2);
-        vout = wasm_u32x4_shr(vout, 16);
         c1 += 2;
         wasm_v128_store16_lane(c0, vout, 0);
-        vout = wasm_u32x4_shr(vout, 16);
         c0 += 2;
+
+        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
         wasm_v128_store8_lane(c1, vout, 4);

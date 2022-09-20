@@ -181,8 +181,9 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c2s4__wasmsimd_dot
       if (nc & 2) {
         $for M in reversed(range(MR)):
           wasm_v128_store16_lane(c${M}, vout, ${2 * M});
-          vout = wasm_u32x4_shr(vout, 16);
           c${M} += 2;
+
+        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
         $for M in reversed(range(MR)):

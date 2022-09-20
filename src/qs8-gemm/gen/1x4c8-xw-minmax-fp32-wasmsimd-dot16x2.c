@@ -106,8 +106,9 @@ void xnn_qs8_gemm_xw_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2(
     } else {
       if (nc & 2) {
         wasm_v128_store16_lane(c0, vout, 0);
-        vout = wasm_u32x4_shr(vout, 16);
         c0 += 2;
+
+        vout = wasm_u32x4_shr(vout, 16);
       }
       if (nc & 1) {
         wasm_v128_store8_lane(c0, vout, 0);
