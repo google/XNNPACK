@@ -2159,6 +2159,8 @@ void xnn_f32_vlrelu_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vslope = _mm_load_ps(params->sse.slope);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -2215,6 +2217,8 @@ void xnn_f32_vrndd_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
   const __m128 vone = _mm_load_ps(params->sse2.one);
@@ -2281,6 +2285,8 @@ void xnn_f32_vrndne_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -2341,6 +2347,8 @@ void xnn_f32_vrndu_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
   const __m128 vone = _mm_load_ps(params->sse2.one);
@@ -2417,6 +2425,8 @@ void xnn_f32_vrndz_ukernel__sse2_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128i vmagic = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -2477,7 +2487,10 @@ void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_x8(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_lut64_p2.sign_mask);
   const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_lut64_p2.magic_bias);
@@ -7046,6 +7059,12 @@ void xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);
   const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_hi);
@@ -7155,6 +7174,12 @@ void xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_add_epi32(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(params->sse2.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),
     _mm_load_si128((const __m128i*) params->sse2.bias));
@@ -7600,8 +7625,13 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.b_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
@@ -7703,8 +7733,13 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
@@ -10911,6 +10946,12 @@ void xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_x8(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
   const __m128i va_multiplier_lo = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_lo);
   const __m128i va_multiplier_hi = _mm_load_si128((const __m128i*) params->sse2.a_multiplier_hi);
@@ -11018,6 +11059,12 @@ void xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_x8(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_add_epi32(
     _mm_shuffle_epi32(_mm_cvtsi32_si128(params->sse2.b_multiplier * (int32_t) *input_b), _MM_SHUFFLE(0, 0, 0, 0)),
     _mm_load_si128((const __m128i*) params->sse2.bias));
@@ -11455,8 +11502,13 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.b_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
@@ -11560,8 +11612,13 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);

@@ -22,7 +22,10 @@ void xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_x176(
     float scale,
     float max)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
   const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E43p-1f);

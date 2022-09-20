@@ -21,7 +21,10 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x40(
     void* output,
     const union xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(__fp16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
   const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_log2e));

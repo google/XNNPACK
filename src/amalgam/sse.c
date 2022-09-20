@@ -7874,6 +7874,8 @@ void xnn_f32_vhswish_ukernel__sse_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vsixth = _mm_load_ps(params->sse.sixth);
   const __m128 vhalf = _mm_load_ps(params->sse.half);
@@ -7942,6 +7944,8 @@ void xnn_f32_vlrelu_ukernel__sse_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m128 vslope = _mm_load_ps(params->sse.slope);
   const __m128 vzero = _mm_setzero_ps();
@@ -8108,6 +8112,8 @@ void xnn_f32_vsqrt_ukernel__sse_sqrt_x4(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx = _mm_loadu_ps(input);

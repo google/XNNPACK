@@ -2540,6 +2540,8 @@ void xnn_f16_vhswish_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -2615,6 +2617,8 @@ void xnn_f16_vlrelu_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vslope = _mm256_load_ps(params->avx.slope);
   const uint16_t* i = (const uint16_t*) input;
@@ -2675,6 +2679,8 @@ void xnn_f16_vrndd_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -2729,6 +2735,8 @@ void xnn_f16_vrndne_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -2783,6 +2791,8 @@ void xnn_f16_vrndu_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -2837,6 +2847,8 @@ void xnn_f16_vrndz_ukernel__f16c_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

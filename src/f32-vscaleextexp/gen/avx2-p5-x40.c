@@ -19,12 +19,15 @@ static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0
 
 void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
     size_t batch,
-    const float* x,
-    float* y,
+    const float* input,
+    float* output,
     float scale_value,
     float scale_exp)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);
@@ -47,21 +50,21 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
 
   for (; batch >= 40 * sizeof(float); batch -= 40 * sizeof(float)) {
     // Load 40 (5x8) inputs at a time.
-    const __m256 vx0 = _mm256_loadu_ps(x);
-    const __m256 vx1 = _mm256_loadu_ps(x + 8);
-    const __m256 vx2 = _mm256_loadu_ps(x + 16);
-    const __m256 vx3 = _mm256_loadu_ps(x + 24);
-    const __m256 vx4 = _mm256_loadu_ps(x + 32);
-    x += 40;
+    const __m256 vx0 = _mm256_loadu_ps(input);
+    const __m256 vx1 = _mm256_loadu_ps(input + 8);
+    const __m256 vx2 = _mm256_loadu_ps(input + 16);
+    const __m256 vx3 = _mm256_loadu_ps(input + 24);
+    const __m256 vx4 = _mm256_loadu_ps(input + 32);
+    input += 40;
 
-    // Compute reduced argument batch := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn0 = _mm256_round_ps(_mm256_mul_ps(vx0, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn1 = _mm256_round_ps(_mm256_mul_ps(vx1, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn2 = _mm256_round_ps(_mm256_mul_ps(vx2, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn3 = _mm256_round_ps(_mm256_mul_ps(vx3, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
     const __m256 vn4 = _mm256_round_ps(_mm256_mul_ps(vx4, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - batch * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2_hi, vx0);
     __m256 vt1 = _mm256_fmadd_ps(vn1, vminus_ln2_hi, vx1);
@@ -151,23 +154,23 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
     vf4 = _mm256_mul_ps(vf4, vs4);
 
     // Store 40 (5x8) outputs at a time.
-    _mm256_storeu_ps(y, vf0);
-    _mm256_storeu_ps(y + 8, vf1);
-    _mm256_storeu_ps(y + 16, vf2);
-    _mm256_storeu_ps(y + 24, vf3);
-    _mm256_storeu_ps(y + 32, vf4);
-    y += 40;
+    _mm256_storeu_ps(output, vf0);
+    _mm256_storeu_ps(output + 8, vf1);
+    _mm256_storeu_ps(output + 16, vf2);
+    _mm256_storeu_ps(output + 24, vf3);
+    _mm256_storeu_ps(output + 32, vf4);
+    output += 40;
   }
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     // Load 8 inputs at a time.
-    const __m256 vx = _mm256_loadu_ps(x);
-    x += 8;
+    const __m256 vx = _mm256_loadu_ps(input);
+    input += 8;
 
-    // Compute reduced argument batch := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - batch * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -193,8 +196,8 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
     vf = _mm256_mul_ps(vf, vs);
 
     // Store 8 results at a time.
-    _mm256_storeu_ps(y, vf);
-    y += 8;
+    _mm256_storeu_ps(output, vf);
+    output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
@@ -202,12 +205,12 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     // Load up to 7 inputs at a time.
-    const __m256 vx = _mm256_maskload_ps(x, vmask);
+    const __m256 vx = _mm256_maskload_ps(input, vmask);
 
-    // Compute reduced argument batch := round(x / log(2)).
+    // Compute reduced argument batch := round(input / log(2)).
     const __m256 vn = _mm256_round_ps(_mm256_mul_ps(vx, vlog2e), _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
 
-    // Compute reduced argument t := x - batch * log(2).
+    // Compute reduced argument t := input - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2_hi, vx);
     vt = _mm256_fmadd_ps(vn, vminus_ln2_lo, vt);
@@ -233,7 +236,7 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_x40(
     vf = _mm256_mul_ps(vf, vs);
 
     // Store up to 7 inputs at a time.
-    _mm256_maskstore_ps(y, vmask, vf);
+    _mm256_maskstore_ps(output, vmask, vf);
   }
   _mm256_zeroupper();
 }

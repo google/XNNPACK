@@ -23,6 +23,11 @@ void xnn_qu8_vcvt_ukernel__armsimd32_x4(
     uint8_t* output,
     const union xnn_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const uint16x2_t vminus_input_zero_point = (uint16x2_t) params->armsimd32.minus_input_zero_point;
   const int32_t vbias = params->armsimd32.bias;
   const int32_t vmultiplier = params->armsimd32.multiplier;

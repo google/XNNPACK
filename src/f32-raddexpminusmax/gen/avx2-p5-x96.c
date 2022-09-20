@@ -22,6 +22,7 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_x96(
     float* sum,
     float max)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(sum != NULL);

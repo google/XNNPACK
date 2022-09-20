@@ -19,6 +19,11 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_x4(
     int8_t* output,
     const union xnn_qs8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
   const int32_t vpositive_multiplier = params->scalar_select.positive_multiplier;
   const int32_t vnegative_multiplier = params->scalar_select.negative_multiplier;

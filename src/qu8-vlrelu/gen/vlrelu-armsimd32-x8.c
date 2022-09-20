@@ -23,6 +23,11 @@ void xnn_qu8_vlrelu_ukernel__armsimd32_x8(
     uint8_t* output,
     const union xnn_qu8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const uint16x2_t vinput_zero_point = (uint16x2_t) params->armsimd32.input_zero_point;
   const int16x2_t vpositive_multiplier = (int16x2_t) params->armsimd32.positive_multiplier;
   const int16x2_t vnegative_multiplier = (int16x2_t) params->armsimd32.negative_multiplier;

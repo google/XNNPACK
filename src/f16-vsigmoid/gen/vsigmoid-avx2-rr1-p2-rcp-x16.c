@@ -22,7 +22,10 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x16(
     void* output,
     const union xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsign_mask = _mm256_load_ps(params->avx2_rr1_p2.sign_mask);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p2.magic_bias);

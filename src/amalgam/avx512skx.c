@@ -3508,6 +3508,12 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m512i vbias = _mm512_load_si512(params->avx512.bias);
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
@@ -3568,6 +3574,12 @@ void xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
@@ -5158,6 +5170,12 @@ void xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m512i vbias = _mm512_load_si512(params->avx512.bias);
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
@@ -5218,6 +5236,12 @@ void xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
@@ -5272,6 +5296,7 @@ void xnn_x8_lut_ukernel__avx512skx_vpshufb_x64(
     const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 

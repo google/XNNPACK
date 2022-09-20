@@ -3702,7 +3702,10 @@ void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32(
     float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vprescale = _mm256_load_ps(params->avx_rr2_lut4_p4.prescale);
   const __m256 valpha = _mm256_load_ps(params->avx_rr2_lut4_p4.alpha);
@@ -3916,6 +3919,8 @@ void xnn_f32_vhswish_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
   const __m256 vhalf = _mm256_load_ps(params->avx.half);
@@ -3994,6 +3999,8 @@ void xnn_f32_vlrelu_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vslope = _mm256_load_ps(params->avx.slope);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
@@ -4053,6 +4060,8 @@ void xnn_f32_vrndd_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -4108,6 +4117,8 @@ void xnn_f32_vrndne_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -4163,6 +4174,8 @@ void xnn_f32_vrndu_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -4218,6 +4231,8 @@ void xnn_f32_vrndz_ukernel__avx_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -4271,7 +4286,10 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_x40(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsign_mask = _mm256_load_ps(params->avx_rr2_p5.sign_mask);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx_rr2_p5.magic_bias);
@@ -4523,6 +4541,8 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_x8(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_loadu_ps(input);
@@ -8796,6 +8816,12 @@ void xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4_mul32.bias);
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.a_multiplier);
   const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.b_multiplier);
@@ -8878,6 +8904,12 @@ void xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4_mul32.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->sse4_mul32.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4_mul32.output_zero_point);
@@ -9137,8 +9169,13 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_x16(
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.a_zero_point);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.b_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse4.scale);
@@ -9260,8 +9297,13 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
     const int8_t* input_b,
     int8_t* output,
     const union xnn_qs8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.a_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse4.scale);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
@@ -11531,6 +11573,12 @@ void xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_x8(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4.bias);
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4.a_multiplier);
   const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->sse4.b_multiplier);
@@ -11613,6 +11661,12 @@ void xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_x8(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->sse4.shift);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4.output_zero_point);
@@ -11872,8 +11926,13 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_x16(
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.b_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
@@ -11995,8 +12054,13 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
     const uint8_t* input_b,
     uint8_t* output,
     const union xnn_qu8_mul_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
-
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
   const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
@@ -12113,6 +12177,7 @@ void xnn_x8_lut_ukernel__avx_x64(
     const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 

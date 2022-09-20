@@ -2428,6 +2428,8 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_lut16_p3.prescale);
   const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_lut16_p3.alpha);
@@ -2595,6 +2597,8 @@ void xnn_f32_vhswish_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
   const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
@@ -2635,6 +2639,8 @@ void xnn_f32_vlrelu_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512 vslope = _mm512_set1_ps(params->scalar.slope);
   const __m512 vzero = _mm512_setzero_ps();
@@ -2672,6 +2678,8 @@ void xnn_f32_vrndd_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
@@ -2703,6 +2711,8 @@ void xnn_f32_vrndne_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
@@ -2734,6 +2744,8 @@ void xnn_f32_vrndu_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
@@ -2765,6 +2777,8 @@ void xnn_f32_vrndz_ukernel__avx512f_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx0123456789ABCDEF = _mm512_loadu_ps(input);
@@ -2794,7 +2808,10 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr2_lut32_p2.sign_mask);
   const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr2_lut32_p2.magic_bias);

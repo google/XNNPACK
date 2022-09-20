@@ -23,6 +23,8 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(__fp16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __fp16* i = (const __fp16*) input;
   __fp16* o = (__fp16*) output;

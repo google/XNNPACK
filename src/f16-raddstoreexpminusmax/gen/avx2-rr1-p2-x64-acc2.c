@@ -23,7 +23,12 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x64_acc2(
     void* sum,
     const union xnn_f16_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const __m256 vi_max = _mm256_cvtph_ps(_mm_set1_epi16((short) *((const uint16_t*) max)));
   const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p2.log2e);

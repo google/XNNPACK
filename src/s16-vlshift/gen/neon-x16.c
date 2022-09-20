@@ -23,7 +23,7 @@ void xnn_s16_vlshift_ukernel__neon_x16(
     int16_t* output,
     uint32_t shift)
 {
-  assert(batch > 0);
+  assert(batch != 0);
   assert(input != NULL);
   assert(output != NULL);
   assert(shift < 16);

@@ -19,6 +19,11 @@ void xnn_qs8_vlrelu_ukernel__scalar_andxor_x1(
     int8_t* output,
     const union xnn_qs8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const int32_t vinput_zero_point = params->scalar_andxor.input_zero_point;
   const int32_t vmultiplier_diff = params->scalar_andxor.multiplier_diff;
   const int32_t vmultiplier_base = params->scalar_andxor.multiplier_base;

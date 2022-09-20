@@ -21,6 +21,7 @@ void xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_x192_acc3(
     float* sum,
     float max)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(sum != NULL);

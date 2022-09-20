@@ -19,6 +19,11 @@ void xnn_qu8_vcvt_ukernel__scalar_x2(
     uint8_t* output,
     const union xnn_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
   const int32_t vbias = params->scalar.bias;
   const int32_t vmultiplier = params->scalar.multiplier;
   for (; batch >= 2 * sizeof(uint8_t); batch -= 2 * sizeof(uint8_t)) {

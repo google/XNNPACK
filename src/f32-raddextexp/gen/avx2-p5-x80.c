@@ -22,6 +22,7 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_x80(
     const float* input,
     float* sum)
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(sum != NULL);

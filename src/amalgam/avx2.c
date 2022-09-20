@@ -1133,7 +1133,12 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40(
     void* sum,
     const union xnn_f16_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(max != NULL);
+  assert(output != NULL);
+  assert(sum != NULL);
 
   const __m256 vi_max = _mm256_cvtph_ps(_mm_set1_epi16((short) *((const uint16_t*) max)));
   const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p2.log2e);
@@ -1428,7 +1433,10 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32(
     void* output,
     const union xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsign_mask = _mm256_load_ps(params->avx2_rr1_p2.sign_mask);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p2.magic_bias);
@@ -1844,7 +1852,10 @@ void xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x56(
     float* output,
     const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_lut4_p4.prescale);
   const __m256 valpha = _mm256_load_ps(params->avx2_rr1_lut4_p4.alpha);
@@ -2080,7 +2091,10 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_x40(
     float* output,
     const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vsign_mask = _mm256_load_ps(params->avx2_rr1_p5.sign_mask);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p5.magic_bias);
@@ -5674,6 +5688,12 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m256i vbias = _mm256_load_si256((const __m256i*) params->avx2.bias);
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vb_multiplier = _mm256_load_si256((const __m256i*) params->avx2.b_multiplier);
@@ -5759,6 +5779,12 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
     int8_t* output,
     const union xnn_qs8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
@@ -7661,6 +7687,12 @@ void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m256i vbias = _mm256_load_si256((const __m256i*) params->avx2.bias);
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m256i vb_multiplier = _mm256_load_si256((const __m256i*) params->avx2.b_multiplier);
@@ -7746,6 +7778,12 @@ void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
     uint8_t* output,
     const union xnn_qu8_add_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
   const __m256i va_multiplier = _mm256_load_si256((const __m256i*) params->avx2.a_multiplier);
   const __m128i vshift = _mm_load_si128((const __m128i*) params->avx2.shift);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
@@ -7999,6 +8037,7 @@ void xnn_x8_lut_ukernel__avx2_x128(
     const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
 {
   assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
