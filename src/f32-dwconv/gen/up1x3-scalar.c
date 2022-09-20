@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/up-scalar.c.in
+//   Template: src/f32-dwconv/unipass-scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

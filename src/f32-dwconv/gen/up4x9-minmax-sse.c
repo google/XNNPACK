@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/up-sse.c.in
+//   Template: src/f32-dwconv/unipass-sse.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

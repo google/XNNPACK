@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-dwconv/up-fma3.c.in
+//   Template: src/f16-dwconv/unipass-fma3.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

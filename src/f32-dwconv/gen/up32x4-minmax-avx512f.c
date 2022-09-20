@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/up-avx512.c.in
+//   Template: src/f32-dwconv/unipass-avx512.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

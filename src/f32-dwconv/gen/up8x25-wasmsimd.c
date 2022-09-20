@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-dwconv/up-wasmsimd.c.in
+//   Template: src/f32-dwconv/unipass-wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

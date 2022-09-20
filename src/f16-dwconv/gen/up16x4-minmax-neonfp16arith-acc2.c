@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-dwconv/up-neonfp16arith.c.in
+//   Template: src/f16-dwconv/unipass-neonfp16arith.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
