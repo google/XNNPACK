@@ -382,6 +382,8 @@ void xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4(
         if (c & 1) {
           wasm_v128_store32_lane(o, vmax, 0);
           wasm_v128_store32_lane(i, vidx, 0);
+          o += 1;
+          i += 1;
         }
       }
     }
