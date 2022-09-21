@@ -7750,6 +7750,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(transpose-nd-test PRIVATE XNNPACK gtest gtest_main)
   ADD_TEST(NAME transpose-nd-test COMMAND transpose-nd-test)
 
+  ADD_EXECUTABLE(transpose-nd-eager-test test/transpose-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(transpose-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(transpose-nd-eager-test PRIVATE XNNPACK gtest gtest_main)
+  ADD_TEST(NAME transpose-nd-eager-test COMMAND transpose-nd-eager-test)
+
   ADD_EXECUTABLE(truncation-nc-test test/truncation-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(truncation-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)

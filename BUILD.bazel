@@ -15134,6 +15134,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "transpose_nd_eager_test",
+    srcs = [
+        "test/transpose-nd-eager.cc",
+        "test/transpose-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "truncation_nc_test",
     srcs = [
         "test/truncation-nc.cc",
