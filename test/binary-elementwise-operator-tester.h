@@ -1013,6 +1013,137 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
+  void TestRunF32() const {
+    ASSERT_NE(operation_type(), OperationType::Unknown);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+
+    // Compute generalized shapes.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+    std::fill(input1_dims.begin(), input1_dims.end(), 1);
+    std::fill(input2_dims.begin(), input2_dims.end(), 1);
+    std::fill(output_dims.begin(), output_dims.end(), 1);
+    std::copy(input1_shape().cbegin(), input1_shape().cend(),
+              input1_dims.end() - num_input1_dims());
+    std::copy(input2_shape().cbegin(), input2_shape().cend(),
+              input2_dims.end() - num_input2_dims());
+    for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+      if (input1_dims[i] != 1 && input2_dims[i] != 1) {
+        ASSERT_EQ(input1_dims[i], input2_dims[i]);
+      }
+      output_dims[i] = std::max(input1_dims[i], input2_dims[i]);
+    }
+    const size_t num_output_elements =
+        std::accumulate(output_dims.begin(), output_dims.end(), size_t(1),
+                        std::multiplies<size_t>());
+
+    // Compute generalized strides.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input2_strides;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_strides;
+    size_t input1_stride = 1, input2_stride = 1, output_stride = 1;
+    for (size_t i = XNN_MAX_TENSOR_DIMS; i != 0; i--) {
+      input1_strides[i - 1] = input1_dims[i - 1] == 1 ? 0 : input1_stride;
+      input2_strides[i - 1] = input2_dims[i - 1] == 1 ? 0 : input2_stride;
+      output_strides[i - 1] = output_stride;
+      input1_stride *= input1_dims[i - 1];
+      input2_stride *= input2_dims[i - 1];
+      output_stride *= output_dims[i - 1];
+    }
+
+    std::vector<float> input1(XNN_EXTRA_BYTES / sizeof(float) +
+                              num_input1_elements());
+    std::vector<float> input2(XNN_EXTRA_BYTES / sizeof(float) +
+                              num_input2_elements());
+    std::vector<float> output(num_output_elements);
+    std::vector<float> output_ref(num_output_elements);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input1.begin(), input1.end(),
+                    [&]() { return f32dist(rng); });
+      std::generate(input2.begin(), input2.end(),
+                    [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  output_ref[i * output_strides[0] + j * output_strides[1] +
+                             k * output_strides[2] + l * output_strides[3] +
+                             m * output_strides[4] + n * output_strides[5]] =
+                      Compute(
+                          input1[i * input1_strides[0] + j * input1_strides[1] +
+                                 k * input1_strides[2] + l * input1_strides[3] +
+                                 m * input1_strides[4] + n * input1_strides[5]],
+                          input2[i * input2_strides[0] + j * input2_strides[1] +
+                                 k * input2_strides[2] + l * input2_strides[3] +
+                                 m * input2_strides[4] +
+                                 n * input2_strides[5]]);
+                }
+              }
+            }
+          }
+        }
+      }
+      const float accumulated_min =
+          *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max =
+          *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float output_min =
+          num_output_elements == 1
+              ? -std::numeric_limits<float>::infinity()
+              : accumulated_min + accumulated_range / 255.0f * float(qmin());
+      const float output_max = num_output_elements == 1
+                                   ? +std::numeric_limits<float>::infinity()
+                                   : accumulated_max - accumulated_range /
+                                                           255.0f *
+                                                           float(255 - qmax());
+      for (float& output_value : output_ref) {
+        output_value = std::min(std::max(output_value, output_min), output_max);
+      }
+
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_add_nd_f32(num_input1_dims(), input1_shape().data(),
+                                   num_input2_dims(), input2_shape().data(),
+                                   input1.data(), input2.data(), output.data(),
+                                   output_min, output_max,
+                                   0,
+                                   nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < output_dims[0]; i++) {
+        for (size_t j = 0; j < output_dims[1]; j++) {
+          for (size_t k = 0; k < output_dims[2]; k++) {
+            for (size_t l = 0; l < output_dims[3]; l++) {
+              for (size_t m = 0; m < output_dims[4]; m++) {
+                for (size_t n = 0; n < output_dims[5]; n++) {
+                  const size_t index =
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
+                  ASSERT_NEAR(output[index], output_ref[index],
+                              1.0e-6f * std::abs(output_ref[index]))
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
  private:
   std::vector<size_t> input1_shape_;
   std::vector<size_t> input2_shape_;

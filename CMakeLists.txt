@@ -7542,6 +7542,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME add-nd-test COMMAND add-nd-test)
 
+  ADD_EXECUTABLE(add-nd-eager-test test/add-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(add-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(add-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME add-nd-eager-test COMMAND add-nd-eager-test)
+
   ADD_EXECUTABLE(argmax-pooling-nhwc-test test/argmax-pooling-nhwc.cc)
   TARGET_INCLUDE_DIRECTORIES(argmax-pooling-nhwc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(argmax-pooling-nhwc-test PRIVATE XNNPACK gtest gtest_main microparams_init logging operators)

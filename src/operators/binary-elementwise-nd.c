@@ -18,6 +18,27 @@
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
+static void init_binary_elementwise_nd(
+  const void* params,
+  size_t params_size,
+  uint32_t flags,
+  enum xnn_operator_type operator_type,
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
+  xnn_operator_t binary_elementwise_op)
+{
+  if (params_size != 0) {
+    memcpy(&binary_elementwise_op->params, params, params_size);
+  }
+
+  binary_elementwise_op->ukernel.vbinary.op_function   = vbinary_fused_ukernels->op_ukernel;
+  binary_elementwise_op->ukernel.vbinary.opc_function  = vbinary_fused_ukernels->opc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.ropc_function = vbinary_fused_ukernels->ropc_ukernel;
+
+  binary_elementwise_op->type = operator_type;
+  binary_elementwise_op->flags = flags;
+
+  binary_elementwise_op->state = xnn_run_state_invalid;
+}
 
 static enum xnn_status create_binary_elementwise_nd(
     uint32_t flags,
@@ -48,18 +69,13 @@ static enum xnn_status create_binary_elementwise_nd(
     return xnn_status_out_of_memory;
   }
 
-  if (params_size != 0) {
-    memcpy(&binary_elementwise_op->params, params, params_size);
-  }
-
-  binary_elementwise_op->ukernel.vbinary.op_function   = vbinary_fused_ukernels->op_ukernel;
-  binary_elementwise_op->ukernel.vbinary.opc_function  = vbinary_fused_ukernels->opc_ukernel;
-  binary_elementwise_op->ukernel.vbinary.ropc_function = vbinary_fused_ukernels->ropc_ukernel;
-
-  binary_elementwise_op->type = operator_type;
-  binary_elementwise_op->flags = flags;
-
-  binary_elementwise_op->state = xnn_run_state_invalid;
+  init_binary_elementwise_nd(
+    params,
+    params_size,
+    flags,
+    operator_type,
+    vbinary_fused_ukernels,
+    binary_elementwise_op);
 
   *binary_elementwise_op_out = binary_elementwise_op;
   return xnn_status_success;
@@ -1139,6 +1155,159 @@ enum xnn_status xnn_setup_add_nd_f32(
     input1, input2, output,
     &xnn_params.f32.vadd,
     pthreadpool_get_threads_count(threadpool));
+}
+
+static enum xnn_status run_binary_elementwise_nd(
+  enum xnn_operator_type operator_type,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  uint32_t setup_log2_element_size,
+  size_t params_offset,
+  size_t setup_params_size,
+  size_t rparams_offset,
+  size_t setup_reversed_params_size,
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
+  const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+  const void* create_params,
+  size_t create_params_size,
+  uint32_t create_init_flag,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+ if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to run %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_uninitialized;
+  }
+
+if ((xnn_params.init_flags & create_init_flag) != create_init_flag) {
+    xnn_log_error("failed to run %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  struct xnn_operator binary_elementwise_op;
+  memset(&binary_elementwise_op, 0, sizeof(binary_elementwise_op));
+
+  init_binary_elementwise_nd(
+    create_params,
+    create_params_size,
+    flags,
+    operator_type,
+    vbinary_fused_ukernels,
+    &binary_elementwise_op);
+
+  const void* setup_params = (void*) ((uintptr_t) &binary_elementwise_op + params_offset);
+  const void* setup_reversed_params = (void*) ((uintptr_t) &binary_elementwise_op + rparams_offset);
+
+  const enum xnn_status status = setup_binary_elementwise_nd(
+    &binary_elementwise_op, operator_type,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    setup_log2_element_size,
+    setup_params, setup_params_size,
+    setup_reversed_params, setup_reversed_params_size,
+    vbinary,
+    pthreadpool_get_threads_count(threadpool));
+
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  return xnn_run_operator(&binary_elementwise_op, threadpool);
+}
+
+static enum xnn_status run_binary_elementwise_nd_f32(
+  enum xnn_operator_type operator_type,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to run %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+      xnn_log_error(
+        "failed to run %s operator with NaN output upper bound: upper bound must be non-NaN",
+        xnn_operator_type_to_string(operator_type));
+      return xnn_status_invalid_parameter;
+    }
+
+  if (output_min >= output_max) {
+      xnn_log_error(
+        "failed to run %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+        xnn_operator_type_to_string(operator_type), output_min, output_max);
+      return xnn_status_invalid_parameter;
+    }
+
+  union xnn_f32_minmax_params params;
+  if (vbinary->init.f32_minmax != NULL) {
+    vbinary->init.f32_minmax(&params, output_min, output_max);
+  }
+
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &vbinary->minmax;
+  if (linear_activation && vbinary->linear.op_ukernel != NULL) {
+    vbinary_fused_ukernels = &vbinary->linear;
+  }
+
+  return run_binary_elementwise_nd(
+    operator_type,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    2 /* log2(sizeof(float)) */,
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    vbinary_fused_ukernels, vbinary,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_F32,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_add_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  return run_binary_elementwise_nd_f32(
+    xnn_operator_type_add_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    output_min, output_max,
+    &xnn_params.f32.vadd,
+    flags,
+    threadpool);
 }
 
 enum xnn_status xnn_setup_add_nd_qs8(

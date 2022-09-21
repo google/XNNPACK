@@ -14744,6 +14744,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "add_nd_eager_test",
+    srcs = [
+        "test/add-nd-eager.cc",
+        "test/binary-elementwise-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "argmax_pooling_nhwc_test",
     srcs = [
         "test/argmax-pooling-nhwc.cc",
