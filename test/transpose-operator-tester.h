@@ -116,9 +116,9 @@ class TransposeOperatorTester {
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
               xnn_run_transpose_nd_x8(
-                  0 /* flags */,
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
+                  0 /* flags */,
                   nullptr /* thread pool */));
 
     // Verify results.
@@ -185,9 +185,9 @@ class TransposeOperatorTester {
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
               xnn_run_transpose_nd_x16(
-                  0 /* flags */,
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
+                  0 /* flags */,
                   nullptr /* thread pool */));
 
     // Verify results.
@@ -254,9 +254,9 @@ class TransposeOperatorTester {
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
               xnn_run_transpose_nd_x32(
-                  0,
                   input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
+                  0 /* flags */,
                   nullptr /* thread pool */));
 
     // Verify results.

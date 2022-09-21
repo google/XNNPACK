@@ -465,14 +465,14 @@ enum xnn_status run_transpose_nd(
 }
 
 enum xnn_status xnn_run_transpose_nd_x32(
-    uint32_t flags,
     const void* input,
     void* output,
     const size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
-    pthreadpool_t threadpool) {
-
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
   return run_transpose_nd(
     flags,
     input,
@@ -487,14 +487,14 @@ enum xnn_status xnn_run_transpose_nd_x32(
 }
 
 enum xnn_status xnn_run_transpose_nd_x16(
-    uint32_t flags,
     const void* input,
     void* output,
     const size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
-    pthreadpool_t threadpool) {
-
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
   return run_transpose_nd(
     flags,
     input,
@@ -509,14 +509,14 @@ enum xnn_status xnn_run_transpose_nd_x16(
 }
 
 enum xnn_status xnn_run_transpose_nd_x8(
-    uint32_t flags,
     const void* input,
     void* output,
     const size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
-    pthreadpool_t threadpool) {
-
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
   return run_transpose_nd(
     flags,
     input,
