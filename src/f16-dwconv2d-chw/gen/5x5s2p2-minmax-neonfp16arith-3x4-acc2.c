@@ -31,8 +31,8 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x4_acc2(
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
-  const uint16x4_t vmask_even = vld1_u16(params->neonfp16arith.mask_even);
-  const uint16x4_t vmask_odd = vld1_u16(params->neonfp16arith.mask_odd);
+  const uint16x4_t vmask_even = vld1_u16(params->neonfp16arith.maskx4_even);
+  const uint16x4_t vmask_odd = vld1_u16(params->neonfp16arith.maskx4_odd);
   const float16x4_t vmax = vld1_dup_f16(&params->neonfp16arith.max);
   const float16x4_t vmin = vld1_dup_f16(&params->neonfp16arith.min);
 
