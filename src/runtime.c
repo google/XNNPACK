@@ -644,7 +644,7 @@ enum xnn_status xnn_invoke_runtime(
         continue;
       }
 
-      const enum xnn_status status = xnn_run_operator(runtime->opdata[i].operator_objects[j], runtime->threadpool);
+      const enum xnn_status status = xnn_run_operator_with_index(runtime->opdata[i].operator_objects[j], i, j, runtime->threadpool);
       if (status != xnn_status_success) {
         return status;
       }

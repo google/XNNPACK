@@ -304,6 +304,12 @@ struct xnn_operator {
   enum xnn_run_state state;
 };
 
+XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
+  xnn_operator_t op,
+  size_t opdata_index,
+  size_t operator_object_index,
+  pthreadpool_t threadpool);
+
 static inline void* packed_weights(struct xnn_operator* op) {
   if (op->weights_cache == NULL) {
     return op->packed_weights.pointer;

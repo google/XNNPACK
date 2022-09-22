@@ -1334,7 +1334,17 @@ void xnn_compute_vmulcaddc(
   }
 #endif  // XNN_MAX_UARCH_TYPES > 1
 
+
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
+{
+  return xnn_run_operator_with_index(op, 0, 0, threadpool);
+}
+
+enum xnn_status xnn_run_operator_with_index(
+  xnn_operator_t op,
+  size_t opdata_index,
+  size_t operator_object_index,
+  pthreadpool_t threadpool)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to run operator: XNNPACK is not initialized");
@@ -1345,8 +1355,14 @@ enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
       xnn_log_error("failed to run operator: operator was not successfully setup");
       return xnn_status_invalid_state;
     case xnn_run_state_ready:
+      xnn_log_debug("running operator %zu:%zu (%s)", opdata_index,
+                    operator_object_index,
+                    xnn_operator_type_to_string(op->type));
       break;
     case xnn_run_state_skip:
+      xnn_log_debug("skip running operator %zu:%zu (%s)", opdata_index,
+                    operator_object_index,
+                    xnn_operator_type_to_string(op->type));
       return xnn_status_success;
   }
 
