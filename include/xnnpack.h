@@ -1570,19 +1570,6 @@ enum xnn_status xnn_run_add_nd_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_run_multiply_nd_f32(
-  size_t num_input1_dims,
-  const size_t* input1_shape,
-  size_t num_input2_dims,
-  const size_t* input2_shape,
-  const float* input1,
-  const float* input2,
-  float* output,
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
@@ -1795,6 +1782,19 @@ enum xnn_status xnn_setup_divide_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_divide_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_elu_nc_f32(
   size_t channels,
   size_t input_stride,
@@ -1963,6 +1963,19 @@ enum xnn_status xnn_setup_multiply_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_multiply_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_negate_nc_f32(

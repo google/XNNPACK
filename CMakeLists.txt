@@ -7625,6 +7625,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(divide-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME divide-nd-test COMMAND divide-nd-test)
 
+  ADD_EXECUTABLE(divide-nd-eager-test test/divide-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(divide-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(divide-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME divide-nd-eager-test COMMAND divide-nd-eager-test)
+
   ADD_EXECUTABLE(elu-nc-test test/elu-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(elu-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
