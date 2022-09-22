@@ -2897,8 +2897,8 @@ static void init(void) {
             .output_height_tile = 1,
           };
           xnn_params.f16.dwconv2d_chw_5x5 = (struct dwconv2d_chw_parameters) {
-            .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x4,
-            .output_width_tile = 4,
+            .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8,
+            .output_width_tile = 8,
             .output_height_tile = 1,
           };
           xnn_params.f16.dwconv2d_chw_5x5s2 = (struct dwconv2d_chw_parameters) {
