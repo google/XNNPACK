@@ -1112,13 +1112,30 @@ class BinaryElementwiseOperatorTester {
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
-      ASSERT_EQ(xnn_status_success,
-                xnn_run_add_nd_f32(num_input1_dims(), input1_shape().data(),
-                                   num_input2_dims(), input2_shape().data(),
-                                   input1.data(), input2.data(), output.data(),
-                                   output_min, output_max,
-                                   0,
-                                   nullptr /* thread pool */));
+      switch (operation_type()) {
+        case OperationType::Add:
+          ASSERT_EQ(xnn_status_success,
+                  xnn_run_add_nd_f32(
+                    num_input1_dims(), input1_shape().data(),
+                    num_input2_dims(), input2_shape().data(),
+                    input1.data(), input2.data(), output.data(),
+                    output_min, output_max,
+                    0,
+                    nullptr /* thread pool */));
+          break;
+        case OperationType::Multiply:
+          ASSERT_EQ(xnn_status_success,
+                  xnn_run_multiply_nd_f32(
+                    num_input1_dims(), input1_shape().data(),
+                    num_input2_dims(), input2_shape().data(),
+                    input1.data(), input2.data(), output.data(),
+                    output_min, output_max,
+                    0,
+                    nullptr /* thread pool */));
+          break;
+        default:
+            FAIL() << "Unsupported operation type";
+      }
 
       // Verify results.
       for (size_t i = 0; i < output_dims[0]; i++) {

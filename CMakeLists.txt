@@ -7680,6 +7680,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(multiply-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME multiply-nd-test COMMAND multiply-nd-test)
 
+  ADD_EXECUTABLE(multiply-nd-eager-test test/multiply-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(multiply-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(multiply-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME multiply-nd-eager-test COMMAND multiply-nd-eager-test)
+
   ADD_EXECUTABLE(negate-nc-test test/negate-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(negate-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
