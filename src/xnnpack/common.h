@@ -122,6 +122,12 @@
   #define XNN_PLATFORM_FUCHSIA 0
 #endif
 
+#if defined(__hexagon__) && !defined(__linux__)
+  #define XNN_PLATFORM_QURT 1
+#else
+  #define XNN_PLATFORM_QURT 0
+#endif
+
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS && !XNN_PLATFORM_FUCHSIA
   #define XNN_PLATFORM_JIT 1
 #else

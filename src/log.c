@@ -19,6 +19,9 @@
 #if defined(__ANDROID__)
   #include <android/log.h>
 #endif
+#if defined(__hexagon__)
+  #include <qurt_printf.h>
+#endif
 
 #ifndef XNN_LOG_TO_STDIO
   #if defined(__ANDROID__)
@@ -39,6 +42,11 @@
 
   #define XNN_LOG_STDERR STD_ERROR_HANDLE
   #define XNN_LOG_STDOUT STD_OUTPUT_HANDLE
+#elif defined(__hexagon__)
+  #define XNN_LOG_NEWLINE_LENGTH 1
+
+  #define XNN_LOG_STDERR 0
+  #define XNN_LOG_STDOUT 0
 #else
   #define XNN_LOG_NEWLINE_LENGTH 1
 
@@ -95,6 +103,8 @@ static void xnn_vlog(int output_handle, const char* prefix, size_t prefix_length
       GetStdHandle((DWORD) output_handle),
       out_buffer, (prefix_length + format_length + XNN_LOG_NEWLINE_LENGTH) * sizeof(char),
       &bytes_written, NULL);
+  #elif defined(__hexagon__)
+    qurt_printf("%s", out_buffer);
   #else
     out_buffer[prefix_length + format_length] = '\n';
 
