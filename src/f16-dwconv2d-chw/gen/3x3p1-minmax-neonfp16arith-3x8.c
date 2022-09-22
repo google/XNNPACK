@@ -30,7 +30,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8(
   assert(input_width % sizeof(__fp16) == 0);
   assert(padding_top == 1);
 
-  const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.maskx8);
+  const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.mask);
   const float16x8_t vmax = vld1q_dup_f16(&params->neonfp16arith.max);
   const float16x8_t vmin = vld1q_dup_f16(&params->neonfp16arith.min);
 

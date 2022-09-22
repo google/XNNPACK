@@ -2417,10 +2417,9 @@ union xnn_f16_chw_params {
     uint16_t max;
     XNN_ALIGN(8) uint16_t maskx4_even[4]; // used by stride 2 kernels
     XNN_ALIGN(8) uint16_t maskx4_odd[4];  // used by stride 2 kernels
-    XNN_ALIGN(8) uint16_t maskx4[4]; // used by stride 1 kernels
     XNN_ALIGN(16) uint16_t maskx8_even[8]; // used by stride 2 kernels
     XNN_ALIGN(16) uint16_t maskx8_odd[8];  // used by stride 2 kernels
-    XNN_ALIGN(16) uint16_t maskx8[8]; // used by stride 1 x8 kernels
+    XNN_ALIGN(16) uint16_t mask[8]; // used by stride 1 x8 kernels
   } neonfp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
