@@ -238,6 +238,7 @@ static void optimize_tensor_allocation_for_in_place_operations(
       case xnn_node_type_bankers_rounding:
       case xnn_node_type_ceiling:
       case xnn_node_type_clamp:
+      case xnn_node_type_copy:
       case xnn_node_type_elu:
       case xnn_node_type_floor:
       case xnn_node_type_hardswish:
@@ -257,9 +258,11 @@ static void optimize_tensor_allocation_for_in_place_operations(
     struct xnn_value* output = &subgraph->values[node->outputs[0]];
     const uint32_t input_id = node->inputs[0];
     const struct xnn_value* input = &subgraph->values[input_id];
-    if (xnn_value_is_external_input(input) || input->num_consumers > 1) {
+    if (xnn_value_is_external_input(input) || xnn_value_is_persistent(output) || input->num_consumers > 1) {
       // External inputs cannot be overwritten.
-      return;
+      // Persistent tensors will need their own space, and cannot alias an internal tensor.
+      // TODO(zhin): consider aliasing input to output rather than output to input.
+      continue;
     }
     if (output->num_consumers == 1) {
       uint32_t reuse_id = input_id;
