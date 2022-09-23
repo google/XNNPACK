@@ -2141,6 +2141,19 @@ enum xnn_status xnn_setup_squared_difference_nd_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_squared_difference_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_subtract_nd_f32(
   float output_min,
   float output_max,
