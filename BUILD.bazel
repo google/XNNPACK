@@ -15010,12 +15010,30 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "maximum_nd_eager_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/maximum-nd-eager.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "minimum_nd_test",
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/minimum-nd.cc",
     ],
     shard_count = 5,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "minimum_nd_eager_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/minimum-nd-eager.cc",
+    ],
     deps = OPERATOR_TEST_DEPS,
 )
 

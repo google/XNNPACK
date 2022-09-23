@@ -1133,6 +1133,26 @@ class BinaryElementwiseOperatorTester {
                     0,
                     nullptr /* thread pool */));
           break;
+        case OperationType::Maximum:
+          ASSERT_EQ(xnn_status_success,
+                  xnn_run_maximum_nd_f32(
+                    num_input1_dims(), input1_shape().data(),
+                    num_input2_dims(), input2_shape().data(),
+                    input1.data(), input2.data(), output.data(),
+                    output_min, output_max,
+                    0,
+                    nullptr /* thread pool */));
+          break;
+        case OperationType::Minimum:
+          ASSERT_EQ(xnn_status_success,
+                  xnn_run_minimum_nd_f32(
+                    num_input1_dims(), input1_shape().data(),
+                    num_input2_dims(), input2_shape().data(),
+                    input1.data(), input2.data(), output.data(),
+                    output_min, output_max,
+                    0,
+                    nullptr /* thread pool */));
+          break;
         case OperationType::Multiply:
           ASSERT_EQ(xnn_status_success,
                   xnn_run_multiply_nd_f32(

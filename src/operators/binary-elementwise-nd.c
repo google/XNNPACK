@@ -1334,6 +1334,86 @@ enum xnn_status xnn_run_divide_nd_f32(
     threadpool);
 }
 
+enum xnn_status xnn_run_maximum_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  union xnn_f32_minmax_params params;
+  if (xnn_params.f32.vmax.init.f32_minmax != NULL) {
+    xnn_params.f32.vmax.init.f32_minmax(&params, output_min, output_max);
+  }
+
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &xnn_params.f32.vmax.minmax;
+  if (linear_activation && xnn_params.f32.vmax.linear.op_ukernel != NULL) {
+    vbinary_fused_ukernels = &xnn_params.f32.vmax.linear;
+  }
+
+  return run_binary_elementwise_nd(
+    xnn_operator_type_maximum_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    2 /* log2(sizeof(float)) */,
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    vbinary_fused_ukernels, &xnn_params.f32.vmax,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_F32,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_minimum_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  union xnn_f32_minmax_params params;
+  if (xnn_params.f32.vmin.init.f32_minmax != NULL) {
+    xnn_params.f32.vmin.init.f32_minmax(&params, output_min, output_max);
+  }
+
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &xnn_params.f32.vmin.minmax;
+  if (linear_activation && xnn_params.f32.vmin.linear.op_ukernel != NULL) {
+    vbinary_fused_ukernels = &xnn_params.f32.vmin.linear;
+  }
+
+  return run_binary_elementwise_nd(
+    xnn_operator_type_minimum_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    2 /* log2(sizeof(float)) */,
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
+    vbinary_fused_ukernels, &xnn_params.f32.vmin,
+    &params,
+    sizeof(params),
+    XNN_INIT_FLAG_F32,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_run_multiply_nd_f32(
   size_t num_input1_dims,
   const size_t* input1_shape,

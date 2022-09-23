@@ -7675,10 +7675,20 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(maximum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME maximum-nd-test COMMAND maximum-nd-test)
 
+  ADD_EXECUTABLE(maximum-nd-eager-test test/maximum-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(maximum-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(maximum-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME maximum-nd-eager-test COMMAND maximum-nd-eager-test)
+
   ADD_EXECUTABLE(minimum-nd-test test/minimum-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(minimum-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME minimum-nd-test COMMAND minimum-nd-test)
+
+  ADD_EXECUTABLE(minimum-nd-eager-test test/minimum-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(minimum-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(minimum-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME minimum-nd-eager-test COMMAND minimum-nd-eager-test)
 
   ADD_EXECUTABLE(multiply-nd-test test/multiply-nd.cc)
   TARGET_INCLUDE_DIRECTORIES(multiply-nd-test PRIVATE src test)
