@@ -25,9 +25,7 @@ CMAKE_ARGS+=("-DXNNPACK_BUILD_BENCHMARKS=ON")
 CMAKE_ARGS+=("-DXNNPACK_BUILD_TESTS=ON")
 
 # Cross-compilation options for Google Benchmark
-# CMAKE_ARGS+=("-DHAVE_POSIX_REGEX=0")
-# CMAKE_ARGS+=("-DHAVE_STEADY_CLOCK=0")
-# CMAKE_ARGS+=("-DHAVE_STD_REGEX=0")
+CMAKE_ARGS+=("-DHAVE_STEADY_CLOCK=0")
 
 # Use-specified CMake arguments go last to allow overridding defaults
 CMAKE_ARGS+=($@)

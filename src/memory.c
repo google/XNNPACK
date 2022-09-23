@@ -67,7 +67,11 @@ static void* allocate_buffer(size_t size) {
     return NULL;
   }
 #else
-  void* p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  #if XNN_PLATFORM_QURT
+    void* p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+  #else
+    void* p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  #endif
   if (p == MAP_FAILED) {
     xnn_log_error("failed to allocate %zu bytes for code/weights buffer, error code: %d", size, errno);
     return NULL;

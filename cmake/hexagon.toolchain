@@ -71,7 +71,7 @@ SET(HEXAGON_SIM_Q6SS_CONTENT
 "$ENV{HEXAGON_TOOLS_ROOT}/lib/iss/qtimer.so --csr_base=0xFC900000 --irq_p=1 --freq=19200000 --cnttid=1
 $ENV{HEXAGON_TOOLS_ROOT}/lib/iss/l2vic.so 32 0xFC910000")
 
-SET(HEXAGON_RUN_CONTENT
+SET(HEXAGON_SIMRUN_CONTENT
 "#!/bin/sh
 ${HEXAGON_SIM} -mv66g_1024 --quiet --simulated_returnval --usefs ${CMAKE_CURRENT_BINARY_DIR} --pmu_statsfile ${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt --cosim_file ${CMAKE_BINARY_DIR}/q6ss.cfg --l2tcm_base 0xd800 --rtos ${CMAKE_BINARY_DIR}/osam.cfg $ENV{HEXAGON_SDK_ROOT}/libs/common/qurt/computev66/sdksim_bin/runelf.pbn -- $@")
 
@@ -79,8 +79,8 @@ ${HEXAGON_SIM} -mv66g_1024 --quiet --simulated_returnval --usefs ${CMAKE_CURRENT
 FILE(WRITE "${CMAKE_BINARY_DIR}/osam.cfg" "${HEXAGON_SIM_OSAM_CONTENT}")
 FILE(WRITE "${CMAKE_BINARY_DIR}/q6ss.cfg" "${HEXAGON_SIM_Q6SS_CONTENT}")
 
-FILE(TOUCH "${CMAKE_BINARY_DIR}/hexagon-run")
-FILE(CHMOD "${CMAKE_BINARY_DIR}/hexagon-run" FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ WORLD_READ)
-FILE(WRITE "${CMAKE_BINARY_DIR}/hexagon-run" "${HEXAGON_RUN_CONTENT}")
+FILE(TOUCH "${CMAKE_BINARY_DIR}/simrun")
+FILE(CHMOD "${CMAKE_BINARY_DIR}/simrun" FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ WORLD_READ)
+FILE(WRITE "${CMAKE_BINARY_DIR}/simrun" "${HEXAGON_SIMRUN_CONTENT}")
 
 SET(CMAKE_CROSSCOMPILING_EMULATOR "${HEXAGON_SIM}" "-mv66g_1024" "--quiet" "--simulated_returnval" "--usefs" "${CMAKE_CURRENT_BINARY_DIR}" "--pmu_statsfile" "${CMAKE_CURRENT_BINARY_DIR}/pmu_stats.txt" "--cosim_file" "${CMAKE_BINARY_DIR}/q6ss.cfg" "--l2tcm_base" "0xd800" "--rtos" "${CMAKE_BINARY_DIR}/osam.cfg" "$ENV{HEXAGON_SDK_ROOT}/libs/common/qurt/computev66/sdksim_bin/runelf.pbn" "--")
