@@ -60,10 +60,10 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
       }
 
     $for M in range(4 + ROW_TILE):
-      float16x8_t vi${M}x0123 = vmovq_n_f16(0);
+      float16x8_t vi${M}x01234567 = vmovq_n_f16(0);
 
     $for M in range(4 + ROW_TILE):
-      float16x8_t vi${M}x4567 = vld1q_f16(i${M}); i${M} += 8;
+      float16x8_t vi${M}x89ABCDEF = vld1q_f16(i${M}); i${M} += 8;
 
     size_t w = input_width;
     for (; w > 16 * sizeof(__fp16); w -= 8 * sizeof(__fp16)) {
@@ -71,116 +71,116 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
         float16x8_t vo${M}p0 = vdupq_laneq_f16(vw01234567, 0);
 
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x89AB = vld1q_f16(i${M}); i${M} += 8;
+        const float16x8_t vi${M}xGHIJKLMN = vld1q_f16(i${M}); i${M} += 8;
 
       // Center column
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:
-          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x4567, vw01234567, 3);
+          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x89ABCDEF, vw01234567, 3);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x4567, vw01234567, 3);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 2:
-          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x4567, vw89ABCDEF, 0);
+          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x4567, vw89ABCDEF, 0);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 3:
-          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x4567, vw89ABCDEF, 5);
+          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
         $else:
-          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x4567, vw89ABCDEF, 5);
+          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 4:
-          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x4567, vwGHIJKLMN, 2);
+          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
         $else:
-          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x4567, vwGHIJKLMN, 2);
+          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 6:
-          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x4567, vwGHIJKLMN, 7);
+          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
         $else:
-          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x4567, vwGHIJKLMN, 7);
+          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
 
       // Left by 1 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x3456 = vextq_f16(vi${M}x0123, vi${M}x4567, 7);
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x3456, vw01234567, 2);
+        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x3456, vw01234567, 7);
+        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x3456, vw89ABCDEF, 4);
+        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x3456, vwGHIJKLMN, 1);
+        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x3456, vwGHIJKLMN, 6);
+        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
 
       // Left by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x2345 = vextq_f16(vi${M}x0123, vi${M}x4567, 6);
-        vi${M}x0123 = vi${M}x4567;
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
+        vi${M}x01234567 = vi${M}x89ABCDEF;
 
       $for M in range(ROW_TILE):
-        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x2345, vw01234567, 1);
+        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x2345, vw01234567, 6);
+        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x2345, vw89ABCDEF, 3);
+        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x2345, vwGHIJKLMN, 0);
+        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
 
       $for M in range(ROW_TILE):
-        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x2345, vwGHIJKLMN, 5);
+        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
 
       // Right by 1 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x5678 = vextq_f16(vi${M}x4567, vi${M}x89AB, 1);
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x5678, vw01234567, 4);
+        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x5678, vw89ABCDEF, 1);
+        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x5678, vw89ABCDEF, 6);
+        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x5678, vwGHIJKLMN, 3);
+        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x5678, vwOP, 0);
+        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
 
       // Right by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x6789 = vextq_f16(vi${M}x4567, vi${M}x89AB, 2);
-        vi${M}x4567 = vi${M}x89AB;
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 2);
+        vi${M}x89ABCDEF = vi${M}xGHIJKLMN;
 
       $for M in range(ROW_TILE):
-        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}x6789, vw01234567, 5);
+        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
 
       $for M in range(ROW_TILE):
-        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}x6789, vw89ABCDEF, 2);
+        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}x6789, vw89ABCDEF, 7);
+        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}x6789, vwGHIJKLMN, 4);
+        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}x6789, vwOP, 1);
+        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
 
       $if ACCUMULATORS > 1:
         $ACC_SLICE = 1
@@ -208,119 +208,119 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
         float16x8_t vo${M}p0 = vdupq_laneq_f16(vw01234567, 0);
 
       $for M in range(4 + ROW_TILE):
-        float16x8_t vi${M}x89AB = vld1q_f16(i${M}); i${M} += 8;
+        float16x8_t vi${M}xGHIJKLMN = vld1q_f16(i${M}); i${M} += 8;
 
       $for M in range(4 + ROW_TILE):
-        vi${M}x89AB = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}x89AB)));
+        vi${M}xGHIJKLMN = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}xGHIJKLMN)));
 
       // Center column
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:
-          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x4567, vw01234567, 3);
+          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x89ABCDEF, vw01234567, 3);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x4567, vw01234567, 3);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 2:
-          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x4567, vw89ABCDEF, 0);
+          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x4567, vw89ABCDEF, 0);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 3:
-          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x4567, vw89ABCDEF, 5);
+          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
         $else:
-          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x4567, vw89ABCDEF, 5);
+          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 4:
-          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x4567, vwGHIJKLMN, 2);
+          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
         $else:
-          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x4567, vwGHIJKLMN, 2);
+          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 6:
-          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x4567, vwGHIJKLMN, 7);
+          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
         $else:
-          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x4567, vwGHIJKLMN, 7);
+          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
 
       // Left by 1 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x3456 = vextq_f16(vi${M}x0123, vi${M}x4567, 7);
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x3456, vw01234567, 2);
+        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x3456, vw01234567, 7);
+        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x3456, vw89ABCDEF, 4);
+        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x3456, vwGHIJKLMN, 1);
+        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x3456, vwGHIJKLMN, 6);
+        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
 
       // Left by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x2345 = vextq_f16(vi${M}x0123, vi${M}x4567, 6);
-        vi${M}x0123 = vi${M}x4567;
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
+        vi${M}x01234567 = vi${M}x89ABCDEF;
 
       $for M in range(ROW_TILE):
-        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x2345, vw01234567, 1);
+        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x2345, vw01234567, 6);
+        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x2345, vw89ABCDEF, 3);
+        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x2345, vwGHIJKLMN, 0);
+        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
 
       $for M in range(ROW_TILE):
-        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x2345, vwGHIJKLMN, 5);
+        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
 
       // Right by 1 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x5678 = vextq_f16(vi${M}x4567, vi${M}x89AB, 1);
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x5678, vw01234567, 4);
+        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x5678, vw89ABCDEF, 1);
+        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x5678, vw89ABCDEF, 6);
+        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x5678, vwGHIJKLMN, 3);
+        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x5678, vwOP, 0);
+        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
 
       // Right by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x6789 = vextq_f16(vi${M}x4567, vi${M}x89AB, 2);
-        vi${M}x4567 = vi${M}x89AB;
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x89ABCDEF, vi${M}xGHIJKLMN, 2);
+        vi${M}x89ABCDEF = vi${M}xGHIJKLMN;
 
       $for M in range(ROW_TILE):
-        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}x6789, vw01234567, 5);
+        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
 
       $for M in range(ROW_TILE):
-        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}x6789, vw89ABCDEF, 2);
+        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}x6789, vw89ABCDEF, 7);
+        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}x6789, vwGHIJKLMN, 4);
+        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}x6789, vwOP, 1);
+        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
 
       $if ACCUMULATORS > 1:
         $ACC_SLICE = 1
@@ -350,115 +350,115 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
         float16x8_t vo${M}p0 = vdupq_laneq_f16(vw01234567, 0);
 
       $for M in range(4 + ROW_TILE):
-        vi${M}x4567 = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}x4567)));
+        vi${M}x89ABCDEF = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi${M}x89ABCDEF)));
 
       // Center column
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 1:
-          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x4567, vw01234567, 3);
+          float16x8_t vo${M}p1 = vmulq_laneq_f16(vi${M}x89ABCDEF, vw01234567, 3);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x4567, vw01234567, 3);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 3);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 2:
-          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x4567, vw89ABCDEF, 0);
+          float16x8_t vo${M}p2 = vmulq_laneq_f16(vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
         $else:
-          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x4567, vw89ABCDEF, 0);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw89ABCDEF, 0);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 3:
-          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x4567, vw89ABCDEF, 5);
+          float16x8_t vo${M}p3 = vmulq_laneq_f16(vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
         $else:
-          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x4567, vw89ABCDEF, 5);
+          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+2}x89ABCDEF, vw89ABCDEF, 5);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 4:
-          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x4567, vwGHIJKLMN, 2);
+          float16x8_t vo${M}p4 = vmulq_laneq_f16(vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
         $else:
-          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x4567, vwGHIJKLMN, 2);
+          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+3}x89ABCDEF, vwGHIJKLMN, 2);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 6:
-          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x4567, vwGHIJKLMN, 7);
+          float16x8_t vo${M}p5 = vmulq_laneq_f16(vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
         $else:
-          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x4567, vwGHIJKLMN, 7);
+          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M+4}x89ABCDEF, vwGHIJKLMN, 7);
 
       // Left by 1 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x3456 = vextq_f16(vi${M}x0123, vi${M}x4567, 7);
+        const float16x8_t vi${M}x789ABCDE = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x3456, vw01234567, 2);
+        vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x3456, vw01234567, 7);
+        vo${M}p${8 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${8 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x3456, vw89ABCDEF, 4);
+        vo${M}p${9 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${9 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw89ABCDEF, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x3456, vwGHIJKLMN, 1);
+        vo${M}p${10 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${10 % ACCUMULATORS}, vi${M+3}x789ABCDE, vwGHIJKLMN, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x3456, vwGHIJKLMN, 6);
+        vo${M}p${11 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${11 % ACCUMULATORS}, vi${M+4}x789ABCDE, vwGHIJKLMN, 6);
 
       // Left by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x2345 = vextq_f16(vi${M}x0123, vi${M}x4567, 6);
+        const float16x8_t vi${M}x6789ABCD = vextq_f16(vi${M}x01234567, vi${M}x89ABCDEF, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x2345, vw01234567, 1);
+        vo${M}p${12 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${12 % ACCUMULATORS}, vi${M}x6789ABCD, vw01234567, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x2345, vw01234567, 6);
+        vo${M}p${13 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${13 % ACCUMULATORS}, vi${M+1}x6789ABCD, vw01234567, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x2345, vw89ABCDEF, 3);
+        vo${M}p${14 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${14 % ACCUMULATORS}, vi${M+2}x6789ABCD, vw89ABCDEF, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x2345, vwGHIJKLMN, 0);
+        vo${M}p${15 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${15 % ACCUMULATORS}, vi${M+3}x6789ABCD, vwGHIJKLMN, 0);
 
       $for M in range(ROW_TILE):
-        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x2345, vwGHIJKLMN, 5);
+        vo${M}p${16 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vwGHIJKLMN, 5);
 
       // Right by 1 column
       const float16x8_t vzero = vmovq_n_f16(0);
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x5678 = vextq_f16(vi${M}x4567, vzero, 1);
+        const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vzero, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x5678, vw01234567, 4);
+        vo${M}p${17 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${17 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x5678, vw89ABCDEF, 1);
+        vo${M}p${18 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${18 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw89ABCDEF, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x5678, vw89ABCDEF, 6);
+        vo${M}p${19 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${19 % ACCUMULATORS}, vi${M+2}x9ABCDEFG, vw89ABCDEF, 6);
 
       $for M in range(ROW_TILE):
-        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x5678, vwGHIJKLMN, 3);
+        vo${M}p${20 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${20 % ACCUMULATORS}, vi${M+3}x9ABCDEFG, vwGHIJKLMN, 3);
 
       $for M in range(ROW_TILE):
-        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x5678, vwOP, 0);
+        vo${M}p${21 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${21 % ACCUMULATORS}, vi${M+4}x9ABCDEFG, vwOP, 0);
 
       // Right by 2 column
       $for M in range(4 + ROW_TILE):
-        const float16x8_t vi${M}x6789 = vextq_f16(vi${M}x5678, vzero, 1);
+        const float16x8_t vi${M}xABCDEFGH = vextq_f16(vi${M}x9ABCDEFG, vzero, 1);
 
       $for M in range(ROW_TILE):
-        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}x6789, vw01234567, 5);
+        vo${M}p${22 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${22 % ACCUMULATORS}, vi${M}xABCDEFGH, vw01234567, 5);
 
       $for M in range(ROW_TILE):
-        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}x6789, vw89ABCDEF, 2);
+        vo${M}p${23 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${23 % ACCUMULATORS}, vi${M+1}xABCDEFGH, vw89ABCDEF, 2);
 
       $for M in range(ROW_TILE):
-        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}x6789, vw89ABCDEF, 7);
+        vo${M}p${24 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${24 % ACCUMULATORS}, vi${M+2}xABCDEFGH, vw89ABCDEF, 7);
 
       $for M in range(ROW_TILE):
-        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}x6789, vwGHIJKLMN, 4);
+        vo${M}p${25 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${25 % ACCUMULATORS}, vi${M+3}xABCDEFGH, vwGHIJKLMN, 4);
 
       $for M in range(ROW_TILE):
-        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}x6789, vwOP, 1);
+        vo${M}p${26 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${26 % ACCUMULATORS}, vi${M+4}xABCDEFGH, vwOP, 1);
 
       $if ACCUMULATORS > 1:
         $ACC_SLICE = 1
