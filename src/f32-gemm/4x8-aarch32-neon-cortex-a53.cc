@@ -9,8 +9,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
-#include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/memory.h>
+
 
 namespace xnnpack {
 namespace aarch32 {

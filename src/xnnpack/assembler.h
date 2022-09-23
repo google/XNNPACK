@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xnnpack/allocator.h>
+#include <xnnpack/memory.h>
 
 #include <array>
 #include <cstdint>

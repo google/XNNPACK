@@ -8,7 +8,7 @@
 #include <stddef.h>            // For size_t.
 #include <stdint.h>            // For uint32_t.
 #include <xnnpack.h>           // For xnn_status.
-#include <xnnpack/allocator.h> // For xnn_code_buffer.
+#include <xnnpack/memory.h>    // For xnn_code_buffer.
 #include <xnnpack/mutex.h>     // For xnn_mutex.
 
 #ifdef __cplusplus

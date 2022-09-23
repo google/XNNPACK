@@ -9,8 +9,8 @@
 
 #include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
-#include <xnnpack/allocator.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/memory.h>
 
 
 namespace xnnpack {

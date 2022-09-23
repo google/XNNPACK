@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include <xnnpack.h>
-#include <xnnpack/allocator.h>
+#include <xnnpack/memory.h>
 
 #include <benchmark/benchmark.h>
 

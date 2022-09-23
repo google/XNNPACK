@@ -1609,17 +1609,6 @@ typedef void (*xnn_f32_gavgpool_cw_ukernel_function)(
 
 /********************* JIT microkernel generator pointers ********************/
 
-// JIT GEMM: used by GEMM/IGEMM microkernel generators.
-
-struct jit_gemm_params {
-  struct {
-    float min;
-    float max;
-  } f32_minmax;
-  size_t num_post_operations;
-  struct xnn_post_operation* post_operations;
-};
-
 typedef xnn_status_t (*xnn_jit_gemm_code_generator_function)(
     struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
 typedef xnn_status_t (*xnn_jit_igemm_code_generator_function)(

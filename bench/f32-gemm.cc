@@ -22,7 +22,6 @@
 #include "bench/gemm.h"
 #include "bench/utils.h"
 
-#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
@@ -403,7 +402,6 @@ static void GEMMBenchmark(benchmark::State& state,
   init_params(&params,
     -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
-  xnn_initialize(/*allocator=*/nullptr);
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
   jit_gemm_params jit_params = {

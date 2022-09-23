@@ -3,20 +3,19 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack.h>
-#include <xnnpack/aarch32-assembler.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-
 #include <ios>
 
-#include "assembler-helpers.h"
 #include <gtest/gtest.h>
+
+#include <xnnpack/aarch32-assembler.h>
+#include <xnnpack/memory.h>
+#include <xnnpack/common.h>
+#include "assembler-helpers.h"
+
 
 namespace xnnpack {
 namespace aarch32 {
 TEST(AArch32Assembler, InstructionEncoding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -282,7 +281,6 @@ TEST(AArch32Assembler, InstructionEncoding) {
 }
 
 TEST(AArch32Assembler, Label) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -341,7 +339,6 @@ TEST(AArch32Assembler, Label) {
 }
 
 TEST(AArch32Assembler, Align) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -446,7 +443,6 @@ TEST(AArch32Assembler, QRegister) {
 }
 
 TEST(AArch32Assembler, CodeBufferOverflow) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   // Requested memory is rounded to page size.
   xnn_allocate_code_memory(&b, 4);
@@ -463,7 +459,6 @@ TEST(AArch32Assembler, CodeBufferOverflow) {
 }
 
 TEST(AArch32Assembler, BoundOverflow) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   // Requested memory is rounded to page size.
   xnn_allocate_code_memory(&b, 4);
@@ -486,7 +481,6 @@ TEST(AArch32Assembler, BoundOverflow) {
 
 #if XNN_ARCH_ARM && XNN_PLATFORM_JIT
 TEST(AArch32Assembler, JitAllocCodeBuffer) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   typedef uint32_t (*Func)(uint32_t);
 
   xnn_code_buffer b;

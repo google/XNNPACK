@@ -7629,20 +7629,6 @@ static void init(void) {
   #error "Unsupported architecture"
 #endif
 
-  // Get page size.
-  #if XNN_PLATFORM_WINDOWS
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    xnn_params.page_size = sysinfo.dwPageSize;
-  #else
-    const long res = sysconf(_SC_PAGESIZE);
-    if (res == -1) {
-      xnn_log_error("failed to get page size, error code: %d", errno);
-      return;
-    }
-    xnn_params.page_size = res;
-  #endif
-
   memcpy(&xnn_params.allocator, init_allocator, sizeof(struct xnn_allocator));
   xnn_params.init_flags = init_flags;
 }

@@ -18,6 +18,7 @@
 #include <xnnpack/dwconv.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/params.h>
 
 
 static void DWConvEnd2EndBenchmark(

@@ -2496,3 +2496,14 @@ union xnn_f32_gavgpool_params {
 struct xnn_code_buffer;
 
 typedef int xnn_status_t;
+
+// JIT GEMM: used by GEMM/IGEMM microkernel generators.
+
+struct jit_gemm_params {
+  struct {
+    float min;
+    float max;
+  } f32_minmax;
+  size_t num_post_operations;
+  struct xnn_post_operation* post_operations;
+};

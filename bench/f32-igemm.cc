@@ -15,7 +15,6 @@
 #include "bench/conv.h"
 #include "bench/utils.h"
 
-#include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
@@ -261,7 +260,6 @@ static void f32_igemm(benchmark::State& state,
     }
   };
 
-  xnn_initialize(/*allocator=*/nullptr);
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
   generator(&code_buffer,

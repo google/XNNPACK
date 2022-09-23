@@ -10,8 +10,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
-#include <xnnpack/allocator.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/memory.h>
+
 
 namespace xnnpack {
 namespace aarch64 {

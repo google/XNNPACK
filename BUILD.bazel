@@ -8873,10 +8873,9 @@ xnnpack_cc_library(
     name = "allocator",
     srcs = [
         "src/allocator.c",
-        "src/memory.c",
     ],
     hdrs = ["src/xnnpack/allocator.h"],
-    # Do not use xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS undefined
+    gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
@@ -8916,6 +8915,22 @@ xnnpack_cc_library(
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+)
+
+xnnpack_cc_library(
+    name = "memory",
+    srcs = [
+        "src/memory.c",
+    ],
+    hdrs = ["src/xnnpack/memory.h"],
+    # Do not use xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS undefined
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging",
+        ":math",
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(
@@ -10942,6 +10957,7 @@ xnnpack_cc_library(
         ":common",
         ":logging",
         ":math",
+        ":memory",
         ":mutex",
         ":xnnpack_h",
     ],
@@ -11094,12 +11110,12 @@ xnnpack_cc_library(
     aarch64_srcs = JIT_AARCH64_SRCS,
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":logging",
         ":math",
+        ":memory",
         ":microkernels_h",
-        ":params",
+        ":microparams",
         ":xnnpack_h",
     ],
 )
@@ -11124,12 +11140,12 @@ xnnpack_cc_library(
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":allocator",
         ":common",
         ":logging",
         ":math",
+        ":memory",
         ":microkernels_h",
-        ":params",
+        ":microparams",
         ":xnnpack_h",
     ],
 )
@@ -15910,10 +15926,9 @@ xnnpack_unit_test(
         "test/jit.cc",
     ],
     deps = [
-        ":XNNPACK",
-        ":allocator",
         ":common",
         ":jit_test_mode",
+        ":memory",
     ],
 )
 
@@ -15924,10 +15939,9 @@ xnnpack_unit_test(
         "test/assembler-helpers.h",
     ],
     deps = [
-        ":XNNPACK",
-        ":allocator",
         ":common",
         ":jit_test_mode",
+        ":memory",
     ],
 )
 
@@ -15938,10 +15952,9 @@ xnnpack_unit_test(
         "test/assembler-helpers.h",
     ],
     deps = [
-        ":XNNPACK",
-        ":allocator",
         ":common",
         ":jit_test_mode",
+        ":memory",
     ],
 )
 

@@ -253,10 +253,6 @@ SET(HOT_SRCS
   src/indirection.c
   src/packing.c)
 
-SET(ALLOCATOR_SRCS
-  src/allocator.c
-  src/memory.c)
-
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
   src/tables/exp2-k-over-2048.c
@@ -7199,9 +7195,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv(32|64)$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SCALAR_RISCV_MICROKERNEL_SRCS})
 ENDIF()
 ADD_LIBRARY(all_microkernels OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
-ADD_LIBRARY(allocator OBJECT ${ALLOCATOR_SRCS})
-# Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
-SET_TARGET_PROPERTIES(allocator PROPERTIES C_EXTENSIONS YES)
+ADD_LIBRARY(allocator OBJECT src/allocator.c)
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(microparams_init OBJECT src/microparams-init.c)
 ADD_LIBRARY(normalization OBJECT src/normalization.c)
@@ -7212,6 +7206,9 @@ ADD_LIBRARY(cache OBJECT src/cache.c)
 ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
 ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
 ADD_LIBRARY(mutex OBJECT src/mutex.c)
+ADD_LIBRARY(memory OBJECT src/memory.c)
+# Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
+SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
 ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
 ADD_LIBRARY(post-operation OBJECT src/operators/post-operation.c)
 IF(XNNPACK_LIBRARY_TYPE STREQUAL "default")
@@ -7325,6 +7322,7 @@ TARGET_COMPILE_DEFINITIONS(logging PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<
 TARGET_COMPILE_DEFINITIONS(subgraph PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(operators PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 TARGET_COMPILE_DEFINITIONS(mutex PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(memory PRIVATE "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE "restrict=")
@@ -7358,6 +7356,7 @@ TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(memory PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(mutex PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(post-operation PUBLIC include src)
 IF(WIN32)
@@ -7436,10 +7435,10 @@ IF(NOT TARGET pthreadpool)
     SET_PROPERTY(TARGET pthreadpool PROPERTY IMPORTED_IMPLIB "${PTHREADPOOL_LIBRARY}")
   ENDIF()
 ENDIF()
-TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool allocator)
+TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool allocator memory)
 TARGET_LINK_LIBRARIES(allocator PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(all_microkernels PRIVATE pthreadpool)
-TARGET_LINK_LIBRARIES(cache PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(cache PRIVATE memory pthreadpool)
 TARGET_LINK_LIBRARIES(indirection PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(jit PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(logging PRIVATE pthreadpool)
@@ -7448,6 +7447,7 @@ TARGET_LINK_LIBRARIES(microparams_init PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(subgraph PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(operators PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(mutex PRIVATE pthreadpool)
+TARGET_LINK_LIBRARIES(memory PRIVATE pthreadpool)
 TARGET_LINK_LIBRARIES(post-operation PUBLIC pthreadpool allocator)
 
 # ---[ Configure FXdiv
@@ -8033,7 +8033,7 @@ IF(XNNPACK_BUILD_TESTS)
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(bf16-gemm-minmax-test test/bf16-gemm-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(bf16-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init)
   ADD_TEST(NAME bf16-gemm-minmax-test COMMAND bf16-gemm-minmax-test)
 
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8323,7 +8323,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc test/f32-gemm-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME f32-gemm-minmax-test COMMAND f32-gemm-minmax-test)
 
   ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc test/f32-gemminc-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -8357,7 +8357,7 @@ IF(XNNPACK_BUILD_TESTS)
     # Work-around for "too many sections" error
     TARGET_COMPILE_OPTIONS(f32-igemm-minmax-test PRIVATE "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:-Wa,-mbig-obj>")
   ENDIF()
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME f32-igemm-minmax-test COMMAND f32-igemm-minmax-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8677,12 +8677,12 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(qc8-gemm-minmax-fp32-test test/qc8-gemm-minmax-fp32.cc test/qc8-gemm-minmax-fp32-2.cc test/qc8-gemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qc8-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qc8-gemm-minmax-fp32-test COMMAND qc8-gemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc test/qc8-igemm-minmax-fp32-2.cc test/qc8-igemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qc8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qc8-igemm-minmax-fp32-test COMMAND qc8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -8717,17 +8717,17 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc test/qs8-gemm-minmax-rndnu-2.cc test/qs8-gemm-minmax-rndnu-3.cc test/qs8-gemm-minmax-rndnu-4.cc test/qs8-gemm-minmax-rndnu-5.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-gemm-minmax-rndnu-test COMMAND qs8-gemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc test/qs8-igemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-igemm-minmax-fp32-test COMMAND qs8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc test/qs8-igemm-minmax-rndnu-2.cc test/qs8-igemm-minmax-rndnu-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init allocator)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-igemm-minmax-rndnu-test COMMAND qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -9020,15 +9020,15 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(jit-test test/jit.cc)
   TARGET_INCLUDE_DIRECTORIES(jit-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(jit-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main allocator)
+  TARGET_LINK_LIBRARIES(jit-test PRIVATE jit pthreadpool gtest gtest_main memory)
 
   ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc)
   TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main allocator)
+  TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit pthreadpool gtest gtest_main memory)
 
   ADD_EXECUTABLE(aarch64-assembler-test test/aarch64-assembler.cc)
   TARGET_INCLUDE_DIRECTORIES(aarch64-assembler-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE XNNPACK jit pthreadpool gtest gtest_main allocator)
+  TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit pthreadpool gtest gtest_main memory)
 
   ADD_EXECUTABLE(code-cache-test test/code-cache.cc)
   TARGET_INCLUDE_DIRECTORIES(code-cache-test PRIVATE include src)
@@ -9064,7 +9064,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_LIBRARY(bench-utils bench/utils.cc)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE .)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PUBLIC include src)
-  TARGET_LINK_LIBRARIES(bench-utils PRIVATE XNNPACK benchmark cpuinfo jit)
+  TARGET_LINK_LIBRARIES(bench-utils PRIVATE jit memory benchmark cpuinfo pthreadpool)
 
   # ---[ Build accuracy microbenchmarks
   ADD_EXECUTABLE(f16-exp-ulp-eval eval/f16-exp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)

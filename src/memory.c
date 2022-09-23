@@ -24,19 +24,41 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <xnnpack.h>
 
-#include "xnnpack/allocator.h"
-#include "xnnpack/log.h"
-#include "xnnpack/math.h"
-#include "xnnpack/params.h"
+#include <xnnpack/log.h>
+#include <xnnpack/math.h>
+#include <xnnpack/memory.h>
+
 
 // Helpers to allocate/mmap and release memory used by both code and weights cache.
+
+static size_t system_page_size = 0;
+
+static size_t get_page_size() {
+  if (system_page_size == 0) {
+    // Get page size.
+    #if XNN_PLATFORM_WINDOWS
+      SYSTEM_INFO sysinfo;
+      GetSystemInfo(&sysinfo);
+      assert(sysinfo.dwPageSize != 0);
+      system_page_size = (size_t) sysinfo.dwPageSize;
+    #else
+      const long result = sysconf(_SC_PAGESIZE);
+      if (result == -1) {
+        xnn_log_fatal("failed to get page size, error code: %d", errno);
+      }
+      assert(result >= 0);
+      system_page_size = (size_t) result;
+    #endif
+  }
+  assert(is_po2(system_page_size));
+  return system_page_size;
+}
 
 // Maps `size` bytes of memory, returns pointer to allocation, NULL if failed.
 static void* allocate_buffer(size_t size) {
   xnn_log_debug("allocating buffer of size %zu", size);
-  assert(size == round_up_po2(size, xnn_params.page_size));
+  assert(size % get_page_size() == 0);
 #if XNN_PLATFORM_WINDOWS
   void* p = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (p == NULL) {
@@ -78,50 +100,50 @@ static enum xnn_status release_memory(void* start, size_t capacity) {
 static void* resize_buffer(
   void* old_pointer, size_t old_size, size_t old_capacity, size_t new_size, size_t* new_capacity_out)
 {
-  size_t new_capacity = round_up_po2(new_size, xnn_params.page_size);
-#if XNN_PLATFORM_LINUX
-  void* new_pointer = mremap(old_pointer, old_size, new_capacity, MREMAP_MAYMOVE, NULL);
-  if (new_pointer == MAP_FAILED) {
-    xnn_log_error("mremap failed with errno: %d", errno);
-    return NULL;
-  }
-  xnn_log_debug("resize_buffer: remap, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
-#else
-  void* new_pointer = allocate_buffer(new_capacity);
-  if (new_pointer == NULL) {
-    xnn_log_error("allocate_buffer failed");
-    return NULL;
-  }
-  memcpy(new_pointer, old_pointer, old_size);
-  // Release old code_buffer.
-  enum xnn_status status = release_memory(old_pointer, old_capacity);
-  if (status != xnn_status_success) {
-    xnn_log_error("releasing old buffer failed, this could be a leak of %zu bytes", old_capacity);
-    // Log but proceed as per normal since we successfully allocated a new memory that can be used by the caller.
-  }
-  xnn_log_debug("resize_buffer: allocate memory, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
-#endif
+  const size_t new_capacity = round_up_po2(new_size, get_page_size());
+  #if XNN_PLATFORM_LINUX
+    void* new_pointer = mremap(old_pointer, old_size, new_capacity, MREMAP_MAYMOVE, NULL);
+    if (new_pointer == MAP_FAILED) {
+      xnn_log_error("mremap failed with errno: %d", errno);
+      return NULL;
+    }
+    xnn_log_debug("resize_buffer: remap, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
+  #else
+    void* new_pointer = allocate_buffer(new_capacity);
+    if (new_pointer == NULL) {
+      xnn_log_error("allocate_buffer failed");
+      return NULL;
+    }
+    memcpy(new_pointer, old_pointer, old_size);
+    // Release old code_buffer.
+    const enum xnn_status status = release_memory(old_pointer, old_capacity);
+    if (status != xnn_status_success) {
+      xnn_log_error("releasing old buffer failed, this could be a leak of %zu bytes", old_capacity);
+      // Log but proceed as per normal since we successfully allocated a new memory that can be used by the caller.
+    }
+    xnn_log_debug("resize_buffer: allocate memory, old capacity %zu to new capacity %zu", old_capacity, new_capacity);
+  #endif
   *new_capacity_out = new_capacity;
   return new_pointer;
 }
 
-enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buf, size_t size) {
-  memset(buf, 0, sizeof(struct xnn_code_buffer));
-  size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
-  buf->start = allocate_buffer(page_aligned_size);
-  if (buf->start == NULL) {
+enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buffer, size_t size) {
+  memset(buffer, 0, sizeof(struct xnn_code_buffer));
+  const size_t page_aligned_size = round_up_po2(size, get_page_size());
+  buffer->start = allocate_buffer(page_aligned_size);
+  if (buffer->start == NULL) {
     return xnn_status_out_of_memory;
   }
 
-  buf->size = 0;
-  buf->capacity = page_aligned_size;
+  buffer->size = 0;
+  buffer->capacity = page_aligned_size;
   return xnn_status_success;
 }
 
 // Releases unused memory. Will write the new capacity to `capacity`.
 static enum xnn_status release_unused_memory(size_t size, void* start, size_t* capacity) {
   // Release all unused pages.
-  const size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
+  const size_t page_aligned_size = round_up_po2(size, get_page_size());
   const uint8_t* mem_start = (uint8_t*) start;
   const uint8_t* unused_start = mem_start + page_aligned_size;
   assert(*capacity >= page_aligned_size);
@@ -208,122 +230,122 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
 }
 
 #if XNN_PLATFORM_JIT
-enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buf) {
-  enum xnn_status status;
-  status = release_unused_memory(buf->size, buf->start, &buf->capacity);
+enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
+  const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
   if (status != xnn_status_success) {
     return status;
   }
 
-  if (buf->capacity == 0) {
+  if (buffer->capacity == 0) {
     return xnn_status_success;
   }
 
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
     // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-    __builtin___clear_cache(buf->start, (void*) ((uint8_t*) buf->start + buf->capacity));
+    __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
   #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
   // Set permissions to RX (no write).
   #if XNN_PLATFORM_WINDOWS
     DWORD old = 0;
-    if (!VirtualProtect(buf->start, buf->size, PAGE_EXECUTE_READ, &old)) {
+    if (!VirtualProtect(buffer->start, buffer->size, PAGE_EXECUTE_READ, &old)) {
       xnn_log_error("failed to make code buffer read+execute, error code: %" PRIu32, (uint32_t) GetLastError());
       return xnn_status_invalid_state;
     }
   #else
-    if (mprotect(buf->start, buf->size, PROT_READ | PROT_EXEC) == -1) {
+    if (mprotect(buffer->start, buffer->size, PROT_READ | PROT_EXEC) == -1) {
       xnn_log_error("failed to make code buffer read+execute, error code: %d", errno);
       return xnn_status_invalid_state;
     }
   #endif
-  return set_memory_permission(buf->start, buf->size, xnn_memory_permission_read_execute);
+  return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
 }
 #endif  // XNN_PLATFORM_JIT
 
-enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buf) {
-  if (buf->capacity == 0) {
+enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buffer) {
+  if (buffer->capacity == 0) {
     return xnn_status_success;
   }
-  const enum xnn_status status = release_memory(buf->start, buf->capacity);
+  const enum xnn_status status = release_memory(buffer->start, buffer->capacity);
   if (status != xnn_status_success) {
     return status;
   }
-  memset(buf, 0, sizeof(struct xnn_code_buffer));
+  memset(buffer, 0, sizeof(struct xnn_code_buffer));
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buf, size_t n) {
-  if (buf->size + n <= buf->capacity) {
+enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buffer, size_t min_available_size) {
+  if (buffer->size + min_available_size <= buffer->capacity) {
     return xnn_status_success;
   }
-  xnn_log_debug("reserving code memory of size %zu", n);
+  xnn_log_debug("reserving code memory of size %zu", min_available_size);
 
   size_t new_capacity = 0;
-  void* new_start = resize_buffer(buf->start, buf->size, buf->capacity, buf->size + n, &new_capacity);
+  void* new_start =
+    resize_buffer(buffer->start, buffer->size, buffer->capacity, buffer->size + min_available_size, &new_capacity);
   if (new_start == NULL) {
     xnn_log_error("failed to reserve code memory");
     return xnn_status_out_of_memory;
   }
-  buf->start = new_start;
-  buf->capacity = new_capacity;
+  buffer->start = new_start;
+  buffer->capacity = new_capacity;
   return xnn_status_success;
 }
 
-enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buf, size_t size) {
-  memset(buf, 0, sizeof(struct xnn_weights_buffer));
-  size_t page_aligned_size = round_up_po2(size, xnn_params.page_size);
-  buf->start = allocate_buffer(page_aligned_size);
-  if (buf->start == NULL) {
+enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buffer, size_t size) {
+  memset(buffer, 0, sizeof(struct xnn_weights_buffer));
+  const size_t page_aligned_size = round_up_po2(size, get_page_size());
+  buffer->start = allocate_buffer(page_aligned_size);
+  if (buffer->start == NULL) {
     return xnn_status_out_of_memory;
   }
 
-  buf->size = 0;
-  buf->capacity = page_aligned_size;
+  buffer->size = 0;
+  buffer->capacity = page_aligned_size;
   return xnn_status_success;
 }
 
-enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buf) {
-  if (buf->capacity == 0) {
+enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buffer) {
+  if (buffer->capacity == 0) {
     return xnn_status_success;
   }
-  enum xnn_status status = release_memory(buf->start, buf->capacity);
+  const enum xnn_status status = release_memory(buffer->start, buffer->capacity);
   if (status != xnn_status_success) {
     return status;
   }
-  memset(buf, 0, sizeof(struct xnn_code_buffer));
+  memset(buffer, 0, sizeof(struct xnn_code_buffer));
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buf, size_t n) {
-  if (buf->size + n <= buf->capacity) {
-    xnn_log_debug("reserving weights memory of size %zu without growing buffer", n);
+enum xnn_status xnn_reserve_weights_memory(struct xnn_weights_buffer* buffer, size_t min_available_size) {
+  if (buffer->size + min_available_size <= buffer->capacity) {
+    xnn_log_debug("reserving weights memory of size %zu without growing buffer", min_available_size);
     return xnn_status_success;
   }
 
   size_t new_capacity = 0;
-  void* new_start = resize_buffer(buf->start, buf->size, buf->capacity, buf->size + n, &new_capacity);
+  void* new_start =
+    resize_buffer(buffer->start, buffer->size, buffer->capacity, buffer->size + min_available_size, &new_capacity);
   if (new_start == NULL) {
     xnn_log_error("failed to reserve weights memory");
     return xnn_status_out_of_memory;
   }
-  buf->start = new_start;
-  buf->capacity = new_capacity;
+  buffer->start = new_start;
+  buffer->capacity = new_capacity;
 
   return xnn_status_success;
 }
 
-enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buf) {
-  enum xnn_status status;
-  status = release_unused_memory(buf->size, buf->start, &buf->capacity);
+enum xnn_status xnn_finalize_weights_memory(struct xnn_weights_buffer* buffer) {
+  const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
   if (status != xnn_status_success) {
     return status;
   }
 
-  if (buf->capacity == 0) {
+  if (buffer->capacity == 0) {
     return xnn_status_success;
   }
 
-  return set_memory_permission(buf->start, buf->size, xnn_memory_permission_read_only);
+  return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_only);
 }

@@ -8,6 +8,7 @@
 
 #include <xnnpack/assembler.h>
 
+
 namespace xnnpack {
 namespace aarch64 {
 

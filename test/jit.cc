@@ -5,13 +5,13 @@
 
 #include <cstring>
 
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-
 #include <gtest/gtest.h>
 
+#include <xnnpack/common.h>
+#include <xnnpack/memory.h>
+
+
 TEST(JIT_MEMORY, allocate_and_release_empty_code) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
 #if XNN_PLATFORM_JIT
@@ -21,7 +21,6 @@ TEST(JIT_MEMORY, allocate_and_release_empty_code) {
 }
 
 TEST(JIT_MEMORY, allocate_and_release_junk_code) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
   std::string junk = "1234";
@@ -38,14 +37,12 @@ TEST(JIT_MEMORY, allocate_and_release_junk_code) {
 }
 
 TEST(JIT_MEMORY, allocate_and_release_code_buffer_with_no_capacity) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   b.capacity = 0;
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 
 TEST(JIT_MEMORY, grow_memory) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, 8));
   size_t original_capacity = b.capacity;
@@ -77,7 +74,6 @@ TEST(JIT_MEMORY, grow_memory) {
 }
 
 TEST(JIT_MEMORY, finalize_twice) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE));
   const std::string junk = "1234";

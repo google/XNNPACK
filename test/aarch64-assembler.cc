@@ -3,19 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack.h>
-#include <xnnpack/aarch64-assembler.h>
-#include <xnnpack/allocator.h>
-#include <xnnpack/common.h>
-
-#include "assembler-helpers.h"
 #include <gtest/gtest.h>
+
+#include <xnnpack/aarch64-assembler.h>
+#include <xnnpack/common.h>
+#include <xnnpack/memory.h>
+#include "assembler-helpers.h"
+
 
 namespace xnnpack {
 namespace aarch64 {
 
 TEST(AArch64Assembler, Initialization) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -23,7 +22,6 @@ TEST(AArch64Assembler, Initialization) {
 }
 
 TEST(AArch64Assembler, BaseInstructionEncoding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -112,7 +110,6 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 }
 
 TEST(AArch64Assembler, SIMDInstructionEncoding) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -260,7 +257,6 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
 }
 
 TEST(AArch64Assembler, Label) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -316,7 +312,6 @@ TEST(AArch64Assembler, Label) {
 }
 
 TEST(AArch64Assembler, Tbnz) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -345,7 +340,6 @@ TEST(AArch64Assembler, Tbnz) {
 }
 
 TEST(AArch64Assembler, Tbz) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -374,7 +368,6 @@ TEST(AArch64Assembler, Tbz) {
 }
 
 TEST(AArch64Assembler, UnconditionalBranch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -403,7 +396,6 @@ TEST(AArch64Assembler, UnconditionalBranch) {
 }
 
 TEST(AArch64Assembler, Align) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
@@ -446,7 +438,6 @@ TEST(AArch64Assembler, Align) {
 }
 
 TEST(AArch64Assembler, AssembleToEndOfBuffer) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
 
@@ -478,7 +469,6 @@ TEST(AArch64Assembler, AssembleToEndOfBuffer) {
 }
 
 TEST(AArch64Assembler, FinalizeWithError) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
 
@@ -495,7 +485,6 @@ TEST(AArch64Assembler, FinalizeWithError) {
 }
 
 TEST(AArch64Assembler, BindOverflow) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   xnn_code_buffer b;
   // Requested memory is rounded to page size.
   xnn_allocate_code_memory(&b, 4);

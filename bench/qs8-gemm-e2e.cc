@@ -22,6 +22,7 @@
 #include <xnnpack/igemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/params.h>
 
 
 static void GEMMEnd2EndBenchmark(
