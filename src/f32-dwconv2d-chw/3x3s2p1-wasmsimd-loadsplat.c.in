@@ -112,26 +112,26 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
           vo${M}p${4 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${4 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x8ACE, vk21));
 
       $for M in range(1 + 2 * ROW_TILE):
-        const v128_t vi${M}x7BDF = wasm_v32x4_shuffle(vi${M}x1357, vi${M}x9BDF, 3, 4, 5, 6);
+        const v128_t vi${M}x79BD = wasm_v32x4_shuffle(vi${M}x1357, vi${M}x9BDF, 3, 4, 5, 6);
         vi${M}x1357 = vi${M}x9BDF;
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 4:
-          v128_t vo${M}p4 = wasm_f32x4_mul(vi${2*M}x7BDF, vk00);
+          v128_t vo${M}p4 = wasm_f32x4_mul(vi${2*M}x79BD, vk00);
         $else:
-          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x7BDF, vk00));
+          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x79BD, vk00));
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 5:
-          v128_t vo${M}p5 = wasm_f32x4_mul(vi${2*M+1}x7BDF, vk10);
+          v128_t vo${M}p5 = wasm_f32x4_mul(vi${2*M+1}x79BD, vk10);
         $else:
-          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+1}x7BDF, vk10));
+          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+1}x79BD, vk10));
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 6:
-          v128_t vo${M}p6 = wasm_f32x4_mul(vi${2*M+2}x7BDF, vk11);
+          v128_t vo${M}p6 = wasm_f32x4_mul(vi${2*M+2}x79BD, vk11);
         $else:
-          vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x7BDF, vk20));
+          vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x79BD, vk20));
 
       $for M in range(ROW_TILE):
         vo${M}p${8 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${8 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x9BDF, vk02));
@@ -198,25 +198,25 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd${ARCH_SUFFIX}_loadsplat_${RO
           vo${M}p${4 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${4 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x8ACE, vk21));
 
       $for M in range(1 + 2 * ROW_TILE):
-        const v128_t vi${M}x7BDF = wasm_v32x4_shuffle(vi${M}x1357, vi${M}x9BDF, 3, 4, 5, 6);
+        const v128_t vi${M}x79BD = wasm_v32x4_shuffle(vi${M}x1357, vi${M}x9BDF, 3, 4, 5, 6);
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 4:
-          v128_t vo${M}p4 = wasm_f32x4_mul(vi${2*M}x7BDF, vk00);
+          v128_t vo${M}p4 = wasm_f32x4_mul(vi${2*M}x79BD, vk00);
         $else:
-          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x7BDF, vk00));
+          vo${M}p${5 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${5 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x79BD, vk00));
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 5:
-          v128_t vo${M}p5 = wasm_f32x4_mul(vi${2*M+1}x7BDF, vk10);
+          v128_t vo${M}p5 = wasm_f32x4_mul(vi${2*M+1}x79BD, vk10);
         $else:
-          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+1}x7BDF, vk10));
+          vo${M}p${6 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${6 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+1}x79BD, vk10));
 
       $for M in range(ROW_TILE):
         $if ACCUMULATORS > 6:
-          v128_t vo${M}p6 = wasm_f32x4_mul(vi${2*M+2}x7BDF, vk11);
+          v128_t vo${M}p6 = wasm_f32x4_mul(vi${2*M+2}x79BD, vk11);
         $else:
-          vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x7BDF, vk20));
+          vo${M}p${7 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${7 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M+2}x79BD, vk20));
 
       $for M in range(ROW_TILE):
         vo${M}p${8 % ACCUMULATORS} = wasm_f32x4_add(vo${M}p${8 % ACCUMULATORS}, wasm_f32x4_mul(vi${2*M}x9BDF, vk02));

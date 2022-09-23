@@ -77,18 +77,18 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3(
       vo0p1 = vfmaq_lane_f16(vo0p1, vi2x8ACE9BDF.val[0], vw89, 0);
 
       // Left column
-      const float16x8_t vi0x7BDF = vextq_f16(vi0x1357, vi0x8ACE9BDF.val[1], 7);
+      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x8ACE9BDF.val[1], 7);
       vi0x1357 = vi0x8ACE9BDF.val[1];
-      const float16x8_t vi1x7BDF = vextq_f16(vi1x1357, vi1x8ACE9BDF.val[1], 7);
+      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x8ACE9BDF.val[1], 7);
       vi1x1357 = vi1x8ACE9BDF.val[1];
-      const float16x8_t vi2x7BDF = vextq_f16(vi2x1357, vi2x8ACE9BDF.val[1], 7);
+      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x8ACE9BDF.val[1], 7);
       vi2x1357 = vi2x8ACE9BDF.val[1];
 
-      vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x7BDF, vw01234567, 1);
+      vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x79BD, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x7BDF, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
 
-      vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x7BDF, vw01234567, 7);
+      vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x79BD, vw01234567, 7);
 
       // Right column
       vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x8ACE9BDF.val[1], vw01234567, 3);
@@ -131,15 +131,15 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3(
       vo0p1 = vfmaq_lane_f16(vo0p1, vi2x8ACE, vw89, 0);
 
       // Left column
-      const float16x8_t vi0x7BDF = vextq_f16(vi0x1357, vi0x9BDF, 7);
-      const float16x8_t vi1x7BDF = vextq_f16(vi1x1357, vi1x9BDF, 7);
-      const float16x8_t vi2x7BDF = vextq_f16(vi2x1357, vi2x9BDF, 7);
+      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x9BDF, 7);
+      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x9BDF, 7);
+      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x9BDF, 7);
 
-      vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x7BDF, vw01234567, 1);
+      vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x79BD, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x7BDF, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
 
-      vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x7BDF, vw01234567, 7);
+      vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x79BD, vw01234567, 7);
 
       // Right column
       vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x9BDF, vw01234567, 3);

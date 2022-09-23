@@ -132,39 +132,39 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       vo3p0 = vfmaq_lane_f16(vo3p0, vi8x8ACE9BDF.val[0], vw89, 0);
 
       // Left column
-      const float16x8_t vi0x7BDF = vextq_f16(vi0x1357, vi0x8ACE9BDF.val[1], 7);
+      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x8ACE9BDF.val[1], 7);
       vi0x1357 = vi0x8ACE9BDF.val[1];
-      const float16x8_t vi1x7BDF = vextq_f16(vi1x1357, vi1x8ACE9BDF.val[1], 7);
+      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x8ACE9BDF.val[1], 7);
       vi1x1357 = vi1x8ACE9BDF.val[1];
-      const float16x8_t vi2x7BDF = vextq_f16(vi2x1357, vi2x8ACE9BDF.val[1], 7);
+      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x8ACE9BDF.val[1], 7);
       vi2x1357 = vi2x8ACE9BDF.val[1];
-      const float16x8_t vi3x7BDF = vextq_f16(vi3x1357, vi3x8ACE9BDF.val[1], 7);
+      const float16x8_t vi3x79BD = vextq_f16(vi3x1357, vi3x8ACE9BDF.val[1], 7);
       vi3x1357 = vi3x8ACE9BDF.val[1];
-      const float16x8_t vi4x7BDF = vextq_f16(vi4x1357, vi4x8ACE9BDF.val[1], 7);
+      const float16x8_t vi4x79BD = vextq_f16(vi4x1357, vi4x8ACE9BDF.val[1], 7);
       vi4x1357 = vi4x8ACE9BDF.val[1];
-      const float16x8_t vi5x7BDF = vextq_f16(vi5x1357, vi5x8ACE9BDF.val[1], 7);
+      const float16x8_t vi5x79BD = vextq_f16(vi5x1357, vi5x8ACE9BDF.val[1], 7);
       vi5x1357 = vi5x8ACE9BDF.val[1];
-      const float16x8_t vi6x7BDF = vextq_f16(vi6x1357, vi6x8ACE9BDF.val[1], 7);
+      const float16x8_t vi6x79BD = vextq_f16(vi6x1357, vi6x8ACE9BDF.val[1], 7);
       vi6x1357 = vi6x8ACE9BDF.val[1];
-      const float16x8_t vi7x7BDF = vextq_f16(vi7x1357, vi7x8ACE9BDF.val[1], 7);
+      const float16x8_t vi7x79BD = vextq_f16(vi7x1357, vi7x8ACE9BDF.val[1], 7);
       vi7x1357 = vi7x8ACE9BDF.val[1];
-      const float16x8_t vi8x7BDF = vextq_f16(vi8x1357, vi8x8ACE9BDF.val[1], 7);
+      const float16x8_t vi8x79BD = vextq_f16(vi8x1357, vi8x8ACE9BDF.val[1], 7);
       vi8x1357 = vi8x8ACE9BDF.val[1];
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x7BDF, vw01234567, 1);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2x7BDF, vw01234567, 1);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4x7BDF, vw01234567, 1);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6x7BDF, vw01234567, 1);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x79BD, vw01234567, 1);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2x79BD, vw01234567, 1);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4x79BD, vw01234567, 1);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6x79BD, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x7BDF, vw01234567, 4);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3x7BDF, vw01234567, 4);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5x7BDF, vw01234567, 4);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7x7BDF, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3x79BD, vw01234567, 4);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5x79BD, vw01234567, 4);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7x79BD, vw01234567, 4);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x7BDF, vw01234567, 7);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4x7BDF, vw01234567, 7);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6x7BDF, vw01234567, 7);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8x7BDF, vw01234567, 7);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x79BD, vw01234567, 7);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4x79BD, vw01234567, 7);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6x79BD, vw01234567, 7);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8x79BD, vw01234567, 7);
 
       // Right column
       vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x8ACE9BDF.val[1], vw01234567, 3);
@@ -253,30 +253,30 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       vo3p0 = vfmaq_lane_f16(vo3p0, vi8x8ACE, vw89, 0);
 
       // Left column
-      const float16x8_t vi0x7BDF = vextq_f16(vi0x1357, vi0x9BDF, 7);
-      const float16x8_t vi1x7BDF = vextq_f16(vi1x1357, vi1x9BDF, 7);
-      const float16x8_t vi2x7BDF = vextq_f16(vi2x1357, vi2x9BDF, 7);
-      const float16x8_t vi3x7BDF = vextq_f16(vi3x1357, vi3x9BDF, 7);
-      const float16x8_t vi4x7BDF = vextq_f16(vi4x1357, vi4x9BDF, 7);
-      const float16x8_t vi5x7BDF = vextq_f16(vi5x1357, vi5x9BDF, 7);
-      const float16x8_t vi6x7BDF = vextq_f16(vi6x1357, vi6x9BDF, 7);
-      const float16x8_t vi7x7BDF = vextq_f16(vi7x1357, vi7x9BDF, 7);
-      const float16x8_t vi8x7BDF = vextq_f16(vi8x1357, vi8x9BDF, 7);
+      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x9BDF, 7);
+      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x9BDF, 7);
+      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x9BDF, 7);
+      const float16x8_t vi3x79BD = vextq_f16(vi3x1357, vi3x9BDF, 7);
+      const float16x8_t vi4x79BD = vextq_f16(vi4x1357, vi4x9BDF, 7);
+      const float16x8_t vi5x79BD = vextq_f16(vi5x1357, vi5x9BDF, 7);
+      const float16x8_t vi6x79BD = vextq_f16(vi6x1357, vi6x9BDF, 7);
+      const float16x8_t vi7x79BD = vextq_f16(vi7x1357, vi7x9BDF, 7);
+      const float16x8_t vi8x79BD = vextq_f16(vi8x1357, vi8x9BDF, 7);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x7BDF, vw01234567, 1);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2x7BDF, vw01234567, 1);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4x7BDF, vw01234567, 1);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6x7BDF, vw01234567, 1);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x79BD, vw01234567, 1);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2x79BD, vw01234567, 1);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4x79BD, vw01234567, 1);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6x79BD, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x7BDF, vw01234567, 4);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3x7BDF, vw01234567, 4);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5x7BDF, vw01234567, 4);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7x7BDF, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3x79BD, vw01234567, 4);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5x79BD, vw01234567, 4);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7x79BD, vw01234567, 4);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x7BDF, vw01234567, 7);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4x7BDF, vw01234567, 7);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6x7BDF, vw01234567, 7);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8x7BDF, vw01234567, 7);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x79BD, vw01234567, 7);
+      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4x79BD, vw01234567, 7);
+      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6x79BD, vw01234567, 7);
+      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8x79BD, vw01234567, 7);
 
       // Right column
       vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x9BDF, vw01234567, 3);

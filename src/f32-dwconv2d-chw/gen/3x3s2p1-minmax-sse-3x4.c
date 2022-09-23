@@ -161,13 +161,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_3x4(
       vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x9BDF, vk22));
       vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x9BDF, vk22));
 
-      const __m128 vi0x7BDF = _mm_move_ss(vi0xF9BD, vi0x7531);
-      const __m128 vi1x7BDF = _mm_move_ss(vi1xF9BD, vi1x7531);
-      const __m128 vi2x7BDF = _mm_move_ss(vi2xF9BD, vi2x7531);
-      const __m128 vi3x7BDF = _mm_move_ss(vi3xF9BD, vi3x7531);
-      const __m128 vi4x7BDF = _mm_move_ss(vi4xF9BD, vi4x7531);
-      const __m128 vi5x7BDF = _mm_move_ss(vi5xF9BD, vi5x7531);
-      const __m128 vi6x7BDF = _mm_move_ss(vi6xF9BD, vi6x7531);
+      const __m128 vi0x79BD = _mm_move_ss(vi0xF9BD, vi0x7531);
+      const __m128 vi1x79BD = _mm_move_ss(vi1xF9BD, vi1x7531);
+      const __m128 vi2x79BD = _mm_move_ss(vi2xF9BD, vi2x7531);
+      const __m128 vi3x79BD = _mm_move_ss(vi3xF9BD, vi3x7531);
+      const __m128 vi4x79BD = _mm_move_ss(vi4xF9BD, vi4x7531);
+      const __m128 vi5x79BD = _mm_move_ss(vi5xF9BD, vi5x7531);
+      const __m128 vi6x79BD = _mm_move_ss(vi6xF9BD, vi6x7531);
 
       vi0x7531 = vi0xF9BD;
       vi1x7531 = vi1xF9BD;
@@ -177,15 +177,15 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_3x4(
       vi5x7531 = vi5xF9BD;
       vi6x7531 = vi6xF9BD;
 
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x7BDF, vk00));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi2x7BDF, vk00));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi4x7BDF, vk00));
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi1x7BDF, vk10));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi3x7BDF, vk10));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi5x7BDF, vk10));
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi2x7BDF, vk20));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x7BDF, vk20));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x7BDF, vk20));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x79BD, vk00));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi2x79BD, vk00));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi4x79BD, vk00));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi1x79BD, vk10));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi3x79BD, vk10));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi5x79BD, vk10));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi2x79BD, vk20));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x79BD, vk20));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x79BD, vk20));
 
 
       __m128 vo0 = _mm_max_ps(vo0p0, vmin);
@@ -264,13 +264,13 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_3x4(
       vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x9BDF, vk22));
       vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x9BDF, vk22));
 
-      const __m128 vi0x7BDF = _mm_move_ss(vi0xF9BD, vi0x7531);
-      const __m128 vi1x7BDF = _mm_move_ss(vi1xF9BD, vi1x7531);
-      const __m128 vi2x7BDF = _mm_move_ss(vi2xF9BD, vi2x7531);
-      const __m128 vi3x7BDF = _mm_move_ss(vi3xF9BD, vi3x7531);
-      const __m128 vi4x7BDF = _mm_move_ss(vi4xF9BD, vi4x7531);
-      const __m128 vi5x7BDF = _mm_move_ss(vi5xF9BD, vi5x7531);
-      const __m128 vi6x7BDF = _mm_move_ss(vi6xF9BD, vi6x7531);
+      const __m128 vi0x79BD = _mm_move_ss(vi0xF9BD, vi0x7531);
+      const __m128 vi1x79BD = _mm_move_ss(vi1xF9BD, vi1x7531);
+      const __m128 vi2x79BD = _mm_move_ss(vi2xF9BD, vi2x7531);
+      const __m128 vi3x79BD = _mm_move_ss(vi3xF9BD, vi3x7531);
+      const __m128 vi4x79BD = _mm_move_ss(vi4xF9BD, vi4x7531);
+      const __m128 vi5x79BD = _mm_move_ss(vi5xF9BD, vi5x7531);
+      const __m128 vi6x79BD = _mm_move_ss(vi6xF9BD, vi6x7531);
 
       vi0x7531 = vi0xF9BD;
       vi1x7531 = vi1xF9BD;
@@ -280,15 +280,15 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_3x4(
       vi5x7531 = vi5xF9BD;
       vi6x7531 = vi6xF9BD;
 
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x7BDF, vk00));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi2x7BDF, vk00));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi4x7BDF, vk00));
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi1x7BDF, vk10));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi3x7BDF, vk10));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi5x7BDF, vk10));
-      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi2x7BDF, vk20));
-      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x7BDF, vk20));
-      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x7BDF, vk20));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi0x79BD, vk00));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi2x79BD, vk00));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi4x79BD, vk00));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi1x79BD, vk10));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi3x79BD, vk10));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi5x79BD, vk10));
+      vo0p0 = _mm_add_ps(vo0p0, _mm_mul_ps(vi2x79BD, vk20));
+      vo1p0 = _mm_add_ps(vo1p0, _mm_mul_ps(vi4x79BD, vk20));
+      vo2p0 = _mm_add_ps(vo2p0, _mm_mul_ps(vi6x79BD, vk20));
 
 
       __m128 vo0 = _mm_max_ps(vo0p0, vmin);

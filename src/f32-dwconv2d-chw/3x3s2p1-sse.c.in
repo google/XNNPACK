@@ -105,14 +105,14 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_${ROW_TILE}x4${"_acc%d" % ACCUMUL
             vo${M}p${(K+3) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+3) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2));
 
       $for M in range(1 + 2 * ROW_TILE):
-        const __m128 vi${M}x7BDF = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
+        const __m128 vi${M}x79BD = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
 
       $for M in range(1 + 2 * ROW_TILE):
         vi${M}x7531 = vi${M}xF9BD;
 
       $for K in range(3):
         $for M in range(ROW_TILE):
-          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x7BDF, vk${K}0));
+          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x79BD, vk${K}0));
 
       $if ACCUMULATORS > 1:
         $ACC_SLICE = 1
@@ -164,14 +164,14 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__sse_${ROW_TILE}x4${"_acc%d" % ACCUMUL
             vo${M}p${(K+3) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+3) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x9BDF, vk${K}2));
 
       $for M in range(1 + 2 * ROW_TILE):
-        const __m128 vi${M}x7BDF = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
+        const __m128 vi${M}x79BD = _mm_move_ss(vi${M}xF9BD, vi${M}x7531);
 
       $for M in range(1 + 2 * ROW_TILE):
         vi${M}x7531 = vi${M}xF9BD;
 
       $for K in range(3):
         $for M in range(ROW_TILE):
-          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x7BDF, vk${K}0));
+          vo${M}p${(K+6) % ACCUMULATORS} = _mm_add_ps(vo${M}p${(K+6) % ACCUMULATORS}, _mm_mul_ps(vi${2*M+K}x79BD, vk${K}0));
 
       $if ACCUMULATORS > 1:
         $ACC_SLICE = 1

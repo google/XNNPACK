@@ -127,25 +127,25 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_loadsplat_2x4(
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x8ACE, vk21));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x8ACE, vk21));
 
-      const v128_t vi0x7BDF = wasm_v32x4_shuffle(vi0x1357, vi0x9BDF, 3, 4, 5, 6);
+      const v128_t vi0x79BD = wasm_v32x4_shuffle(vi0x1357, vi0x9BDF, 3, 4, 5, 6);
       vi0x1357 = vi0x9BDF;
-      const v128_t vi1x7BDF = wasm_v32x4_shuffle(vi1x1357, vi1x9BDF, 3, 4, 5, 6);
+      const v128_t vi1x79BD = wasm_v32x4_shuffle(vi1x1357, vi1x9BDF, 3, 4, 5, 6);
       vi1x1357 = vi1x9BDF;
-      const v128_t vi2x7BDF = wasm_v32x4_shuffle(vi2x1357, vi2x9BDF, 3, 4, 5, 6);
+      const v128_t vi2x79BD = wasm_v32x4_shuffle(vi2x1357, vi2x9BDF, 3, 4, 5, 6);
       vi2x1357 = vi2x9BDF;
-      const v128_t vi3x7BDF = wasm_v32x4_shuffle(vi3x1357, vi3x9BDF, 3, 4, 5, 6);
+      const v128_t vi3x79BD = wasm_v32x4_shuffle(vi3x1357, vi3x9BDF, 3, 4, 5, 6);
       vi3x1357 = vi3x9BDF;
-      const v128_t vi4x7BDF = wasm_v32x4_shuffle(vi4x1357, vi4x9BDF, 3, 4, 5, 6);
+      const v128_t vi4x79BD = wasm_v32x4_shuffle(vi4x1357, vi4x9BDF, 3, 4, 5, 6);
       vi4x1357 = vi4x9BDF;
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x7BDF, vk00));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x7BDF, vk00));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x79BD, vk00));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x79BD, vk00));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x7BDF, vk10));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x7BDF, vk10));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x79BD, vk10));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x79BD, vk10));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x7BDF, vk20));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x7BDF, vk20));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x79BD, vk20));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x79BD, vk20));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x9BDF, vk02));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x9BDF, vk02));
@@ -202,20 +202,20 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__wasmsimd_x86_loadsplat_2x4(
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x8ACE, vk21));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x8ACE, vk21));
 
-      const v128_t vi0x7BDF = wasm_v32x4_shuffle(vi0x1357, vi0x9BDF, 3, 4, 5, 6);
-      const v128_t vi1x7BDF = wasm_v32x4_shuffle(vi1x1357, vi1x9BDF, 3, 4, 5, 6);
-      const v128_t vi2x7BDF = wasm_v32x4_shuffle(vi2x1357, vi2x9BDF, 3, 4, 5, 6);
-      const v128_t vi3x7BDF = wasm_v32x4_shuffle(vi3x1357, vi3x9BDF, 3, 4, 5, 6);
-      const v128_t vi4x7BDF = wasm_v32x4_shuffle(vi4x1357, vi4x9BDF, 3, 4, 5, 6);
+      const v128_t vi0x79BD = wasm_v32x4_shuffle(vi0x1357, vi0x9BDF, 3, 4, 5, 6);
+      const v128_t vi1x79BD = wasm_v32x4_shuffle(vi1x1357, vi1x9BDF, 3, 4, 5, 6);
+      const v128_t vi2x79BD = wasm_v32x4_shuffle(vi2x1357, vi2x9BDF, 3, 4, 5, 6);
+      const v128_t vi3x79BD = wasm_v32x4_shuffle(vi3x1357, vi3x9BDF, 3, 4, 5, 6);
+      const v128_t vi4x79BD = wasm_v32x4_shuffle(vi4x1357, vi4x9BDF, 3, 4, 5, 6);
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x7BDF, vk00));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x7BDF, vk00));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x79BD, vk00));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x79BD, vk00));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x7BDF, vk10));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x7BDF, vk10));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi1x79BD, vk10));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi3x79BD, vk10));
 
-      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x7BDF, vk20));
-      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x7BDF, vk20));
+      vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi2x79BD, vk20));
+      vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi4x79BD, vk20));
 
       vo0p0 = wasm_f32x4_add(vo0p0, wasm_f32x4_mul(vi0x9BDF, vk02));
       vo1p0 = wasm_f32x4_add(vo1p0, wasm_f32x4_mul(vi2x9BDF, vk02));
