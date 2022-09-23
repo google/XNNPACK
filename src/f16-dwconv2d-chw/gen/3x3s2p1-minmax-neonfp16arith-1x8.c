@@ -57,45 +57,45 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
       i2 = zero;
     }
 
-    float16x8_t vi0x1357 = vmovq_n_f16(0);
-    float16x8_t vi1x1357 = vmovq_n_f16(0);
-    float16x8_t vi2x1357 = vmovq_n_f16(0);
+    float16x8_t vi0x13579BDF = vmovq_n_f16(0);
+    float16x8_t vi1x13579BDF = vmovq_n_f16(0);
+    float16x8_t vi2x13579BDF = vmovq_n_f16(0);
 
     size_t w = input_width;
     for (; w >= 16 * sizeof(__fp16); w -= 16 * sizeof(__fp16)) {
       float16x8_t vo0p0 = vdupq_laneq_f16(vw01234567, 0);
 
-      const float16x8x2_t vi0x8ACE9BDF = vld2q_f16(i0); i0 += 16;
-      const float16x8x2_t vi1x8ACE9BDF = vld2q_f16(i1); i1 += 16;
-      const float16x8x2_t vi2x8ACE9BDF = vld2q_f16(i2); i2 += 16;
+      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0); i0 += 16;
+      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1); i1 += 16;
+      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16(i2); i2 += 16;
 
       // Center column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x8ACE9BDF.val[0], vw01234567, 2);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x8ACE9BDF.val[0], vw01234567, 5);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x8ACE9BDF.val[0], vw89, 0);
+      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
 
       // Left column
-      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x8ACE9BDF.val[1], 7);
-      vi0x1357 = vi0x8ACE9BDF.val[1];
-      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x8ACE9BDF.val[1], 7);
-      vi1x1357 = vi1x8ACE9BDF.val[1];
-      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x8ACE9BDF.val[1], 7);
-      vi2x1357 = vi2x8ACE9BDF.val[1];
+      const float16x8_t vi0xFHJLNPRT = vextq_f16(vi0x13579BDF, vi0xGIKMOQSUHJLNPRTV.val[1], 7);
+      vi0x13579BDF = vi0xGIKMOQSUHJLNPRTV.val[1];
+      const float16x8_t vi1xFHJLNPRT = vextq_f16(vi1x13579BDF, vi1xGIKMOQSUHJLNPRTV.val[1], 7);
+      vi1x13579BDF = vi1xGIKMOQSUHJLNPRTV.val[1];
+      const float16x8_t vi2xFHJLNPRT = vextq_f16(vi2x13579BDF, vi2xGIKMOQSUHJLNPRTV.val[1], 7);
+      vi2x13579BDF = vi2xGIKMOQSUHJLNPRTV.val[1];
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x79BD, vw01234567, 1);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x79BD, vw01234567, 7);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
 
       // Right column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x8ACE9BDF.val[1], vw01234567, 3);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x8ACE9BDF.val[1], vw01234567, 6);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x8ACE9BDF.val[1], vw89, 1);
+      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
 
 
       float16x8_t vo0 = vmaxq_f16(vo0p0, vmin);
@@ -110,41 +110,41 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
     if XNN_LIKELY(w != 0) {
       float16x8_t vo0p0 = vdupq_laneq_f16(vw01234567, 0);
 
-      const float16x8x2_t vi0x8ACE9BDF = vld2q_f16(i0);
-      const float16x8x2_t vi1x8ACE9BDF = vld2q_f16(i1);
-      const float16x8x2_t vi2x8ACE9BDF = vld2q_f16(i2);
+      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0);
+      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1);
+      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16(i2);
 
-      const float16x8_t vi0x8ACE = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi0x8ACE9BDF.val[0])));
-      const float16x8_t vi0x9BDF = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi0x8ACE9BDF.val[1])));
-      const float16x8_t vi1x8ACE = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi1x8ACE9BDF.val[0])));
-      const float16x8_t vi1x9BDF = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi1x8ACE9BDF.val[1])));
-      const float16x8_t vi2x8ACE = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi2x8ACE9BDF.val[0])));
-      const float16x8_t vi2x9BDF = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi2x8ACE9BDF.val[1])));
+      const float16x8_t vi0xGIKMOQSU = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi0xGIKMOQSUHJLNPRTV.val[0])));
+      const float16x8_t vi0xHJLNPRTV = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi0xGIKMOQSUHJLNPRTV.val[1])));
+      const float16x8_t vi1xGIKMOQSU = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi1xGIKMOQSUHJLNPRTV.val[0])));
+      const float16x8_t vi1xHJLNPRTV = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi1xGIKMOQSUHJLNPRTV.val[1])));
+      const float16x8_t vi2xGIKMOQSU = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi2xGIKMOQSUHJLNPRTV.val[0])));
+      const float16x8_t vi2xHJLNPRTV = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi2xGIKMOQSUHJLNPRTV.val[1])));
 
       // Center column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x8ACE, vw01234567, 2);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSU, vw01234567, 2);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x8ACE, vw01234567, 5);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSU, vw01234567, 5);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x8ACE, vw89, 0);
+      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSU, vw89, 0);
 
       // Left column
-      const float16x8_t vi0x79BD = vextq_f16(vi0x1357, vi0x9BDF, 7);
-      const float16x8_t vi1x79BD = vextq_f16(vi1x1357, vi1x9BDF, 7);
-      const float16x8_t vi2x79BD = vextq_f16(vi2x1357, vi2x9BDF, 7);
+      const float16x8_t vi0xFHJLNPRT = vextq_f16(vi0x13579BDF, vi0xHJLNPRTV, 7);
+      const float16x8_t vi1xFHJLNPRT = vextq_f16(vi1x13579BDF, vi1xHJLNPRTV, 7);
+      const float16x8_t vi2xFHJLNPRT = vextq_f16(vi2x13579BDF, vi2xHJLNPRTV, 7);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x79BD, vw01234567, 1);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x79BD, vw01234567, 4);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2x79BD, vw01234567, 7);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
 
       // Right column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x9BDF, vw01234567, 3);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xHJLNPRTV, vw01234567, 3);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x9BDF, vw01234567, 6);
+      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xHJLNPRTV, vw01234567, 6);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x9BDF, vw89, 1);
+      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xHJLNPRTV, vw89, 1);
 
 
       float16x8_t vo0 = vmaxq_f16(vo0p0, vmin);
