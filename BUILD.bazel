@@ -14753,24 +14753,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "divide_nd_eager_test",
-    srcs = [
-        "test/binary-elementwise-operator-tester.h",
-        "test/divide-nd-eager.cc",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "multiply_nd_eager_test",
-    srcs = [
-        "test/binary-elementwise-operator-tester.h",
-        "test/multiply-nd-eager.cc",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "argmax_pooling_nhwc_test",
     srcs = [
         "test/argmax-pooling-nhwc.cc",
@@ -14919,6 +14901,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "divide_nd_eager_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/divide-nd-eager.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "elu_nc_test",
     srcs = [
         "test/elu-nc.cc",
@@ -15019,6 +15010,15 @@ xnnpack_unit_test(
         "test/multiply-nd.cc",
     ],
     shard_count = 5,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "multiply_nd_eager_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/multiply-nd-eager.cc",
+    ],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -15129,6 +15129,15 @@ xnnpack_unit_test(
         "test/subtract-nd.cc",
     ],
     shard_count = 5,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "subtract_nd_eager_test",
+    srcs = [
+        "test/binary-elementwise-operator-tester.h",
+        "test/subtract-nd-eager.cc",
+    ],
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -15413,6 +15422,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "deconvolution_2d_test",
+    timeout = "moderate",
     srcs = [
         "test/deconvolution-2d.cc",
     ],

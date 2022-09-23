@@ -7750,6 +7750,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(subtract-nd-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
   ADD_TEST(NAME subtract-nd-test COMMAND subtract-nd-test)
 
+  ADD_EXECUTABLE(subtract-nd-eager-test test/subtract-nd-eager.cc)
+  TARGET_INCLUDE_DIRECTORIES(subtract-nd-eager-test PRIVATE src test)
+  TARGET_LINK_LIBRARIES(subtract-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main microparams_init logging operators)
+  ADD_TEST(NAME subtract-nd-eager-test COMMAND subtract-nd-eager-test)
+
   ADD_EXECUTABLE(tanh-nc-test test/tanh-nc.cc)
   TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
   TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main microparams_init logging operators)
