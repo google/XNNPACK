@@ -42,7 +42,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x2(
     output[1] = vacc1;
     output += 2;
   }
-  if XNN_UNLIKELY(batch != 0) {
+  if XNN_LIKELY(batch != 0) {
     assert(batch == 2 * sizeof(int16_t));
 
     const int32_t vr = (int32_t) input[0];

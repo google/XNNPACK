@@ -3934,6 +3934,14 @@ SET(ALL_NEONDOT_MICROKERNEL_SRCS
   src/qu8-igemm/gen/8x8c4-minmax-rndnu-neondot.c
   src/qu8-igemm/gen/8x16c4-minmax-rndnu-neondot.c)
 
+SET(ALL_HEXAGON_MICROKERNEL_SRCS
+  src/cs16-vsquareabs/gen/hexagon-x2.c
+  src/cs16-vsquareabs/gen/hexagon-x4.c
+  src/cs16-vsquareabs/gen/hexagon-x6.c
+  src/cs16-vsquareabs/gen/hexagon-x8.c
+  src/cs16-vsquareabs/gen/hexagon-x10.c
+  src/cs16-vsquareabs/gen/hexagon-x12.c)
+
 SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/9p8x-minmax-sse-c4.c
   src/f32-avgpool/9x-minmax-sse-c4.c
@@ -7190,6 +7198,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^(i[3-6]86|x86_64|AMD64)$" OR IOS_ARCH MATC
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX2_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX512F_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_AVX512SKX_MICROKERNEL_SRCS})
+ENDIF()
+IF(XNNPACK_TARGET_PROCESSOR MATCHES "Hexagon")
+  LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_HEXAGON_MICROKERNEL_SRCS})
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv(32|64)$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SCALAR_RISCV_MICROKERNEL_SRCS})

@@ -51,6 +51,12 @@
   #define XNN_ARCH_RISCV 0
 #endif
 
+#if defined(__hexagon__)
+  #define XNN_ARCH_HEXAGON 1
+#else
+  #define XNN_ARCH_HEXAGON 0
+#endif
+
 #if defined(__wasm__)
   #if defined(__wasm_relaxed_simd__)
     #define XNN_ARCH_WASM 0

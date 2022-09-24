@@ -1,0 +1,55 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE % 2 == 0
+$assert BATCH_TILE >= 2
+$SIMD_TILE = BATCH_TILE // 2
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <hexagon_protos.h>
+#include <hexagon_types.h>
+
+#include <xnnpack/vsquareabs.h>
+
+
+void xnn_cs16_vsquareabs_ukernel__hexagon_x${BATCH_TILE}(
+    size_t batch,
+    const int16_t* input,
+    uint32_t* output) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % (sizeof(int16_t) * 2) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const HEXAGON_Vect64* i = (const HEXAGON_Vect64*) input;
+  HEXAGON_Vect64* o = (HEXAGON_Vect64*) output;
+  $if BATCH_TILE > 2:
+    for (; batch >= ${BATCH_TILE * 2} * sizeof(int16_t); batch -= ${BATCH_TILE * 2} * sizeof(int16_t)) {
+      $for N in range(SIMD_TILE):
+        HEXAGON_Vect64 vacc${N} = *i++;
+
+      $for N in range(SIMD_TILE):
+        vacc${N} = Q6_P_vdmpy_PP_sat(vacc${N}, vacc${N});
+
+      $for N in range(SIMD_TILE):
+        *o++ = vacc${N};
+    }
+  for (; batch >= 4 * sizeof(int16_t); batch -= 4 * sizeof(int16_t)) {
+    HEXAGON_Vect64 vacc = *i++;
+    vacc = Q6_P_vdmpy_PP_sat(vacc, vacc);
+    *o++ = vacc;
+  }
+  if XNN_LIKELY(batch != 0) {
+    assert(batch == 2 * sizeof(int16_t));
+
+    const HEXAGON_Vect32 vi = *((const HEXAGON_Vect32*) i);
+    HEXAGON_Vect32 vacc = Q6_R_mpy_RlRl(vi, vi);
+    vacc = Q6_R_mpyacc_RhRh_sat(vacc, vi, vi);
+    *((HEXAGON_Vect32*) o) = vacc;
+  }
+}

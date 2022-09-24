@@ -52,7 +52,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x${BATCH_TILE}(
       output += ${BATCH_TILE};
     }
     $if BATCH_TILE == 2:
-      if XNN_UNLIKELY(batch != 0) {
+      if XNN_LIKELY(batch != 0) {
         assert(batch == 2 * sizeof(int16_t));
 
         const int32_t vr = (int32_t) input[0];
@@ -64,7 +64,7 @@ void xnn_cs16_vsquareabs_ukernel__scalar_x${BATCH_TILE}(
         *output = vacc;
       }
     $else:
-      if XNN_UNLIKELY(batch != 0) {
+      if XNN_LIKELY(batch != 0) {
         do {
           const int32_t vr = (int32_t) input[0];
           const int32_t vi = (int32_t) input[1];

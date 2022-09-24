@@ -49,12 +49,7 @@ void cs16_vsquareabs(
 static void BenchmarkBatch(benchmark::internal::Benchmark* b)
 {
   b->ArgNames({"batch"});
-  b->Args({32});
-  b->Args({64});
-  b->Args({117});
-  b->Args({400});
-  b->Args({1000});
-  b->Args({10000});
+  b->Args({237});
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -79,6 +74,33 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_HEXAGON
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x2,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x2)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x4,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x4)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x6,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x6)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x8,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x8)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x10,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x10)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_hexagon_x12,
+                    xnn_cs16_vsquareabs_ukernel__hexagon_x12)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ARCH_HEXAGON
 
 BENCHMARK_CAPTURE(cs16_vsquareabs, cs16_scalar_x1,
                   xnn_cs16_vsquareabs_ukernel__scalar_x1)
