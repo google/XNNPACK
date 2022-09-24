@@ -14995,7 +14995,7 @@ xnnpack_unit_test(
         "test/max-pooling-nhwc.cc",
         "test/max-pooling-operator-tester.h",
     ],
-    shard_count = 5,
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
