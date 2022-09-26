@@ -15283,6 +15283,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":math",
         ":subgraph_test_mode",
     ],
 )

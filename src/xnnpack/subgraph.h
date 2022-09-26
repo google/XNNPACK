@@ -135,6 +135,8 @@ enum xnn_allocation_type {
   xnn_allocation_type_workspace,
   /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
   xnn_allocation_type_external,
+  // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
+  xnn_allocation_type_persistent,
 };
 
 struct xnn_blob {
@@ -412,6 +414,7 @@ struct xnn_workspace {
   struct xnn_runtime* first_user;
   // Workspace will be destroyed in xnn_delete_runtime or xnn_delete_workspace if num_users reaches 0.
   size_t ref_count;
+  size_t persistent_size;
 };
 
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);

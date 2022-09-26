@@ -155,8 +155,8 @@ static enum xnn_status initialize_workspace_blobs(
     struct xnn_value_allocation_tracker* mem_alloc_tracker)
 {
   assert(runtime->workspace != NULL);
-
-  size_t mem_arena_size = mem_alloc_tracker->mem_arena_size;
+  const size_t persistent_size = runtime->workspace->persistent_size;
+  size_t mem_arena_size = mem_alloc_tracker->mem_arena_size + persistent_size;
   if (mem_arena_size == 0) {
     return xnn_status_success;
   }
@@ -189,16 +189,21 @@ static enum xnn_status initialize_workspace_blobs(
   assert(runtime->workspace->size >= mem_arena_size);
 
   // Initialize current runtime's blob pointers.
+  size_t persistent_offset = 0;
   for (size_t i = 0; i < subgraph->num_values; i++) {
     const struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
     if (value->datatype != xnn_datatype_invalid && value->type == xnn_value_type_dense_tensor) {
       if (blob->allocation_type == xnn_allocation_type_workspace) {
         // Value is purely internal to the runtime, allocate it in the workspace.
-        blob->data = (void*) ((uintptr_t) runtime->workspace->data + mem_alloc_tracker->usage[i].alloc_offset);
+        blob->data = (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset);
+      } else if (blob->allocation_type == xnn_allocation_type_persistent) {
+        blob->data = (void*) ((uintptr_t) runtime->workspace->data + persistent_offset);
+        persistent_offset += round_up_po2(blob->size, XNN_EXTRA_BYTES);
       }
     }
   }
+  assert(persistent_offset == persistent_size);
 
   // Adjust the blob pointers of all runtimes that share this workspace.
   if (workspace_data_delta != 0) {
@@ -209,7 +214,8 @@ static enum xnn_status initialize_workspace_blobs(
       }
       for (size_t i = 0; i < rt->num_blobs; i++) {
         struct xnn_blob* blob = &rt->blobs[i];
-        if (blob->allocation_type == xnn_allocation_type_workspace) {
+        if (blob->allocation_type == xnn_allocation_type_workspace ||
+            blob->allocation_type == xnn_allocation_type_persistent) {
           assert(blob->data != NULL);
           blob->data = (void*) ((uintptr_t) blob->data + workspace_data_delta);
         }
@@ -258,9 +264,9 @@ static void optimize_tensor_allocation_for_in_place_operations(
     struct xnn_value* output = &subgraph->values[node->outputs[0]];
     const uint32_t input_id = node->inputs[0];
     const struct xnn_value* input = &subgraph->values[input_id];
-    if (xnn_value_is_external_input(input) || xnn_value_is_persistent(output) || input->num_consumers > 1) {
+    if (xnn_value_is_external_input(input) || xnn_value_is_persistent(output) || xnn_value_is_persistent(input) || input->num_consumers > 1) {
       // External inputs cannot be overwritten.
-      // Persistent tensors will need their own space, and cannot alias an internal tensor.
+      // Persistent tensors have their own space allocated at the front of the workspace.
       // TODO(zhin): consider aliasing input to output rather than output to input.
       continue;
     }
@@ -382,6 +388,7 @@ enum xnn_status xnn_create_runtime_v4(
   struct xnn_value_allocation_tracker mem_alloc_tracker;
   xnn_init_value_allocation_tracker(&mem_alloc_tracker, subgraph);
 
+  size_t persistent_size = 0;
   for (uint32_t i = 0; i < subgraph->num_values; i++) {
     struct xnn_value* value = &subgraph->values[i];
     struct xnn_blob* blob = &runtime->blobs[i];
@@ -392,6 +399,10 @@ enum xnn_status xnn_create_runtime_v4(
         if (xnn_value_is_external(value)) {
           // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
           blob->allocation_type = xnn_allocation_type_external;
+        } else if (xnn_value_is_persistent(value)) {
+          // Persistent values are allocated in the front of the workspace without overlaps.
+          blob->allocation_type = xnn_allocation_type_persistent;
+          persistent_size += round_up_po2(blob->size, XNN_EXTRA_BYTES);
         } else {
           // Value is purely internal to the runtime, and must be allocated in its workspace.
           xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
@@ -409,6 +420,7 @@ enum xnn_status xnn_create_runtime_v4(
   runtime->workspace = workspace;
   runtime->next_workspace_user = runtime->workspace->first_user;
   runtime->workspace->first_user = runtime;
+  runtime->workspace->persistent_size = persistent_size;
 
   status = initialize_workspace_blobs(subgraph, runtime, &mem_alloc_tracker);
   if (status != xnn_status_success) {
