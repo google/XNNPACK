@@ -279,44 +279,44 @@ static void f16_dwconv2d_chw(benchmark::State& state,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x4(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x4, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x8(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x4(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x4, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x8(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_3x4(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x4, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_3x8(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x4_acc2, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc3(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x4_acc3, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc3(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc4(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x4_acc4, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc4(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc5(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x4_acc5, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc5(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x4_acc2, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc3(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x4_acc3, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc3(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
-  static void dwconv2d_chw_5x5s2p2__neonfp16arith_3x4_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x4_acc2, 5, 5, 2, 2,
+  static void dwconv2d_chw_5x5s2p2__neonfp16arith_3x8_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, 5, 5, 2, 2,
       benchmark::utils::CheckNEONFP16ARITH);
   }
 
@@ -354,16 +354,16 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfp16arith_3x8_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfp16arith_4x8_acc2)
 
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x4)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x4)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x4)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc2)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc3)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc4)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x4_acc5)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc2)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x4_acc3)
-  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x4_acc2)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x8)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x8)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x8)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc2)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc4)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_1x8_acc5)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc2)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc3)
+  BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x8_acc2)
 #endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
 
 

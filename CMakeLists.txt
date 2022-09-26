@@ -3746,7 +3746,7 @@ SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv2d-chw/gen/3x3p1-minmax-neonfp16arith-2x8.c
   src/f16-dwconv2d-chw/gen/3x3s2p1-minmax-neonfp16arith-1x8.c
   src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-1x8.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c
@@ -3785,16 +3785,16 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-4x8-acc2.c
   src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-4x8.c
   src/f16-dwconv2d-chw/gen/5x5p2-minmax-neonfp16arith-5x8.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4-acc2.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4-acc3.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4-acc4.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4-acc5.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x4.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x4-acc2.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x4-acc3.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x4.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-3x4-acc2.c
-  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-3x4.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8-acc2.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8-acc3.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8-acc4.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8-acc5.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-1x8.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x8-acc2.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x8-acc3.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-2x8.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-3x8-acc2.c
+  src/f16-dwconv2d-chw/gen/5x5s2p2-minmax-neonfp16arith-3x8.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
@@ -7216,8 +7216,8 @@ ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(cache OBJECT src/cache.c)
 ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
 ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
-ADD_LIBRARY(mutex OBJECT src/mutex.c)
-ADD_LIBRARY(memory OBJECT src/memory.c)
+ADD_LIBRARY(memory OBJECT src/memory.c
+ADD_LIBRARY(mutex OBJECT src/mutex.c))
 # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
 SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
 ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
