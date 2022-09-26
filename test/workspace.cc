@@ -118,7 +118,7 @@ std::vector<xnn_runtime_t> workspace_user_to_list(xnn_workspace_t workspace)
 }
 }  // namespace
 
-TEST(WORKSPACE, static_data_not_moved_does_not_segv)
+TEST(Workspace, StaticDataNotMovedDoesNotSegv)
 {
   std::array<size_t, 4> dims = {2, 20, 20, 3};
   size_t num_elements = dims[0] * dims[1] * dims[2] * dims[3];
@@ -177,7 +177,7 @@ TEST(WORKSPACE, static_data_not_moved_does_not_segv)
   }
 }
 
-TEST(WORKSPACE, workspace_no_growth)
+TEST(Workspace, WorkspaceNoGrowth)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -231,7 +231,7 @@ TEST(WORKSPACE, workspace_no_growth)
   ASSERT_EQ(workspace->ref_count, 3);
 }
 
-TEST(WORKSPACE, workspace_grow)
+TEST(Workspace, WorkspaceGrow)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -295,7 +295,7 @@ TEST(WORKSPACE, workspace_grow)
   ASSERT_EQ(workspace->ref_count, 3);
 }
 
-TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first)
+TEST(Workspace, WorkspaceRuntimeDeleteHeadRuntimeFirst)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -335,7 +335,7 @@ TEST(WORKSPACE, workspace_runtime_delete_head_runtime_first)
   ASSERT_EQ(workspace->ref_count, 1);
 }
 
-TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first)
+TEST(Workspace, WorkspaceRuntimeDeleteTailRuntimeFirst)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -376,7 +376,7 @@ TEST(WORKSPACE, workspace_runtime_delete_tail_runtime_first)
   ASSERT_EQ(workspace->ref_count, 1);
 }
 
-TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
+TEST(Workspace, WorkspaceRuntimeDeleteMiddleRuntimeFirst)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -432,7 +432,7 @@ TEST(WORKSPACE, workspace_runtime_delete_middle_runtime_first)
   ASSERT_EQ(workspace->ref_count, 1);
 }
 
-TEST(WORKSPACE, zero_sized_workspace_for_graph_without_internal_tensors)
+TEST(Workspace, ZeroSizedWorkspaceForGraphWithoutInternalTensors)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
