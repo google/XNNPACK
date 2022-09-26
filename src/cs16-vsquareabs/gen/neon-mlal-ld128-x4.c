@@ -32,7 +32,7 @@ void xnn_cs16_vsquareabs_ukernel__neon_mlal_ld128_x4(
     vacc = vmlal_s16(vacc, vi.val[1], vi.val[1]);
     vst1q_u32(output, vreinterpretq_u32_s32(vacc)); output += 4;
   }
-  if XNN_UNLIKELY(batch != 0) {
+  if XNN_LIKELY(batch != 0) {
     const int16x4x2_t vi = vld2_s16(input);
     int32x4_t vacc = vmull_s16(vi.val[0], vi.val[0]);
     vacc = vmlal_s16(vacc, vi.val[1], vi.val[1]);
