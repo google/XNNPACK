@@ -2041,9 +2041,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/sigmoid-f32-neon-rr2-lut64-p2-nr2recps.c
   src/math/sigmoid-f32-neon-rr2-lut2048-p1-nr2recps.c
   src/math/sigmoid-f32-neon-rr2-p5-nr2recps.c
-  src/math/sqrt-neon-nr1rsqrts.c
-  src/math/sqrt-neon-nr2rsqrts.c
-  src/math/sqrt-neon-nr3rsqrts.c
+  src/math/sqrt-f32-neon-nr1rsqrts.c
+  src/math/sqrt-f32-neon-nr2rsqrts.c
+  src/math/sqrt-f32-neon-nr3rsqrts.c
   src/qc8-dwconv/gen/up8x3-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up8x9-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/up8x9-minmax-fp32-neon-mul8-ld64.c
@@ -3109,11 +3109,11 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/math/sigmoid-f32-neonfma-rr2-p5-nr1recps1fma.c
   src/math/sigmoid-f32-neonfma-rr2-p5-nr2fma.c
   src/math/sigmoid-f32-neonfma-rr2-p5-nr2recps.c
-  src/math/sqrt-neonfma-nr1fma.c
-  src/math/sqrt-neonfma-nr1rsqrts1fma1adj.c
-  src/math/sqrt-neonfma-nr2fma.c
-  src/math/sqrt-neonfma-nr2fma1adj.c
-  src/math/sqrt-neonfma-nr3fma.c)
+  src/math/sqrt-f32-neonfma-nr1fma.c
+  src/math/sqrt-f32-neonfma-nr1rsqrts1fma1adj.c
+  src/math/sqrt-f32-neonfma-nr2fma.c
+  src/math/sqrt-f32-neonfma-nr2fma1adj.c
+  src/math/sqrt-f32-neonfma-nr3fma.c)
 
 SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c
@@ -4169,9 +4169,9 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/roundne-sse-addsub.c
   src/math/roundu-sse-addsub.c
   src/math/roundz-sse-addsub.c
-  src/math/sqrt-sse-hh1mac.c
-  src/math/sqrt-sse-nr1mac.c
-  src/math/sqrt-sse-nr2mac.c
+  src/math/sqrt-f32-sse-hh1mac.c
+  src/math/sqrt-f32-sse-nr1mac.c
+  src/math/sqrt-f32-sse-nr2mac.c
   src/x32-packx/x4-sse.c
   src/x32-transposec/4x4-sse.c)
 
@@ -5969,9 +5969,9 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/fma3-nr1fma1adj-x48.c
   src/f32-vsqrt/gen/fma3-nr1fma1adj-x56.c
   src/f32-vsqrt/gen/fma3-nr1fma1adj-x64.c
-  src/math/sqrt-fma3-nr1fma.c
-  src/math/sqrt-fma3-nr1fma1adj.c
-  src/math/sqrt-fma3-nr2fma.c)
+  src/math/sqrt-f32-fma3-nr1fma.c
+  src/math/sqrt-f32-fma3-nr1fma1adj.c
+  src/math/sqrt-f32-fma3-nr2fma.c)
 
 SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-gemm/gen/1x16-minmax-avx2-broadcast.c
@@ -6653,9 +6653,9 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-div.c
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-nr1fma.c
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-nr1fma1adj.c
-  src/math/sqrt-avx512f-nr1fma.c
-  src/math/sqrt-avx512f-nr1fma1adj.c
-  src/math/sqrt-avx512f-nr2fma.c)
+  src/math/sqrt-sse-avx512f-nr1fma.c
+  src/math/sqrt-sse-avx512f-nr1fma1adj.c
+  src/math/sqrt-sse-avx512f-nr2fma.c)
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
