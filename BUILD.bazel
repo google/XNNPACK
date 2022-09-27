@@ -5264,6 +5264,9 @@ ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/sigmoid-f16-neonfp16arith-rr2-p3-nr1fma.c",
     "src/math/sigmoid-f16-neonfp16arith-rr2-p3-nr1recps.c",
     "src/math/sigmoid-f16-neonfp16arith-rr2-p3-recpe.c",
+    "src/math/sqrt-f16-neonfp16arith-nr1fma.c",
+    "src/math/sqrt-f16-neonfp16arith-nr1fma1adj.c",
+    "src/math/sqrt-f16-neonfp16arith-nr1rsqrts.c",
 ]
 
 PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
@@ -12660,6 +12663,14 @@ xnnpack_benchmark(
     name = "f16_sigmoid_ulp_eval",
     srcs = [
         "eval/f16-sigmoid-ulp.cc",
+    ],
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f16_sqrt_ulp_eval",
+    srcs = [
+        "eval/f16-sqrt-ulp.cc",
     ],
     deps = ACCURACY_EVAL_DEPS,
 )
