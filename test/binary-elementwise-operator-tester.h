@@ -1301,6 +1301,17 @@ void TestRunQS8() const {
               0,
               nullptr /* thread pool */));
           break;
+        case OperationType::Multiply:
+          ASSERT_EQ(xnn_status_success,
+            xnn_run_multiply_nd_qs8(
+              num_input1_dims(), input1_shape().data(), input1_zero_point(), input1_scale(),
+              num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
+              input1.data(), input2.data(), output.data(),
+              output_zero_point(), output_scale(),
+              int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+              0,
+              nullptr /* thread pool */));
+          break;
         default:
           FAIL() << "Unsupported operation type";
       }
