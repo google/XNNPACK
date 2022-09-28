@@ -44,7 +44,7 @@ static void ComputeError(
     const float abs_error = std::abs(output_ref - fp16_ieee_to_fp32_value(output[i]));
     const float output_abs = std::abs(output_ref);
     const float output_ulp = (uint32_as_float(float_as_uint32(output_abs) + 1) - output_abs);
-    error[i] = float(abs_error / (output_ulp * 0x1.0p+13f /* difference between HP and SP ULP */));
+    error[i] = float(abs_error / (output_ulp * 8192.0f /* difference between HP and SP ULP */));
   }
 }
 
