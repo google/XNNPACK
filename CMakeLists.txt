@@ -6656,9 +6656,9 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-div.c
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-nr1fma.c
   src/math/sigmoid-f32-avx512f-rr2-p5-scalef-nr1fma1adj.c
-  src/math/sqrt-sse-avx512f-nr1fma.c
-  src/math/sqrt-sse-avx512f-nr1fma1adj.c
-  src/math/sqrt-sse-avx512f-nr2fma.c)
+  src/math/sqrt-f32-avx512f-nr1fma.c
+  src/math/sqrt-f32-avx512f-nr1fma1adj.c
+  src/math/sqrt-f32-avx512f-nr2fma.c)
 
 SET(PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/vcvt-avx512skx-x16.c
@@ -7219,8 +7219,8 @@ ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(cache OBJECT src/cache.c)
 ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
 ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
-ADD_LIBRARY(memory OBJECT src/memory.c
-ADD_LIBRARY(mutex OBJECT src/mutex.c))
+ADD_LIBRARY(memory OBJECT src/memory.c)
+ADD_LIBRARY(mutex OBJECT src/mutex.c)
 # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
 SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
 ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
