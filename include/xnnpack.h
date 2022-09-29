@@ -3330,6 +3330,25 @@ enum xnn_status xnn_setup_subtract_nd_qs8(
   int8_t* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_subtract_nd_qs8(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  int8_t input1_zero_point,
+  float input1_scale,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  int8_t input2_zero_point,
+  float input2_scale,
+  const int8_t* input1,
+  const int8_t* input2,
+  int8_t* output,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_tanh_nc_qs8(
   size_t channels,
   size_t input_stride,
