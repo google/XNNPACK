@@ -3817,7 +3817,8 @@ SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/sigmoid-f16-neonfp16arith-rr1-p2-div.c
   src/math/sigmoid-f16-neonfp16arith-rr1-p3-div.c
   src/math/sigmoid-f16-neonfp16arith-rr2-p2-div.c
-  src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c)
+  src/math/sigmoid-f16-neonfp16arith-rr2-p3-div.c
+  src/math/sqrt-f16-neonfp16arith-sqrt.c)
 
 SET(ALL_NEONBF16_MICROKERNEL_SRCS
   src/bf16-gemm/gen/1x4c8-minmax-neonbf16-bfdot.c
@@ -9164,6 +9165,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   # ---[ Build accuracy tests
+  ADD_EXECUTABLE(f16-sqrt-eval eval/f16-sqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-sqrt-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f16-sqrt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+
   ADD_EXECUTABLE(f16-f32-cvt-eval eval/f16-f32-cvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f16-f32-cvt-eval PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
