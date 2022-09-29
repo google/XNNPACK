@@ -42,7 +42,7 @@ _ISA_TO_MACRO_MAP = {
 
 _ISA_TO_ARCH_MAP = {
   "armsimd32": ["aarch32"],
-  "fp16arith": ["aarch64"],
+  "fp16arith": ["aarch32", "aarch64"],
   "neon": ["aarch32", "aarch64"],
   "neonfp16": ["aarch32", "aarch64"],
   "neonfma": ["aarch32", "aarch64"],
