@@ -328,7 +328,6 @@ DECLARE_F32_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f32_gavgpool_cw_ukernel__wasmsimd_x
       void* output,                                       \
       const union xnn_f16_gavgpool_params* params);
 
-DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4)
 DECLARE_F16_GAVGPOOL_CW_UKERNEL_FUNCTION(xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8)
 
 

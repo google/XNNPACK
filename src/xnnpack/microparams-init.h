@@ -284,14 +284,7 @@ DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_scalar
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_x4_params(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint16_t output_min,
-  uint16_t output_max,
-  uint32_t width);
-
-XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_x8_params(
+XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint16_t output_min,

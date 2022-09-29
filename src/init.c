@@ -2907,8 +2907,8 @@ static void init(void) {
             .output_height_tile = 1,
           };
           xnn_params.f16.gavgpool_cw = (struct gavgpool_cw_parameters) {
-            .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x4,
-            .channel_tile = 4,
+            .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
+            .channel_tile = 8,
           };
           xnn_params.f16.ibilinear_chw = (struct ibilinear_chw_parameters) {
             .ukernel = (xnn_ibilinear_chw_ukernel_function) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8,
