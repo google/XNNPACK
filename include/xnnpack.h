@@ -3396,6 +3396,25 @@ enum xnn_status xnn_setup_add_nd_qu8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_add_nd_qu8(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  uint8_t input1_zero_point,
+  float input1_scale,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  uint8_t input2_zero_point,
+  float input2_scale,
+  const uint8_t* input1,
+  const uint8_t* input2,
+  uint8_t* output,
+  uint8_t output_zero_point,
+  float output_scale,
+  uint8_t output_min,
+  uint8_t output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
