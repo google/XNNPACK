@@ -44,6 +44,11 @@ tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=128 -o src/x8-lut/ge
 tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=192 -o src/x8-lut/gen/lut-avx512skx-vpshufb-x192.c &
 tools/xngen src/x8-lut/avx512skx-vpshufb.c.in -D BATCH_TILE=256 -o src/x8-lut/gen/lut-avx512skx-vpshufb-x256.c &
 
+tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=64  -o src/x8-lut/gen/lut-avx512vbmi-vpermx2b-x64.c &
+tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=128 -o src/x8-lut/gen/lut-avx512vbmi-vpermx2b-x128.c &
+tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=192 -o src/x8-lut/gen/lut-avx512vbmi-vpermx2b-x192.c &
+tools/xngen src/x8-lut/avx512vbmi-vpermx2b.c.in -D BATCH_TILE=256 -o src/x8-lut/gen/lut-avx512vbmi-vpermx2b-x256.c &
+
 ################################## Unit tests #################################
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
 

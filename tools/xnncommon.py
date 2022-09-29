@@ -61,6 +61,7 @@ _ISA_TO_ARCH_MAP = {
   "avx2": ["x86-32", "x86-64"],
   "avx512f": ["x86-32", "x86-64"],
   "avx512skx": ["x86-32", "x86-64"],
+  "avx512vbmi": ["x86-32", "x86-64"],
   "wasm32": ["wasm", "wasmsimd"],
   "wasm": ["wasm", "wasmsimd", "wasmrelaxedsimd"],
   "wasmsimd": ["wasmsimd", "wasmrelaxedsimd"],
@@ -88,6 +89,7 @@ _ISA_TO_CHECK_MAP = {
   "fma3": "TEST_REQUIRES_X86_FMA3",
   "avx512f": "TEST_REQUIRES_X86_AVX512F",
   "avx512skx": "TEST_REQUIRES_X86_AVX512SKX",
+  "avx512vbmi": "TEST_REQUIRES_X86_AVX512VBMI",
 }
 
 
