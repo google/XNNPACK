@@ -14,5 +14,6 @@ tools/amalgamate-microkernels.py -s PROD_AVX2_MICROKERNEL_SRCS -o src/amalgam/av
 tools/amalgamate-microkernels.py -s PROD_F16C_MICROKERNEL_SRCS -o src/amalgam/f16c.c &
 tools/amalgamate-microkernels.py -s PROD_AVX512F_MICROKERNEL_SRCS -o src/amalgam/avx512f.c &
 tools/amalgamate-microkernels.py -s PROD_AVX512SKX_MICROKERNEL_SRCS -o src/amalgam/avx512skx.c &
+tools/amalgamate-microkernels.py -s PROD_AVX512VBMI_MICROKERNEL_SRCS -o src/amalgam/avx512vbmi.c &
 
 wait

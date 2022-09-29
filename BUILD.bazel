@@ -8316,6 +8316,7 @@ ALL_AVX512SKX_MICROKERNEL_SRCS = [
 ]
 
 PROD_AVX512VBMI_MICROKERNEL_SRCS = [
+    "src/x8-lut/gen/lut-avx512vbmi-vpermx2b-x128.c",
 ]
 
 ALL_AVX512VBMI_MICROKERNEL_SRCS = [
@@ -10531,6 +10532,33 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "avx512vbmi_amalgam_microkernels",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = [
+        "-mavx512f",
+        "-mavx512cd",
+        "-mavx512bw",
+        "-mavx512dq",
+        "-mavx512vl",
+        "-mavx512vbmi",
+    ],
+    mingw_copts = ["-fno-asynchronous-unwind-tables"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX512"],
+    msvc_x86_64_copts = ["/arch:AVX512"],
+    msys_copts = ["-fno-asynchronous-unwind-tables"],
+    x86_srcs = ["src/amalgam/avx512vbmi.c"],
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "avx512vbmi_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = [
@@ -10754,6 +10782,7 @@ xnnpack_aggregate_library(
         ":avx2_amalgam_microkernels",
         ":avx512f_amalgam_microkernels",
         ":avx512skx_amalgam_microkernels",
+        ":avx512vbmi_amalgam_microkernels",
     ],
 )
 

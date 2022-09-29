@@ -4175,7 +4175,11 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X8;
 
     if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
-      xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512skx_vpshufb_x64;
+      if (cpuinfo_has_x86_avx512vbmi()) {
+        xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x128;
+      } else {
+        xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512skx_vpshufb_x64;
+      }
     } else if (cpuinfo_has_x86_avx2()) {
       xnn_params.x8.lut = xnn_x8_lut_ukernel__avx2_x128;
     } else if (cpuinfo_has_x86_avx()) {
