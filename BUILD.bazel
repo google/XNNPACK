@@ -14953,6 +14953,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "add_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "test/add-nd-eager.cc",
         "test/binary-elementwise-operator-tester.h",
@@ -15242,6 +15243,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "multiply_nd_eager_test",
+    timeout = "moderate",
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/multiply-nd-eager.cc",
