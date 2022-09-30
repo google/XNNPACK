@@ -3720,6 +3720,10 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x48.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x56.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x64.c
+  src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x8.c
+  src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x16.c
+  src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x24.c
+  src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x32.c
   src/f16-vunary/gen/vabs-neonfp16arith-x8.c
   src/f16-vunary/gen/vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/vneg-neonfp16arith-x8.c
@@ -9389,6 +9393,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-vsigmoid-bench PRIVATE benchmark bench-utils fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f16-vsqrt-bench bench/f16-vsqrt.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-vsqrt-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-vsqrt-bench PRIVATE benchmark bench-utils fp16 pthreadpool microparams_init)
 
   ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-bench PRIVATE . include src)

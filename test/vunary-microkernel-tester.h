@@ -864,7 +864,7 @@ class VUnaryMicrokernelTester {
   void Test(xnn_f16_vsqrt_ukernel_function vsqrt, xnn_init_f16_sqrt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
+    std::uniform_real_distribution<float> f32dist(0.001f, 10.0f);
 
     std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));

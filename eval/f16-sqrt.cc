@@ -27,12 +27,25 @@ constexpr int kBlockSize = 1024;
 
 
 #if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+  TEST(F16_SQRT__NEONFP16ARITH_SQRT, negative_zero) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
+    xnn_math_f16_sqrt__neonfp16arith_sqrt(kBlockSize * sizeof(uint16_t), inputs.data(), outputs.data());
+    const uint16_t reference_output = UINT16_C(0x8000);
+    ASSERT_EQ(reference_output, outputs[0])
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << inputs[0]
+      << ", optimized = 0x" << std::hex << std::setw(4) << std::setfill('0') << outputs[0];
+  }
+
   TEST(F16_SQRT__NEONFP16ARITH_SQRT, DISABLED_negative_subnormal) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
-    for (uint16_t n = 0; n <= UINT16_C(0x0400); n += kBlockSize) {
+    for (uint16_t n = UINT16_C(0x0001); n <= UINT16_C(0x0400); n += kBlockSize) {
       for (uint16_t i = 0; i < kBlockSize; i++) {
         inputs[i] = std::min<uint16_t>(n + i, UINT16_C(0x03FF)) | UINT16_C(0x8000);
       }
@@ -98,12 +111,25 @@ constexpr int kBlockSize = 1024;
     }
   }
 
+  TEST(F16_SQRT__NEONFP16ARITH_SQRT, positive_zero) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
+    xnn_math_f16_sqrt__neonfp16arith_sqrt(kBlockSize * sizeof(uint16_t), inputs.data(), outputs.data());
+    const uint16_t reference_output = UINT16_C(0x0000);
+    ASSERT_EQ(reference_output, outputs[0])
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << inputs[0]
+      << ", optimized = 0x" << std::hex << std::setw(4) << std::setfill('0') << outputs[0];
+  }
+
   TEST(F16_SQRT__NEONFP16ARITH_SQRT, DISABLED_positive_subnormal) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
-    for (uint16_t n = 0; n <= UINT16_C(0x0400); n += kBlockSize) {
+    for (uint16_t n = UINT16_C(0x0001); n <= UINT16_C(0x0400); n += kBlockSize) {
       for (uint16_t i = 0; i < kBlockSize; i++) {
         inputs[i] = std::min<uint16_t>(n + i, UINT16_C(0x03FF));
       }
@@ -179,12 +205,25 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, negative_subnormal) {
+  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, negative_zero) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
-    for (uint16_t n = 0; n <= UINT16_C(0x0400); n += kBlockSize) {
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x8000));
+    xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(kBlockSize * sizeof(uint16_t), inputs.data(), outputs.data());
+    const uint16_t reference_output = UINT16_C(0x8000);
+    ASSERT_EQ(reference_output, outputs[0])
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << inputs[0]
+      << ", optimized = 0x" << std::hex << std::setw(4) << std::setfill('0') << outputs[0];
+  }
+
+  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, DISABLED_negative_subnormal) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x0001); n <= UINT16_C(0x0400); n += kBlockSize) {
       for (uint16_t i = 0; i < kBlockSize; i++) {
         inputs[i] = std::min<uint16_t>(n + i, UINT16_C(0x03FF)) | UINT16_C(0x8000);
       }
@@ -250,12 +289,25 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, positive_subnormal) {
+  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, positive_zero) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
-    for (uint16_t n = 0; n <= UINT16_C(0x0400); n += kBlockSize) {
+    std::fill(inputs.begin(), inputs.end(), UINT16_C(0x0000));
+    xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(kBlockSize * sizeof(uint16_t), inputs.data(), outputs.data());
+    const uint16_t reference_output = UINT16_C(0x0000);
+    ASSERT_EQ(reference_output, outputs[0])
+      << "input = 0x" << std::hex << std::setw(4) << std::setfill('0') << inputs[0]
+      << ", optimized = 0x" << std::hex << std::setw(4) << std::setfill('0') << outputs[0];
+  }
+
+  TEST(F16_SQRT__NEONFP16ARITH_NR1FMA1ADJ, DISABLED_positive_subnormal) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> inputs(kBlockSize);
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> outputs(kBlockSize);
+    for (uint16_t n = UINT16_C(0x0001); n <= UINT16_C(0x0400); n += kBlockSize) {
       for (uint16_t i = 0; i < kBlockSize; i++) {
         inputs[i] = std::min<uint16_t>(n + i, UINT16_C(0x03FF));
       }

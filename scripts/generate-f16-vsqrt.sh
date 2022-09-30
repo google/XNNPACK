@@ -8,6 +8,11 @@
 tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c &
 tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/neonfp16arith-sqrt-x16.c &
 
+tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x8.c &
+tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x16.c &
+tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=24 -o src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x24.c &
+tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=32 -o src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x32.c &
+
 ################################### ARM FP16 ##################################
 tools/xngen src/f16-vsqrt/fp16arith-sqrt.c.in -D BATCH_TILE=1 -o src/f16-vsqrt/gen/fp16arith-sqrt-x1.c &
 tools/xngen src/f16-vsqrt/fp16arith-sqrt.c.in -D BATCH_TILE=2 -o src/f16-vsqrt/gen/fp16arith-sqrt-x2.c &

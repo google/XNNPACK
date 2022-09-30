@@ -84,6 +84,10 @@ bool CheckVFP(benchmark::State& state);
 // If ARMv6 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckARMV6(benchmark::State& state);
 
+// Check if ARM FP16-ARITH extension is supported.
+// If FP16-ARITH is unsupported, report error in benchmark state, and return false.
+bool CheckFP16ARITH(benchmark::State& state);
+
 // Check if ARM NEON extension is supported.
 // If NEON is unsupported, report error in benchmark state, and return false.
 bool CheckNEON(benchmark::State& state);
