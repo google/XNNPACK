@@ -9,6 +9,12 @@
 #include <benchmark/benchmark.h>
 
 
+#define BENCHMARK_FP16_END2END(benchmark_fn) \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::FP16MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::FP16MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_large, models::FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
+  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_small, models::FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
 #define BENCHMARK_FP32_END2END(benchmark_fn) \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime(); \

@@ -9252,6 +9252,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE .)
   TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache microparams_init logging operators)
 
+  ADD_EXECUTABLE(f16-gemm-e2e-bench bench/f16-gemm-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-gemm-e2e-bench PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f16-gemm-e2e-bench PRIVATE XNNPACK fp16 benchmark bench-models bench-utils cache jit microparams_init logging operators)
+
   ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
   TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK benchmark bench-models bench-utils cache microparams_init logging operators)
