@@ -9462,6 +9462,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
 
+  ADD_EXECUTABLE(f16-spmm-bench bench/f16-spmm.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-spmm-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-spmm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
   ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
