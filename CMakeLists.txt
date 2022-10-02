@@ -9414,6 +9414,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
 
+  ADD_EXECUTABLE(f16-conv-hwc2chw-bench bench/f16-conv-hwc2chw.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  TARGET_INCLUDE_DIRECTORIES(f16-conv-hwc2chw-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f32-conv-hwc2chw-bench bench/f32-conv-hwc2chw.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
+  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc2chw-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
   ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:indirection> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
