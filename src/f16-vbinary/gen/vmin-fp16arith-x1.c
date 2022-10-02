@@ -37,7 +37,7 @@ void xnn_f16_vmin_ukernel__fp16arith_x1(
   do {
     const float16_t va = *a++;
     const float16_t vb = *b++;
-    float16_t vacc = vminh_f16(va, vb);
+    float16_t vacc = vminnmh_f16(va, vb);
     *o++ = vacc;
     batch -= sizeof(float16_t);
   } while (batch != 0);

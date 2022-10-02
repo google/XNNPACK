@@ -43,8 +43,8 @@ void xnn_f16_vmulc_minmax_ukernel__fp16arith_x1(
   do {
     float16_t vacc = *a++;
     vacc = vmulh_f16(vacc, vb);
-    vacc = vmaxh_f16(vacc, vy_min);
-    vacc = vminh_f16(vacc, vy_max);
+    vacc = vmaxnmh_f16(vacc, vy_min);
+    vacc = vminnmh_f16(vacc, vy_max);
     *o++ = vacc;
     batch -= sizeof(float16_t);
   } while (batch != 0);

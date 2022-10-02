@@ -43,10 +43,10 @@ void xnn_f16_vmaxc_ukernel__fp16arith_x4(
     float16_t vacc3 = a[3];
     a += 4;
 
-    vacc0 = vmaxh_f16(vacc0, vb);
-    vacc1 = vmaxh_f16(vacc1, vb);
-    vacc2 = vmaxh_f16(vacc2, vb);
-    vacc3 = vmaxh_f16(vacc3, vb);
+    vacc0 = vmaxnmh_f16(vacc0, vb);
+    vacc1 = vmaxnmh_f16(vacc1, vb);
+    vacc2 = vmaxnmh_f16(vacc2, vb);
+    vacc3 = vmaxnmh_f16(vacc3, vb);
 
 
 
@@ -59,7 +59,7 @@ void xnn_f16_vmaxc_ukernel__fp16arith_x4(
   if XNN_UNLIKELY(batch != 0) {
     do {
       float16_t vacc = *a++;
-      vacc = vmaxh_f16(vacc, vb);
+      vacc = vmaxnmh_f16(vacc, vb);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

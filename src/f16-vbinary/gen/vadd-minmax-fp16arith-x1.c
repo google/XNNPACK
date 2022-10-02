@@ -42,8 +42,8 @@ void xnn_f16_vadd_minmax_ukernel__fp16arith_x1(
     const float16_t va = *a++;
     const float16_t vb = *b++;
     float16_t vacc = vaddh_f16(va, vb);
-    vacc = vmaxh_f16(vacc, vy_min);
-    vacc = vminh_f16(vacc, vy_max);
+    vacc = vmaxnmh_f16(vacc, vy_min);
+    vacc = vminnmh_f16(vacc, vy_max);
     *o++ = vacc;
     batch -= sizeof(float16_t);
   } while (batch != 0);

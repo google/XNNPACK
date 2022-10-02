@@ -41,8 +41,8 @@ void xnn_f16_vmaxc_ukernel__fp16arith_x2(
     float16_t vacc1 = a[1];
     a += 2;
 
-    vacc0 = vmaxh_f16(vacc0, vb);
-    vacc1 = vmaxh_f16(vacc1, vb);
+    vacc0 = vmaxnmh_f16(vacc0, vb);
+    vacc1 = vmaxnmh_f16(vacc1, vb);
 
 
 
@@ -52,7 +52,7 @@ void xnn_f16_vmaxc_ukernel__fp16arith_x2(
   }
   if XNN_UNLIKELY(batch != 0) {
     float16_t vacc = *a;
-    vacc = vmaxh_f16(vacc, vb);
+    vacc = vmaxnmh_f16(vacc, vb);
     *o = vacc;
   }
 }

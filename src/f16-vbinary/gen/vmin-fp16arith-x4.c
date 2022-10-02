@@ -45,10 +45,10 @@ void xnn_f16_vmin_ukernel__fp16arith_x4(
     const float16_t vb2 = *b++;
     const float16_t vb3 = *b++;
 
-    float16_t vacc0 = vminh_f16(va0, vb0);
-    float16_t vacc1 = vminh_f16(va1, vb1);
-    float16_t vacc2 = vminh_f16(va2, vb2);
-    float16_t vacc3 = vminh_f16(va3, vb3);
+    float16_t vacc0 = vminnmh_f16(va0, vb0);
+    float16_t vacc1 = vminnmh_f16(va1, vb1);
+    float16_t vacc2 = vminnmh_f16(va2, vb2);
+    float16_t vacc3 = vminnmh_f16(va3, vb3);
 
 
 
@@ -61,7 +61,7 @@ void xnn_f16_vmin_ukernel__fp16arith_x4(
     do {
       const float16_t va = *a++;
       const float16_t vb = *b++;
-      float16_t vacc = vminh_f16(va, vb);
+      float16_t vacc = vminnmh_f16(va, vb);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

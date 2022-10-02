@@ -53,15 +53,15 @@ void xnn_f16_vmulc_minmax_ukernel__fp16arith_x4(
     vacc3 = vmulh_f16(vacc3, vb);
 
 
-    vacc0 = vmaxh_f16(vacc0, vy_min);
-    vacc1 = vmaxh_f16(vacc1, vy_min);
-    vacc2 = vmaxh_f16(vacc2, vy_min);
-    vacc3 = vmaxh_f16(vacc3, vy_min);
+    vacc0 = vmaxnmh_f16(vacc0, vy_min);
+    vacc1 = vmaxnmh_f16(vacc1, vy_min);
+    vacc2 = vmaxnmh_f16(vacc2, vy_min);
+    vacc3 = vmaxnmh_f16(vacc3, vy_min);
 
-    vacc0 = vminh_f16(vacc0, vy_max);
-    vacc1 = vminh_f16(vacc1, vy_max);
-    vacc2 = vminh_f16(vacc2, vy_max);
-    vacc3 = vminh_f16(vacc3, vy_max);
+    vacc0 = vminnmh_f16(vacc0, vy_max);
+    vacc1 = vminnmh_f16(vacc1, vy_max);
+    vacc2 = vminnmh_f16(vacc2, vy_max);
+    vacc3 = vminnmh_f16(vacc3, vy_max);
 
     o[0] = vacc0;
     o[1] = vacc1;
@@ -73,8 +73,8 @@ void xnn_f16_vmulc_minmax_ukernel__fp16arith_x4(
     do {
       float16_t vacc = *a++;
       vacc = vmulh_f16(vacc, vb);
-      vacc = vmaxh_f16(vacc, vy_min);
-      vacc = vminh_f16(vacc, vy_max);
+      vacc = vmaxnmh_f16(vacc, vy_min);
+      vacc = vminnmh_f16(vacc, vy_max);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

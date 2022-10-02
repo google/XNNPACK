@@ -21,8 +21,8 @@ $if ACTIVATION == "MINMAX":
 $VOPH_F16 = {
 $  "ADD": lambda x, y: "vaddh_f16(%s, %s)" % (x, y),
 $  "DIV": lambda x, y: "vdivh_f16(%s, %s)" % (x, y),
-$  "MAX": lambda x, y: "vmaxh_f16(%s, %s)" % (x, y),
-$  "MIN": lambda x, y: "vminh_f16(%s, %s)" % (x, y),
+$  "MAX": lambda x, y: "vmaxnmh_f16(%s, %s)" % (x, y),
+$  "MIN": lambda x, y: "vminnmh_f16(%s, %s)" % (x, y),
 $  "MUL": lambda x, y: "vmulh_f16(%s, %s)" % (x, y),
 $  "SUB": lambda x, y: "vsubh_f16(%s, %s)" % (x, y),
 $  "SQRDIFF": lambda x, y: "vsubh_f16(%s, %s)" % (x, y),
@@ -68,10 +68,10 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
 
       $if ACTIVATION == "MINMAX":
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vmaxh_f16(vacc${ABC[N]}, vy_min);
+          vacc${ABC[N]} = vmaxnmh_f16(vacc${ABC[N]}, vy_min);
 
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vminh_f16(vacc${ABC[N]}, vy_max);
+          vacc${ABC[N]} = vminnmh_f16(vacc${ABC[N]}, vy_max);
 
       $for N in range(BATCH_TILE):
         *o++ = vacc${ABC[N]};
@@ -85,8 +85,8 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
           $if OP == "SQRDIFF":
             vacc = vmulh_f16(vacc, vacc);
           $if ACTIVATION == "MINMAX":
-            vacc = vmaxh_f16(vacc, vy_min);
-            vacc = vminh_f16(vacc, vy_max);
+            vacc = vmaxnmh_f16(vacc, vy_min);
+            vacc = vminnmh_f16(vacc, vy_max);
           *o++ = vacc;
           batch -= sizeof(float16_t);
         } while (batch != 0);
@@ -97,8 +97,8 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
         $if OP == "SQRDIFF":
           vacc = vmulh_f16(vacc, vacc);
         $if ACTIVATION == "MINMAX":
-          vacc = vmaxh_f16(vacc, vy_min);
-          vacc = vminh_f16(vacc, vy_max);
+          vacc = vmaxnmh_f16(vacc, vy_min);
+          vacc = vminnmh_f16(vacc, vy_max);
         *o = vacc;
     }
   $else:
@@ -109,8 +109,8 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
       $if OP == "SQRDIFF":
         vacc = vmulh_f16(vacc, vacc);
       $if ACTIVATION == "MINMAX":
-        vacc = vmaxh_f16(vacc, vy_min);
-        vacc = vminh_f16(vacc, vy_max);
+        vacc = vmaxnmh_f16(vacc, vy_min);
+        vacc = vminnmh_f16(vacc, vy_max);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

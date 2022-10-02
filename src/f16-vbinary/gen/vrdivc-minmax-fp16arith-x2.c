@@ -49,11 +49,11 @@ void xnn_f16_vrdivc_minmax_ukernel__fp16arith_x2(
     vacc1 = vdivh_f16(vb, vacc1);
 
 
-    vacc0 = vmaxh_f16(vacc0, vy_min);
-    vacc1 = vmaxh_f16(vacc1, vy_min);
+    vacc0 = vmaxnmh_f16(vacc0, vy_min);
+    vacc1 = vmaxnmh_f16(vacc1, vy_min);
 
-    vacc0 = vminh_f16(vacc0, vy_max);
-    vacc1 = vminh_f16(vacc1, vy_max);
+    vacc0 = vminnmh_f16(vacc0, vy_max);
+    vacc1 = vminnmh_f16(vacc1, vy_max);
 
     o[0] = vacc0;
     o[1] = vacc1;
@@ -62,8 +62,8 @@ void xnn_f16_vrdivc_minmax_ukernel__fp16arith_x2(
   if XNN_UNLIKELY(batch != 0) {
     float16_t vacc = *a;
     vacc = vdivh_f16(vb, vacc);
-    vacc = vmaxh_f16(vacc, vy_min);
-    vacc = vminh_f16(vacc, vy_max);
+    vacc = vmaxnmh_f16(vacc, vy_min);
+    vacc = vminnmh_f16(vacc, vy_max);
     *o = vacc;
   }
 }

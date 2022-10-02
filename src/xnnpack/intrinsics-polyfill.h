@@ -173,12 +173,12 @@ float16_t vdivh_f16(float16_t a, float16_t b) {
 }
 
 static XNN_INTRINSIC
-float16_t vmaxh_f16(float16_t a, float16_t b) {
+float16_t vmaxnmh_f16(float16_t a, float16_t b) {
   return XNN_UNPREDICTABLE(b < a) ? a : b;
 }
 
 static XNN_INTRINSIC
-float16_t vminh_f16(float16_t a, float16_t b) {
+float16_t vminnmh_f16(float16_t a, float16_t b) {
   return XNN_UNPREDICTABLE(b < a) ? b : a;
 }
 

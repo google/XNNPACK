@@ -43,10 +43,10 @@ void xnn_f16_vminc_ukernel__fp16arith_x4(
     float16_t vacc3 = a[3];
     a += 4;
 
-    vacc0 = vminh_f16(vacc0, vb);
-    vacc1 = vminh_f16(vacc1, vb);
-    vacc2 = vminh_f16(vacc2, vb);
-    vacc3 = vminh_f16(vacc3, vb);
+    vacc0 = vminnmh_f16(vacc0, vb);
+    vacc1 = vminnmh_f16(vacc1, vb);
+    vacc2 = vminnmh_f16(vacc2, vb);
+    vacc3 = vminnmh_f16(vacc3, vb);
 
 
 
@@ -59,7 +59,7 @@ void xnn_f16_vminc_ukernel__fp16arith_x4(
   if XNN_UNLIKELY(batch != 0) {
     do {
       float16_t vacc = *a++;
-      vacc = vminh_f16(vacc, vb);
+      vacc = vminnmh_f16(vacc, vb);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

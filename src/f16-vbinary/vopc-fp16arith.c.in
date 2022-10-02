@@ -23,8 +23,8 @@ $VOPH_F16 = {
 $  "ADD": lambda x: "vaddh_f16(%s, vb)" % x,
 $  "DIV": lambda x: "vdivh_f16(%s, vb)" % x,
 $  "RDIV": lambda x: "vdivh_f16(vb, %s)" % x,
-$  "MAX": lambda x: "vmaxh_f16(%s, vb)" % x,
-$  "MIN": lambda x: "vminh_f16(%s, vb)" % x,
+$  "MAX": lambda x: "vmaxnmh_f16(%s, vb)" % x,
+$  "MIN": lambda x: "vminnmh_f16(%s, vb)" % x,
 $  "MUL": lambda x: "vmulh_f16(%s, vb)" % x,
 $  "SUB": lambda x: "vsubh_f16(%s, vb)" % x,
 $  "RSUB": lambda x: "vsubh_f16(vb, %s)" % x,
@@ -70,10 +70,10 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
 
       $if ACTIVATION == "MINMAX":
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vmaxh_f16(vacc${ABC[N]}, vy_min);
+          vacc${ABC[N]} = vmaxnmh_f16(vacc${ABC[N]}, vy_min);
 
         $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = vminh_f16(vacc${ABC[N]}, vy_max);
+          vacc${ABC[N]} = vminnmh_f16(vacc${ABC[N]}, vy_max);
 
       $for N in range(BATCH_TILE):
         o[${N}] = vacc${ABC[N]};
@@ -87,8 +87,8 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
           $if OP == "SQRDIFF":
             vacc = vmulh_f16(vacc, vacc);
           $if ACTIVATION == "MINMAX":
-            vacc = vmaxh_f16(vacc, vy_min);
-            vacc = vminh_f16(vacc, vy_max);
+            vacc = vmaxnmh_f16(vacc, vy_min);
+            vacc = vminnmh_f16(vacc, vy_max);
           *o++ = vacc;
           batch -= sizeof(float16_t);
         } while (batch != 0);
@@ -98,8 +98,8 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
         $if OP == "SQRDIFF":
           vacc = vmulh_f16(vacc, vacc);
         $if ACTIVATION == "MINMAX":
-          vacc = vmaxh_f16(vacc, vy_min);
-          vacc = vminh_f16(vacc, vy_max);
+          vacc = vmaxnmh_f16(vacc, vy_min);
+          vacc = vminnmh_f16(vacc, vy_max);
         *o = vacc;
     }
   $else:
@@ -109,8 +109,8 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
       $if OP == "SQRDIFF":
         vacc = vmulh_f16(vacc, vacc);
       $if ACTIVATION == "MINMAX":
-        vacc = vmaxh_f16(vacc, vy_min);
-        vacc = vminh_f16(vacc, vy_max);
+        vacc = vmaxnmh_f16(vacc, vy_min);
+        vacc = vminnmh_f16(vacc, vy_max);
       *o++ = vacc;
       batch -= sizeof(float16_t);
     } while (batch != 0);

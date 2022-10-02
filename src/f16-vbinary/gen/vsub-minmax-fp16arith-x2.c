@@ -49,11 +49,11 @@ void xnn_f16_vsub_minmax_ukernel__fp16arith_x2(
     float16_t vacc1 = vsubh_f16(va1, vb1);
 
 
-    vacc0 = vmaxh_f16(vacc0, vy_min);
-    vacc1 = vmaxh_f16(vacc1, vy_min);
+    vacc0 = vmaxnmh_f16(vacc0, vy_min);
+    vacc1 = vmaxnmh_f16(vacc1, vy_min);
 
-    vacc0 = vminh_f16(vacc0, vy_max);
-    vacc1 = vminh_f16(vacc1, vy_max);
+    vacc0 = vminnmh_f16(vacc0, vy_max);
+    vacc1 = vminnmh_f16(vacc1, vy_max);
 
     *o++ = vacc0;
     *o++ = vacc1;
@@ -62,8 +62,8 @@ void xnn_f16_vsub_minmax_ukernel__fp16arith_x2(
     const float16_t va = *a;
     const float16_t vb = *b;
     float16_t vacc = vsubh_f16(va, vb);
-    vacc = vmaxh_f16(vacc, vy_min);
-    vacc = vminh_f16(vacc, vy_max);
+    vacc = vmaxnmh_f16(vacc, vy_min);
+    vacc = vminnmh_f16(vacc, vy_max);
     *o = vacc;
   }
 }

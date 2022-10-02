@@ -41,8 +41,8 @@ void xnn_f16_vmax_ukernel__fp16arith_x2(
     const float16_t vb0 = *b++;
     const float16_t vb1 = *b++;
 
-    float16_t vacc0 = vmaxh_f16(va0, vb0);
-    float16_t vacc1 = vmaxh_f16(va1, vb1);
+    float16_t vacc0 = vmaxnmh_f16(va0, vb0);
+    float16_t vacc1 = vmaxnmh_f16(va1, vb1);
 
 
 
@@ -52,7 +52,7 @@ void xnn_f16_vmax_ukernel__fp16arith_x2(
   if XNN_UNLIKELY(batch != 0) {
     const float16_t va = *a;
     const float16_t vb = *b;
-    float16_t vacc = vmaxh_f16(va, vb);
+    float16_t vacc = vmaxnmh_f16(va, vb);
     *o = vacc;
   }
 }
