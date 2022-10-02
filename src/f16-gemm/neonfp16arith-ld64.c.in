@@ -87,12 +87,9 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
             $for M in range(MR):
               vacc${M}x${ABC[N:N+8]} = vfmaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
         #else
-          $for M in range(MR):
-            const float16x8_t va${M}c${L} = vdupq_lane_f16(va${M}, ${L});
-
           $for N in range(0, NR, 8):
             $for M in range(MR):
-              vacc${M}x${ABC[N:N+8]} = vfmaq_f16(vacc${M}x${ABC[N:N+8]}, va${M}c${L}, vb${ABC[N:N+8]}c${L});
+              vacc${M}x${ABC[N:N+8]} = vaddq_f16(vacc${M}x${ABC[N:N+8]}, vmulq_lane_f16(vb${ABC[N:N+8]}c${L}, va${M}, ${L}));
         #endif
 
       k -= 4 * sizeof(__fp16);
