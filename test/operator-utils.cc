@@ -8,7 +8,7 @@
 #include <xnnpack/params.h>
 #include <gtest/gtest.h>
 
-TEST(COMPUTE_CONVOLUTION_OUTPUT_DMENSION, compute) {
+TEST(COMPUTE_CONVOLUTION_OUTPUT_DIMENSION, compute) {
   ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 1), 3);
   ASSERT_EQ(xnn_compute_convolution_output_dimension(10, 3, 2, 1), 6);
   ASSERT_EQ(xnn_compute_convolution_output_dimension(5, 3, 1, 2), 2);

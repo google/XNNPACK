@@ -8088,7 +8088,7 @@ IF(XNNPACK_BUILD_TESTS)
   # ---[ Build microkernel-level unit tests
   ADD_EXECUTABLE(bf16-gemm-minmax-test test/bf16-gemm-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(bf16-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init)
+  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init)
   ADD_TEST(NAME bf16-gemm-minmax-test COMMAND bf16-gemm-minmax-test)
 
   ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8378,7 +8378,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc test/f32-gemm-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME f32-gemm-minmax-test COMMAND f32-gemm-minmax-test)
 
   ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc test/f32-gemminc-minmax-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -8412,7 +8412,7 @@ IF(XNNPACK_BUILD_TESTS)
     # Work-around for "too many sections" error
     TARGET_COMPILE_OPTIONS(f32-igemm-minmax-test PRIVATE "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:-Wa,-mbig-obj>")
   ENDIF()
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME f32-igemm-minmax-test COMMAND f32-igemm-minmax-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -8732,12 +8732,12 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(qc8-gemm-minmax-fp32-test test/qc8-gemm-minmax-fp32.cc test/qc8-gemm-minmax-fp32-2.cc test/qc8-gemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qc8-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(qc8-gemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qc8-gemm-minmax-fp32-test COMMAND qc8-gemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qc8-igemm-minmax-fp32-test test/qc8-igemm-minmax-fp32.cc test/qc8-igemm-minmax-fp32-2.cc test/qc8-igemm-minmax-fp32-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qc8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(qc8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qc8-igemm-minmax-fp32-test COMMAND qc8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-dwconv-minmax-fp32-test test/qs8-dwconv-minmax-fp32.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
@@ -8772,17 +8772,17 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(qs8-gemm-minmax-rndnu-test test/qs8-gemm-minmax-rndnu.cc test/qs8-gemm-minmax-rndnu-2.cc test/qs8-gemm-minmax-rndnu-3.cc test/qs8-gemm-minmax-rndnu-4.cc test/qs8-gemm-minmax-rndnu-5.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-gemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(qs8-gemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-gemm-minmax-rndnu-test COMMAND qs8-gemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-fp32-test test/qs8-igemm-minmax-fp32.cc test/qs8-igemm-minmax-fp32-2.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-fp32-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-igemm-minmax-fp32-test COMMAND qs8-igemm-minmax-fp32-test)
 
   ADD_EXECUTABLE(qs8-igemm-minmax-rndnu-test test/qs8-igemm-minmax-rndnu.cc test/qs8-igemm-minmax-rndnu-2.cc test/qs8-igemm-minmax-rndnu-3.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(qs8-igemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE XNNPACK cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
+  TARGET_LINK_LIBRARIES(qs8-igemm-minmax-rndnu-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main jit gemm-microkernel-tester microparams_init memory)
   ADD_TEST(NAME qs8-igemm-minmax-rndnu-test COMMAND qs8-igemm-minmax-rndnu-test)
 
   ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc $<TARGET_OBJECTS:all_microkernels>)
@@ -9103,7 +9103,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(packing-test test/packing.cc)
   TARGET_INCLUDE_DIRECTORIES(packing-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE XNNPACK fp16 gtest gtest_main operators pthreadpool packing)
+  TARGET_LINK_LIBRARIES(packing-test PRIVATE packing fp16 gtest gtest_main pthreadpool)
 ENDIF()
 
 # ---[ XNNPACK microbenchmarks
@@ -9148,24 +9148,24 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   ADD_EXECUTABLE(f32-expminus-ulp-eval eval/f32-expminus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-expminus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-expminus-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-expm1minus-ulp-eval eval/f32-expm1minus-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-expm1minus-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-expm1minus-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-extexp-ulp-eval eval/f32-extexp-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   SET_TARGET_PROPERTIES(f32-extexp-ulp-eval PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-extexp-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-extexp-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-sigmoid-ulp-eval eval/f32-sigmoid-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-sigmoid-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-sigmoid-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   ADD_EXECUTABLE(f32-sqrt-ulp-eval eval/f32-sqrt-ulp.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-sqrt-ulp-eval PRIVATE . src)
-  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE XNNPACK benchmark bench-utils cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool)
 
   # ---[ Build accuracy tests
   ADD_EXECUTABLE(f16-sqrt-eval eval/f16-sqrt.cc $<TARGET_OBJECTS:all_microkernels>)
