@@ -15,6 +15,7 @@
 #include <xnnpack/common.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
@@ -53,28 +54,28 @@ void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
       #else
-        vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c0, va0, 0));
+        vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
       #endif
       const float16x8_t vb01234567c1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
       #else
-        vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c1, va0, 1));
+        vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
       #endif
       const float16x8_t vb01234567c2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
       #else
-        vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c2, va0, 2));
+        vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
       #endif
       const float16x8_t vb01234567c3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
       #else
-        vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c3, va0, 3));
+        vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
       #endif
 
       k -= 4 * sizeof(__fp16);

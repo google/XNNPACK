@@ -198,6 +198,23 @@ float16_t vsqrth_f16(float16_t v) {
 }
 #endif  // AArch32 Clang targeting ARMv8.2-A with FP16 arithmetics
 
+// AArch32 targeting ARMv8.2-A with NEON+FP16 arithmetics
+#if XNN_ARCH_ARM && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#include <arm_neon.h>
+
+static XNN_INTRINSIC
+float16x8_t vmlaq_lane_f16(float16x8_t acc, float16x8_t x, float16x4_t y, const int n) {
+  #if defined(__GNUC__)
+    __asm__ ("vmla.f16 %q[acc], %q[x], %P[y][%c[n]]"
+        : [acc] "+w" (acc)
+        : [x] "w" (x), [y] "x" (y), [n] "i" (n));
+    return acc;
+  #else
+    return vaddq_f16(vacc, vmulq_lane_f16(x, y, n));
+  #endif
+}
+#endif  // AArch32 targeting ARMv8.2-A with NEON+FP16 arithmetics
+
 #if XNN_ARCH_ARM64
 #include <arm_neon.h>
 

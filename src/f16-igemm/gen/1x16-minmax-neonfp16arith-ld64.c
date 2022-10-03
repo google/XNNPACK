@@ -13,6 +13,7 @@
 #include <arm_neon.h>
 
 #include <xnnpack/igemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
@@ -67,8 +68,8 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
           vacc0x89ABCDEF = vfmaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc0, va0, 0);
         #else
-          vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c0, va0, 0));
-          vacc0x89ABCDEF = vaddq_f16(vacc0x89ABCDEF, vmulq_lane_f16(vb89ABCDEFc0, va0, 0));
+          vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
+          vacc0x89ABCDEF = vmlaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc0, va0, 0);
         #endif
         const float16x8_t vb01234567c1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
         const float16x8_t vb89ABCDEFc1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
@@ -77,8 +78,8 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
           vacc0x89ABCDEF = vfmaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc1, va0, 1);
         #else
-          vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c1, va0, 1));
-          vacc0x89ABCDEF = vaddq_f16(vacc0x89ABCDEF, vmulq_lane_f16(vb89ABCDEFc1, va0, 1));
+          vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
+          vacc0x89ABCDEF = vmlaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc1, va0, 1);
         #endif
         const float16x8_t vb01234567c2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
         const float16x8_t vb89ABCDEFc2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
@@ -87,8 +88,8 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
           vacc0x89ABCDEF = vfmaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc2, va0, 2);
         #else
-          vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c2, va0, 2));
-          vacc0x89ABCDEF = vaddq_f16(vacc0x89ABCDEF, vmulq_lane_f16(vb89ABCDEFc2, va0, 2));
+          vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
+          vacc0x89ABCDEF = vmlaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc2, va0, 2);
         #endif
         const float16x8_t vb01234567c3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
         const float16x8_t vb89ABCDEFc3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
@@ -97,8 +98,8 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
           vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
           vacc0x89ABCDEF = vfmaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc3, va0, 3);
         #else
-          vacc0x01234567 = vaddq_f16(vacc0x01234567, vmulq_lane_f16(vb01234567c3, va0, 3));
-          vacc0x89ABCDEF = vaddq_f16(vacc0x89ABCDEF, vmulq_lane_f16(vb89ABCDEFc3, va0, 3));
+          vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
+          vacc0x89ABCDEF = vmlaq_lane_f16(vacc0x89ABCDEF, vb89ABCDEFc3, va0, 3);
         #endif
       }
       if XNN_UNLIKELY(k != 0) {

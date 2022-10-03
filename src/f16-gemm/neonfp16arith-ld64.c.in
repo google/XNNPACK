@@ -13,6 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
@@ -89,7 +90,7 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
         #else
           $for N in range(0, NR, 8):
             $for M in range(MR):
-              vacc${M}x${ABC[N:N+8]} = vaddq_f16(vacc${M}x${ABC[N:N+8]}, vmulq_lane_f16(vb${ABC[N:N+8]}c${L}, va${M}, ${L}));
+              vacc${M}x${ABC[N:N+8]} = vmlaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
         #endif
 
       k -= 4 * sizeof(__fp16);
