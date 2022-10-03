@@ -1537,6 +1537,11 @@ SET(ALL_ARMSIMD32_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/vlrelu-armsimd32-x4.c
   src/qu8-vlrelu/gen/vlrelu-armsimd32-x8.c)
 
+SET(PROD_FP16ARITH_MICROKERNEL_SRCS
+  src/f16-vbinary/gen/vdiv-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vdivc-minmax-fp16arith-x2.c
+  src/f16-vbinary/gen/vrdivc-minmax-fp16arith-x2.c)
+
 SET(ALL_FP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/vadd-minmax-fp16arith-x1.c
   src/f16-vbinary/gen/vadd-minmax-fp16arith-x2.c
@@ -3514,22 +3519,28 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
+  src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c
   src/f16-gavgpool-cw/neonfp16arith-x8.c
   src/f16-gavgpool/gen/7p7x-minmax-neonfp16arith-c8.c
   src/f16-gavgpool/gen/7x-minmax-neonfp16arith-c8.c
+  src/f16-gemm/gen/1x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/1x16-minmax-neonfp16arith-ld64.c
+  src/f16-gemm/gen/6x8-minmax-neonfp16arith-ld64.c
   src/f16-gemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-ibilinear-chw/gen/neonfp16arith-p8.c
   src/f16-ibilinear/gen/neonfp16arith-c8.c
+  src/f16-igemm/gen/1x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/1x16-minmax-neonfp16arith-ld64.c
+  src/f16-igemm/gen/6x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/6x16-minmax-neonfp16arith-ld64.c
   src/f16-maxpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-pavgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-pavgpool/9x-minmax-neonfp16arith-c8.c
   src/f16-prelu/gen/neonfp16arith-2x16.c
+  src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x32.c
   src/f16-raddstoreexpminusmax/gen/neonfp16arith-rr2-p2-x40.c
   src/f16-rmax/neonfp16arith.c
   src/f16-spmm/gen/32x1-minmax-neonfp16arith.c
@@ -3555,7 +3566,9 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/vrndne-neonfp16arith-x16.c
   src/f16-vrnd/gen/vrndu-neonfp16arith-x16.c
   src/f16-vrnd/gen/vrndz-neonfp16arith-x16.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c
+  src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x8.c
   src/f16-vunary/gen/vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/vneg-neonfp16arith-x16.c
   src/f16-vunary/gen/vsqr-neonfp16arith-x16.c)
@@ -7131,7 +7144,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFMA_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONV8_MICROKERNEL_SRCS})
   IF(XNNPACK_ENABLE_ARM_FP16)
-    LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_FP16ARITH_MICROKERNEL_SRCS})
+    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_FP16ARITH_MICROKERNEL_SRCS})
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
@@ -7143,6 +7156,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^armv[5-8]" OR IOS_ARCH MATCHES "^armv7")
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFMA_MICROKERNEL_SRCS})
   LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONV8_MICROKERNEL_SRCS})
   IF(XNNPACK_ENABLE_ARM_FP16)
+    LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_FP16ARITH_MICROKERNEL_SRCS})
     LIST(APPEND ALL_MICROKERNEL_SRCS ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_BF16)
