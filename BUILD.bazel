@@ -16712,6 +16712,7 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "arm_fp16_enabled_by_default",
     match_any = [
+        ":aarch32",
         ":aarch64",
     ],
 )

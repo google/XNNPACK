@@ -159,7 +159,7 @@ int32x4_t vcvtnq_s32_f32(float32x4_t v) {
 #endif  // ARM NEON
 
 // AArch32 Clang targeting ARMv8.2-A with FP16 arithmetics
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM && (defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) && defined(__clang__))
+#if XNN_ARCH_ARM && (defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) && defined(__clang__))
 #include <arm_fp16.h>
 
 static XNN_INTRINSIC
@@ -199,7 +199,7 @@ float16_t vsqrth_f16(float16_t v) {
 #endif  // AArch32 Clang targeting ARMv8.2-A with FP16 arithmetics
 
 // AArch32 targeting ARMv8.2-A with NEON+FP16 arithmetics
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#if XNN_ARCH_ARM && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #include <arm_neon.h>
 
 #ifdef __GNUC__
