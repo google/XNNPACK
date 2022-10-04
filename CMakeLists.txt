@@ -3518,8 +3518,8 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
 SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
-  src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c
+  src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x4-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up16x9-minmax-neonfp16arith.c
@@ -3566,8 +3566,8 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vrnd/gen/vrndne-neonfp16arith-x16.c
   src/f16-vrnd/gen/vrndu-neonfp16arith-x16.c
   src/f16-vrnd/gen/vrndz-neonfp16arith-x16.c
-  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x16.c
   src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1fma-x40.c
+  src/f16-vsigmoid/gen/vsigmoid-neonfp16arith-rr2-p2-nr1recps-x16.c
   src/f16-vsqrt/gen/neonfp16arith-nr1fma1adj-x8.c
   src/f16-vunary/gen/vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/vneg-neonfp16arith-x16.c
@@ -9471,6 +9471,22 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f32-raddstoreexpminusmax-bench bench/f32-raddstoreexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-raddstoreexpminusmax-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f32-raddexpminusmax-bench bench/f32-raddexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f32-raddexpminusmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-raddexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f32-raddextexp-bench bench/f32-raddextexp.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f32-raddextexp-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-raddextexp-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f32-vscaleexpminusmax-bench bench/f32-vscaleexpminusmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f32-vscaleexpminusmax-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vscaleexpminusmax-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
+
+  ADD_EXECUTABLE(f32-vscaleextexp-bench bench/f32-vscaleextexp.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f32-vscaleextexp-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vscaleextexp-bench PRIVATE benchmark bench-utils cpuinfo fp16 pthreadpool microparams_init)
 
   ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE . include src)
