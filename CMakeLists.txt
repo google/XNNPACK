@@ -8120,6 +8120,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-avgpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
   ADD_TEST(NAME f16-avgpool-minmax-test COMMAND f16-avgpool-minmax-test)
 
+  ADD_EXECUTABLE(f16-conv-hwc2chw-test test/f16-conv-hwc2chw.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-conv-hwc2chw-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
+  ADD_TEST(NAME f16-conv-hwc2chw-test COMMAND f16-conv-hwc2chw-test)
+
   ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc $<TARGET_OBJECTS:all_microkernels> $<TARGET_OBJECTS:packing>)
   TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
@@ -8164,6 +8169,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(f16-spmm-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-spmm-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
   ADD_TEST(NAME f16-spmm-minmax-test COMMAND f16-spmm-minmax-test)
+
+  ADD_EXECUTABLE(f16-rmax-test test/f16-rmax.cc $<TARGET_OBJECTS:all_microkernels>)
+  TARGET_INCLUDE_DIRECTORIES(f16-rmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-rmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main microparams_init)
+  ADD_TEST(NAME f16-rmax-test COMMAND f16-rmax-test)
 
   ADD_EXECUTABLE(f16-vabs-test test/f16-vabs.cc $<TARGET_OBJECTS:all_microkernels>)
   TARGET_INCLUDE_DIRECTORIES(f16-vabs-test PRIVATE include src test)
