@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
