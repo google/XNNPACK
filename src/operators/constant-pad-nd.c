@@ -29,7 +29,7 @@ static enum xnn_status create_constant_pad_nd(
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
       "failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -39,7 +39,7 @@ static enum xnn_status create_constant_pad_nd(
   if (constant_pad_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_constant_pad_nd_x32));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
