@@ -145,18 +145,9 @@ enum xnn_status xnn_define_static_transpose(
     return status;
   }
 
-  if (num_dims == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
-      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (num_dims > XNN_MAX_TENSOR_DIMS) {
-    xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be <= %d",
-      xnn_node_type_to_string(xnn_node_type_static_transpose), num_dims, XNN_MAX_TENSOR_DIMS);
-    return xnn_status_invalid_parameter;
+  status = xnn_subgraph_check_num_dims(xnn_node_type_static_transpose, num_dims);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   for (size_t i = 0; i < num_dims; ++i) {

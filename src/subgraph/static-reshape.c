@@ -243,11 +243,9 @@ enum xnn_status xnn_define_static_reshape(
   }
 #endif  // !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
 
-  if (num_dims > XNN_MAX_TENSOR_DIMS) {
-    xnn_log_error(
-      "failed to define %s operator with %zu-dimensional output shape: at most %zu dimensions are supported",
-      xnn_node_type_to_string(xnn_node_type_static_reshape), num_dims, (size_t) XNN_MAX_TENSOR_DIMS);
-    return xnn_status_unsupported_parameter;
+  status = xnn_subgraph_check_num_dims(xnn_node_type_static_reshape, num_dims);
+  if (status != xnn_status_success) {
+    return status;
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

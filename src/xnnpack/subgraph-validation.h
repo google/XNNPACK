@@ -48,6 +48,7 @@ enum xnn_status xnn_subgraph_check_datatype_matches_two_inputs(
   uint32_t output_id,
   const struct xnn_value* output_value);
 enum xnn_status xnn_subgraph_check_output_min_max(enum xnn_node_type node_type, float output_min, float output_max);
+enum xnn_status xnn_subgraph_check_num_dims(enum xnn_node_type node_type, size_t num_dims);
 
 #ifdef __cplusplus
 }  // extern "C"
