@@ -15410,6 +15410,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd-eager.cc",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -15438,6 +15439,7 @@ xnnpack_unit_test(
         "test/transpose-nd-eager.cc",
         "test/transpose-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
