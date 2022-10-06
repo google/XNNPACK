@@ -8117,6 +8117,12 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Normalization unit tests
+  ADD_EXECUTABLE(slice-normalization-test test/slice-normalization.cc)
+  TARGET_INCLUDE_DIRECTORIES(slice-normalization-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(slice-normalization-test PRIVATE gtest gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(slice-normalization-test PRIVATE normalization)
+  ADD_TEST(NAME slice-normalization-test COMMAND slice-normalization-test)
+
   ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
   TARGET_INCLUDE_DIRECTORIES(transpose-normalization-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE gtest gtest_main pthreadpool)

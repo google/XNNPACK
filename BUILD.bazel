@@ -11448,6 +11448,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":math",
+        ":xnnpack_h",
     ],
 )
 
@@ -11463,6 +11464,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":math",
+        ":xnnpack_h",
     ],
 )
 
@@ -15319,6 +15321,15 @@ xnnpack_unit_test(
     srcs = [
         "test/negate-nc.cc",
         "test/negate-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "slice_normalization_test",
+    srcs = [
+        "test/slice-normalization.cc",
+        "test/slice-normalization-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

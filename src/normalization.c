@@ -7,7 +7,54 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <xnnpack.h>
 #include <xnnpack/math.h>
+
+void xnn_normalize_slice(
+    const size_t num_dims,
+    const size_t* offsets,
+    const size_t* sizes,
+    const size_t* input_shape,
+    size_t* normalized_offsets,
+    size_t* normalized_input_shape,
+    size_t* normalized_output_shape,
+    size_t* num_normalized_dims)
+{
+  *num_normalized_dims = num_dims;
+  for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+    normalized_offsets[i] = 0;
+    normalized_input_shape[i] = 1;
+    normalized_output_shape[i] = 1;
+  }
+
+  size_t output_dims = num_dims;
+  bool merge_previous_dim = false;
+  size_t num_sliced_dims = 0;
+  for (size_t i = 0; i < num_dims; i++) {
+    const size_t begin = offsets[num_dims - 1 - i];
+    const size_t size = sizes[num_dims - 1 - i];
+    const size_t input_dim = input_shape[num_dims - 1 - i];
+
+    const bool merge_current_dim = (begin == 0 && size == input_dim) || (size == 1);
+    if (merge_previous_dim) {
+      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] =
+        begin * normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims];
+      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] *= input_dim;
+      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] *= size;
+      output_dims -= 1;
+    } else {
+      normalized_offsets[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = begin;
+      normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = input_dim;
+      normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - num_sliced_dims] = size;
+      if (!merge_current_dim) {
+        // If merge_current_dim, we can merge current dimension with the next dim, so don't advance num_sliced_dims.
+        num_sliced_dims += 1;
+      }
+    }
+    merge_previous_dim = merge_current_dim;
+  }
+  *num_normalized_dims = output_dims;
+}
 
 // Returns true if input stride and output stride are NULL or the expected input/output stride matches the actual input/output stride.
 static bool can_dimension_be_removed(

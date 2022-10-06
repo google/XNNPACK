@@ -11,6 +11,23 @@
 extern "C" {
 #endif
 
+// Calculates normalized offsets, input_shape, and output_shape.
+// Each value in offsets must be less than the corresponding dimension of input_shape.
+// Each value in sizes must be > 0 and less than or equals to the corresponding dimension of input_shape.
+// This function merges dimensions dimensions that are full slices into the outermost dimension possible.
+// E.g. Given input shape { 4, 5, 3 }, with offsets { 0, 2, 0 }, and sizes { 4, 1, 3 }, the innermost dimension is a
+// full slice, and so can be merged with its outer dimension, to give normalized input shape of { 4, 15 },
+// output shape { 4, 3 } with offsets { 0, 6 }.
+void xnn_normalize_slice(
+    const size_t num_dims,
+    const size_t* offsets,
+    const size_t* sizes,
+    const size_t* input_shape,
+    size_t* normalized_offsets,
+    size_t* normalized_input_shape,
+    size_t* normalized_output_shape,
+    size_t* num_normalized_dims);
+
 void xnn_normalize_transpose_permutation(
     const size_t num_dims,
     const size_t element_size,
