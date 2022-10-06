@@ -13,6 +13,7 @@
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
+#include <xnnpack/intrinsics-polyfill.h>
 
 
 void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
@@ -100,10 +101,10 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
 
     size_t w = input_width;
     for (; w >= 16 * sizeof(__fp16); w -= 16 * sizeof(__fp16)) {
-      float16x8_t vo0p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo1p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo2p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo3p0 = vdupq_laneq_f16(vw01234567, 0);
+      float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo1p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo2p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo3p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
       const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0); i0 += 16;
       const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1); i1 += 16;
@@ -116,21 +117,66 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       const float16x8x2_t vi8xGIKMOQSUHJLNPRTV = vld2q_f16(i8); i8 += 16;
 
       // Center column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
-      vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
-      vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[0], vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[0], vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[0], vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[0], vw01234567, 2);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[0], vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[0], vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[0], vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[0], vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[0], vw01234567, 5);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[0], vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[0], vw89, 0);
+      #endif
       // Left column
       const float16x8_t vi0xFHJLNPRT = vextq_f16(vi0x13579BDF, vi0xGIKMOQSUHJLNPRTV.val[1], 7);
       vi0x13579BDF = vi0xGIKMOQSUHJLNPRTV.val[1];
@@ -151,37 +197,127 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       const float16x8_t vi8xFHJLNPRT = vextq_f16(vi8x13579BDF, vi8xGIKMOQSUHJLNPRTV.val[1], 7);
       vi8x13579BDF = vi8xGIKMOQSUHJLNPRTV.val[1];
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xFHJLNPRT, vw01234567, 1);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xFHJLNPRT, vw01234567, 1);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xFHJLNPRT, vw01234567, 1);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xFHJLNPRT, vw01234567, 4);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xFHJLNPRT, vw01234567, 4);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xFHJLNPRT, vw01234567, 4);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4xFHJLNPRT, vw01234567, 7);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6xFHJLNPRT, vw01234567, 7);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8xFHJLNPRT, vw01234567, 7);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xFHJLNPRT, vw01234567, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xFHJLNPRT, vw01234567, 1);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xFHJLNPRT, vw01234567, 1);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xFHJLNPRT, vw01234567, 4);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xFHJLNPRT, vw01234567, 4);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xFHJLNPRT, vw01234567, 4);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi4xFHJLNPRT, vw01234567, 7);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi6xFHJLNPRT, vw01234567, 7);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi8xFHJLNPRT, vw01234567, 7);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
       // Right column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
-      vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
-      vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xGIKMOQSUHJLNPRTV.val[1], vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xGIKMOQSUHJLNPRTV.val[1], vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xGIKMOQSUHJLNPRTV.val[1], vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[1], vw01234567, 3);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xGIKMOQSUHJLNPRTV.val[1], vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xGIKMOQSUHJLNPRTV.val[1], vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xGIKMOQSUHJLNPRTV.val[1], vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xGIKMOQSUHJLNPRTV.val[1], vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[1], vw01234567, 6);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xGIKMOQSUHJLNPRTV.val[1], vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xGIKMOQSUHJLNPRTV.val[1], vw89, 1);
+      #endif
 
       float16x8_t vo0 = vmaxq_f16(vo0p0, vmin);
       float16x8_t vo1 = vmaxq_f16(vo1p0, vmin);
@@ -202,10 +338,10 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
     // Last block has 0-15 pixels to process.
     assert(w < 16 * sizeof(__fp16));
     if XNN_LIKELY(w != 0) {
-      float16x8_t vo0p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo1p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo2p0 = vdupq_laneq_f16(vw01234567, 0);
-      float16x8_t vo3p0 = vdupq_laneq_f16(vw01234567, 0);
+      float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo1p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo2p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
+      float16x8_t vo3p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
       const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0);
       const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1);
@@ -237,21 +373,66 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       const float16x8_t vi8xHJLNPRTV = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi8xGIKMOQSUHJLNPRTV.val[1])));
 
       // Center column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSU, vw01234567, 2);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSU, vw01234567, 2);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSU, vw01234567, 2);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSU, vw01234567, 2);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSU, vw01234567, 5);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSU, vw01234567, 5);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSU, vw01234567, 5);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSU, vw01234567, 5);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSU, vw89, 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSU, vw89, 0);
-      vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSU, vw89, 0);
-      vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSU, vw89, 0);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xGIKMOQSU, vw01234567, 2);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xGIKMOQSU, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xGIKMOQSU, vw01234567, 2);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xGIKMOQSU, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xGIKMOQSU, vw01234567, 2);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xGIKMOQSU, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xGIKMOQSU, vw01234567, 2);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xGIKMOQSU, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xGIKMOQSU, vw01234567, 5);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xGIKMOQSU, vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xGIKMOQSU, vw01234567, 5);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xGIKMOQSU, vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xGIKMOQSU, vw01234567, 5);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xGIKMOQSU, vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xGIKMOQSU, vw01234567, 5);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xGIKMOQSU, vget_high_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2xGIKMOQSU, vw89, 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xGIKMOQSU, vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi4xGIKMOQSU, vw89, 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xGIKMOQSU, vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_lane_f16(vo2p0, vi6xGIKMOQSU, vw89, 0);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xGIKMOQSU, vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_lane_f16(vo3p0, vi8xGIKMOQSU, vw89, 0);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xGIKMOQSU, vw89, 0);
+      #endif
       // Left column
       const float16x8_t vi0xFHJLNPRT = vextq_f16(vi0x13579BDF, vi0xHJLNPRTV, 7);
       const float16x8_t vi1xFHJLNPRT = vextq_f16(vi1x13579BDF, vi1xHJLNPRTV, 7);
@@ -263,37 +444,127 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8(
       const float16x8_t vi7xFHJLNPRT = vextq_f16(vi7x13579BDF, vi7xHJLNPRTV, 7);
       const float16x8_t vi8xFHJLNPRT = vextq_f16(vi8x13579BDF, vi8xHJLNPRTV, 7);
 
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xFHJLNPRT, vw01234567, 1);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xFHJLNPRT, vw01234567, 1);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xFHJLNPRT, vw01234567, 1);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xFHJLNPRT, vw01234567, 4);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xFHJLNPRT, vw01234567, 4);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xFHJLNPRT, vw01234567, 4);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi4xFHJLNPRT, vw01234567, 7);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi6xFHJLNPRT, vw01234567, 7);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi8xFHJLNPRT, vw01234567, 7);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xFHJLNPRT, vw01234567, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xFHJLNPRT, vw01234567, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xFHJLNPRT, vw01234567, 1);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xFHJLNPRT, vw01234567, 1);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xFHJLNPRT, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xFHJLNPRT, vw01234567, 4);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xFHJLNPRT, vw01234567, 4);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xFHJLNPRT, vw01234567, 4);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xFHJLNPRT, vw01234567, 4);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xFHJLNPRT, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi2xFHJLNPRT, vw01234567, 7);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi4xFHJLNPRT, vw01234567, 7);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi6xFHJLNPRT, vw01234567, 7);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi8xFHJLNPRT, vw01234567, 7);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xFHJLNPRT, vget_high_f16(vw01234567), 3);
+      #endif
       // Right column
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xHJLNPRTV, vw01234567, 3);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xHJLNPRTV, vw01234567, 3);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xHJLNPRTV, vw01234567, 3);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xHJLNPRTV, vw01234567, 3);
-
-      vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xHJLNPRTV, vw01234567, 6);
-      vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xHJLNPRTV, vw01234567, 6);
-      vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xHJLNPRTV, vw01234567, 6);
-      vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xHJLNPRTV, vw01234567, 6);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2xHJLNPRTV, vw89, 1);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi4xHJLNPRTV, vw89, 1);
-      vo2p0 = vfmaq_lane_f16(vo2p0, vi6xHJLNPRTV, vw89, 1);
-      vo3p0 = vfmaq_lane_f16(vo3p0, vi8xHJLNPRTV, vw89, 1);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0xHJLNPRTV, vw01234567, 3);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0xHJLNPRTV, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi2xHJLNPRTV, vw01234567, 3);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2xHJLNPRTV, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi4xHJLNPRTV, vw01234567, 3);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi4xHJLNPRTV, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi6xHJLNPRTV, vw01234567, 3);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi6xHJLNPRTV, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1xHJLNPRTV, vw01234567, 6);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1xHJLNPRTV, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_laneq_f16(vo1p0, vi3xHJLNPRTV, vw01234567, 6);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3xHJLNPRTV, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_laneq_f16(vo2p0, vi5xHJLNPRTV, vw01234567, 6);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi5xHJLNPRTV, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_laneq_f16(vo3p0, vi7xHJLNPRTV, vw01234567, 6);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi7xHJLNPRTV, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2xHJLNPRTV, vw89, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2xHJLNPRTV, vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi4xHJLNPRTV, vw89, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi4xHJLNPRTV, vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo2p0 = vfmaq_lane_f16(vo2p0, vi6xHJLNPRTV, vw89, 1);
+      #else
+        vo2p0 = vmlaq_lane_f16(vo2p0, vi6xHJLNPRTV, vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo3p0 = vfmaq_lane_f16(vo3p0, vi8xHJLNPRTV, vw89, 1);
+      #else
+        vo3p0 = vmlaq_lane_f16(vo3p0, vi8xHJLNPRTV, vw89, 1);
+      #endif
 
       float16x8_t vo0 = vmaxq_f16(vo0p0, vmin);
       float16x8_t vo1 = vmaxq_f16(vo1p0, vmin);
