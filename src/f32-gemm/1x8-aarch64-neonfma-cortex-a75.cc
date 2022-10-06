@@ -17,8 +17,8 @@
 namespace xnnpack {
 namespace aarch64 {
 namespace {
-class Generator : public Assembler {
-  using Assembler::Assembler;
+class Generator : public MacroAssembler {
+  using MacroAssembler::MacroAssembler;
 
 public:
   void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max);
