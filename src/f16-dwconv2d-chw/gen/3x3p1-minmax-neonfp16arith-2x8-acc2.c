@@ -14,6 +14,9 @@
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
 
+#ifdef XNN_ARCH_ARM
+#include <xnnpack/intrinsics-polyfill.h>
+#endif
 
 void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2(
     size_t input_height,
@@ -79,30 +82,64 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2(
       const float16x8_t vi3xGHIJKLMN = vld1q_f16(i3); i3 += 8;
 
       // Center column
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #endif
       float16x8_t vo0p1 = vmulq_lane_f16(vi1x89ABCDEF, vget_high_f16(vw01234567), 1);
       float16x8_t vo1p1 = vmulq_lane_f16(vi2x89ABCDEF, vget_high_f16(vw01234567), 1);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
+      #endif
       // Left column
       const float16x8_t vi0x789ABCDE = vextq_f16(vi0x01234567, vi0x89ABCDEF, 7);
       const float16x8_t vi1x789ABCDE = vextq_f16(vi1x01234567, vi1x89ABCDEF, 7);
       const float16x8_t vi2x789ABCDE = vextq_f16(vi2x01234567, vi2x89ABCDEF, 7);
       const float16x8_t vi3x789ABCDE = vextq_f16(vi3x01234567, vi3x89ABCDEF, 7);
 
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
-
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
-
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
+      #endif
       vi0x01234567 = vi0x89ABCDEF;
       vi1x01234567 = vi1x89ABCDEF;
       vi2x01234567 = vi2x89ABCDEF;
@@ -114,15 +151,36 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2(
       const float16x8_t vi2x9ABCDEFG = vextq_f16(vi2x89ABCDEF, vi2xGHIJKLMN, 1);
       const float16x8_t vi3x9ABCDEFG = vextq_f16(vi3x89ABCDEF, vi3xGHIJKLMN, 1);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
-
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
+      #endif
       vi0x89ABCDEF = vi0xGHIJKLMN;
       vi1x89ABCDEF = vi1xGHIJKLMN;
       vi2x89ABCDEF = vi2xGHIJKLMN;
@@ -154,30 +212,64 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2(
       vi3x89ABCDEF = vreinterpretq_f16_u16(vandq_u16(vmask, vreinterpretq_u16_f16(vi3x89ABCDEF)));
 
       // Center column
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi1x89ABCDEF, vget_low_f16(vw01234567), 2);
+      #endif
       float16x8_t vo0p1 = vmulq_lane_f16(vi1x89ABCDEF, vget_high_f16(vw01234567), 1);
       float16x8_t vo1p1 = vmulq_lane_f16(vi2x89ABCDEF, vget_high_f16(vw01234567), 1);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2x89ABCDEF, vw89, 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3x89ABCDEF, vw89, 0);
+      #endif
       // Left column
       const float16x8_t vi0x789ABCDE = vextq_f16(vi0x01234567, vi0x89ABCDEF, 7);
       const float16x8_t vi1x789ABCDE = vextq_f16(vi1x01234567, vi1x89ABCDEF, 7);
       const float16x8_t vi2x789ABCDE = vextq_f16(vi2x01234567, vi2x89ABCDEF, 7);
       const float16x8_t vi3x789ABCDE = vextq_f16(vi3x01234567, vi3x89ABCDEF, 7);
 
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
-
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
-
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi0x789ABCDE, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi1x789ABCDE, vget_low_f16(vw01234567), 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi2x789ABCDE, vget_high_f16(vw01234567), 0);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi3x789ABCDE, vget_high_f16(vw01234567), 3);
+      #endif
       // Right column
       const float16x8_t vzero = vmovq_n_f16(0);
       const float16x8_t vi0x9ABCDEFG = vextq_f16(vi0x89ABCDEF, vzero, 1);
@@ -185,15 +277,36 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2(
       const float16x8_t vi2x9ABCDEFG = vextq_f16(vi2x89ABCDEF, vzero, 1);
       const float16x8_t vi3x9ABCDEFG = vextq_f16(vi3x89ABCDEF, vzero, 1);
 
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
-
-      vo0p1 = vfmaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
-      vo1p1 = vfmaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
-
-      vo0p0 = vfmaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
-      vo1p0 = vfmaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
-
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi1x9ABCDEFG, vget_low_f16(vw01234567), 3);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p1 = vfmaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #else
+        vo0p1 = vmlaq_lane_f16(vo0p1, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p1 = vfmaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #else
+        vo1p1 = vmlaq_lane_f16(vo1p1, vi2x9ABCDEFG, vget_high_f16(vw01234567), 2);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo0p0 = vfmaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
+      #else
+        vo0p0 = vmlaq_lane_f16(vo0p0, vi2x9ABCDEFG, vw89, 1);
+      #endif
+      #if XNN_ARCH_ARM64
+        vo1p0 = vfmaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
+      #else
+        vo1p0 = vmlaq_lane_f16(vo1p0, vi3x9ABCDEFG, vw89, 1);
+      #endif
       vo0p0 = vaddq_f16(vo0p0, vo0p1);
       vo1p0 = vaddq_f16(vo1p0, vo1p1);
 
