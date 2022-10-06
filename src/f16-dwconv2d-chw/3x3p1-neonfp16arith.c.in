@@ -11,10 +11,8 @@ $assert ACCUMULATORS >= 1
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
-
-#ifdef XNN_ARCH_ARM
 #include <xnnpack/intrinsics-polyfill.h>
-#endif
+
 
 void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" % ACCUMULATORS if ACCUMULATORS > 1 else ""}(
     size_t input_height,
@@ -76,7 +74,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
       // Center column
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p0 = vfmaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 2);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 2);
         #else
           vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 2);
         #endif
@@ -85,7 +83,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
           float16x8_t vo${M}p1 = vmulq_lane_f16(vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
         $else:
           #if XNN_ARCH_ARM64
-            vo${M}p0 = vfmaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw01234567, 5);
           #else
             vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
           #endif
@@ -107,19 +105,19 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
           float16x8_t vo${M}p3 = vmulq_lane_f16(vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
         $else:
           #if XNN_ARCH_ARM64
-            vo${M}p${3 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
+            vo${M}p${3 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 1);
           #else
             vo${M}p${3 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
           #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${4 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 0);
+          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 4);
         #else
           vo${M}p${4 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 0);
         #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${5 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw01234567), 3);
+          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw01234567, 7);
         #else
           vo${M}p${5 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw01234567), 3);
         #endif
@@ -132,13 +130,13 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
 
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${6 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_low_f16(vw01234567), 3);
+          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 3);
         #else
           vo${M}p${6 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_low_f16(vw01234567), 3);
         #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${7 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_high_f16(vw01234567), 2);
+          vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw01234567, 6);
         #else
           vo${M}p${7 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_high_f16(vw01234567), 2);
         #endif
@@ -183,7 +181,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
       // Center column
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p0 = vfmaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 2);
+          vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M}x89ABCDEF, vw01234567, 2);
         #else
           vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M}x89ABCDEF, vget_low_f16(vw01234567), 2);
         #endif
@@ -192,7 +190,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
           float16x8_t vo${M}p1 = vmulq_lane_f16(vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
         $else:
           #if XNN_ARCH_ARM64
-            vo${M}p0 = vfmaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
+            vo${M}p0 = vfmaq_laneq_f16(vo${M}p0, vi${M+1}x89ABCDEF, vw01234567, 5);
           #else
             vo${M}p0 = vmlaq_lane_f16(vo${M}p0, vi${M+1}x89ABCDEF, vget_high_f16(vw01234567), 1);
           #endif
@@ -214,19 +212,19 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
           float16x8_t vo${M}p3 = vmulq_lane_f16(vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
         $else:
           #if XNN_ARCH_ARM64
-            vo${M}p${3 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
+            vo${M}p${3 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vw01234567, 1);
           #else
             vo${M}p${3 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${3 % ACCUMULATORS}, vi${M}x789ABCDE, vget_low_f16(vw01234567), 1);
           #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${4 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 0);
+          vo${M}p${4 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vw01234567, 4);
         #else
           vo${M}p${4 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${4 % ACCUMULATORS}, vi${M+1}x789ABCDE, vget_high_f16(vw01234567), 0);
         #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${5 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw01234567), 3);
+          vo${M}p${5 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vw01234567, 7);
         #else
           vo${M}p${5 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${5 % ACCUMULATORS}, vi${M+2}x789ABCDE, vget_high_f16(vw01234567), 3);
         #endif
@@ -237,13 +235,13 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
 
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${6 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_low_f16(vw01234567), 3);
+          vo${M}p${6 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vw01234567, 3);
         #else
           vo${M}p${6 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${6 % ACCUMULATORS}, vi${M}x9ABCDEFG, vget_low_f16(vw01234567), 3);
         #endif
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
-          vo${M}p${7 % ACCUMULATORS} = vfmaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_high_f16(vw01234567), 2);
+          vo${M}p${7 % ACCUMULATORS} = vfmaq_laneq_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vw01234567, 6);
         #else
           vo${M}p${7 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${7 % ACCUMULATORS}, vi${M+1}x9ABCDEFG, vget_high_f16(vw01234567), 2);
         #endif

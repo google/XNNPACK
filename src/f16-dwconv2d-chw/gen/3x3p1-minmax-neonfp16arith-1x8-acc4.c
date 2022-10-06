@@ -13,10 +13,8 @@
 
 #include <xnnpack/dwconv.h>
 #include <xnnpack/math.h>
-
-#ifdef XNN_ARCH_ARM
 #include <xnnpack/intrinsics-polyfill.h>
-#endif
+
 
 void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
     size_t input_height,
@@ -73,7 +71,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
 
       // Center column
       #if XNN_ARCH_ARM64
-        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x89ABCDEF, vw01234567, 2);
       #else
         vo0p0 = vmlaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
       #endif
@@ -86,12 +84,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
 
       float16x8_t vo0p3 = vmulq_lane_f16(vi0x789ABCDE, vget_low_f16(vw01234567), 1);
       #if XNN_ARCH_ARM64
-        vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x789ABCDE, vw01234567, 4);
       #else
         vo0p0 = vmlaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
       #endif
       #if XNN_ARCH_ARM64
-        vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+        vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x789ABCDE, vw01234567, 7);
       #else
         vo0p1 = vmlaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
       #endif
@@ -105,12 +103,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
       const float16x8_t vi2x9ABCDEFG = vextq_f16(vi2x89ABCDEF, vi2xGHIJKLMN, 1);
 
       #if XNN_ARCH_ARM64
-        vo0p2 = vfmaq_lane_f16(vo0p2, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+        vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x9ABCDEFG, vw01234567, 3);
       #else
         vo0p2 = vmlaq_lane_f16(vo0p2, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
       #endif
       #if XNN_ARCH_ARM64
-        vo0p3 = vfmaq_lane_f16(vo0p3, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+        vo0p3 = vfmaq_laneq_f16(vo0p3, vi1x9ABCDEFG, vw01234567, 6);
       #else
         vo0p3 = vmlaq_lane_f16(vo0p3, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
       #endif
@@ -146,7 +144,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
 
       // Center column
       #if XNN_ARCH_ARM64
-        vo0p0 = vfmaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi0x89ABCDEF, vw01234567, 2);
       #else
         vo0p0 = vmlaq_lane_f16(vo0p0, vi0x89ABCDEF, vget_low_f16(vw01234567), 2);
       #endif
@@ -159,12 +157,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
 
       float16x8_t vo0p3 = vmulq_lane_f16(vi0x789ABCDE, vget_low_f16(vw01234567), 1);
       #if XNN_ARCH_ARM64
-        vo0p0 = vfmaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
+        vo0p0 = vfmaq_laneq_f16(vo0p0, vi1x789ABCDE, vw01234567, 4);
       #else
         vo0p0 = vmlaq_lane_f16(vo0p0, vi1x789ABCDE, vget_high_f16(vw01234567), 0);
       #endif
       #if XNN_ARCH_ARM64
-        vo0p1 = vfmaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
+        vo0p1 = vfmaq_laneq_f16(vo0p1, vi2x789ABCDE, vw01234567, 7);
       #else
         vo0p1 = vmlaq_lane_f16(vo0p1, vi2x789ABCDE, vget_high_f16(vw01234567), 3);
       #endif
@@ -175,12 +173,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
       const float16x8_t vi2x9ABCDEFG = vextq_f16(vi2x89ABCDEF, vzero, 1);
 
       #if XNN_ARCH_ARM64
-        vo0p2 = vfmaq_lane_f16(vo0p2, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
+        vo0p2 = vfmaq_laneq_f16(vo0p2, vi0x9ABCDEFG, vw01234567, 3);
       #else
         vo0p2 = vmlaq_lane_f16(vo0p2, vi0x9ABCDEFG, vget_low_f16(vw01234567), 3);
       #endif
       #if XNN_ARCH_ARM64
-        vo0p3 = vfmaq_lane_f16(vo0p3, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
+        vo0p3 = vfmaq_laneq_f16(vo0p3, vi1x9ABCDEFG, vw01234567, 6);
       #else
         vo0p3 = vmlaq_lane_f16(vo0p3, vi1x9ABCDEFG, vget_high_f16(vw01234567), 2);
       #endif
