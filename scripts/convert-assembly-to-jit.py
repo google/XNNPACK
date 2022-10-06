@@ -256,7 +256,8 @@ def main(input_file):
         elif '#include <xnnpack/assembly.h>' in line:
           prologue.append(f'#include <cassert>')
           prologue.append(f'#include <cstddef>')
-          prologue.append(f'#include <limits>')
+          if minmax:
+            prologue.append(f'#include <limits>')
           prologue.append('')
           prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
           prologue.append('#include <xnnpack/allocator.h>')

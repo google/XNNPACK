@@ -5,6 +5,7 @@
 
 
 #include <cassert>
+#include <limits>
 
 #include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
