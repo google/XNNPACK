@@ -21,6 +21,7 @@
 #include <cpuinfo.h>
 
 #include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/allocator.h>
 
 #include "bench/utils.h"
@@ -334,6 +335,8 @@ bool CheckAVX512VBMI(benchmark::State& state) {
   return true;
 }
 
+#if XNN_PLATFORM_JIT
+
 CodeMemoryHelper::CodeMemoryHelper() {
   status = xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
 }
@@ -343,6 +346,8 @@ CodeMemoryHelper::~CodeMemoryHelper() {
     xnn_release_code_memory(&buffer);
   }
 }
+
+#endif  // XNN_PLATFORM_JIT
 
 }  // namespace utils
 }  // namespace benchmark

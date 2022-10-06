@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include <xnnpack.h>
+#include <xnnpack/common.h>
 #include <xnnpack/memory.h>
 
 #include <benchmark/benchmark.h>
@@ -171,6 +172,8 @@ inline T Doz(T a, T b) {
   return a >= b ? a - b : T(0);
 }
 
+#if XNN_PLATFORM_JIT
+
 // A struct that uses RAII pattern to allocate and release code memory.
 struct CodeMemoryHelper {
   CodeMemoryHelper();
@@ -179,6 +182,8 @@ struct CodeMemoryHelper {
   xnn_code_buffer buffer;
   xnn_status status;
 };
+
+#endif  // XNN_PLATFORM_JIT
 
 }  // namespace utils
 }  // namespace benchmark
