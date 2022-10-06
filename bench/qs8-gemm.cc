@@ -13,8 +13,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
@@ -38,10 +36,6 @@ static void GEMMBenchmark(benchmark::State& state,
   benchmark::utils::IsaCheckFunction isa_check = nullptr,
   bool extended_weights = false)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("cpuinfo initialization failed");
-    return;
-  }
   if (isa_check && !isa_check(state)) {
     return;
   }

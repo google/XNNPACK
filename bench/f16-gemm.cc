@@ -13,8 +13,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
-
 #include <benchmark/benchmark.h>
 #include <fp16/fp16.h>
 #include "bench/gemm.h"
