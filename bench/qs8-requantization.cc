@@ -27,8 +27,12 @@ class Requantization : public benchmark::Fixture {
  public:
   inline Requantization()
   {
+#if XNN_ARCH_HEXAGON
+    const size_t l1d_size = 16384;
+#else
     cpuinfo_initialize();
     const size_t l1d_size = cpuinfo_get_l1d_cache(0)->size;
+#endif
     const size_t l1d_reserve = 1024;
     n_ = (l1d_size - l1d_reserve) / (sizeof(int32_t) + sizeof(int8_t));
     n_ = n_ / 16 * 16;
