@@ -3128,9 +3128,11 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-4x4.c
   src/f32-dwconv2d-chw/gen/5x5s2p2-minmax-neonfma-1x4-acc2.c
   src/f32-gemm/gen/1x8-minmax-neonfma-lane-ld64.c
+  src/f32-gemm/gen/4x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-gemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/1x8-minmax-neonfma-lane-ld64.c
+  src/f32-igemm/gen/4x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x2-minmax-neonfma-lane-ld64.c
   src/f32-igemm/gen/6x8-minmax-neonfma-lane-ld64.c
   src/f32-spmm/gen/32x2-minmax-neonfma.c
