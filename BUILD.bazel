@@ -11294,6 +11294,7 @@ xnnpack_cc_library(
         ":memory",
         ":microkernels_h",
         ":microparams",
+        ":post_operation",
         ":xnnpack_h",
     ],
 )
@@ -11324,6 +11325,7 @@ xnnpack_cc_library(
         ":memory",
         ":microkernels_h",
         ":microparams",
+        ":post_operation",
         ":xnnpack_h",
     ],
 )
@@ -13677,6 +13679,17 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "f32_gemm_post_operation_test",
+    srcs = [
+        "test/f32-gemm-post-operation.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":post_operation",
     ],
 )
 

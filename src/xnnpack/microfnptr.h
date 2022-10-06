@@ -86,6 +86,20 @@ typedef void (*xnn_f32_gemm_relu_ukernel_function)(
     size_t cn_stride,
     const union xnn_f32_relu_params* params);
 
+// GEneral Matrix Multiplication with post operations
+
+typedef void (*xnn_f32_gemm_post_operation_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const void* params);
+
 // GEMM: GEneral Matrix Multiplication with Min+Max activation
 
 typedef void (*xnn_bf16_gemm_minmax_ukernel_function)(

@@ -466,6 +466,8 @@ class Assembler : public AssemblerBase {
   void vmovl_s8(QRegister qd, DRegister dm);
   void vmrs(CoreRegister rt, SpecialFPRegister spec_reg);
   void vmul_f32(QRegister qd, QRegister qn, QRegister qm);
+  // VMUL.F32 <Qd>, <Qn>, <Dm[x]>
+  void vmul_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   void vneg_f32(QRegister qd, QRegister qm);
   void vpop(DRegisterList regs);
   void vpush(DRegisterList regs);
@@ -515,6 +517,14 @@ class Assembler : public AssemblerBase {
   void vst1(DataSize size, DRegisterList regs, MemOperand op);
   void vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm);
   void vst1(DataSize size, DRegisterLane dd, MemOperand op);
+};
+
+class MacroAssembler : public Assembler {
+  using Assembler::Assembler;
+ public:
+   void f32_hardswish(QRegister sixth, QRegister three, QRegister six,
+                      QRegister zero, const QRegister *accs, size_t num_accs,
+                      const QRegister *tmps, size_t num_tmps);
 };
 
 }  // namespace aarch32

@@ -738,5 +738,41 @@ void Assembler::tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l) {
   return branch_to_label(op | bit_pos | xd.code, BranchType::kTbxz, l);
 }
 
+void MacroAssembler::f32_hardswish(VRegister sixth, VRegister three,
+                                   VRegister six, VRegister zero,
+                                   const VRegister* accs, size_t num_accs,
+                                   const VRegister* tmps, size_t num_tmps) {
+  assert(num_accs >= 4);
+  assert(num_accs % 4 == 0);
+  assert(num_tmps == 4);
+
+  for (size_t i = 0; i < num_accs; i+= 4) {
+    const auto acc0 = accs[i];
+    const auto acc1 = accs[i+1];
+    const auto acc2 = accs[i+2];
+    const auto acc3 = accs[i+3];
+    fmul(tmps[0], acc0, sixth);
+    fmul(tmps[1], acc1, sixth);
+    fmul(tmps[2], acc2, sixth);
+    fmul(tmps[3], acc3, sixth);
+    fadd(acc0, acc0, three);
+    fadd(acc1, acc1, three);
+    fadd(acc2, acc2, three);
+    fadd(acc3, acc3, three);
+    fmax(acc0, acc0, zero);
+    fmax(acc1, acc1, zero);
+    fmax(acc2, acc2, zero);
+    fmax(acc3, acc3, zero);
+    fmin(acc0, acc0, six);
+    fmin(acc1, acc1, six);
+    fmin(acc2, acc2, six);
+    fmin(acc3, acc3, six);
+    fmul(acc0, acc0, tmps[0]);
+    fmul(acc1, acc1, tmps[1]);
+    fmul(acc2, acc2, tmps[2]);
+    fmul(acc3, acc3, tmps[3]);
+  }
+}
+
 }  // namespace aarch64
 }  // namespace xnnpack

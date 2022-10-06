@@ -200,6 +200,9 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xEEF1FA10, a.vmrs(APSR_nzcv, FPSCR));
 
   CHECK_ENCODING(0xF34E2DD2, a.vmul_f32(q9, q15, q1));
+  CHECK_ENCODING(0xF3EE29C7, a.vmul_f32(q9, q15, d7[0]));
+  CHECK_ENCODING(0xF3EE29E7, a.vmul_f32(q9, q15, d7[1]));
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.vmul_f32(q9, q15, d7[2]));
 
   CHECK_ENCODING(0xF3F927EE, a.vneg_f32(q9, q15));
 

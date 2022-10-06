@@ -407,5 +407,13 @@ class Assembler : public AssemblerBase {
 
 };
 
+class MacroAssembler : public Assembler {
+  using Assembler::Assembler;
+ public:
+   void f32_hardswish(VRegister sixth, VRegister three, VRegister six,
+                      VRegister zero, const VRegister *accs, size_t num_accs,
+                      const VRegister *tmps, size_t num_tmps);
+};
+
 }  // namespace aarch64
 }  // namespace xnnpack

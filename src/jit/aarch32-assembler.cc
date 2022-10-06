@@ -3,12 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cmath>
+#include <cstddef>
+
 #include "xnnpack/aarch32-assembler.h"
 #include "xnnpack/assembler.h"
 #include "xnnpack/math.h"
-
-#include <cmath>
-#include <cstddef>
 
 namespace xnnpack {
 namespace aarch32 {
@@ -507,6 +507,14 @@ void Assembler::vmul_f32(QRegister qd, QRegister qn, QRegister qm) {
   emit32(0xF3000D50 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(qm, 5, 0));
 }
 
+void Assembler::vmul_f32(QRegister qd, QRegister qn, DRegisterLane dm) {
+  if (dm.lane > 1) {
+    error_ = Error::kInvalidLaneIndex;
+    return;
+  }
+  emit32(0xF3A00940 | encode(qd, 22, 12) | encode(qn, 7, 16) | encode(dm, 5, 0) | dm.lane << 5);
+}
+
 void Assembler::vneg_f32(QRegister qd, QRegister qm) {
   emit32(0xF3B907C0 | encode(qd, 22, 12) | encode(qm, 5, 0));
 }
@@ -643,6 +651,43 @@ void Assembler::align(uint8_t n) {
     cursor += kInstructionSizeInBytes;
   }
 }
+
+void MacroAssembler::f32_hardswish(QRegister sixth, QRegister three,
+                                   QRegister six, QRegister zero,
+                                   const QRegister* accs, size_t num_accs,
+                                   const QRegister* tmps, size_t num_tmps) {
+  assert(num_accs >= 4);
+  assert(num_accs % 4 == 0);
+  assert(num_tmps == 4);
+
+  for (size_t i = 0; i < num_accs; i+= 4) {
+    const auto acc0 = accs[i];
+    const auto acc1 = accs[i+1];
+    const auto acc2 = accs[i+2];
+    const auto acc3 = accs[i+3];
+    vmul_f32(tmps[0], acc0, sixth.low()[0]);
+    vmul_f32(tmps[1], acc1, sixth.low()[0]);
+    vmul_f32(tmps[2], acc2, sixth.low()[0]);
+    vmul_f32(tmps[3], acc3, sixth.low()[0]);
+    vadd_f32(acc0, acc0, three);
+    vadd_f32(acc1, acc1, three);
+    vadd_f32(acc2, acc2, three);
+    vadd_f32(acc3, acc3, three);
+    vmax_f32(acc0, acc0, zero);
+    vmax_f32(acc1, acc1, zero);
+    vmax_f32(acc2, acc2, zero);
+    vmax_f32(acc3, acc3, zero);
+    vmin_f32(acc0, acc0, six);
+    vmin_f32(acc1, acc1, six);
+    vmin_f32(acc2, acc2, six);
+    vmin_f32(acc3, acc3, six);
+    vmul_f32(acc0, acc0, tmps[0]);
+    vmul_f32(acc1, acc1, tmps[1]);
+    vmul_f32(acc2, acc2, tmps[2]);
+    vmul_f32(acc3, acc3, tmps[3]);
+  }
+}
+
 
 }  // namespace aarch32
 }  // namespace xnnpack

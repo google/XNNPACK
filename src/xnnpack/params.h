@@ -17,7 +17,6 @@
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams.h>
 
-
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT

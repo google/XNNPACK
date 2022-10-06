@@ -9,18 +9,20 @@
 
 #include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
+#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/memory.h>
 #include <xnnpack/microparams.h>
-
+#include <xnnpack/post-operation.h>
 
 namespace xnnpack {
 namespace aarch64 {
 namespace {
-class Generator : public Assembler {
-  using Assembler::Assembler;
+class Generator : public MacroAssembler {
+  using MacroAssembler::MacroAssembler;
  public:
-  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max);
+  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
+  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 // void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld128(
@@ -72,16 +74,19 @@ class Generator : public Assembler {
 // unused B   v12 v13 v14 v15
 
 // Converted from: src/f32-gemm/gen/6x8-minmax-aarch64-neonfma-ld128.S
-void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max) {
+void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params) {
   assert(max_mr <= 6);
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
-
-  Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
-
+  const size_t num_post_operations = jit_gemm_params->num_post_operations;
+  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
+  const float min = jit_gemm_params->f32_minmax.min;
+  const float max = jit_gemm_params->f32_minmax.max;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
   const bool clamp_max = max != +std::numeric_limits<float>::infinity();
+
+  Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
 
   // Load params pointer
   ldr(x8, mem[sp, 8]);
@@ -255,6 +260,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, float min, 
     fmin(v31.v4s(), v31.v4s(), v7.v4s());
   }
 
+  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
+  perform_post_operations(max_mr, num_post_operations, post_operations);
+
   // Store full 6 x 8
   b_lo(l5);
 
@@ -383,6 +391,38 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, float min, 
 
   align(16, AlignInstruction::kHlt);
 }
+
+void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        // Reuse A pointers (don't use v8-v15 as they are callee saved).
+        const auto sixth = v0.v4s();
+        const auto three = v1.v4s();
+        const auto six = v2.v4s();
+        const auto zero = v3.v4s();
+        // v4, v5, v6, v7 available for temporaries.
+        ld3r({sixth, three, six}, mem[x8]++);
+        movi(zero, 0);
+        const VRegister accs[] = {
+          v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s(),
+          v24.v4s(), v25.v4s(), v26.v4s(), v27.v4s(),
+          v28.v4s(), v29.v4s(), v30.v4s(), v31.v4s(),
+        };
+        const VRegister tmps[] = {v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
+
 }  // namespace
 }  // aarch64
 }  // xnnpack
@@ -392,8 +432,7 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128(
   using namespace xnnpack::aarch64;
   Generator g(code);
   assert(params != nullptr);
-  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
+  g.generate(max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

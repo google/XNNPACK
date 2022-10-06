@@ -10,7 +10,7 @@
 
 char* allocate_and_initialize_post_operation_params(
     size_t num_post_operations,
-    struct xnn_post_operation* post_operations) {
+    const struct xnn_post_operation* post_operations) {
 
   union {
     union xnn_f32_hswish_params hswish_params;

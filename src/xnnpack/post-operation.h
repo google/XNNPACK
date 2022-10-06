@@ -31,7 +31,7 @@ extern "C" {
 // This allocation will be freed when the operator holding these params is deleted.
 char* allocate_and_initialize_post_operation_params(
     size_t num_post_operations,
-    struct xnn_post_operation* post_operations);
+    const struct xnn_post_operation* post_operations);
 
 #ifdef __cplusplus
 }  // extern "C"

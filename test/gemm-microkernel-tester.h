@@ -10,8 +10,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/post-operation.h>
 #include <xnnpack/requantization.h>
 
 
@@ -272,6 +274,9 @@ class GemmMicrokernelTester {
     xnn_jit_igemm_code_generator_function igemm_generator,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
+  void Test(
+    xnn_jit_gemm_code_generator_function gemm_generator,
+    const std::vector<xnn_post_operation>& fused_operators) const;
 #endif  // XNN_PLATFORM_JIT
 
  private:

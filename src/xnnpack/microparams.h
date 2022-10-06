@@ -2503,5 +2503,5 @@ struct jit_gemm_params {
     float max;
   } f32_minmax;
   size_t num_post_operations;
-  struct xnn_post_operation* post_operations;
+  const struct xnn_post_operation* post_operations;
 };
