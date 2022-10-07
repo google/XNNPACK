@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
+void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfp16arith_2x2(
     size_t input_height,
     size_t input_width,
     size_t output_y_start,

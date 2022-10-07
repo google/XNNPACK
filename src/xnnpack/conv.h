@@ -95,7 +95,8 @@ DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3
       size_t output_channel_stride,                          \
       const union xnn_f16_minmax_params* params);
 
-DECLARE_F16_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2)
+DECLARE_F16_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch32_neonfp16arith_2x2)
+DECLARE_F16_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfp16arith_2x2)
 
 #ifdef __cplusplus
 }  // extern "C"
