@@ -96,15 +96,10 @@ class SliceNormalizationTester {
                         actual_normalized_output_shape.data(),
                         &actual_num_normalized_dims);
 
-    for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS - num_dims(); i++) {
-      EXPECT_EQ(expected_offsets()[i], actual_normalized_offsets[i])
-          << "at dimension i=" << i;
-      EXPECT_EQ(expected_input_shape()[i], actual_normalized_input_shape[i])
-          << "at dimension i=" << i;
-      EXPECT_EQ(expected_output_shape()[i], actual_normalized_output_shape[i])
-          << "at dimension i=" << i;
-    }
     EXPECT_EQ(expected_num_normalized_dims_, actual_num_normalized_dims);
+    EXPECT_EQ(expected_offsets(), actual_normalized_offsets);
+    EXPECT_EQ(expected_input_shape(), actual_normalized_input_shape);
+    EXPECT_EQ(expected_output_shape(), actual_normalized_output_shape);
   }
 
  private:

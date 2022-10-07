@@ -11447,6 +11447,7 @@ xnnpack_cc_library(
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
+        ":common",
         ":math",
         ":xnnpack_h",
     ],

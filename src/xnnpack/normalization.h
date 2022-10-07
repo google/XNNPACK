@@ -7,6 +7,9 @@
 
 #include <stddef.h>
 
+#include <xnnpack.h>
+#include <xnnpack/common.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,12 +23,12 @@ extern "C" {
 // output shape { 4, 3 } with offsets { 0, 6 }.
 void xnn_normalize_slice(
     const size_t num_dims,
-    const size_t* offsets,
-    const size_t* sizes,
-    const size_t* input_shape,
-    size_t* normalized_offsets,
-    size_t* normalized_input_shape,
-    size_t* normalized_output_shape,
+    const size_t offsets[XNN_MIN_ELEMENTS(1)],
+    const size_t sizes[XNN_MIN_ELEMENTS(1)],
+    const size_t input_shape[XNN_MIN_ELEMENTS(1)],
+    size_t normalized_offsets[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
+    size_t normalized_input_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
+    size_t normalized_output_shape[XNN_MIN_ELEMENTS(XNN_MAX_TENSOR_DIMS)],
     size_t* num_normalized_dims);
 
 void xnn_normalize_transpose_permutation(
