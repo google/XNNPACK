@@ -7595,7 +7595,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE fp16 pthreadpool gtest)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE jit packing)
   IF(XNNPACK_BUILD_LIBRARY)
-    TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK)
+    TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK post-operation)
   ENDIF()
 
   IF(XNNPACK_BUILD_LIBRARY)
