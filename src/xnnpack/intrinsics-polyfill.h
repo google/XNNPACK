@@ -211,9 +211,19 @@ float16_t vsqrth_f16(float16_t v) {
           : "w" (x), "x" (y), "i" (n));      \
       result;                                \
     })
+  #define vmla_lane_f16(acc, x, y, n)        \
+    ({                                       \
+      float16x4_t result = acc;              \
+      __asm__ ("vmla.f16 %P0, %P1, %P2[%c3]" \
+          : "+w" (result)                    \
+          : "w" (x), "x" (y), "i" (n));      \
+      result;                                \
+    })
 #else
   #define vmlaq_lane_f16(acc, x, y, n) \
     vaddq_f16((acc), vmulq_lane_f16((x), (y), (n)))
+  #define vmla_lane_f16(acc, x, y, n) \
+    vadd_f16((acc), vmul_lane_f16((x), (y), (n)))
 #endif
 #endif  // AArch32 targeting ARMv8.2-A with NEON+FP16 arithmetics
 
