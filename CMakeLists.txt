@@ -234,6 +234,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-constant-pad.c
   src/subgraph/static-reshape.c
   src/subgraph/static-resize-bilinear-2d.c
+  src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
   src/subgraph/subtract.c
   src/subgraph/unpooling-2d.c
@@ -8071,6 +8072,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME sigmoid-test COMMAND sigmoid-test)
+
+    ADD_EXECUTABLE(static-slice-test test/static-slice.cc)
+    SET_TARGET_PROPERTIES(static-slice-test PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(static-slice-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(static-slice-test PRIVATE XNNPACK fp16 gmock gtest gtest_main subgraph)
+    ADD_TEST(NAME static-slice-test COMMAND static-slice-test)
 
     ADD_EXECUTABLE(softmax-test test/softmax.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-test PRIVATE src test)

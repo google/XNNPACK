@@ -913,9 +913,9 @@ enum xnn_status xnn_define_squared_difference(
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param pre_paddings - number of padding elements to insert before input elements for every dimension. This array
-///                       must have as many elements as the the number of dimensions in the input tensor.
+///                       must have as many elements as the number of dimensions in the input tensor.
 /// @param post_paddings - number of padding elements to insert after input elements for every dimension. This array
-///                        must have as many elements as the the number of dimensions in the input tensor.
+///                        must have as many elements as the number of dimensions in the input tensor.
 /// @param padding_value - constant value used to initialize padding elements.
 /// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
@@ -1342,6 +1342,25 @@ enum xnn_status xnn_define_square(
 /// @param flags - binary features of the Square Root Node. No supported flags are currently defined.
 enum xnn_status xnn_define_square_root(
   xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements.
+/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice(
+  xnn_subgraph_t subgraph,
+  size_t num_dims,
+  const size_t* offsets,
+  const size_t* sizes,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);

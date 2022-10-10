@@ -100,6 +100,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Static Reshape";
     case xnn_node_type_static_resize_bilinear_2d:
       return "Static Resize Bilinear 2D";
+    case xnn_node_type_static_slice:
+      return "Static Slice";
     case xnn_node_type_static_transpose:
       return "Static Transpose";
     case xnn_node_type_subtract:

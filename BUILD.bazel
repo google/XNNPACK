@@ -145,6 +145,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/static-constant-pad.c",
     "src/subgraph/static-reshape.c",
     "src/subgraph/static-resize-bilinear-2d.c",
+    "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
     "src/subgraph/subtract.c",
     "src/subgraph/unpooling-2d.c",
@@ -16137,6 +16138,20 @@ xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
     srcs = [
         "test/static-resize-bilinear-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "static_slice_test",
+    srcs = [
+        "test/static-slice.cc",
     ],
     deps = [
         ":XNNPACK_test_mode",

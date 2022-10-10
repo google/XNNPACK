@@ -273,6 +273,11 @@ struct xnn_node {
       size_t perm[XNN_MAX_TENSOR_DIMS];
       size_t num_dims;
     } transpose;
+    struct {
+      size_t num_dims;
+      size_t offsets[XNN_MAX_TENSOR_DIMS];
+      size_t sizes[XNN_MAX_TENSOR_DIMS];
+    } slice;
   } params;
   struct {
     float output_min;
@@ -321,6 +326,9 @@ struct xnn_operator_data {
   struct xnn_shape shape2;
   size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
   size_t post_paddings[XNN_MAX_TENSOR_DIMS];
+  // TODO(zhin): merge this with pre_paddings/post_paddings to reduce size of this struct.
+  size_t offsets[XNN_MAX_TENSOR_DIMS];
+  size_t sizes[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];

@@ -48,6 +48,7 @@ enum xnn_node_type {
   xnn_node_type_static_constant_pad,
   xnn_node_type_static_reshape,
   xnn_node_type_static_resize_bilinear_2d,
+  xnn_node_type_static_slice,
   xnn_node_type_static_transpose,
   xnn_node_type_subtract,
   xnn_node_type_unpooling_2d,
