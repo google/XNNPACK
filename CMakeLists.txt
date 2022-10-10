@@ -8168,7 +8168,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(f16-dwconv-minmax-test test/f16-dwconv-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main logging)
   TARGET_LINK_LIBRARIES(f16-dwconv-minmax-test PRIVATE all_microkernels microparams_init packing)
   ADD_TEST(NAME f16-dwconv-minmax-test COMMAND f16-dwconv-minmax-test)
 
@@ -9339,17 +9339,17 @@ IF(XNNPACK_BUILD_TESTS)
   IF(XNNPACK_BUILD_LIBRARY)
     ADD_EXECUTABLE(jit-test test/jit.cc)
     TARGET_INCLUDE_DIRECTORIES(jit-test PRIVATE include src)
-    TARGET_LINK_LIBRARIES(jit-test PRIVATE pthreadpool gtest gtest_main)
+    TARGET_LINK_LIBRARIES(jit-test PRIVATE pthreadpool gtest gtest_main logging)
     TARGET_LINK_LIBRARIES(jit-test PRIVATE jit memory)
 
     ADD_EXECUTABLE(aarch32-assembler-test test/aarch32-assembler.cc)
     TARGET_INCLUDE_DIRECTORIES(aarch32-assembler-test PRIVATE include src)
-    TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE pthreadpool gtest gtest_main)
+    TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE pthreadpool gtest gtest_main logging)
     TARGET_LINK_LIBRARIES(aarch32-assembler-test PRIVATE jit memory)
 
     ADD_EXECUTABLE(aarch64-assembler-test test/aarch64-assembler.cc)
     TARGET_INCLUDE_DIRECTORIES(aarch64-assembler-test PRIVATE include src)
-    TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE pthreadpool gtest gtest_main)
+    TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE pthreadpool gtest gtest_main logging)
     TARGET_LINK_LIBRARIES(aarch64-assembler-test PRIVATE jit memory)
 
     ADD_EXECUTABLE(code-cache-test test/code-cache.cc)
@@ -9362,7 +9362,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(mutex-test test/mutex.cc)
     TARGET_INCLUDE_DIRECTORIES(mutex-test PRIVATE include src)
-    TARGET_LINK_LIBRARIES(mutex-test PRIVATE gtest gtest_main pthreadpool)
+    TARGET_LINK_LIBRARIES(mutex-test PRIVATE gtest gtest_main pthreadpool logging)
     TARGET_LINK_LIBRARIES(mutex-test PRIVATE mutex)
 
     ADD_EXECUTABLE(operator-utils-test test/operator-utils.cc)
