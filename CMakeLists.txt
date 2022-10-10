@@ -188,6 +188,7 @@ SET(OPERATOR_SRCS
   src/operators/prelu-nc.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
+  src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
   src/operators/unary-elementwise-nc.c
@@ -7799,6 +7800,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME sigmoid-nc-test COMMAND sigmoid-nc-test)
+
+    ADD_EXECUTABLE(slice-nd-test test/slice-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(slice-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(slice-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME slice-nd-test COMMAND slice-nd-test)
 
     ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)

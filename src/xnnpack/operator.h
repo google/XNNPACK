@@ -287,6 +287,7 @@ struct xnn_operator {
     struct prelu_context prelu;
     struct resize_bilinear_context resize_bilinear;
     struct resize_bilinear_chw_context resize_bilinear_chw;
+    struct slice_context slice;
     struct spmm_context spmm;
     struct subconv_context subconv;
     struct subgemm_context subgemm;

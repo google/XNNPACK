@@ -98,6 +98,7 @@ OPERATOR_SRCS = [
     "src/operators/prelu-nc.c",
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
+    "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
     "src/operators/unary-elementwise-nc.c",
@@ -15388,6 +15389,17 @@ xnnpack_unit_test(
         "test/sigmoid-nc.cc",
         "test/sigmoid-operator-tester.h",
     ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "slice_nd_test",
+    timeout = "moderate",
+    srcs = [
+        "test/slice-nd.cc",
+        "test/slice-operator-tester.h",
+    ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 

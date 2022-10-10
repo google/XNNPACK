@@ -979,6 +979,82 @@ void xnn_compute_pad_5d(
   }
 }
 
+void xnn_compute_slice_1d(
+    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i)
+{
+  const void* input = (const void*) ((uintptr_t) context->input + i * context->input_stride[0]);
+  void* output = (void*) ((uintptr_t) context->output + i * context->output_stride[0]);
+
+  context->ukernel(context->contiguous_size, input, output, NULL);
+}
+
+void xnn_compute_slice_2d(
+    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j)
+{
+  const void* input =
+      (const void*) ((uintptr_t) context->input +
+                     i * context->input_stride[1] +
+                     j * context->input_stride[0]);
+  void* output =
+      (void*) ((uintptr_t) context->output + i * context->output_stride[1] + j * context->output_stride[0]);
+
+  context->ukernel(context->contiguous_size, input, output, NULL);
+}
+
+void xnn_compute_slice_3d(
+    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t k)
+{
+  const void* input =
+      (const void*) ((uintptr_t) context->input +
+                     i * context->input_stride[2] +
+                     j * context->input_stride[1] +
+                     k * context->input_stride[0]);
+  void* output =
+      (void*) ((uintptr_t) context->output + i * context->output_stride[2] +
+               j * context->output_stride[1] + k * context->output_stride[0]);
+
+  context->ukernel(context->contiguous_size, input, output, NULL);
+}
+
+void xnn_compute_slice_4d(
+    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t k, size_t l)
+{
+  const void* input =
+      (const void*) ((uintptr_t) context->input +
+                     i * context->input_stride[3] +
+                     j * context->input_stride[2] +
+                     k * context->input_stride[1] +
+                     l * context->input_stride[0]);
+  void* output =
+      (void*) ((uintptr_t) context->output + i * context->output_stride[3] +
+               j * context->output_stride[2] + k * context->output_stride[1] + l * context->output_stride[0]);
+
+  context->ukernel(context->contiguous_size, input, output, NULL);
+}
+
+void xnn_compute_slice_5d(
+    const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t i, size_t j, size_t k, size_t l, size_t m)
+{
+  const void* input =
+      (const void* ) ((uintptr_t) context->input +
+                      i * context->input_stride[4] +
+                      j * context->input_stride[3] +
+                      k * context->input_stride[2] +
+                      l * context->input_stride[1] +
+                      m * context->input_stride[0]);
+  void* output =
+      (void*) ((uintptr_t) context->output + i * context->output_stride[4] +
+               j * context->output_stride[3] + k * context->output_stride[2] +
+               l * context->output_stride[1] + m * context->output_stride[0]);
+
+  context->ukernel(context->contiguous_size, input, output, NULL);
+}
+
 void xnn_compute_elementwise_binary_1d(
     const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i)
