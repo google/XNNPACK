@@ -13564,6 +13564,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_igemm_post_operation_test",
+    srcs = [
+        "test/f32-igemm-post-operation.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":post_operation",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_conv_hwc_test",
     srcs = [
         "test/conv-hwc-microkernel-tester.h",

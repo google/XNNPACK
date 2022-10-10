@@ -11,6 +11,8 @@
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/memory.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/post-operation.h>
 
 
 namespace xnnpack {
@@ -19,7 +21,8 @@ namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
  public:
-  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params);
+  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
+  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 
@@ -57,11 +60,17 @@ class Generator : public MacroAssembler {
 // Clamp (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-igemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
+void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  const size_t num_post_operations = jit_gemm_params->num_post_operations;
+  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
+  const float min = jit_gemm_params->f32_minmax.min;
+  const float max = jit_gemm_params->f32_minmax.max;
+  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
+  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
 
@@ -286,28 +295,38 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldr(r7, mem[sp, 128]); // cn_stride
   ldr(r14, mem[sp, 72]); // p = ks
 
-  // Load min/max values
-  vld1r_32({d4,d5}, mem[r5]++);
   subs(r1, r1, 8);
-  vld1r_32({d6,d7}, mem[r5]);
+  if (clamp_min || clamp_max) {
+    assert(num_post_operations == 0);
+    // Load min/max values
+    vld1r_32({d4,d5}, mem[r5]++);
+    vld1r_32({d6,d7}, mem[r5]);
+  }
 
   // Clamp
-  vmax_f32(q8, q8, q2);
-  vmax_f32(q9, q9, q2);
-  vmax_f32(q10, q10, q2);
-  vmax_f32(q11, q11, q2);
-  vmax_f32(q12, q12, q2);
-  vmax_f32(q13, q13, q2);
-  vmax_f32(q14, q14, q2);
-  vmax_f32(q15, q15, q2);
-  vmin_f32(q8, q8, q3);
-  vmin_f32(q9, q9, q3);
-  vmin_f32(q10, q10, q3);
-  vmin_f32(q11, q11, q3);
-  vmin_f32(q12, q12, q3);
-  vmin_f32(q13, q13, q3);
-  vmin_f32(q14, q14, q3);
-  vmin_f32(q15, q15, q3);
+  if (clamp_min) {
+    vmax_f32(q8, q8, q2);
+    vmax_f32(q9, q9, q2);
+    vmax_f32(q10, q10, q2);
+    vmax_f32(q11, q11, q2);
+    vmax_f32(q12, q12, q2);
+    vmax_f32(q13, q13, q2);
+    vmax_f32(q14, q14, q2);
+    vmax_f32(q15, q15, q2);
+  }
+  if (clamp_max) {
+    vmin_f32(q8, q8, q3);
+    vmin_f32(q9, q9, q3);
+    vmin_f32(q10, q10, q3);
+    vmin_f32(q11, q11, q3);
+    vmin_f32(q12, q12, q3);
+    vmin_f32(q13, q13, q3);
+    vmin_f32(q14, q14, q3);
+    vmin_f32(q15, q15, q3);
+  }
+
+  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
+  perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
   blo(l7);
@@ -412,6 +431,33 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   add(sp, sp, 12); // skip pad, r2, r3
   pop({r4, r5, r6, r7, r8, r9, r10, r11, pc});
 }
+
+void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        const auto sixth = q0;
+        const auto three = q1;
+        const auto six = q2;
+        const auto zero = q3;
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[r5]++);
+        vmov(zero, 0);
+        vmov(three.high(), three.low());
+        vmov(six.high(), six.low());
+        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
+        const QRegister tmps[] = {q4, q5, q6, q7};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
 }  // namespace
 }  // aarch32
 }  // xnnpack
@@ -420,7 +466,7 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_cod
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(false, max_mr, nc_mod_nr, kc, nullptr);
+  g.generate(false, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -432,7 +478,7 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75(xn
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(true, max_mr, nc_mod_nr, kc, nullptr);
+  g.generate(true, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;

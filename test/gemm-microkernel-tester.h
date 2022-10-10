@@ -277,6 +277,9 @@ class GemmMicrokernelTester {
   void Test(
     xnn_jit_gemm_code_generator_function gemm_generator,
     const std::vector<xnn_post_operation>& fused_operators) const;
+  void Test(
+    xnn_jit_igemm_code_generator_function gemm_generator,
+    const std::vector<xnn_post_operation>& fused_operators) const;
 #endif  // XNN_PLATFORM_JIT
 
  private:

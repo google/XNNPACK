@@ -8543,6 +8543,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE all_microkernels jit gemm-microkernel-tester microparams_init)
   ADD_TEST(NAME f32-igemm-minmax-test COMMAND f32-igemm-minmax-test)
 
+  ADD_EXECUTABLE(f32-igemm-post-operation-test test/f32-igemm-post-operation.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-igemm-post-operation-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-igemm-post-operation-test PRIVATE cpuinfo pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-igemm-post-operation-test PRIVATE all_microkernels jit gemm-microkernel-tester microparams_init)
+  ADD_TEST(NAME f32-igemm-post-operation-test COMMAND f32-igemm-post-operation-test)
+
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-maxpool-minmax-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-maxpool-minmax-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
