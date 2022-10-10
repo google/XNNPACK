@@ -70,11 +70,6 @@ IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   ADD_COMPILE_OPTIONS("-Wno-psabi")
 ENDIF()
 
-# Xcode does not support COMPILE_FLAGS according to https://cmake.org/cmake/help/latest/prop_sf/COMPILE_FLAGS.html
-IF(CMAKE_GENERATOR STREQUAL Xcode)
-  set(XCODE ON)
-ENDIF()
-
 # ---[ Build flags
 IF(NOT CMAKE_SYSTEM_PROCESSOR)
   IF(IOS)
@@ -248,7 +243,8 @@ SET(LOGGING_SRCS
   src/datatype-strings.c
   src/node-type.c
   src/operator-strings.c
-  src/ukernel-strings.c)
+  src/ukernel-strings.c
+  src/log.c)
 
 SET(COLD_SRCS
   src/init.c
@@ -7407,10 +7403,14 @@ IF(MSVC)
   SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O2 >")
   SET_PROPERTY(SOURCE ${HOT_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O2 >")
   SET_PROPERTY(SOURCE ${COLD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: /O1 >")
-ELSEIF(NOT XCODE)
-  SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: -O2 >")
-  SET_PROPERTY(SOURCE ${HOT_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: -O2 >")
-  SET_PROPERTY(SOURCE ${COLD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS "$<$<NOT:$<CONFIG:Debug>>: -Os >")
+ELSEIF(NOT (CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "Debug")))
+  # Compataible with Xcode, which does not support per-config per-source settings,
+  # so expressions that depend on the build configuration are not allowed with that generator.
+  # from https://cmake.org/cmake/help/latest/prop_sf/COMPILE_FLAGS.html#prop_sf:COMPILE_FLAGS
+  # For any of Debug, Release, RelWithDebInfo and MinSizeRel, we just skip it when Debug
+  SET_PROPERTY(SOURCE ${ALL_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O2 ")
+  SET_PROPERTY(SOURCE ${HOT_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O2 ")
+  SET_PROPERTY(SOURCE ${COLD_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Os ")
 ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(all_microkernels PRIVATE src)
