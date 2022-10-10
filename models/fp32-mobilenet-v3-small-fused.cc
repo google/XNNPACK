@@ -36,7 +36,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 68992> v13;
   alignas(16) static std::array<float, 18816> v14;
   alignas(16) static std::array<float, 18816> v15;
-  alignas(16) static std::array<float, 75264> v16;
   alignas(16) static std::array<float, 75264> v17;
   alignas(16) static std::array<float, 18816> v18;
   alignas(16) static std::array<float, 18816> v19;
@@ -45,7 +44,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 96> v22;
   alignas(16) static std::array<float, 18816> v23;
   alignas(16) static std::array<float, 7840> v24;
-  alignas(16) static std::array<float, 47040> v25;
   alignas(16) static std::array<float, 47040> v26;
   alignas(16) static std::array<float, 47040> v27;
   alignas(16) static std::array<float, 47040> v28;
@@ -55,7 +53,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 47040> v32;
   alignas(16) static std::array<float, 7840> v33;
   alignas(16) static std::array<float, 7840> v34;
-  alignas(16) static std::array<float, 47040> v35;
   alignas(16) static std::array<float, 47040> v36;
   alignas(16) static std::array<float, 47040> v37;
   alignas(16) static std::array<float, 47040> v38;
@@ -65,7 +62,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 47040> v42;
   alignas(16) static std::array<float, 7840> v43;
   alignas(16) static std::array<float, 7840> v44;
-  alignas(16) static std::array<float, 23520> v45;
   alignas(16) static std::array<float, 23520> v46;
   alignas(16) static std::array<float, 23520> v47;
   alignas(16) static std::array<float, 23520> v48;
@@ -74,7 +70,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 120> v51;
   alignas(16) static std::array<float, 23520> v52;
   alignas(16) static std::array<float, 9408> v53;
-  alignas(16) static std::array<float, 28224> v54;
   alignas(16) static std::array<float, 28224> v55;
   alignas(16) static std::array<float, 28224> v56;
   alignas(16) static std::array<float, 28224> v57;
@@ -84,7 +79,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 28224> v61;
   alignas(16) static std::array<float, 9408> v62;
   alignas(16) static std::array<float, 9408> v63;
-  alignas(16) static std::array<float, 56448> v64;
   alignas(16) static std::array<float, 56448> v65;
   alignas(16) static std::array<float, 14112> v66;
   alignas(16) static std::array<float, 14112> v67;
@@ -93,7 +87,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 288> v70;
   alignas(16) static std::array<float, 14112> v71;
   alignas(16) static std::array<float, 4704> v72;
-  alignas(16) static std::array<float, 28224> v73;
   alignas(16) static std::array<float, 28224> v74;
   alignas(16) static std::array<float, 28224> v75;
   alignas(16) static std::array<float, 28224> v76;
@@ -103,7 +96,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 28224> v80;
   alignas(16) static std::array<float, 4704> v81;
   alignas(16) static std::array<float, 4704> v82;
-  alignas(16) static std::array<float, 28224> v83;
   alignas(16) static std::array<float, 28224> v84;
   alignas(16) static std::array<float, 28224> v85;
   alignas(16) static std::array<float, 28224> v86;
@@ -113,10 +105,8 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 28224> v90;
   alignas(16) static std::array<float, 4704> v91;
   alignas(16) static std::array<float, 4704> v92;
-  alignas(16) static std::array<float, 28224> v93;
   alignas(16) static std::array<float, 28224> v94;
   alignas(16) static std::array<float, 576> v95;
-  alignas(16) static std::array<float, 1024> v96;
   alignas(16) static std::array<float, 1024> v97;
   alignas(16) static std::array<float, 1024> v98;
   alignas(16) static std::array<float, 1001> v99;
@@ -248,7 +238,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v13.begin(), v13.end(), std::ref(f32rng));
   std::generate(v14.begin(), v14.end(), std::ref(f32rng));
   std::generate(v15.begin(), v15.end(), std::ref(f32rng));
-  std::generate(v16.begin(), v16.end(), std::ref(f32rng));
   std::generate(v17.begin(), v17.end(), std::ref(f32rng));
   std::generate(v18.begin(), v18.end(), std::ref(f32rng));
   std::generate(v19.begin(), v19.end(), std::ref(f32rng));
@@ -257,7 +246,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v22.begin(), v22.end(), std::ref(f32rng));
   std::generate(v23.begin(), v23.end(), std::ref(f32rng));
   std::generate(v24.begin(), v24.end(), std::ref(f32rng));
-  std::generate(v25.begin(), v25.end(), std::ref(f32rng));
   std::generate(v26.begin(), v26.end(), std::ref(f32rng));
   std::generate(v27.begin(), v27.end(), std::ref(f32rng));
   std::generate(v28.begin(), v28.end(), std::ref(f32rng));
@@ -267,7 +255,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v32.begin(), v32.end(), std::ref(f32rng));
   std::generate(v33.begin(), v33.end(), std::ref(f32rng));
   std::generate(v34.begin(), v34.end(), std::ref(f32rng));
-  std::generate(v35.begin(), v35.end(), std::ref(f32rng));
   std::generate(v36.begin(), v36.end(), std::ref(f32rng));
   std::generate(v37.begin(), v37.end(), std::ref(f32rng));
   std::generate(v38.begin(), v38.end(), std::ref(f32rng));
@@ -277,7 +264,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v42.begin(), v42.end(), std::ref(f32rng));
   std::generate(v43.begin(), v43.end(), std::ref(f32rng));
   std::generate(v44.begin(), v44.end(), std::ref(f32rng));
-  std::generate(v45.begin(), v45.end(), std::ref(f32rng));
   std::generate(v46.begin(), v46.end(), std::ref(f32rng));
   std::generate(v47.begin(), v47.end(), std::ref(f32rng));
   std::generate(v48.begin(), v48.end(), std::ref(f32rng));
@@ -286,7 +272,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v51.begin(), v51.end(), std::ref(f32rng));
   std::generate(v52.begin(), v52.end(), std::ref(f32rng));
   std::generate(v53.begin(), v53.end(), std::ref(f32rng));
-  std::generate(v54.begin(), v54.end(), std::ref(f32rng));
   std::generate(v55.begin(), v55.end(), std::ref(f32rng));
   std::generate(v56.begin(), v56.end(), std::ref(f32rng));
   std::generate(v57.begin(), v57.end(), std::ref(f32rng));
@@ -296,7 +281,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v61.begin(), v61.end(), std::ref(f32rng));
   std::generate(v62.begin(), v62.end(), std::ref(f32rng));
   std::generate(v63.begin(), v63.end(), std::ref(f32rng));
-  std::generate(v64.begin(), v64.end(), std::ref(f32rng));
   std::generate(v65.begin(), v65.end(), std::ref(f32rng));
   std::generate(v66.begin(), v66.end(), std::ref(f32rng));
   std::generate(v67.begin(), v67.end(), std::ref(f32rng));
@@ -305,7 +289,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v70.begin(), v70.end(), std::ref(f32rng));
   std::generate(v71.begin(), v71.end(), std::ref(f32rng));
   std::generate(v72.begin(), v72.end(), std::ref(f32rng));
-  std::generate(v73.begin(), v73.end(), std::ref(f32rng));
   std::generate(v74.begin(), v74.end(), std::ref(f32rng));
   std::generate(v75.begin(), v75.end(), std::ref(f32rng));
   std::generate(v76.begin(), v76.end(), std::ref(f32rng));
@@ -315,7 +298,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v80.begin(), v80.end(), std::ref(f32rng));
   std::generate(v81.begin(), v81.end(), std::ref(f32rng));
   std::generate(v82.begin(), v82.end(), std::ref(f32rng));
-  std::generate(v83.begin(), v83.end(), std::ref(f32rng));
   std::generate(v84.begin(), v84.end(), std::ref(f32rng));
   std::generate(v85.begin(), v85.end(), std::ref(f32rng));
   std::generate(v86.begin(), v86.end(), std::ref(f32rng));
@@ -325,10 +307,8 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::generate(v90.begin(), v90.end(), std::ref(f32rng));
   std::generate(v91.begin(), v91.end(), std::ref(f32rng));
   std::generate(v92.begin(), v92.end(), std::ref(f32rng));
-  std::generate(v93.begin(), v93.end(), std::ref(f32rng));
   std::generate(v94.begin(), v94.end(), std::ref(f32rng));
   std::generate(v95.begin(), v95.end(), std::ref(f32rng));
-  std::generate(v96.begin(), v96.end(), std::ref(f32rng));
   std::generate(v97.begin(), v97.end(), std::ref(f32rng));
   std::generate(v98.begin(), v98.end(), std::ref(f32rng));
   std::generate(v99.begin(), v99.end(), std::ref(f32rng));
@@ -2272,7 +2252,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op15,
     1 /* batch size */, 28 /* input height */, 28 /* input width */,
-    v15.data() /* input */, v16.data() /* output */,
+    v15.data() /* input */, v17.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
@@ -2356,7 +2336,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op24,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v24.data() /* input */, v25.data() /* output */,
+    v24.data() /* input */, v26.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
@@ -2454,7 +2434,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op34,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v34.data() /* input */, v35.data() /* output */,
+    v34.data() /* input */, v36.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #34" << std::endl;
@@ -2552,7 +2532,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op44,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v44.data() /* input */, v45.data() /* output */,
+    v44.data() /* input */, v46.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #44" << std::endl;
@@ -2636,7 +2616,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op53,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v53.data() /* input */, v54.data() /* output */,
+    v53.data() /* input */, v55.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
@@ -2734,7 +2714,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op63,
     1 /* batch size */, 14 /* input height */, 14 /* input width */,
-    v63.data() /* input */, v64.data() /* output */,
+    v63.data() /* input */, v65.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
@@ -2818,7 +2798,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op72,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v72.data() /* input */, v73.data() /* output */,
+    v72.data() /* input */, v74.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #72" << std::endl;
@@ -2916,7 +2896,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op82,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v82.data() /* input */, v83.data() /* output */,
+    v82.data() /* input */, v84.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
@@ -3014,7 +2994,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op92,
     1 /* batch size */, 7 /* input height */, 7 /* input width */,
-    v92.data() /* input */, v93.data() /* output */,
+    v92.data() /* input */, v94.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #92" << std::endl;
@@ -3034,7 +3014,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op95,
     1 /* batch size */, 1 /* input height */, 1 /* input width */,
-    v95.data() /* input */, v96.data() /* output */,
+    v95.data() /* input */, v97.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #95" << std::endl;
