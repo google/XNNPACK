@@ -248,23 +248,10 @@ enum xnn_status xnn_define_depth_to_space(
   }
 
 #if !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
-  if (compute_type == xnn_datatype_qint8 || compute_type == xnn_datatype_quint8) {
-    if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": mismatching zero point quantization parameter across input (%"PRId32") and output (%"PRId32")",
-        xnn_node_type_to_string(xnn_node_type_depth_to_space), input_id, output_id,
-        input_value->quantization.zero_point, output_value->quantization.zero_point);
-      return xnn_status_invalid_parameter;
-    }
-    if (input_value->quantization.scale != output_value->quantization.scale) {
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": mismatching zero point quantization parameter across input (%.7g) and output (%.7g)",
-        xnn_node_type_to_string(xnn_node_type_depth_to_space), input_id, output_id,
-        input_value->quantization.scale, output_value->quantization.scale);
-      return xnn_status_invalid_parameter;
-    }
+  status = xnn_subgraph_check_quantization_parameter_matches(
+      xnn_node_type_depth_to_space, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
   }
 #endif  // !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
 
