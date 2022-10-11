@@ -12,7 +12,7 @@ set -e
 
 if [ ! -d "/Library/Developer/CommandLineTools" ] || [ ! -x "$(command -v xcodebuild)" ] 
 then
-  echo "Have you installed Xcode? please make sure /Library/Developer/CommandLineTools exist"
+  echo "Have you installed Xcode?"
   exit 1
 fi
 
@@ -21,7 +21,9 @@ mkdir -p build/iOS/arm64
 # Create Tool-chain file
 IOS_TOOL_CHAIN=build/iOS/arm64/ios_tmp.toolchain.cmake
 cat << EOF > ${IOS_TOOL_CHAIN}
-set(CMAKE_SYSTEM_NAME iOS) 
+set(CMAKE_SYSTEM_NAME iOS)
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED NO)
+set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED NO)
 EOF
 
 CMAKE_ARGS=()
@@ -48,11 +50,8 @@ CMAKE_ARGS+=("-DHAVE_POSIX_REGEX=0")
 CMAKE_ARGS+=("-DHAVE_STEADY_CLOCK=0")
 CMAKE_ARGS+=("-DHAVE_STD_REGEX=0")
 
-# Android-specific options
+# iOS-specific options
 CMAKE_ARGS+=("-DIOS_ARCH=arm64")
-CMAKE_ARGS+=("-DANDROID_PIE=ON")
-CMAKE_ARGS+=("-DANDROID_STL=c++_static")
-CMAKE_ARGS+=("-DANDROID_CPP_FEATURES=exceptions")
 
 # Use-specified CMake arguments go last to allow overridding defaults
 CMAKE_ARGS+=($@)
