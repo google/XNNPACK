@@ -60,4 +60,4 @@ CMAKE_ARGS+=($@)
 cd build/iOS/arm64 && cmake ../../.. \
     "${CMAKE_ARGS[@]}"
 
-cmake --build .
+cmake --build . --config Release
