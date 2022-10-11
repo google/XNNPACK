@@ -15020,6 +15020,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "abs_nc_eager_test",
+    srcs = [
+        "test/abs-nc-eager.cc",
+        "test/abs-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "add_nd_test",
     timeout = "moderate",
     srcs = [

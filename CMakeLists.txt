@@ -7614,6 +7614,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME abs-nc-test COMMAND abs-nc-test)
 
+    ADD_EXECUTABLE(abs-nc-eager-test test/abs-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(abs-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(abs-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME abs-nc-eager-test COMMAND abs-nc-eager-test)
+
     ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
