@@ -7649,6 +7649,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME ceiling-nc-test COMMAND ceiling-nc-test)
 
+    ADD_EXECUTABLE(ceiling-nc-eager-test test/ceiling-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(ceiling-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(ceiling-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME ceiling-nc-eager-test COMMAND ceiling-nc-eager-test)
+
     ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(channel-shuffle-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(channel-shuffle-nc-test PRIVATE XNNPACK gtest gtest_main)

@@ -577,6 +577,35 @@ enum xnn_status xnn_create_ceiling_nc_f32(
     ceiling_op_out);
 }
 
+enum xnn_status xnn_run_ceiling_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  union xnn_f32_rnd_params params;
+  if (xnn_params.f32.rndu.init.f32_rnd != NULL) {
+    xnn_params.f32.rndu.init.f32_rnd(&params);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_ceiling_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.f32.rndu.ukernel,
+    XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_create_convert_nc_f16_f32(
   size_t channels,
   size_t input_stride,

@@ -1669,6 +1669,16 @@ enum xnn_status xnn_create_ceiling_nc_f32(
   uint32_t flags,
   xnn_operator_t* ceiling_op_out);
 
+enum xnn_status xnn_run_ceiling_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_setup_ceiling_nc_f32(
   xnn_operator_t ceiling_op,
   size_t batch_size,

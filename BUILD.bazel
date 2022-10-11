@@ -15087,6 +15087,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "ceiling_nc_eager_test",
+    srcs = [
+        "test/ceiling-nc-eager.cc",
+        "test/ceiling-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "channel_shuffle_nc_test",
     srcs = [
         "test/channel-shuffle-nc.cc",
