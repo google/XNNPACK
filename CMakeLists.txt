@@ -3523,6 +3523,7 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
 SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
@@ -3585,6 +3586,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
 SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
@@ -3811,14 +3813,12 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/sqrt-f16-neonfp16arith-nr1rsqrts.c)
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c
   src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
