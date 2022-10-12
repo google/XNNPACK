@@ -913,9 +913,9 @@ enum xnn_status xnn_define_squared_difference(
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
 /// @param pre_paddings - number of padding elements to insert before input elements for every dimension. This array
-///                       must have as many elements as the the number of dimensions in the input tensor.
+///                       must have as many elements as the number of dimensions in the input tensor.
 /// @param post_paddings - number of padding elements to insert after input elements for every dimension. This array
-///                        must have as many elements as the the number of dimensions in the input tensor.
+///                        must have as many elements as the number of dimensions in the input tensor.
 /// @param padding_value - constant value used to initialize padding elements.
 /// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
@@ -1346,6 +1346,25 @@ enum xnn_status xnn_define_square_root(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements.
+/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice(
+  xnn_subgraph_t subgraph,
+  size_t num_dims,
+  const size_t* offsets,
+  const size_t* sizes,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///
 /// The Static Transpose Node applies a generalized transpose to the input tensor using the permuation in perm.
@@ -1540,6 +1559,16 @@ enum xnn_status xnn_setup_abs_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_abs_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_add_nd_f32(
   float output_min,
   float output_max,
@@ -1639,6 +1668,16 @@ enum xnn_status xnn_create_ceiling_nc_f32(
   size_t output_stride,
   uint32_t flags,
   xnn_operator_t* ceiling_op_out);
+
+enum xnn_status xnn_run_ceiling_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_ceiling_nc_f32(
   xnn_operator_t ceiling_op,
@@ -2332,6 +2371,20 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_slice_nd_x32(
+  uint32_t flags,
+  xnn_operator_t* slice_op_out);
+
+enum xnn_status xnn_setup_slice_nd_x32(
+  xnn_operator_t slice_op,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* offsets,
+  const size_t* sizes,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_space_to_depth_nhwc_x32(
   size_t input_channels,
   size_t input_channel_stride,
@@ -2950,6 +3003,20 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x16(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_slice_nd_x16(
+  uint32_t flags,
+  xnn_operator_t* slice_op_out);
+
+enum xnn_status xnn_setup_slice_nd_x16(
+  xnn_operator_t slice_op,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* offsets,
+  const size_t* sizes,
   const void* input,
   void* output,
   pthreadpool_t threadpool);
@@ -3925,6 +3992,20 @@ enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_slice_nd_x8(
+  uint32_t flags,
+  xnn_operator_t* slice_op_out);
+
+enum xnn_status xnn_setup_slice_nd_x8(
+  xnn_operator_t slice_op,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* offsets,
+  const size_t* sizes,
   const void* input,
   void* output,
   pthreadpool_t threadpool);

@@ -1062,6 +1062,34 @@ struct pad_context {
       size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
+struct slice_context {
+  const void* input;
+  size_t input_stride[XNN_MAX_TENSOR_DIMS - 1];
+  void* output;
+  size_t output_stride[XNN_MAX_TENSOR_DIMS - 1];
+  size_t offsets[XNN_MAX_TENSOR_DIMS];
+  size_t contiguous_size;
+  xnn_vunary_ukernel_function ukernel;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_slice_1d(
+      const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i);
+  XNN_PRIVATE void xnn_compute_slice_2d(
+      const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j);
+  XNN_PRIVATE void xnn_compute_slice_3d(
+      const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j, size_t k);
+  XNN_PRIVATE void xnn_compute_slice_4d(
+      const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j, size_t k, size_t l);
+  XNN_PRIVATE void xnn_compute_slice_5d(
+      const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t i, size_t j, size_t k, size_t l, size_t m);
+#endif
+
 struct u8_softmax_context {
   size_t n;
   const uint8_t* x;

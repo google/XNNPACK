@@ -269,10 +269,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   subs(r1, r1, 8);
   if (clamp_min || clamp_max) {
+    assert(num_post_operations == 0);
     // Load min/max values
     vld1r_32({d4,d5}, mem[r5]++);
-    // post-increment for fused operations.
-    vld1r_32({d6,d7}, mem[r5]++);
+    vld1r_32({d6,d7}, mem[r5]);
   }
 
   // Clamp

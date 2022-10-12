@@ -188,6 +188,7 @@ SET(OPERATOR_SRCS
   src/operators/prelu-nc.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
+  src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
   src/operators/unary-elementwise-nc.c
@@ -233,6 +234,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-constant-pad.c
   src/subgraph/static-reshape.c
   src/subgraph/static-resize-bilinear-2d.c
+  src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
   src/subgraph/subtract.c
   src/subgraph/unpooling-2d.c
@@ -3522,6 +3524,7 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
 SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c
@@ -3584,6 +3587,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
 SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c
   src/f16-avgpool/9x-minmax-neonfp16arith-c8.c
+  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c
   src/f16-dwconv/gen/up8x3-minmax-neonfp16arith.c
   src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c
@@ -3810,14 +3814,12 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/sqrt-f16-neonfp16arith-nr1rsqrts.c)
 
 SET(PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c
   src/f16-vsqrt/gen/neonfp16arith-sqrt-x8.c)
 
 SET(ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS
-  src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c
   src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c
@@ -7613,6 +7615,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(abs-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME abs-nc-test COMMAND abs-nc-test)
 
+    ADD_EXECUTABLE(abs-nc-eager-test test/abs-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(abs-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(abs-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME abs-nc-eager-test COMMAND abs-nc-eager-test)
+
     ADD_EXECUTABLE(add-nd-test test/add-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(add-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(add-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
@@ -7642,6 +7649,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME ceiling-nc-test COMMAND ceiling-nc-test)
+
+    ADD_EXECUTABLE(ceiling-nc-eager-test test/ceiling-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(ceiling-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(ceiling-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME ceiling-nc-eager-test COMMAND ceiling-nc-eager-test)
 
     ADD_EXECUTABLE(channel-shuffle-nc-test test/channel-shuffle-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(channel-shuffle-nc-test PRIVATE src test)
@@ -7800,6 +7812,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME sigmoid-nc-test COMMAND sigmoid-nc-test)
+
+    ADD_EXECUTABLE(slice-nd-test test/slice-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(slice-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(slice-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME slice-nd-test COMMAND slice-nd-test)
 
     ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
@@ -8066,6 +8083,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(sigmoid-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME sigmoid-test COMMAND sigmoid-test)
+
+    ADD_EXECUTABLE(static-slice-test test/static-slice.cc)
+    SET_TARGET_PROPERTIES(static-slice-test PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(static-slice-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(static-slice-test PRIVATE XNNPACK fp16 gmock gtest gtest_main subgraph)
+    ADD_TEST(NAME static-slice-test COMMAND static-slice-test)
 
     ADD_EXECUTABLE(softmax-test test/softmax.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-test PRIVATE src test)
@@ -8543,6 +8566,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE cpuinfo pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE all_microkernels jit gemm-microkernel-tester microparams_init)
   ADD_TEST(NAME f32-igemm-minmax-test COMMAND f32-igemm-minmax-test)
+
+  ADD_EXECUTABLE(f32-igemm-post-operation-test test/f32-igemm-post-operation.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-igemm-post-operation-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-igemm-post-operation-test PRIVATE cpuinfo pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-igemm-post-operation-test PRIVATE all_microkernels jit gemm-microkernel-tester microparams_init)
+  ADD_TEST(NAME f32-igemm-post-operation-test COMMAND f32-igemm-post-operation-test)
 
   ADD_EXECUTABLE(f32-maxpool-minmax-test test/f32-maxpool-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-maxpool-minmax-test PRIVATE include src test)

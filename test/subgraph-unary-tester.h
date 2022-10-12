@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstddef>
@@ -57,7 +58,7 @@ protected:
     return dims;
   }
 
-  size_t NumElements(std::vector<size_t>& dims)
+  static size_t NumElements(const std::vector<size_t>& dims)
   {
     return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }

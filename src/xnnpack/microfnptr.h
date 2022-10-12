@@ -265,6 +265,22 @@ typedef void (*xnn_f32_igemm_minmax_ukernel_function)(
     const float* zero,
     const union xnn_f32_minmax_params* params);
 
+// IGEMM: Indirect GEMM with post operations
+
+typedef void (*xnn_f32_igemm_post_operation_ukernel_function)(
+    size_t mr,
+    size_t nr,
+    size_t kc,
+    size_t ks,
+    const float** a,
+    const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    size_t a_offset,
+    const float* zero,
+    const void* params);
+
 typedef void (*xnn_qc8_igemm_minmax_ukernel_function)(
     size_t mr,
     size_t nr,

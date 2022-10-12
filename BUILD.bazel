@@ -98,6 +98,7 @@ OPERATOR_SRCS = [
     "src/operators/prelu-nc.c",
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
+    "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
     "src/operators/unary-elementwise-nc.c",
@@ -144,6 +145,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/static-constant-pad.c",
     "src/subgraph/static-reshape.c",
     "src/subgraph/static-resize-bilinear-2d.c",
+    "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
     "src/subgraph/subtract.c",
     "src/subgraph/unpooling-2d.c",
@@ -5041,6 +5043,7 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
 PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c",
     "src/f16-avgpool/9x-minmax-neonfp16arith-c8.c",
+    "src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c",
     "src/f16-dwconv/gen/up8x9-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up8x25-minmax-neonfp16arith-acc2.c",
     "src/f16-dwconv/gen/up16x3-minmax-neonfp16arith.c",
@@ -5104,6 +5107,7 @@ PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
 ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-avgpool/9p8x-minmax-neonfp16arith-c8.c",
     "src/f16-avgpool/9x-minmax-neonfp16arith-c8.c",
+    "src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c",
     "src/f16-dwconv/gen/up8x3-minmax-neonfp16arith-acc2.c",
     "src/f16-dwconv/gen/up8x3-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/up8x4-minmax-neonfp16arith-acc2.c",
@@ -5331,7 +5335,6 @@ ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
 ]
 
 PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
-    "src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c",
     "src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c",
     "src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c",
     "src/f16-vbinary/gen/vrdivc-minmax-neonfp16arith-x8.c",
@@ -5339,7 +5342,6 @@ PROD_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
 ]
 
 ALL_AARCH64_NEONFP16ARITH_MICROKERNEL_SRCS = [
-    "src/f16-conv-hwc2chw/3x3s2p1c3x4-neonfp16arith-2x2.c",
     "src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x8.c",
     "src/f16-vbinary/gen/vdiv-minmax-neonfp16arith-x16.c",
     "src/f16-vbinary/gen/vdivc-minmax-neonfp16arith-x8.c",
@@ -13564,6 +13566,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_igemm_post_operation_test",
+    srcs = [
+        "test/f32-igemm-post-operation.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":post_operation",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_conv_hwc_test",
     srcs = [
         "test/conv-hwc-microkernel-tester.h",
@@ -15007,6 +15020,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "abs_nc_eager_test",
+    srcs = [
+        "test/abs-nc-eager.cc",
+        "test/abs-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "add_nd_test",
     timeout = "moderate",
     srcs = [
@@ -15059,6 +15081,15 @@ xnnpack_unit_test(
     name = "ceiling_nc_test",
     srcs = [
         "test/ceiling-nc.cc",
+        "test/ceiling-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "ceiling_nc_eager_test",
+    srcs = [
+        "test/ceiling-nc-eager.cc",
         "test/ceiling-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
@@ -15377,6 +15408,17 @@ xnnpack_unit_test(
         "test/sigmoid-nc.cc",
         "test/sigmoid-operator-tester.h",
     ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "slice_nd_test",
+    timeout = "moderate",
+    srcs = [
+        "test/slice-nd.cc",
+        "test/slice-operator-tester.h",
+    ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -16114,6 +16156,20 @@ xnnpack_unit_test(
     name = "static_resize_bilinear_2d_test",
     srcs = [
         "test/static-resize-bilinear-2d.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "static_slice_test",
+    srcs = [
+        "test/static-slice.cc",
     ],
     deps = [
         ":XNNPACK_test_mode",
