@@ -7664,6 +7664,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME clamp-nc-test COMMAND clamp-nc-test)
 
+    ADD_EXECUTABLE(clamp-nc-eager-test test/clamp-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(clamp-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(clamp-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME clamp-nc-eager-test COMMAND clamp-nc-eager-test)
+
     ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK gtest gtest_main)

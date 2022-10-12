@@ -202,6 +202,83 @@ static enum xnn_status setup_unary_elementwise_nc(
   return xnn_status_success;
 }
 
+static enum xnn_status run_unary_elementwise_nc(
+    enum xnn_operator_type operator_type,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    xnn_vunary_ukernel_function ukernel,
+    uint32_t datatype_init_flags,
+    const void* params,
+    size_t params_size,
+    uint32_t log2_input_size,
+    uint32_t log2_output_size,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to run %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_uninitialized;
+  }
+
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
+    xnn_log_error("failed to run %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
+  if (channels == 0) {
+    xnn_log_error(
+      "failed to run %s operator with %zu channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(operator_type), channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_stride < channels) {
+    xnn_log_error(
+      "failed to run %s operator with input element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(operator_type), input_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_stride < channels) {
+    xnn_log_error(
+      "failed to run %s operator with output element stride of %zu: "
+      "stride must be at least as large as the number of channels (%zu)",
+      xnn_operator_type_to_string(operator_type), output_stride, channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  struct xnn_operator unary_elementwise_op;
+  memset(&unary_elementwise_op, 0, sizeof(unary_elementwise_op));
+
+  init_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    NULL, 0,
+    operator_type,
+    ukernel,
+    &unary_elementwise_op);
+
+  const enum xnn_status status = setup_unary_elementwise_nc(
+    &unary_elementwise_op, operator_type,
+    batch_size, input, output,
+    log2_input_size,
+    log2_output_size,
+    params, params_size,
+    pthreadpool_get_threads_count(threadpool));
+
+  if (status != xnn_status_success){
+    return status;
+  }
+
+  return xnn_run_operator(&unary_elementwise_op, threadpool);
+}
+
 enum xnn_status xnn_create_clamp_nc_f16(
     size_t channels,
     size_t input_stride,
@@ -400,84 +477,6 @@ enum xnn_status xnn_create_abs_nc_f32(
     xnn_operator_type_abs_nc_f32,
     xnn_params.f32.abs.ukernel,
     abs_op_out);
-}
-
-static enum xnn_status run_unary_elementwise_nc(
-    enum xnn_operator_type operator_type,
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
-    size_t batch_size,
-    const void* input,
-    void* output,
-    xnn_vunary_ukernel_function ukernel,
-    uint32_t datatype_init_flags,
-    const void* params,
-    size_t params_size,
-    uint32_t log2_input_size,
-    uint32_t log2_output_size,
-    uint32_t flags,
-    pthreadpool_t threadpool
-)
-{
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to run %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to run %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_unsupported_hardware;
-  }
-
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to run %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(operator_type), channels);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (input_stride < channels) {
-    xnn_log_error(
-      "failed to run %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), input_stride, channels);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_stride < channels) {
-    xnn_log_error(
-      "failed to run %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(operator_type), output_stride, channels);
-    return xnn_status_invalid_parameter;
-  }
-
-  struct xnn_operator unary_elementwise_op;
-  memset(&unary_elementwise_op, 0, sizeof(unary_elementwise_op));
-
-  init_unary_elementwise_nc(
-    channels, input_stride, output_stride, flags,
-    NULL, 0,
-    operator_type,
-    ukernel,
-    &unary_elementwise_op);
-
-  const enum xnn_status status = setup_unary_elementwise_nc(
-    &unary_elementwise_op, operator_type,
-    batch_size, input, output,
-    log2_input_size,
-    log2_output_size,
-    params, params_size,
-    pthreadpool_get_threads_count(threadpool));
-
-  if (status != xnn_status_success){
-    return status;
-  }
-
-  return xnn_run_operator(&unary_elementwise_op, threadpool);
 }
 
 enum xnn_status xnn_run_abs_nc_f32(
@@ -1544,6 +1543,64 @@ enum xnn_status xnn_setup_clamp_nc_f32(
     2 /* log2(sizeof(float)) */,
     &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_run_clamp_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f32), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
+  xnn_vunary_ukernel_function clamp_ukernel = xnn_params.f32.clamp.ukernel;
+  if (relu_activation && xnn_params.f32.relu.ukernel != NULL) {
+    clamp_ukernel = xnn_params.f32.relu.ukernel;
+  }
+
+  union xnn_f32_minmax_params params;
+  if (xnn_params.f32.clamp.init.f32_minmax != NULL) {
+    xnn_params.f32.clamp.init.f32_minmax(&params, output_min, output_max);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_clamp_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    clamp_ukernel,
+    XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
 }
 
 enum xnn_status xnn_setup_clamp_nc_s8(

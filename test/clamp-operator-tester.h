@@ -380,6 +380,64 @@ class ClampOperatorTester {
     }
   }
 
+  void TestRunF32() const {
+    ASSERT_LT(qmin(), qmax());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(
+      std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max());
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const float x = input[i * input_stride() + c];
+          const float y = relu_activation() ? std::max(x, 0.f) :
+            std::min(std::max(x, float(qmin())), float(qmax()));
+          output_ref[i * channels() + c] = y;
+        }
+      }
+
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      const float output_min = relu_activation() ? 0.0f : float(qmin());
+      const float output_max = relu_activation() ? std::numeric_limits<float>::infinity() : float(qmax());
+
+      ASSERT_EQ(xnn_status_success,
+      xnn_run_clamp_nc_f32(
+        channels(),
+        input_stride(),
+        output_stride(),
+        batch_size(),
+        input.data(),
+        output.data(),
+        output_min,
+        output_max,
+        0,
+        nullptr  /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_LE(output[i * output_stride() + c], output_max)
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+          ASSERT_GE(output[i * output_stride() + c], output_min)
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
+            << ", min " << output_min << ", max " << output_max;
+        }
+      }
+    }
+  }
+
  private:
   size_t batch_size_{1};
   size_t channels_{1};

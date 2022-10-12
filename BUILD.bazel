@@ -15114,6 +15114,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "clamp_nc_eager_test",
+    srcs = [
+        "test/clamp-nc-eager.cc",
+        "test/clamp-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "constant_pad_nd_test",
     srcs = [
         "test/constant-pad-nd.cc",

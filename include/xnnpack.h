@@ -1702,6 +1702,18 @@ enum xnn_status xnn_setup_clamp_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_clamp_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 typedef const struct xnn_caches* xnn_caches_t;
 
 enum xnn_status xnn_create_convolution2d_nhwc_f32(
