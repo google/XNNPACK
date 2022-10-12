@@ -120,7 +120,7 @@ cleanup:
   #endif
   va_end(args_copy);
 }
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) && XNN_LOG_LEVEL > XNN_LOG_NONE
   static const char xnnpack_module[] = "XNNPACK";
 #endif
 
