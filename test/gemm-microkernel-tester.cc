@@ -2531,4 +2531,134 @@ void GemmMicrokernelTester::Test(
   }
 }
 
+void GemmMicrokernelTester::Test(
+    xnn_jit_igemm_code_generator_function igemm_generator,
+    const std::vector<xnn_post_operation>& post_operations) const
+{
+  ASSERT_LE(m(), mr());
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  std::uniform_real_distribution<float> f32dist;
+
+  std::vector<float> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(n() * ks() * k());
+  std::vector<float, AlignedAllocator<float, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<float> bias(n());
+  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+  std::vector<float> junk(k() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<const float*> im2col(mr() * ks());
+  std::fill(junk.begin(), junk.end(), nanf(""));
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+    std::fill(c.begin(), c.end(), nanf(""));
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+    xnn_pack_f32_conv_goki_w(
+      1, n(), ks(), k(), nr(), kr(), sr(),
+      b.data(), bias.data(), packed_w.data(), 0 /* extra bytes */, nullptr);
+
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      for (size_t m_index = 0; m_index < mr(); m_index++) {
+        im2col[ks_index * mr() + m_index] = a.data() + a_stride() * m_index - a_offset();
+      }
+    }
+    std::shuffle(im2col.begin(), im2col.end(), rng);
+    if (zero_index() != SIZE_MAX) {
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        im2col[ks_index * mr() + zero_index()] = a.data();
+      }
+    }
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      for (size_t m_index = m(); m_index < mr(); m_index++) {
+        im2col[ks_index * mr() + m_index] = junk.data();
+      }
+    }
+
+    std::fill(c_ref.begin(), c_ref.end(), 0.0);
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+          for (size_t k_index = 0; k_index < k(); k_index++) {
+            ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+            ASSERT_LT(k_index, k());
+            ASSERT_LT(k_index, a_stride());
+            if (im2col[ks_index * mr() + m_index] == a.data()) {
+              c_ref[m_index * n() + n_index] +=
+                (im2col[ks_index * mr() + m_index][k_index]) *
+                (b[(n_index * ks() + ks_index) * k() + k_index]);
+            } else {
+              c_ref[m_index * n() + n_index] +=
+                (im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                (b[(n_index * ks() + ks_index) * k() + k_index]);
+            }
+          }
+        }
+        c_ref[m_index * n() + n_index] += bias[n_index];
+      }
+    }
+
+    PerformUnaryOperation(c_ref, post_operations);
+
+    char *post_operation_params = allocate_and_initialize_post_operation_params(
+        post_operations.size(), post_operations.data());
+
+    const float* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
+
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+
+    const float output_min = -std::numeric_limits<float>::infinity();
+    const float output_max = std::numeric_limits<float>::infinity();
+    jit_gemm_params p = (jit_gemm_params) {
+      .f32_minmax = {
+        .min = output_min,
+        .max = output_max
+      },
+      .num_post_operations = post_operations.size(),
+      .post_operations = post_operations.data(),
+    };
+    ASSERT_EQ(xnn_status_success,
+              igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f32_igemm_post_operation_ukernel_function igemm_post_operation =
+        reinterpret_cast<xnn_f32_igemm_post_operation_ukernel_function>(code_buffer.start);
+
+    igemm_post_operation(
+      m(), n(), k() * sizeof(float), ks() * mr() * sizeof(void*),
+      im2col.data(), packed_w.data(),
+      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+      a_offset() * sizeof(float), zero_pointer,
+      post_operation_params);
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_max)
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_min)
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+        ASSERT_NEAR(
+            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+            c_ref[i * n() + j],
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+      }
+    }
+  }
+}
+
 #endif  // XNN_PLATFORM_JIT

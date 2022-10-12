@@ -12,8 +12,8 @@
 #include <arm_neon.h>
 
 #include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/math.h>
 
 
 void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8(
