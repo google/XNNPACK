@@ -190,6 +190,50 @@ class TruncationOperatorTester {
     }
   }
 
+  void TestRunF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[i * channels() + c] = std::trunc(input[i * input_stride() + c]);
+        }
+      }
+
+      // Initialize and run Truncation operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_truncation_nc_f32(
+          channels(),
+          input_stride(),
+          output_stride(),
+          batch_size(),
+          input.data(),
+          output.data(),
+          0,
+          nullptr  /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
  private:
   size_t batch_size_{1};
   size_t channels_{1};

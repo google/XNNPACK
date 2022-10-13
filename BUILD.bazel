@@ -15626,6 +15626,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "truncation_nc_eager_test",
+    srcs = [
+        "test/truncation-nc-eager.cc",
+        "test/truncation-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "unpooling_nhwc_test",
     srcs = [
         "test/unpooling-nhwc.cc",

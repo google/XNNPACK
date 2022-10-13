@@ -2331,6 +2331,16 @@ enum xnn_status xnn_setup_truncation_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_truncation_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 #ifndef XNN_NO_NCHW_OPERATORS
 
 enum xnn_status xnn_create_convolution2d_nchw_f32(

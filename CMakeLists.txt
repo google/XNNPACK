@@ -7927,6 +7927,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(truncation-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME truncation-nc-test COMMAND truncation-nc-test)
 
+    ADD_EXECUTABLE(truncation-nc-eager-test test/truncation-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(truncation-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(truncation-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME truncation-nc-eager-test COMMAND truncation-nc-eager-test)
+
     ADD_EXECUTABLE(unpooling-nhwc-test test/unpooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(unpooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(unpooling-nhwc-test PRIVATE XNNPACK gtest gtest_main)
