@@ -329,6 +329,53 @@ class ELUOperatorTester {
     }
   }
 
+void TestRunF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-20.0f, 20.0f);
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (batch_size() - 1) * input_stride() + channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<double> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const double x = double(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = std::signbit(x) ? std::expm1(x) * alpha() : x;
+        }
+      }
+
+      // Create, setup, run, and destroy ELU operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_elu_nc_f32(
+          channels(),
+          input_stride(),
+          output_stride(),
+          batch_size(),
+          input.data(), output.data(),
+          alpha(),
+          0,
+          nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(output[i * output_stride() + c],
+                      output_ref[i * channels() + c],
+                      std::abs(output_ref[i * channels() + c]) * 1.0e-5)
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
+            << ", input " << input[i * input_stride() + c] << ", alpha " << alpha();
+        }
+      }
+    }
+  }
+
  private:
   size_t batch_size_{1};
   size_t channels_{1};

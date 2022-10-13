@@ -2159,3 +2159,40 @@ enum xnn_status xnn_run_clamp_nc_f32(
     flags,
     threadpool);
 }
+
+enum xnn_status xnn_run_elu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  float alpha,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  if (alpha <= 0.0f || !isnormal(alpha)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g alpha parameter: alpha must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_elu_nc_f32), alpha);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_elu_params params;
+  if (xnn_params.f32.elu.init.f32_elu != NULL) {
+    xnn_params.f32.elu.init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_elu_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.f32.elu.ukernel,
+    XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}

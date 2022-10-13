@@ -15243,6 +15243,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "elu_nc_eager_test",
+    srcs = [
+        "test/elu-nc-eager.cc",
+        "test/elu-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "fully_connected_nc_test",
     srcs = [
         "test/fully-connected-nc.cc",

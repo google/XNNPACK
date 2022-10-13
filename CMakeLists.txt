@@ -7732,6 +7732,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(elu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME elu-nc-test COMMAND elu-nc-test)
 
+    ADD_EXECUTABLE(elu-nc-eager-test test/elu-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(elu-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(elu-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME elu-nc-eager-test COMMAND elu-nc-eager-test)
+
     ADD_EXECUTABLE(fully-connected-nc-test test/fully-connected-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(fully-connected-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
