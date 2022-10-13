@@ -15540,6 +15540,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "square_root_nc_eager_test",
+    srcs = [
+        "test/square-root-nc-eager.cc",
+        "test/square-root-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "squared_difference_nd_test",
     srcs = [
         "test/binary-elementwise-operator-tester.h",

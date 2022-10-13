@@ -2369,3 +2369,31 @@ enum xnn_status xnn_run_square_nc_f32(
     flags,
     threadpool);
 }
+
+enum xnn_status xnn_run_square_root_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  union xnn_f32_sqrt_params params;
+  if (xnn_params.f32.sqrt.init.f32_sqrt != NULL) {
+    xnn_params.f32.sqrt.init.f32_sqrt(&params);
+  }
+  return run_unary_elementwise_nc(
+    xnn_operator_type_square_root_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.f32.sqrt.ukernel,
+    XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
