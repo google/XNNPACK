@@ -7872,6 +7872,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(square-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME square-nc-test COMMAND square-nc-test)
 
+    ADD_EXECUTABLE(square-nc-eager-test test/square-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(square-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(square-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME square-nc-eager-test COMMAND square-nc-eager-test)
+
     ADD_EXECUTABLE(square-root-nc-test test/square-root-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(square-root-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(square-root-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)

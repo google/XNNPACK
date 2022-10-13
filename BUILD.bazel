@@ -15522,6 +15522,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "square_nc_eager_test",
+    srcs = [
+        "test/square-nc-eager.cc",
+        "test/square-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "square_root_nc_test",
     srcs = [
         "test/square-root-nc.cc",
