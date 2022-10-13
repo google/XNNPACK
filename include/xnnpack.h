@@ -2370,6 +2370,16 @@ enum xnn_status xnn_setup_copy_nc_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_copy_nc_x32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const uint32_t* input,
+  uint32_t* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_depth_to_space_nhwc_x32(
   size_t output_channels,
   size_t input_channel_stride,

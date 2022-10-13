@@ -2160,6 +2160,30 @@ enum xnn_status xnn_run_clamp_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_run_copy_nc_x32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const uint32_t* input,
+    uint32_t* output,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  return run_unary_elementwise_nc(
+    xnn_operator_type_copy_nc_x32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.xx.copy,
+    XNN_INIT_FLAG_X32,
+    NULL, 0,
+    2 /* log2(sizeof(uint32_t)) */, 2 /* log2(sizeof(uint32_t)) */,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_run_elu_nc_f32(
   size_t channels,
   size_t input_stride,
