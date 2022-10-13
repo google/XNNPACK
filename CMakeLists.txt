@@ -7777,6 +7777,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME leaky-relu-nc-test COMMAND leaky-relu-nc-test)
 
+    ADD_EXECUTABLE(leaky-relu-nc-eager-test test/leaky-relu-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(leaky-relu-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME leaky-relu-nc-eager-test COMMAND leaky-relu-nc-eager-test)
+
     ADD_EXECUTABLE(max-pooling-nhwc-test test/max-pooling-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(max-pooling-nhwc-test PRIVATE XNNPACK fp16 gtest gtest_main)

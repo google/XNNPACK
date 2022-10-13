@@ -15324,6 +15324,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "leaky_relu_nc_eager_test",
+    srcs = [
+        "test/leaky-relu-nc-eager.cc",
+        "test/leaky-relu-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "max_pooling_nhwc_test",
     timeout = "moderate",
     srcs = [

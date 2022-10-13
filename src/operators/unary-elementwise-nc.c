@@ -2248,3 +2248,40 @@ enum xnn_status xnn_run_hardswish_nc_f32(
     flags,
     threadpool);
 }
+
+enum xnn_status xnn_run_leaky_relu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  float negative_slope,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  if (!isfinite(negative_slope)) {
+    xnn_log_error(
+      "failed to create %s operator with %f negative slope: finite number expected",
+      xnn_operator_type_to_string(xnn_operator_type_leaky_relu_nc_f32),
+      negative_slope);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_lrelu_params params;
+  if (xnn_params.f32.lrelu.init.f32_lrelu != NULL) {
+    xnn_params.f32.lrelu.init.f32_lrelu(&params, negative_slope);
+  }
+  return run_unary_elementwise_nc(
+    xnn_operator_type_leaky_relu_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.f32.lrelu.ukernel,
+    XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}

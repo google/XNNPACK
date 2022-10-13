@@ -1972,6 +1972,17 @@ enum xnn_status xnn_setup_leaky_relu_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_leaky_relu_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  float negative_slope,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
