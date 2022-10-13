@@ -15475,6 +15475,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "sigmoid_nc_eager_test",
+    srcs = [
+        "test/sigmoid-nc-eager.cc",
+        "test/sigmoid-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "slice_nd_test",
     timeout = "moderate",
     srcs = [

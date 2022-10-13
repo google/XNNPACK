@@ -7847,6 +7847,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(sigmoid-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME sigmoid-nc-test COMMAND sigmoid-nc-test)
 
+    ADD_EXECUTABLE(sigmoid-nc-eager-test test/sigmoid-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(sigmoid-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME sigmoid-nc-eager-test COMMAND sigmoid-nc-eager-test)
+
     ADD_EXECUTABLE(slice-nd-test test/slice-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(slice-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(slice-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
