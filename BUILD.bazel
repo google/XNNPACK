@@ -15078,6 +15078,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "bankers_rounding_nc_eager_test",
+    srcs = [
+        "test/bankers-rounding-nc-eager.cc",
+        "test/bankers-rounding-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "ceiling_nc_test",
     srcs = [
         "test/ceiling-nc.cc",

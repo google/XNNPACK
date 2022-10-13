@@ -7644,6 +7644,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(bankers-rounding-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME bankers-rounding-nc-test COMMAND bankers-rounding-nc-test)
 
+    ADD_EXECUTABLE(bankers-rounding-nc-eager-test test/bankers-rounding-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(bankers-rounding-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME bankers-rounding-nc-eager-test COMMAND bankers-rounding-nc-eager-test)
+
     ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(ceiling-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)

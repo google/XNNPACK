@@ -1662,6 +1662,16 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_bankers_rounding_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_ceiling_nc_f32(
   size_t channels,
   size_t input_stride,
