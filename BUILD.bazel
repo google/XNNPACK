@@ -15412,6 +15412,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "negate_nc_eager_test",
+    srcs = [
+        "test/negate-nc-eager.cc",
+        "test/negate-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "slice_normalization_test",
     srcs = [
         "test/slice-normalization.cc",

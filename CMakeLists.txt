@@ -7822,6 +7822,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(negate-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME negate-nc-test COMMAND negate-nc-test)
 
+    ADD_EXECUTABLE(negate-nc-eager-test test/negate-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(negate-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(negate-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME negate-nc-eager-test COMMAND negate-nc-eager-test)
+
     ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
