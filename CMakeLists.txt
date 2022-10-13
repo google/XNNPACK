@@ -7767,6 +7767,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME hardswish-nc-test COMMAND hardswish-nc-test)
 
+    ADD_EXECUTABLE(hardswish-nc-eager-test test/hardswish-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(hardswish-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(hardswish-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME hardswish-nc-eager-test COMMAND hardswish-nc-eager-test)
+
     ADD_EXECUTABLE(leaky-relu-nc-test test/leaky-relu-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(leaky-relu-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(leaky-relu-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
