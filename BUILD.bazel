@@ -15141,6 +15141,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "constant_pad_nd_eager_test",
+    srcs = [
+        "test/constant-pad-nd-eager.cc",
+        "test/constant-pad-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "convert_nc_test",
     srcs = [
         "test/convert-nc.cc",

@@ -7679,6 +7679,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK gtest gtest_main)
     ADD_TEST(NAME constant-pad-nd-test COMMAND constant-pad-nd-test)
 
+    ADD_EXECUTABLE(constant-pad-nd-eager-test test/constant-pad-eager-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(constant-pad-nd-eager-test PRIVATE XNNPACK gtest gtest_main)
+    ADD_TEST(NAME constant-pad-nd-eager-test COMMAND constant-pad-nd-eager-test)
+
     ADD_EXECUTABLE(convert-nc-test test/convert-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(convert-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)

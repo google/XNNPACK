@@ -17,6 +17,20 @@
 #include <xnnpack/params.h>
 
 
+static void init_constant_pad_nd(
+    uint32_t padding_value,
+    uint32_t flags,
+    enum xnn_operator_type operator_type,
+    xnn_operator_t constant_pad_op)
+{
+  constant_pad_op->pad_value = padding_value;
+
+  constant_pad_op->type = operator_type;
+  constant_pad_op->flags = flags;
+
+  constant_pad_op->state = xnn_run_state_invalid;
+}
+
 static enum xnn_status create_constant_pad_nd(
     uint32_t padding_value,
     uint32_t flags,
@@ -43,14 +57,9 @@ static enum xnn_status create_constant_pad_nd(
     goto error;
   }
 
-  constant_pad_op->pad_value = padding_value;
-
-  constant_pad_op->type = operator_type;
-  constant_pad_op->flags = flags;
-
-  constant_pad_op->state = xnn_run_state_invalid;
-
+  init_constant_pad_nd(padding_value, flags, operator_type, constant_pad_op);
   *constant_pad_op_out = constant_pad_op;
+
   return xnn_status_success;
 
 error:
@@ -254,4 +263,107 @@ enum xnn_status xnn_setup_constant_pad_nd_x32(
     num_dims, input_shape, pre_padding, post_padding,
     input, output, 2 /* log2(element size) */,
     pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status run_constant_pad_nd(
+    uint32_t flags,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* pre_paddings,
+    const size_t* post_paddings,
+    const void* input,
+    void* output,
+    uint32_t log2_element_size,
+    const uint32_t padding_value,
+    enum xnn_operator_type operator_type,
+    pthreadpool_t threadpool)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    return xnn_status_uninitialized;
+  }
+  struct xnn_operator constant_pad_op;
+  memset(&constant_pad_op, 0, sizeof(constant_pad_op));
+
+  init_constant_pad_nd(
+      padding_value,
+      flags,
+      operator_type,
+      &constant_pad_op);
+
+  const enum xnn_status status = setup_constant_pad_nd(
+    &constant_pad_op, operator_type,
+    num_dims, input_shape, pre_paddings, post_paddings,
+    input, output,log2_element_size,
+    pthreadpool_get_threads_count(threadpool));
+
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  return xnn_run_operator(&constant_pad_op, threadpool);
+}
+
+enum xnn_status xnn_run_constant_pad_nd_x8(
+    uint32_t flags,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* pre_paddings,
+    const size_t* post_paddings,
+    const void* input,
+    void* output,
+    const void* padding_value,
+    pthreadpool_t threadpool)
+{
+  const uint32_t padding_pattern = *((const uint8_t*) padding_value);
+  return run_constant_pad_nd(
+    flags,
+    num_dims, input_shape, pre_paddings, post_paddings,
+    input, output, 0 /* log2(sizeof(float)) */,
+    padding_pattern * UINT32_C(0x01010101),
+    xnn_operator_type_constant_pad_nd_x32,
+    threadpool);
+}
+
+enum xnn_status xnn_run_constant_pad_nd_x16(
+    uint32_t flags,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* pre_paddings,
+    const size_t* post_paddings,
+    const void* input,
+    void* output,
+    const void* padding_value,
+    pthreadpool_t threadpool)
+{
+  const uint32_t padding_pattern = *((const uint16_t*) padding_value);
+  return run_constant_pad_nd(
+    flags,
+    num_dims, input_shape, pre_paddings, post_paddings,
+    input, output, 1 /* log2(sizeof(float)) */,
+    padding_pattern * UINT32_C(0x00010001),
+    xnn_operator_type_constant_pad_nd_x32,
+    threadpool);
+}
+
+enum xnn_status xnn_run_constant_pad_nd_x32(
+    uint32_t flags,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* pre_paddings,
+    const size_t* post_paddings,
+    const void* input,
+    void* output,
+    const void* padding_value,
+    pthreadpool_t threadpool)
+{
+  const uint32_t padding_pattern = *((const uint32_t*) padding_value);
+  return run_constant_pad_nd(
+    flags,
+    num_dims, input_shape, pre_paddings, post_paddings,
+    input, output, 2 /* log2(sizeof(float)) */,
+    padding_pattern,
+    xnn_operator_type_constant_pad_nd_x32,
+    threadpool);
 }

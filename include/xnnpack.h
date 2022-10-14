@@ -2427,6 +2427,17 @@ enum xnn_status xnn_setup_constant_pad_nd_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_constant_pad_nd_x32(
+  uint32_t flags,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  const void* input,
+  void* output,
+  const void* padding_value,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_copy_nc_x32(
   size_t channels,
   size_t input_stride,
@@ -3088,6 +3099,17 @@ enum xnn_status xnn_setup_constant_pad_nd_x16(
   const size_t* post_padding,
   const void* input,
   void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_constant_pad_nd_x16(
+  uint32_t flags,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  const void* input,
+  void* output,
+  const void* padding_value,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_copy_nc_x16(
@@ -4091,6 +4113,17 @@ enum xnn_status xnn_setup_constant_pad_nd_x8(
   const size_t* post_padding,
   const void* input,
   void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_constant_pad_nd_x8(
+  uint32_t flags,
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* pre_paddings,
+  const size_t* post_paddings,
+  const void* input,
+  void* output,
+  const void* padding_value,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_depth_to_space_nhwc_x8(
