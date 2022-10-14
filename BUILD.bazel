@@ -15288,6 +15288,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "floor_nc_eager_test",
+    srcs = [
+        "test/floor-nc-eager.cc",
+        "test/floor-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "global_average_pooling_nwc_test",
     srcs = [
         "test/global-average-pooling-nwc.cc",

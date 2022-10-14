@@ -7757,6 +7757,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(floor-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME floor-nc-test COMMAND floor-nc-test)
 
+    ADD_EXECUTABLE(floor-nc-eager-test test/floor-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(floor-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(floor-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME floor-nc-eager-test COMMAND floor-nc-eager-test)
+
     ADD_EXECUTABLE(global-average-pooling-nwc-test test/global-average-pooling-nwc.cc)
     TARGET_INCLUDE_DIRECTORIES(global-average-pooling-nwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(global-average-pooling-nwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
