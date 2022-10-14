@@ -9827,6 +9827,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE all_microkernels bench-utils microparams_init)
 
+  ADD_EXECUTABLE(f32-gavgpool-cw-bench bench/f32-gavgpool-cw.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-bench PRIVATE all_microkernels bench-utils microparams_init)
+
   ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE benchmark pthreadpool)

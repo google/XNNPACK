@@ -11950,6 +11950,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_gavgpool_cw_bench",
+    srcs = [
+        "bench/f32-gavgpool-cw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_conv_hwc2chw_bench",
     srcs = [
         "bench/dconv.h",
