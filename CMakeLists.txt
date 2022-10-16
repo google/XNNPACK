@@ -9685,7 +9685,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(elu-bench bench/elu.cc)
     TARGET_INCLUDE_DIRECTORIES(elu-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(floor-bench bench/floor.cc)
     TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE .)
