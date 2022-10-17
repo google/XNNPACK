@@ -9653,7 +9653,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build operator-level microbenchmarks
     ADD_EXECUTABLE(abs-bench bench/abs.cc)
     TARGET_INCLUDE_DIRECTORIES(abs-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc)
     TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE .)
