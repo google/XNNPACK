@@ -9661,11 +9661,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(bankers-rounding-bench bench/bankers-rounding.cc)
     TARGET_INCLUDE_DIRECTORIES(bankers-rounding-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(ceiling-bench bench/ceiling.cc)
     TARGET_INCLUDE_DIRECTORIES(ceiling-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc)
     TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE .)
@@ -9689,7 +9689,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(floor-bench bench/floor.cc)
     TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
     TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE .)
