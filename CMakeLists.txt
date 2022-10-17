@@ -9701,7 +9701,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     ADD_EXECUTABLE(leaky-relu-bench bench/leaky-relu.cc)
     TARGET_INCLUDE_DIRECTORIES(leaky-relu-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK benchmark bench-utils)
+    TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
 
     ADD_EXECUTABLE(max-pooling-bench bench/max-pooling.cc)
     TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE .)
