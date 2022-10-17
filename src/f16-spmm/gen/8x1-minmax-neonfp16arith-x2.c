@@ -117,7 +117,7 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const float16x4_t va01 = vreinterpret_f16_f32(vld1_dup_f32((const void*) i));
+            const float16x4_t va01 = vreinterpret_f16_u32(vld1_dup_u32((const void*) i));
             i = (const __fp16*restrict) ((uintptr_t) i + (uintptr_t) diff);
             const float16x4_t vb = vld1_dup_f16(w); w += 1;
             vacc01 = vfma_f16(vacc01, va01, vb);
@@ -125,7 +125,7 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2(
         }
         float16x4_t vout01 = vmin_f16(vacc01, vget_low_f16(vmax));
         vout01 = vmax_f16(vout01, vget_low_f16(vmin));
-        vst1_lane_f32((void*) o, vreinterpret_f32_f16(vout01), 0);
+        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vout01), 0);
         o = (__fp16*restrict) ((uintptr_t) o + output_stride);
       } while (--n != 0);
       o = (__fp16*restrict) ((uintptr_t) o - output_decrement);

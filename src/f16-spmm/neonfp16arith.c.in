@@ -122,7 +122,7 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
               $if SUBMR == 1:
                 const float16x4_t va0 = vld1_dup_f16(i);
               $elif SUBMR == 2:
-                const float16x4_t va01 = vreinterpret_f16_f32(vld1_dup_f32((const void*) i));
+                const float16x4_t va01 = vreinterpret_f16_u32(vld1_dup_u32((const void*) i));
               $elif SUBMR == 4:
                 const float16x4_t va0123 = vld1_f16(i);
               $else:
@@ -147,7 +147,7 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
             $if SUBMR == 1:
               vst1_lane_f16(o, vout${ABC[0]}, 0);
             $elif SUBMR == 2:
-              vst1_lane_f32((void*) o, vreinterpret_f32_f16(vout${ABC[0:SUBMR]}), 0);
+              vst1_lane_u32((void*) o, vreinterpret_u32_f16(vout${ABC[0:SUBMR]}), 0);
             $else:
               vst1_f16(o, vout${ABC[0:SUBMR]});
           $else:
