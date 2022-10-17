@@ -202,7 +202,13 @@ float16_t vsqrth_f16(float16_t v) {
 #if XNN_ARCH_ARM && defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #include <arm_neon.h>
 
-#ifdef __GNUC__
+#if !defined(__GNUC__) || defined(__clang_major__) & (__clang_major__ < 10)
+  // GNU-style assembly is not supported, or "x" constraint is not supported (Clang pre-10)
+  #define vmlaq_lane_f16(acc, x, y, n) \
+    vaddq_f16((acc), vmulq_lane_f16((x), (y), (n)))
+  #define vmla_lane_f16(acc, x, y, n) \
+    vadd_f16((acc), vmul_lane_f16((x), (y), (n)))
+#else
   #define vmlaq_lane_f16(acc, x, y, n)       \
     ({                                       \
       float16x8_t result = acc;              \
@@ -219,11 +225,6 @@ float16_t vsqrth_f16(float16_t v) {
           : "w" (x), "x" (y), "i" (n));      \
       result;                                \
     })
-#else
-  #define vmlaq_lane_f16(acc, x, y, n) \
-    vaddq_f16((acc), vmulq_lane_f16((x), (y), (n)))
-  #define vmla_lane_f16(acc, x, y, n) \
-    vadd_f16((acc), vmul_lane_f16((x), (y), (n)))
 #endif
 #endif  // AArch32 targeting ARMv8.2-A with NEON+FP16 arithmetics
 
