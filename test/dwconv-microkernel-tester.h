@@ -195,7 +195,7 @@ class DWConvMicrokernelTester {
       std::fill(zero.begin(), zero.end(), input_zero_point());
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
-      std::fill(packed_weights.begin(), packed_weights.end(), 0);
+      std::fill(packed_weights.begin(), packed_weights.end(), kernel_zero_point());
       const xnn_qu8_packing_params packing_params = { input_zero_point(), kernel_zero_point() };
       xnn_pack_qu8_dwconv_ghw_w(
         kr(), kr(), 1, channels(), cr(),
