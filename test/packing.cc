@@ -165,8 +165,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     2, 6,
     // go down the columns first
     4, 8, 3, 7, 5, 9,
-    // followed by 10 zeros to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 kernel_zero_point to make up the difference with primary_tile
+    // (primary_tile - h * w) * c = (9 - 2 * 2) * 2 = 10
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
   };
   ASSERT_EQ(expected, packed_weights);
 }
@@ -240,7 +241,8 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0, 0, 0, 0,
     // weights
     21, 0, 23, 0, 22, 0, 24, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // kernel_zero_point to make up the difference with primary_tile (5)
+    127, 127, 127, 127, 127, 0, 0, 0, 0, 0
   };
   ASSERT_EQ(expected, packed_weights);
 }
@@ -396,8 +398,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     2, 3,
     // go down the columns first
     6, 7, 4, 5, 8, 9,
-    // followed by 10 zeros to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 kernel_zero_point to make up the difference with primary_tile
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
   };
   ASSERT_EQ(expected, packed_weights);
 }
@@ -449,8 +451,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     15, 16,
     10, 11,
     20, 21,
-    // followed by 10 zeros to make up the difference with primary_tile
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 kernel_zero_point to make up the difference with primary_tile
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
     // bias first (cr == 2 of them)
     // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
     0x40, 0xDF, 0, 0,
@@ -458,14 +460,16 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     0x45, 0xDD, 0, 0,
     // then weights, channels first
     7, 8, 17, 18, 12, 13, 22, 23,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // followed by 10 kernel_zero_point to make up the difference with primary_tile
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
     // bias
     // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
     0x4A, 0xDB, 0, 0,
     0, 0, 0, 0,
     // weights
     9, 0, 19, 0, 14, 0, 24, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    // kernel_zero_point to make up the difference with primary_tile (5)
+    127, 127, 127, 127, 127, 0, 0, 0, 0, 0
   };
   ASSERT_EQ(expected, packed_weights);
 }

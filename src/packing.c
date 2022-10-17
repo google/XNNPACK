@@ -1553,8 +1553,15 @@ void xnn_pack_qu8_dwconv_ghw_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(uint8_t));
       }
     }
-    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
-    packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
+
+    for (size_t i = 0; i < (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t); i++) {
+      *((uint8_t*) packed_w) = params->kernel_zero_point;
+      packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+    }
+    for (size_t i = 0; i < extra_bytes; i++) {
+      *((uint8_t*) packed_w) = params->kernel_zero_point;
+      packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+    }
   }
 }
 
@@ -1761,8 +1768,15 @@ void xnn_pack_qu8_dwconv_hwg_w(
         packed_w = (void*) ((uintptr_t) packed_w + (cr - cr_block_size) * sizeof(uint8_t));
       }
     }
-    packed_w = (void*) ((uintptr_t) packed_w + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
-    packed_w = (void*) ((uintptr_t) packed_w + extra_bytes);
+
+    for (size_t i = 0; i < (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t); i++) {
+      *((uint8_t*) packed_w) = params->kernel_zero_point;
+      packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+    }
+    for (size_t i = 0; i < extra_bytes; i++) {
+      *((uint8_t*) packed_w) = params->kernel_zero_point;
+      packed_w = (void*) ((uintptr_t) packed_w + sizeof(uint8_t));
+    }
   }
 }
 
