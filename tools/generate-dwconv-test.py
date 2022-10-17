@@ -54,6 +54,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}) {
   DWConvMicrokernelTester()
     .cr(${CR})
     .kr(${KR})
+    .kh(${KR})
     .channels(${CBLOCK})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -65,6 +66,7 @@ $if IS_PIPELINED:
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
+      .kh(${KR})
       .channels(${CBLOCK * 2})
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -77,6 +79,7 @@ $if CBLOCK > 1:
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -90,6 +93,7 @@ $if CBLOCK > 1:
         DWConvMicrokernelTester()
           .cr(${CR})
           .kr(${KR})
+          .kh(${KR})
           .channels(channels)
           .qmin(128)
           .Test(${", ".join(TEST_ARGS)});
@@ -103,6 +107,7 @@ $if CBLOCK > 1:
         DWConvMicrokernelTester()
           .cr(${CR})
           .kr(${KR})
+          .kh(${KR})
           .channels(channels)
           .qmax(128)
           .Test(${", ".join(TEST_ARGS)});
@@ -116,6 +121,7 @@ $if CBLOCK > 1:
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -128,6 +134,7 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}) {
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
+      .kh(${KR})
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -141,6 +148,7 @@ $if ACTIVATION == "MINMAX":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .qmin(128)
         .Test(${", ".join(TEST_ARGS)});
@@ -154,6 +162,7 @@ $if ACTIVATION == "MINMAX":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .qmax(128)
         .Test(${", ".join(TEST_ARGS)});
@@ -167,6 +176,7 @@ TEST(${TEST_NAME}, multipixel) {
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
+      .kh(${KR})
       .channels(channels)
       .width(3)
       .Test(${", ".join(TEST_ARGS)});
@@ -181,6 +191,7 @@ TEST(${TEST_NAME}, multipixel_with_step) {
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .width(3)
         .step(step)
@@ -196,6 +207,7 @@ TEST(${TEST_NAME}, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
+      .kh(${KR})
       .channels(${CR})
       .width(5)
       .output_stride(${next_prime(CR * 5 + 1)})
@@ -211,6 +223,7 @@ $if ACTIVATION == "MINMAX":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .width(3)
         .qmin(128)
@@ -225,6 +238,7 @@ $if ACTIVATION == "MINMAX":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .width(3)
         .qmax(128)
@@ -240,6 +254,7 @@ $if DATATYPE == "qu8":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .width(3)
         .input_zero_point(255)
@@ -255,6 +270,7 @@ $if DATATYPE == "qu8":
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .width(3)
         .input_zero_point(0)
@@ -270,6 +286,7 @@ TEST(${TEST_NAME}, input_offset) {
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
+      .kh(${KR})
       .channels(channels)
       .input_offset(${next_prime(CR + 1) * 16})
       .Test(${", ".join(TEST_ARGS)});
@@ -284,11 +301,24 @@ TEST(${TEST_NAME}, zero) {
       DWConvMicrokernelTester()
         .cr(${CR})
         .kr(${KR})
+        .kh(${KR})
         .channels(channels)
         .input_offset(${next_prime(CR + 1) * 16})
         .zero_index(mz)
         .Test(${", ".join(TEST_ARGS)});
     }
+  }
+}
+
+TEST(${TEST_NAME}, kernel_size_lt_${KR}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (int32_t kernel_height = ${KR - 1}; kernel_height > 0; kernel_height -= 2) {
+    DWConvMicrokernelTester()
+      .cr(${CR})
+      .kr(${KR})
+      .kh(kernel_height)
+      .Test(${", ".join(TEST_ARGS)});
   }
 }
 """
@@ -301,7 +331,7 @@ def generate_test_cases(ukernel, primary_tile, cr, kr, c_block,
     ukernel: C name of the micro-kernel function.
     cr: CR parameter of the DWCONV micro-kernel.
     kr: KR parameter of the DWCONV micro-kernel.
-    k_block: Number of C values processed per one iteration of the main loop of
+    c_block: Number of C values processed per one iteration of the main loop of
              the micro-kernel.
     init_fn: C name of the function to initialize microkernel parameters.
     requantization: name of the requantization scheme used by the microkernel.
