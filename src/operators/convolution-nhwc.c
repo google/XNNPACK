@@ -47,7 +47,7 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
     size_t num_ukernels)
 {
   while (num_ukernels-- != 0) {
-    if (ukernel->primary_tile >= kernel_size) {
+    if (ukernel->primary_tile == kernel_size) {
       return ukernel;
     }
     ukernel++;
@@ -427,11 +427,10 @@ static enum xnn_status create_convolution2d_nhwc(
     case xnn_ukernel_type_dwconv:
     {
       assert(dwconv_ukernel != NULL);
-      const uint8_t primary_tile = dwconv_ukernel->primary_tile;
-      assert(primary_tile >= kernel_size);
+      assert(dwconv_ukernel->primary_tile == kernel_size);
 
       const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
-      const size_t packed_weights_size = ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
+      const size_t packed_weights_size = ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
           convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
@@ -465,9 +464,9 @@ static enum xnn_status create_convolution2d_nhwc(
 
         init_scale_params(
           groups, dwconv_ukernel->channel_tile,
-          dwconv_ukernel->channel_tile * ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
+          dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
           scale_params,
-          (void*) ((uintptr_t) weights_ptr + dwconv_ukernel->channel_tile * ((primary_tile << log2_filter_element_size) + bias_element_size)));
+          (void*) ((uintptr_t) weights_ptr + dwconv_ukernel->channel_tile * ((kernel_size << log2_filter_element_size) + bias_element_size)));
       }
 
       if (use_weights_cache(convolution_op)) {
