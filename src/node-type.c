@@ -88,6 +88,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Sigmoid";
     case xnn_node_type_softmax:
       return "Softmax";
+    case xnn_node_type_space_to_depth:
+      return "Space To Depth";
     case xnn_node_type_square:
       return "Square";
     case xnn_node_type_square_root:
