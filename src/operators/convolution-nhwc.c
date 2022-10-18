@@ -118,6 +118,9 @@ static void generate_gemms_up_to_max_mr(
     xnn_operator_t convolution_op)
 {
   assert(XNN_MAX_MR >= max_mr);
+  for (size_t mr = 0; mr < max_mr; mr++) {
+    convolution_op->ukernel.gemm.gemm_cases[mr].generated_code_offset[XNN_UARCH_DEFAULT] = SIZE_MAX;
+  }
   if (convolution_op->code_cache == NULL) {
     return;
   }
@@ -184,6 +187,9 @@ static void generate_igemms_up_to_max_mr(
     xnn_operator_t convolution_op)
 {
   assert(XNN_MAX_MR >= max_mr);
+  for (size_t mr = 0; mr < max_mr; mr++) {
+    convolution_op->ukernel.igemm.igemm_cases[mr].generated_code_offset[XNN_UARCH_DEFAULT] = SIZE_MAX;
+  }
   if (convolution_op->code_cache == NULL) {
     return;
   }

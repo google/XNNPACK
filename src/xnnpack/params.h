@@ -26,6 +26,9 @@ struct xnn_hmp_gemm_ukernel {
 
 static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
+#if XNN_PLATFORM_JIT
+  ukernel.generated_code_offset[0] = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
 #if XNN_PLATFORM_JIT
@@ -57,6 +60,9 @@ struct xnn_hmp_igemm_ukernel {
 
 static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function function) {
   struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
+#if XNN_PLATFORM_JIT
+  ukernel.generated_code_offset[0] = SIZE_MAX;
+#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
 #if XNN_PLATFORM_JIT

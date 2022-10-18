@@ -77,11 +77,22 @@ static size_t calculate_microkernel_cost(size_t batch_size, uint32_t mr, uint32_
   return divide_round_up(batch_size, mr) * (3 * (mr + nr) + mr * nr);
 }
 
+static bool mr_supported_for_gemm(uint32_t mr, struct xnn_hmp_gemm_ukernel* gemm_cases)
+{
+  #if XNN_PLATFORM_JIT
+    return gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] != NULL ||
+           gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] != SIZE_MAX;
+  #else
+    return gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] != NULL;
+  #endif
+}
+
 uint32_t xnn_get_heuristic_mr_gemm(
   size_t batch_size, uint32_t max_mr, uint32_t nr, struct xnn_hmp_gemm_ukernel *gemm_cases)
 {
-  assert(gemm_cases[max_mr-1].function[XNN_UARCH_DEFAULT] != NULL);
-  if (batch_size <= max_mr && gemm_cases[batch_size-1].function[XNN_UARCH_DEFAULT] != NULL) {
+  assert(mr_supported_for_gemm(max_mr, gemm_cases));
+
+  if (batch_size <= max_mr && mr_supported_for_gemm(batch_size, gemm_cases)) {
     // We have a microkernel with MR that is the exact match with batch_size.
     return batch_size;
   }
@@ -92,7 +103,7 @@ uint32_t xnn_get_heuristic_mr_gemm(
   uint32_t best_mr = max_mr;
   size_t best_cost = SIZE_MAX;
   for (uint32_t mr = 1; mr <= max_mr; mr++) {
-    if (gemm_cases[mr-1].function[XNN_UARCH_DEFAULT] == NULL) {
+    if (!mr_supported_for_gemm(mr, gemm_cases)) {
       continue;
     }
     const size_t current_cost = calculate_microkernel_cost(batch_size, mr, nr);
@@ -101,15 +112,25 @@ uint32_t xnn_get_heuristic_mr_gemm(
       best_cost = current_cost;
     }
   }
-  assert(gemm_cases[best_mr-1].function[XNN_UARCH_DEFAULT] != NULL);
+  assert(mr_supported_for_gemm(best_mr, gemm_cases));
   return best_mr;
+}
+
+static bool mr_supported_for_igemm(uint32_t mr, struct xnn_hmp_igemm_ukernel* igemm_cases)
+{
+  #if XNN_PLATFORM_JIT
+    return igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] != NULL ||
+           igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] != SIZE_MAX;
+  #else
+    return igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] != NULL;
+  #endif
 }
 
 uint32_t xnn_get_heuristic_mr_igemm(
   size_t batch_size, uint32_t max_mr, uint32_t nr, struct xnn_hmp_igemm_ukernel *igemm_cases)
 {
-  assert(igemm_cases[max_mr-1].function[XNN_UARCH_DEFAULT] != NULL);
-  if (batch_size <= max_mr && igemm_cases[batch_size-1].function[XNN_UARCH_DEFAULT] != NULL) {
+  assert(mr_supported_for_igemm(max_mr, igemm_cases));
+  if (batch_size <= max_mr && mr_supported_for_igemm(batch_size, igemm_cases)) {
     // We have a microkernel with MR that is the exact match with batch_size.
     return batch_size;
   }
@@ -120,7 +141,7 @@ uint32_t xnn_get_heuristic_mr_igemm(
   uint32_t best_mr = max_mr;
   size_t best_cost = SIZE_MAX;
   for (uint32_t mr = 1; mr <= max_mr; mr++) {
-    if (igemm_cases[mr-1].function[XNN_UARCH_DEFAULT] == NULL) {
+    if (!mr_supported_for_igemm(mr, igemm_cases)) {
       continue;
     }
     const size_t current_cost = calculate_microkernel_cost(batch_size, mr, nr);
@@ -129,6 +150,6 @@ uint32_t xnn_get_heuristic_mr_igemm(
       best_cost = current_cost;
     }
   }
-  assert(igemm_cases[best_mr-1].function[XNN_UARCH_DEFAULT] != NULL);
+  assert(mr_supported_for_igemm(best_mr, igemm_cases));
   return best_mr;
 }
