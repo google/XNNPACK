@@ -106,6 +106,9 @@ static void GEMMEnd2EndBenchmark(
 }
 
 #if XNN_PLATFORM_JIT
+// Dummy ukernel (for both GEMM and IGEMM), should never be called when benchmarking JIT.
+void dummy_ukernel() {}
+
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
@@ -125,10 +128,11 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
-  // Nullify the microkernels to ensure we run JIT kernels.
+  // Set the microkernels to a dummy function to ensure we run JIT kernels, but don't set to null because we rely on
+  // their existence to specialize on MR.
   for (size_t i = 0; i < XNN_MAX_MR; i++) {
-    xnn_params.f32.gemm.minmax.gemm[i] = xnn_init_hmp_gemm_ukernel(nullptr);
-    xnn_params.f32.gemm.minmax.igemm[i] = xnn_init_hmp_igemm_ukernel(nullptr);
+    xnn_params.f32.gemm.minmax.gemm[i] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_function) dummy_ukernel);
+    xnn_params.f32.gemm.minmax.igemm[i] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_function) dummy_ukernel);
   }
   xnn_params.f32.gemm.init.f32 = init_params;
   xnn_params.f32.gemm.mr = mr;
