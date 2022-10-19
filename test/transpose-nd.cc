@@ -4,6 +4,14 @@
 
 #include "transpose-operator-tester.h"
 
+TEST(TRANSPOSE_ND_X32, Zero_dim) {
+  TransposeOperatorTester()
+      .num_dims(2)
+      .shape({7, 0})
+      .perm({1, 0})
+      .TestX32();
+}
+
 TEST(TRANSPOSE_ND_X32_2, 1D_redundant_dim) {
   TransposeOperatorTester()
       .num_dims(1)

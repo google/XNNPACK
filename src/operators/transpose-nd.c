@@ -182,6 +182,17 @@ static enum xnn_status setup_transpose_nd(
     }
   }
 
+  // Early exit without setting up context if any shape dimension is zero.
+  bool degenerate_shape = false;
+  for (size_t i = 0; i < num_dims; ++i) {
+    degenerate_shape |= input_shape[i] == 0;
+  }
+
+  if (degenerate_shape) {
+    transpose_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
   transpose_op->channels = num_dims;
 
   struct transpose_context* context = &transpose_op->context.transpose;
