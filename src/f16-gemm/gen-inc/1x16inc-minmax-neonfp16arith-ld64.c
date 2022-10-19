@@ -110,13 +110,13 @@ void xnn_f16_gemminc_minmax_ukernel_1x16__neonfp16arith_ld64(
     }
 
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
-    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = vminq_f16(vacc0x89ABCDEF, vmax);
-
     const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
     vacc0x89ABCDEF = vmaxq_f16(vacc0x89ABCDEF, vmin);
+
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
+    vacc0x89ABCDEF = vminq_f16(vacc0x89ABCDEF, vmax);
 
     if XNN_LIKELY(nc >= 16) {
       vst1q_f16(c0, vacc0x01234567);

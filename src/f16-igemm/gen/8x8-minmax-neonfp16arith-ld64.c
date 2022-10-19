@@ -251,16 +251,6 @@ void xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64(
     } while (p != 0);
 
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
-    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
-    vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
-    vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
-    vacc3x01234567 = vminq_f16(vacc3x01234567, vmax);
-    vacc4x01234567 = vminq_f16(vacc4x01234567, vmax);
-    vacc5x01234567 = vminq_f16(vacc5x01234567, vmax);
-    vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
-    vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
-
     const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
     vacc1x01234567 = vmaxq_f16(vacc1x01234567, vmin);
@@ -270,6 +260,16 @@ void xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64(
     vacc5x01234567 = vmaxq_f16(vacc5x01234567, vmin);
     vacc6x01234567 = vmaxq_f16(vacc6x01234567, vmin);
     vacc7x01234567 = vmaxq_f16(vacc7x01234567, vmin);
+
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
+    vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
+    vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
+    vacc3x01234567 = vminq_f16(vacc3x01234567, vmax);
+    vacc4x01234567 = vminq_f16(vacc4x01234567, vmax);
+    vacc5x01234567 = vminq_f16(vacc5x01234567, vmax);
+    vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
+    vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
       vst1q_f16(c7, vacc7x01234567);

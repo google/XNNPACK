@@ -304,24 +304,6 @@ void xnn_f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64(
     }
 
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
-    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
-    vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
-    vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
-    vacc3x01234567 = vminq_f16(vacc3x01234567, vmax);
-    vacc4x01234567 = vminq_f16(vacc4x01234567, vmax);
-    vacc5x01234567 = vminq_f16(vacc5x01234567, vmax);
-    vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
-    vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
-    vacc0x89ABCDEF = vminq_f16(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = vminq_f16(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = vminq_f16(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = vminq_f16(vacc3x89ABCDEF, vmax);
-    vacc4x89ABCDEF = vminq_f16(vacc4x89ABCDEF, vmax);
-    vacc5x89ABCDEF = vminq_f16(vacc5x89ABCDEF, vmax);
-    vacc6x89ABCDEF = vminq_f16(vacc6x89ABCDEF, vmax);
-    vacc7x89ABCDEF = vminq_f16(vacc7x89ABCDEF, vmax);
-
     const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
     vacc0x01234567 = vmaxq_f16(vacc0x01234567, vmin);
     vacc1x01234567 = vmaxq_f16(vacc1x01234567, vmin);
@@ -339,6 +321,24 @@ void xnn_f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64(
     vacc5x89ABCDEF = vmaxq_f16(vacc5x89ABCDEF, vmin);
     vacc6x89ABCDEF = vmaxq_f16(vacc6x89ABCDEF, vmin);
     vacc7x89ABCDEF = vmaxq_f16(vacc7x89ABCDEF, vmin);
+
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
+    vacc1x01234567 = vminq_f16(vacc1x01234567, vmax);
+    vacc2x01234567 = vminq_f16(vacc2x01234567, vmax);
+    vacc3x01234567 = vminq_f16(vacc3x01234567, vmax);
+    vacc4x01234567 = vminq_f16(vacc4x01234567, vmax);
+    vacc5x01234567 = vminq_f16(vacc5x01234567, vmax);
+    vacc6x01234567 = vminq_f16(vacc6x01234567, vmax);
+    vacc7x01234567 = vminq_f16(vacc7x01234567, vmax);
+    vacc0x89ABCDEF = vminq_f16(vacc0x89ABCDEF, vmax);
+    vacc1x89ABCDEF = vminq_f16(vacc1x89ABCDEF, vmax);
+    vacc2x89ABCDEF = vminq_f16(vacc2x89ABCDEF, vmax);
+    vacc3x89ABCDEF = vminq_f16(vacc3x89ABCDEF, vmax);
+    vacc4x89ABCDEF = vminq_f16(vacc4x89ABCDEF, vmax);
+    vacc5x89ABCDEF = vminq_f16(vacc5x89ABCDEF, vmax);
+    vacc6x89ABCDEF = vminq_f16(vacc6x89ABCDEF, vmax);
+    vacc7x89ABCDEF = vminq_f16(vacc7x89ABCDEF, vmax);
 
     if XNN_LIKELY(nc >= 16) {
       vst1q_f16(c0, vacc0x01234567);
