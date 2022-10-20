@@ -32,8 +32,16 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
   const __fp16*restrict i = (const __fp16*) input;
   __fp16*restrict o = (__fp16*) output;
 
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+  #if XNN_ARCH_ARM64
+    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->fp16arith.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
+    const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
+  #else
+    // vld2_dup is to work around aarch32 clang bug with vld1q_dup
+    const uint16x4x2_t vminmax = vld2_dup_u16(&params->fp16arith.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0],vminmax.val[0]));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1],vminmax.val[1]));
+  #endif
 
   size_t output_decrement = output_stride * nc - 8 * sizeof(__fp16);
   while XNN_LIKELY(mc >= 8 * sizeof(__fp16)) {
