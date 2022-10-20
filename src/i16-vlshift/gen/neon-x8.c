@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-vlshift/neon.c.in
+//   Template: src/i16-vlshift/neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -17,10 +17,10 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_s16_vlshift_ukernel__neon_x8(
+void xnn_i16_vlshift_ukernel__neon_x8(
     size_t batch,
-    const int16_t* input,
-    int16_t* output,
+    const uint16_t* input,
+    uint16_t* output,
     uint32_t shift)
 {
   assert(batch != 0);
@@ -30,33 +30,30 @@ void xnn_s16_vlshift_ukernel__neon_x8(
 
   const int16x8_t vshift = vdupq_n_s16((int16_t) shift);
 
-
   // Remainder of full vectors
   for (; batch >= 8; batch -= 8) {
-    const int16x8_t vi = vld1q_s16(input); input += 8;
-
-    const int16x8_t vout = vshlq_s16(vi, vshift);
-
-    vst1q_s16(output, vout); output += 8;
+    const uint16x8_t vi = vld1q_u16(input); input += 8;
+    const uint16x8_t vout = vshlq_u16(vi, vshift);
+    vst1q_u16(output, vout); output += 8;
   }
 
   // Remainder of 1 to 7 batch
   if XNN_UNLIKELY(batch != 0) {
-    const int16x8_t vi = vld1q_s16(input);
+    const uint16x8_t vi = vld1q_u16(input);
 
-    const int16x8_t vout = vshlq_s16(vi, vshift);
-    int16x4_t vout_lo = vget_low_s16(vout);
+    const uint16x8_t vout = vshlq_u16(vi, vshift);
+    uint16x4_t vout_lo = vget_low_u16(vout);
 
     if (batch & 4) {
-      vst1_s16(output, vout_lo); output += 4;
-      vout_lo = vget_high_s16(vout);
+      vst1_u16(output, vout_lo); output += 4;
+      vout_lo = vget_high_u16(vout);
     }
     if (batch & 2) {
-      vst1_lane_u32((void*) output, vreinterpret_u32_s16(vout_lo), 0); output += 2;
-      vout_lo = vext_s16(vout_lo, vout_lo, 2);
+      vst1_lane_u32((void*) output, vreinterpret_u32_u16(vout_lo), 0); output += 2;
+      vout_lo = vext_u16(vout_lo, vout_lo, 2);
     }
     if (batch & 1){
-      vst1_lane_s16(output, vout_lo, 0);
+      vst1_lane_u16(output, vout_lo, 0);
     }
   }
 }

@@ -1005,6 +1005,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vunary/gen/vsqr-scalar-x1.c
   src/f32-vunary/gen/vsqr-scalar-x2.c
   src/f32-vunary/gen/vsqr-scalar-x4.c
+  src/i16-vlshift/gen/scalar-x1.c
+  src/i16-vlshift/gen/scalar-x2.c
+  src/i16-vlshift/gen/scalar-x3.c
+  src/i16-vlshift/gen/scalar-x4.c
   src/math/cvt-f32-f16-scalar-bitcast.c
   src/math/cvt-f32-f16-scalar-fabsf.c
   src/math/expminus-f32-scalar-rr2-lut64-p2.c
@@ -1394,10 +1398,6 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/scalar-x2.c
   src/s16-rmaxabs/gen/scalar-x3.c
   src/s16-rmaxabs/gen/scalar-x4.c
-  src/s16-vlshift/gen/scalar-x1.c
-  src/s16-vlshift/gen/scalar-x2.c
-  src/s16-vlshift/gen/scalar-x3.c
-  src/s16-vlshift/gen/scalar-x4.c
   src/s16-window/gen/scalar-x1.c
   src/s16-window/gen/scalar-x2.c
   src/s16-window/gen/scalar-x3.c
@@ -2032,6 +2032,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vunary/gen/vneg-neon-x8.c
   src/f32-vunary/gen/vsqr-neon-x4.c
   src/f32-vunary/gen/vsqr-neon-x8.c
+  src/i16-vlshift/gen/neon-x8.c
+  src/i16-vlshift/gen/neon-x16.c
+  src/i16-vlshift/gen/neon-x24.c
+  src/i16-vlshift/gen/neon-x32.c
   src/math/cvt-f16-f32-neon-int16.c
   src/math/cvt-f16-f32-neon-int32.c
   src/math/cvt-f32-f16-neon.c
@@ -2787,10 +2791,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-rmaxabs/gen/neon-x16.c
   src/s16-rmaxabs/gen/neon-x24.c
   src/s16-rmaxabs/gen/neon-x32.c
-  src/s16-vlshift/gen/neon-x8.c
-  src/s16-vlshift/gen/neon-x16.c
-  src/s16-vlshift/gen/neon-x24.c
-  src/s16-vlshift/gen/neon-x32.c
   src/s16-window/gen/neon-x8.c
   src/s16-window/gen/neon-x16.c
   src/s16-window/gen/neon-x24.c
@@ -9275,11 +9275,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE all_microkernels)
   ADD_TEST(NAME u32-vlog-test COMMAND u32-vlog-test)
 
-  ADD_EXECUTABLE(s16-vlshift-test test/s16-vlshift.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-vlshift-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s16-vlshift-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
-  TARGET_LINK_LIBRARIES(s16-vlshift-test PRIVATE all_microkernels)
-  ADD_TEST(NAME s16-vlshift-test COMMAND s16-vlshift-test)
+  ADD_EXECUTABLE(i16-vlshift-test test/i16-vlshift.cc)
+  TARGET_INCLUDE_DIRECTORIES(i16-vlshift-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(i16-vlshift-test PRIVATE cpuinfo fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(i16-vlshift-test PRIVATE all_microkernels)
+  ADD_TEST(NAME i16-vlshift-test COMMAND i16-vlshift-test)
 
   ADD_EXECUTABLE(cs16-vsquareabs-test test/cs16-vsquareabs.cc)
   TARGET_INCLUDE_DIRECTORIES(cs16-vsquareabs-test PRIVATE include src test)
@@ -10059,10 +10059,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(u64-u32-vsqrtshift-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(u64-u32-vsqrtshift-bench PRIVATE all_microkernels bench-utils microparams_init)
 
-  ADD_EXECUTABLE(s16-vlshift-bench bench/s16-vlshift.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-vlshift-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(s16-vlshift-bench PRIVATE benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(s16-vlshift-bench PRIVATE all_microkernels bench-utils)
+  ADD_EXECUTABLE(i16-vlshift-bench bench/i16-vlshift.cc)
+  TARGET_INCLUDE_DIRECTORIES(i16-vlshift-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(i16-vlshift-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(i16-vlshift-bench PRIVATE all_microkernels bench-utils)
 
   ADD_EXECUTABLE(cs16-vsquareabs-bench bench/cs16-vsquareabs.cc)
   TARGET_INCLUDE_DIRECTORIES(cs16-vsquareabs-bench PRIVATE . include src)

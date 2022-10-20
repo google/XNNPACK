@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-vlshift/scalar.c.in
+//   Template: src/i16-vlshift/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -15,10 +15,10 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_s16_vlshift_ukernel__scalar_x3(
+void xnn_i16_vlshift_ukernel__scalar_x2(
     size_t batch,
-    const int16_t* input,
-    int16_t* output,
+    const uint16_t* input,
+    uint16_t* output,
     uint32_t shift)
 {
   assert(batch != 0);
@@ -26,28 +26,23 @@ void xnn_s16_vlshift_ukernel__scalar_x3(
   assert(output != NULL);
   assert(shift < 16);
 
-  for (; batch >= 3; batch -= 3) {
-    const uint16_t vi0 = (uint16_t) input[0];
-    const uint16_t vi1 = (uint16_t) input[1];
-    const uint16_t vi2 = (uint16_t) input[2];
-    input += 3;
+  for (; batch >= 2; batch -= 2) {
+    const uint16_t vi0 = input[0];
+    const uint16_t vi1 = input[1];
+    input += 2;
 
     const uint16_t vout0 = vi0 << shift;
     const uint16_t vout1 = vi1 << shift;
-    const uint16_t vout2 = vi2 << shift;
 
-    output[0] = (int16_t) vout0;
-    output[1] = (int16_t) vout1;
-    output[2] = (int16_t) vout2;
-    output += 3;
+    output[0] = vout0;
+    output[1] = vout1;
+    output += 2;
   }
  if XNN_UNLIKELY(batch != 0) {
    do {
-     const uint16_t vi = (uint16_t) *input++;
-
+     const uint16_t vi = *input++;
      const uint16_t vout = vi << shift;
-
-     *output++ = (int16_t) vout;
+     *output++ = vout;
    } while (--batch != 0);
  }
 }

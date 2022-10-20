@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/s16-vlshift/scalar.c.in
+//   Template: src/i16-vlshift/scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
@@ -15,10 +15,10 @@
 #include <xnnpack/vlshift.h>
 
 
-void xnn_s16_vlshift_ukernel__scalar_x1(
+void xnn_i16_vlshift_ukernel__scalar_x1(
     size_t batch,
-    const int16_t* input,
-    int16_t* output,
+    const uint16_t* input,
+    uint16_t* output,
     uint32_t shift)
 {
   assert(batch != 0);
@@ -28,11 +28,9 @@ void xnn_s16_vlshift_ukernel__scalar_x1(
 
  if XNN_UNLIKELY(batch != 0) {
    do {
-     const uint16_t vi = (uint16_t) *input++;
-
+     const uint16_t vi = *input++;
      const uint16_t vout = vi << shift;
-
-     *output++ = (int16_t) vout;
+     *output++ = vout;
    } while (--batch != 0);
  }
 }

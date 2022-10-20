@@ -12,10 +12,10 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/vlshift.h>
 
 
-void xnn_s16_vlshift_ukernel__scalar_x${BATCH_TILE}(
+void xnn_i16_vlshift_ukernel__scalar_x${BATCH_TILE}(
     size_t batch,
-    const int16_t* input,
-    int16_t* output,
+    const uint16_t* input,
+    uint16_t* output,
     uint32_t shift)
 {
   assert(batch != 0);
@@ -26,23 +26,21 @@ void xnn_s16_vlshift_ukernel__scalar_x${BATCH_TILE}(
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE}; batch -= ${BATCH_TILE}) {
       $for C in range(BATCH_TILE):
-        const uint16_t vi${C} = (uint16_t) input[${C}];
+        const uint16_t vi${C} = input[${C}];
       input += ${BATCH_TILE};
 
       $for C in range(BATCH_TILE):
         const uint16_t vout${C} = vi${C} << shift;
 
       $for C in range(BATCH_TILE):
-        output[${C}] = (int16_t) vout${C};
+        output[${C}] = vout${C};
       output += ${BATCH_TILE};
     }
  if XNN_UNLIKELY(batch != 0) {
    do {
-     const uint16_t vi = (uint16_t) *input++;
-
+     const uint16_t vi = *input++;
      const uint16_t vout = vi << shift;
-
-     *output++ = (int16_t) vout;
+     *output++ = vout;
    } while (--batch != 0);
  }
 }

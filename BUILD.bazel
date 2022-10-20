@@ -1020,6 +1020,10 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/vsqr-scalar-x1.c",
     "src/f32-vunary/gen/vsqr-scalar-x2.c",
     "src/f32-vunary/gen/vsqr-scalar-x4.c",
+    "src/i16-vlshift/gen/scalar-x1.c",
+    "src/i16-vlshift/gen/scalar-x2.c",
+    "src/i16-vlshift/gen/scalar-x3.c",
+    "src/i16-vlshift/gen/scalar-x4.c",
     "src/math/cvt-f32-f16-scalar-bitcast.c",
     "src/math/cvt-f32-f16-scalar-fabsf.c",
     "src/math/expminus-f32-scalar-rr2-lut64-p2.c",
@@ -1409,10 +1413,6 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/s16-rmaxabs/gen/scalar-x2.c",
     "src/s16-rmaxabs/gen/scalar-x3.c",
     "src/s16-rmaxabs/gen/scalar-x4.c",
-    "src/s16-vlshift/gen/scalar-x1.c",
-    "src/s16-vlshift/gen/scalar-x2.c",
-    "src/s16-vlshift/gen/scalar-x3.c",
-    "src/s16-vlshift/gen/scalar-x4.c",
     "src/s16-window/gen/scalar-x1.c",
     "src/s16-window/gen/scalar-x2.c",
     "src/s16-window/gen/scalar-x3.c",
@@ -3543,6 +3543,10 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/vneg-neon-x8.c",
     "src/f32-vunary/gen/vsqr-neon-x4.c",
     "src/f32-vunary/gen/vsqr-neon-x8.c",
+    "src/i16-vlshift/gen/neon-x8.c",
+    "src/i16-vlshift/gen/neon-x16.c",
+    "src/i16-vlshift/gen/neon-x24.c",
+    "src/i16-vlshift/gen/neon-x32.c",
     "src/math/cvt-f16-f32-neon-int16.c",
     "src/math/cvt-f16-f32-neon-int32.c",
     "src/math/cvt-f32-f16-neon.c",
@@ -4298,10 +4302,6 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/s16-rmaxabs/gen/neon-x16.c",
     "src/s16-rmaxabs/gen/neon-x24.c",
     "src/s16-rmaxabs/gen/neon-x32.c",
-    "src/s16-vlshift/gen/neon-x8.c",
-    "src/s16-vlshift/gen/neon-x16.c",
-    "src/s16-vlshift/gen/neon-x24.c",
-    "src/s16-vlshift/gen/neon-x32.c",
     "src/s16-window/gen/neon-x8.c",
     "src/s16-window/gen/neon-x16.c",
     "src/s16-window/gen/neon-x24.c",
@@ -12306,9 +12306,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "s16_vlshift_bench",
+    name = "i16_vlshift_bench",
     srcs = [
-        "bench/s16-vlshift.cc",
+        "bench/i16-vlshift.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -14767,9 +14767,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "s16_vlshift_test",
+    name = "i16_vlshift_test",
     srcs = [
-        "test/s16-vlshift.cc",
+        "test/i16-vlshift.cc",
         "test/vlshift-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
