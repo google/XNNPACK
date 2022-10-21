@@ -17,11 +17,15 @@
 #include <xnnpack/params.h>
 
 
-enum xnn_status xnn_create_global_average_pooling_ncw_f32(
+static enum xnn_status create_global_average_pooling_ncw(
     size_t channels,
-    float output_min,
-    float output_max,
     uint32_t flags,
+    uint32_t log2_element_size,
+    size_t params_offset,
+    const void* params,
+    size_t params_size,
+    uint32_t datatype_init_flags,
+    enum xnn_operator_type operator_type,
     xnn_operator_t* global_average_pooling_op_out)
 {
   xnn_operator_t global_average_pooling_op = NULL;
@@ -29,7 +33,15 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+  status = xnn_status_unsupported_hardware;
+
+  if ((xnn_params.init_flags & datatype_init_flags) == 0) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -38,28 +50,7 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32), channels);
-    goto error;
-  }
-
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
-    goto error;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
-    goto error;
-  }
-
-  if (output_min >= output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32), output_min, output_max);
+      xnn_operator_type_to_string(operator_type), channels);
     goto error;
   }
 
@@ -69,14 +60,14 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
   if (global_average_pooling_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
   global_average_pooling_op->channels = channels;
-  xnn_init_f32_gavgpool_params(&global_average_pooling_op->params.f32_gavgpool, nanf(""), output_min, output_max, 0);
+  memcpy((void*) ((uintptr_t) global_average_pooling_op + params_offset), params, params_size);
 
-  global_average_pooling_op->type = xnn_operator_type_global_average_pooling_ncw_f32;
+  global_average_pooling_op->type = operator_type;
   global_average_pooling_op->flags = flags;
 
   global_average_pooling_op->state = xnn_run_state_invalid;
@@ -87,6 +78,48 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
 error:
   xnn_delete_operator(global_average_pooling_op);
   return status;
+}
+
+
+enum xnn_status xnn_create_global_average_pooling_ncw_f32(
+    size_t channels,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* global_average_pooling_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_ncw_f32), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_gavgpool_params params;
+  xnn_init_f32_gavgpool_params(&params, nanf(""), output_min, output_max, 0);
+
+  return create_global_average_pooling_ncw(
+    channels, flags,
+    2 /* log2(sizeof(float)) */,
+    offsetof(struct xnn_operator, params.f32_gavgpool),
+    &params, sizeof(params),
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_global_average_pooling_ncw_f32,
+    global_average_pooling_op_out);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
