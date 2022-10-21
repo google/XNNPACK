@@ -15168,6 +15168,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "convert_nc_eager_test",
+    srcs = [
+        "test/convert-nc-eager.cc",
+        "test/convert-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "convolution_nhwc_test",
     timeout = "moderate",
     srcs = [

@@ -7690,6 +7690,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(convert-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME convert-nc-test COMMAND convert-nc-test)
 
+    ADD_EXECUTABLE(convert-nc-eager-test test/convert-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(convert-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(convert-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME convert-nc-eager-test COMMAND convert-nc-eager-test)
+
     ADD_EXECUTABLE(convolution-nhwc-test test/convolution-nhwc.cc)
     SET_TARGET_PROPERTIES(convolution-nhwc-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(convolution-nhwc-test PRIVATE src test)

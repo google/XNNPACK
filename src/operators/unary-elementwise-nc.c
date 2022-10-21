@@ -2160,6 +2160,64 @@ enum xnn_status xnn_run_clamp_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_run_convert_nc_f16_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const void* input,
+    float* output,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  union xnn_f16_f32_cvt_params params;
+  if (xnn_params.vcvt.f16_to_f32.init.f16_f32_cvt != NULL) {
+    xnn_params.vcvt.f16_to_f32.init.f16_f32_cvt(&params);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_convert_nc_f16_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.vcvt.f16_to_f32.ukernel,
+    XNN_INIT_FLAG_VCVT,
+    &params, sizeof(params),
+    1 /* log2(sizeof(uint16_t)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_convert_nc_f32_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const float* input,
+    void* output,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  union xnn_f32_f16_cvt_params params;
+  if (xnn_params.vcvt.f32_to_f16.init.f32_f16_cvt != NULL) {
+    xnn_params.vcvt.f32_to_f16.init.f32_f16_cvt(&params);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_convert_nc_f32_f16,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.vcvt.f32_to_f16.ukernel,
+    XNN_INIT_FLAG_VCVT,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 1 /* log2(sizeof(uint16_t)) */,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_run_copy_nc_x32(
     size_t channels,
     size_t input_stride,

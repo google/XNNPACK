@@ -4245,6 +4245,16 @@ enum xnn_status xnn_setup_convert_nc_f16_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_convert_nc_f16_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const void* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_convert_nc_f32_f16(
   size_t channels,
   size_t input_stride,
@@ -4257,6 +4267,16 @@ enum xnn_status xnn_setup_convert_nc_f32_f16(
   size_t batch_size,
   const float* input,
   void* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_convert_nc_f32_f16(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  void* output,
+  uint32_t flags,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_convert_nc_f32_qs8(
