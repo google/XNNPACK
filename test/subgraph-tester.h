@@ -155,6 +155,13 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_concatenate2(
+        subgraph_.get(), axis, input1_id, input2_id, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   inline SubgraphTester& AddConstantPad(
       const size_t *pre_paddings, const size_t *post_paddings,
       float padding_value, uint32_t input_id, uint32_t output_id) {
@@ -179,6 +186,13 @@ class SubgraphTester {
         output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
+    return *this;
+  }
+
+  inline SubgraphTester& AddCopy(uint32_t input_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_copy(
+        subgraph_.get(), input_id, output_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
 
@@ -281,6 +295,13 @@ class SubgraphTester {
                         input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
+    return *this;
+  }
+
+  inline SubgraphTester& AddEvenSplit2(size_t split_dim, uint32_t input_id, uint32_t output1_id, uint32_t output2_id) {
+    const xnn_status status = xnn_define_even_split2(
+        subgraph_.get(), split_dim, input_id, output1_id, output2_id, 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
 

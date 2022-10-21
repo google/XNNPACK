@@ -14,6 +14,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/node-type.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
@@ -960,6 +961,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   return true;
 }
 
+static void xnn_node_replace_output(struct xnn_node* node, uint32_t old_output_id, uint32_t new_output_id)
+{
+  for (size_t i = 0; i < node->num_outputs; i++) {
+    if (node->outputs[i] == old_output_id) {
+      node->outputs[i] = new_output_id;
+    }
+  }
+}
+
 enum xnn_status xnn_subgraph_fusion(
     xnn_subgraph_t subgraph)
 {
@@ -1089,6 +1099,60 @@ enum xnn_status xnn_subgraph_fusion(
           default:
             break;
         }
+      }
+
+      // Try to fuse copy upstream. Copy can be fused upstream as long as this value is internal.
+      // E.g. ---> (N1) --- value ---> (Copy) ---> v1
+      // If value is persistent or external, fusing copy upstream into N1 will skip the write to value, N1 will write to
+      // v1 instead, which is wrong.
+      if (consumer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value)) {
+        xnn_log_info(
+          "value %d fuse Copy Node #%" PRIu32 " into upstream %s Node #%" PRIu32, value->id, consumer->id,
+          xnn_node_type_to_string(producer->type), producer->id);
+        assert(consumer->num_inputs == 1);
+        assert(consumer->num_outputs == 1);
+        const uint32_t fused_output_id = consumer->outputs[0];
+        assert(fused_output_id < subgraph->num_values);
+        subgraph->values[fused_output_id].producer = producer_id;
+        xnn_node_replace_output(producer, value->id, fused_output_id);
+        xnn_node_clear(consumer);
+        xnn_value_clear(value);
+      }
+
+      // Try to fuse copy downstream.
+      // E.g. --- v1 ---> (copy) --- value ---> (n2)
+      // If value is external or persistent, we cannot simply remove the copy, since we need to write to value.
+      if (producer->type == xnn_node_type_copy && xnn_value_is_valid(value) && xnn_value_is_internal(value)) {
+        // We need to check that value is valid here because value could have been cleared by a previous optimization,
+        // this can happen if we have a chain of Copy(s), e.g.:
+        // ---v1--> (Copy1) ---v2--> (Copy2) ---v3--> (Copy3) ---v4-->
+        // v2 could have been cleared when we fused Copy2 upstream into Copy1, so v2 isn't valid anymore, but since v2's
+        // producer is also a Copy, we will incorrectly try to fuse Copy1 downstream into Copy2 (again).
+        xnn_log_info(
+          "value %d fuse Copy Node #%" PRIu32 " into downstream %s Node #%" PRIu32, value->id, producer->id,
+          xnn_node_type_to_string(consumer->type), consumer->id);
+        assert(producer->num_outputs == 1);
+        assert(producer->num_inputs == 1);
+        const uint32_t copy_input_id = producer->inputs[0];
+        const uint32_t copy_output_id = producer->outputs[0];
+        bool found_consumer_input = false;
+        for (size_t i = 0; i < consumer->num_inputs; i++) {
+          if (consumer->inputs[i] == copy_output_id) {
+            consumer->inputs[i] = copy_input_id;;
+            found_consumer_input = true;
+            // TODO(b/254734644): A consumer can only consume this value once, since we asserted earlier that value has
+            // only 1 consumer, so we can break here as there will be no other consumer inputs that has the same id.
+            break;
+          }
+        }
+        (void) found_consumer_input;  // Silence unused variable warning in non-debug.
+        assert(found_consumer_input);
+
+        if (subgraph->values[copy_input_id].first_consumer == producer_id) {
+          subgraph->values[copy_input_id].first_consumer = consumer_id;
+        }
+        xnn_node_clear(producer);
+        xnn_value_clear(value);
       }
     }
   }

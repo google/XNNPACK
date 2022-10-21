@@ -597,4 +597,250 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, not_fused_due_to_padding_value_not
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
 
+TEST(COPY, fused_downstream) {
+  // ---input--> (Copy) ---intermediate--> (Clamp) ---output-->
+  const uint32_t input_id = 0;
+  const uint32_t intermediate_id = 1;
+  const uint32_t output_id = 2;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(3);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, intermediate_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddCopy(input_id, intermediate_id)
+      .AddClamp(-0.5f, 0.5f, intermediate_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+  const xnn_node* clamp_node = tester.Node(1);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  EXPECT_EQ(clamp_node->inputs[0], input_id);
+  EXPECT_EQ(clamp_node->outputs[0], output_id);
+}
+
+TEST(COPY, fused_downstream_node_with_multiple_inputs) {
+  // ---static data---------------------------\
+  // ---input--> (Copy) ---intermediate--> (Add) ---output-->
+  const uint32_t input_id = 0;
+  const uint32_t copy_out_id = 1;
+  const uint32_t output_id = 2;
+  const uint32_t static_id = 3;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(4);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, copy_out_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddStaticTensorF32(dims, TensorType::kDense, static_id)
+      .AddCopy(input_id, copy_out_id)
+      .AddAddition(static_id, copy_out_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+  const xnn_node* addition_node = tester.Node(1);
+  ASSERT_EQ(addition_node->type, xnn_node_type_add2);
+  ASSERT_EQ(addition_node->num_inputs, 2);
+  EXPECT_EQ(addition_node->inputs[0], static_id);
+  EXPECT_EQ(addition_node->inputs[1], input_id);
+}
+
+TEST(COPY, not_fused_downstream_due_to_persistent_tensor) {
+  // ---input--> (Copy) ---persistent--> (Clamp) ---output-->
+  // We cannot fuse Copy downstream because we need to write to the persistent tensor.
+  const uint32_t input_id = 0;
+  const uint32_t intermediate_id = 1;
+  const uint32_t output_id = 2;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(3);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, intermediate_id, /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddOutputTensorF32(dims, output_id)
+      .AddCopy(input_id, intermediate_id)
+      .AddClamp(-0.5f, 0.5f, intermediate_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+}
+
+TEST(COPY, fused_upstream) {
+  // ---input--> (Clamp) ---intermediate--> (Copy) ---output-->
+  const uint32_t input_id = 0;
+  const uint32_t intermediate_id = 1;
+  const uint32_t output_id = 2;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(3);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, intermediate_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddClamp(-0.5f, 0.5f, input_id, intermediate_id)
+      .AddCopy(intermediate_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+
+  const xnn_node* clamp_node = tester.Node(0);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  EXPECT_EQ(clamp_node->inputs[0], input_id);
+  EXPECT_EQ(clamp_node->outputs[0], output_id);
+}
+
+TEST(COPY, fused_upstream_with_multiple_outputs) {
+  // ---input--> (Split) ---split_out1--> (Copy) ---copy_out1--> (Concat) ---output-->
+  //                \-------split_out2--> (Copy) ---copy_out2---/
+  const uint32_t input_id = 0;
+  const uint32_t split_out1 = 1;
+  const uint32_t split_out2 = 2;
+  const uint32_t copy_out1 = 3;
+  const uint32_t copy_out2 = 4;
+  const uint32_t output_id = 5;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  const size_t axis = 1;
+  const std::vector<size_t> split_dims = {1, 1, 3, 4};
+
+  auto tester = RuntimeTester(6);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(split_dims, split_out1)
+      .AddDynamicTensorF32(split_dims, split_out2)
+      .AddDynamicTensorF32(split_dims, copy_out1)
+      .AddDynamicTensorF32(split_dims, copy_out2)
+      .AddOutputTensorF32(dims, output_id)
+      .AddEvenSplit2(axis, input_id, split_out1, split_out2)
+      .AddCopy(split_out1, copy_out1)
+      .AddCopy(split_out2, copy_out2)
+      .AddConcatenate2(axis, copy_out1, copy_out2, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 4);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+
+  const xnn_node* split_node = tester.Node(0);
+  ASSERT_EQ(split_node->type, xnn_node_type_even_split2);
+  EXPECT_EQ(split_node->inputs[0], input_id);
+  ASSERT_EQ(split_node->num_outputs, 2);
+  EXPECT_EQ(split_node->outputs[0], copy_out1);
+  EXPECT_EQ(split_node->outputs[1], copy_out2);
+
+  const xnn_node* concat_node = tester.Node(3);
+  ASSERT_EQ(concat_node->type, xnn_node_type_concatenate2);
+  ASSERT_EQ(concat_node->num_inputs, 2);
+  EXPECT_EQ(concat_node->inputs[0], copy_out1);
+  EXPECT_EQ(concat_node->inputs[1], copy_out2);
+  EXPECT_EQ(concat_node->outputs[0], output_id);
+}
+
+TEST(COPY, not_fused_upstream_due_to_persistent_tensor) {
+  // ---input--> (Clamp) ---persistent tensor--> (Copy) ---output-->
+  // Clamp needs to write to persistent tensor, so we cannot fuse Copy upstream.
+  // However, Copy can potentially be fused downstream, we verify that in another test.
+  const uint32_t input_id = 0;
+  const uint32_t persistent_id = 1;
+  const uint32_t output_id = 2;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(3);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, persistent_id, /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddOutputTensorF32(dims, output_id)
+      .AddClamp(-0.5f, 0.5f, input_id, persistent_id)
+      .AddCopy(persistent_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+
+  const xnn_node* clamp_node = tester.Node(0);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  EXPECT_EQ(clamp_node->outputs[0], persistent_id);
+}
+
+TEST(COPY, not_fused_upstream_due_to_persistent_tensor_but_can_be_fused_downstream) {
+  // ---input--> (Clamp) ---persistent tensor--> (Copy) ---copy_out--> (HardSwish) ---output-->
+  // We cannot fuse Copy upstream, but later on we can fuse it downstream.
+  const uint32_t input_id = 0;
+  const uint32_t persistent_id = 1;
+  const uint32_t copy_out_id = 2;
+  const uint32_t output_id = 3;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(4);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, persistent_id, /*flags=*/XNN_VALUE_FLAG_PERSISTENT)
+      .AddDynamicTensorF32(dims, copy_out_id)
+      .AddOutputTensorF32(dims, output_id)
+      .AddClamp(-0.5f, 0.5f, input_id, persistent_id)
+      .AddCopy(persistent_id, copy_out_id)
+      .AddHardSwish(copy_out_id, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 2);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+
+  const xnn_node* clamp_node = tester.Node(0);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  EXPECT_EQ(clamp_node->outputs[0], persistent_id);
+
+  const xnn_node* hardswish_node = tester.Node(2);
+  ASSERT_EQ(hardswish_node->type, xnn_node_type_hardswish);
+  EXPECT_EQ(hardswish_node->inputs[0], persistent_id);
+}
+
+TEST(COPY, fused_chain_of_copies) {
+  // ---input--> (Copy) ---copy_out1--> (Copy) ---copy_out2--> (Copy) ---output-->
+  const uint32_t input_id = 0;
+  const uint32_t copy_out1 = 1;
+  const uint32_t copy_out2 = 2;
+  const uint32_t output_id = 3;
+  const std::vector<size_t> dims = {1, 2, 3, 4};
+  auto tester = RuntimeTester(4);
+  tester
+      .AddInputTensorF32(dims, input_id)
+      .AddDynamicTensorF32(dims, copy_out1)
+      .AddDynamicTensorF32(dims, copy_out2)
+      .AddOutputTensorF32(dims, output_id)
+      .AddCopy(input_id, copy_out1)
+      .AddCopy(copy_out1, copy_out2)
+      .AddCopy(copy_out2, output_id);
+
+  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 3);
+
+  std::vector<float> optimized_output = tester.RunWithFusion<float>();
+  EXPECT_EQ(tester.NumOperators(), 1);
+  EXPECT_EQ(unoptimized_output, optimized_output);
+
+  const xnn_node* copy_node = tester.Node(0);
+  ASSERT_EQ(copy_node->type, xnn_node_type_copy);
+  EXPECT_EQ(copy_node->inputs[0], input_id);
+  EXPECT_EQ(copy_node->outputs[0], output_id);
+}
+
+
 }  // namespace xnnpack
