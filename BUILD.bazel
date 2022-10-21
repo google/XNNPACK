@@ -139,6 +139,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/prelu.c",
     "src/subgraph/sigmoid.c",
     "src/subgraph/softmax.c",
+    "src/subgraph/space-to-depth-2d.c",
     "src/subgraph/square-root.c",
     "src/subgraph/square.c",
     "src/subgraph/squared-difference.c",
@@ -16196,6 +16197,20 @@ xnnpack_unit_test(
     name = "softmax_test",
     srcs = [
         "test/softmax.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "space_to_depth_2d_test",
+    srcs = [
+        "test/space-to-depth-2d.cc",
     ],
     deps = [
         ":XNNPACK_test_mode",

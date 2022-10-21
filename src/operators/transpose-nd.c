@@ -1102,14 +1102,35 @@ static enum xnn_status setup_space_to_depth_nhwc(
     return xnn_status_invalid_parameter;
   }
 
+  const uint32_t block_size = space_to_depth_op->block_size;
+  if (input_width % block_size != 0) {
+    xnn_log_error(
+        "failed to setup %s operator with %zu input width and %u block size: input width must be divisible by block "
+        "size",
+      xnn_operator_type_to_string(expected_operator_type), input_width, block_size);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_height % block_size != 0) {
+    xnn_log_error(
+        "failed to setup %s operator with %zu input height and %u block size: input height must be divisible by block "
+        "size",
+      xnn_operator_type_to_string(expected_operator_type), input_height, block_size);
+    return xnn_status_invalid_parameter;
+  }
+
   if (batch_size == 0) {
     space_to_depth_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
 
-  const uint32_t block_size = space_to_depth_op->block_size;
-
-  const size_t input_shape[5] = {batch_size * (input_height / block_size), block_size, input_width / block_size, block_size, space_to_depth_op->channels};
+  const size_t channels = space_to_depth_op->channels;
+  const size_t input_shape[5] = {
+    batch_size * (input_height / block_size),
+    block_size,
+    input_width / block_size,
+    block_size,
+    channels};
   const size_t perm[5] = {0, 2, 1, 3, 4};
 
   const size_t input_stride[5] = {
@@ -1121,8 +1142,8 @@ static enum xnn_status setup_space_to_depth_nhwc(
   const size_t output_stride[5] = {
     (input_width/block_size) * space_to_depth_op->output_pixel_stride,
     space_to_depth_op->output_pixel_stride,
-    block_size * space_to_depth_op->channels,
-    space_to_depth_op->channels,
+    block_size * channels,
+    channels,
     1};
 
   return setup_transpose_nd(

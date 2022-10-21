@@ -1320,6 +1320,27 @@ enum xnn_status xnn_define_softmax(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Space To Depth 2D Node and add it to a Subgraph.
+///
+/// The Space To Depth 2D Node rearranges blocks of spatial data into blocks (a reverse transform to Depth To Space 2D).
+/// For a given input pixel, an output square of pixels with side @a block_size is formed from values in the
+/// corresponding number of its channels. The output depth is therefore @a block_size x @a block_size times greater
+/// than that of the input.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param block_size - the size of the spatial block.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [N, IH * block_size, IW * block_size, OC] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [N, IH, IW, OC * block_size * block_size] dimensions.
+/// @param flags - binary features of the input_channels Node. No supported flags are currently defined.
+enum xnn_status xnn_define_space_to_depth_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t block_size,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Square Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

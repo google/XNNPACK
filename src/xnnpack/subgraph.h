@@ -278,6 +278,9 @@ struct xnn_node {
       size_t offsets[XNN_MAX_TENSOR_DIMS];
       size_t sizes[XNN_MAX_TENSOR_DIMS];
     } slice;
+    struct {
+      uint32_t block_size;
+    } space_to_depth_2d;
   } params;
   struct {
     float output_min;
