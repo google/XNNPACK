@@ -488,6 +488,8 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_VCVT       0x00002000
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
 #define XNN_INIT_FLAG_CHW_OPT    0x00004000
+// Indicates that TRANSPOSE XNNPACK microkernels are available for use.
+#define XNN_INIT_FLAG_TRANSPOSE  0x00008000
 
 struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
@@ -531,11 +533,7 @@ struct xnn_parameters {
   struct {
     xnn_x8_lut_ukernel_function lut;
     struct zip_parameters zip;
-    struct transpose_parameters transpose;
   } x8;
-  struct {
-    struct transpose_parameters transpose;
-  } x16;
   struct {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
@@ -645,6 +643,12 @@ struct xnn_parameters {
     struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
   struct {
+    struct transpose_parameters x8;
+    struct transpose_parameters x16;
+    struct transpose_parameters x32;
+    struct transpose_parameters xx;
+  } transpose;
+  struct {
     struct vunary_parameters f16_to_f32;
     struct vunary_parameters f32_to_f16;
     struct vunary_parameters f32_to_qs8;
@@ -657,13 +661,11 @@ struct xnn_parameters {
   struct {
     xnn_unpool_ukernel_function unpool;
     struct zip_parameters zip;
-    struct transpose_parameters transpose;
   } x32;
   struct {
     xnn_vunary_ukernel_function copy;
     struct fill_parameters fill;
     struct pad_parameters pad;
-    struct transpose_parameters transpose;
   } xx;
 };
 

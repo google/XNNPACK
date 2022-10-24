@@ -801,22 +801,7 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__neon,
         .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__neon,
       };
-
-      xnn_params.x8.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon,
-        .tile_size = 32,
-      };
     #endif  // XNN_NO_X8_OPERATORS
-
-    /**************************** X16 AArch32 micro-kernels ****************************/
-    #ifndef XNN_NO_X16_OPERATORS
-      init_flags |= XNN_INIT_FLAG_X16;
-
-      xnn_params.x16.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon,
-        .tile_size = 32,
-      };
-    #endif  // XNN_NO_X16_OPERATORS
 
     /**************************** F16 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_F16_OPERATORS
@@ -1450,6 +1435,30 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
+    /*************************** TRANSPOSE AArch32 micro-kernels **********************/
+    #ifndef XNN_NO_TRANSPOSE_OPERATORS
+      init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+      xnn_params.transpose.x8 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.x16 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.x32 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_reuse_dec_zip_neon,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.xx = (struct transpose_parameters) {
+        .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+        .tile_size = 32,
+      };
+    #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
     /*************************** VCVT AArch32 micro-kernels ***************************/
     #ifndef XNN_NO_VCVT_OPERATORS
       init_flags |= XNN_INIT_FLAG_VCVT;
@@ -1531,11 +1540,6 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__neon,
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
       };
-
-      xnn_params.x32.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_reuse_dec_zip_neon,
-        .tile_size = 32,
-      };
     #endif  // XNN_NO_X32_OPERATORS
 
     /**************************** XX AArch32 micro-kernels ****************************/
@@ -1550,10 +1554,6 @@ static void init(void) {
       xnn_params.xx.pad = (struct pad_parameters) {
         .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__neon,
         .row_tile = 1,
-      };
-      xnn_params.xx.transpose = (struct transpose_parameters) {
-        .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-        .tile_size = 32,
       };
     #endif  // XNN_NO_XX_OPERATORS
 
@@ -1755,22 +1755,7 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__scalar,
         .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__scalar,
       };
-
-      xnn_params.x8.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
-        .tile_size = 32,
-      };
     #endif  // XNN_NO_X8_OPERATORS
-
-    /**************************** X16 AArch32 Pre-NEON micro-kernels ****************************/
-    #ifndef XNN_NO_X16_OPERATORS
-      init_flags |= XNN_INIT_FLAG_X16;
-
-      xnn_params.x16.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
-        .tile_size = 32,
-      };
-    #endif  // XNN_NO_X16_OPERATORS
 
     /**************************** F32 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_F32_OPERATORS
@@ -2049,6 +2034,31 @@ static void init(void) {
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
+    /*************************** TRANSPOSE AArch32 Pre-NEON micro-kernels **********************/
+    #ifndef XNN_NO_TRANSPOSE_OPERATORS
+      init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+      xnn_params.transpose.x8 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.x16 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.x32 = (struct transpose_parameters) {
+        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
+        .tile_size = 32,
+      };
+
+      xnn_params.transpose.xx = (struct transpose_parameters) {
+        .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+        .tile_size = 32,
+      };
+    #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
     /*************************** VCVT AArch32 Pre-NEON micro-kernels ***************************/
     #ifndef XNN_NO_VCVT_OPERATORS
       init_flags |= XNN_INIT_FLAG_VCVT;
@@ -2106,11 +2116,6 @@ static void init(void) {
         .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__scalar,
         .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
       };
-
-      xnn_params.x32.transpose = (struct transpose_parameters) {
-        .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
-        .tile_size = 32,
-      };
     #endif  // XNN_NO_X32_OPERATORS
 
     /**************************** XX AArch32 Pre-NEON micro-kernels ****************************/
@@ -2125,10 +2130,6 @@ static void init(void) {
       xnn_params.xx.pad = (struct pad_parameters) {
         .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__scalar,
         .row_tile = 1,
-      };
-      xnn_params.xx.transpose = (struct transpose_parameters) {
-        .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-        .tile_size = 32,
       };
     #endif  // XNN_NO_XX_OPERATORS
   }
@@ -2807,22 +2808,7 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__neon,
       .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__neon,
     };
-
-    xnn_params.x8.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X8_OPERATORS
-
-  /**************************** X16 AArch64 micro-kernels ****************************/
-  #ifndef XNN_NO_X16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_X16;
-
-    xnn_params.x16.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon,
-      .tile_size = 32,
-    };
-  #endif  // XNN_NO_X16_OPERATORS
 
   /**************************** F16 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
@@ -3640,6 +3626,31 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** TRANSPOSE AArch64 micro-kernels **********************/
+  #ifndef XNN_NO_TRANSPOSE_OPERATORS
+    init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+    xnn_params.transpose.x8 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_dec_zip_neon,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x16 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_dec_zip_neon,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x32 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.xx = (struct transpose_parameters) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+      .tile_size = 32,
+    };
+  #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
   /*************************** VCVT AArch64 micro-kernels ***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
@@ -3695,11 +3706,6 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__neon,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__neon,
     };
-
-    xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
   /**************************** XX AArch64 micro-kernels ****************************/
@@ -3714,10 +3720,6 @@ static void init(void) {
     xnn_params.xx.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__neon,
       .row_tile = 1,
-    };
-    xnn_params.xx.transpose = (struct transpose_parameters) {
-      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-      .tile_size = 32,
     };
   #endif
 
@@ -4432,23 +4434,7 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__sse2,
       .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__sse2,
     };
-
-    xnn_params.x8.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X8_OPERATORS
-
-
-  /**************************** X16 x86 micro-kernels ****************************/
-  #ifndef XNN_NO_X16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_X16;
-
-    xnn_params.x16.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2,
-      .tile_size = 32,
-    };
-  #endif  // XNN_NO_X16_OPERATORS
 
   /**************************** F16 x86 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
@@ -5348,6 +5334,31 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** TRANSPOSE x86 micro-kernels **********************/
+  #ifndef XNN_NO_TRANSPOSE_OPERATORS
+    init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+    xnn_params.transpose.x8 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__16x16_reuse_mov_sse2,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x16 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x32 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_sse,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.xx = (struct transpose_parameters) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+      .tile_size = 32,
+    };
+  #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
   /*************************** VCVT x86 micro-kernels ***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
@@ -5376,11 +5387,6 @@ static void init(void) {
         .ukernel = (xnn_vunary_ukernel_function) xnn_f16_f32_vcvt_ukernel__avx_int16_x16,
         .init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params,
         .element_tile = 16,
-      };
-      xnn_params.vcvt.f32_to_f16 = (struct vunary_parameters) {
-        .ukernel = (xnn_vunary_ukernel_function) xnn_f32_f16_vcvt_ukernel__avx_x24,
-        .init.f32_f16_cvt = xnn_init_f32_f16_cvt_sse2_params,
-        .element_tile = 24,
       };
     } else if (cpuinfo_has_x86_sse4_1()) {
       xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
@@ -5586,11 +5592,6 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__sse2,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__sse2,
     };
-
-    xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_sse,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
   /**************************** XX x86 micro-kernels ****************************/
@@ -5605,10 +5606,6 @@ static void init(void) {
     xnn_params.xx.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__sse2,
       .row_tile = 1,
-    };
-    xnn_params.xx.transpose = (struct transpose_parameters) {
-      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-      .tile_size = 32,
     };
   #endif
 
@@ -5863,22 +5860,7 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__scalar,
     };
-
-    xnn_params.x8.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X8_OPERATORS
-
-  /**************************** X16 WAsm SIMD micro-kernels****************************/
-  #ifndef XNN_NO_X16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_X16;
-
-    xnn_params.x16.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
-  #endif  // XNN_NO_X16_OPERATORS
 
   /**************************** F32 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_F32_OPERATORS
@@ -6456,6 +6438,31 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** TRANSPOSE WAsm SIMD micro-kernels***********************/
+  #ifndef XNN_NO_TRANSPOSE_OPERATORS
+    init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+    xnn_params.transpose.x8 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x16 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x32 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.xx = (struct transpose_parameters) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+      .tile_size = 32,
+    };
+  #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
   /*************************** VCVT WAsm SIMD micro-kernels***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
@@ -6464,11 +6471,6 @@ static void init(void) {
       .ukernel = (xnn_vunary_ukernel_function) xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16,
       .init.f16_f32_cvt = xnn_init_f16_f32_cvt_wasmsimd_int16_params,
       .element_tile = 16,
-    };
-    xnn_params.vcvt.f32_to_f16 = (struct vunary_parameters) {
-      .ukernel = (xnn_vunary_ukernel_function) xnn_f32_f16_vcvt_ukernel__wasmsimd_x24,
-      .init.f32_f16_cvt = xnn_init_f32_f16_cvt_wasmsimd_params,
-      .element_tile = 24,
     };
     xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
       .ukernel = (xnn_vunary_ukernel_function) xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x32,
@@ -6529,11 +6531,6 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__wasmsimd,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__wasmsimd,
     };
-
-    xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
   /**************************** XX WAsm SIMD micro-kernels****************************/
@@ -6548,10 +6545,6 @@ static void init(void) {
     xnn_params.xx.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__wasmsimd,
       .row_tile = 1,
-    };
-    xnn_params.xx.transpose = (struct transpose_parameters) {
-      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-      .tile_size = 32,
     };
   #endif
 
@@ -6835,22 +6828,7 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__scalar,
     };
-
-    xnn_params.x8.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X8_OPERATORS
-
-  /**************************** X16 WAsm micro-kernels****************************/
-  #ifndef XNN_NO_X16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_X16;
-
-    xnn_params.x16.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
-  #endif  // XNN_NO_X16_OPERATORS
 
   /**************************** F32 WAsm micro-kernels****************************/
   #ifndef XNN_NO_F32_OPERATORS
@@ -7181,6 +7159,31 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /*************************** TRANSPOSE WAsm micro-kernels**********************/
+  #ifndef XNN_NO_TRANSPOSE_OPERATORS
+    init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+    xnn_params.transpose.x8 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x16 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x32 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.xx = (struct transpose_parameters) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+      .tile_size = 32,
+    };
+  #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
   /*************************** VCVT WAsm micro-kernels***************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
@@ -7267,11 +7270,6 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
     };
-
-    xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
   /**************************** XX WAsm micro-kernels****************************/
@@ -7286,10 +7284,6 @@ static void init(void) {
     xnn_params.xx.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__scalar,
       .row_tile = 1,
-    };
-    xnn_params.xx.transpose = (struct transpose_parameters) {
-      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-      .tile_size = 32,
     };
   #endif
 
@@ -7490,22 +7484,7 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x8_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x8_zip_xm_ukernel__scalar,
     };
-
-    xnn_params.x8.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X8_OPERATORS
-
-  /************************** X16 RISC-V micro-kernels ***************************/
-  #ifndef XNN_NO_X16_OPERATORS
-    init_flags |= XNN_INIT_FLAG_X16;
-
-    xnn_params.x16.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
-  #endif  // XNN_NO_X16_OPERATORS
 
   /************************** F32 RISC-V micro-kernels **************************/
   #ifndef XNN_NO_F32_OPERATORS
@@ -7784,6 +7763,31 @@ static void init(void) {
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
+  /************************** TRANSPOSE RISC-V micro-kernels *********************/
+  #ifndef XNN_NO_TRANSPOSE_OPERATORS
+    init_flags |= XNN_INIT_FLAG_TRANSPOSE;
+
+    xnn_params.transpose.x8 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x8_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x16 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x16_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.x32 = (struct transpose_parameters) {
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
+      .tile_size = 32,
+    };
+
+    xnn_params.transpose.xx = (struct transpose_parameters) {
+      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
+      .tile_size = 32,
+    };
+  #endif  // XNN_NO_TRANSPOSE_OPERATORS
+
   /************************** VCVT RISC-V micro-kernels *************************/
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
@@ -7841,11 +7845,6 @@ static void init(void) {
       .x4 = (xnn_zipc_ukernel_function) xnn_x32_zip_x4_ukernel__scalar,
       .xm = (xnn_zipv_ukernel_function) xnn_x32_zip_xm_ukernel__scalar,
     };
-
-    xnn_params.x32.transpose = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__2x4_scalar_int,
-      .tile_size = 32,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
   /************************** XX RISC-V micro-kernels ***************************/
@@ -7860,10 +7859,6 @@ static void init(void) {
     xnn_params.xx.pad = (struct pad_parameters) {
       .ukernel = (xnn_pad_ukernel_function) xnn_xx_pad_ukernel__scalar,
       .row_tile = 1,
-    };
-    xnn_params.xx.transpose = (struct transpose_parameters) {
-      .variable_size_ukernel = xnn_xx_transposev_ukernel__1x1_memcpy,
-      .tile_size = 32,
     };
   #endif  // XNN_NO_XX_OPERATORS
 
