@@ -23,6 +23,8 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16(
 {
   assert(batch != 0);
   assert(batch % sizeof(__fp16) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.prescale));
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.sat_cutoff));

@@ -1873,6 +1873,11 @@ typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
   int32_t bias,
   float scale);
 
+typedef void (*xnn_update_f16_gavgpool_neonfp16arith_params_fn)(
+  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t multiplier,
+  uint32_t width);
+
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
   union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t input_x_zero_point,

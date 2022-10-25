@@ -298,6 +298,13 @@ XNN_INTERNAL size_t xnn_init_f32_gavgpool_params(
   float output_max,
   uint32_t width);
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+XNN_INTERNAL void xnn_update_f16_gavgpool_neonfp16arith_params(
+  union xnn_f16_gavgpool_params* params,
+  uint16_t multiplier,
+  uint32_t width);
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
 XNN_INTERNAL void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params* params,
   float multiplier,

@@ -40,13 +40,29 @@ static enum xnn_status create_global_average_pooling_operator(
 
   enum xnn_status status;
   if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
-    assert(node->compute_type == xnn_compute_type_fp32);
-    status = xnn_create_global_average_pooling_ncw_f32(
-      channel_dim /* channels */,
-      node->activation.output_min,
-      node->activation.output_max,
-      node->flags,
-      &opdata->operator_objects[0]);
+    assert(node->compute_type == xnn_compute_type_fp32 || node->compute_type == xnn_compute_type_fp16);
+    switch (node->compute_type) {
+      case xnn_compute_type_fp32:
+        status = xnn_create_global_average_pooling_ncw_f32(
+          channel_dim /* channels */,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+#ifndef XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp16:
+        status = xnn_create_global_average_pooling_ncw_f16(
+          channel_dim /* channels */,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+      default:
+        XNN_UNREACHABLE;
+    }
   } else {
     assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
     assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
@@ -160,6 +176,17 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_global_average_pooling_ncw_f16:
+      return xnn_setup_global_average_pooling_ncw_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return xnn_setup_global_average_pooling_nwc_f32(
         opdata->operator_objects[0],

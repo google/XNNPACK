@@ -22,7 +22,10 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_x16(
     void* output,
     const union xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
+  assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
 
   const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_p3.prescale);
   const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_p3.sat_cutoff);

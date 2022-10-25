@@ -67,6 +67,8 @@
   string: "Convert (NC, QU8)"
 - name: xnn_operator_type_convert_nc_qu8_f32
   string: "Convert (NC, QU8, F32)"
+- name: xnn_operator_type_convolution_nchw_f32
+  string: "Convolution (NCHW, F32)"
 - name: xnn_operator_type_convolution_nhwc_f16
   string: "Convolution (NHWC, F16)"
 - name: xnn_operator_type_convolution_nhwc_f32
@@ -77,8 +79,6 @@
   string: "Convolution (NHWC, QS8)"
 - name: xnn_operator_type_convolution_nhwc_qu8
   string: "Convolution (NHWC, QU8)"
-- name: xnn_operator_type_convolution_nchw_f32
-  string: "Convolution (NCHW, F32)"
 - name: xnn_operator_type_copy_nc_x8
   string: "Copy (NC, X8)"
 - name: xnn_operator_type_copy_nc_x16
@@ -123,6 +123,10 @@
   string: "Fully Connected (NC, QS8)"
 - name: xnn_operator_type_fully_connected_nc_qu8
   string: "Fully Connected (NC, QU8)"
+- name: xnn_operator_type_global_average_pooling_ncw_f16
+  string: "Global Average Pooling (NCW, F16)"
+- name: xnn_operator_type_global_average_pooling_ncw_f32
+  string: "Global Average Pooling (NCW, F32)"
 - name: xnn_operator_type_global_average_pooling_nwc_f16
   string: "Global Average Pooling (NWC, F16)"
 - name: xnn_operator_type_global_average_pooling_nwc_f32
@@ -131,8 +135,6 @@
   string: "Global Average Pooling (NWC, QS8)"
 - name: xnn_operator_type_global_average_pooling_nwc_qu8
   string: "Global Average Pooling (NWC, QU8)"
-- name: xnn_operator_type_global_average_pooling_ncw_f32
-  string: "Global Average Pooling (NCW, F32)"
 - name: xnn_operator_type_hardswish_nc_f16
   string: "HardSwish (NC, F16)"
 - name: xnn_operator_type_hardswish_nc_f32
@@ -177,6 +179,8 @@
   string: "PReLU (NC, F16)"
 - name: xnn_operator_type_prelu_nc_f32
   string: "PReLU (NC, F32)"
+- name: xnn_operator_type_resize_bilinear_nchw_f32
+  string: "Resize Bilinear (NCHW, F32)"
 - name: xnn_operator_type_resize_bilinear_nhwc_f16
   string: "Resize Bilinear (NHWC, F16)"
 - name: xnn_operator_type_resize_bilinear_nhwc_f32
@@ -185,8 +189,6 @@
   string: "Resize Bilinear (NHWC, S8)"
 - name: xnn_operator_type_resize_bilinear_nhwc_u8
   string: "Resize Bilinear (NHWC, U8)"
-- name: xnn_operator_type_resize_bilinear_nchw_f32
-  string: "Resize Bilinear (NCHW, F32)"
 - name: xnn_operator_type_sigmoid_nc_f16
   string: "Sigmoid (NC, F16)"
 - name: xnn_operator_type_sigmoid_nc_f32
@@ -237,15 +239,15 @@
   string: "Tanh (NC, QS8)"
 - name: xnn_operator_type_tanh_nc_qu8
   string: "Tanh (NC, QU8)"
-- name: xnn_operator_type_truncation_nc_f16
-  string: "Truncation (NC, F16)"
-- name: xnn_operator_type_truncation_nc_f32
-  string: "Truncation (NC, F32)"
 - name: xnn_operator_type_transpose_nd_x8
   string: "Transpose (ND, X8)"
 - name: xnn_operator_type_transpose_nd_x16
   string: "Transpose (ND, X16)"
 - name: xnn_operator_type_transpose_nd_x32
   string: "Transpose (ND, X32)"
+- name: xnn_operator_type_truncation_nc_f16
+  string: "Truncation (NC, F16)"
+- name: xnn_operator_type_truncation_nc_f32
+  string: "Truncation (NC, F32)"
 - name: xnn_operator_type_unpooling_nhwc_x32
   string: "Unpooling (NHWC, X32)"

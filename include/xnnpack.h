@@ -3113,6 +3113,25 @@ enum xnn_status xnn_setup_truncation_nc_f16(
   void* output,
   pthreadpool_t threadpool);
 
+#ifndef XNN_NO_NCHW_OPERATORS
+
+enum xnn_status xnn_create_global_average_pooling_ncw_f16(
+  size_t channels,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* global_average_pooling_op_out);
+
+enum xnn_status xnn_setup_global_average_pooling_ncw_f16(
+  xnn_operator_t global_average_pooling_op,
+  size_t batch_size,
+  size_t width,
+  const void* input,
+  void* output,
+  pthreadpool_t threadpool);
+
+#endif  // XNN_NO_NCHW_OPERATORS
+
 #endif  // XNN_NO_F16_OPERATORS
 
 #ifndef XNN_NO_X16_OPERATORS

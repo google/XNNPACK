@@ -13,7 +13,7 @@
 
 #include <xnnpack/operator-type.h>
 
-static const uint16_t offset[] = {0,8,22,36,50,64,78,92,119,147,175,203,230,257,275,293,318,344,360,376,391,406,428,451,474,497,520,543,566,584,607,625,648,672,696,720,744,768,792,806,821,836,862,888,914,940,972,998,1025,1052,1069,1086,1100,1114,1128,1144,1160,1186,1212,1238,1264,1298,1332,1366,1400,1434,1454,1474,1495,1516,1537,1558,1582,1606,1629,1652,1670,1688,1706,1724,1743,1762,1781,1800,1817,1834,1850,1866,1894,1922,1949,1976,2004,2022,2040,2058,2076,2091,2107,2123,2141,2159,2177,2203,2230,2257,2274,2291,2313,2335,2364,2393,2412,2431,2450,2469,2484,2499,2520,2541,2560,2580,2600};
+static const uint16_t offset[] = {0,8,22,36,50,64,78,92,119,147,175,203,230,257,275,293,318,344,360,376,391,406,428,451,474,497,520,543,566,584,607,625,648,672,696,720,744,768,792,806,821,836,862,888,914,940,972,998,1025,1052,1069,1086,1100,1114,1128,1144,1160,1186,1212,1238,1264,1298,1332,1366,1400,1434,1468,1488,1508,1529,1550,1571,1592,1616,1640,1663,1686,1704,1722,1740,1758,1777,1796,1815,1834,1851,1868,1884,1900,1928,1956,1984,2011,2038,2056,2074,2092,2110,2125,2141,2157,2175,2193,2211,2237,2264,2291,2308,2325,2347,2369,2398,2427,2446,2465,2484,2503,2518,2533,2552,2572,2592,2613,2634};
 
 static const char *data =
     "Invalid\0"
@@ -48,12 +48,12 @@ static const char *data =
     "Convert (NC, QS8, F32)\0"
     "Convert (NC, QU8)\0"
     "Convert (NC, QU8, F32)\0"
+    "Convolution (NCHW, F32)\0"
     "Convolution (NHWC, F16)\0"
     "Convolution (NHWC, F32)\0"
     "Convolution (NHWC, QC8)\0"
     "Convolution (NHWC, QS8)\0"
     "Convolution (NHWC, QU8)\0"
-    "Convolution (NCHW, F32)\0"
     "Copy (NC, X8)\0"
     "Copy (NC, X16)\0"
     "Copy (NC, X32)\0"
@@ -76,11 +76,12 @@ static const char *data =
     "Fully Connected (NC, F32)\0"
     "Fully Connected (NC, QS8)\0"
     "Fully Connected (NC, QU8)\0"
+    "Global Average Pooling (NCW, F16)\0"
+    "Global Average Pooling (NCW, F32)\0"
     "Global Average Pooling (NWC, F16)\0"
     "Global Average Pooling (NWC, F32)\0"
     "Global Average Pooling (NWC, QS8)\0"
     "Global Average Pooling (NWC, QU8)\0"
-    "Global Average Pooling (NCW, F32)\0"
     "HardSwish (NC, F16)\0"
     "HardSwish (NC, F32)\0"
     "Leaky ReLU (NC, F16)\0"
@@ -103,11 +104,11 @@ static const char *data =
     "Negate (NC, F32)\0"
     "PReLU (NC, F16)\0"
     "PReLU (NC, F32)\0"
+    "Resize Bilinear (NCHW, F32)\0"
     "Resize Bilinear (NHWC, F16)\0"
     "Resize Bilinear (NHWC, F32)\0"
     "Resize Bilinear (NHWC, S8)\0"
     "Resize Bilinear (NHWC, U8)\0"
-    "Resize Bilinear (NCHW, F32)\0"
     "Sigmoid (NC, F16)\0"
     "Sigmoid (NC, F32)\0"
     "Sigmoid (NC, QS8)\0"
@@ -133,11 +134,11 @@ static const char *data =
     "Subtract (ND, QU8)\0"
     "Tanh (NC, QS8)\0"
     "Tanh (NC, QU8)\0"
-    "Truncation (NC, F16)\0"
-    "Truncation (NC, F32)\0"
     "Transpose (ND, X8)\0"
     "Transpose (ND, X16)\0"
     "Transpose (ND, X32)\0"
+    "Truncation (NC, F16)\0"
+    "Truncation (NC, F32)\0"
     "Unpooling (NHWC, X32)\0"
 ;
 

@@ -1029,6 +1029,8 @@ static void init(void) {
             };
             xnn_params.f16.gavgpool_cw = (struct gavgpool_cw_parameters) {
               .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
+              .init.f16 = xnn_init_f16_gavgpool_neonfp16arith_params,
+              .update.f16 = xnn_update_f16_gavgpool_neonfp16arith_params,
               .channel_tile = 8,
             };
             xnn_params.f16.ibilinear_chw = (struct ibilinear_chw_parameters) {
@@ -3132,6 +3134,8 @@ static void init(void) {
           };
           xnn_params.f16.gavgpool_cw = (struct gavgpool_cw_parameters) {
             .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
+            .init.f16 = xnn_init_f16_gavgpool_neonfp16arith_params,
+            .update.f16 = xnn_update_f16_gavgpool_neonfp16arith_params,
             .channel_tile = 8,
           };
           xnn_params.f16.ibilinear_chw = (struct ibilinear_chw_parameters) {

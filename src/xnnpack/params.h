@@ -272,6 +272,13 @@ struct dwconv2d_chw_parameters {
 
 struct gavgpool_cw_parameters {
   xnn_gavgpool_cw_ukernel_function ukernel;
+  union {
+    xnn_init_f16_gavgpool_neonfp16arith_params_fn f16;
+  } init;
+  union {
+    xnn_update_f16_gavgpool_neonfp16arith_params_fn f16;
+  } update;
+
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
   uint8_t channel_tile;

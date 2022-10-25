@@ -202,6 +202,7 @@ struct xnn_operator {
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
     // Parameters for Global Average Pooling in CHW layout
+    union xnn_f16_gavgpool_params f16_gavgpool;
     union xnn_f32_gavgpool_params f32_gavgpool;
     union xnn_f32_hswish_params f32_hswish;
     // Pixelwise Average Pooling normally use f16_minmax_params, but also initialize

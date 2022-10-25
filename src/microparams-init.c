@@ -1904,6 +1904,7 @@ size_t xnn_init_f32_gavgpool_params(
   #endif
 }
 
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_gavgpool_neonfp16arith_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
@@ -1911,25 +1912,22 @@ size_t xnn_init_f16_gavgpool_neonfp16arith_params(
   uint16_t output_max,
   uint32_t width)
 {
-  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neonfp16arith.multiplier = multiplier;
-    params->neonfp16arith.output_min = output_min;
-    params->neonfp16arith.output_max = output_max;
+  params->neonfp16arith.multiplier = multiplier;
+  params->neonfp16arith.output_min = output_min;
+  params->neonfp16arith.output_max = output_max;
 
-    const uint32_t w = (width - 1) & 7;
-    params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
-    params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
-    params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
-    params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
-    params->neonfp16arith.mask[4] = -(uint16_t) (w >= 4);
-    params->neonfp16arith.mask[5] = -(uint16_t) (w >= 5);
-    params->neonfp16arith.mask[6] = -(uint16_t) (w >= 6);
-    params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
-    return sizeof(params->neonfp16arith);
-  #else
-    return 0;
-  #endif
+  const uint32_t w = (width - 1) & 7;
+  params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
+  params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
+  params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
+  params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
+  params->neonfp16arith.mask[4] = -(uint16_t) (w >= 4);
+  params->neonfp16arith.mask[5] = -(uint16_t) (w >= 5);
+  params->neonfp16arith.mask[6] = -(uint16_t) (w >= 6);
+  params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
+  return sizeof(params->neonfp16arith);
 }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params* params,
@@ -1964,6 +1962,26 @@ void xnn_update_f32_gavgpool_params(
     params->scalar.mask[3] = -(int32_t) (w >= 3);
   #endif
 }
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+void xnn_update_f16_gavgpool_neonfp16arith_params(
+  union xnn_f16_gavgpool_params* params,
+  uint16_t multiplier,
+  uint32_t width)
+{
+  params->neonfp16arith.multiplier = multiplier;
+
+  const uint32_t w = (width - 1) & 7;
+  params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
+  params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
+  params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
+  params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
+  params->neonfp16arith.mask[4] = -(uint16_t) (w >= 4);
+  params->neonfp16arith.mask[5] = -(uint16_t) (w >= 5);
+  params->neonfp16arith.mask[6] = -(uint16_t) (w >= 6);
+  params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_scalar_f32_gavgpool_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],

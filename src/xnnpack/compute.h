@@ -746,6 +746,7 @@ struct global_average_pooling_ncw_context {
   size_t output_batch_stride;
   xnn_gavgpool_cw_ukernel_function ukernel;
   union {
+    union xnn_f16_gavgpool_params f16;
     union xnn_f32_gavgpool_params f32;
   } params;
 };

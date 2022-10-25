@@ -446,6 +446,81 @@ class GlobalAveragePoolingOperatorTester {
     }
   }
 
+  void TestNCWxF16() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(1.0e-3f, 1.0f);
+
+    std::vector<uint16_t> input(batch_size() * channels() * width() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output(batch_size() * channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t j = 0; j < channels(); j++) {
+          float acc = 0.0f;
+          for (size_t k = 0; k < width(); k++) {
+            acc += fp16_ieee_to_fp32_value(input[(i * channels() + j) * width() + k]);
+          }
+          output_ref[i * channels() + j] = acc / float(width());
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
+      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Global Average Pooling operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t global_average_pooling_op = nullptr;
+
+      xnn_status status = xnn_create_global_average_pooling_ncw_f16(
+        channels(), output_min, output_max,
+        0, &global_average_pooling_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+
+      // Smart pointer to automatically delete global_average_pooling_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_ncw_f16(
+          global_average_pooling_op,
+          batch_size(), width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_LE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_max);
+          ASSERT_GE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_min);
+          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+            << "at batch index " << i << " / " << batch_size()
+            << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
   void TestNCWxF32() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
