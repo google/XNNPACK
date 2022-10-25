@@ -2256,6 +2256,44 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
     threadpool);
 }
 
+enum xnn_status xnn_run_convert_nc_f32_qu8(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const float* input,
+    uint8_t* output,
+    float output_scale,
+    uint8_t output_zero_point,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_qu8_cvt_params params;
+  if (xnn_params.vcvt.f32_to_qu8.init.f32_qu8_cvt != NULL) {
+    xnn_params.vcvt.f32_to_qu8.init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_convert_nc_f32_qu8,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.vcvt.f32_to_qu8.ukernel,
+    XNN_INIT_FLAG_VCVT,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 0 /* log2(sizeof(uint8_t)) */,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_run_convert_nc_qs8_f32(
     size_t channels,
     size_t input_stride,
@@ -2290,6 +2328,44 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
     XNN_INIT_FLAG_VCVT,
     &params, sizeof(params),
     0 /* log2(sizeof(int8_t)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_convert_nc_qu8_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    size_t batch_size,
+    const uint8_t* input,
+    float* output,
+    float input_scale,
+    uint8_t input_zero_point,
+    uint32_t flags,
+    pthreadpool_t threadpool)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8_f32), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_qu8_f32_cvt_params params;
+  if (xnn_params.vcvt.qu8_to_f32.init.qu8_f32_cvt != NULL) {
+    xnn_params.vcvt.qu8_to_f32.init.qu8_f32_cvt(&params, input_scale, input_zero_point);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_convert_nc_qu8_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    xnn_params.vcvt.qu8_to_f32.ukernel,
+    XNN_INIT_FLAG_VCVT,
+    &params, sizeof(params),
+    0 /* log2(sizeof(uint8_t)) */, 2 /* log2(sizeof(float)) */,
     flags,
     threadpool);
 }

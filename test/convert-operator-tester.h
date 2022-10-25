@@ -650,6 +650,100 @@ class ConvertOperatorTester {
     }
   }
 
+  void TestRunF32toQU8() const {
+    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
+    ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<uint8_t> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
+
+      // Compute reference results.
+      const float inv_scale = 1.0f / scale();
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float scaled_input = input[i * input_stride() + c] * inv_scale;
+          scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
+          scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+          output_ref[i * channels() + c] = uint8_t(std::lrintf(scaled_input) + long(zero_point()));
+        }
+      }
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_convert_nc_f32_qu8(
+          channels(), input_stride(), output_stride(),
+          batch_size(), input.data(), output.data(),
+          scale(), uint8_t(zero_point()),
+          0, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void TestRunQU8toF32() const {
+    ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * scale();
+        }
+      }
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_convert_nc_qu8_f32(
+          channels(), input_stride(), output_stride(),
+          batch_size(), input.data(), output.data(),
+          scale(), uint8_t(zero_point()),
+          0, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
  private:
   size_t batch_size_{1};
   size_t channels_{1};
