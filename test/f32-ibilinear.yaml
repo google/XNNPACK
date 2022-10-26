@@ -18,3 +18,6 @@
 # WAsm SIMD
 - name: xnn_f32_ibilinear_ukernel__wasmsimd_c4
 - name: xnn_f32_ibilinear_ukernel__wasmsimd_c8
+# WAsm Relaxed SIMD
+- name: xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c4
+- name: xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8

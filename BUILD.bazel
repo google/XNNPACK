@@ -2907,6 +2907,8 @@ ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/6x8s4-minmax-wasmrelaxedsimd.c",
     "src/f32-gemm/gen/6x8s4-relu-wasmrelaxedsimd-fma.c",
     "src/f32-gemm/gen/6x8s4-wasmrelaxedsimd-fma.c",
+    "src/f32-ibilinear/gen/wasmrelaxedsimd-c4.c",
+    "src/f32-ibilinear/gen/wasmrelaxedsimd-c8.c",
     "src/f32-igemm/gen/1x8-minmax-wasmrelaxedsimd-fma-loadsplat.c",
     "src/f32-igemm/gen/1x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-igemm/gen/1x8-minmax-wasmrelaxedsimd-loadsplat.c",
