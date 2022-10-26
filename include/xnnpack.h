@@ -2541,6 +2541,16 @@ enum xnn_status xnn_setup_slice_nd_x32(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_run_slice_nd_x32(
+  size_t num_dims,
+  const size_t* input_shape,
+  const size_t* offsets,
+  const size_t* sizes,
+  const void* input,
+  void* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_space_to_depth_nhwc_x32(
   size_t input_channels,
   size_t input_channel_stride,

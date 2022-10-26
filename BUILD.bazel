@@ -15533,6 +15533,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "slice_nd_eager_test",
+    timeout = "moderate",
+    srcs = [
+        "test/slice-nd-eager.cc",
+        "test/slice-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "softmax_nc_test",
     srcs = [
         "test/softmax-nc.cc",

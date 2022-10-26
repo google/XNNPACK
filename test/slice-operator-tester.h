@@ -273,6 +273,49 @@ class SliceOperatorTester {
     }
   }
 
+void TestRunX32() const {
+    ASSERT_EQ(num_dims(), num_offsets());
+    ASSERT_EQ(num_dims(), num_sizes());
+
+    // Compute generalized shapes.
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> input_offsets;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_sizes;
+    std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims;
+    std::fill(input_dims.begin(), input_dims.end(), 1);
+    std::fill(input_offsets.begin(), input_offsets.end(), 0);
+    std::fill(output_sizes.begin(), output_sizes.end(), 0);
+    std::fill(output_dims.begin(), output_dims.end(), 1);
+    for (size_t i = 0; i < num_dims(); i++) {
+      input_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = input_dim(i);
+      input_offsets[XNN_MAX_TENSOR_DIMS - num_dims() + i] = offset(i);
+      output_sizes[XNN_MAX_TENSOR_DIMS - num_dims() + i] = size(i);
+      output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
+    }
+
+    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
+    std::vector<uint32_t> output(num_output_elements());
+    std::vector<uint32_t> output_ref(num_output_elements());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::iota(input.begin(), input.end(), UINT32_C(0));
+      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
+
+      ComputeReference(input_dims, output_dims, input_offsets, input, output_ref);
+
+      // Create, setup, run, and destroy a binary elementwise operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_slice_nd_x32(
+          num_dims(),
+          input_shape().data(), offsets().data(), sizes().data(),
+          input.data(), output.data(),
+          0,
+          nullptr /* thread pool */));
+      ASSERT_EQ(output, output_ref);
+    }
+  }
+
  private:
   template <typename T>
   void ComputeReference(

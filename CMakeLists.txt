@@ -7873,6 +7873,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(slice-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME slice-nd-test COMMAND slice-nd-test)
 
+    ADD_EXECUTABLE(slice-nd-eager-test test/slice-nd-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(slice-nd-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(slice-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME slice-nd-eager-test COMMAND slice-nd-eager-test)
+
     ADD_EXECUTABLE(softmax-nc-test test/softmax-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(softmax-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(softmax-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
