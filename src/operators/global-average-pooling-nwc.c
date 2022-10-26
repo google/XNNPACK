@@ -46,7 +46,7 @@ static enum xnn_status create_global_average_pooling_nwc(
 
   status = xnn_status_unsupported_hardware;
 
-  if ((xnn_params.init_flags & datatype_init_flags) == 0) {
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
@@ -144,7 +144,7 @@ static enum xnn_status setup_global_average_pooling_nwc(
     return xnn_status_uninitialized;
   }
 
-  if ((xnn_params.init_flags & datatype_init_flags) == 0) {
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
     xnn_log_error("failed to setup %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(global_average_pooling_op->type));
     return xnn_status_unsupported_hardware;
