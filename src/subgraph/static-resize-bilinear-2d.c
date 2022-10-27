@@ -38,12 +38,24 @@ static enum xnn_status create_resize_bilinear_operator(
 
   enum xnn_status status;
   if (values[input_id].layout == xnn_layout_type_nchw) {
-    assert(values[output_id].layout == xnn_layout_type_nchw);
-    assert(node->compute_type == xnn_compute_type_fp32);
-    status = xnn_create_resize_bilinear2d_nchw_f32(
-      channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
-      node->flags,
-      &opdata->operator_objects[0]);
+    switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp16:
+        status = xnn_create_resize_bilinear2d_nchw_f16(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+#endif  // !defined(XNN_NO_F16_OPERATORS)
+      case xnn_compute_type_fp32:
+        status = xnn_create_resize_bilinear2d_nchw_f32(
+          channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
@@ -117,6 +129,20 @@ static enum xnn_status setup_resize_bilinear_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_resize_bilinear_nchw_f16:
+      return xnn_setup_resize_bilinear2d_nchw_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        opdata->output_height,
+        opdata->output_width,
+        input_data,
+        output_data,
+        threadpool);
+      break;
+#endif
     case xnn_operator_type_resize_bilinear_nchw_f32:
       return xnn_setup_resize_bilinear2d_nchw_f32(
         opdata->operator_objects[0],
