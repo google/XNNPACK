@@ -1,7 +1,3 @@
-// Auto-generated file. Do not edit!
-//   Template: src/u32-filterbank-subtract/scalar.c.in
-//   Generator: tools/xngen
-//
 // Copyright 2022 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
