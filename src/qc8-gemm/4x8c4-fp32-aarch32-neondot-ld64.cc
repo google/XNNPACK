@@ -66,7 +66,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
 
   Label l0, l1, l2, l3, l4, l5, l6, l7;
 
-  // Auto-generated file. Do not edit!
   // Push 80 bytes
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d13}); // +48 = 80

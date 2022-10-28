@@ -69,7 +69,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8;
 
-  // Auto-generated file. Do not edit!
   add(r2, r2, 3); // kc = (kc + 3) & ~3
   bic(r2, r2, 3);
 
