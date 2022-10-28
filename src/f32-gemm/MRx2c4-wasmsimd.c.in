@@ -68,9 +68,9 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
     const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
-    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, w[0]);
+    v128_t vacc0x0c4 = wasm_v128_load32_zero(w);
     $for N in range(1, NR):
-      v128_t vacc0x${N}c4 = wasm_f32x4_replace_lane(vacc0x0c4, 0, w[${N}]);
+      v128_t vacc0x${N}c4 = wasm_v128_load32_zero(w + ${N});
     $for M in range(1, MR):
       $for N in range(NR):
         v128_t vacc${M}x${N}c4 = vacc0x${N}c4;

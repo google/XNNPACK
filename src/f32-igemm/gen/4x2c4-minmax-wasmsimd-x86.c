@@ -57,8 +57,8 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
   const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
   const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
   do {
-    v128_t vacc0x0c4 = wasm_f32x4_replace_lane(wasm_f32x4_const_splat(0.0f), 0, w[0]);
-    v128_t vacc0x1c4 = wasm_f32x4_replace_lane(vacc0x0c4, 0, w[1]);
+    v128_t vacc0x0c4 = wasm_v128_load32_zero(w);
+    v128_t vacc0x1c4 = wasm_v128_load32_zero(w + 1);
     v128_t vacc1x0c4 = vacc0x0c4;
     v128_t vacc1x1c4 = vacc0x1c4;
     v128_t vacc2x0c4 = vacc0x0c4;
