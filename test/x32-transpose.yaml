@@ -20,9 +20,11 @@
 - name: xnn_x32_transposec_ukernel__4x2_scalar_int
 - name: xnn_x32_transposec_ukernel__4x4_scalar_float
 - name: xnn_x32_transposec_ukernel__4x4_scalar_int
-# AArch64 assembly
-- name: xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl
+# AArch64
+- name: xnn_x32_transposec_ukernel__4x4_neon_tbl128
   init: xnn_init_x32_transpose_neon_tbl128_params
+  arch:
+    - aarch64
 # x86 SSE
 - name: xnn_x32_transposec_ukernel__4x4_multi_mov_sse2
 - name: xnn_x32_transposec_ukernel__4x4_multi_multi_sse2

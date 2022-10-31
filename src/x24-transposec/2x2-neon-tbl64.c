@@ -11,7 +11,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_x24_transposec_ukernel__2x2_neon_tbl(
+void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
     const void* input,
     void* output,
     size_t input_stride,

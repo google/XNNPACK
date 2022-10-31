@@ -3645,7 +3645,7 @@ static void init(void) {
     };
 
     xnn_params.transpose.x32 = (struct transpose_parameters) {
-      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl,
+      .const_size_ukernel = (xnn_transposec_ukernel_function) xnn_x32_transposec_ukernel__4x4_neon_tbl128,
       .tile_size = 32,
       .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_neon_tbl128_params,
     };

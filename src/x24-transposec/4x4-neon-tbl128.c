@@ -12,7 +12,7 @@
 #include <xnnpack/transpose.h>
 #include <xnnpack/microparams.h>
 
-void xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl(
+void xnn_x24_transposec_ukernel__4x4_neon_tbl128(
     const void* input,
     void* output,
     size_t input_stride,
