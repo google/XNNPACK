@@ -93,6 +93,8 @@
   string: "Deconvolution (NHWC, QS8)"
 - name: xnn_operator_type_deconvolution_nhwc_qu8
   string: "Deconvolution (NHWC, QU8)"
+- name: xnn_operator_type_depth_to_space_nchw2nhwc_x16
+  string: "Depth To Space (NCHW2NHWC, X16)"
 - name: xnn_operator_type_depth_to_space_nchw2nhwc_x32
   string: "Depth To Space (NCHW2NHWC, X32)"
 - name: xnn_operator_type_depth_to_space_nhwc_x8

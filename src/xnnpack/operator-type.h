@@ -55,6 +55,7 @@ enum xnn_operator_type {
   xnn_operator_type_deconvolution_nhwc_f32,
   xnn_operator_type_deconvolution_nhwc_qs8,
   xnn_operator_type_deconvolution_nhwc_qu8,
+  xnn_operator_type_depth_to_space_nchw2nhwc_x16,
   xnn_operator_type_depth_to_space_nchw2nhwc_x32,
   xnn_operator_type_depth_to_space_nhwc_x8,
   xnn_operator_type_depth_to_space_nhwc_x16,
