@@ -607,8 +607,8 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
 
-      float* nonzero_values = packed_weights(convolution_op);
-      int32_t* input_increments = (int32_t*) (nonzero_values + num_nonzero_values + convolution_op->group_output_channels);
+      void* nonzero_values = packed_weights(convolution_op);
+      int32_t* input_increments = (int32_t*) ((intptr_t) nonzero_values + ((num_nonzero_values + convolution_op->group_output_channels) << log2_input_element_size));
       uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
       int32_t* input_channel_diffs = (int32_t*) (output_channel_nonzeros + num_output_channel_blocks);
 
