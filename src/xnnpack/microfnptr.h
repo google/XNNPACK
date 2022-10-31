@@ -2076,6 +2076,14 @@ typedef size_t (*xnn_init_f16_chw_params_fn)(
   uint16_t output_min,
   uint16_t output_max);
 
+typedef void (*xnn_update_chw_params_fn)(
+  void* params,
+  uint32_t width);
+
+typedef void (*xnn_update_f32_chw_params_fn)(
+  union xnn_f32_chw_params* params,
+  uint32_t width);
+
 typedef size_t (*xnn_init_x24_transpose_params_fn)(
   union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]
 );
