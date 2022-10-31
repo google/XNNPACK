@@ -3,6 +3,8 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# LINT.IfChange
+
 - name: xnn_operator_type_invalid
   string: "Invalid"
 - name: xnn_operator_type_abs_nc_f16
@@ -255,3 +257,5 @@
   string: "Truncation (NC, F32)"
 - name: xnn_operator_type_unpooling_nhwc_x32
   string: "Unpooling (NHWC, X32)"
+
+# LINT.ThenChange(operator-strings.c, xnnpack/operator-type.h)

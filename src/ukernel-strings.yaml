@@ -3,6 +3,8 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# LINT.IfChange
+
 - name: xnn_ukernel_type_default
   string: "Default"
 - name: xnn_ukernel_type_average_pooling
@@ -23,3 +25,5 @@
   string: "Subconv2D"
 - name: xnn_ukernel_type_vmulcaddc
   string: "VMulCAddC"
+
+# LINT.ThenChange(ukernel-strings.c, xnnpack/ukernel-type.h)
