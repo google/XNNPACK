@@ -1497,7 +1497,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
     .Test(xnn_x24_transposec_ukernel__4x4_scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_2_bw_2) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
@@ -1507,7 +1507,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(2)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_1_4_bw_1_4) {
@@ -1521,7 +1521,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+          .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
       }
     }
   }
@@ -1535,7 +1535,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(2)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_2_bw_3_4) {
@@ -1548,7 +1548,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(2)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
     }
   }
 
@@ -1562,7 +1562,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(4)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
     }
   }
 
@@ -1575,7 +1575,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_3_4_bw_2){
@@ -1588,7 +1588,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
     }
   }
 
@@ -1602,7 +1602,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
     }
   }
 
@@ -1617,7 +1617,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+          .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
       }
     }
   }
@@ -1631,7 +1631,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(2)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_2_bw_2_os_4) {
@@ -1643,7 +1643,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(2)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_2_bw_2_is_4_os_4) {
@@ -1655,7 +1655,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(2)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_34_bw_38_ies_14) {
@@ -1668,7 +1668,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .input_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_6_bw_10_oes_14) {
@@ -1681,7 +1681,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .output_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
 
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL_3, bh_14_bw_46_ies_20_oes_16) {
@@ -1695,12 +1695,12 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .input_element_stride(20)
       .output_element_stride(16)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl, xnn_init_x24_transpose_neon_tbl64_params);
   }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_4_bw_4) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
@@ -1710,7 +1710,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_1_8_bw_1_8) {
@@ -1724,7 +1724,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
       }
     }
   }
@@ -1738,7 +1738,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_4_bw_5_8) {
@@ -1751,7 +1751,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(4)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
@@ -1765,7 +1765,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(8)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
@@ -1778,7 +1778,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(8)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_5_8_bw_4){
@@ -1791,7 +1791,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
@@ -1805,7 +1805,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
@@ -1820,7 +1820,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
       }
     }
   }
@@ -1834,7 +1834,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_4_bw_4_os_8) {
@@ -1846,7 +1846,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_4_bw_4_is_8_os_8) {
@@ -1858,7 +1858,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_68_bw_76_ies_14) {
@@ -1871,7 +1871,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .input_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_12_bw_20_oes_14) {
@@ -1884,7 +1884,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .output_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL_3, bh_28_bw_92_ies_20_oes_16) {
@@ -1898,12 +1898,12 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .input_element_stride(20)
       .output_element_stride(16)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl, xnn_init_x24_transpose_neon_tbl128_params);
   }
-#endif  // XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_4_bw_4) {
     TEST_REQUIRES_X86_SSSE3;
     TransposeMicrokernelTester()
@@ -1913,7 +1913,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_1_8_bw_1_8) {
@@ -1927,7 +1927,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+          .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
       }
     }
   }
@@ -1941,7 +1941,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_4_bw_5_8) {
@@ -1954,7 +1954,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(4)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+        .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
     }
   }
 
@@ -1968,7 +1968,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(8)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+        .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
     }
   }
 
@@ -1981,7 +1981,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(8)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_5_8_bw_4){
@@ -1994,7 +1994,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+        .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
     }
   }
 
@@ -2008,7 +2008,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+        .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
     }
   }
 
@@ -2023,7 +2023,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+          .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
       }
     }
   }
@@ -2037,7 +2037,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_4_bw_4_os_8) {
@@ -2049,7 +2049,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_4_bw_4_is_8_os_8) {
@@ -2061,7 +2061,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_68_bw_76_ies_14) {
@@ -2074,7 +2074,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .input_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_12_bw_20_oes_14) {
@@ -2087,7 +2087,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .output_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
 
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_28_bw_92_ies_20_oes_16) {
@@ -2101,6 +2101,6 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .input_element_stride(20)
       .output_element_stride(16)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_ssse3);
+      .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY

@@ -16,12 +16,14 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>
 
 
 void transpose(
     benchmark::State& state,
     xnn_x24_transposec_ukernel_function transpose,
+    xnn_init_x24_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -39,9 +41,13 @@ void transpose(
   std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 
+  xnn_x24_transpose_params params;
+  if (init_params) {
+    init_params(&params);
+  }
   for (auto _ : state) {
     transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, width,
-              height);
+              height, &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -77,18 +83,21 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar, xnn_x24_transposec_ukernel__4x4_scalar)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(transpose, 2x2_neon_tbl, xnn_x24_transposec_ukernel__2x2_neon_tbl)
+  BENCHMARK_CAPTURE(transpose, 2x2_neon_tbl, xnn_x24_transposec_ukernel__2x2_neon_tbl,
+                    xnn_init_x24_transpose_neon_tbl64_params)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(transpose, 4x4_aarch64_neon_tbl, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl)
+  BENCHMARK_CAPTURE(transpose, 4x4_aarch64_neon_tbl, xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl,
+                    xnn_init_x24_transpose_neon_tbl128_params)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-BENCHMARK_CAPTURE(transpose, 4x4_ssse3, xnn_x24_transposec_ukernel__4x4_ssse3, benchmark::utils::CheckSSSE3)
-    ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 4x4_ssse3, xnn_x24_transposec_ukernel__4x4_ssse3,
+                    xnn_init_x24_transpose_ssse3_params, benchmark::utils::CheckSSSE3)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

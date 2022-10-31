@@ -36,7 +36,8 @@ void xnn_compute_transposec_2d(
       context->input_stride[1],
       context->output_stride[0],
       tile_i,
-      tile_j);
+      tile_j,
+      &context->params);
 }
 
 void xnn_compute_transposec_3d(
@@ -61,7 +62,8 @@ void xnn_compute_transposec_3d(
       ld_input,
       ld_output,
       tile_j,
-      tile_k);
+      tile_k,
+      &context->params);
 }
 
 void xnn_compute_transposec_4d(
@@ -87,7 +89,8 @@ void xnn_compute_transposec_4d(
       ld_input,
       ld_output,
       tile_k,
-      tile_l);
+      tile_l,
+      &context->params);
 }
 
 void xnn_compute_transposec_5d(
@@ -114,7 +117,8 @@ void xnn_compute_transposec_5d(
       ld_input,
       ld_output,
       tile_l,
-      tile_m);
+      tile_m,
+      &context->params);
 }
 
 void xnn_compute_transposec_6d(
@@ -144,7 +148,8 @@ void xnn_compute_transposec_6d(
       ld_input,
       ld_output,
       tile_m,
-      tile_n);
+      tile_n,
+      &context->params);
 }
 
 void xnn_compute_transposev_2d(

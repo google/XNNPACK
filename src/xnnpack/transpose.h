@@ -9,31 +9,35 @@
 #include <stdint.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(fn_name)   \
-  XNN_INTERNAL void fn_name(const void* input,            \
-                            void* output,                 \
-                            size_t input_row_stride,      \
-                            size_t output_row_stride,     \
-                            size_t input_element_stride,  \
-                            size_t output_element_stride, \
-                            size_t element_size,          \
-                            size_t block_width,           \
-                            size_t block_height);
+#define DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                            \
+      const void* input,                                \
+      void* output,                                     \
+      size_t input_row_stride,                          \
+      size_t output_row_stride,                         \
+      size_t input_element_stride,                      \
+      size_t output_element_stride,                     \
+      size_t element_size,                              \
+      size_t block_width,                               \
+      size_t block_height);
 
 DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_memcpy)
 
 #define DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(const uint64_t* input,      \
-                            uint64_t* output,           \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t block_width,         \
-                            size_t block_height);
+  XNN_INTERNAL void fn_name(                             \
+      const uint64_t* input,                             \
+      uint64_t* output,                                  \
+      size_t input_stride,                               \
+      size_t output_stride,                              \
+      size_t block_width,                                \
+      size_t block_height,                               \
+      const union xnn_x64_transpose_params* params);
 
 DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__1x2_scalar_float)
 DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__1x2_scalar_int)
@@ -53,12 +57,14 @@ DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__4x2_scalar_f
 DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x64_transposec_ukernel__4x2_scalar_int)
 
 #define DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(const uint32_t* input,      \
-                            uint32_t* output,           \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t block_width,         \
-                            size_t block_height);
+  XNN_INTERNAL void fn_name(                             \
+      const uint32_t* input,                             \
+      uint32_t* output,                                  \
+      size_t input_stride,                               \
+      size_t output_stride,                              \
+      size_t block_width,                                \
+      size_t block_height,                               \
+      const union xnn_x32_transpose_params* params);
 
 DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__1x2_scalar_float)
 DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__1x2_scalar_int)
@@ -108,12 +114,14 @@ DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__4x4_scalar_i
 DECLARE_X32_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x32_transposec_ukernel__4x4_sse)
 
 #define DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(const void* input,      \
-                            void* output,           \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t block_width,         \
-                            size_t block_height);
+  XNN_INTERNAL void fn_name(                             \
+      const void* input,                                 \
+      void* output,                                      \
+      size_t input_stride,                               \
+      size_t output_stride,                              \
+      size_t block_width,                                \
+      size_t block_height,                               \
+      const union xnn_x24_transpose_params* params);
 
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__1x2_scalar)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__1x4_scalar)
@@ -128,12 +136,14 @@ DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_scalar)
 DECLARE_X24_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x24_transposec_ukernel__4x4_ssse3)
 
 #define DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(const uint16_t* input,      \
-                            uint16_t* output,           \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t block_width,         \
-                            size_t block_height);
+  XNN_INTERNAL void fn_name(                             \
+      const uint16_t* input,                             \
+      uint16_t* output,                                  \
+      size_t input_stride,                               \
+      size_t output_stride,                              \
+      size_t block_width,                                \
+      size_t block_height,                               \
+      const union xnn_x16_transpose_params* params);
 
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__1x2_scalar_int)
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__1x4_scalar_int)
@@ -170,13 +180,15 @@ DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_sw
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_switch_wasmsimd)
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_switch_zip_neon)
 
-#define DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(fn_name)  \
-  XNN_INTERNAL void fn_name(const uint8_t* input,       \
-                            uint8_t* output,            \
-                            size_t input_stride,        \
-                            size_t output_stride,       \
-                            size_t block_width,         \
-                            size_t block_height);
+#define DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                            \
+      const uint8_t* input,                             \
+      uint8_t* output,                                  \
+      size_t input_stride,                              \
+      size_t output_stride,                             \
+      size_t block_width,                               \
+      size_t block_height,                              \
+      const union xnn_x8_transpose_params* params);
 
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__1x2_scalar_int)
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__1x4_scalar_int)

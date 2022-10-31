@@ -243,6 +243,9 @@ static enum xnn_status setup_transpose_nd(
       transpose_op->compute.tile[0] = xnn_params.transpose.x32.tile_size;
       transpose_op->compute.tile[1] = xnn_params.transpose.x32.tile_size;
       context->const_size_ukernel = xnn_params.transpose.x32.const_size_ukernel;
+      if (xnn_params.transpose.x32.init.x32 != NULL) {
+        xnn_params.transpose.x32.init.x32(&context->params.x32_params);
+      }
       break;
     default:
       context->element_size = normalized_element_size;

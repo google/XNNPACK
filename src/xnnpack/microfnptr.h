@@ -992,7 +992,8 @@ typedef void (*xnn_x8_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const union xnn_x8_transpose_params* params);
 
 typedef void (*xnn_x16_transposec_ukernel_function)(
     const uint16_t* a,
@@ -1000,7 +1001,8 @@ typedef void (*xnn_x16_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const union xnn_x16_transpose_params* params);
 
 typedef void (*xnn_x24_transposec_ukernel_function)(
     const void* a,
@@ -1008,7 +1010,8 @@ typedef void (*xnn_x24_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const union xnn_x24_transpose_params* params);
 
 typedef void (*xnn_x32_transposec_ukernel_function)(
     const uint32_t* a,
@@ -1016,7 +1019,8 @@ typedef void (*xnn_x32_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const union xnn_x32_transpose_params* params);
 
 typedef void (*xnn_x64_transposec_ukernel_function)(
     const uint64_t* a,
@@ -1024,7 +1028,8 @@ typedef void (*xnn_x64_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const union xnn_x64_transpose_params* params);
 
 typedef void (*xnn_transposec_ukernel_function)(
     const void* input,
@@ -1032,7 +1037,8 @@ typedef void (*xnn_transposec_ukernel_function)(
     size_t input_stride,
     size_t output_size,
     size_t block_width,
-    size_t block_height);
+    size_t block_height,
+    const void* params);
 
 // TRANSPOSEV: TRANSPOSE Variable-size elements
 
@@ -2070,3 +2076,10 @@ typedef size_t (*xnn_init_f16_chw_params_fn)(
   uint16_t output_min,
   uint16_t output_max);
 
+typedef size_t (*xnn_init_x24_transpose_params_fn)(
+  union xnn_x24_transpose_params params[XNN_MIN_ELEMENTS(1)]
+);
+
+typedef size_t (*xnn_init_x32_transpose_params_fn)(
+  union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]
+);

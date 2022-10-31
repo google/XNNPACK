@@ -72,6 +72,12 @@ struct transpose_context {
     size_t element_size;
     size_t log2_element_size;
   };
+  union {
+    union xnn_x8_transpose_params x8_params;
+    union xnn_x16_transpose_params x16_params;
+    union xnn_x24_transpose_params x24_params;
+    union xnn_x32_transpose_params x32_params;
+  } params;
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
 };
