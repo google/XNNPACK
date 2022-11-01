@@ -112,6 +112,7 @@ Benchmarked on Feb 8, 2022 with `end2end-bench --benchmark_min_time=5` on a Rasp
 - [TensorFlow Lite](https://blog.tensorflow.org/2020/07/accelerating-tensorflow-lite-xnnpack-integration.html).
 - [TensorFlow.js WebAssembly backend](https://blog.tensorflow.org/2020/03/introducing-webassembly-backend-for-tensorflow-js.html).
 - [PyTorch Mobile](https://pytorch.org/mobile).
+- [ONNX Runtime Mobile](https://onnxruntime.ai/docs/execution-providers/Xnnpack-ExecutionProvider.html)
 - [MediaPipe for the Web](https://developers.googleblog.com/2020/01/mediapipe-on-web.html).
 - [Alibaba HALO (Heterogeneity-Aware Lowering and Optimization)](https://github.com/alibaba/heterogeneity-aware-lowering-and-optimization)
 - [Samsung ONE (On-device Neural Engine)](https://github.com/Samsung/ONE)
