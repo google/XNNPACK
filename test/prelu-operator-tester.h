@@ -144,10 +144,7 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -260,10 +257,7 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);

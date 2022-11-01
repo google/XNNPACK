@@ -26,10 +26,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -76,10 +75,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -137,10 +135,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -194,10 +191,9 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -259,10 +255,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -307,10 +302,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -368,10 +362,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -419,10 +412,9 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qu8_packing_params params = {
-    .input_zero_point = 127,
-    .kernel_zero_point = 127,
-  };
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -484,9 +476,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -531,9 +522,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -589,9 +579,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -643,9 +632,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
       h,
@@ -705,9 +693,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -750,9 +737,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -808,9 +794,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
       h,
@@ -856,9 +841,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::iota(k.begin(), k.end(), b.size());
   std::vector<uint8_t> packed_weights(((primary_tile + sizeof(int32_t)/sizeof(uint8_t)) * round_up_po2(c, cr)));
 
-  xnn_qs8_packing_params params = {
-    .input_zero_point = 127,
-  };
+  xnn_qs8_packing_params params = {};
+  params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
       h,

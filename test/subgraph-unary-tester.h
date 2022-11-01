@@ -41,9 +41,8 @@ protected:
 
   void AllocateInputsAndOutputs() {
     channels = dims.empty() ? 1 : dims.back();
-    xnn_shape shape = {
-      .num_dims = dims.size(),
-    };
+    xnn_shape shape = {};
+    shape.num_dims = dims.size();
     memcpy(shape.dim, dims.data(), dims.size() * sizeof(size_t));
     batch_size = xnn_shape_multiply_non_channel_dims(&shape);
     num_output_elements = batch_size * channels;

@@ -666,10 +666,7 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -882,10 +879,7 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1120,10 +1114,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1348,10 +1339,7 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       #if XNN_PLATFORM_JIT
         xnn_code_cache code_cache;
         if (use_jit()) {
@@ -1624,10 +1612,7 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1890,10 +1875,7 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);

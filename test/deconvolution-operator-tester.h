@@ -536,10 +536,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -739,10 +736,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -952,10 +946,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1153,10 +1144,7 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {
-        .code_cache = NULL,
-        .weights_cache = NULL,
-      };
+      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
@@ -1240,10 +1228,7 @@ class DeconvolutionOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    xnn_caches caches = {
-      .code_cache = NULL,
-      .weights_cache = NULL,
-    };
+    xnn_caches caches = {};
     xnn_weights_cache weights_cache;
     xnn_init_weights_cache(&weights_cache);
     caches.weights_cache = &weights_cache;
