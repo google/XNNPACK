@@ -1453,6 +1453,7 @@ enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out);
 /// Runtime objects created with this workspace are destroyed.
 /// @param workspace - the workspace object to destroy.
 enum xnn_status xnn_release_workspace(xnn_workspace_t workspace);
+void xnn_retain_workspace(xnn_workspace_t workspace);
 
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 typedef struct xnn_runtime* xnn_runtime_t;

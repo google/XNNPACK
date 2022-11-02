@@ -57,7 +57,7 @@ enum xnn_status xnn_create_workspace(xnn_workspace_t* workspace_out)
   return xnn_status_success;
 }
 
-static inline void xnn_retain_workspace(xnn_workspace_t workspace)
+inline void xnn_retain_workspace(xnn_workspace_t workspace)
 {
   workspace->ref_count++;
 }
