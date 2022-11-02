@@ -60,11 +60,11 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_x${BATCH_TILE}(
       b += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 8):
-        __m256 vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va" + ABC[N:N+8], "vb" + ABC[N:N+8])}, _MM_FROUND_NO_EXC));
+        __m256 vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va" + ABC[N:N+8], "vb" + ABC[N:N+8])}, _MM_FROUND_TO_NEAREST_INT));
 
       $if OP == "SQRDIFF":
         $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy${ABC[N:N+8]}, vy${ABC[N:N+8]}), _MM_FROUND_NO_EXC));
+          vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy${ABC[N:N+8]}, vy${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
 
       $if ACTIVATION == "MINMAX":
         $for N in range(0, BATCH_TILE, 8):
@@ -73,9 +73,9 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_x${BATCH_TILE}(
         $for N in range(0, BATCH_TILE, 8):
           vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
 
-      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy${ABC[0:8]}, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
       $for N in range(8, BATCH_TILE, 8):
-        _mm_storeu_si128((__m128i*) (o + ${N}), _mm256_cvtps_ph(vy${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) (o + ${N}), _mm256_cvtps_ph(vy${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
       o += ${BATCH_TILE};
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -84,30 +84,30 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_x${BATCH_TILE}(
     a += 8;
     b += 8;
 
-    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_NO_EXC));
+    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_TO_NEAREST_INT));
     $if OP == "SQRDIFF":
-      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_NO_EXC));
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_TO_NEAREST_INT));
 
     $if ACTIVATION == "MINMAX":
       vy = _mm256_max_ps(vy, vy_min);
       vy = _mm256_min_ps(vy, vy_max);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
     const __m256 vb = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
 
-    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_NO_EXC));
+    __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va", "vb")}, _MM_FROUND_TO_NEAREST_INT));
     $if OP == "SQRDIFF":
-      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_NO_EXC));
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_TO_NEAREST_INT));
 
     $if ACTIVATION == "MINMAX":
       vy = _mm256_max_ps(vy, vy_min);
       vy = _mm256_min_ps(vy, vy_max);
 
-    __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC);
+    __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);

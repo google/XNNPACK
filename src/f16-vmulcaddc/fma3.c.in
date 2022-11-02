@@ -85,9 +85,9 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(
             vacc${M}x${ABC[C:C+8]} = _mm256_min_ps(vacc${M}x${ABC[C:C+8]}, vmax);
 
         $for M in range(ROW_TILE):
-          _mm_storeu_si128((__m128i*) o${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC));
+          _mm_storeu_si128((__m128i*) o${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
           $for C in range(8, CHANNEL_TILE, 8):
-            _mm_storeu_si128((__m128i*) (o${M} + ${C}), _mm256_cvtps_ph(vacc${M}x${ABC[C:C+8]}, _MM_FROUND_NO_EXC));
+            _mm_storeu_si128((__m128i*) (o${M} + ${C}), _mm256_cvtps_ph(vacc${M}x${ABC[C:C+8]}, _MM_FROUND_TO_NEAREST_INT));
           o${M} += ${CHANNEL_TILE};
       }
     for (; c >= 8 * sizeof(uint16_t); c -= 8 * sizeof(uint16_t)) {
@@ -110,7 +110,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(
         vacc${M} = _mm256_min_ps(vacc${M}, vmax);
 
       $for M in range(ROW_TILE):
-        _mm_storeu_si128((__m128i*) o${M}, _mm256_cvtps_ph(vacc${M}, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) o${M}, _mm256_cvtps_ph(vacc${M}, _MM_FROUND_TO_NEAREST_INT));
         o${M} += 8;
     }
     if XNN_UNLIKELY(c != 0) {
@@ -132,7 +132,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(
         vacc${M} = _mm256_min_ps(vacc${M}, vmax);
 
       $for M in range(ROW_TILE):
-        __m128i vh${M} = _mm256_cvtps_ph(vacc${M}, _MM_FROUND_NO_EXC);
+        __m128i vh${M} = _mm256_cvtps_ph(vacc${M}, _MM_FROUND_TO_NEAREST_INT);
 
       if (c & (4 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):

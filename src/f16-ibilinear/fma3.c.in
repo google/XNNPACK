@@ -60,18 +60,18 @@ void xnn_f16_ibilinear_ukernel__fma3_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 els
         i3 += ${CHANNEL_TILE};
 
         $for C in range(0, CHANNEL_TILE, 8):
-          const __m256 vtd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr${ABC[C:C+8]}, vtl${ABC[C:C+8]}), _MM_FROUND_NO_EXC));
-          const __m256 vbd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr${ABC[C:C+8]}, vbl${ABC[C:C+8]}), _MM_FROUND_NO_EXC));
+          const __m256 vtd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr${ABC[C:C+8]}, vtl${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
+          const __m256 vbd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr${ABC[C:C+8]}, vbl${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          const __m256 vt${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd${ABC[C:C+8]}, valphah, vtl${ABC[C:C+8]}), _MM_FROUND_NO_EXC));
-          const __m256 vb${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd${ABC[C:C+8]}, valphah, vbl${ABC[C:C+8]}), _MM_FROUND_NO_EXC));
+          const __m256 vt${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd${ABC[C:C+8]}, valphah, vtl${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
+          const __m256 vb${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd${ABC[C:C+8]}, valphah, vbl${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          const __m256 vd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb${ABC[C:C+8]}, vt${ABC[C:C+8]}), _MM_FROUND_NO_EXC));
+          const __m256 vd${ABC[C:C+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb${ABC[C:C+8]}, vt${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          const __m128i vo${ABC[C:C+8]} = _mm256_cvtps_ph(_mm256_fmadd_ps(vd${ABC[C:C+8]}, valphav, vt${ABC[C:C+8]}), _MM_FROUND_NO_EXC);
+          const __m128i vo${ABC[C:C+8]} = _mm256_cvtps_ph(_mm256_fmadd_ps(vd${ABC[C:C+8]}, valphav, vt${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT);
 
         _mm_storeu_si128((__m128i*) o, vo${ABC[0:8]});
         $for C in range(8, CHANNEL_TILE, 8):
@@ -88,15 +88,15 @@ void xnn_f16_ibilinear_ukernel__fma3_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 els
       const __m256 vbr = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
       i3 += 8;
 
-      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_NO_EXC));
+      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_NO_EXC);
+      const __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_TO_NEAREST_INT);
 
       _mm_storeu_si128((__m128i*) o, vo);
       o += 8;
@@ -111,15 +111,15 @@ void xnn_f16_ibilinear_ukernel__fma3_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 els
       const __m256 vbr = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
       i3 += 8;
 
-      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_NO_EXC));
+      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_TO_NEAREST_INT));
 
-      __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_NO_EXC);
+      __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_TO_NEAREST_INT);
       if (c & (4 * sizeof(uint16_t))) {
         _mm_storel_epi64((__m128i*) o, vo);
         vo = _mm_unpackhi_epi64(vo, vo);

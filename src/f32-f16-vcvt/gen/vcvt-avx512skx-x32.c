@@ -33,15 +33,15 @@ void xnn_f32_f16_vcvt_ukernel__avx512skx_x32(
     const __m512 vf1 = _mm512_loadu_ps(input + 16);
     input += 32;
 
-    _mm256_storeu_si256((__m256i*) o, _mm512_cvtps_ph(vf0, _MM_FROUND_NO_EXC));
-    _mm256_storeu_si256((__m256i*) (o + 16), _mm512_cvtps_ph(vf1, _MM_FROUND_NO_EXC));
+    _mm256_storeu_si256((__m256i*) o, _mm512_cvtps_ph(vf0, _MM_FROUND_NO_EXC | _MM_FROUND_TO_NEAREST_INT));
+    _mm256_storeu_si256((__m256i*) (o + 16), _mm512_cvtps_ph(vf1, _MM_FROUND_NO_EXC | _MM_FROUND_TO_NEAREST_INT));
     o += 32;
   }
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vf = _mm512_loadu_ps(input);
     input += 16;
 
-    _mm256_storeu_si256((__m256i*) o, _mm512_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm256_storeu_si256((__m256i*) o, _mm512_cvtps_ph(vf, _MM_FROUND_NO_EXC | _MM_FROUND_TO_NEAREST_INT));
     o += 16;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -53,7 +53,7 @@ void xnn_f32_f16_vcvt_ukernel__avx512skx_x32(
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vf = _mm512_maskz_loadu_ps(vmask, input);
-    const __m256i vh = _mm512_cvtps_ph(vf, _MM_FROUND_NO_EXC);
+    const __m256i vh = _mm512_cvtps_ph(vf, _MM_FROUND_NO_EXC | _MM_FROUND_TO_NEAREST_INT);
     _mm256_mask_storeu_epi16(o, vmask, vh);
   }
 }

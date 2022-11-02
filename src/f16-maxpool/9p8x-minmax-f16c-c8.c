@@ -105,7 +105,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         const __m256 vmax = _mm256_max_ps(vmax2345, vmax01678);
         const __m256 vout = _mm256_max_ps(_mm256_min_ps(vmax, voutput_max), voutput_min);
 
-        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT));
         o += 8;
       }
       if (c != 0) {
@@ -138,7 +138,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         const __m256 vmax = _mm256_max_ps(vmax2345, vmax01678);
         __m256 vout = _mm256_max_ps(_mm256_min_ps(vmax, voutput_max), voutput_min);
 
-        __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC);
+        __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT);
         if (c & 4) {
           _mm_storel_epi64((__m128i*) o, vh);
           vh = _mm_unpackhi_epi64(vh, vh);
@@ -226,7 +226,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         const __m256 vmax = _mm256_max_ps(vmax2345, vmax0167);
         const __m256 vout = _mm256_max_ps(_mm256_min_ps(vmax, voutput_max), voutput_min);
 
-        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT));
         o += 8;
       }
       if (c != 0) {
@@ -250,7 +250,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         const __m256 vmax = _mm256_max_ps(vmax2345, vmax0167);
         __m256 vout = _mm256_max_ps(_mm256_min_ps(vmax, voutput_max), voutput_min);
 
-        __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_NO_EXC);
+        __m128i vh = _mm256_cvtps_ph(vout, _MM_FROUND_TO_NEAREST_INT);
         if (c & 4) {
           _mm_storel_epi64((__m128i*) o, vh);
           vh = _mm_unpackhi_epi64(vh, vh);

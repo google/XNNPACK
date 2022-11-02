@@ -92,7 +92,7 @@ void xnn_math_f16_sigmoid__avx2_rr1_p2_div(
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(z) : 1.0 - sigmoid(z)
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
 }

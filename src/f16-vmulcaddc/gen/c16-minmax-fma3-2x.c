@@ -78,11 +78,11 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
       vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
       vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
 
-      _mm_storeu_si128((__m128i*) o0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC));
-      _mm_storeu_si128((__m128i*) (o0 + 8), _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT));
+      _mm_storeu_si128((__m128i*) (o0 + 8), _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_TO_NEAREST_INT));
       o0 += 16;
-      _mm_storeu_si128((__m128i*) o1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC));
-      _mm_storeu_si128((__m128i*) (o1 + 8), _mm256_cvtps_ph(vacc1x89ABCDEF, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_TO_NEAREST_INT));
+      _mm_storeu_si128((__m128i*) (o1 + 8), _mm256_cvtps_ph(vacc1x89ABCDEF, _MM_FROUND_TO_NEAREST_INT));
       o1 += 16;
     }
     for (; c >= 8 * sizeof(uint16_t); c -= 8 * sizeof(uint16_t)) {
@@ -105,9 +105,9 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
       vacc0 = _mm256_min_ps(vacc0, vmax);
       vacc1 = _mm256_min_ps(vacc1, vmax);
 
-      _mm_storeu_si128((__m128i*) o0, _mm256_cvtps_ph(vacc0, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o0, _mm256_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT));
       o0 += 8;
-      _mm_storeu_si128((__m128i*) o1, _mm256_cvtps_ph(vacc1, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o1, _mm256_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT));
       o1 += 8;
     }
     if XNN_UNLIKELY(c != 0) {
@@ -129,8 +129,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
       vacc0 = _mm256_min_ps(vacc0, vmax);
       vacc1 = _mm256_min_ps(vacc1, vmax);
 
-      __m128i vh0 = _mm256_cvtps_ph(vacc0, _MM_FROUND_NO_EXC);
-      __m128i vh1 = _mm256_cvtps_ph(vacc1, _MM_FROUND_NO_EXC);
+      __m128i vh0 = _mm256_cvtps_ph(vacc0, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh1 = _mm256_cvtps_ph(vacc1, _MM_FROUND_TO_NEAREST_INT);
 
       if (c & (4 * sizeof(uint16_t))) {
         _mm_storel_epi64((__m128i*) o0, vh0);

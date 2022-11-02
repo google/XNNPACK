@@ -64,5 +64,5 @@ void xnn_f16_rmax_ukernel__f16c(
   }
   vmax_lo = _mm_max_ps(vmax_lo, _mm_movehl_ps(vmax_lo, vmax_lo));
   vmax_lo = _mm_max_ss(vmax_lo, _mm_movehdup_ps(vmax_lo));
-  *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(_mm_cvtps_ph(vmax_lo, _MM_FROUND_NO_EXC), 0);
+  *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(_mm_cvtps_ph(vmax_lo, _MM_FROUND_TO_NEAREST_INT), 0);
 }

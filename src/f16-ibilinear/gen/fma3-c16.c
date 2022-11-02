@@ -57,21 +57,21 @@ void xnn_f16_ibilinear_ukernel__fma3_c16(
       i2 += 16;
       i3 += 16;
 
-      const __m256 vtd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr456789AB, vtl456789AB), _MM_FROUND_NO_EXC));
-      const __m256 vbd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr456789AB, vbl456789AB), _MM_FROUND_NO_EXC));
-      const __m256 vtdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtrCDEFGHIJ, vtlCDEFGHIJ), _MM_FROUND_NO_EXC));
-      const __m256 vbdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbrCDEFGHIJ, vblCDEFGHIJ), _MM_FROUND_NO_EXC));
+      const __m256 vtd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr456789AB, vtl456789AB), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr456789AB, vbl456789AB), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vtdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtrCDEFGHIJ, vtlCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbrCDEFGHIJ, vblCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vt456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd456789AB, valphah, vtl456789AB), _MM_FROUND_NO_EXC));
-      const __m256 vb456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd456789AB, valphah, vbl456789AB), _MM_FROUND_NO_EXC));
-      const __m256 vtCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtdCDEFGHIJ, valphah, vtlCDEFGHIJ), _MM_FROUND_NO_EXC));
-      const __m256 vbCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbdCDEFGHIJ, valphah, vblCDEFGHIJ), _MM_FROUND_NO_EXC));
+      const __m256 vt456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd456789AB, valphah, vtl456789AB), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vb456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd456789AB, valphah, vbl456789AB), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vtCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtdCDEFGHIJ, valphah, vtlCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbdCDEFGHIJ, valphah, vblCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb456789AB, vt456789AB), _MM_FROUND_NO_EXC));
-      const __m256 vdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbCDEFGHIJ, vtCDEFGHIJ), _MM_FROUND_NO_EXC));
+      const __m256 vd456789AB = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb456789AB, vt456789AB), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vdCDEFGHIJ = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbCDEFGHIJ, vtCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m128i vo456789AB = _mm256_cvtps_ph(_mm256_fmadd_ps(vd456789AB, valphav, vt456789AB), _MM_FROUND_NO_EXC);
-      const __m128i voCDEFGHIJ = _mm256_cvtps_ph(_mm256_fmadd_ps(vdCDEFGHIJ, valphav, vtCDEFGHIJ), _MM_FROUND_NO_EXC);
+      const __m128i vo456789AB = _mm256_cvtps_ph(_mm256_fmadd_ps(vd456789AB, valphav, vt456789AB), _MM_FROUND_TO_NEAREST_INT);
+      const __m128i voCDEFGHIJ = _mm256_cvtps_ph(_mm256_fmadd_ps(vdCDEFGHIJ, valphav, vtCDEFGHIJ), _MM_FROUND_TO_NEAREST_INT);
 
       _mm_storeu_si128((__m128i*) o, vo456789AB);
       _mm_storeu_si128((__m128i*) (o + 8), voCDEFGHIJ);
@@ -87,15 +87,15 @@ void xnn_f16_ibilinear_ukernel__fma3_c16(
       const __m256 vbr = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
       i3 += 8;
 
-      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_NO_EXC));
+      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_NO_EXC);
+      const __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_TO_NEAREST_INT);
 
       _mm_storeu_si128((__m128i*) o, vo);
       o += 8;
@@ -110,15 +110,15 @@ void xnn_f16_ibilinear_ukernel__fma3_c16(
       const __m256 vbr = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
       i3 += 8;
 
-      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vtd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vtr, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vbd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vbr, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_NO_EXC));
-      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_NO_EXC));
+      const __m256 vt = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vtd, valphah, vtl), _MM_FROUND_TO_NEAREST_INT));
+      const __m256 vb = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vbd, valphah, vbl), _MM_FROUND_TO_NEAREST_INT));
 
-      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_NO_EXC));
+      const __m256 vd = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_sub_ps(vb, vt), _MM_FROUND_TO_NEAREST_INT));
 
-      __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_NO_EXC);
+      __m128i vo = _mm256_cvtps_ph(_mm256_fmadd_ps(vd, valphav, vt), _MM_FROUND_TO_NEAREST_INT);
       if (c & (4 * sizeof(uint16_t))) {
         _mm_storel_epi64((__m128i*) o, vo);
         vo = _mm_unpackhi_epi64(vo, vo);

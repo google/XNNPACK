@@ -38,21 +38,21 @@ void xnn_f16_vhswish_ukernel__f16c_x8(
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;
-    __m128i vacc = _mm256_cvtps_ph(_mm256_add_ps(vx, vthree), _MM_FROUND_NO_EXC);
-    vx = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vx, vsixth), _MM_FROUND_NO_EXC));
+    __m128i vacc = _mm256_cvtps_ph(_mm256_add_ps(vx, vthree), _MM_FROUND_TO_NEAREST_INT);
+    vx = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vx, vsixth), _MM_FROUND_TO_NEAREST_INT));
     vacc = _mm_max_epi16(vacc, vzero);
     vacc = _mm_min_epi16(vacc, vsix);
-    vacc = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc), vx), _MM_FROUND_NO_EXC);
+    vacc = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc), vx), _MM_FROUND_TO_NEAREST_INT);
     _mm_storeu_si128((__m128i*) o, vacc);
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
     __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
-    __m128i vacc = _mm256_cvtps_ph(_mm256_add_ps(vx, vthree), _MM_FROUND_NO_EXC);
-    vx = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vx, vsixth), _MM_FROUND_NO_EXC));
+    __m128i vacc = _mm256_cvtps_ph(_mm256_add_ps(vx, vthree), _MM_FROUND_TO_NEAREST_INT);
+    vx = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vx, vsixth), _MM_FROUND_TO_NEAREST_INT));
     vacc = _mm_max_epi16(vacc, vzero);
     vacc = _mm_min_epi16(vacc, vsix);
-    vacc = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc), vx), _MM_FROUND_NO_EXC);
+    vacc = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc), vx), _MM_FROUND_TO_NEAREST_INT);
 
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vacc);

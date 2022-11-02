@@ -24,7 +24,7 @@ void xnn_math_f32_f16_cvt__f16c(
     const __m256 vx = _mm256_loadu_ps(input);
     input += 8;
 
-    const __m128i vy = _mm256_cvtps_ph(vx, _MM_FROUND_NO_EXC);
+    const __m128i vy = _mm256_cvtps_ph(vx, _MM_FROUND_TO_NEAREST_INT);
 
     _mm_storeu_si128((__m128i*) o, vy);
     o += 8;

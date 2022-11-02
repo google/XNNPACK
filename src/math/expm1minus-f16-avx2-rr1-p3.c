@@ -78,7 +78,7 @@ void xnn_math_f16_expm1minus__avx2_rr1_p3(
     vs = _mm256_sub_ps(vs, vone);
     const __m256 vf = _mm256_fmadd_ps(vp, vt, vs);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
 }

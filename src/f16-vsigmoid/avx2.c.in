@@ -89,9 +89,9 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_${DIV_ALGO}_x${BATCH_TILE}(
       $for N in range(SIMD_TILE):
         vf${ABC[N]} = _mm256_blendv_ps(_mm256_sub_ps(vone, vf${ABC[N]}), vf${ABC[N]}, vx${ABC[N]});
 
-      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf${ABC[0]}, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf${ABC[0]}, _MM_FROUND_TO_NEAREST_INT));
       $for N in range(1, SIMD_TILE):
-        _mm_storeu_si128((__m128i*) (o + ${N * 8}), _mm256_cvtps_ph(vf${ABC[N]}, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) (o + ${N * 8}), _mm256_cvtps_ph(vf${ABC[N]}, _MM_FROUND_TO_NEAREST_INT));
       o += ${BATCH_TILE};
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -120,7 +120,7 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_${DIV_ALGO}_x${BATCH_TILE}(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -150,7 +150,7 @@ void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_${DIV_ALGO}_x${BATCH_TILE}(
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vz, vdenorm_cutoff, _CMP_LT_OS), vf);
     vf = _mm256_blendv_ps(_mm256_sub_ps(vone, vf), vf, vx);
 
-    __m128i vh = _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC);
+    __m128i vh = _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);

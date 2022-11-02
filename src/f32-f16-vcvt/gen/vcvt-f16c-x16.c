@@ -33,15 +33,15 @@ void xnn_f32_f16_vcvt_ukernel__f16c_x16(
     const __m256 vf1 = _mm256_loadu_ps(input + 8);
     input += 16;
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf0, _MM_FROUND_NO_EXC));
-    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vf1, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf0, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vf1, _MM_FROUND_TO_NEAREST_INT));
     o += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vf = _mm256_loadu_ps(input);
     input += 8;
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -53,11 +53,11 @@ void xnn_f32_f16_vcvt_ukernel__f16c_x16(
 
     __m128 vf_lo = _mm256_castps256_ps128(vf);
     if (batch & (4 * sizeof(float))) {
-      _mm_storel_epi64((__m128i*) o, _mm_cvtps_ph(vf_lo, _MM_FROUND_NO_EXC));
+      _mm_storel_epi64((__m128i*) o, _mm_cvtps_ph(vf_lo, _MM_FROUND_TO_NEAREST_INT));
       vf_lo = _mm256_extractf128_ps(vf, 1);
       o += 4;
     }
-    __m128i vh = _mm_cvtps_ph(vf_lo, _MM_FROUND_NO_EXC);
+    __m128i vh = _mm_cvtps_ph(vf_lo, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (2 * sizeof(float))) {
       _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);

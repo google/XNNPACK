@@ -47,28 +47,28 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
     const __m256 vi1x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
 
     const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-    __m128i vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(vi0x01234567, vi1x01234567), _MM_FROUND_NO_EXC);
+    __m128i vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(vi0x01234567, vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi2x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-    __m128i vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(vi0x89ABCDEF, vi1x89ABCDEF), _MM_FROUND_NO_EXC);
+    __m128i vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(vi0x89ABCDEF, vi1x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
 
     const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi3x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi4x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi5x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi6x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_NO_EXC);
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
 
     _mm_store_si128((__m128i*) b, vacc01234567); b += 8;
     _mm_store_si128((__m128i*) b, vacc89ABCDEF); b += 8;
@@ -78,17 +78,17 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
       const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
       const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
       const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-      __m128i vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(vi0x01234567, vi1x01234567), _MM_FROUND_NO_EXC);
+      __m128i vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(vi0x01234567, vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
 
       const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
 
       _mm_store_si128((__m128i*) b, vacc01234567); b += 8;
 
@@ -115,31 +115,31 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
       const __m256 vi0x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
 
       const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi1x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi0x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi0x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi2x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi1x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi1x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi3x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi4x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi5x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi6x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_NO_EXC);
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
-      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_NO_EXC);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
+      vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
 
       _mm_store_si128((__m128i*) b, vacc01234567); b += 8;
       _mm_store_si128((__m128i*) b, vacc89ABCDEF); b += 8;
@@ -150,18 +150,18 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
         const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
 
         const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_TO_NEAREST_INT);
         const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
         const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
         const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
         const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
         const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
-        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
+        vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
 
         _mm_store_si128((__m128i*) b, vacc01234567);
         b += 8;
@@ -209,34 +209,34 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
     const __m256 vi0x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
 
     const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi1x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi0x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi0x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi2x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi1x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi1x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi3x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi2x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi4x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi3x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi5x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi4x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
     const __m256 vi6x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_NO_EXC);
-    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_NO_EXC);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi5x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc89ABCDEF), vi6x89ABCDEF), _MM_FROUND_TO_NEAREST_INT);
 
-    vacc01234567 = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc01234567), vscale), _MM_FROUND_NO_EXC);
-    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc89ABCDEF), vscale), _MM_FROUND_NO_EXC);
+    vacc01234567 = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc01234567), vscale), _MM_FROUND_TO_NEAREST_INT);
+    vacc89ABCDEF = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc89ABCDEF), vscale), _MM_FROUND_TO_NEAREST_INT);
 
     __m256 vout01234567 = _mm256_max_ps(_mm256_cvtph_ps(vacc01234567), vmin);
     __m256 vout89ABCDEF = _mm256_max_ps(_mm256_cvtph_ps(vacc89ABCDEF), vmin);
@@ -244,8 +244,8 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
     vout01234567 = _mm256_min_ps(vout01234567, vmax);
     vout89ABCDEF = _mm256_min_ps(vout89ABCDEF, vmax);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC));
-    _mm_storeu_si128((__m128i*) ((uint16_t*) o + 8), _mm256_cvtps_ph(vout89ABCDEF, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout01234567, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) ((uint16_t*) o + 8), _mm256_cvtps_ph(vout89ABCDEF, _MM_FROUND_TO_NEAREST_INT));
     o += 16;
   }
   if XNN_UNLIKELY(channels != 0) {
@@ -254,29 +254,29 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c16(
 
       const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
       const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi0x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi2x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi1x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi3x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi2x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi4x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi3x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi5x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi4x01234567), _MM_FROUND_TO_NEAREST_INT);
       const __m256 vi6x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_NO_EXC);
-      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi5x01234567), _MM_FROUND_TO_NEAREST_INT);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_add_ps(_mm256_cvtph_ps(vacc01234567), vi6x01234567), _MM_FROUND_TO_NEAREST_INT);
 
-      vacc01234567 = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc01234567), vscale), _MM_FROUND_NO_EXC);
+      vacc01234567 = _mm256_cvtps_ph(_mm256_mul_ps(_mm256_cvtph_ps(vacc01234567), vscale), _MM_FROUND_TO_NEAREST_INT);
       __m256 vout01234567 = _mm256_max_ps(_mm256_cvtph_ps(vacc01234567), vmin);
       vout01234567 = _mm256_min_ps(vout01234567, vmax);
 
       if XNN_LIKELY(channels >= 8) {
-        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vout01234567, _MM_FROUND_TO_NEAREST_INT));
         o += 8;
         channels -= 8;
       } else {
-        __m128i vh01234567 = _mm256_cvtps_ph(vout01234567, _MM_FROUND_NO_EXC);
+        __m128i vh01234567 = _mm256_cvtps_ph(vout01234567, _MM_FROUND_TO_NEAREST_INT);
         if (channels & 4) {
           _mm_storel_epi64((__m128i*) o, vh01234567);
           o += 4;

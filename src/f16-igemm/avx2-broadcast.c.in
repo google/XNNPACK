@@ -87,7 +87,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 8):
-            vacc${M}x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]}), _MM_FROUND_NO_EXC));
+            vacc${M}x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
 
         k -= sizeof(uint16_t);
       } while (k != 0);
@@ -106,9 +106,9 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
         $for N in range(8, NR, 8):
-          _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
+          _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
       a = (const void**restrict) ((uintptr_t) a - ks);
@@ -117,14 +117,14 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
       $for LOG2N in reversed(range(NR.bit_length())):
         $if LOG2N == 3:
           $for M in reversed(range(MR)):
-            __m128i vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC);
+            __m128i vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT);
         $if NR != 1 << LOG2N:
           if (nc & ${1 << LOG2N}) {
             $if LOG2N >= 4:
               $for M in reversed(range(MR)):
-                _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_NO_EXC));
+                _mm_storeu_si128((__m128i*) c${M}, _mm256_cvtps_ph(vacc${M}x${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
                 $for N in range(8, 1 << LOG2N, 8):
-                  _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_NO_EXC));
+                  _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
 
               $for M in reversed(range(MR)):
                 $for N in range(0, 1 << (LOG2N - 1), 8):
@@ -137,7 +137,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
                 _mm_storeu_si128((__m128i*) c${M}, vh${M}x${ABC[0:8]});
 
               $for M in reversed(range(MR)):
-                vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_NO_EXC);
+                vh${M}x${ABC[0:8]} = _mm256_cvtps_ph(vacc${M}x${ABC[8:16]}, _MM_FROUND_TO_NEAREST_INT);
 
               $for M in reversed(range(MR)):
                 c${M} += ${1 << LOG2N};

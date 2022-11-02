@@ -136,13 +136,13 @@ void xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast(
         const __m256 va6 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a6));
         a6 += 1;
 
-        vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_NO_EXC));
-        vacc1x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va1, vb01234567, vacc1x01234567), _MM_FROUND_NO_EXC));
-        vacc2x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va2, vb01234567, vacc2x01234567), _MM_FROUND_NO_EXC));
-        vacc3x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va3, vb01234567, vacc3x01234567), _MM_FROUND_NO_EXC));
-        vacc4x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va4, vb01234567, vacc4x01234567), _MM_FROUND_NO_EXC));
-        vacc5x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va5, vb01234567, vacc5x01234567), _MM_FROUND_NO_EXC));
-        vacc6x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va6, vb01234567, vacc6x01234567), _MM_FROUND_NO_EXC));
+        vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc1x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va1, vb01234567, vacc1x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc2x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va2, vb01234567, vacc2x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc3x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va3, vb01234567, vacc3x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc4x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va4, vb01234567, vacc4x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc5x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va5, vb01234567, vacc5x01234567), _MM_FROUND_TO_NEAREST_INT));
+        vacc6x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va6, vb01234567, vacc6x01234567), _MM_FROUND_TO_NEAREST_INT));
 
         k -= sizeof(uint16_t);
       } while (k != 0);
@@ -168,31 +168,31 @@ void xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast(
     vacc6x01234567 = _mm256_min_ps(vacc6x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
-      _mm_storeu_si128((__m128i*) c6, _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c6, _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_TO_NEAREST_INT));
       c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
-      _mm_storeu_si128((__m128i*) c5, _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c5, _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_TO_NEAREST_INT));
       c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
-      _mm_storeu_si128((__m128i*) c4, _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c4, _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_TO_NEAREST_INT));
       c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
-      _mm_storeu_si128((__m128i*) c3, _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c3, _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_TO_NEAREST_INT));
       c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
-      _mm_storeu_si128((__m128i*) c2, _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c2, _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_TO_NEAREST_INT));
       c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
-      _mm_storeu_si128((__m128i*) c1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c1, _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_TO_NEAREST_INT));
       c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
-      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT));
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a = (const void**restrict) ((uintptr_t) a - ks);
       nc -= 8;
     } else {
-      __m128i vh6x01234567 = _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh5x01234567 = _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh4x01234567 = _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh3x01234567 = _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh2x01234567 = _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh1x01234567 = _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_NO_EXC);
-      __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh6x01234567 = _mm256_cvtps_ph(vacc6x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh5x01234567 = _mm256_cvtps_ph(vacc5x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh4x01234567 = _mm256_cvtps_ph(vacc4x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh3x01234567 = _mm256_cvtps_ph(vacc3x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh2x01234567 = _mm256_cvtps_ph(vacc2x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh1x01234567 = _mm256_cvtps_ph(vacc1x01234567, _MM_FROUND_TO_NEAREST_INT);
+      __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT);
       if (nc & 4) {
         _mm_storel_epi64((__m128i*) c6, vh6x01234567);
         _mm_storel_epi64((__m128i*) c5, vh5x01234567);

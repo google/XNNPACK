@@ -77,9 +77,9 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_x${BATCH_TILE}(
       $for N in range(SIMD_TILE):
         const __m256 vy${N} = _mm256_blendv_ps(vx${N}, ve${N}, vx${N});
 
-      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy0, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy0, _MM_FROUND_TO_NEAREST_INT));
       $for N in range(1, SIMD_TILE):
-        _mm_storeu_si128((__m128i*) (o + ${N * 8}), _mm256_cvtps_ph(vy${N}, _MM_FROUND_NO_EXC));
+        _mm_storeu_si128((__m128i*) (o + ${N * 8}), _mm256_cvtps_ph(vy${N}, _MM_FROUND_TO_NEAREST_INT));
       o += ${BATCH_TILE};
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
@@ -102,7 +102,7 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_x${BATCH_TILE}(
     vx = _mm256_mul_ps(vx, vbeta);
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -126,7 +126,7 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_x${BATCH_TILE}(
     vx = _mm256_mul_ps(vx, vbeta);
     const __m256 vy = _mm256_blendv_ps(vx, ve, vx);
 
-    __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_NO_EXC);
+    __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vh);
       vh = _mm_unpackhi_epi64(vh, vh);

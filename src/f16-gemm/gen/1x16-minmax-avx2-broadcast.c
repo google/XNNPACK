@@ -53,8 +53,8 @@ void xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast(
       const __m256 vb89ABCDEF = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + 8)));
       w = (const uint16_t*) w + 16;
 
-      vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_NO_EXC));
-      vacc0x89ABCDEF = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb89ABCDEF, vacc0x89ABCDEF), _MM_FROUND_NO_EXC));
+      vacc0x01234567 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb01234567, vacc0x01234567), _MM_FROUND_TO_NEAREST_INT));
+      vacc0x89ABCDEF = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb89ABCDEF, vacc0x89ABCDEF), _MM_FROUND_TO_NEAREST_INT));
 
       k -= sizeof(uint16_t);
     } while (k != 0);
@@ -68,19 +68,19 @@ void xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast(
     vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC));
-      _mm_storeu_si128((__m128i*) (c0 + 8), _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_NO_EXC));
+      _mm_storeu_si128((__m128i*) c0, _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT));
+      _mm_storeu_si128((__m128i*) (c0 + 8), _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_TO_NEAREST_INT));
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
 
       nc -= 16;
     } else {
-      __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_NO_EXC);
+      __m128i vh0x01234567 = _mm256_cvtps_ph(vacc0x01234567, _MM_FROUND_TO_NEAREST_INT);
       if (nc & 8) {
         _mm_storeu_si128((__m128i*) c0, vh0x01234567);
 
-        vh0x01234567 = _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_NO_EXC);
+        vh0x01234567 = _mm256_cvtps_ph(vacc0x89ABCDEF, _MM_FROUND_TO_NEAREST_INT);
 
         c0 += 8;
       }

@@ -93,10 +93,10 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x32(
     vf2 = _mm256_andnot_ps(_mm256_cmp_ps(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2);
     vf3 = _mm256_andnot_ps(_mm256_cmp_ps(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf0, _MM_FROUND_NO_EXC));
-    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vf1, _MM_FROUND_NO_EXC));
-    _mm_storeu_si128((__m128i*) (o + 16), _mm256_cvtps_ph(vf2, _MM_FROUND_NO_EXC));
-    _mm_storeu_si128((__m128i*) (o + 24), _mm256_cvtps_ph(vf3, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf0, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 8), _mm256_cvtps_ph(vf1, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 16), _mm256_cvtps_ph(vf2, _MM_FROUND_TO_NEAREST_INT));
+    _mm_storeu_si128((__m128i*) (o + 24), _mm256_cvtps_ph(vf3, _MM_FROUND_TO_NEAREST_INT));
     o += 32;
 
     vacc0 = _mm256_add_ps(vacc0, vf0);
@@ -125,7 +125,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x32(
     __m256 vf = _mm256_fmadd_ps(vt, vp, vs);
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
 
-    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC));
+    _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
 
     vacc = _mm256_add_ps(vacc, vf);
@@ -152,7 +152,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x32(
     __m256 vf = _mm256_fmadd_ps(vt, vp, vs);
     vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
 
-    __m128i vh = _mm256_cvtps_ph(vf, _MM_FROUND_NO_EXC);
+    __m128i vh = _mm256_cvtps_ph(vf, _MM_FROUND_TO_NEAREST_INT);
     __m128 vf_lo = _mm256_castps256_ps128(vf);
     if (batch & (4 * sizeof(uint16_t))) {
       _mm_storel_epi64((__m128i*) o, vh);
@@ -175,6 +175,6 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x32(
   }
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));
   vacc_lo = _mm_add_ss(vacc_lo, _mm_movehdup_ps(vacc_lo));
-  *((uint16_t*) sum) = (uint16_t) _mm_extract_epi16(_mm_cvtps_ph(vacc_lo, _MM_FROUND_NO_EXC), 0);
+  *((uint16_t*) sum) = (uint16_t) _mm_extract_epi16(_mm_cvtps_ph(vacc_lo, _MM_FROUND_TO_NEAREST_INT), 0);
   _mm256_zeroupper();
 }
