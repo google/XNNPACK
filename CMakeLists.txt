@@ -63,6 +63,9 @@ ADD_COMPILE_DEFINITIONS("XNN_ENABLE_GEMM_M_SPECIALIZATION=$<BOOL:${XNNPACK_ENABL
 IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Disable "unary minus operator applied to unsigned type, result still unsigned" warning
   ADD_COMPILE_OPTIONS("/wd4146")
+  # Test files have many sections, increase the limit. See
+  # https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file.
+  ADD_COMPILE_OPTIONS("/bigobj")
 ENDIF()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -92,6 +95,10 @@ IF(NOT CMAKE_SYSTEM_NAME)
   MESSAGE(FATAL_ERROR "CMAKE_SYSTEM_NAME not defined")
 ELSEIF(NOT CMAKE_SYSTEM_NAME MATCHES "^(Darwin|Linux|Android|Windows|CYGWIN|MSYS|QURT)$")
   MESSAGE(FATAL_ERROR "Unrecognized CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
+ENDIF()
+IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  # Disable min/max macros as they break std::min/max and std::numeric_limits<T>min/max.
+  ADD_COMPILE_DEFINITIONS("NOMINMAX")
 ENDIF()
 
 # ---[ Download deps
