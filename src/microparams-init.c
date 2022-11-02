@@ -6907,6 +6907,18 @@ size_t xnn_init_x24_transpose_ssse3_params(union xnn_x24_transpose_params params
   params->ssse3.pos5[11] = 3;
   return sizeof(params->ssse3);
 }
+
+size_t xnn_init_x32_transpose_avx_params(union xnn_x32_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
+  memset(&params->avx.mask_table[0], -1, sizeof(uint32_t) * 8);
+  memset(&params->avx.mask_table[8], 0, sizeof(uint32_t) * 7);
+  return sizeof(params->avx);
+}
+
+size_t xnn_init_x64_transpose_avx_params(union xnn_x64_transpose_params params[XNN_MIN_ELEMENTS(1)]) {
+  memset(&params->avx.mask_table[0], -1, sizeof(uint64_t) * 4);
+  memset(&params->avx.mask_table[4], 0, sizeof(uint64_t) * 3);
+  return sizeof(params->avx);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

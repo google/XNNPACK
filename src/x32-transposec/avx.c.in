@@ -1,0 +1,356 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+$assert IN_PTRS in ["MULTI", "REUSE"]
+$assert OUT_PTRS in ["MULTI", "SWITCH", "MOV"]
+$TILE_SIZE = int(256/SIZE)
+$NUM_ITERS = TILE_SIZE.bit_length() - 1
+
+$__M128X = {32: "__m128", 64: "__m128d"}[SIZE]
+$__M256X = {32: "__m256", 64: "__m256d"}[SIZE]
+$XFLOAT = {32: "float", 64: "double"}[SIZE]
+$_MM_STOREU_PX = {32: "_mm_storeu_ps", 64: "_mm_storeu_pd"}[SIZE]
+$_MM256_UNPACKLO_PX = {32: "_mm256_unpacklo_ps", 64: "_mm256_unpacklo_pd"}[SIZE]
+$_MM256_UNPACKHI_PX = {32: "_mm256_unpackhi_ps", 64: "_mm256_unpackhi_pd"}[SIZE]
+$_MM256_MASKLOAD_PX = {32: "_mm256_maskload_ps", 64: "_mm256_maskload_pd"}[SIZE]
+$_MM256_PERMUTE2F128_PX = {32: "_mm256_permute2f128_ps", 64: "_mm256_permute2f128_pd"}[SIZE]
+$_MM256_STOREU_PX = {32: "_mm256_storeu_ps", 64: "_mm256_storeu_pd"}[SIZE]
+$_MM256_UNDEFINED_PX = {32: "_mm256_undefined_ps", 64: "_mm256_undefined_pd"}[SIZE]
+$_MM256_CASTPX256_PX128 = {32: "_mm256_castps256_ps128", 64: "_mm256_castpd256_pd128"}[SIZE]
+$_MM256_INSERTF128_PX = {32: "_mm256_insertf128_ps", 64: "_mm256_insertf128_pd"}[SIZE]
+$_MM256_EXTRACTF128_PX = {32: "_mm256_extractf128_ps", 64: "_mm256_extractf128_pd"}[SIZE]
+$_MM_STOREL_PX = {32: "_mm_storel_pi", 64: "_mm_storel_pd"}[SIZE]
+$CASTX = {32: "(__m64*) ", 64: ""}[SIZE]
+
+#include <immintrin.h>
+
+#include <assert.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/math.h>
+#include <xnnpack/transpose.h>
+#include <xnnpack/unaligned.h>
+
+void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower()}_${OUT_PTRS.lower()}_avx(
+    const uint${SIZE}_t* input,
+    uint${SIZE}_t* output,
+    size_t input_stride,
+    size_t output_stride,
+    size_t block_width,
+    size_t block_height,
+    const union xnn_x${SIZE}_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(output_stride >= block_height * sizeof(${XFLOAT}));
+  assert(input_stride >= block_width * sizeof(${XFLOAT}));
+
+  const size_t tile_height = ${TILE_SIZE};
+  const size_t tile_width = ${TILE_SIZE};
+  const size_t tile_hbytes = tile_height * sizeof(${XFLOAT});
+  const size_t tile_wbytes = tile_width * sizeof(${XFLOAT});
+  const size_t input_reset = tile_wbytes - round_down_po2(block_height, tile_height) * input_stride;
+  $if IN_PTRS == "MULTI":
+    const size_t input_offset = tile_height * input_stride;
+  $if OUT_PTRS == "MOV":
+    const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(${XFLOAT}) - tile_hbytes;
+  $else:
+    const size_t output_reset = tile_width * output_stride - round_down_po2(block_height, 2) * sizeof(${XFLOAT});
+
+  $if IN_PTRS == "MULTI":
+    const ${XFLOAT}* i0 = (const ${XFLOAT}*) input;
+    $for N in range(1, TILE_SIZE):
+      const ${XFLOAT}* i${N} = (const ${XFLOAT}*) ((uintptr_t) i${N-1} + input_stride);
+  $else:
+    const ${XFLOAT}* i0 = (const ${XFLOAT}*) input;
+  $if OUT_PTRS == "MULTI":
+    ${XFLOAT}* o0 = (${XFLOAT}*) output;
+  $if OUT_PTRS == "SWITCH":
+    ${XFLOAT}* o = (${XFLOAT}*) output;
+  $elif OUT_PTRS != "MULTI":
+    ${XFLOAT}* o = (${XFLOAT}*) ((uintptr_t) output - tile_hbytes);
+  $if OUT_PTRS in ["SWITCH", "MOV"]:
+    const size_t minus_output_stride = -output_stride;
+
+  do {
+    $if OUT_PTRS == "MULTI":
+      ${XFLOAT}* o1 = (${XFLOAT}*) (block_width < 2 ? o0 : (${XFLOAT}*) ((uintptr_t) o0 + output_stride));
+      $for N in range(2, TILE_SIZE, 2):
+        ${XFLOAT}* o${N} = (${XFLOAT}*) (block_width <= ${N} ? o0 : (${XFLOAT}*) ((uintptr_t) o${N-1} + output_stride));
+        ${XFLOAT}* o${N+1} = (${XFLOAT}*) (block_width < ${N+2} ? o0 : (${XFLOAT}*) ((uintptr_t) o${N} + output_stride));
+    const size_t rem = min(block_width - 1, ${TILE_SIZE-1});
+    $if OUT_PTRS == "MOV":
+      const size_t oN_stride = rem * output_stride;
+      const size_t oN_offset = oN_stride + tile_hbytes;
+    $elif OUT_PTRS == "SWITCH":
+      const size_t oN_stride = rem * output_stride;
+
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ ${TILE_SIZE-1}]));
+
+    size_t bh = block_height;
+    for (; bh >= ${TILE_SIZE}; bh -= ${TILE_SIZE}) {
+      $for N in range(TILE_SIZE):
+        $if IN_PTRS == "REUSE":
+          const ${__M256X} v${NUM_ITERS}_${N} = ${_MM256_MASKLOAD_PX}(i0, vmask);
+          i0 = (${XFLOAT}*) ((uintptr_t) i0 + input_stride);
+        $else:
+          const ${__M256X} v${NUM_ITERS}_${N} = ${_MM256_MASKLOAD_PX}(i${N}, vmask);
+          i${N} = (${XFLOAT}*) ((uintptr_t) i${N} + input_offset);
+
+      $for M in range(0, NUM_ITERS-1):
+        $for N in range(2):
+          $for O in range(TILE_SIZE>>2):
+            const ${__M256X} v${NUM_ITERS-M-1}_${N*(TILE_SIZE>>1)+O*2} =  ${_MM256_UNPACKLO_PX}(v${NUM_ITERS-M}_${O+N*(TILE_SIZE>>1)}, v${NUM_ITERS-M}_${(O+N*(TILE_SIZE>>1))+int(TILE_SIZE/4)});
+            const ${__M256X} v${NUM_ITERS-M-1}_${N*(TILE_SIZE>>1)+O*2+1} = ${_MM256_UNPACKHI_PX}(v${NUM_ITERS-M}_${O+N*(TILE_SIZE>>1)}, v${NUM_ITERS-M}_${(O+N*(TILE_SIZE>>1))+int(TILE_SIZE/4)});
+
+      $if OUT_PTRS != "SWITCH":
+        $for N in range(0,(TILE_SIZE>>1)):
+           const ${__M256X} v0_${(N)} = ${_MM256_INSERTF128_PX}(v1_${N}, ${_MM256_CASTPX256_PX128}(v1_${N+(TILE_SIZE>>1)}), 1);
+           const ${__M256X} v0_${(N)+(TILE_SIZE>>1)} = ${_MM256_PERMUTE2F128_PX}(v1_${N}, v1_${N+(TILE_SIZE>>1)}, 0x31);
+
+      $if OUT_PTRS == "SWITCH":
+        ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+        switch (rem) {
+          default:
+            XNN_UNREACHABLE;
+          $for N in reversed(range(TILE_SIZE>>1, TILE_SIZE)):
+            case ${N}: {
+              const ${__M256X} v0_${N} = ${_MM256_PERMUTE2F128_PX}(v1_${N-(TILE_SIZE>>1)}, v1_${N}, 0x31);
+              ${_MM256_STOREU_PX}(oN, v0_${N});
+              oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+            }
+          $for N in reversed(range(2, TILE_SIZE>>1)):
+            case ${N}: {
+              const ${__M256X} v0_${(N)} = ${_MM256_INSERTF128_PX}(v1_${N}, ${_MM256_CASTPX256_PX128}(v1_${N+(TILE_SIZE>>1)}), 1);
+              ${_MM256_STOREU_PX}(oN, v0_${N});
+              oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+            }
+          case 1: {
+            const ${__M256X} v0_1 = ${_MM256_INSERTF128_PX}(v1_1, ${_MM256_CASTPX256_PX128}(v1_${(TILE_SIZE>>1)+1}), 1);
+            ${_MM256_STOREU_PX}( oN, v0_1);
+          }
+          case 0: {
+            const ${__M256X} v0_0 = ${_MM256_INSERTF128_PX}(v1_0, ${_MM256_CASTPX256_PX128}(v1_${(TILE_SIZE>>1)}), 1);
+            ${_MM256_STOREU_PX}(o, v0_0);
+            o = (${XFLOAT}*) ((uintptr_t) o + tile_hbytes);
+          }
+        }
+      $elif OUT_PTRS == "MOV":
+        o = (${XFLOAT}*) ((uintptr_t) o + oN_offset);
+        ${_MM256_STOREU_PX}(o, v0_${TILE_SIZE-1});
+        ${XFLOAT} *oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+        $for N in reversed(range(2, TILE_SIZE, 2)):
+          if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+            o = oN;
+          }
+          ${_MM256_STOREU_PX}(o, v0_${N});
+          oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+          if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+            o = oN;
+          }
+          ${_MM256_STOREU_PX}(o, v0_${N-1});
+          oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+        if XNN_UNPREDICTABLE(block_width > 1) {
+          o = oN;
+        }
+        ${_MM256_STOREU_PX}(o, v0_0);
+      $else:
+        $for N in reversed(range(TILE_SIZE)):
+          ${_MM256_STOREU_PX}(o${N}, v0_${N});
+          o${N} = (${XFLOAT}*) ((uintptr_t) o${N} + tile_hbytes);
+    }
+    $if OUT_PTRS == "MOV":
+      o = (${XFLOAT}*) ((uintptr_t) o + tile_hbytes);
+    if (bh != 0) {
+      $if IN_PTRS == "REUSE":
+        const ${__M256X} v${NUM_ITERS}_0 = ${_MM256_MASKLOAD_PX}(i0, vmask);
+        $for N in range(1, TILE_SIZE - 1, 2):
+          const ${XFLOAT} *i${N} = (const ${XFLOAT}*) ((uintptr_t) i${N-1} + input_stride);
+          if XNN_UNPREDICTABLE(bh < ${N+1}) {
+            i${N} = i${N-1};
+          }
+          const ${__M256X} v${NUM_ITERS}_${N} = ${_MM256_MASKLOAD_PX}(i${N}, vmask);
+          const ${XFLOAT} *i${N+1} = (const ${XFLOAT}*) ((uintptr_t) i${N} + input_stride);
+          if XNN_UNPREDICTABLE(bh <= ${N+1}) {
+            i${N+1} = i${N};
+          }
+          const ${__M256X} v${NUM_ITERS}_${N+1} = ${_MM256_MASKLOAD_PX}(i${N+1}, vmask);
+      $else:
+        const ${__M256X} v${NUM_ITERS}_0 = ${_MM256_MASKLOAD_PX}(i0, vmask);
+        $for N in range(1, TILE_SIZE - 1, 2):
+          if XNN_UNPREDICTABLE(bh < ${N+1}) {
+            i${N} = i0;
+          }
+          const ${__M256X} v${NUM_ITERS}_${N} = ${_MM256_MASKLOAD_PX}(i${N}, vmask);
+          if XNN_UNPREDICTABLE(bh <= ${N+1}) {
+            i${N+1} = i0;
+          }
+          const ${__M256X} v${NUM_ITERS}_${N+1} = ${_MM256_MASKLOAD_PX}(i${N+1}, vmask);
+      const ${__M256X} v${NUM_ITERS}_${TILE_SIZE-1} = ${_MM256_UNDEFINED_PX}();
+
+      $for M in range(0, NUM_ITERS-1):
+        $for N in range(2):
+          $for O in range(TILE_SIZE>>2):
+            const ${__M256X} v${NUM_ITERS-M-1}_${N*(TILE_SIZE>>1)+O*2} =  ${_MM256_UNPACKLO_PX}(v${NUM_ITERS-M}_${O+N*(TILE_SIZE>>1)}, v${NUM_ITERS-M}_${(O+N*(TILE_SIZE>>1))+int(TILE_SIZE/4)});
+            const ${__M256X} v${NUM_ITERS-M-1}_${N*(TILE_SIZE>>1)+O*2+1} = ${_MM256_UNPACKHI_PX}(v${NUM_ITERS-M}_${O+N*(TILE_SIZE>>1)}, v${NUM_ITERS-M}_${(O+N*(TILE_SIZE>>1))+int(TILE_SIZE/4)});
+
+      $for N in range(0,(TILE_SIZE>>1)):
+         ${__M256X} v0_${N} = ${_MM256_INSERTF128_PX}(v1_${N}, ${_MM256_CASTPX256_PX128}(v1_${N+(TILE_SIZE>>1)}), 1);
+         ${__M256X} v0_${N+(TILE_SIZE>>1)} = ${_MM256_PERMUTE2F128_PX}(v1_${N}, v1_${N+(TILE_SIZE>>1)}, 0x31);
+
+      $for N in range(0,TILE_SIZE):
+         ${__M128X} v0_${N}_lo = ${_MM256_CASTPX256_PX128}(v0_${N});
+
+      if (bh & ${TILE_SIZE>>1}) {
+        $if OUT_PTRS == "SWITCH":
+          ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+          switch (rem) {
+            $for N in reversed(range(2, TILE_SIZE)):
+              case ${N}:
+                ${_MM_STOREU_PX}(oN, v0_${N}_lo);
+                 v0_${N}_lo = ${_MM256_EXTRACTF128_PX}(v0_${N}, 1);
+                oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+            case 1:
+              ${_MM_STOREU_PX}(oN, v0_1_lo);
+              v0_1_lo = ${_MM256_EXTRACTF128_PX}(v0_1, 1);
+            case 0:
+              ${_MM_STOREU_PX}(o, v0_0_lo);
+              v0_0_lo = ${_MM256_EXTRACTF128_PX}(v0_0, 1);
+              break;
+            default:
+              XNN_UNREACHABLE;
+          }
+          o += ${TILE_SIZE>>1};
+        $elif OUT_PTRS == "MOV":
+          o = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+          ${_MM_STOREU_PX}(o, v0_${TILE_SIZE-1}_lo);
+          v0_${TILE_SIZE-1}_lo = ${_MM256_EXTRACTF128_PX}(v0_${TILE_SIZE-1}, 1);
+          ${XFLOAT} *oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+          $for N in reversed(range(2, TILE_SIZE, 2)):
+            if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+              o = oN;
+            }
+            ${_MM_STOREU_PX}(o, v0_${N}_lo);
+            v0_${N}_lo = ${_MM256_EXTRACTF128_PX}(v0_${N}, 1);
+            oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+              o = oN;
+            }
+            ${_MM_STOREU_PX}(o, v0_${N-1}_lo);
+            v0_${N-1}_lo = ${_MM256_EXTRACTF128_PX}(v0_${N-1}, 1);
+            oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+          if XNN_UNPREDICTABLE(block_width > 1) {
+            o = oN;
+          }
+          ${_MM_STOREU_PX}(o, v0_0_lo);
+          v0_0_lo = ${_MM256_EXTRACTF128_PX}(v0_0, 1);
+          o += ${TILE_SIZE>>1};
+        $else:
+          $for N in reversed(range(TILE_SIZE)):
+            ${_MM_STOREU_PX}(o${N}, v0_${N}_lo);
+            v0_${N}_lo = ${_MM256_EXTRACTF128_PX}(v0_${N}, 1);
+            o${N} += ${TILE_SIZE>>1};
+      }
+
+      if (bh & ${TILE_SIZE>>2}) {
+        $if OUT_PTRS == "SWITCH":
+          ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+          switch (rem) {
+            $for N in reversed(range(2, TILE_SIZE)):
+              case ${N}:
+                ${_MM_STOREL_PX}(${CASTX}oN, v0_${N}_lo);
+                oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+            case 1:
+              ${_MM_STOREL_PX}(${CASTX}oN, v0_1_lo);
+            case 0:
+              ${_MM_STOREL_PX}(${CASTX}o, v0_0_lo);
+              break;
+            default:
+              XNN_UNREACHABLE;
+          }
+          $if SIZE == 32:
+            o += ${TILE_SIZE>>2};
+        $elif OUT_PTRS == "MOV":
+          o = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+          ${_MM_STOREL_PX}(${CASTX}o, v0_${TILE_SIZE-1}_lo);
+          ${XFLOAT} *oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+          $for N in reversed(range(2, TILE_SIZE, 2)):
+            if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+              o = oN;
+            }
+            ${_MM_STOREL_PX}(${CASTX}o, v0_${N}_lo);
+            oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+              o = oN;
+            }
+            ${_MM_STOREL_PX}(${CASTX}o, v0_${N-1}_lo);
+            oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+          if XNN_UNPREDICTABLE(block_width > 1) {
+            o = oN;
+          }
+          ${_MM_STOREL_PX}(${CASTX}o, v0_0_lo);
+          $if SIZE == 32:
+            o += ${TILE_SIZE>>2};
+        $else:
+          $for N in reversed(range(TILE_SIZE)):
+            ${_MM_STOREL_PX}(${CASTX}o${N}, v0_${N}_lo);
+            $if SIZE == 32:
+              o${N} += ${TILE_SIZE>>2};
+        $if SIZE == 32:
+          $for N in range(TILE_SIZE):
+            v0_${N}_lo = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(v0_${N}_lo), _mm_castps_pd(v0_${N}_lo)));
+      }
+      $if SIZE == 32:
+        if (bh & 1) {
+          $if OUT_PTRS == "SWITCH":
+            ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+            switch (rem) {
+              $for N in reversed(range(2, TILE_SIZE)):
+                case ${N}:
+                  _mm_store_ss(oN, v0_${N}_lo);
+                  oN = (${XFLOAT}*) ((uintptr_t) oN + minus_output_stride);
+              case 1:
+                _mm_store_ss(oN, v0_1_lo);
+              case 0:
+                _mm_store_ss(o, v0_0_lo);
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
+          $elif OUT_PTRS == "MOV":
+            o = (${XFLOAT}*) ((uintptr_t) o + oN_stride);
+            _mm_store_ss(o, v0_${TILE_SIZE-1}_lo);
+            ${XFLOAT}* oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+            $for N in reversed(range(2, TILE_SIZE, 2)):
+              if XNN_UNPREDICTABLE(block_width > ${N+1}) {
+                o = oN;
+              }
+              _mm_store_ss(o, v0_${N}_lo);
+              oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+              if XNN_UNPREDICTABLE(block_width >= ${N+1}) {
+                o = oN;
+              }
+              _mm_store_ss(o, v0_${N-1}_lo);
+              oN = (${XFLOAT}*) ((uintptr_t) o + minus_output_stride);
+            if XNN_UNPREDICTABLE(block_width > 1) {
+              o = oN;
+            }
+            _mm_store_ss(o, v0_0_lo);
+          $else:
+            $for N in reversed(range(TILE_SIZE)):
+              _mm_store_ss(o${N}, v0_${N}_lo);
+        }
+    }
+
+    $if IN_PTRS == "MULTI":
+      i0 = (const ${XFLOAT}*) ((uintptr_t) i0 + input_reset);
+      $for N in range(1, TILE_SIZE):
+        i${N} = (const ${XFLOAT}*) ((uintptr_t) i${N-1} + input_stride);
+    $else:
+      i0 = (const ${XFLOAT}*) ((uintptr_t) i0 + input_reset);
+    $if OUT_PTRS == "MULTI":
+      o0 = (${XFLOAT}*) ((uintptr_t) o0 + output_reset);
+    $else:
+      o = (${XFLOAT}*) ((uintptr_t) o + output_reset);
+    block_width = doz(block_width, tile_width);
+  } while (block_width != 0);
+}

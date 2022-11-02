@@ -16,12 +16,14 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>
 
 
 void transpose(
     benchmark::State& state,
     xnn_x64_transposec_ukernel_function transpose,
+    xnn_init_x64_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -39,9 +41,13 @@ void transpose(
   std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 
+  xnn_x64_transpose_params params;
+  if (init_params) {
+    init_params(&params);
+  }
   for (auto _ : state) {
     transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, width,
-              height, nullptr);
+              height, &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -83,6 +89,8 @@ BENCHMARK_CAPTURE(transpose, 4x2_scalar_float, xnn_x64_transposec_ukernel__4x2_s
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(transpose, 2x2_multi_mov_sse2, xnn_x64_transposec_ukernel__2x2_multi_mov_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose, 2x2_multi_multi_sse2, xnn_x64_transposec_ukernel__2x2_multi_multi_sse2)
+      ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 2x2_multi_switch_sse2, xnn_x64_transposec_ukernel__2x2_multi_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 2x2_reuse_mov_sse2, xnn_x64_transposec_ukernel__2x2_reuse_mov_sse2)
@@ -91,6 +99,36 @@ BENCHMARK_CAPTURE(transpose, 4x2_scalar_float, xnn_x64_transposec_ukernel__4x2_s
       ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 2x2_reuse_switch_sse2, xnn_x64_transposec_ukernel__2x2_reuse_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_multi_mov_avx,
+                    xnn_x64_transposec_ukernel__4x4_multi_mov_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_multi_multi_avx,
+                    xnn_x64_transposec_ukernel__4x4_multi_multi_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_multi_switch_avx,
+                    xnn_x64_transposec_ukernel__4x4_multi_switch_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_reuse_mov_avx,
+                    xnn_x64_transposec_ukernel__4x4_reuse_mov_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_reuse_multi_avx,
+                    xnn_x64_transposec_ukernel__4x4_reuse_multi_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    4x4_reuse_switch_avx,
+                    xnn_x64_transposec_ukernel__4x4_reuse_switch_avx,
+                    xnn_init_x64_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

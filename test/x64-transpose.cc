@@ -3083,3 +3083,1221 @@ TEST(X64_TRANSPOSEC__4X2_SCALAR_INT_8, bh_28_bw_46_ies_25_oes_21) {
       .Test(xnn_x64_transposec_ukernel__2x2_reuse_switch_sse2);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MOV_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_MULTI_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_MULTI_SWITCH_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_multi_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MOV_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_mov_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_MULTI_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_multi_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_1_8_bw_1_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 1; i <= 8; ++i){
+      for(size_t j = 1; j <= 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j * 3)
+          .output_stride(i * 7)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(8)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(4)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(i)
+        .output_stride(8)
+        .block_width(i)
+        .block_height(8)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_8_bw_4) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(16)
+      .block_width(4)
+      .block_height(8)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_5_8_bw_4){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(21)
+        .output_stride(i)
+        .block_width(7)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_5_8_bw_8){
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      TransposeMicrokernelTester()
+        .input_stride(8)
+        .output_stride(i)
+        .block_width(8)
+        .block_height(i)
+        .element_size(8)
+        .iterations(1)
+        .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_5_8_bw_5_8) {
+    TEST_REQUIRES_X86_AVX;
+    for(size_t i = 5; i < 8; ++i){
+      for(size_t j = 5; j < 8; ++j){
+        TransposeMicrokernelTester()
+          .input_stride(j)
+          .output_stride(i)
+          .block_width(j)
+          .block_height(i)
+          .element_size(8)
+          .iterations(1)
+          .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+      }
+    }
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_4_is_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(4)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_4_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(4)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_4_bw_4_is_8_os_8) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(8)
+      .output_stride(8)
+      .block_width(4)
+      .block_height(4)
+      .element_size(8)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_68_bw_76_ies_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(76)
+      .output_stride(68)
+      .block_width(76)
+      .block_height(68)
+      .element_size(8)
+      .input_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_12_bw_20_oes_19) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(20)
+      .output_stride(12)
+      .block_width(20)
+      .block_height(12)
+      .element_size(8)
+      .output_element_stride(19)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+
+  TEST(X64_TRANSPOSEC__4X4_REUSE_SWITCH_AVX_8, bh_28_bw_92_ies_25_oes_21) {
+    TEST_REQUIRES_X86_AVX;
+    TransposeMicrokernelTester()
+      .input_stride(97)
+      .output_stride(34)
+      .block_width(92)
+      .block_height(28)
+      .element_size(8)
+      .input_element_stride(25)
+      .output_element_stride(21)
+      .iterations(1)
+      .Test(xnn_x64_transposec_ukernel__4x4_reuse_switch_avx, xnn_init_x64_transpose_avx_params);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY

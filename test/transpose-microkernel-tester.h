@@ -123,12 +123,17 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x64_transposec_ukernel_function transpose) const {
+  void Test(xnn_x64_transposec_ukernel_function transpose, const xnn_init_x64_transpose_params_fn init_params = nullptr) const {
     std::vector<uint64_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint64_t));
     std::vector<uint64_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
       std::fill(output.begin(), output.end(), UINT64_C(0xBADC0FFEE0DDF00D));
+
+      union xnn_x64_transpose_params params;
+      if (init_params) {
+        init_params(&params);
+      }
 
       // Call optimized micro-kernel.
       transpose(input.data(),
@@ -137,7 +142,7 @@ class TransposeMicrokernelTester {
                 output_stride() * sizeof(uint64_t),
                 block_width(),
                 block_height(),
-                nullptr);
+                &params);
 
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {

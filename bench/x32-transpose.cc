@@ -61,7 +61,7 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->ArgNames({"height", "width"});
   b->Args({32, 32});
   b->Args({64, 64});
-  b->Args({117, 117});
+  b->Args({128, 128});
   b->Args({1024, 1024});
 }
 
@@ -169,6 +169,31 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar_float, xnn_x32_transposec_ukernel__4x4_s
       ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 4x4_reuse_switch_sse2, xnn_x32_transposec_ukernel__4x4_reuse_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    8x8_multi_mov_avx,
+                    xnn_x32_transposec_ukernel__8x8_multi_mov_avx,
+                    xnn_init_x32_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    8x8_multi_switch_avx,
+                    xnn_x32_transposec_ukernel__8x8_multi_switch_avx,
+                    xnn_init_x32_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    8x8_reuse_mov_avx,
+                    xnn_x32_transposec_ukernel__8x8_reuse_mov_avx,
+                    xnn_init_x32_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    8x8_reuse_multi_avx,
+                    xnn_x32_transposec_ukernel__8x8_reuse_multi_avx,
+                    xnn_init_x32_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    8x8_reuse_switch_avx,
+                    xnn_x32_transposec_ukernel__8x8_reuse_switch_avx,
+                    xnn_init_x32_transpose_avx_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
