@@ -16533,6 +16533,19 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [":packing_test_mode"],
 )
 
+xnnpack_unit_test(
+    name = "indirection_test",
+    srcs = [
+        "test/indirection.cc",
+    ],
+    deps = [
+        ":allocator",
+        ":indirection_test_mode",
+        ":operators_test_mode",
+        ":xnnpack_h",
+    ],
+)
+
 ############################# Build configurations #############################
 
 # Enables usage of ARM FP16 (FP16 arithmetics) kernels.
