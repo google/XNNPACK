@@ -34,7 +34,7 @@ void f32_gavgpool_cw(
 
   std::vector<float, AlignedAllocator<float, 64>> input(elements * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> output(channels);
-  std::iota(input.begin(), input.end(), 0);
+  std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
   union xnn_f32_gavgpool_params params;

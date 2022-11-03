@@ -306,3 +306,9 @@
     #define XNN_PRIVATE
   #endif
 #endif
+
+#if defined(__clang__)
+  #define XNN_PRAGMA_CLANG(pragma) _Pragma(pragma)
+#else
+  #define XNN_PRAGMA_CLANG(pragma)
+#endif
