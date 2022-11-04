@@ -354,4 +354,26 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
 
 }
 
+TEST(MemoryPlanner, CannotReuseStaticValues) {
+  uint32_t static_id = 0;
+  uint32_t clamp_out_id = 1;
+  uint32_t output_id = 2;
+
+  // --- static_id --> Clamp --- clamp_out_id --> Leaky Relu --- output_id -->
+  RuntimeTester tester(3);
+  tester
+      .AddStaticTensorF32({1, 3, 3, 3}, TensorType::kDense, static_id)
+      .AddDynamicTensorF32({1, 3, 3, 3}, clamp_out_id) // 108 bytes.
+      .AddOutputTensorF32({1, 3, 3, 3}, output_id)
+      .AddClamp(0.0f, 1.0f, static_id, clamp_out_id)
+      .AddLeakyRelu(1.0f, clamp_out_id, output_id);
+  tester.CreateRuntime();
+
+  xnn_runtime_t runtime = tester.Runtime();
+
+  // clamp_out_id cannot reuse static_id (because it is static).
+  ASSERT_EQ(runtime->workspace->size,
+            round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
+}
+
 } // namespace xnnpack

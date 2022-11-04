@@ -136,6 +136,10 @@ XNN_INLINE bool xnn_value_is_valid(const struct xnn_value* value) {
   return value->type != xnn_value_type_invalid;
 }
 
+XNN_INLINE bool xnn_value_is_static(const struct xnn_value* value) {
+  return value->data != NULL;
+}
+
 enum xnn_allocation_type {
   xnn_allocation_type_invalid = 0,
   /// Static data that is provided by caller, needs to outlive the xnn_runtime.

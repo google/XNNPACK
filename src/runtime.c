@@ -226,6 +226,16 @@ static enum xnn_status initialize_workspace_blobs(
   return xnn_status_success;
 }
 
+// External inputs cannot be overwritten.
+// Static inputs cannot be overwritten.
+// Persistent tensors have their own space allocated at the front of the workspace.
+// If input has more than 1 consumer, we can't track all the consumers and update the first_consumer, so bail out.
+static bool input_memory_can_be_reused(const struct xnn_value* input, const struct xnn_value* output)
+{
+  return !xnn_value_is_external(input) && !xnn_value_is_static(input) && !xnn_value_is_persistent(input)
+      && !xnn_value_is_persistent(output) && input->num_consumers <= 1;
+}
+
 // An in-place operation reuses the input tensor's memory for its output. Examples are element-wise unary operations
 // like activation functions. Usually, an output tensor is allocated space. For an in-place operation, we want the
 // output tensor to share the input tensor's memory. We do this by calling xnn_mark_tensor_as_reuse, which:
@@ -264,9 +274,7 @@ static void optimize_tensor_allocation_for_in_place_operations(
     struct xnn_value* output = &subgraph->values[node->outputs[0]];
     const uint32_t input_id = node->inputs[0];
     const struct xnn_value* input = &subgraph->values[input_id];
-    if (xnn_value_is_external_input(input) || xnn_value_is_persistent(output) || xnn_value_is_persistent(input) || input->num_consumers > 1) {
-      // External inputs cannot be overwritten.
-      // Persistent tensors have their own space allocated at the front of the workspace.
+    if (!input_memory_can_be_reused(input, output)) {
       // TODO(zhin): consider aliasing input to output rather than output to input.
       continue;
     }
