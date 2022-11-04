@@ -381,6 +381,8 @@ enum xnn_status xnn_finalize_weights_cache(
       cache->finalization_state = finalized_state;
       return xnn_status_success;
     }
+    default:
+      XNN_UNREACHABLE;
   }
 }
 

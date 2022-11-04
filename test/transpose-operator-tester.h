@@ -60,7 +60,7 @@ class TransposeOperatorTester {
   inline const std::vector<size_t>& perm() const { return this->perm_; }
 
   void TestX8() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -100,7 +100,7 @@ class TransposeOperatorTester {
   }
 
     void TestRunX8() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -129,7 +129,7 @@ class TransposeOperatorTester {
   }
 
   void TestX16() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -169,7 +169,7 @@ class TransposeOperatorTester {
   }
 
   void TestRunX16() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -198,7 +198,7 @@ class TransposeOperatorTester {
   }
 
   void TestX32() const {
-    size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
@@ -238,7 +238,7 @@ class TransposeOperatorTester {
   }
 
   void TestRunX32() const {
-    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), 1, std::multiplies<size_t>());
+    const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
