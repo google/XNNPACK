@@ -11,6 +11,69 @@
 
 #include <xnnpack/assembler.h>
 
+// MSVC defines these tokens using macros, causing name collisions. We use these name in our assembler, so undef them.
+// These macros are pulled in via xnnpack/math.h -> intrin.h -> arm_neon.h.
+#include <xnnpack/math.h>
+#ifdef vabs_f32
+  #undef vabs_f32
+#endif
+#ifdef vadd_f32
+  #undef vadd_f32
+#endif
+#ifdef vcvt_f32_s32
+  #undef vcvt_f32_s32
+#endif
+#ifdef vcvt_s32_f32
+  #undef vcvt_s32_f32
+#endif
+#ifdef vcvtn_s32_f32
+  #undef vcvtn_s32_f32
+#endif
+#ifdef vmax_f32
+  #undef vmax_f32
+#endif
+#ifdef vmax_s8
+  #undef vmax_s8
+#endif
+#ifdef vmin_f32
+  #undef vmin_f32
+#endif
+#ifdef vmin_s8
+  #undef vmin_s8
+#endif
+#ifdef vmla_f32
+  #undef vmla_f32
+#endif
+#ifdef vmlal_s16
+  #undef vmlal_s16
+#endif
+#ifdef vmovl_s8
+  #undef vmovl_s8
+#endif
+#ifdef vmul_f32
+  #undef vmul_f32
+#endif
+#ifdef vneg_f32
+  #undef vneg_f32
+#endif
+#ifdef vqadd_s16
+  #undef vqadd_s16
+#endif
+#ifdef vqdmulh_s32
+  #undef vqdmulh_s32
+#endif
+#ifdef vqmovn_s16
+  #undef vqmovn_s16
+#endif
+#ifdef vqmovn_s32
+  #undef vqmovn_s32
+#endif
+#ifdef vqshl_s32
+  #undef vqshl_s32
+#endif
+#ifdef vrshl_s32
+  #undef vrshl_s32
+#endif
 
 namespace xnnpack {
 namespace aarch32 {

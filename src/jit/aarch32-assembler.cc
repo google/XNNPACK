@@ -8,6 +8,7 @@
 
 #include "xnnpack/aarch32-assembler.h"
 #include "xnnpack/assembler.h"
+#include "xnnpack/common.h"
 #include "xnnpack/math.h"
 
 namespace xnnpack {
