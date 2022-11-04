@@ -118,7 +118,7 @@ jobs:
         run: sudo apt install ninja-build
       - name: Setup Android NDK
         id: setup-ndk
-        uses: nttld/setup-ndk@v1.0.6
+        uses: nttld/setup-ndk@v1
         with:
           ndk-version: r23b
           add-to-path: false
