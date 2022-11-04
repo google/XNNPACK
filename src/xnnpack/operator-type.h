@@ -42,6 +42,7 @@ enum xnn_operator_type {
   xnn_operator_type_convert_nc_qs8_f32,
   xnn_operator_type_convert_nc_qu8,
   xnn_operator_type_convert_nc_qu8_f32,
+  xnn_operator_type_convolution_nchw_f16,
   xnn_operator_type_convolution_nchw_f32,
   xnn_operator_type_convolution_nhwc_f16,
   xnn_operator_type_convolution_nhwc_f32,

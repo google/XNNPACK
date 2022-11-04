@@ -69,6 +69,8 @@
   string: "Convert (NC, QU8)"
 - name: xnn_operator_type_convert_nc_qu8_f32
   string: "Convert (NC, QU8, F32)"
+- name: xnn_operator_type_convolution_nchw_f16
+  string: "Convolution (NCHW, F16)"
 - name: xnn_operator_type_convolution_nchw_f32
   string: "Convolution (NCHW, F32)"
 - name: xnn_operator_type_convolution_nhwc_f16
