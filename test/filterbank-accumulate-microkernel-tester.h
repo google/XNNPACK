@@ -45,7 +45,7 @@ class FilterbankAccumulateMicrokernelTester {
   void Test(xnn_u32_filterbank_accumulate_ukernel_function filterbank_accumulate) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    auto u8rng = std::bind(std::uniform_int_distribution<int>(1, 10), std::ref(rng));
+    auto u8rng = std::bind(std::uniform_int_distribution<uint16_t>(1, 10), std::ref(rng));
     auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
