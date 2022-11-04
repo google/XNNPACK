@@ -1324,8 +1324,8 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f16(
   return setup_unary_elementwise_nc(
     rounding_op, xnn_operator_type_bankers_rounding_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1356,8 +1356,8 @@ enum xnn_status xnn_setup_ceiling_nc_f16(
   return setup_unary_elementwise_nc(
     ceiling_op, xnn_operator_type_ceiling_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1628,8 +1628,8 @@ enum xnn_status xnn_setup_elu_nc_f16(
   return setup_unary_elementwise_nc(
     elu_op, xnn_operator_type_elu_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     &elu_op->params.f16_elu, sizeof(elu_op->params.f16_elu),
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1660,8 +1660,8 @@ enum xnn_status xnn_setup_floor_nc_f16(
   return setup_unary_elementwise_nc(
     floor_op, xnn_operator_type_floor_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1692,8 +1692,8 @@ enum xnn_status xnn_setup_hardswish_nc_f16(
   return setup_unary_elementwise_nc(
     hardswish_op, xnn_operator_type_hardswish_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     &hardswish_op->params.f16_hswish, sizeof(hardswish_op->params.f16_hswish),
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1884,8 +1884,8 @@ enum xnn_status xnn_setup_square_root_nc_f16(
   return setup_unary_elementwise_nc(
     sqrt_op, xnn_operator_type_square_root_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -1916,8 +1916,8 @@ enum xnn_status xnn_setup_truncation_nc_f16(
   return setup_unary_elementwise_nc(
     truncation_op, xnn_operator_type_truncation_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(half)) */,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }

@@ -1085,7 +1085,7 @@ static enum xnn_status setup_binary_elementwise_nd_f16(
     input1,
     input2,
     output,
-    1 /* log2(sizeof(half)) */,
+    1 /* log2(sizeof(uint16_t)) */,
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
     &binary_elementwise_op->params.f16_minmax, sizeof(binary_elementwise_op->params.f16_minmax),
     vbinary,
