@@ -36,7 +36,7 @@ void filterbank_accumulate(
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(input_size * 2);
   std::vector<uint64_t, AlignedAllocator<uint64_t, 64>> output(rows);
   std::iota(input.begin(), input.end(), 0);
-  std::fill(weight_widths.begin(), weight_widths.end(), batch);
+  std::fill(weight_widths.begin(), weight_widths.end(), static_cast<uint8_t>(batch));
   std::iota(weights.begin(), weights.end(), 0);
   std::iota(output.begin(), output.end(), 0);
 

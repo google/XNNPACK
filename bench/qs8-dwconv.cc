@@ -88,7 +88,7 @@ static void DWConvBenchmark(benchmark::State& state,
       (c_elements * sizeof(int8_t) + w_size) + sizeof(void*) * i_elements);
 
   std::vector<char, AlignedAllocator<char, 64>> w(w_size * num_buffers);
-  std::fill(w.begin(), w.end(), 0.0f);
+  std::fill(w.begin(), w.end(), 0);
   struct xnn_qs8_packing_params packing_params;
   packing_params.input_zero_point = 0;
   xnn_pack_qs8_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels, channel_tile,
@@ -122,7 +122,7 @@ static void DWConvBenchmark(benchmark::State& state,
   }
 
   std::vector<int8_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  std::fill(c.begin(), c.end(), INT8_C(0));
 
   xnn_qs8_conv_minmax_params params;
   init_params(&params,

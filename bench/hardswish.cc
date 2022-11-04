@@ -102,7 +102,7 @@ static void xnnpack_hardswish_f16(benchmark::State& state) {
   std::vector<uint16_t> input(batch_size + XNN_EXTRA_BYTES / sizeof(uint16_t));
   std::vector<uint16_t> output(batch_size);
   std::generate(input.begin(), input.end(), std::ref(f16rng));
-  std::fill(output.begin(), output.end(), std::nanf(""));
+  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {

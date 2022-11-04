@@ -1907,7 +1907,7 @@ class DeconvolutionOperatorTester {
           }
         }
       } else {
-        std::fill(output_ref.begin(), output_ref.end(), 0);
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
@@ -2035,7 +2035,7 @@ class DeconvolutionOperatorTester {
           }
         }
       } else {
-        std::fill(next_output_ref.begin(), next_output_ref.end(), 0);
+        std::fill(next_output_ref.begin(), next_output_ref.end(), 0.0f);
       }
       for (size_t i = 0; i < next_batch_size(); i++) {
         for (size_t oy = 0; oy < next_output_height(); oy++) {

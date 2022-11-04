@@ -341,8 +341,8 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
   // Output sizes
   operator_output = std::vector<float>(NumElements(output_dims));
   subgraph_output = std::vector<float>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), UINT32_C(0xDEADBEEF));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT32_C(0xDEADBEEF));
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

@@ -90,7 +90,7 @@ class NegateOperatorTester {
     std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
     std::vector<uint16_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.

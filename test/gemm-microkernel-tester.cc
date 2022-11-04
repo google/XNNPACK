@@ -890,7 +890,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_function igemm_min
     std::generate(b.begin(), b.end(), std::ref(f16rng));
     std::generate(bias.begin(), bias.end(), std::ref(f16rng));
     std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     xnn_pack_f16_conv_goki_w(
@@ -914,7 +914,7 @@ void GemmMicrokernelTester::Test(xnn_f16_igemm_minmax_ukernel_function igemm_min
       }
     }
 
-    std::fill(c_ref.begin(), c_ref.end(), 0.0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
@@ -1403,7 +1403,7 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_ukernel_function igemm) const {
       }
     }
 
-    std::fill(c_ref.begin(), c_ref.end(), 0.0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t ks_index = 0; ks_index < ks(); ks_index++) {

@@ -40,7 +40,7 @@ class Rounding : public benchmark::Fixture {
     input_.resize(n());
     std::generate(input_.begin(), input_.end(), std::ref(f32rng));
     output_.resize(n());
-    std::fill(output_.begin(), output_.end(), 0xA5);
+    std::fill(output_.begin(), output_.end(), std::nanf(""));
   }
 
   virtual void TearDown(benchmark::State& state) override
