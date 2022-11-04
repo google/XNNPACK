@@ -783,3 +783,28 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
     &convolution_op->params.f32_chw,
     pthreadpool_get_threads_count(threadpool));
 }
+
+enum xnn_status xnn_setup_convolution2d_nchw_f16(
+    xnn_operator_t convolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_convolution2d_nchw(
+    convolution_op,
+    xnn_operator_type_convolution_nchw_f16,
+    (xnn_update_chw_params_fn) xnn_update_f16_chw_params,
+    batch_size, input_height, input_width,
+    input, output,
+    XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE,
+    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
+    sizeof(uint16_t) /* sizeof(bias element) */,
+    1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
+    &convolution_op->params.f16_minmax,
+    &convolution_op->params.f16_chw,
+    pthreadpool_get_threads_count(threadpool));
+}
