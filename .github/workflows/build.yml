@@ -89,7 +89,6 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v3
-      - uses: ilammy/msvc-dev-cmd@v1
       - name: Configure and build
         run: scripts/build-windows-win32.cmd
         shell: cmd
@@ -99,7 +98,6 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v3
-      - uses: ilammy/msvc-dev-cmd@v1
       - name: Configure and build
         run: scripts/build-windows-x64.cmd
         shell: cmd
