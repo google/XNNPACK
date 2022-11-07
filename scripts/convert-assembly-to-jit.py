@@ -9,6 +9,7 @@ Takes a single argument, an assembly file, and prints converted output to stdout
 """
 
 import argparse
+from collections import defaultdict
 import datetime
 import re
 import sys
@@ -160,6 +161,7 @@ def fix_fn_name(name):
   # remove any type of activations from name
   if 'minmax' in name:
     name = name.replace('minmax_', '')
+  name = re.sub(r'(\dx\d)', r'upto\1', name, 1)
   return f'xnn_generate_{name}'
 
 
@@ -186,6 +188,155 @@ AARCH64 = 'aarch64'
 GEMM = 'GEMM'
 IGEMM = 'IGEMM'
 
+
+def parse_prologue(input_file, lines, arch, minmax, kernel_type, prfm, mr):
+  prologue = []
+  # Whether we are in the auto-generated comment.
+  in_autogen = False
+  in_a_pointers = False
+  # Whether we are in the comment section that lists C (output) registers.
+  in_c_pointers = False
+  # Whether we are in the comment section that lists vector register usage.
+  in_vector_register_usage = False
+  a_pointers = []
+  c_pointers = []
+  # Mapping from register type (A, B, or C), to the list of list of registers.
+  vector_register_usage = defaultdict(list)
+  # Mapping from vector registers to their row index (in MR).
+  vector_register_map = {}
+
+  for line in lines:
+    if 'Auto-generated file' in line:
+      in_autogen = True
+      continue
+    elif 'BEGIN_FUNCTION' in line:
+      prologue.append(f'// Converted from: {input_file[20:]}')
+      params = 'float min, float max' if minmax else 'void* params'
+      prefetch = 'bool prefetch, ' if prfm else ''
+      if kernel_type == GEMM:
+        prologue.append(
+            f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, {params})'
+        )
+        prologue.append('{')
+      else:
+        prologue.append(
+            f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params}) {{'
+        )
+      continue
+    elif 'Copyright ' in line:
+      in_autogen = False
+      # replace year
+      prologue.append(
+          re.sub(r'\d{4}', str(datetime.date.today().year), line, 1).rstrip())
+      continue
+    elif '#include <xnnpack/assembly.h>' in line:
+      prologue.append(f'#include <cassert>')
+      prologue.append(f'#include <cstddef>')
+      if minmax:
+        prologue.append(f'#include <limits>')
+      prologue.append('')
+      prologue.append('#include <xnnpack.h>')
+      prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
+      if kernel_type == GEMM:
+        prologue.append('#include <xnnpack/gemm.h>')
+      else:
+        prologue.append('#include <xnnpack/igemm.h>')
+      prologue.append('#include <xnnpack/memory.h>')
+      prologue.append('#include <xnnpack/microparams.h>')
+      prologue.append('')
+      prologue.append('namespace xnnpack {')
+      prologue.append(f'namespace {arch} {{')
+      prologue.append('namespace {')
+      prologue.append('class Generator : public MacroAssembler {')
+      prologue.append('  using MacroAssembler::MacroAssembler;')
+      prologue.append(' public:')
+      params = 'float min, float max' if minmax else 'void* params'
+      prefetch = 'bool prefetch, ' if prfm else ''
+      if kernel_type == GEMM:
+        prologue.append(
+            f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, {params});'
+        )
+      else:
+        prologue.append(
+            f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params});'
+        )
+      prologue.append('};')
+      continue
+    elif in_a_pointers:
+      prologue.append(fix_comments(line.rstrip()))
+      if not line.strip():
+        in_a_pointers = False
+        continue
+      m = re.search(r'#\W+(\w\d+)', line)
+      if not m:
+        print(f'ERROR expected to find A pointers: {line}', file=sys.stderr)
+        sys.exit(1)
+      a_pointers.append(m.group(1))
+      continue
+    elif 'A pointers' in line:
+      prologue.append(fix_comments(line.rstrip()))
+      in_a_pointers = True
+      continue
+    elif in_c_pointers:
+      prologue.append(fix_comments(line.rstrip()))
+      if not line.strip():
+        in_c_pointers = False
+        continue
+      m = re.search(r'#\W+(\w\d+)', line)
+      if not m:
+        print(f'ERROR expected to find C pointers: {line}', file=sys.stderr)
+        sys.exit(1)
+      c_pointers.append(m.group(1))
+      continue
+    elif 'C pointers' in line:
+      prologue.append(fix_comments(line.rstrip()))
+      in_c_pointers = True
+      continue
+    elif in_vector_register_usage:
+      prologue.append(fix_comments(line.rstrip()))
+      if not line.strip():
+        in_vector_register_usage = False
+        continue
+      if 'clamp' in line.lower() or 'unused' in line.lower():
+        continue
+      m = re.search(r'#\W+(\w)\d?\W+((v\d+\W*)+)', line)
+      if not m:
+        print(
+            f'ERROR failed to parse vector register usage: {line}',
+            file=sys.stderr)
+        sys.exit(1)
+      param_reg = m.group(1)
+      vec_regs = m.group(2).split()
+      vector_register_usage[param_reg].append(vec_regs)
+      continue
+    elif 'Vector register usage' in line:
+      prologue.append(fix_comments(line.rstrip()))
+      in_vector_register_usage = True
+      continue
+    elif any(re.fullmatch(p, line) for p in IGNORE_LINES):
+      continue
+    elif in_autogen:
+      continue
+    else:
+      prologue.append(fix_comments(line.rstrip()))
+      continue
+
+  # check that number of registers matches mr
+  if len(a_pointers) != int(mr):
+    print(f'len(a_pointers) {len(a_pointers)} != mr {mr}', file=sys.stderr)
+    sys.exit(1)
+  if len(c_pointers) != int(mr):
+    print('len(c_pointers) != mr', file=sys.stderr)
+    sys.exit(1)
+
+  for _, v in vector_register_usage.items():
+    for i, _ in enumerate(v):
+      for j, _ in enumerate(v[i]):
+        vector_register_map[v[i][j]] = i
+
+  return prologue
+
+
 def main(input_file):
   arch = None
   kernel_type = GEMM
@@ -209,10 +360,13 @@ def main(input_file):
   if 'prfm' in input_file:
     prfm = True
 
-  # Whether we are in the copyright section.
-  in_copyright = False
-  # Whether we are in the microkernel function.
-  in_function = False
+  mr = 0
+  nr = 0
+  m = re.search(r'(\d+)x(\d+)', input_file)
+  if m:
+    mr = int(m[1])
+    nr = int(m[2])
+
   # Instructions that make up the microkernel.
   instructions = []
   # Lines of code or comments before the actual function body.
@@ -223,279 +377,245 @@ def main(input_file):
   # Name of the microkernel function.
   fn_name = ''
   sc = ';'
-  # Whether we are in the auto-generated comment.
-  in_autogen = False
 
+  lines = []
   with open(input_file, 'r', encoding='utf-8') as f:
-    for line in f:
-      line = line.rstrip()
+    lines = f.read().splitlines()
 
-      # Handle all lines before the microkernel instructions begin.
-      if not in_function:
-        if 'Auto-generated file' in line:
-          in_autogen = True
-          continue
-        elif 'BEGIN_FUNCTION' in line:
-          in_function = True
-          fn_name = line.split()[1]
-          prologue.append(f'// Converted from: {input_file[20:]}')
-          params = 'float min, float max' if minmax else 'void* params'
-          prefetch = 'bool prefetch, ' if prfm else ''
-          if kernel_type == GEMM:
-            prologue.append(f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, {params}) {{')
-          else:
-            prologue.append(f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params}) {{')
-          continue
-        elif 'Copyright ' in line:
-          in_autogen = False
-          # replace year
-          prologue.append(
-              re.sub('\d{4}', str(datetime.date.today().year), line,
-                     1).rstrip())
-          continue
-        elif '#include <xnnpack/assembly.h>' in line:
-          prologue.append(f'#include <cassert>')
-          prologue.append(f'#include <cstddef>')
-          if minmax:
-            prologue.append(f'#include <limits>')
-          prologue.append('')
-          prologue.append(f'#include <xnnpack/{arch}-assembler.h>')
-          prologue.append('#include <xnnpack/allocator.h>')
-          if kernel_type == GEMM:
-            prologue.append('#include <xnnpack/gemm.h>')
-          else:
-            prologue.append('#include <xnnpack/igemm.h>')
-          prologue.append('')
-          prologue.append('namespace xnnpack {')
-          prologue.append(f'namespace {arch} {{')
-          prologue.append('namespace {')
-          prologue.append('class Generator : public MacroAssembler {')
-          prologue.append('  using MacroAssembler::MacroAssembler;')
-          prologue.append(' public:')
-          params = 'float min, float max' if minmax else 'void* params'
-          prefetch = 'bool prefetch, ' if prfm else ''
-          if kernel_type == GEMM:
-            prologue.append(f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, {params});')
-          else:
-            prologue.append(f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params});')
-          prologue.append('};')
-          continue
-        elif any(re.fullmatch(p, line) for p in IGNORE_LINES):
-          continue
-        elif in_autogen:
-          continue
-        else:
-          prologue.append(fix_comments(line.rstrip()))
-          continue
-      # end if not in_function
+  begin_function_index = 0
+  for i, line in enumerate(lines):
+    if 'BEGIN_FUNCTION' in line:
+      begin_function_index = i
+      break
 
-      # We are now in the microkernel function body.
-      # Don't keep the ifdefs.
-      m = re.fullmatch(IFDEF_RE, line)
-      if m:
-        continue
-      # But keep other comments.
-      m = re.fullmatch(COMMENT_RE, line)
-      if m:
-        instructions.append(m[1])
-        continue
+  fn_name = lines[begin_function_index].split()[1]
 
-      m = re.fullmatch(LABEL, line)
-      if m:
-        labels.append(m[1])
-        instructions.append(f'bind(l{m[1]}){sc}')
-        continue
-      m = re.fullmatch(INSTR_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}(){sc} {m[2]}')
-        continue
-      m = re.fullmatch(INSTR_OP_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}){sc} {m[3]}')
-        continue
-      m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP_REG, line)
-      if m:
+  # Prologue includes the BEING_FUNCTION declaration of function name.
+  prologue_lines = lines[:begin_function_index + 1]
+  # Microkernel body does not include the BEGIN_FUNCION.
+  microkernel_body = lines[begin_function_index + 1:]
+
+  prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
+                            kernel_type, prfm, mr)
+
+  for line in microkernel_body:
+    # We are now in the microkernel function body.
+    # Don't keep the ifdefs.
+    m = re.fullmatch(IFDEF_RE, line)
+    if m:
+      continue
+    # But keep other comments.
+    m = re.fullmatch(COMMENT_RE, line)
+    if m:
+      instructions.append(m[1])
+      continue
+
+    m = re.fullmatch(LABEL, line)
+    if m:
+      labels.append(m[1])
+      instructions.append(f'bind(l{m[1]}){sc}')
+      continue
+    m = re.fullmatch(INSTR_RE, line)
+    if m:
+      instructions.append(f'{fix_instr_name(m[1])}(){sc} {m[2]}')
+      continue
+    m = re.fullmatch(INSTR_OP_RE, line)
+    if m:
+      instructions.append(f'{fix_instr_name(m[1])}({m[2]}){sc} {m[3]}')
+      continue
+    m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP_REG, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}], {m[5]}){sc} {m[6]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_REG, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REGLIST_CONSEC_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_REGLIST_LIST_RE, line)
+    if m:
+      instructions.append(f'{fix_instr_name(m[1])}({{{m[2]}}}){sc} {m[3]}')
+      continue
+    m = re.fullmatch(INSTR_MEMOP_OFFSET_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_REG_MEMOP_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_REG_MEMOP_IMM_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}')
+      continue
+    m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
+    if m:
+      if m[5]:  # wb
         instructions.append(
-            f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}], {m[5]}){sc} {m[6]}'
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}')
+      else:  # no wb
+        instructions.append(
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}]){sc} {m[5]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REG_MEMOP_OFFSET_RE, line)
+    if m:
+      if m[6]:  # wb
+        instructions.append(
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]++){sc} {m[7]}'
         )
-        continue
-      m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_REG, line)
-      if m:
+      else:  # no wb
         instructions.append(
-            f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REGLIST_CONSEC_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_REGLIST_LIST_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({{{m[2]}}}){sc} {m[3]}')
-        continue
-      m = re.fullmatch(INSTR_MEMOP_OFFSET_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_REG_MEMOP_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_REG_MEMOP_IMM_RE , line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
-      if m:
-        if m[5]: # wb
-          instructions.append(
-              f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}')
-        else: # no wb
-          instructions.append(
-              f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}]){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_MEMOP_OFFSET_RE, line)
-      if m:
-        if m[6]: # wb
-          instructions.append(
-              f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]++){sc} {m[7]}')
-        else: #no wb
-          instructions.append(
-              f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]){sc} {m[7]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_MEMOP_IMM_RE , line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}], {m[5]}){sc} {m[6]}')
-        continue
-      m = re.fullmatch(INSTR_REG_IMM_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {m[3]}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_REG_RE, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}, {fix_regs(m[4])}){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_REG_IMM_RE, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, {m[5]}){sc} {m[6]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REGLIST_CONSECT, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}(mem[{m[2]}], {{{m[3]}-{m[4]}}}){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REGLIST_CONSECT_WB, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}-{m[4]}}}){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REGLIST_INDIV_WB, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}}}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_B_IMM, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}(l{m[2]}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_B_REG_IMM_IMM , line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, l{m[4]}){sc} {m[6]}')
-        continue
-      m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]){sc} {m[7]}'
         )
-        continue
-      m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_IMM, line)
-      if m:
+      continue
+    m = re.fullmatch(INSTR_REG_REG_MEMOP_IMM_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}], {m[5]}){sc} {m[6]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REG_IMM_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {m[3]}){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REG_REG_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}, {fix_regs(m[4])}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REG_REG_REG_IMM_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, {m[5]}){sc} {m[6]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REG_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}){sc} {m[4]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REG_REGLIST_CONSECT, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}], {{{m[3]}-{m[4]}}}){sc} {m[5]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REGLIST_CONSECT_WB, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}-{m[4]}}}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REG_REGLIST_INDIV_WB, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}}}){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_B_IMM, line)
+    if m:
+      instructions.append(f'{fix_instr_name(m[1])}(l{m[2]}){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_B_REG_IMM_IMM, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, l{m[4]}){sc} {m[6]}')
+      continue
+    m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_IMM, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}]{maybe_wb(m[5])}){sc} {m[6]}'
+      )
+      continue
+    m = re.fullmatch(INSTR_REGLIST_REPLICATE_MEMOP, line)
+    if m:
+      if m[5]:
         instructions.append(
-            f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}'
+            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]++){sc} {m[6]}'
         )
-        continue
-      m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP, line)
-      if m:
+      else:
         instructions.append(
-            f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}]{maybe_wb(m[5])}){sc} {m[6]}'
+            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]){sc} {m[6]}'
         )
-        continue
-      m = re.fullmatch(INSTR_REGLIST_REPLICATE_MEMOP, line)
-      if m:
-        if m[5]:
-          instructions.append(
-              f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]++){sc} {m[6]}'
-          )
-        else:
-          instructions.append(
-              f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]){sc} {m[6]}'
-          )
-        continue
-      m = re.fullmatch(INSTR_REGLIST_INDEX_MEMOP, line)
-      if m:
-        instructions.append(
-            f'{fix_instr_name(m[1])}({{{m[2]}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
-        )
-        continue
-      m = re.fullmatch(P2ALIGN_RE, line)
-      if m:
-        instructions.append(f'align({1 << int(m[1])}){sc}')
-        continue
-      m = re.fullmatch(INSTR_REG_FPSCR, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, {m[3]}){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_PLD_MEMOP, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}')
-        continue
-      m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
-        continue
-      m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
-      if m:
-        instructions.append(f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, k{m[5]}){sc} {m[6]}')
-        continue
+      continue
+    m = re.fullmatch(INSTR_REGLIST_INDEX_MEMOP, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({{{m[2]}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
+      )
+      continue
+    m = re.fullmatch(P2ALIGN_RE, line)
+    if m:
+      instructions.append(f'align({1 << int(m[1])}){sc}')
+      continue
+    m = re.fullmatch(INSTR_REG_FPSCR, line)
+    if m:
+      instructions.append(f'{fix_instr_name(m[1])}({m[2]}, {m[3]}){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_PLD_MEMOP, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}')
+      continue
+    m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
+      continue
+    m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
+    if m:
+      instructions.append(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, k{m[5]}){sc} {m[6]}')
+      continue
 
-      # Keep empty lines for formatting
-      if line.strip() == '':
-        instructions.append('')
-        continue
+    # Keep empty lines for formatting
+    if line.strip() == '':
+      instructions.append('')
+      continue
 
-      # Assembly directives that we don't are about.
-      if line.strip().startswith('.'):
-        continue
+    # Assembly directives that we don't are about.
+    if line.strip().startswith('.'):
+      continue
 
-      if line.startswith('END_FUNCTION'):
-        break
+    if line.startswith('END_FUNCTION'):
+      break
 
-      # All other lines are error.
-      print(f'ERROR: {line}', file=sys.stderr)
-      sys.exit(1)
+    # All other lines are error.
+    print(f'ERROR: {line}', file=sys.stderr)
+    sys.exit(1)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
     print(p)
 
-
-  m = re.search('(\d+)x(\d+)', input_file)
-  mr = 0
-  nr = 0
-  if m:
-    mr = m[1]
-    nr = m[2]
   labels_str = ', '.join(f'l{l}' for l in labels)
   print(f'  assert(max_mr <= {mr});')
   print(f'  assert(nc_mod_nr < {nr});')
@@ -535,9 +655,13 @@ def main(input_file):
 
 def print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch=''):
   if kernel_type == GEMM:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {{')
+    print(
+        f'xnn_status_t {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {{'
+    )
   else:
-    print(f'xnn_status {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {{')
+    print(
+        f'xnn_status_t {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {{'
+    )
   print(f'  using namespace xnnpack::{arch};')
   print('  Generator g(code);')
   if minmax:
