@@ -56,36 +56,28 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
       const v128_t vw4567p1 = wasm_v128_load(w + 12);
       w += 2 * 8;
 
-      const v128_t vtltr0 = wasm_v128_load64_splat(itl0);
-      const v128_t vblbr0 = wasm_v128_load64_splat(ibl0);
-      const double vtltr1 = *((const double*) itl1);
-      const double vblbr1 = *((const double*) ibl1);
-      const v128_t vtltr2 = wasm_v128_load64_splat(itl2);
-      const v128_t vblbr2 = wasm_v128_load64_splat(ibl2);
-      const double vtltr3 = *((const double*) itl3);
-      const double vblbr3 = *((const double*) ibl3);
-      const v128_t vtltr4 = wasm_v128_load64_splat(itl4);
-      const v128_t vblbr4 = wasm_v128_load64_splat(ibl4);
-      const double vtltr5 = *((const double*) itl5);
-      const double vblbr5 = *((const double*) ibl5);
-      const v128_t vtltr6 = wasm_v128_load64_splat(itl6);
-      const v128_t vblbr6 = wasm_v128_load64_splat(ibl6);
-      const double vtltr7 = *((const double*) itl7);
-      const double vblbr7 = *((const double*) ibl7);
+      const v128_t vtltr0 = wasm_v128_load64_zero(itl0);
+      const v128_t vblbr0 = wasm_v128_load64_zero(ibl0);
+      const v128_t vtltr2 = wasm_v128_load64_zero(itl2);
+      const v128_t vblbr2 = wasm_v128_load64_zero(ibl2);
+      const v128_t vtltr4 = wasm_v128_load64_zero(itl4);
+      const v128_t vblbr4 = wasm_v128_load64_zero(ibl4);
+      const v128_t vtltr6 = wasm_v128_load64_zero(itl6);
+      const v128_t vblbr6 = wasm_v128_load64_zero(ibl6);
+
+      const v128_t vtltr01 = wasm_v128_load64_lane(itl1, vtltr0, 1);
+      const v128_t vblbr01 = wasm_v128_load64_lane(ibl1, vblbr0, 1);
+      const v128_t vtltr23 = wasm_v128_load64_lane(itl3, vtltr2, 1);
+      const v128_t vblbr23 = wasm_v128_load64_lane(ibl3, vblbr2, 1);
+      const v128_t vtltr45 = wasm_v128_load64_lane(itl5, vtltr4, 1);
+      const v128_t vblbr45 = wasm_v128_load64_lane(ibl5, vblbr4, 1);
+      const v128_t vtltr67 = wasm_v128_load64_lane(itl7, vtltr6, 1);
+      const v128_t vblbr67 = wasm_v128_load64_lane(ibl7, vblbr6, 1);
 
       const v128_t valphah0123 = wasm_v32x4_shuffle(vw0123p0, vw0123p1, 0, 2, 4, 6);
       const v128_t valphav0123 = wasm_v32x4_shuffle(vw0123p0, vw0123p1, 1, 3, 5, 7);
       const v128_t valphah4567 = wasm_v32x4_shuffle(vw4567p0, vw4567p1, 0, 2, 4, 6);
       const v128_t valphav4567 = wasm_v32x4_shuffle(vw4567p0, vw4567p1, 1, 3, 5, 7);
-
-      const v128_t vtltr01 = wasm_f64x2_replace_lane(vtltr0, 1, vtltr1);
-      const v128_t vblbr01 = wasm_f64x2_replace_lane(vblbr0, 1, vblbr1);
-      const v128_t vtltr23 = wasm_f64x2_replace_lane(vtltr2, 1, vtltr3);
-      const v128_t vblbr23 = wasm_f64x2_replace_lane(vblbr2, 1, vblbr3);
-      const v128_t vtltr45 = wasm_f64x2_replace_lane(vtltr4, 1, vtltr5);
-      const v128_t vblbr45 = wasm_f64x2_replace_lane(vblbr4, 1, vblbr5);
-      const v128_t vtltr67 = wasm_f64x2_replace_lane(vtltr6, 1, vtltr7);
-      const v128_t vblbr67 = wasm_f64x2_replace_lane(vblbr6, 1, vblbr7);
 
       const v128_t vldrd01 = wasm_f32x4_sub(vblbr01, vtltr01);
       const v128_t vldrd23 = wasm_f32x4_sub(vblbr23, vtltr23);
@@ -135,20 +127,16 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
 
       const v128_t vtltr0 = wasm_v128_load64_splat(itl0);
       const v128_t vblbr0 = wasm_v128_load64_splat(ibl0);
-      const double vtltr1 = *((const double*) itl1);
-      const double vblbr1 = *((const double*) ibl1);
       const v128_t vtltr2 = wasm_v128_load64_splat(itl2);
       const v128_t vblbr2 = wasm_v128_load64_splat(ibl2);
-      const double vtltr3 = *((const double*) itl3);
-      const double vblbr3 = *((const double*) ibl3);
+
+      const v128_t vtltr01 = wasm_v128_load64_lane(itl1, vtltr0, 1);
+      const v128_t vblbr01 = wasm_v128_load64_lane(ibl1, vblbr0, 1);
+      const v128_t vtltr23 = wasm_v128_load64_lane(itl3, vtltr2, 1);
+      const v128_t vblbr23 = wasm_v128_load64_lane(ibl3, vblbr2, 1);
 
       const v128_t valphah = wasm_v32x4_shuffle(vw0, vw1, 0, 2, 4, 6);
       const v128_t valphav = wasm_v32x4_shuffle(vw0, vw1, 1, 3, 5, 7);
-
-      const v128_t vtltr01 = wasm_f64x2_replace_lane(vtltr0, 1, vtltr1);
-      const v128_t vblbr01 = wasm_f64x2_replace_lane(vblbr0, 1, vblbr1);
-      const v128_t vtltr23 = wasm_f64x2_replace_lane(vtltr2, 1, vtltr3);
-      const v128_t vblbr23 = wasm_f64x2_replace_lane(vblbr2, 1, vblbr3);
 
       const v128_t vldrd01 = wasm_f32x4_sub(vblbr01, vtltr01);
       const v128_t vldrd23 = wasm_f32x4_sub(vblbr23, vtltr23);
@@ -183,8 +171,8 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         const float* ibl1 = (const float*) ((uintptr_t) i[3] + input_offset);
         i += 4;
 
-        const v128_t vtltr = wasm_f64x2_replace_lane(wasm_v128_load64_splat(itl0), 1, *((const double*) itl1));
-        const v128_t vblbr = wasm_f64x2_replace_lane(wasm_v128_load64_splat(ibl0), 1, *((const double*) ibl1));
+        const v128_t vtltr = wasm_v128_load64_lane(itl1, wasm_v128_load64_zero(itl0), 1);
+        const v128_t vblbr = wasm_v128_load64_lane(ibl1, wasm_v128_load64_zero(ibl0), 1);
 
         const v128_t vldrd = wasm_f32x4_sub(vblbr, vtltr);
         const v128_t vld = wasm_v32x4_shuffle(vldrd, vldrd, 0, 2, 0, 2);
@@ -224,8 +212,8 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
         const float* ibl = (const float*) ((uintptr_t) i[1] + input_offset);
         i += 2;
 
-        const v128_t vtltr = wasm_v128_load64_splat(itl);
-        const v128_t vblbr = wasm_v128_load64_splat(ibl);
+        const v128_t vtltr = wasm_v128_load64_zero(itl);
+        const v128_t vblbr = wasm_v128_load64_zero(ibl);
 
         // Compute at once
         //    left_diff = bottom_left  - top_left
