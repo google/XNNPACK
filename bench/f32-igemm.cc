@@ -253,12 +253,9 @@ static void f32_igemm(benchmark::State& state,
   init_params(&params,
     -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());
 
-  jit_gemm_params jit_params = {
-    .f32_minmax = {
-      .min = -std::numeric_limits<float>::infinity(),
-      .max = +std::numeric_limits<float>::infinity()
-    }
-  };
+  jit_gemm_params jit_params = {};
+  jit_params.f32_minmax.min = -std::numeric_limits<float>::infinity();
+  jit_params.f32_minmax.max = +std::numeric_limits<float>::infinity();
 
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);

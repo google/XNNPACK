@@ -404,12 +404,9 @@ static void GEMMBenchmark(benchmark::State& state,
 
   xnn_code_buffer code_buffer;
   xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  jit_gemm_params jit_params = {
-    .f32_minmax = {
-      .min = -std::numeric_limits<float>::infinity(),
-      .max = +std::numeric_limits<float>::infinity()
-    }
-  };
+  jit_gemm_params jit_params = {};
+  jit_params.f32_minmax.min = -std::numeric_limits<float>::infinity();
+  jit_params.f32_minmax.max = +std::numeric_limits<float>::infinity();
   generator(&code_buffer, mr, nc % nr, kc * sizeof(float), &jit_params);
   xnn_finalize_code_memory(&code_buffer);
   xnn_f32_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.start);

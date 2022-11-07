@@ -1725,12 +1725,9 @@ void GemmMicrokernelTester::Test(
     ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    jit_gemm_params p = (jit_gemm_params) {
-      .f32_minmax = {
-        .min = c_min,
-        .max = c_max
-      }
-    };
+    jit_gemm_params p = {};
+    p.f32_minmax.min = c_min;
+    p.f32_minmax.max = c_max;
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
     xnn_f32_gemm_minmax_ukernel_function gemm_minmax =
@@ -1859,12 +1856,9 @@ void GemmMicrokernelTester::Test(
     ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    jit_gemm_params p = (jit_gemm_params) {
-      .f32_minmax = {
-        .min = c_min,
-        .max = c_max
-      }
-    };
+    jit_gemm_params p = {};
+    p.f32_minmax.min = c_min;
+    p.f32_minmax.max = c_max;
     ASSERT_EQ(xnn_status_success,
               igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
@@ -2487,14 +2481,11 @@ void GemmMicrokernelTester::Test(
 
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    jit_gemm_params p = (jit_gemm_params) {
-      .f32_minmax = {
-        .min = output_min,
-        .max = output_max
-      },
-      .num_post_operations = post_operations.size(),
-      .post_operations = post_operations.data(),
-    };
+    jit_gemm_params p = {};
+    p.f32_minmax.min = output_min;
+    p.f32_minmax.max = output_max;
+    p.num_post_operations = post_operations.size();
+    p.post_operations = post_operations.data();
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
     xnn_f32_gemm_post_operation_ukernel_function gemm_post_operation =
@@ -2616,14 +2607,11 @@ void GemmMicrokernelTester::Test(
 
     const float output_min = -std::numeric_limits<float>::infinity();
     const float output_max = std::numeric_limits<float>::infinity();
-    jit_gemm_params p = (jit_gemm_params) {
-      .f32_minmax = {
-        .min = output_min,
-        .max = output_max
-      },
-      .num_post_operations = post_operations.size(),
-      .post_operations = post_operations.data(),
-    };
+    jit_gemm_params p = {};
+    p.f32_minmax.min = output_min;
+    p.f32_minmax.max = output_max;
+    p.num_post_operations = post_operations.size();
+    p.post_operations = post_operations.data();
     ASSERT_EQ(xnn_status_success,
               igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
