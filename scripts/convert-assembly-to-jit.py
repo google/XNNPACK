@@ -337,68 +337,13 @@ def parse_prologue(input_file, lines, arch, minmax, kernel_type, prfm, mr):
   return prologue
 
 
-def main(input_file):
-  arch = None
-  kernel_type = GEMM
-  minmax = False
-  prfm = False
-  datatype = 'f32'
-  ctype = 'float'
-
-  if 'aarch32' in input_file:
-    arch = AARCH32
-  elif 'aarch64' in input_file:
-    arch = AARCH64
-  else:
-    print('ERROR: unknown architecture')
-    sys.exit(1)
-
-  if 'igemm' in input_file:
-    kernel_type = IGEMM
-  if 'minmax' in input_file:
-    minmax = True
-  if 'prfm' in input_file:
-    prfm = True
-
-  mr = 0
-  nr = 0
-  m = re.search(r'(\d+)x(\d+)', input_file)
-  if m:
-    mr = int(m[1])
-    nr = int(m[2])
-
-  # Instructions that make up the microkernel.
-  instructions = []
-  # Lines of code or comments before the actual function body.
-  prologue = []
+def parse_microkernel(lines):
   # All labels need to be declared first, collect them and output them after
   # function signature.
   labels = []
-  # Name of the microkernel function.
-  fn_name = ''
   sc = ';'
-
-  lines = []
-  with open(input_file, 'r', encoding='utf-8') as f:
-    lines = f.read().splitlines()
-
-  begin_function_index = 0
-  for i, line in enumerate(lines):
-    if 'BEGIN_FUNCTION' in line:
-      begin_function_index = i
-      break
-
-  fn_name = lines[begin_function_index].split()[1]
-
-  # Prologue includes the BEING_FUNCTION declaration of function name.
-  prologue_lines = lines[:begin_function_index + 1]
-  # Microkernel body does not include the BEGIN_FUNCION.
-  microkernel_body = lines[begin_function_index + 1:]
-
-  prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
-                            kernel_type, prfm, mr)
-
-  for line in microkernel_body:
+  instructions = []
+  for line in lines:
     # We are now in the microkernel function body.
     # Don't keep the ifdefs.
     m = re.fullmatch(IFDEF_RE, line)
@@ -611,6 +556,65 @@ def main(input_file):
     # All other lines are error.
     print(f'ERROR: {line}', file=sys.stderr)
     sys.exit(1)
+
+  return instructions, labels
+
+def main(input_file):
+  arch = None
+  kernel_type = GEMM
+  minmax = False
+  prfm = False
+  ctype = 'float'
+
+  if 'aarch32' in input_file:
+    arch = AARCH32
+  elif 'aarch64' in input_file:
+    arch = AARCH64
+  else:
+    print('ERROR: unknown architecture')
+    sys.exit(1)
+
+  if 'igemm' in input_file:
+    kernel_type = IGEMM
+  if 'minmax' in input_file:
+    minmax = True
+  if 'prfm' in input_file:
+    prfm = True
+
+  mr = 0
+  nr = 0
+  m = re.search(r'(\d+)x(\d+)', input_file)
+  if m:
+    mr = int(m[1])
+    nr = int(m[2])
+
+  # Instructions that make up the microkernel.
+  instructions = []
+  # Lines of code or comments before the actual function body.
+  prologue = []
+  # Name of the microkernel function.
+  fn_name = ''
+
+  lines = []
+  with open(input_file, 'r', encoding='utf-8') as f:
+    lines = f.read().splitlines()
+
+  begin_function_index = 0
+  for i, line in enumerate(lines):
+    if 'BEGIN_FUNCTION' in line:
+      begin_function_index = i
+      break
+
+  fn_name = lines[begin_function_index].split()[1]
+
+  # Prologue includes the BEING_FUNCTION declaration of function name.
+  prologue_lines = lines[:begin_function_index + 1]
+  # Microkernel body does not include the BEGIN_FUNCION.
+  microkernel_body = lines[begin_function_index + 1:]
+
+  prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
+                            kernel_type, prfm, mr)
+  instructions, labels = parse_microkernel(microkernel_body)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
