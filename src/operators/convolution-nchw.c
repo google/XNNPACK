@@ -664,22 +664,24 @@ static enum xnn_status setup_convolution2d_nchw(
     case xnn_ukernel_type_conv2d_hwc2chw:
     {
       const size_t zero_size = (input_width * convolution_op->group_input_channels << log2_input_element_size) + XNN_EXTRA_BYTES;
-      void* zero_buffer = xnn_reallocate_memory(convolution_op->zero_buffer, zero_size);
-      if (zero_buffer == NULL) {
+
+      // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
+      xnn_release_simd_memory(convolution_op->zero_buffer);
+      convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
+      if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator zero padding",
           sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
         return xnn_status_out_of_memory;
       }
-      memset(zero_buffer, 0, zero_size);
-      convolution_op->zero_buffer = zero_buffer;
+      memset(convolution_op->zero_buffer, 0, zero_size);
 
       convolution_op->context.conv2d = (struct conv2d_context) {
         .input_height = input_height,
         .input_width = input_width,
         .input = input,
         .input_batch_stride = input_batch_stride,
-        .zero = zero_buffer,
+        .zero = convolution_op->zero_buffer,
         .packed_weights = packed_weights(convolution_op),
         .output = output,
         .output_batch_stride = output_batch_stride,
@@ -717,22 +719,24 @@ static enum xnn_status setup_convolution2d_nchw(
     case xnn_ukernel_type_dwconv:
     {
       const size_t zero_size = (input_width << log2_input_element_size) + 2 * XNN_EXTRA_BYTES;
-      void* zero_buffer = xnn_reallocate_memory(convolution_op->zero_buffer, zero_size);
-      if (zero_buffer == NULL) {
+
+      // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
+      xnn_release_simd_memory(convolution_op->zero_buffer);
+      convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
+      if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator zero padding",
           sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
         return xnn_status_out_of_memory;
       }
-      memset(zero_buffer, 0, zero_size);
-      convolution_op->zero_buffer = zero_buffer;
+      memset(convolution_op->zero_buffer, 0, zero_size);
 
       update_chw_params(chw_params, (uint32_t) input_width);
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
         .input_height = input_height,
         .input_width = input_width << log2_input_element_size,
         .input = input,
-        .zero = zero_buffer,
+        .zero = convolution_op->zero_buffer,
         .input_padding_top = convolution_op->padding_top,
         .input_channel_stride = input_height * input_width << log2_input_element_size,
         .input_batch_stride = input_batch_stride,

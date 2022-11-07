@@ -63,7 +63,7 @@ void xnn_f32_vlrelu_ukernel__avx512f_x${BATCH_TILE}(
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512 vacc = _mm512_maskz_loadu_ps(vmask, input);
-    const __mmask16 vsign = _mm512_mask_cmp_ps_mask(vmask, vacc, vzero, _CMP_LT_OQ);
+    const __mmask16 vsign = _mm512_cmp_ps_mask(vacc, vzero, _CMP_LT_OQ);
     vacc = _mm512_mask_mul_ps(vacc, vsign, vacc, vslope);
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
